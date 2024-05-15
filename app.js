@@ -5,7 +5,7 @@ const path            = require('path');
 const cors            = require('cors');
 const cookieParser    = require('cookie-parser');
 const bodyParser      = require('body-parser');
-const connect         = require('./utils/dbConnection')()
+const connect         = require('./utils/dbConnection')
 
 
 //-----------------   routes   -----------------------//
@@ -15,6 +15,7 @@ const medicineRouter  = require('./routes/medicineRoute')()
 const categoryRouter  = require('./routes/categoryRoutes')()
 const buyerRouter     = require('./routes/buyerRoutes')()
 const sellerRouter    = require('./routes/sellerRoutes')()
+const supplierRouter  = require('./routes/supplierRoutes')()
 const guestRouter     = require('./routes/guestRoutes')()
 const orderRouter     = require('./routes/orderRoutes')()
 //-----------------   routes   -----------------------//
@@ -60,6 +61,7 @@ app.use('/api/medicine', medicineRouter);
 app.use('/api/category', categoryRouter);
 app.use('/api/buyer', buyerRouter);
 app.use('/api/seller', sellerRouter);
+app.use('/api/supplier', supplierRouter);
 app.use('/api/guest', guestRouter);
 app.use('/api/order', orderRouter);
 //--------------- api routes ------------------//

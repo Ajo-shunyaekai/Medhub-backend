@@ -2,7 +2,7 @@ const express                                    = require('express');
 var routes                                       = express.Router();
 const multer                                     = require('multer')
 const Controller                                 = require('../controller/Medicine')
-const {checkAuthorization, checkAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkAuthentication, checkSellerAuthentication}  = require('../middleware/Authorization');
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
@@ -35,7 +35,7 @@ const cpUpload = (req, res, next) => {
 
 module.exports = () => {
 
-    routes.post('/add-medicine', checkAuthorization, checkAuthentication, cpUpload, (req, res) => {
+    routes.post('/add-medicine', checkAuthorization, checkSellerAuthentication, cpUpload, (req, res) => {
         
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
             res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
@@ -61,7 +61,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/medicine-list', checkAuthorization, checkAuthentication, (req, res) => {
+    routes.post('/medicine-list', checkAuthorization, (req, res) => {
        
         Controller.allMedicineList(req.body, result => {
             const response = handleResponse(result);
@@ -69,14 +69,14 @@ module.exports = () => {
         });
     });
 
-    routes.post('/medicine-details', checkAuthorization, checkAuthentication, (req, res) => {
+    routes.post('/medicine-details', checkAuthorization, (req, res) => {
         Controller.getMedicineDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/edit-medicine', checkAuthorization, checkAuthentication,cpUpload, (req, res) => {
+    routes.post('/edit-medicine', checkAuthorization, checkSellerAuthentication,cpUpload, (req, res) => {
       
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
             res.send({ code: 415, message: 'Medicine Images fields are required!', errObj: {} });

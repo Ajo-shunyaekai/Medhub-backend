@@ -3,6 +3,7 @@ const jwt     = require('jsonwebtoken');
 const Buyer   = require('../schema/buyerSchema');
 const User    = require('../schema/userSchema');
 const Seller  = require('../schema/sellerSchema')
+const Supplier = require('../schema/supplierSchema')
 
 
 module.exports = {
@@ -106,6 +107,29 @@ module.exports = {
             }
 
             if (seller.status === 0) {
+                return res.status(400).send({ message: "Access Denied" });
+            }
+
+            next();
+
+        } catch (error) {
+            console.error('Error checking access token:', error);
+            return res.status(500).send({ message: "Internal Server Error" });
+        }
+    },
+
+    checkSupplierAuthentication : async (req, res, next) => {
+        const access_token  = req.headers.access_token;
+        const supplier_id   = req.body.supplier_id;
+
+        try {
+            const supplier = await Supplier.find({token: access_token, supplier_id : supplier_id });
+
+            if (!supplier) {
+                return res.status(400).send({ message: "Invalid Access Token" });
+            }
+
+            if (supplier.status === 0) {
                 return res.status(400).send({ message: "Access Denied" });
             }
 
