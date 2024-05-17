@@ -1,55 +1,7 @@
-// const mongoose = require('mongoose');
-// const Schema   = mongoose.Schema;
-
-// const medicineSchema = new Schema({
-//     medicine_id: {
-//         type: String,
-//         required: true,
-//         unique: true
-//     },
-//     medicine_name: {
-//         type: String,
-//         required: true
-//     },
-//     description: {
-//         type: String,
-//         required: true
-//     },
-//     category_name: {
-//         type: String,
-//         ref: 'Category',
-//         required: true
-//     },
-//     price: {
-//         type: String,
-//         required: true,
-//         min: 0
-//     },
-//     inventory: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: "MedicineInventory"
-//     },
-//     medicine_image: {
-//         type: String,
-//         trim: true
-//     },
-//     createdAt: {
-//         type: Date,
-//         default: Date.now
-//     },
-//     updatedAt: {
-//         type: Date,
-//         default: Date.now
-//     }
-// })
-
-// module.exports = mongoose.model('Medicine', medicineSchema);
-
-
 const mongoose = require('mongoose');
 
 const medicineSchema = new mongoose.Schema({
-    medicine_id: {
+  medicine_id: {
     type: String,
     required: true,
     unique: true
@@ -66,7 +18,33 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  description: {
+  country_of_origin: {
+    type: String,
+    required: true
+  },
+  dossier_type: {
+    type: String,
+    required: true
+  },
+  dossier_status: {
+    type: String,
+    required: true
+  },
+  gmp_approvals: {
+    type: String,
+    required: true
+  },
+  medicine_image: [{
+    type: String,
+    trim: true
+  }],
+  registered_in: [
+    {
+      type: String,
+      required: true
+    }
+  ],
+  comments: {
     type: String,
     required: true
   },
@@ -78,14 +56,26 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
-  // manufacturer: {
-  //   type: String,
-  //   required: true
-  // },
   category_name: {
     type: String,
     required: true
   },
+  created_at: {
+    type: Date,
+    default: Date.now
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now
+  }
+  // description: {
+  //   type: String,
+  //   required: true
+  // },
+  // manufacturer: {
+  //   type: String,
+  //   required: true
+  // },
   // indications: [{
   //   type: String
   // }],
@@ -100,18 +90,6 @@ const medicineSchema = new mongoose.Schema({
   //   type: String,
   //   required: true
   // },
-  medicine_image: {
-    type: String,
-    trim: true
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now
-  }
 });
 
 const Medicine = mongoose.model('Medicine', medicineSchema);

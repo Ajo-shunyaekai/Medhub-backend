@@ -84,4 +84,20 @@ module.exports = {
           callback({code: 500});
        }
     },
+
+    filterValues : async(reqObj, callback) => {
+      try {
+        const countryData = await Supplier.find({}, { country_of_origin: 1, _id: 0 }).exec();
+
+        const result = {
+          country: countryData,
+          // forms: formsData
+      };
+
+      callback({ code: 200, message: "Filter values", result: [result] });
+      }catch (error) {
+        console.error('Error:', error);
+        callback({code: 500});
+     }
+  },
 }

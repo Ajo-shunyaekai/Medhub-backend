@@ -54,14 +54,24 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-//--------------- api routes ------------------//
+//------------------------------ api routes ------------------//
 app.use('/api/user', userRouter);
 app.use('/api/admin', adminRouter);
+
+//----------medicine-------------//
 app.use('/api/medicine', medicineRouter);
+app.use('/api/buyer/medicine', medicineRouter);
+//----------medicine-------------//
+
 app.use('/api/category', categoryRouter);
 app.use('/api/buyer', buyerRouter);
+
 app.use('/api/seller', sellerRouter);
+// app.use('/api/buyer/seller', sellerRouter);
+
 app.use('/api/supplier', supplierRouter);
+app.use('/api/buyer/supplier', supplierRouter);
+
 app.use('/api/guest', guestRouter);
 app.use('/api/order', orderRouter);
 //--------------- api routes ------------------//

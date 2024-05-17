@@ -55,6 +55,13 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/get-filter-values', checkAuthorization, (req, res) => {
+        Controller.filterValues(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
    return routes
 }

@@ -106,13 +106,25 @@ module.exports = {
 
     supplierList : async(reqObj, callback) => {
       try {
-        Supplier.find({}).select('supplier_id supplier_name supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
-        .then((data) => {
-          callback({code: 200, message : 'Supplier fetched successfully', result:data})
-      }).catch((error) => {
-          console.error('Error:', error);
-          callback({code: 400, message : 'Error in fetching users list'})
-      });
+        const { searchKey } = reqObj
+        if(searchKey === '') {
+          Supplier.find({}).select('supplier_id supplier_name supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          .then((data) => {
+            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+        }).catch((error) => {
+            console.error('Error:', error);
+            callback({code: 400, message : 'Error in fetching users list'})
+        });
+        } else {
+          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }}).select('supplier_id supplier_name supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          .then((data) => {
+            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+        }).catch((error) => {
+            console.error('Error:', error);
+            callback({code: 400, message : 'Error in fetching users list'})
+        });
+        }
+       
       }catch (error) {
         callback({code: 500, message : 'Internal server error'})
       }

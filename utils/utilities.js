@@ -28,24 +28,37 @@ module.exports = {
             objData.email       = 'Email Field is required';
         }
         if(type === 'addProduct' || type === 'editProduct') {
+            objData.supplier_id     = 'Supplier ID is required';
+            objData.medicine_name      = 'Medicine Name is required';
+            objData.drugs_name         = 'Drugs Name is required';
+            objData.country_of_origin  = 'Country of origin is required';
+            objData.dossier_type       = 'Dossier Type is required';
+            objData.gmp_approvals      = 'GMP Approval is required';
+            objData.registered_in      = 'Registered Countries are required';
+            objData.comments           = 'Comment is required';
+            objData.dosage_form       = 'Dossage Form is required';
+            // objData.delivery_info      = 'Delivery Info is required';
+            objData.strength           = 'Strength is required';
+            objData.category_name      = 'Category Name  is required';
+            estimated_delivery_days  = 'Estimated Delivery Days are required'
+            qty_range        = 'Quantity range is required',
+            price = 'Price is required'
 
-            objData.medicine_name         = 'Medicine Name is required';
-            objData.description           = 'Description is required';
-            objData.category_name         = 'Category Name  is required';
-            objData.generic_name          = 'Generic Name is required';
-            objData.manufacturer          = 'Manufacturer  is required';
-            objData.prescription_required = 'Prescriptions is required';
-            objData.storage_conditions    = 'Storage Conditions is required';
-            objData.batch_number          = 'Batch Number is required';
-            objData.expiry_date           = 'Expirty Date  is required';
-            objData.location              = 'Location is required';
-            objData.supplier              = 'Supplier is required';
-            objData.received_date         = 'Recieved Date  is required';
-            objData.quantity              = 'Qantity is required';
-            objData.unit_price            = 'Unit Price is required';
-            objData.indications           = 'Indications is required';
-            objData.side_effects          = 'Side Effects is required';
-            objData.strength              = 'Strength is required';
+            // objData.description           = 'Description is required';
+            // objData.generic_name          = 'Generic Name is required';
+            // objData.manufacturer          = 'Manufacturer  is required';
+            // objData.prescription_required = 'Prescriptions is required';
+            // objData.storage_conditions    = 'Storage Conditions is required';
+            // objData.batch_number          = 'Batch Number is required';
+            // objData.expiry_date           = 'Expirty Date  is required';
+            // objData.location              = 'Location is required';
+            // objData.supplier              = 'Supplier is required';
+            // objData.received_date         = 'Recieved Date  is required';
+            // objData.quantity              = 'Qantity is required';
+            // objData.unit_price            = 'Unit Price is required';
+            // objData.indications           = 'Indications is required';
+            // objData.side_effects          = 'Side Effects is required';
+            
         }
         if(type == 'buyerRegister'){
             objData.buyer_name  = 'Buyer Name field is required';

@@ -12,37 +12,70 @@ module.exports = {
   addMedicine: async (reqObj, callback) => {
     try {
       let medicine_id = "MED-" + Math.random().toString(16).slice(2);
+      
 
       const medicine = new Medicine({
         medicine_id           : medicine_id,
-        medicine_name         : reqObj.medicine_name,
-        generic_name          : reqObj.generic_name,
-        description           : reqObj.description,
-        dosage_form           : reqObj.dosage_form,
-        strength              : reqObj.strength,
-        manufacturer          : reqObj.manufacturer,
-        category_name         : reqObj.category_name,
-        indications           : reqObj.indications,
-        side_effects          : reqObj.side_effects,
-        prescription_required : reqObj.prescription_required,
-        storage_conditions    : reqObj.storage_conditions,
+        supplier_id           : reqObj.supplier_id,
+        medicine_name: reqObj.medicine_name,
+        drugs_name         : reqObj.drugs_name,
+       country_of_origin         : reqObj.country_of_origin ,
+        dossier_type         : reqObj.dossier_type,
+        dossier_status        : reqObj.dossier_status,
+        gmp_approvals         : reqObj.gmp_approvals,
         medicine_image        : reqObj.medicine_image,
+        registered_in         : reqObj.registered_in ,
+        comments              : reqObj.comments,
+        dosage_form         : reqObj.dosage_form,
+        category_name      : reqObj.category_name,
+        strength          : reqObj.strength
+
+        // generic_name          : reqObj.generic_name,
+        // description           : reqObj.description,
+        // dosage_form           : reqObj.dosage_form,
+        // strength              : reqObj.strength,
+        // manufacturer          : reqObj.manufacturer,
+        // category_name         : reqObj.category_name,
+        // indications           : reqObj.indications,
+        // side_effects          : reqObj.side_effects,
+        // prescription_required : reqObj.prescription_required,
+        // storage_conditions    : reqObj.storage_conditions,
+        // medicine_image        : reqObj.medicine_image,
       });
 
       medicine.save().then((savedMedicine) => {
 
-        const quantityArray  = reqObj.quantity.map((value, index) => ({strength: reqObj.strength[index], value: Number(value) }));
-        const unitPriceArray = reqObj.unit_price.map((value, index) => ({strength: reqObj.strength[index], value: Number(value) }));
+        // const quantityArray  = reqObj.quantity.map((value, index) => ({strength: reqObj.strength[index], value: Number(value) }));
+        // const unitPriceArray = reqObj.unit_price.map((value, index) => ({strength: reqObj.strength[index], value: Number(value) }));
+        // const deliveryInfoArray  = reqObj.deliver_info.map((value, index) => ({quantity: reqObj.quantity[index], value: Number(value) }));
+        const { qty_range, price, estimated_delivery_days } = reqObj;
+
+        // Check if all arrays have the same length
+        if (qty_range.length !== price.length || price.length !== estimated_delivery_days.length) {
+          return res.status(400).json({ message: 'All input arrays must have the same length' });
+        }
+
+        // Map the data to match the schema
+        const deliveryInfoArray = qty_range.map((qty, index) => ({
+          quantity: qty,
+          price: price[index],
+          est_delivery_days: estimated_delivery_days[index]
+        }));
+        // console.log('deliveryInfoArray',deliveryInfoArray);
 
         const medicineInventory = new MedicineInventory({
           medicine_id   : savedMedicine.medicine_id,
-          batch_number  : reqObj.batch_number,
-          expiry_date   : reqObj.expiry_date,
-          quantity      : quantityArray,
-          unit_price    : unitPriceArray,
-          location      : reqObj.location,
-          supplier      : reqObj.supplier,
-          received_date : reqObj.received_date,
+          supplier_id   : reqObj.supplier_id,
+          delivery_info : deliveryInfoArray,
+          strength      : reqObj.strength
+
+          // batch_number  : reqObj.batch_number,
+          // expiry_date   : reqObj.expiry_date,
+          // quantity      : quantityArray,
+          // unit_price    : unitPriceArray,
+          // location      : reqObj.location,
+          // supplier      : reqObj.supplier,
+          // received_date : reqObj.received_date,
         });
         medicineInventory.save()
           .then((data) => {
@@ -61,41 +94,100 @@ module.exports = {
 
   allMedicineList: async (reqObj, callback) => {
     try {
-      Medicine.aggregate([
-        {
-          $lookup: {
-            from         : "medicineinventories",
-            localField   : "medicine_id",
-            foreignField : "medicine_id",
-            as           : "inventory",
-          },
-        },
-        {
-          $project: {
-            medicine_id    : 1,
-            medicine_name  : 1,
-            medicine_image : 1,
-            inventory : {
-              $arrayElemAt: ["$inventory", 0],
+      const {searchKey} = reqObj
+
+      if(searchKey === '') {
+        Medicine.aggregate([
+          {
+            $lookup: {
+              from         : "medicineinventories",
+              localField   : "medicine_id",
+              foreignField : "medicine_id",
+              as           : "inventory",
             },
           },
-        },
-        {
-          $project: {
-            medicine_id           : 1,
-            medicine_name         : 1,
-            medicine_image        : 1,
-            "inventory.quantity"  : 1,
-            "inventory.price"     : 1,
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              inventory : {
+                $arrayElemAt: ["$inventory", 0],
+              },
+            },
           },
-        },
-      ])
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              "inventory.delivery_info"  : 1,
+              "inventory.price"     : 1,
+            },
+          },
+          
+        ])
+          .then((data) => {
+            callback({code: 200, message: "Medicine list fetched successfully", result: data});
+          })
+          .catch((err) => {
+            callback({ code: 400, message: "Error fetching medicine list", result: err});
+          });
+      } else {
+        Medicine.aggregate([
+          {
+            $match: {'medicine_name': { $regex: searchKey, $options: 'i' }}
+          },
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              inventory : {
+                $arrayElemAt: ["$inventory", 0],
+              },
+            }
+          }
+        ])
         .then((data) => {
           callback({code: 200, message: "Medicine list fetched successfully", result: data});
         })
         .catch((err) => {
           callback({ code: 400, message: "Error fetching medicine list", result: err});
         });
+
+      }
+     
     } catch (error) {
       callback({ code: 500, message: "Internal Server Error", result: error });
     }
@@ -117,46 +209,97 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id           : 1,
-            medicine_name         : 1,
-            generic_name          : 1,
-            description           : 1,
-            category_name         : 1,
-            medicine_image        : 1,
-            strength              : 1,
-            dosage_form           : 1,
-            manufacturer          : 1,
-            indications           : 1,
-            side_effects          : 1,
-            prescription_required : 1,
-            storage_conditions    : 1,
-            inventory: {
+            medicine_id       : 1,
+            supplier_id       : 1,
+            medicine_name     : 1,
+            medicine_image    : 1,
+            drugs_name        : 1,
+            country_of_origin : 1,
+            dossier_type      : 1,
+            dossier_status    : 1,
+            gmp_approvals     : 1,
+            registered_in     : 1,
+            comments          : 1,
+            dosage_form       : 1,
+            category_name     : 1,
+            strength          : 1,
+            inventory : {
               $arrayElemAt: ["$inventory", 0],
             },
           },
         },
         {
           $project: {
-            medicine_id               : 1,
-            medicine_name             : 1,
-            generic_name              : 1,
-            description               : 1,
-            category_name             : 1,
-            medicine_image            : 1,
-            strength                  : 1,
-            dosage_form               : 1,
-            manufacturer              : 1,
-            indications               : 1,
-            side_effects              : 1,
-            prescription_required     : 1,
-            storage_conditions        : 1,
-            "inventory.quantity"      : 1,
-            "inventory.unit_price"    : 1,
-            "inventory.batch_number"  : 1,
-            "inventory.location"      : 1,
-            "inventory.supplier"      : 1,
-            "inventory.expiry_date"   : 1,
-            "inventory.received_date" : 1,
+            medicine_id       : 1,
+            supplier_id       : 1,
+            medicine_name     : 1,
+            medicine_image    : 1,
+            drugs_name        : 1,
+            country_of_origin : 1,
+            dossier_type      : 1,
+            dossier_status    : 1,
+            gmp_approvals     : 1,
+            registered_in     : 1,
+            comments          : 1,
+            dosage_form       : 1,
+            category_name     : 1,
+            strength          : 1,
+            "inventory.delivery_info"  : 1,
+            "inventory.strength"       : 1,
+          },
+        },
+        {
+          $lookup: {
+            from         : "suppliers",
+            localField   : "supplier_id",
+            foreignField : "supplier_id",
+            as           : "supplier",
+          },
+        },
+        {
+          $project: {
+            medicine_id       : 1,
+            supplier_id       : 1,
+            medicine_name     : 1,
+            medicine_image    : 1,
+            drugs_name        : 1,
+            country_of_origin : 1,
+            dossier_type      : 1,
+            dossier_status    : 1,
+            gmp_approvals     : 1,
+            registered_in     : 1,
+            comments          : 1,
+            dosage_form       : 1,
+            category_name     : 1,
+            strength          : 1,
+            "inventory.delivery_info"  : 1,
+            "inventory.strength"       : 1,
+            supplier : {
+              $arrayElemAt: ["$supplier", 0],
+            },
+          },
+        },
+        {
+          $project: {
+            medicine_id       : 1,
+            supplier_id       : 1,
+            medicine_name     : 1,
+            medicine_image    : 1,
+            drugs_name        : 1,
+            country_of_origin : 1,
+            dossier_type      : 1,
+            dossier_status    : 1,
+            gmp_approvals     : 1,
+            registered_in     : 1,
+            comments          : 1,
+            dosage_form       : 1,
+            category_name     : 1,
+            strength          : 1,
+            "inventory.delivery_info"  : 1,
+            "inventory.strength"       : 1,
+            "supplier.supplier_id"     : 1, 
+            "supplier.supplier_name"   : 1,
+            "supplier.description"     : 1
           },
         },
       ])

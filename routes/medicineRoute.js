@@ -1,5 +1,6 @@
 const express                                    = require('express');
 var routes                                       = express.Router();
+const path = require('path');
 const multer                                     = require('multer')
 const Controller                                 = require('../controller/Medicine')
 const {checkAuthorization, checkAuthentication, checkSellerAuthentication}  = require('../middleware/Authorization');
@@ -44,7 +45,9 @@ module.exports = () => {
     
         let obj = {
             ...req.body,
-            medicine_image: req.files['product_image'].map(file => file.path).join(',')
+            medicine_image: req.files['product_image'].map(file => path.basename(file.path))
+            // medicine_image: req.files['product_image'].map(file => file.path).join(',')
+            // medicine_image: req.files['product_image'].map(file => path.basename(file.path)).join(',')
         }
     
         let errObj = validation(obj, 'addProduct');
