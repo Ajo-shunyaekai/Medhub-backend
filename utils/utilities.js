@@ -68,13 +68,18 @@ module.exports = {
             objData.license_no        = 'License No Field is required';
         }
         if(type == 'supplierRegister'){
-            objData.company_name      = 'Company Name field is required';
-            objData.company_address   = 'Address field is required';
+            objData.supplier_name      = 'Supplier Name field is required';
+            objData.supplier_address  = 'Address field is required';
+            objData.description           = ' description Field is required';
+            objData.license_no             = ' license_no Field is required';
+            objData.country_of_origin              = 'country_of_origin  Field is required';
+            objData.contact_person_name              = ' contact_person_name Field is required';
+            objData.designation            = 'designation Field is required';
+            objData.payment_terms              = 'payment_terms Field is required';
+            objData.country_code             = 'country_code  Field is required';
             objData.email             = 'Email Field is required';
             objData.password          = 'Password Field is required'
             objData.mobile_no         = 'Mobile Field is required';
-            // objData.business_type     = 'Business Type Field is required'
-            // objData.license_no        = 'License No Field is required';
         }
         if(type == 'sellerLogin'){
             objData.email             = 'Email Field is required';

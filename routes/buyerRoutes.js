@@ -71,6 +71,22 @@ module.exports = () => {
         });
     });
 
+    routes.post('/supplier-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.supplierList(req.body, result => {
+            // res.send({ code : 200, message : 'User list', result });
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/supplier-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.supplierDetails(req.body, result => {
+            // res.send({ code : 200, message : 'User list', result });
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     return routes;
 
 }

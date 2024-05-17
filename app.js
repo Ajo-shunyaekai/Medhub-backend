@@ -37,7 +37,7 @@ app.get('/*', function (req, res) {
 // });
 
 const corsOptions = {
-    origins     : [ 'http://192.168.1.31:2221/', 'http://localhost:2221/', 'http://localhost:3030/', '192.168.1.59:3000/','http://localhost:3000/','http://localhost:3001/', 'https://deliver.shunyaekai.com'], 
+    origins     : [ 'http://192.168.1.31:2221/', 'http://localhost:2221/', 'http://localhost:3030/', '192.168.1.59:3000/','http://localhost:3000/','http://localhost:3001/', 'https://deliver.shunyaekai.com','http://192.168.1.59:3000/'], 
     methods     : 'GET, POST', // HTTP methods to allow
     credentials : true, // Allow sending cookies and HTTP authentication information
 };

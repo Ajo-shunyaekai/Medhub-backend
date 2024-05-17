@@ -1,8 +1,8 @@
 require('dotenv').config();
-const jwt     = require('jsonwebtoken'); 
-const Buyer   = require('../schema/buyerSchema');
-const User    = require('../schema/userSchema');
-const Seller  = require('../schema/sellerSchema')
+const jwt      = require('jsonwebtoken'); 
+const Buyer    = require('../schema/buyerSchema');
+const User     = require('../schema/userSchema');
+const Seller   = require('../schema/sellerSchema')
 const Supplier = require('../schema/supplierSchema')
 
 
@@ -23,7 +23,6 @@ module.exports = {
         } catch (error) {
             res.status(500).send({ message : "Internal server error for checkAuthorization"});
         }
-       
     },
 
     checkAuthentication : async (req, res, next) => {  /// For Admin 
@@ -45,7 +44,6 @@ module.exports = {
         } catch (error) {
             res.status(500).send({ message : "Internal server error for checkAuthentication"});
         }
-       
     },
 
     checkUserAuthentication : async (req, res, next) => {
@@ -139,5 +137,5 @@ module.exports = {
             console.error('Error checking access token:', error);
             return res.status(500).send({ message: "Internal Server Error" });
         }
-    }
+    },
 }

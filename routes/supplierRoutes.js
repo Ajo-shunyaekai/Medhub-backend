@@ -9,16 +9,23 @@ const {validation}                               = require('../utils/utilities')
 module.exports = () => {
 
     routes.post('/register', checkAuthorization, (req, res) => {
+        
+        const countryCode  = req.body.mobile_no.split(" ")[0]; 
+        const number       = req.body.mobile_no.split(" ").slice(1).join(" ")
+        const regObj = {
+            ...req.body,
+            country_code : countryCode
+        }
 
-        const errObj = validation(req.body, 'supplierRegister')
+        const errObj = validation(regObj, 'supplierRegister')
 
         if(Object.values(errObj).length){
             res.send( { code : 419, message : 'All fields are required', errObj });
             return;
         }
 
-        const countryCode  = req.body.mobile_no.split(" ")[0]; 
-        const number       = req.body.mobile_no.split(" ").slice(1).join(" ")
+        // const countryCode  = req.body.mobile_no.split(" ")[0]; 
+        // const number       = req.body.mobile_no.split(" ").slice(1).join(" ")
 
         const obj = {
             ...req.body,

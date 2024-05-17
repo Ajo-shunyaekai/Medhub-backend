@@ -19,14 +19,20 @@ module.exports = {
 
           const newSupplier = new Supplier({
               supplier_id      : supplierId,
-              company_name     : reqObj.company_name,
-              company_address  : reqObj.company_address,
+              supplier_name    : reqObj.supplier_name,
+              supplier_address  : reqObj.supplier_address,
+              description    : reqObj.description,
+              license_no    : reqObj.license_no,
+              country_of_origin    : reqObj. country_of_origin,
+              contact_person_name    : reqObj.contact_person_name,
+              designation   : reqObj.designation,
+              payment_terms   : reqObj.payment_terms,
+              estimated_delivery_time   : reqObj.estimated_delivery_time,
+              tags          : reqObj.tags,
               mobile           : reqObj.mobile,
               country_code     : reqObj.countryCode,
               email            : reqObj.email,
               password         : reqObj.password,
-            //   business_type    : reqObj.business_type,
-            //   license_no       : reqObj.license_no,
               token            : token,
               status           : 1
             });

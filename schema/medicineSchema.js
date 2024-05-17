@@ -54,11 +54,15 @@ const medicineSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  supplier_id: {
+    type: String,
+    required: true,
+  },
   medicine_name: {
     type: String,
     required: true
   },
-  generic_name: {
+  drugs_name: {
     type: String,
     required: true
   },
@@ -74,28 +78,28 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
-  manufacturer: {
-    type: String,
-    required: true
-  },
+  // manufacturer: {
+  //   type: String,
+  //   required: true
+  // },
   category_name: {
     type: String,
     required: true
   },
-  indications: [{
-    type: String
-  }],
-  side_effects: [{
-    type: String
-  }],
-  prescription_required: {
-    type: Boolean,
-    default: false
-  },
-  storage_conditions: {
-    type: String,
-    required: true
-  },
+  // indications: [{
+  //   type: String
+  // }],
+  // side_effects: [{
+  //   type: String
+  // }],
+  // prescription_required: {
+  //   type: Boolean,
+  //   default: false
+  // },
+  // storage_conditions: {
+  //   type: String,
+  //   required: true
+  // },
   medicine_image: {
     type: String,
     trim: true

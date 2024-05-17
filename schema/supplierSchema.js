@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const Schema   = mongoose.Schema;
 
 const supplierSchema = new Schema({
     supplier_id: {
@@ -7,13 +7,45 @@ const supplierSchema = new Schema({
         required: true,
         unique: true
     },
-    company_name: {
+    supplier_name: {
         type: String,
         required: true,
     },
-    company_address: {
+    supplier_address: {
         type: String,
         required: true,
+    },
+    description: {
+        type: String,
+        required: true,
+    },
+    license_no: {
+        type: String,
+        required: true,
+    },
+    country_of_origin: {
+        type: String,
+        required: true,
+    },
+    contact_person_name: {
+        type: String,
+        required: true,
+    },
+    designation: {
+        type: String,
+        required: true,
+    },
+    payment_terms: {
+        type: String,
+        required: true
+      },
+    tags: {
+        type: String,
+        required: true
+    },
+    estimated_delivery_time: {
+        type: String,
+        required: true, 
     },
     email: {
         type: String,
