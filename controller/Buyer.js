@@ -74,7 +74,7 @@ module.exports = {
        }
     },
 
-    EditProfile : async(reqObj, callback) => {
+    EditProfile : async(reqObj, callback) => { 
         try {
           const buyer_id = reqObj.buyer_id
   
@@ -106,9 +106,39 @@ module.exports = {
 
     supplierList : async(reqObj, callback) => {
       try {
-        const { searchKey } = reqObj
-        if(searchKey === '') {
-          Supplier.find({}).select('supplier_id supplier_name supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+        const { searchKey, filterCountry } = reqObj
+
+        if(searchKey === '' && filterCountry === '') {
+          // console.log('(searchKey ===  filterCountry ===');
+          Supplier.find({}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          .then((data) => {
+            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+        }).catch((error) => {
+            console.error('Error:', error);
+            callback({code: 400, message : 'Error in fetching users list'})
+        });
+        } else if(searchKey !== '' && filterCountry === '' ) {
+          // console.log('searchKey !==  && filterCountry === ');
+          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          .then((data) => {
+            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+        }).catch((error) => {
+            console.error('Error:', error);
+            callback({code: 400, message : 'Error in fetching users list'})
+        });
+        } else if(filterCountry !== '' && searchKey === '') {
+          // console.log('filterCountry !==   && searchKey === ');
+          Supplier.find({country_of_origin: filterCountry}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          .then((data) => {
+            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+        }).catch((error) => {
+            console.error('Error:', error);
+            callback({code: 400, message : 'Error in fetching users list'})
+        });
+
+        } else if((searchKey !== '' && searchKey !== undefined) && (filterCountry !== '' && filterCountry !== undefined)) {
+          // console.log('searchKey !==  && filterCountry !==  ');
+          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry }).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -116,7 +146,8 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else {
-          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }}).select('supplier_id supplier_name supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          // console.log('heree');
+          Supplier.find({}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -124,7 +155,6 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         }
-       
       }catch (error) {
         callback({code: 500, message : 'Internal server error'})
       }
@@ -132,7 +162,7 @@ module.exports = {
 
     supplierDetails : async(reqObj, callback) => {
       try {
-        Supplier.findOne({supplier_id: reqObj.supplier_id}).select('supplier_id supplier_name email mobile country_code supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+        Supplier.findOne({supplier_id: reqObj.supplier_id}).select('supplier_id supplier_name supplier_image email mobile country_code supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
         .then((data) => {
           callback({code: 200, message : 'Supplier details fetched successfully', result:data})
       }).catch((error) => {
@@ -144,4 +174,6 @@ module.exports = {
         // callback(500);
       }
     },
+
+
 }

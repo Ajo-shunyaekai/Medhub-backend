@@ -18,23 +18,24 @@ module.exports = {
           const token       = jwt.sign(data, jwtSecretKey); 
 
           const newSupplier = new Supplier({
-              supplier_id      : supplierId,
-              supplier_name    : reqObj.supplier_name,
-              supplier_address  : reqObj.supplier_address,
-              description    : reqObj.description,
-              license_no    : reqObj.license_no,
-              country_of_origin    : reqObj. country_of_origin,
-              contact_person_name    : reqObj.contact_person_name,
-              designation   : reqObj.designation,
-              payment_terms   : reqObj.payment_terms,
+              supplier_id               : supplierId,
+              supplier_name             : reqObj.supplier_name,
+              supplier_image            : reqObj.supplier_image,
+              supplier_address          : reqObj.supplier_address,
+              description               : reqObj.description,
+              license_no                : reqObj.license_no,
+              country_of_origin         : reqObj. country_of_origin,
+              contact_person_name       : reqObj.contact_person_name,
+              designation               : reqObj.designation,
+              payment_terms             : reqObj.payment_terms,
               estimated_delivery_time   : reqObj.estimated_delivery_time,
-              tags          : reqObj.tags,
-              mobile           : reqObj.mobile,
-              country_code     : reqObj.countryCode,
-              email            : reqObj.email,
-              password         : reqObj.password,
-              token            : token,
-              status           : 1
+              tags                      : reqObj.tags,
+              mobile                    : reqObj.mobile,
+              country_code              : reqObj.countryCode,
+              email                     : reqObj.email,
+              password                  : reqObj.password,
+              token                     : token,
+              status                    : 1
             });
             
             const saltRounds = 10
@@ -87,7 +88,8 @@ module.exports = {
 
     filterValues : async(reqObj, callback) => {
       try {
-        const countryData = await Supplier.find({}, { country_of_origin: 1, _id: 0 }).exec();
+        // const countryData = await Supplier.find({}, { country_of_origin: 1, _id: 0 }).exec();
+        const countryData = await Supplier.distinct("country_of_origin")
 
         const result = {
           country: countryData,
@@ -99,5 +101,5 @@ module.exports = {
         console.error('Error:', error);
         callback({code: 500});
      }
-  },
+    },
 }

@@ -1,6 +1,6 @@
 const express                                    = require('express');
 var routes                                       = express.Router();
-const path = require('path');
+const path                                       = require('path');
 const multer                                     = require('multer')
 const Controller                                 = require('../controller/Medicine')
 const {checkAuthorization, checkAuthentication, checkSellerAuthentication}  = require('../middleware/Authorization');

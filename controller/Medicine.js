@@ -295,11 +295,12 @@ module.exports = {
             dosage_form       : 1,
             category_name     : 1,
             strength          : 1,
-            "inventory.delivery_info"  : 1,
-            "inventory.strength"       : 1,
-            "supplier.supplier_id"     : 1, 
-            "supplier.supplier_name"   : 1,
-            "supplier.description"     : 1
+            "inventory.delivery_info"          : 1,
+            "inventory.strength"               : 1,
+            "supplier.supplier_id"             : 1, 
+            "supplier.supplier_name"           : 1,
+            "supplier.description"             : 1,
+            "supplier.estimated_delivery_time" : 1
           },
         },
       ])

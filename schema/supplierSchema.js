@@ -11,6 +11,10 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
     },
+    supplier_image: [{
+        type: String,
+        required: true,
+    }],
     supplier_address: {
         type: String,
         required: true,
@@ -18,6 +22,8 @@ const supplierSchema = new Schema({
     description: {
         type: String,
         required: true,
+        minlength: [5, 'Description must be at least 10 characters long'],
+        // maxlength: [15, 'Description must be at most 15 characters long']
     },
     license_no: {
         type: String,
