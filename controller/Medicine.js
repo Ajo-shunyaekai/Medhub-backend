@@ -12,23 +12,22 @@ module.exports = {
   addMedicine: async (reqObj, callback) => {
     try {
       let medicine_id = "MED-" + Math.random().toString(16).slice(2);
-      
 
       const medicine = new Medicine({
-        medicine_id           : medicine_id,
-        supplier_id           : reqObj.supplier_id,
-        medicine_name: reqObj.medicine_name,
-        drugs_name         : reqObj.drugs_name,
-       country_of_origin         : reqObj.country_of_origin ,
-        dossier_type         : reqObj.dossier_type,
-        dossier_status        : reqObj.dossier_status,
-        gmp_approvals         : reqObj.gmp_approvals,
-        medicine_image        : reqObj.medicine_image,
-        registered_in         : reqObj.registered_in ,
-        comments              : reqObj.comments,
-        dosage_form         : reqObj.dosage_form,
-        category_name      : reqObj.category_name,
-        strength          : reqObj.strength
+        medicine_id      : medicine_id,
+        supplier_id      : reqObj.supplier_id,
+        medicine_name    : reqObj.medicine_name,
+        drugs_name       : reqObj.drugs_name,
+       country_of_origin : reqObj.country_of_origin ,
+        dossier_type     : reqObj.dossier_type,
+        dossier_status   : reqObj.dossier_status,
+        gmp_approvals    : reqObj.gmp_approvals,
+        medicine_image   : reqObj.medicine_image,
+        registered_in    : reqObj.registered_in ,
+        comments         : reqObj.comments,
+        dosage_form      : reqObj.dosage_form,
+        category_name    : reqObj.category_name,
+        strength         : reqObj.strength
 
         // generic_name          : reqObj.generic_name,
         // description           : reqObj.description,
@@ -94,9 +93,13 @@ module.exports = {
 
   allMedicineList: async (reqObj, callback) => {
     try {
-      const {searchKey} = reqObj
+      const {searchKey, pageNo, pageSize} = reqObj
 
-      if(searchKey === '') {
+      const page_no   = pageNo || 1
+      const page_size = pageSize || 10
+      const offset    = (page_no - 1) * page_size
+
+      if(searchKey === '' || searchKey === undefined) {
         Medicine.aggregate([
           {
             $lookup: {
@@ -121,6 +124,8 @@ module.exports = {
               comments          : 1,
               dosage_form       : 1,
               category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
               inventory : {
                 $arrayElemAt: ["$inventory", 0],
               },
@@ -141,16 +146,26 @@ module.exports = {
               comments          : 1,
               dosage_form       : 1,
               category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
               "inventory.delivery_info"  : 1,
-              "inventory.price"     : 1,
+              "inventory.price"          : 1,
             },
           },
+          { $skip: offset },
+          { $limit: page_size },
           
         ])
           .then((data) => {
-            callback({code: 200, message: "Medicine list fetched successfully", result: data});
+            Medicine.countDocuments()
+            .then(totalItems => {
+                const totalPages = Math.ceil(totalItems / page_size);
+                callback({ code: 200, message: "Medicine list fetched successfully", result: data, total_pages: totalPages });
+            })
+            // callback({code: 200, message: "Medicine list fetched successfully", result: data});
           })
           .catch((err) => {
+            console.log(err);
             callback({ code: 400, message: "Error fetching medicine list", result: err});
           });
       } else {
@@ -173,6 +188,8 @@ module.exports = {
               comments          : 1,
               dosage_form       : 1,
               category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
               inventory : {
                 $arrayElemAt: ["$inventory", 0],
               },

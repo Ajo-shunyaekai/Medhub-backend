@@ -6,19 +6,25 @@ const orderItemSchema = new Schema({
         type: String,
         required: true
     },
+    product_name: {
+        type: String,
+        required: true
+    },
     quantity: {
         type: Number,
         required: true
     },
-    strength: {
-        type: String
-    },
+    // strength: {
+    //     type: String
+    // },
     price: {
-        type: Number,
+        type: String,
         required: true
     },
     status: {
-        type: String
+        type: String,
+        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled', ],
+        default: 'pending'
     },
 
 });
@@ -28,19 +34,54 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
-    user_id: {
+    buyer_id: {
         type: String,
-        ref: 'User',
+        ref: 'Buyer',
+        required: true
+    },
+    supplier_id: {
+        type: String,
+        ref: 'Supplier',
         required: true
     },
     items: [orderItemSchema],
-    total_price: {
-        type: Number,
+    payment_terms: {
+        type: String,
         required: true
     },
-    status: {
+    est_delivery_time: {
         type: String,
-        enum: ['pending', 'shipped', 'delivered', 'cancelled'],
+        required: true
+    },
+    shipping_details: {
+        // type: String,
+        // required: true
+        type: {
+            consignor_name: {
+                type: String,
+                required: true
+            },
+            mobile_no: {
+                type: String,
+                required: true
+            },
+            address: {
+                type: String,
+                required: true
+            }
+        },
+        required: true
+    },
+    remarks: {
+        type: String
+    },
+    // total_price: {
+    //     type: Number,
+    //     required: true
+    // },
+    order_status: {
+        type: String,
+        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
         default: 'pending'
     },
     created_at: {

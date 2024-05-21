@@ -101,6 +101,15 @@ module.exports = {
             objData.email      = 'Email Field is required';
             objData.password   = 'Password Field is required'
         }
+
+        if(type === 'orderRequest') {
+            console.log('orderRequest validation');
+            objData.items   = 'Order Item is required',
+            objData.payment_terms  = "Payment term is reqiured",
+            objData.est_delivery_time  = "Estimated delivery time is required",
+            objData.shipping_details = "Shipping Details is required"
+        }
+
         if(reqObj == null){
             return objData;
         }

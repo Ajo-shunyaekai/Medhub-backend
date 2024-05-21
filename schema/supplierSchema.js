@@ -22,7 +22,7 @@ const supplierSchema = new Schema({
     description: {
         type: String,
         required: true,
-        minlength: [5, 'Description must be at least 10 characters long'],
+        minlength: [5, 'Description must be at least 5 characters long'],
         // maxlength: [15, 'Description must be at most 15 characters long']
     },
     license_no: {

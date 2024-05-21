@@ -60,6 +60,10 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  quantity: {
+    type: String,
+    required: true
+  },
   created_at: {
     type: Date,
     default: Date.now

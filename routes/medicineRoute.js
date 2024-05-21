@@ -111,12 +111,12 @@ module.exports = () => {
         });
     });
 
-    routes.post('/filter', checkAuthorization, (req, res) => {
-        Controller.filterMedicine(req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
+    // routes.post('/filter', checkAuthorization, (req, res) => {
+    //     Controller.filterMedicine(req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
 
     
     

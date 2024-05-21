@@ -61,7 +61,7 @@ app.use('/api/admin', adminRouter);
 //----------medicine-------------//
 app.use('/api/medicine', medicineRouter);
 app.use('/api/buyer/medicine', medicineRouter);
-//----------medicine-------------//
+//---------------medicine------------------//
 
 app.use('/api/category', categoryRouter);
 app.use('/api/buyer', buyerRouter);
@@ -73,7 +73,12 @@ app.use('/api/supplier', supplierRouter);
 app.use('/api/buyer/supplier', supplierRouter);
 
 app.use('/api/guest', guestRouter);
+
+//-----------------order--------------------------//
 app.use('/api/order', orderRouter);
+app.use('/api/buyer/order', orderRouter);
+//-----------------order--------------------------//
+
 //--------------- api routes ------------------//
 
 
