@@ -48,7 +48,7 @@ module.exports = () => {
         }
 
         const countryCode  = req.body.mobile_no.split(" ")[0]; 
-        const number       = req.body.mobile_no.split(" ").slice(1).join(" ")
+        const mob_number       = req.body.mobile_no.split(" ").slice(1).join(" ")
 
         const regObj = {
             ...req.body,
@@ -66,8 +66,8 @@ module.exports = () => {
         const obj = {
             ...req.body,
             countryCode,
-            mobile : number,
-            supplier_image: req.files['supplier_image'].map(file => path.basename(file.path))
+            mobile         : mob_number ,
+            supplier_image : req.files['supplier_image'].map(file => path.basename(file.path))
             // supplier_image: req.files['supplier_image'].map(file => file.path).join(',')
         }
        

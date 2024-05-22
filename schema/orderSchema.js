@@ -54,8 +54,6 @@ const orderSchema = new Schema({
         required: true
     },
     shipping_details: {
-        // type: String,
-        // required: true
         type: {
             consignor_name: {
                 type: String,
@@ -73,7 +71,8 @@ const orderSchema = new Schema({
         required: true
     },
     remarks: {
-        type: String
+        type: String,
+        required: true
     },
     // total_price: {
     //     type: Number,
@@ -83,6 +82,10 @@ const orderSchema = new Schema({
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
         default: 'pending'
+    },
+    invoice_number: {
+        type: String,
+        required: true
     },
     created_at: {
         type: Date,

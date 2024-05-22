@@ -103,11 +103,17 @@ module.exports = {
         }
 
         if(type === 'orderRequest') {
-            console.log('orderRequest validation');
             objData.items   = 'Order Item is required',
             objData.payment_terms  = "Payment term is reqiured",
             objData.est_delivery_time  = "Estimated delivery time is required",
             objData.shipping_details = "Shipping Details is required"
+        }
+
+        if(type === 'cancelOrder') {
+           objData.buyer_id = "Buyer id is required",
+           objData.order_id = "Order id is required",
+           objData.order_type = "Order Type is required",
+           objData.reason = "Reason is required"
         }
 
         if(reqObj == null){
