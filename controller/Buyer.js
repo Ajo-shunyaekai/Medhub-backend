@@ -2,6 +2,7 @@ const bcrypt             = require('bcrypt');
 const jwt                = require('jsonwebtoken');
 const Buyer              = require('../schema/buyerSchema')
 const Supplier           = require('../schema/supplierSchema')
+const Order              = require('../schema/orderSchema')
 
 module.exports = {
   
@@ -19,6 +20,7 @@ module.exports = {
             const newBuyer = new Buyer({
                 buyer_id     : buyerId,
                 buyer_name   : reqObj.buyer_name,
+                company_name : reqObj.company_name,
                 mobile       : reqObj.mobile,
                 country_code : reqObj.countryCode,
                 email        : reqObj.email,
@@ -172,6 +174,61 @@ module.exports = {
       }catch (error) {
         callback({code: 500, message : 'Internal server error'})
         // callback(500);
+      }
+    },
+
+    buyerSupplierOrdersList : async(reqObj, callback) => {
+      try {
+        const {supplier_id, buyer_id} = reqObj
+
+        Order.aggregate([
+          {
+            $match: {
+              buyer_id    : buyer_id,
+              supplier_id : supplier_id,
+            }
+          },
+          {
+            $facet: {
+              completedCount: [
+                {$match: {order_status : 'completed'}},
+                {$count: 'completed'}
+              ],
+              activeCount: [
+                {$match: {order_status : 'active'}},
+                {$count: 'active'}
+              ],
+              pendingCount: [
+                {$match: {order_status : 'pending'}},
+                {$count: 'pending'}
+              ],
+              orderList : [
+                {$project: {
+                  order_id    : 1,
+                  buyer_id    : 1,
+                  supplier_id : 1,
+                  items       : 1,
+                  created_at  : 1
+                }
+              }
+              ]
+            }
+          }
+        ]).then((data) => {
+          const resultObj = {
+            completedCount : data[0]?.completedCount[0]?.completed,
+            activeCount    : data[0]?.activeCount[0]?.active,
+            pendingCount   : data[0]?.pendingCount[0]?.pending,
+            orderList      : data[0]?.orderList
+          }
+          callback({code: 200, message : 'buyer supplier order list fetched successfully', result: resultObj})
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer supplier order list', result: err})
+        })
+      } catch (error) {
+        callback({code: 500, message : 'Internal server error', result: error})
       }
     },
 

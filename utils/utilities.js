@@ -28,7 +28,7 @@ module.exports = {
             objData.email       = 'Email Field is required';
         }
         if(type === 'addProduct' || type === 'editProduct') {
-            objData.supplier_id     = 'Supplier ID is required';
+            objData.supplier_id        = 'Supplier ID is required';
             objData.medicine_name      = 'Medicine Name is required';
             objData.drugs_name         = 'Drugs Name is required';
             objData.country_of_origin  = 'Country of origin is required';
@@ -36,13 +36,13 @@ module.exports = {
             objData.gmp_approvals      = 'GMP Approval is required';
             objData.registered_in      = 'Registered Countries are required';
             objData.comments           = 'Comment is required';
-            objData.dosage_form       = 'Dossage Form is required';
+            objData.dosage_form        = 'Dossage Form is required';
             // objData.delivery_info      = 'Delivery Info is required';
             objData.strength           = 'Strength is required';
             objData.category_name      = 'Category Name  is required';
-            estimated_delivery_days  = 'Estimated Delivery Days are required'
-            qty_range        = 'Quantity range is required',
-            price = 'Price is required'
+            estimated_delivery_days    = 'Estimated Delivery Days are required'
+            qty_range                  = 'Quantity range is required',
+            price                      = 'Price is required'
 
             // objData.description           = 'Description is required';
             // objData.generic_name          = 'Generic Name is required';
@@ -103,17 +103,17 @@ module.exports = {
         }
 
         if(type === 'orderRequest') {
-            objData.items   = 'Order Item is required',
-            objData.payment_terms  = "Payment term is reqiured",
-            objData.est_delivery_time  = "Estimated delivery time is required",
-            objData.shipping_details = "Shipping Details is required"
+            objData.items               = 'Order Item is required',
+            objData.payment_terms       = "Payment term is reqiured",
+            objData.est_delivery_time   = "Estimated delivery time is required",
+            objData.shipping_details    = "Shipping Details is required"
         }
 
         if(type === 'cancelOrder') {
-           objData.buyer_id = "Buyer id is required",
-           objData.order_id = "Order id is required",
+           objData.buyer_id   = "Buyer id is required",
+           objData.order_id   = "Order id is required",
            objData.order_type = "Order Type is required",
-           objData.reason = "Reason is required"
+           objData.reason     = "Reason is required"
         }
 
         if(reqObj == null){

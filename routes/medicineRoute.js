@@ -79,7 +79,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-medicine', checkAuthorization, checkSellerAuthentication,cpUpload, (req, res) => {
+    routes.post('/edit-medicine', checkAuthorization, checkSellerAuthentication, cpUpload, (req, res) => {
       
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
             res.send({ code: 415, message: 'Medicine Images fields are required!', errObj: {} });

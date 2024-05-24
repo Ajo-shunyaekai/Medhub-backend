@@ -39,6 +39,10 @@ const orderSchema = new Schema({
         ref: 'Buyer',
         required: true
     },
+    buyer_company: {
+        type: String,
+        required: true
+    },
     supplier_id: {
         type: String,
         ref: 'Supplier',

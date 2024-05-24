@@ -33,6 +33,7 @@ module.exports = {
         const newOrder = new Order({
             order_id          : orderId,
             buyer_id          : reqObj.buyer_id,
+            buyer_company     : reqObj.company_name,
             supplier_id       : reqObj.supplier_id,
             items             : reqObj.items,
             payment_terms     : reqObj.payment_terms,
@@ -84,6 +85,7 @@ module.exports = {
               $project: {
                 order_id          : 1,
                 buyer_id          : 1,
+                buyer_company     : 1,
                 supplier_id       : 1,
                 items             : 1,
                 payment_terms     : 1,
@@ -117,6 +119,7 @@ module.exports = {
                 _id               : "$_id",
                 order_id          : { $first: "$order_id" },
                 buyer_id          : { $first: "$buyer_id" },
+                buyer_company     : { $first: "$buyer_company" },
                 supplier_id       : { $first: "$supplier_id" },
                 items             : { $push: "$items" },
                 payment_terms     : { $first: "$payment_terms" },
@@ -133,6 +136,7 @@ module.exports = {
                 $project: {
                     order_id          : 1,
                     buyer_id          : 1,
+                    buyer_company     : 1,
                     supplier_id       : 1,
                     items             : 1,
                     payment_terms     : 1,
@@ -196,6 +200,7 @@ module.exports = {
                   $project: {
                     order_id          : 1,
                     buyer_id          : 1,
+                    buyer_company     : 1,
                     supplier_id       : 1,
                     items             : 1,
                     payment_terms     : 1,
@@ -203,6 +208,8 @@ module.exports = {
                     shipping_details  : 1,
                     remarks           : 1,
                     order_status      : 1,
+                    invoice_number    : 1,
+                    created_at        : 1,
                     supplier          : { $arrayElemAt: ["$supplier", 0] }
                   }
                 },
@@ -229,6 +236,7 @@ module.exports = {
                     _id               : "$_id",
                     order_id          : { $first: "$order_id" },
                     buyer_id          : { $first: "$buyer_id" },
+                    buyer_id          : { $first: "$buyer_company" },
                     supplier_id       : { $first: "$supplier_id" },
                     items             : { $push: "$items" },
                     payment_terms     : { $first: "$payment_terms" },
@@ -236,6 +244,8 @@ module.exports = {
                     shipping_details  : { $first: "$shipping_details" },
                     remarks           : { $first: "$remarks" },
                     order_status      : { $first: "$order_status" },
+                    invoice_number    : { $first: "$invoice_number" },
+                    created_at        : {$first: "$created_at"},
                     supplier          : { $first: "$supplier" },
                     totalPrice        : { $sum: "$items.item_price" }
                   }
@@ -244,6 +254,7 @@ module.exports = {
                     $project: {
                         order_id          : 1,
                         buyer_id          : 1,
+                        buyer_company     : 1,
                         supplier_id       : 1,
                         items             : 1,
                         payment_terms     : 1,
@@ -251,6 +262,8 @@ module.exports = {
                         shipping_details  : 1,
                         remarks           : 1,
                         order_status      : 1,
+                        invoice_number    : 1,
+                        created_at        : 1,
                         totalPrice        : 1,
                         "supplier.supplier_image" : 1,
                         "supplier.supplier_name"  : 1
@@ -360,6 +373,7 @@ module.exports = {
             $project: {
               order_id          : 1,
               buyer_id          : 1,
+              buyer_company     : 1,
               supplier_id       : 1,
               items             : 1,
               payment_terms     : 1,
@@ -394,6 +408,7 @@ module.exports = {
               _id               : "$_id",
               order_id          : { $first: "$order_id" },
               buyer_id          : { $first: "$buyer_id" },
+              buyer_company     : { $first: "$buyer_company" },
               supplier_id       : { $first: "$supplier_id" },
               items             : { $push: "$items" },
               payment_terms     : { $first: "$payment_terms" },
@@ -401,7 +416,7 @@ module.exports = {
               shipping_details  : { $first: "$shipping_details" },
               remarks           : { $first: "$remarks" },
               order_status      : { $first: "$order_status" },
-              invoice_number     : { $first: "$invoice_number" },
+              invoice_number    : { $first: "$invoice_number" },
               created_at        : { $first: "$created_at" },
               supplier          : { $first: "$supplier" },
               totalPrice        : { $sum: "$items.item_price" }
@@ -411,6 +426,7 @@ module.exports = {
               $project: {
                   order_id          : 1,
                   buyer_id          : 1,
+                  buyer_company     : 1,
                   supplier_id       : 1,
                   items             : 1,
                   payment_terms     : 1,
@@ -422,7 +438,8 @@ module.exports = {
                   created_at        : 1,
                   totalPrice        : 1,
                   "supplier.supplier_image" : 1,
-                  "supplier.supplier_name"  : 1,
+                  "supplier.supplier_name"     : 1,
+                  "supplier.supplier_address"  : 1,
               }
           },
           { $sort : { created_at: -1 } },
@@ -448,6 +465,121 @@ module.exports = {
       })
       } catch (error) {
         callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+
+    buyerInvoiceDetails : async (reqObj, callback) => {
+      try {
+          const {buyer_id, order_id, filterKey} = reqObj
+
+          Order.aggregate([
+              {
+                  $match: { 
+                      order_id     : order_id,
+                      // buyer_id     : buyer_id,
+                      // order_status : filterKey
+                  }
+              },
+              {
+                $lookup: {
+                  from         : "suppliers",
+                  localField   : "supplier_id",
+                  foreignField : "supplier_id",
+                  as           : "supplier"
+                }
+              },
+              {
+                $project: {
+                  order_id          : 1,
+                  buyer_id          : 1,
+                  buyer_company     : 1,
+                  supplier_id       : 1,
+                  // supplier_name     : 1,
+                  // supplier_address  : 1,
+                  items             : 1,
+                  payment_terms     : 1,
+                  est_delivery_time : 1,
+                  shipping_details  : 1,
+                  remarks           : 1,
+                  order_status      : 1,
+                  invoice_number    : 1,
+                  created_at        : 1,
+                  supplier          : { $arrayElemAt: ["$supplier", 0] }
+                }
+              },
+              {
+                $unwind: "$items"
+              },
+              {
+                $lookup: {
+                  from         : "medicines",
+                  localField   : "items.product_id",
+                  foreignField : "medicine_id",
+                  as           : "medicine"
+                }
+              },
+              {
+                $addFields: {
+                  "items.medicine_image" : {$arrayElemAt : ["$medicine.medicine_image", 0] },
+                  "items.drugs_name"     : {$arrayElemAt  : ["$medicine.drugs_name",0]},
+                  "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+                }
+              },
+              {
+                $group: {
+                  _id               : "$_id",
+                  order_id          : { $first: "$order_id" },
+                  buyer_id          : { $first: "$buyer_id" },
+                  buyer_company     : { $first: "$buyer_company" },
+                  supplier_id       : { $first: "$supplier_id" },
+                  // supplier_name     : { $first: "$supplier_name" },
+                  // supplier_address  : { $first: "$supplier_address" },
+                  items             : { $push: "$items" },
+                  payment_terms     : { $first: "$payment_terms" },
+                  est_delivery_time : { $first: "$est_delivery_time" },
+                  shipping_details  : { $first: "$shipping_details" },
+                  remarks           : { $first: "$remarks" },
+                  order_status      : { $first: "$order_status" },
+                  invoice_number    : { $first: "$invoice_number" },
+                  created_at        : {$first: "$created_at"},
+                  supplier          : { $first: "$supplier" },
+                  totalPrice        : { $sum: "$items.item_price" }
+                }
+              },
+              {
+                  $project: {
+                      order_id          : 1,
+                      buyer_id          : 1,
+                      buyer_company     : 1,
+                      supplier_id       : 1,
+                      // supplier_name     : 1,
+                      // supplier_address  : 1,
+                      items             : 1,
+                      payment_terms     : 1,
+                      est_delivery_time : 1,
+                      shipping_details  : 1,
+                      remarks           : 1,
+                      order_status      : 1,
+                      invoice_number    : 1,
+                      created_at        : 1,
+                      totalPrice        : 1,
+                      "supplier.supplier_image"    : 1,
+                      "supplier.supplier_name"     : 1,
+                      "supplier.supplier_address"  : 1,
+                      // "supplier.supplier_name"  : 1
+                  }
+              }
+          ])
+          .then((data) => {
+              callback({ code: 200, message: "Details Fetched successfully", result: data[0] });
+          })
+          .catch((err) => {
+              console.log(err);
+              callback({ code: 400, message: "Error in fetching order details", result: err });
+          })
+          
+      } catch (error) {
+          
       }
     },
 

@@ -37,7 +37,6 @@ const cpUpload = (req, res, next) => {
     });
 };
 
-
 module.exports = () => {
 
     routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
@@ -48,7 +47,7 @@ module.exports = () => {
         }
 
         const countryCode  = req.body.mobile_no.split(" ")[0]; 
-        const mob_number       = req.body.mobile_no.split(" ").slice(1).join(" ")
+        const mob_number   = req.body.mobile_no.split(" ").slice(1).join(" ")
 
         const regObj = {
             ...req.body,
@@ -97,6 +96,29 @@ module.exports = () => {
 
     routes.post('/get-filter-values', checkAuthorization, (req, res) => {
         Controller.filterValues(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/edit-supplier', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
+
+        if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
+            res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
+            return;
+        }
+
+        const countryCode = req.body.mobile_no.split(" ")[0]; 
+        const mob_number  = req.body.mobile_no.split(" ").slice(1).join(" ")
+
+        const reqObj = {
+            ...req.body,
+            country_code   : countryCode,
+            mobile_no      : mob_number,
+            supplier_image : req.files['supplier_image'].map(file => path.basename(file.path))
+        }
+        console.log(reqObj);
+        Controller.editSupplier(reqObj, result => {
             const response = handleResponse(result);
             res.send(response);
         });

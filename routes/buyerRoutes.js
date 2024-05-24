@@ -87,6 +87,14 @@ module.exports = () => {
         });
     });
 
+    routes.post('/buyer-supplier-orders', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        
+        Controller.buyerSupplierOrdersList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     return routes;
 
 }

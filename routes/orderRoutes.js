@@ -74,6 +74,14 @@ module.exports = () => {
             const response = handleResponse(result);
             res.send(response);
         });
+    });
+
+    routes.post('/invoice-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+
+        Order.buyerInvoiceDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
 });
 
     

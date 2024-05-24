@@ -102,4 +102,52 @@ module.exports = {
         callback({code: 500});
      }
     },
+
+    editSupplier : async(reqObj, callback) => {
+      try {
+        
+       const {
+        supplier_id, supplier_name, description, supplier_address, 
+        email, mobile_no, country_code, country_of_origin, contact_person_name,
+        designation, payment_terms, tags, estimated_delivery_time, supplier_image
+      } = reqObj
+
+      const updateObj = {
+        supplier_name,
+        description,
+        supplier_address,
+        email,
+        mobile : mobile_no,
+        country_code,
+        country_of_origin,
+        contact_person_name,
+        designation,
+        payment_terms,
+        tags,
+        estimated_delivery_time,
+        supplier_image
+      };
+
+      Object.keys(updateObj).forEach(key => updateObj[key] === undefined && delete updateObj[key]);
+
+      const updatedSupplier = await Supplier.findOneAndUpdate(
+        { supplier_id: supplier_id },
+        // updateObj,
+        { $set: updateObj },
+        { new: true }
+      );  
+
+    if (!updatedSupplier) {
+      return callback({ code: 404, message: 'Supplier not found' });
+    }
+
+    callback({ code: 200, message: 'Supplier updated successfully', result: updatedSupplier });
+
+
+      // callback({ code: 200, message: "Filter values", result: [result] });
+      }catch (error) {
+        console.error('Error:', error);
+        callback({code: 500});
+     }
+    },
 }
