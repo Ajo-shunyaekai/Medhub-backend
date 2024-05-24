@@ -18,7 +18,7 @@ module.exports = {
         supplier_id      : reqObj.supplier_id,
         medicine_name    : reqObj.medicine_name,
         drugs_name       : reqObj.drugs_name,
-       country_of_origin : reqObj.country_of_origin ,
+        country_of_origin: reqObj.country_of_origin ,
         dossier_type     : reqObj.dossier_type,
         dossier_status   : reqObj.dossier_status,
         gmp_approvals    : reqObj.gmp_approvals,
@@ -27,7 +27,8 @@ module.exports = {
         comments         : reqObj.comments,
         dosage_form      : reqObj.dosage_form,
         category_name    : reqObj.category_name,
-        strength         : reqObj.strength
+        strength         : reqObj.strength,
+        quantity         : reqObj.quantity
 
         // generic_name          : reqObj.generic_name,
         // description           : reqObj.description,
@@ -317,7 +318,11 @@ module.exports = {
             "supplier.supplier_id"             : 1, 
             "supplier.supplier_name"           : 1,
             "supplier.description"             : 1,
-            "supplier.estimated_delivery_time" : 1
+            "supplier.estimated_delivery_time" : 1,
+            "supplier.tags"                    : 1,
+            "supplier.license_no"              : 1,
+            "supplier.supplier_address"        : 1,
+            "supplier.payment_terms"           : 1,
           },
         },
       ])
@@ -422,5 +427,131 @@ module.exports = {
   }
   
   },
+
+  similarMedicineList: async (reqObj, callback) => {
+    try {
+      const {medicine_name, medicine_id, pageNo, pageSize} = reqObj
+
+      const page_no   = pageNo || 1
+      const page_size = pageSize || 10
+      const offset    = (page_no - 1) * page_size
+
+      // if(searchKey === '' || searchKey === undefined) {
+        Medicine.aggregate([
+          {
+            $match : {
+              medicine_name : medicine_name,
+              medicine_id: { $ne: medicine_id}
+            }
+          },
+          {
+            $lookup: {
+              from         : "medicineinventories",
+              localField   : "medicine_id",
+              foreignField : "medicine_id",
+              as           : "inventory",
+            },
+          },
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
+              inventory : {
+                $arrayElemAt: ["$inventory", 0],
+              },
+            },
+          },
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
+              "inventory.delivery_info"  : 1,
+              "inventory.price"          : 1,
+            },
+          },
+          { $skip: offset },
+          { $limit: page_size },
+          
+        ])
+          .then((data) => {
+            Medicine.countDocuments()
+            .then(totalItems => {
+                const totalPages = Math.ceil(totalItems / page_size);
+                callback({ code: 200, message: "Medicine list fetched successfully", result: data, total_pages: totalPages });
+            })
+            // callback({code: 200, message: "Medicine list fetched successfully", result: data});
+          })
+          .catch((err) => {
+            console.log(err);
+            callback({ code: 400, message: "Error fetching medicine list", result: err});
+          });
+      // } else {
+      //   Medicine.aggregate([
+      //     {
+      //       $match: {'medicine_name': { $regex: searchKey, $options: 'i' }}
+      //     },
+      //     {
+      //       $project: {
+      //         medicine_id       : 1,
+      //         supplier_id       : 1,
+      //         medicine_name     : 1,
+      //         medicine_image    : 1,
+      //         drugs_name        : 1,
+      //         country_of_origin : 1,
+      //         dossier_type      : 1,
+      //         dossier_status    : 1,
+      //         gmp_approvals     : 1,
+      //         registered_in     : 1,
+      //         comments          : 1,
+      //         dosage_form       : 1,
+      //         category_name     : 1,
+      //         strength          : 1,
+      //         quantity          : 1,
+      //         inventory : {
+      //           $arrayElemAt: ["$inventory", 0],
+      //         },
+      //       }
+      //     }
+        // ])
+        // .then((data) => {
+        //   callback({code: 200, message: "Medicine list fetched successfully", result: data});
+        // })
+        // .catch((err) => {
+        //   callback({ code: 400, message: "Error fetching medicine list", result: err});
+        // });
+
+      
+     
+    } catch (error) {
+      callback({ code: 500, message: "Internal Server Error", result: error });
+    }
+  },
+
 
 };

@@ -111,6 +111,14 @@ module.exports = () => {
         });
     });
 
+    routes.post('/similar-medicine-list', checkAuthorization, (req, res) => {
+       
+        Controller.similarMedicineList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     // routes.post('/filter', checkAuthorization, (req, res) => {
     //     Controller.filterMedicine(req.body, result => {
     //         const response = handleResponse(result);
