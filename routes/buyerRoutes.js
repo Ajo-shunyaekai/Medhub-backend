@@ -73,7 +73,6 @@ module.exports = () => {
 
     routes.post('/supplier-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
         Controller.supplierList(req.body, result => {
-            // res.send({ code : 200, message : 'User list', result });
             const response = handleResponse(result);
             res.send(response);
         });
@@ -81,7 +80,6 @@ module.exports = () => {
 
     routes.post('/supplier-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
         Controller.supplierDetails(req.body, result => {
-            // res.send({ code : 200, message : 'User list', result });
             const response = handleResponse(result);
             res.send(response);
         });
@@ -90,6 +88,22 @@ module.exports = () => {
     routes.post('/buyer-supplier-orders', checkAuthorization, checkBuyerAuthentication, (req, res) => {
         
         Controller.buyerSupplierOrdersList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/orders-summary-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        
+        Controller.buyerDashboardOrderDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/orders-seller-country', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        
+        Controller.buyerOrderSellerCountry(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

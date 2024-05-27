@@ -204,11 +204,12 @@ module.exports = {
               ],
               orderList : [
                 {$project: {
-                  order_id    : 1,
-                  buyer_id    : 1,
-                  supplier_id : 1,
-                  items       : 1,
-                  created_at  : 1
+                  order_id     : 1,
+                  buyer_id     : 1,
+                  supplier_id  : 1,
+                  items        : 1,
+                  order_status : 1,
+                  created_at   : 1
                 }
               }
               ]
@@ -231,6 +232,168 @@ module.exports = {
         callback({code: 500, message : 'Internal server error', result: error})
       }
     },
+
+    buyerDashboardOrderDetails : async(reqObj, callback) => {
+      try {
+        const { buyer_id } = reqObj
+        Order.aggregate([
+          {
+            $match : {buyer_id : buyer_id}
+          },
+          {
+            $addFields: {
+              numeric_total_price: {
+                $toDouble: {
+                  $arrayElemAt: [
+                    { $split: ["$total_price", " "] },
+                    0
+                  ]
+                }
+              }
+            }
+          },
+          {
+            $facet: {
+              completedCount: [
+                {$match: {order_status : 'completed'}},
+                // {$count: 'completed'}
+                { 
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                { 
+                  $project: {
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
+                  }
+                }
+              ],
+              activeCount: [
+                {$match: {order_status : 'active'}},
+                // {$count: 'active'}
+                { 
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                { 
+                  $project: {
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
+                  }
+                }
+              ],
+              pendingCount: [
+                {$match: {order_status : 'pending'}},
+                // {$count: 'pending'}
+                { 
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                { 
+                  $project: {
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
+                  }
+                }
+              ],
+              totalPurchaseAmount: [
+                { 
+                  $group: {
+                    _id: null,
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                { 
+                  $project: {
+                    _id: 0,
+                    total_purchase: 1
+                  }
+                }
+              ]
+              
+            }
+          }
+
+        ])
+        .then((data) => {
+          callback({code: 200, message : 'buyer dashoard order details fetched successfully', result: data[0]})
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer dashboard order details', result: err})
+        })
+      } catch (error) {
+        callback({code: 500, message : 'Internal server error', result: error})
+      }
+    },
+
+    buyerOrderSellerCountry : async(reqObj, callback) => {
+      try {
+        const { buyer_id } = reqObj
+
+        Order.aggregate([
+          {
+            $match: {buyer_id : buyer_id}
+          },
+          {
+            $lookup: {
+              from         : 'suppliers',
+              localField   : 'supplier_id',
+              foreignField : 'supplier_id',
+              as           : 'supplier'
+            }
+          },
+          {
+            $unwind: '$supplier'
+          },
+          {
+            $addFields: {
+              numeric_total_price: {
+                $toDouble: {
+                  $arrayElemAt: [
+                    { $split: ["$total_price", " "] },
+                    0
+                  ]
+                }
+              }
+            }
+          },
+          {
+            $group: {
+              _id: '$supplier.country_of_origin',
+              total_purchase: { $sum: '$numeric_total_price' }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              country: '$_id',
+              value: '$total_purchase'
+            }
+          }
+        ])
+        .then((data) => {
+          callback({code: 200, message : 'buyer seller country fetched successfully', result: data})
+        })
+        .catch((err) => {
+          callback({code: 400, message : 'error while fetching buyer seller country', result: err})
+        })
+      } catch (error) {
+        callback({code: 500, message : 'Internal server error', result: error})
+      }
+    }
 
 
 }
