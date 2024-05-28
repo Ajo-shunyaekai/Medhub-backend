@@ -11,25 +11,41 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
     },
-    supplier_image: [{
-        type: String,
-        required: true,
-    }],
-    supplier_address: {
-        type: String,
-        required: true,
-    },
     description: {
         type: String,
         required: true,
         minlength: [5, 'Description must be at least 5 characters long'],
         // maxlength: [15, 'Description must be at most 15 characters long']
     },
+    supplier_address: {
+        type: String,
+        required: true,
+    },
+    supplier_email: {
+        type: String,
+        required: true,
+    },
+    supplier_mobile_no: {
+        type: String,
+        required: true,
+    },
+    supplier_country_code: {
+        type: String,
+        required: true,
+    },
     license_no: {
         type: String,
         required: true,
     },
+    tax_no: {
+        type: String,
+        required: true,
+    },
     country_of_origin: {
+        type: String,
+        required: true,
+    },
+    country_of_operation: {
         type: String,
         required: true,
     },
@@ -41,6 +57,26 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
     },
+    contact_person_mobile_no: {
+        type: String,
+        required: true,
+    },
+    contact_person_country_code: {
+        type: String,
+        required: true,
+    },
+    supplier_image: [{
+        type: String,
+        required: true,
+    }],
+    license_image: [{
+        type: String,
+        required: true,
+    }],
+    tax_image: [{
+        type: String,
+        required: true,
+    }],
     payment_terms: {
         type: String,
         required: true
@@ -53,22 +89,13 @@ const supplierSchema = new Schema({
         type: String,
         required: true, 
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true  
-    },
-    mobile: {
-        type: String,
-        required: true,
-    },
-    country_code: {
-        type: String,
-        required: true,
-    },
     password: {
         type: String,
         required: true, 
+    },
+    status : {
+        type: Number,
+        required: true
     },
     token: {
         type: String,

@@ -75,7 +75,7 @@ module.exports = {
         const buyer_id      = req.body.buyer_id;
 
         try {
-            const buyer = await Buyer.findOne({token: access_token});
+            const buyer = await Buyer.findOne({token: access_token, buyer_id: buyer_id});
 
             if (!buyer) {
                 return res.status(400).send({ message: "Invalid Access Token" });
@@ -84,7 +84,7 @@ module.exports = {
             if (buyer.status === 0) {
                 return res.status(400).send({ message: "Access Denied" });
             }
-
+            
             next();
 
         } catch (error) {

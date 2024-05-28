@@ -11,7 +11,7 @@ const {imageUpload}                              = require('../utils/imageUpload
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './uploads/product_files');
+        cb(null, './uploads/medicine/product_files');
     },
     filename: (req, file, cb) => {
         const ext = file.mimetype.split("/")[1];

@@ -112,7 +112,7 @@ module.exports = {
 
         if(searchKey === '' && filterCountry === '') {
           // console.log('(searchKey ===  filterCountry ===');
-          Supplier.find({}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -149,7 +149,7 @@ module.exports = {
         });
         } else {
           // console.log('heree');
-          Supplier.find({}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -394,6 +394,5 @@ module.exports = {
         callback({code: 500, message : 'Internal server error', result: error})
       }
     }
-
 
 }

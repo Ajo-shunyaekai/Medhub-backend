@@ -18,24 +18,34 @@ module.exports = {
           const token       = jwt.sign(data, jwtSecretKey); 
 
           const newSupplier = new Supplier({
-              supplier_id               : supplierId,
-              supplier_name             : reqObj.supplier_name,
-              supplier_image            : reqObj.supplier_image,
-              supplier_address          : reqObj.supplier_address,
-              description               : reqObj.description,
-              license_no                : reqObj.license_no,
-              country_of_origin         : reqObj. country_of_origin,
-              contact_person_name       : reqObj.contact_person_name,
-              designation               : reqObj.designation,
-              payment_terms             : reqObj.payment_terms,
-              estimated_delivery_time   : reqObj.estimated_delivery_time,
-              tags                      : reqObj.tags,
-              mobile                    : reqObj.mobile,
-              country_code              : reqObj.countryCode,
-              email                     : reqObj.email,
-              password                  : reqObj.password,
-              token                     : token,
-              status                    : 1
+              supplier_id                 : supplierId,
+              supplier_name               : reqObj.supplier_name,
+              supplier_address            : reqObj.supplier_address,
+              description                 : reqObj.description,
+              supplier_email              : reqObj.supplier_email,
+              supplier_mobile_no          : reqObj.supplier_mobile,
+              supplier_country_code       : reqObj.supplier_country_code,
+              license_no                  : reqObj.license_no,
+              tax_no                      : reqObj.tax_no,
+              country_of_origin           : reqObj.country_of_origin,
+              country_of_operation        : reqObj.country_of_operation,
+              contact_person_name         : reqObj.contact_person_name,
+              designation                 : reqObj.designation,
+              contact_person_mobile_no    : reqObj.contact_person_mobile_no,
+              contact_person_country_code : reqObj.contact_person_country_code,
+              supplier_image              : reqObj.supplier_image,
+              license_image               : reqObj.license_image,
+              tax_image                   : reqObj.tax_image,
+              payment_terms               : reqObj.payment_terms,
+              estimated_delivery_time     : reqObj.estimated_delivery_time,
+              tags                        : reqObj.tags,
+              password                    : reqObj.password,
+              token                       : token,
+              status                      : 0
+              // mobile                    : reqObj.mobile,
+              // country_code              : reqObj.countryCode,
+              // email                     : reqObj.email,
+              
             });
             
             const saltRounds = 10
