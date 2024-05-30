@@ -16,7 +16,6 @@ const orderTrackingSchema = new Schema({
         type: String,
         required: true
     },
-    // location: String,
     updated_at: {
         type: Date,
         default: Date.now

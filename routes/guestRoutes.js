@@ -9,7 +9,6 @@ module.exports = () => {
 
     routes.post('/login', checkAuthorization, (req, res) => {  
             Controller.guestLogin(req.body, result => {
-                // res.send({ code : 200, message : 'o login success', result });
                 const response = handleResponse(result);
                 res.send(response);
             });

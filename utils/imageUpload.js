@@ -7,7 +7,6 @@ module.exports = {
                 cb(null, './uploads/product_files');
             },
             filename: (req, file, cb) => {
-                // cb(null, Date.now() + '-' + file.originalname);
                 const ext = file.mimetype.split("/")[1];
                 cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
             },

@@ -7,7 +7,7 @@ module.exports = {
     
     register : async(reqObj, callback) => {
         try {
-          const emailExists = await Supplier.findOne({email : reqObj.email})
+          const emailExists = await Supplier.findOne({supplier_email : reqObj.supplier_email})
           if(emailExists) {
             return callback({code : 409, message: "Email already exists"})
           }
@@ -22,7 +22,7 @@ module.exports = {
               supplier_address            : reqObj.supplier_address,
               description                 : reqObj.description,
               supplier_email              : reqObj.supplier_email,
-              supplier_mobile_no          : reqObj.supplier_mobile,
+              supplier_mobile             : reqObj.supplier_mobile,
               supplier_country_code       : reqObj.supplier_country_code,
               license_no                  : reqObj.license_no,
               tax_no                      : reqObj.tax_no,
@@ -32,6 +32,7 @@ module.exports = {
               designation                 : reqObj.designation,
               contact_person_mobile_no    : reqObj.contact_person_mobile_no,
               contact_person_country_code : reqObj.contact_person_country_code,
+              contact_person_email        : reqObj.contact_person_email,
               supplier_image              : reqObj.supplier_image,
               license_image               : reqObj.license_image,
               tax_image                   : reqObj.tax_image,
@@ -46,23 +47,24 @@ module.exports = {
               // email                     : reqObj.email,
               
             });
+            newSupplier.save() .then(() => {
+              callback({code: 200, message: "Supplier Registration Successfull"})
+            }).catch((err) => {
+              console.log('err',err);
+              callback({code: 400 , message: " Supplier Registration Failed"})
+            })
             
-            const saltRounds = 10
-            bcrypt.genSalt(saltRounds).then((salt) => {
-              return bcrypt.hash(newSupplier.password, salt)
-            })
-            .then((hashedPassword) => {
-                newSupplier.password = hashedPassword
-                newSupplier.save() .then(() => {
-                callback({code: 200, message: "Supplier Registration Successfull"})
-              }).catch((err) => {
-                console.log('err',err);
-                callback({code: 400 , message: " Supplier Registration Failed"})
-              })
-            })
-            .catch((error) => {
-              callback({code: 401});
-            }) 
+            // const saltRounds = 10
+            // bcrypt.genSalt(saltRounds).then((salt) => {
+            //   return bcrypt.hash(newSupplier.password, salt)
+            // })
+            // .then((hashedPassword) => {
+            //     newSupplier.password = hashedPassword
+               
+            // })
+            // .catch((error) => {
+            //   callback({code: 401});
+            // }) 
         } catch (error) {
           console.log('err',error);
           callback({code: 500});
@@ -77,7 +79,6 @@ module.exports = {
           const supplier = await Supplier.findOne({ supplier_email: email });
   
           if (!supplier) {
-              console.log('Not found');
               return callback({code: 404, message: "Email doesn't exists"});
           }
   
@@ -189,7 +190,7 @@ module.exports = {
           newPassword = hashedPassword
           Supplier.findOneAndUpdate(
             { supplier_id: supplier_id },
-            // updateObj,
+
             { $set: {password : newPassword} },
             { new: true }
           ).then(() => {

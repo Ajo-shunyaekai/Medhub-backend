@@ -135,7 +135,7 @@ module.exports = {
         const { searchKey, filterCountry } = reqObj
 
         if(searchKey === '' && filterCountry === '') {
-          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -143,7 +143,7 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else if(searchKey !== '' && filterCountry === '' ) {
-          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -151,7 +151,7 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else if(filterCountry !== '' && searchKey === '') {
-          Supplier.find({country_of_origin: filterCountry}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({country_of_origin: filterCountry, status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -160,7 +160,7 @@ module.exports = {
         });
 
         } else if((searchKey !== '' && searchKey !== undefined) && (filterCountry !== '' && filterCountry !== undefined)) {
-          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry }).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry , status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -168,7 +168,7 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else {
-          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -177,13 +177,14 @@ module.exports = {
         });
         }
       }catch (error) {
+        console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error'})
       }
     },
 
     supplierDetails : async(reqObj, callback) => {
       try {
-        Supplier.findOne({supplier_id: reqObj.supplier_id}).select('supplier_id supplier_name supplier_image email mobile country_code supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+        Supplier.findOne({supplier_id: reqObj.supplier_id}).select('supplier_id supplier_name supplier_image supplier_email supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
         .then((data) => {
           callback({code: 200, message : 'Supplier details fetched successfully', result:data})
       }).catch((error) => {
@@ -191,6 +192,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching supplier details'})
       });
       }catch (error) {
+        console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error'})
       }
     },
@@ -235,11 +237,12 @@ module.exports = {
           }
         ]).then((data) => {
           const resultObj = {
-            completedCount : data[0]?.completedCount[0]?.completed,
-            activeCount    : data[0]?.activeCount[0]?.active,
-            pendingCount   : data[0]?.pendingCount[0]?.pending,
+            completedCount : data[0]?.completedCount[0]?.completed || 0,
+            activeCount    : data[0]?.activeCount[0]?.active || 0,
+            pendingCount   : data[0]?.pendingCount[0]?.pending || 0,
             orderList      : data[0]?.orderList
           }
+         
           callback({code: 200, message : 'buyer supplier order list fetched successfully', result: resultObj})
         })
         .catch((err) => {
@@ -247,6 +250,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer supplier order list', result: err})
         })
       } catch (error) {
+        console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error', result: error})
       }
     },
@@ -274,69 +278,66 @@ module.exports = {
             $facet: {
               completedCount: [
                 {$match: {order_status : 'completed'}},
-                // {$count: 'completed'}
                 { 
                   $group: {
-                    _id: null,
-                    count: { $sum: 1 },
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    count          : { $sum: 1 },
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 { 
                   $project: {
-                    _id: 0,
-                    count: 1,
-                    total_purchase: 1
+                    _id            : 0,
+                    count          : 1,
+                    total_purchase : 1
                   }
                 }
               ],
               activeCount: [
                 {$match: {order_status : 'active'}},
-                // {$count: 'active'}
                 { 
                   $group: {
-                    _id: null,
-                    count: { $sum: 1 },
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    count          : { $sum: 1 },
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 { 
                   $project: {
-                    _id: 0,
-                    count: 1,
-                    total_purchase: 1
+                    _id            : 0,
+                    count          : 1,
+                    total_purchase : 1
                   }
                 }
               ],
               pendingCount: [
                 {$match: {order_status : 'pending'}},
-                // {$count: 'pending'}
                 { 
                   $group: {
-                    _id: null,
-                    count: { $sum: 1 },
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    count          : { $sum: 1 },
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 { 
                   $project: {
-                    _id: 0,
-                    count: 1,
-                    total_purchase: 1
+                    _id            : 0,
+                    count          : 1,
+                    total_purchase : 1
                   }
                 }
               ],
               totalPurchaseAmount: [
                 { 
                   $group: {
-                    _id: null,
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 { 
                   $project: {
-                    _id: 0,
-                    total_purchase: 1
+                    _id            : 0,
+                    total_purchase : 1
                   }
                 }
               ]
@@ -353,6 +354,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer dashboard order details', result: err})
         })
       } catch (error) {
+        console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error', result: error})
       }
     },
@@ -409,6 +411,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer seller country', result: err})
         })
       } catch (error) {
+        console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error', result: error})
       }
     }

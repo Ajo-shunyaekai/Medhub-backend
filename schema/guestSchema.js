@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const guestSchema = new Schema({
-//   guest_id: {
-//     type: String,
-//     required: true,
-//     unique: true
-//   },
   email: {
     type: String
   },
@@ -16,11 +11,6 @@ const guestSchema = new Schema({
   otp: {
     type: String
   },
-//   token: {
-//     type: String,
-//     required: true,
-//     unique : true
-//   },
   createdAt: {
     type: Date,
     default: Date.now,

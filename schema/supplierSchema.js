@@ -15,7 +15,6 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
         minlength: [5, 'Description must be at least 5 characters long'],
-        // maxlength: [15, 'Description must be at most 15 characters long']
     },
     supplier_address: {
         type: String,
@@ -24,8 +23,9 @@ const supplierSchema = new Schema({
     supplier_email: {
         type: String,
         required: true,
+        unique : true
     },
-    supplier_mobile_no: {
+    supplier_mobile: {
         type: String,
         required: true,
     },
@@ -65,6 +65,10 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
     },
+    contact_person_email : {
+        type: String,
+        required: true,
+    },
     supplier_image: [{
         type: String,
         required: true,
@@ -91,16 +95,11 @@ const supplierSchema = new Schema({
     },
     password: {
         type: String,
-        // required: true, 
     },
     status : {
         type: Number, // 0 - pending, 1 - accepted,  2 - rejected
         required: true
     },
-    // reg_status : {
-    //     type: String,
-    //     required: true
-    // },
     token: {
         type: String,
         required: true,

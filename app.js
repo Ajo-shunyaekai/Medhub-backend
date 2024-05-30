@@ -27,6 +27,23 @@ connect()
 app.use('/uploads', express.static('uploads'));
 app.use(express.static(path.join(__dirname, 'build')));
 // app.use(express.static(path.join(__dirname, 'adminBuild')));
+// app.use('/buyer', express.static(path.join(__dirname, 'buyerBuild')));
+// app.use('/supplier', express.static(path.join(__dirname, 'supplierBuild')));
+
+// Fallback for buyer route (SPA handling)
+// app.get('/buyer/*', function (req, res) {
+//   res.sendFile(path.join(__dirname, 'buyerBuild', 'index.html'));
+// });
+
+// // Fallback for supplier route (SPA handling)
+// app.get('/supplier/*', function (req, res) {
+//   res.sendFile(path.join(__dirname, 'supplierBuild', 'index.html'));
+// });
+
+// // Fallback for admin route (SPA handling)
+// app.get('/admin/*', function (req, res) {
+//   res.sendFile(path.join(__dirname, 'adminBuild', 'index.html'));
+// });
 
 app.get('/*', function (req, res) {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
@@ -81,6 +98,18 @@ app.use('/api/buyer/order', orderRouter);
 
 //--------------- api routes ------------------//
 
+// function generatePassword() {
+//   var length = 12,
+//       charset = 
+// "@#$&*0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$&*0123456789abcdefghijklmnopqrstuvwxyz",
+//       password = "";
+//   for (var i = 0, n = charset.length; i < length; ++i) {
+//       password += charset.charAt(Math.floor(Math.random() * n));
+//   }
+//   return password;
+// }
+
+// const password = generatePassword()
 
 const PORT = process.env.PORT || 3333;
 

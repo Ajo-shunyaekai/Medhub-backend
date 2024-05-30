@@ -31,8 +31,8 @@ module.exports = {
         })
         }
       }catch (error) {
-        console.error('Error validating user:', error);
-        callback(500);
+        console.error('Internal Server Error:', error);
+        callback({code: 500, message: "Internal Server Error", result: error })
     }
     },
 
@@ -56,7 +56,8 @@ module.exports = {
           }
   
         }catch (error) {
-          callback({code: 500, message: 'Internal server Error' });
+          console.log('Internal Server Error', error)
+          callback({code: 500, message: "Internal Server Error", result: error })
        }
     },
 

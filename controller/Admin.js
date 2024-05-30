@@ -9,7 +9,7 @@ const MedicineInventory  = require('../schema/medicineInventorySchema')
 
 const generatePassword = () => {
   const password = generator.generate({
-    length: 10,
+    length: 12,
     numbers: true
   });
   return password
@@ -19,8 +19,8 @@ const generatePassword = () => {
 module.exports = {
 
     register : async(reqObj, callback) => {
-
-        const adminId    = 'ADM-' + Math.random().toString(16).slice(2);
+        try {
+          const adminId    = 'ADM-' + Math.random().toString(16).slice(2);
         let jwtSecretKey = process.env.APP_SECRET; 
         let data         = {  time : Date(),  email:reqObj.email } 
         const token      = jwt.sign(data, jwtSecretKey); 
@@ -42,42 +42,47 @@ module.exports = {
 
             newAdmin.save()
             .then((response) => {
-              callback(200)
+              callback({code: 200, message : 'Admin regisrtation successfull', result:response})
             }) .catch((err) => {
               console.error('Error', err);
-              callback(400)
+              callback({code: 200, message : 'Admin registration failed', result: err})
             })
           })
           .catch((error) => {
             console.error('Error generating salt or hashing password:', error);
-            callback(500);
+            callback({code: 400, message: 'Error in generating salt or hashing password', result: error});
           }) 
+        } catch (error) {
+          console.log('Internal Server Error');
+          callback({code: 500, message: 'Internal server error', result: error})
+        }
+        
     },
 
     login : async(reqObj, callback) => {
-      const password = reqObj.password
-      const email    = reqObj.email
-
       try {
+        const password = reqObj.password
+         const email   = reqObj.email
+
         const admin = await Admin.findOne({ email: email });
 
         if (!admin) {
             console.log('Not found');
-            return callback(404);
+            callback({code: 404, message: 'Email not found'})
         }
 
         const isMatch = await bcrypt.compare(password, admin.password);
 
         if (isMatch) {
             console.log('Validation successful');
-            callback(200);
+            callback({code: 200, message: 'Admin Login Successfull'})
         } else {
             console.log('Validation not successful');
-            callback(401);
+            callback({code: 401, message: 'Incorrect Password'})
         }
       }catch (error) {
         console.error('Error validating user:', error);
-        callback(500);
+        callback({code: 500, message: 'Internal Server Error', result: error})
     }
     },
 
@@ -90,6 +95,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching users list'})
       });
       }catch (error) {
+        console.error('Internal Server Error', error);
         callback({code: 500, message : 'Internal server error'})
         // callback(500);
       }
@@ -114,15 +120,15 @@ module.exports = {
   
           if (updateProfile) {
             
-            // const returnObj = {
-            //   user_id    : updateProfile.user_id,
-            //   first_name : updateProfile.first_name,
-            //   last_name  : updateProfile.last_name,
-            //   email      : updateProfile.email,
-            //   status     : updateProfile.status
-            // }
+            const returnObj = {
+              user_id    : updateProfile.user_id,
+              first_name : updateProfile.first_name,
+              last_name  : updateProfile.last_name,
+              email      : updateProfile.email,
+              status     : updateProfile.status
+            }
 
-            // callback({ code: 200, message: `${updateProfile.status === 0 ? 'User blocked successfully': 'User unblocked successfully'}`,result: returnObj});
+            callback({ code: 200, message: `${updateProfile.status === 0 ? 'User blocked successfully': 'User unblocked successfully'}`,result: returnObj});
           } else {
               callback({code:400,  message: "Failed to update user status" });
           }
@@ -134,8 +140,9 @@ module.exports = {
 
     getSupplierList: async(reqObj, callback) => {
       try {
+
         const fields = {
-          supplier_id                : 1,
+          supplier_id                 : 1,
           supplier_name               : 1,
           supplier_image              : 1,
           supplier_address            : 1,
@@ -160,13 +167,13 @@ module.exports = {
         };
 
         Supplier.find({}).select(fields).then((data) => {
-          callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-      }).catch((error) => {
+          callback({code: 200, message : 'Supplier list fetched successfully', result: data})
+        }).catch((error) => {
           console.error('Error:', error);
           callback({code: 400, message : 'Error in fetching suppliers list', result: error})
-      });
+        });
       }catch (err) {
-        callback({code: 500, message : 'Internal server error'})
+        callback({code: 500, message : 'Internal server error', result: err})
       }
     },
 
@@ -211,6 +218,7 @@ module.exports = {
     acceptRejectSupplierRegReq : async(reqObj, callback) => {
       try {
         const { supplier_id, action } = reqObj
+
         const supplier = await Supplier.findOne({ supplier_id : supplier_id });
   
         if (!supplier) {
@@ -250,7 +258,7 @@ module.exports = {
             supplier_country_code : updateProfile.supplier_country_code,
             status                : updateProfile.status,
             password              : updateProfile.password,
-            generatedPasswod      : password
+            generatedPassword     : password
           }
 
           callback({ code: 200, message: `${updateProfile.status === 1 ? 'Supplier registration accepted successfully': updateProfile.status === 2 ? ' Supplier registration rejected' : ''}`,result: returnObj});
@@ -259,8 +267,10 @@ module.exports = {
         }
 
       } catch (error) {
-        
+        console.log('Internal Sever Error:',error)
+        callback({code: 500, message: 'Internal Server Error', result: error})
       }
-    }
+    },
+
 
 }

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const Schema   = mongoose.Schema;
 
 const orderItemSchema = new Schema({
     product_id: {
@@ -14,9 +14,6 @@ const orderItemSchema = new Schema({
         type: Number,
         required: true
     },
-    // strength: {
-    //     type: String
-    // },
     price: {
         type: String,
         required: true
