@@ -71,6 +71,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/profile-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.buyerProfileDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     routes.post('/supplier-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
         Controller.supplierList(req.body, result => {
             const response = handleResponse(result);

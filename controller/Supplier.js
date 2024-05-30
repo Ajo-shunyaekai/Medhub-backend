@@ -3,7 +3,6 @@ const bcrypt   = require('bcrypt');
 const jwt      = require('jsonwebtoken');
 const Supplier = require('../schema/supplierSchema')
 
-
 module.exports = {
     
     register : async(reqObj, callback) => {
@@ -39,7 +38,7 @@ module.exports = {
               payment_terms               : reqObj.payment_terms,
               estimated_delivery_time     : reqObj.estimated_delivery_time,
               tags                        : reqObj.tags,
-              password                    : reqObj.password,
+              // password                    : reqObj.password,
               token                       : token,
               status                      : 0
               // mobile                    : reqObj.mobile,
@@ -75,7 +74,7 @@ module.exports = {
         const email     = reqObj.email
   
         try {
-          const supplier = await Supplier.findOne({ email: email });
+          const supplier = await Supplier.findOne({ supplier_email: email });
   
           if (!supplier) {
               console.log('Not found');
@@ -85,7 +84,6 @@ module.exports = {
           const isMatch = await bcrypt.compare(password, supplier.password);
   
           if (isMatch) {
-              console.log('Validation successful');
               callback({code : 200, message: "Login Successfull"});
           } else {
               callback({code: 401, message: 'Incorrect Password'});
@@ -115,7 +113,6 @@ module.exports = {
 
     editSupplier : async(reqObj, callback) => {
       try {
-        
        const {
         supplier_id, supplier_name, description, supplier_address, 
         email, mobile_no, country_code, country_of_origin, contact_person_name,
@@ -160,4 +157,57 @@ module.exports = {
         callback({code: 500});
      }
     },
+
+    supplierProfileDetails : async(reqObj, callback) => {
+      try {
+        Supplier.findOne({supplier_id: reqObj.supplier_id}).select('supplier_id supplier_name supplier_email supplier_mobile_no supplier_image tax_image license_image email mobile country_code supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+        .then((data) => {
+          callback({code: 200, message : 'Supplier details fetched successfully', result:data})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message : 'Error in fetching supplier details'})
+      });
+      }catch (error) {
+        callback({code: 500, message : 'Internal server error'})
+      }
+    },
+
+    changePassword : async(reqObj, callback) => {
+      try {
+        const { supplier_id, password } = reqObj
+        const supplier = await Supplier.findOne({supplier_id : supplier_id})
+
+        if(!supplier) {
+          return callback({code: 404, message: "Supplier doesn't exists"});
+        }
+        let newPassword
+        const saltRounds = 10
+        bcrypt.genSalt(saltRounds).then((salt) => {
+          return bcrypt.hash(password, salt)
+        })
+        .then((hashedPassword) => {
+          newPassword = hashedPassword
+          Supplier.findOneAndUpdate(
+            { supplier_id: supplier_id },
+            // updateObj,
+            { $set: {password : newPassword} },
+            { new: true }
+          ).then(() => {
+            callback({code: 200, message: "Password updated Successfully"})
+          }) 
+          .catch((err) => {
+            callback({code: 400 , message: "Error while updating password "})
+          })
+        })
+        .catch((err) => {
+          callback({code: 401 , message: "Error while updating password "})
+        })
+
+        // Supplier.findOneAndUpdate({supplier_id : supplier_id},{$set: {password :}})
+      } catch (error) {
+        console.log('error',error);
+            callback({code: 500 , message: "Internal Server Error", error: error})
+      }
+    },
+
 }

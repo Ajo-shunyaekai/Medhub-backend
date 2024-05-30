@@ -4,6 +4,7 @@ const Buyer    = require('../schema/buyerSchema');
 const User     = require('../schema/userSchema');
 const Seller   = require('../schema/sellerSchema')
 const Supplier = require('../schema/supplierSchema')
+const Admin    = require('../schema/adminSchema')
 
 
 module.exports = {
@@ -26,6 +27,8 @@ module.exports = {
     },
 
     checkAuthentication : async (req, res, next) => {  /// For Admin 
+        console.log('header',req.headers.access_token);
+        console.log('process.env.APP_SECRET',process.env.APP_SECRET);
         let access_token = req.headers.access_token;
         try {
             if(!access_token){
@@ -43,6 +46,29 @@ module.exports = {
             }
         } catch (error) {
             res.status(500).send({ message : "Internal server error for checkAuthentication"});
+        }
+    },
+
+    checkAdminAuthentication : async (req, res, next) => {
+        let access_token = req.headers.access_token;
+        const admin_id   = req.body.admin_id;
+
+        try {
+            const admin = await Admin.findOne({token: access_token, admin_id: admin_id});
+           
+            if (!admin) {
+                return res.status(400).send({ message: "Invalid Access Token" });
+            }
+    
+            if (admin.status === 0) {
+                return res.status(400).send({ message: "Access Denied" });
+            }
+
+            next();
+    
+        } catch (error) {
+            console.error('Error checking access token:', error);
+            return res.status(500).send({ message: "Internal Server Error" });
         }
     },
 

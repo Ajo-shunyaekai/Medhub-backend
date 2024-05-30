@@ -98,7 +98,7 @@ module.exports = {
             objData.payment_terms               = 'payment_terms Field is required';
             objData.supplier_country_code       = 'Supplier country code  Field is required';
             objData.contact_person_country_code = 'Contact person country code  Field is required';
-            objData.password                    = 'Password Field is required'
+            // objData.password                    = 'Password Field is required'
             estimated_delivery_time             = 'Estimated Delivery Time is required'
         }
         

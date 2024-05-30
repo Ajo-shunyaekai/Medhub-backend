@@ -91,12 +91,16 @@ const supplierSchema = new Schema({
     },
     password: {
         type: String,
-        required: true, 
+        // required: true, 
     },
     status : {
-        type: Number,
+        type: Number, // 0 - pending, 1 - accepted,  2 - rejected
         required: true
     },
+    // reg_status : {
+    //     type: String,
+    //     required: true
+    // },
     token: {
         type: String,
         required: true,

@@ -150,8 +150,21 @@ module.exports = () => {
             mobile_no      : mob_number,
             supplier_image : req.files['supplier_image'].map(file => path.basename(file.path))
         }
-        console.log(reqObj);
         Controller.editSupplier(reqObj, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/profile-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.supplierProfileDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/change-password', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.changePassword(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

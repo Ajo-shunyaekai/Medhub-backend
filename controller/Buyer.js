@@ -78,22 +78,32 @@ module.exports = {
 
     EditProfile : async(reqObj, callback) => { 
         try {
-          const buyer_id = reqObj.buyer_id
-  
-          const buyer    = await Buyer.findOne({ buyer_id: buyer_id });
+          // const buyer_id = reqObj.buyer_id
+          const {
+            buyer_id, buyer_name, description, buyer_address, 
+            email, mobile_no, country_code
+          } = reqObj
+
+          const updateObj = {
+            buyer_name,
+            description,
+            buyer_address,
+            email,
+            mobile : mobile_no,
+            country_code,
+          };
+
+          const buyer = await Buyer.findOne({ buyer_id: buyer_id });
   
           if (!buyer) {
               return callback({ code: 404, message: 'Buyer Not Found' });
           }
 
+          Object.keys(updateObj).forEach(key => updateObj[key] === undefined && delete updateObj[key]);
+
             Buyer.findOneAndUpdate({buyer_id: buyer_id},
               {
-                $set: {
-                  buyer_name   : reqObj.buyer_name,
-                  mobile       : reqObj.mobile,
-                  country_code : reqObj.countryCode
-  
-                }
+                $set: {updateObj}
               },{new: true}
               ).then((updateProfile) => {
                 callback({ code: 200, message: 'Buyer Profile updated successfully', result: updateProfile});
@@ -106,12 +116,25 @@ module.exports = {
         }
     },
 
+    buyerProfileDetails : async(reqObj, callback) => {
+      try {
+        Buyer.findOne({buyer_id: reqObj.buyer_id}).select('buyer_id buyer_name email mobile country_code company_name') 
+        .then((data) => {
+          callback({code: 200, message : 'Buyer details fetched successfully', result:data})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message : 'Error in fetching buyer details'})
+      });
+      }catch (error) {
+        callback({code: 500, message : 'Internal server error'})
+      }
+    },
+
     supplierList : async(reqObj, callback) => {
       try {
         const { searchKey, filterCountry } = reqObj
 
         if(searchKey === '' && filterCountry === '') {
-          // console.log('(searchKey ===  filterCountry ===');
           Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
@@ -120,7 +143,6 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else if(searchKey !== '' && filterCountry === '' ) {
-          // console.log('searchKey !==  && filterCountry === ');
           Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
@@ -129,7 +151,6 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else if(filterCountry !== '' && searchKey === '') {
-          // console.log('filterCountry !==   && searchKey === ');
           Supplier.find({country_of_origin: filterCountry}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
@@ -139,7 +160,6 @@ module.exports = {
         });
 
         } else if((searchKey !== '' && searchKey !== undefined) && (filterCountry !== '' && filterCountry !== undefined)) {
-          // console.log('searchKey !==  && filterCountry !==  ');
           Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry }).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
@@ -148,7 +168,6 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else {
-          // console.log('heree');
           Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image country_code mobile supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
@@ -173,7 +192,6 @@ module.exports = {
       });
       }catch (error) {
         callback({code: 500, message : 'Internal server error'})
-        // callback(500);
       }
     },
 
@@ -372,15 +390,15 @@ module.exports = {
           },
           {
             $group: {
-              _id: '$supplier.country_of_origin',
-              total_purchase: { $sum: '$numeric_total_price' }
+              _id            : '$supplier.country_of_origin',
+              total_purchase : { $sum: '$numeric_total_price' }
             }
           },
           {
             $project: {
-              _id: 0,
-              country: '$_id',
-              value: '$total_purchase'
+              _id     : 0,
+              country : '$_id',
+              value   : '$total_purchase'
             }
           }
         ])

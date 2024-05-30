@@ -2,7 +2,7 @@ const express                                    = require('express');
 var routes                                       = express.Router();
 const Controller                                 = require('../controller/Admin')
 const MedicineController                         = require('../controller/Medicine')
-const {checkAuthorization, checkAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkAuthentication, checkAdminAuthentication}  = require('../middleware/Authorization');
 const { handleResponse }                         = require('../utils/utilities');
 
 
@@ -20,27 +20,48 @@ module.exports = () => {
             });
     });
 
-    routes.post('/get-user-list', checkAuthorization, checkAuthentication, (req, res) => {
+    routes.post('/get-user-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
             Controller.getUserList(req.body, result => {
-                // res.send({ code : 200, message : 'User list', result });
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
-    routes.post('/block-unblock-user', checkAuthorization, checkAuthentication, (req, res) => {
+    routes.post('/block-unblock-user', checkAuthorization, checkAdminAuthentication, (req, res) => {
             Controller.blockUnblockUser(req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
-    routes.post('/all-medicine-list', checkAuthorization, checkAuthentication, (req, res) => {
+    routes.post('/all-medicine-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
             MedicineController.allMedicineList(req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
+
+    routes.post('/get-supplier-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getSupplierList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-supplier-reg-req-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getRegReqList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+
+    routes.post('/accept-reject-supplier-registration', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.acceptRejectSupplierRegReq(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+});
     
     return routes;
 }
