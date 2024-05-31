@@ -8,7 +8,7 @@ module.exports = {
   
     Regsiter : async(reqObj, callback) => {
         try {
-            const emailExists = await Buyer.findOne({email : reqObj.email})
+            const emailExists = await Buyer.findOne({buyer_email : reqObj.buyer_email})
             if(emailExists) {
               return callback({code : 409, message: "Email already exists"})
             }
@@ -18,32 +18,51 @@ module.exports = {
             const token       = jwt.sign(data, jwtSecretKey); 
   
             const newBuyer = new Buyer({
-                buyer_id     : buyerId,
-                buyer_name   : reqObj.buyer_name,
-                company_name : reqObj.company_name,
-                mobile       : reqObj.mobile,
-                country_code : reqObj.countryCode,
-                email        : reqObj.email,
-                password     : reqObj.password,
-                token        : token,
-                status       : 1
+                buyer_id                    : buyerId,
+                buyer_name                  : reqObj.buyer_name,
+                buyer_address               : reqObj.buyer_address,
+                buyer_email                 : reqObj.buyer_email,
+                buyer_mobile                : reqObj.buyer_mobile,
+                buyer_country_code          : reqObj.buyer_country_code,
+                contact_person_name         : reqObj.contact_person_name,
+                contact_person_mobile       : reqObj.contact_person_mobile,
+                contact_person_country_code : reqObj.contact_person_country_code,
+                contact_person_email        : reqObj.contact_person_email,
+                designation                 : reqObj.designation ,
+                country_of_origin           : reqObj.country_of_origin,
+                country_of_operation        : reqObj.country_of_operation ,
+                license_no                  : reqObj.license_no,
+                tax_no                      : reqObj.tax_no,
+                description                 : reqObj.description,
+                buyer_image                 : reqObj.buyer_image,
+                tax_image                   : reqObj.tax_image,
+                license_image               : reqObj.license_image,
+                token                       : token,
+                status                      : 0
               });
+
+              newBuyer.save() .then(() => {
+                callback({code: 200, message: "Buyer registration request submitted successfully"})
+              }).catch((err) => {
+                console.log('err',err);
+                callback({code: 400 , message: "Error in submiiting buyer eegistration request"})
+              })
               
-              const saltRounds = 10
-              bcrypt.genSalt(saltRounds).then((salt) => {
-                return bcrypt.hash(newBuyer.password, salt)
-              })
-              .then((hashedPassword) => {
-                newBuyer.password = hashedPassword
-                newBuyer.save() .then(() => {
-                  callback({code: 200, message: "Buyer Registration Successfull"})
-                }).catch((err) => {
-                  callback({code: 400 , message: "Buyer Registration Failed"})
-                })
-              })
-              .catch((error) => {
-                callback({code: 401});
-              }) 
+              // const saltRounds = 10
+              // bcrypt.genSalt(saltRounds).then((salt) => {
+              //   return bcrypt.hash(newBuyer.password, salt)
+              // })
+              // .then((hashedPassword) => {
+              //   newBuyer.password = hashedPassword
+              //   newBuyer.save() .then(() => {
+              //     callback({code: 200, message: "Buyer Registration Successfull"})
+              //   }).catch((err) => {
+              //     callback({code: 400 , message: "Buyer Registration Failed"})
+              //   })
+              // })
+              // .catch((error) => {
+              //   callback({code: 401});
+              // }) 
           } catch (error) {
             console.log('error',error);
             callback({code: 500 , message: "Internal Server Error", error: error})

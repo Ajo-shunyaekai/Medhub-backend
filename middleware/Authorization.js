@@ -92,7 +92,7 @@ module.exports = {
             return res.status(500).send({ message: "Internal Server Error" });
         }
     },
-
+    
     //this is working fine
     checkBuyerAuthentication : async (req, res, next) => {
         const access_token  = req.headers.access_token;

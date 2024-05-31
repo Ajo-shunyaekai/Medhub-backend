@@ -11,29 +11,81 @@ const buyerSchema = new Schema({
     type: String,
     required: true
   },
-  company_name: {
+  description: {
     type: String,
     required: true
   },
-  mobile: {
+  buyer_address: {
+    type: String,
+    required: true
+  },
+  buyer_mobile: {
     type: String,
     required : true,
   },
-  country_code: {
+  buyer_country_code: {
     type: String,
     required : true,
   },
-  email: {
+  buyer_email: {
     type: String,
     required: true,
     unique: true
   },
+  contact_person_name: {
+    type: String,
+    required: true,
+  },
+  designation: {
+      type: String,
+      required: true,
+  },
+  contact_person_mobile: {
+    type: String,
+    required: true,
+  },
+  contact_person_country_code: {
+      type: String,
+      required: true,
+  },
+  contact_person_email : {
+      type: String,
+      required: true,
+  },
+  country_of_origin: {
+    type: String,
+    required: true,
+  },
+  country_of_operation: [{
+      type: String,
+      required: true,
+  }],
+  tax_no: {
+    type: String,
+    required: true
+  },
+  license_no: {
+    type: String,
+    required: true
+  },
+  buyer_image: [{
+    type: String,
+    required: true,
+  }],
+  license_image: [{
+    type: String,
+    required: true,
+  }],
+  tax_image: [{
+      type: String,
+      required: true,
+  }],
   password: {
     type: String,
     // required: true
   },
   status: {
-    type: Number,
+    type: Number, // 0 - pending, 1 - accepted,  2 - rejected
     required: true
   },
   token: {

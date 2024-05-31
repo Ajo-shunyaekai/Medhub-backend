@@ -61,11 +61,24 @@ module.exports = {
             
         }
         if(type == 'buyerRegister'){
-            objData.buyer_name  = 'Buyer Name field is required';
-            objData.mobile_no   = 'Mobile No field is required';
-            objData.email       = 'Email Field is required';
-            objData.password    = 'Password Field is required'
+            console.log('buyerRegister vali');
+            objData.buyer_name                  = 'Buyer Company name field is required';
+            objData.buyer_address               = 'Buyer address field is required';
+            objData.buyer_email                 = 'Buyer email Field is required';
+            objData.buyer_mobile             = 'Buyer mobile Field is required';
+            objData.buyer_country_code          = 'Supplier mobile Field is required';
+            objData.contact_person_name         = 'Contact person name Field is required';
+            objData.contact_person_mobile    = 'Contact person mobile Field is required';
+            objData.contact_person_country_code = 'Contact person country code  Field is required';
+            objData.contact_person_email        = 'Contact person email Field is required';
+            objData.designation                 = 'Designation Field is required';
+            objData.country_of_origin           = 'Country of origin Field is required';
+            objData.country_of_operation        = 'Country of operation Field is required';
+            objData.license_no                  = 'License no Field is required';
+            objData.tax_no                      = 'Tax no Field is required';
+            objData.description                 = 'Description Field is required';
         }
+
         if(type === 'editBuyer') {
             objData.buyer_name  = 'First Name field is required';
             objData.mobile_no   = 'Mobile No field is required';
@@ -98,7 +111,7 @@ module.exports = {
             objData.payment_terms               = 'payment_terms Field is required';
             objData.supplier_country_code       = 'Supplier country code  Field is required';
             objData.contact_person_country_code = 'Contact person country code  Field is required';
-            // objData.password                    = 'Password Field is required'
+            objData.tags                        = 'Tags are required';
             estimated_delivery_time             = 'Estimated Delivery Time is required'
         }
         

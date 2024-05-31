@@ -374,9 +374,9 @@ module.exports = {
 
         if (!updateStatus) {
           return callback({ code: 400, message: "Failed to update buyer status" });
-      }
+        }
 
-      let password
+        let password
       
         if (updateStatus) {
            if(updateStatus.status === 1) {
@@ -385,7 +385,7 @@ module.exports = {
             const saltRounds      = 10
             const hashedPassword  = await bcrypt.hash(password, saltRounds);
             updateStatus.password = hashedPassword;
-            
+
             await updateStatus.save();
            }
           
@@ -409,6 +409,9 @@ module.exports = {
         console.log('Internal Sever Error:',error)
         callback({code: 500, message: 'Internal Server Error', result: error})
       }
+    },
+
+    acceptRejeectBuyerRegReq : async(reqObj, callback) => {
     },
 
 
