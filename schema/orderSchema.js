@@ -23,7 +23,6 @@ const orderItemSchema = new Schema({
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled', ],
         default: 'pending'
     },
-
 });
 
 const orderSchema = new Schema({

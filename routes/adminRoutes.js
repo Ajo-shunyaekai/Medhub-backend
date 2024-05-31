@@ -2,8 +2,8 @@ const express                                    = require('express');
 var routes                                       = express.Router();
 const Controller                                 = require('../controller/Admin')
 const MedicineController                         = require('../controller/Medicine')
-const {checkAuthorization, checkAuthentication, checkAdminAuthentication}  = require('../middleware/Authorization');
 const { handleResponse }                         = require('../utils/utilities');
+const {checkAuthorization, checkAuthentication, checkAdminAuthentication}  = require('../middleware/Authorization');
 
 
 module.exports = () => {
@@ -61,7 +61,28 @@ module.exports = () => {
             const response = handleResponse(result);
             res.send(response);
         });
-});
+    });
+
+    routes.post('/get-buyer-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getBuyerList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-buyer-reg-req-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getBuyerRegReqList(req.body, result => {
+            const response = handleResponse(result)
+            res.send(response)
+        })
+    })
+
+    routes.post('/accept-reject-buyer-registration', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.acceptRejectBuyerRegReq(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
     return routes;
 }

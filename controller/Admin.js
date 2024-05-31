@@ -4,6 +4,7 @@ const generator          = require('generate-password');
 const Admin              = require('../schema/adminSchema')
 const User               = require('../schema/userSchema')
 const Supplier           = require('../schema/supplierSchema')
+const Buyer              = require('../schema/buyerSchema')
 const Medicine           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 
@@ -179,6 +180,12 @@ module.exports = {
 
     getRegReqList: async(reqObj, callback) => {
       try {
+        const { pageNo, limit } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = limit || 2
+        const offset    = (page_no -1) * page_size
+
         const fields = {
           supplier_id                : 1,
           supplier_name               : 1,
@@ -264,6 +271,138 @@ module.exports = {
           callback({ code: 200, message: `${updateProfile.status === 1 ? 'Supplier registration accepted successfully': updateProfile.status === 2 ? ' Supplier registration rejected' : ''}`,result: returnObj});
         } else {
             callback({code:400,  message: "Failed to update user status" });
+        }
+
+      } catch (error) {
+        console.log('Internal Sever Error:',error)
+        callback({code: 500, message: 'Internal Server Error', result: error})
+      }
+    },
+
+    getBuyerList: async(reqObj, callback) => {
+      try {
+        const { pageNo, limit } = reqObj
+
+        const fields = {
+          buyer_id                 : 1,
+          company_name             : 1,
+          buyer_name               : 1,
+          buyer_email              : 1,
+          buyer_mobile_no          : 1,
+          buyer_country_code       : 1,
+          status                   : 1
+          
+          // supplier_image           : 1,
+          // supplier_address         : 1,
+          // description              : 1,
+          // license_no                  : 1,
+          // tax_no                      : 1,
+          // country_of_origin           : 1,
+          // country_of_operation        : 1,
+          // contact_person_name         : 1,
+          // designation                 : 1,
+          // contact_person_mobile_no    : 1,
+          // contact_person_country_code : 1,
+          // license_image               : 1,
+          // tax_image                   : 1,
+          // payment_terms               : 1,
+          // tags                        : 1,
+          // estimated_delivery_time     : 1,
+         
+        };
+
+        Buyer.find({}).select(fields).limit(1).then((data) => {
+          callback({code: 200, message: 'Buyer list fetched successfully', result: data})
+        })
+        .catch((err) => {
+          callback({code: 400, message:'Error while fetching buyer list', result: err })
+        })
+
+      } catch (error) {
+        
+      }
+    },
+
+    getBuyerRegReqList: async(reqObj, callback) => {
+      try {
+        const {pageNo, limit} = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = limit | 2
+        const offSet    = (page_no - 1) * page_size
+
+        const fields = {
+          buyer_id                 : 1,
+          company_name             : 1,
+          buyer_name               : 1,
+          buyer_email              : 1,
+          buyer_mobile_no          : 1,
+          buyer_country_code       : 1,
+          status                   : 1
+        };
+
+        Buyer.find({status : 0}).select(fields).limit(2).then((data) => {
+          callback({code: 200, message: 'Buyer Registration Request List fetched Successfully', result: data})
+        })
+        .catch((err) => {
+          callback({code: 400, message: 'Error while fetching buyer registration requests list', result: err})
+        })
+
+      } catch (error) {
+        console.log('INternal server error')
+        callback({code: 500, message: 'Internal server error', result: error})
+      }
+    },
+
+    acceptRejectBuyerRegReq : async(reqObj, callback) => {
+      try {
+        const { buyer_id, action } = reqObj
+
+        const buyer = await Buyer.findOne({ buyer_id : buyer_id });
+  
+        if (!buyer) {
+            return callback({code: 400, message: "Buyer not found" });
+        }
+
+        const newStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+       
+        const updateStatus = await Buyer.findOneAndUpdate(
+            { buyer_id    : buyer_id },
+            { status      : newStatus },
+            { new         : true }
+        );
+
+        if (!updateStatus) {
+          return callback({ code: 400, message: "Failed to update buyer status" });
+      }
+
+      let password
+      
+        if (updateStatus) {
+           if(updateStatus.status === 1) {
+              password = generatePassword()
+            
+            const saltRounds      = 10
+            const hashedPassword  = await bcrypt.hash(password, saltRounds);
+            updateStatus.password = hashedPassword;
+            
+            await updateStatus.save();
+           }
+          
+          const returnObj = {
+            supplier_id           : updateStatus.supplier_id,
+            supplier_name         : updateStatus.supplier_name,
+            supplier_email        : updateStatus.supplier_email,
+            supplier_mobile_no    : updateStatus.supplier_mobile_no,
+            supplier_country_code : updateStatus.supplier_country_code,
+            status                : updateStatus.status,
+            password              : updateStatus.password,
+            generatedPassword     : password
+          }
+
+          callback({ code: 200, message: `${updateProfile.status === 1 ? 'Buyer registration accepted successfully': updateProfile.status === 2 ? 'Buyer registration rejected' : ''}`,result: returnObj});
+        } else {
+            callback({code:400,  message: "Failed to update buyer status" });
         }
 
       } catch (error) {

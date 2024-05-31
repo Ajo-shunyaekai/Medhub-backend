@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const Schema   = mongoose.Schema;
 
 const buyerSchema = new Schema({
   buyer_id: {
@@ -30,7 +30,7 @@ const buyerSchema = new Schema({
   },
   password: {
     type: String,
-    required: true
+    // required: true
   },
   status: {
     type: Number,

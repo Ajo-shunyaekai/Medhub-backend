@@ -2,6 +2,7 @@ require('dotenv').config();
 const bcrypt   = require('bcrypt');
 const jwt      = require('jsonwebtoken');
 const Supplier = require('../schema/supplierSchema')
+const Order    = require('../schema/orderSchema')
 
 module.exports = {
     
@@ -72,27 +73,27 @@ module.exports = {
     },
 
     login : async(reqObj, callback) => {
+      try {
         const password  = reqObj.password
         const email     = reqObj.email
-  
-        try {
-          const supplier = await Supplier.findOne({ supplier_email: email });
-  
-          if (!supplier) {
-              return callback({code: 404, message: "Email doesn't exists"});
-          }
-  
-          const isMatch = await bcrypt.compare(password, supplier.password);
-  
-          if (isMatch) {
-              callback({code : 200, message: "Login Successfull"});
-          } else {
-              callback({code: 401, message: 'Incorrect Password'});
-          }
-        }catch (error) {
-          console.error('Error validating user:', error);
-          callback({code: 500});
-       }
+
+        const supplier = await Supplier.findOne({ supplier_email: email });
+
+        if (!supplier) {
+            return callback({code: 404, message: "Email doesn't exists"});
+        }
+
+        const isMatch = await bcrypt.compare(password, supplier.password);
+
+        if (isMatch) {
+            callback({code : 200, message: "Login Successfull"});
+        } else {
+            callback({code: 401, message: 'Incorrect Password'});
+        }
+      }catch (error) {
+        console.error('Error validating user:', error);
+        callback({code: 500});
+      }
     },
 
     filterValues : async(reqObj, callback) => {
@@ -210,5 +211,54 @@ module.exports = {
             callback({code: 500 , message: "Internal Server Error", error: error})
       }
     },
+
+    // buyerOrderRequests : async(reqObj, callback) => {
+    //   try {
+    //     const { buyer_id, supplier_id, limit, pageNo } = reqObj
+    //     const page_no  = pageNo || 1
+    //     const pageSize = limit || 2
+    //     const offSet   = (page_no - 1) * pageSize
+    //       Order.aggregate([
+    //         {
+    //           $match: { 
+    //               buyer_id    : buyer_id,
+    //               supplier_id : supplier_id
+    //            }
+    //         },
+    //         {
+    //           $lookup: {
+    //             from         : 'suppliers',
+    //             localField   : 'supplier_id',
+    //             foreignField : 'supplier_id',
+    //             as           : 'supplier'
+    //           }
+    //         },
+    //         {
+    //           $project: {
+    //             order_id          : 1,
+    //             buyer_id          : 1,
+    //             buyer_company     : 1,
+    //             supplier_id       : 1,
+    //             items             : 1,
+    //             payment_terms     : 1,
+    //             est_delivery_time : 1,
+    //             shipping_details  : 1,
+    //             remarks           : 1,
+    //             order_status      : 1,
+    //             created_at        : 1,
+    //             supplier          : { $arrayElemAt : ["$supplier", 0] }
+    //           }
+    //         }
+    //       ])
+    //       .then((data) => {
+    //         console.log('dataa', data);
+    //       })
+    //       .catch((err) => {
+    //         console.log('error',err);
+    //       })
+    //   } catch (error) {
+        
+    //   }
+    // }
 
 }

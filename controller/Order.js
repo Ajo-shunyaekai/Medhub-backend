@@ -63,7 +63,7 @@ module.exports = {
           const {page_no, limit, filterKey, buyer_id} = reqObj
     
           const pageNo   = page_no || 1
-          const pageSize = limit || 1
+          const pageSize = limit || 2
           const offset   = (pageNo - 1) * pageSize     
           
         Order.aggregate([
@@ -110,8 +110,8 @@ module.exports = {
             },
             {
               $addFields: {
-                "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
-                "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+                "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
               }
             },
             {
@@ -164,14 +164,15 @@ module.exports = {
                     totalPages,
                     totalItems
                 }
-                callback({ code: 200, message: "List Fetched successfully", result: responseData });
+                callback({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
             })
         })
         .catch((err) => {
-            console.log(err);
+            console.log('Error in fetching order list',err);
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
         } catch (error) {
+          console.log('Intenal Server Error',error)
           callback({ code: 500, message: "Internal Server Error", result: error });
         }
     },

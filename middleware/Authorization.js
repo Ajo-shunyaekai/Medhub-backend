@@ -27,8 +27,6 @@ module.exports = {
     },
 
     checkAuthentication : async (req, res, next) => {  /// For Admin 
-        console.log('header',req.headers.access_token);
-        console.log('process.env.APP_SECRET',process.env.APP_SECRET);
         let access_token = req.headers.access_token;
         try {
             if(!access_token){
@@ -164,4 +162,5 @@ module.exports = {
             return res.status(500).send({ message: "Internal Server Error" });
         }
     },
+    
 }
