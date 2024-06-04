@@ -1,8 +1,9 @@
 require('dotenv').config();
-const bcrypt   = require('bcrypt');
-const jwt      = require('jsonwebtoken');
-const Supplier = require('../schema/supplierSchema')
-const Order    = require('../schema/orderSchema')
+const bcrypt       = require('bcrypt');
+const jwt          = require('jsonwebtoken');
+const Supplier     = require('../schema/supplierSchema')
+const Order        = require('../schema/orderSchema')
+const SupplierEdit = require('../schema/supplierEditSchema')
 
 module.exports = {
     
@@ -42,12 +43,13 @@ module.exports = {
               tags                        : reqObj.tags,
               // password                    : reqObj.password,
               token                       : token,
-              status                      : 0
+              account_status              : 0,
+              profile_status              : 0
               // mobile                    : reqObj.mobile,
               // country_code              : reqObj.countryCode,
               // email                     : reqObj.email,
-              
-            });
+          });
+
             newSupplier.save() .then(() => {
               callback({code: 200, message: "Supplier Registration Successfull"})
             }).catch((err) => {
@@ -116,47 +118,84 @@ module.exports = {
     editSupplier : async(reqObj, callback) => {
       try {
        const {
-        supplier_id, supplier_name, description, supplier_address, 
-        email, mobile_no, country_code, country_of_origin, contact_person_name,
-        designation, payment_terms, tags, estimated_delivery_time, supplier_image
-      } = reqObj
+          supplier_id, supplier_name, description, supplier_address, 
+          supplier_email, supplier_mobile, supplier_country_code, contact_person_name,
+          contact_person_mobile_no, contact_person_country_code, contact_person_email, designation,
+          country_of_origin, country_of_operation, license_no, tax_no, payment_terms, tags, 
+          estimated_delivery_time, supplier_image, tax_image, license_image
+        } = reqObj
 
       const updateObj = {
-        supplier_name,
-        description,
-        supplier_address,
-        email,
-        mobile : mobile_no,
-        country_code,
-        country_of_origin,
+        supplier_id, 
+        supplier_name, 
+        description, 
+        supplier_address, 
+        supplier_email, 
+        supplier_mobile, 
+        supplier_country_code, 
         contact_person_name,
+        contact_person_mobile_no, 
+        contact_person_country_code, 
+        contact_person_email, 
         designation,
-        payment_terms,
-        tags,
-        estimated_delivery_time,
-        supplier_image
+        country_of_origin, 
+        country_of_operation, 
+        license_no, 
+        tax_no, 
+        payment_terms, 
+        tags, 
+        estimated_delivery_time, 
+        supplier_image, 
+        tax_image, 
+        license_image,
+        edit_status: 0
       };
+
+      const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+  
+        if (!supplier) {
+            return callback({ code: 404, message: 'Supplier Not Found' });
+        }
+
+        if(supplier.profile_status === 0) {
+          return callback({code: 202, message: 'Edit request already exists for the supplier'})
+        }
+
 
       Object.keys(updateObj).forEach(key => updateObj[key] === undefined && delete updateObj[key]);
 
-      const updatedSupplier = await Supplier.findOneAndUpdate(
-        { supplier_id: supplier_id },
-        // updateObj,
-        { $set: updateObj },
-        { new: true }
-      );  
+      const supplierEdit = new SupplierEdit(updateObj)
 
-    if (!updatedSupplier) {
-      return callback({ code: 404, message: 'Supplier not found' });
-    }
+      supplierEdit.save().then((data) => {
+        Supplier.findOneAndUpdate({supplier_id : supplier_id},
+          {
+            $set: {
+              profile_status: 0
+            }
+          }).then((result) => {
+            callback({ code: 200, message: 'Profile edit request send successfully', result: data});
+          })
+          .catch((err) => {
+            callback({ code: 400, message: 'Error while sending profile update request', result: err});
+          })
+      })
+    //   const updatedSupplier = await Supplier.findOneAndUpdate(
+    //     { supplier_id: supplier_id },
+    //     { $set: updateObj },
+    //     { new: true }
+    //   );  
 
-    callback({ code: 200, message: 'Supplier updated successfully', result: updatedSupplier });
+    // if (!updatedSupplier) {
+    //   return callback({ code: 404, message: 'Supplier not found' });
+    // }
+
+    // callback({ code: 200, message: 'Supplier updated successfully', result: updatedSupplier });
 
 
       // callback({ code: 200, message: "Filter values", result: [result] });
       }catch (error) {
         console.error('Error:', error);
-        callback({code: 500});
+        callback({ code: 500, message: 'Internal Server Error', error: error});
      }
     },
 

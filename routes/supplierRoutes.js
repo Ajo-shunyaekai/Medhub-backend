@@ -93,7 +93,6 @@ module.exports = () => {
             supplier_image              : req.files['supplier_image'].map(file => path.basename(file.path)),
             license_image               : req.files['license_image'].map(file => path.basename(file.path)),
             tax_image                   : req.files['tax_image'].map(file => path.basename(file.path))
-            // mobile             : number,
         }
 
         const errObj = validation(regObj, 'supplierRegister')
@@ -134,23 +133,45 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-supplier', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
+    routes.post('/edit-supplier-request', checkAuthorization, checkSupplierAuthentication, cpUpload, async(req, res) => {
 
         if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
             res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
             return;
         }
-
-        const countryCode = req.body.mobile_no.split(" ")[0]; 
-        const mob_number  = req.body.mobile_no.split(" ").slice(1).join(" ")
-
-        const reqObj = {
-            ...req.body,
-            country_code   : countryCode,
-            mobile_no      : mob_number,
-            supplier_image : req.files['supplier_image'].map(file => path.basename(file.path))
+        if (!req.files['tax_image'] || req.files['tax_image'].length === 0) {
+            res.send({ code: 415, message: 'Supplier tax image is required!', errObj: {} });
+            return;
         }
-        Controller.editSupplier(reqObj, result => {
+        if (!req.files['license_image'] || req.files['license_image'].length === 0) {
+            res.send({ code: 415, message: 'Supplier license image is required!', errObj: {} });
+            return;
+        }
+
+        const supplierCountryCode     = req.body.supplier_mobile_no.split(" ")[0]; 
+        const supplier_mobile_number  = req.body.supplier_mobile_no.split(" ").slice(1).join(" ")
+        const person_mob_no           = req.body.contact_person_mobile.split(" ").slice(1).join(" ")
+        const personCountryCode       = req.body.contact_person_mobile.split(" ")[0]; 
+        
+        const editObj = {
+            ...req.body,
+            supplier_mobile             : supplier_mobile_number,
+            supplier_country_code       : supplierCountryCode,
+            contact_person_mobile_no    : person_mob_no,
+            contact_person_country_code : personCountryCode,
+            supplier_image              : req.files['supplier_image'].map(file => path.basename(file.path)),
+            license_image               : req.files['license_image'].map(file => path.basename(file.path)),
+            tax_image                   : req.files['tax_image'].map(file => path.basename(file.path))
+        }
+        
+        const errObj = validation(editObj, 'supplierEdit')
+
+        if(Object.values(errObj).length){
+            res.send( { code : 419, message : 'All fields are required', errObj });
+            return;
+        }
+        
+        Controller.editSupplier(editObj, result => {
             const response = handleResponse(result);
             res.send(response);
         });

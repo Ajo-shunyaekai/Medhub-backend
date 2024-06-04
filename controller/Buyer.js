@@ -3,6 +3,7 @@ const jwt                = require('jsonwebtoken');
 const Buyer              = require('../schema/buyerSchema')
 const Supplier           = require('../schema/supplierSchema')
 const Order              = require('../schema/orderSchema')
+const BuyerEdit          = require('../schema/buyerEditSchema')
 
 module.exports = {
   
@@ -38,31 +39,16 @@ module.exports = {
                 tax_image                   : reqObj.tax_image,
                 license_image               : reqObj.license_image,
                 token                       : token,
-                status                      : 0
+                account_status              : 0,
+                profile_status              : 0
               });
 
-              newBuyer.save() .then(() => {
+              newBuyer.save().then(() => {
                 callback({code: 200, message: "Buyer registration request submitted successfully"})
               }).catch((err) => {
                 console.log('err',err);
                 callback({code: 400 , message: "Error in submiiting buyer eegistration request"})
               })
-              
-              // const saltRounds = 10
-              // bcrypt.genSalt(saltRounds).then((salt) => {
-              //   return bcrypt.hash(newBuyer.password, salt)
-              // })
-              // .then((hashedPassword) => {
-              //   newBuyer.password = hashedPassword
-              //   newBuyer.save() .then(() => {
-              //     callback({code: 200, message: "Buyer Registration Successfull"})
-              //   }).catch((err) => {
-              //     callback({code: 400 , message: "Buyer Registration Failed"})
-              //   })
-              // })
-              // .catch((error) => {
-              //   callback({code: 401});
-              // }) 
           } catch (error) {
             console.log('error',error);
             callback({code: 500 , message: "Internal Server Error", error: error})
@@ -74,7 +60,7 @@ module.exports = {
         const email    = reqObj.email
   
         try {
-          const buyer = await Buyer.findOne({ email: email });
+          const buyer = await Buyer.findOne({ buyer_email: email });
   
           if (!buyer) {
               console.log('Not found');
@@ -97,19 +83,34 @@ module.exports = {
 
     EditProfile : async(reqObj, callback) => { 
         try {
-          // const buyer_id = reqObj.buyer_id
           const {
-            buyer_id, buyer_name, description, buyer_address, 
-            email, mobile_no, country_code
+            buyer_id, buyer_name, description, buyer_address,buyer_email, buyer_mobile, 
+            buyer_country_code, contact_person_name, contact_person_mobile, contact_person_country_code,
+            contact_person_email, designation, country_of_origin, country_of_operation, license_no, tax_no,
+            buyer_image, tax_image, license_image
           } = reqObj
 
           const updateObj = {
+            buyer_id,
             buyer_name,
             description,
             buyer_address,
-            email,
-            mobile : mobile_no,
-            country_code,
+            buyer_email,
+            buyer_mobile,
+            buyer_country_code,
+            contact_person_name,
+            contact_person_mobile,
+            contact_person_country_code,
+            contact_person_email,
+            designation,
+            country_of_origin,
+            country_of_operation,
+            license_no,
+            tax_no,
+            buyer_image,
+            tax_image,
+            license_image,
+            edit_status : 0
           };
 
           const buyer = await Buyer.findOne({ buyer_id: buyer_id });
@@ -118,18 +119,37 @@ module.exports = {
               return callback({ code: 404, message: 'Buyer Not Found' });
           }
 
+          if(buyer.profile_status === 0) {
+            return callback({code: 202, message: 'Edit request already exists for the buyer'})
+          }
+
           Object.keys(updateObj).forEach(key => updateObj[key] === undefined && delete updateObj[key]);
 
-            Buyer.findOneAndUpdate({buyer_id: buyer_id},
+          const buyerEdit = new BuyerEdit(updateObj)
+
+          buyerEdit.save().then((data) => {
+            Buyer.findOneAndUpdate({buyer_id : buyer_id},
               {
-                $set: {updateObj}
-              },{new: true}
-              ).then((updateProfile) => {
-                callback({ code: 200, message: 'Buyer Profile updated successfully', result: updateProfile});
+                $set : {profile_status : 0}
+              }).then((result) => {
+                callback({ code: 200, message: 'Profile edit request send successfully', result: data});
               })
               .catch((err) => {
-                callback({ code: 400, message: 'Error in updating the buyer profile', error: updateProfile});
+                callback({ code: 400, message: 'Error while senidng profile update request', result: err});
               })
+            
+          })
+
+            // Buyer.findOneAndUpdate({buyer_id: buyer_id},
+            //   {
+            //     $set: updateObj
+            //   },{new: true}
+            //   ).then((updateProfile) => {
+            //     callback({ code: 200, message: 'Buyer Profile updated successfully', result: updateProfile});
+            //   })
+            //   .catch((err) => {
+            //     callback({ code: 400, message: 'Error in updating the buyer profile', error: updateProfile});
+            //   })
         } catch (error) {
           callback({ code: 500, message: 'Internal Server Error', error: error});
         }

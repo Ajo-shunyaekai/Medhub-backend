@@ -83,6 +83,21 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+
+    routes.post('/get-profile-edit-request-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getProfileUpdateReqList(req.body, result => {
+            const response = handleResponse(result)
+            res.send(response)
+        })
+    })
+
+    routes.post('/accept-reject-profile-edit-req', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.acceptRejectProfileEditRequest(req.body, result => {
+            const response = handleResponse(result)
+            res.send(response)
+        })
+    })
     
     return routes;
 }

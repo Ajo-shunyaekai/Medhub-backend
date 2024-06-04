@@ -7,7 +7,6 @@ const Controller                                 = require('../controller/Buyer'
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
-
 const {checkAuthorization, checkBuyerAuthentication}  = require('../middleware/Authorization');
 
 const storage = multer.diskStorage({
@@ -107,24 +106,54 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-profile', checkAuthorization, checkBuyerAuthentication, (req, res) => {
-        const errObj = validation(req.body, 'editBuyer')
+    routes.post('/edit-profile-request', checkAuthorization, checkBuyerAuthentication, cpUpload, (req, res) => {
+
+        if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
+            res.send({ code: 415, message: 'Buyer Logo is required!', errObj: {} });
+            return;
+        }
+        if (!req.files['tax_image'] || req.files['tax_image'].length === 0) {
+            res.send({ code: 415, message: 'Buyer tax image is required!', errObj: {} });
+            return;
+        }
+        if (!req.files['license_image'] || req.files['license_image'].length === 0) {
+            res.send({ code: 415, message: 'Buyer license image is required!', errObj: {} });
+            return;
+        }
+
+        const buyerCountryCode    = req.body.buyer_mobile.split(" ")[0]; 
+        const buyer_mobile_number = req.body.buyer_mobile.split(" ").slice(1).join(" ")
+        const person_mob_no       = req.body.contact_person_mobile.split(" ").slice(1).join(" ")
+        const personCountryCode   = req.body.contact_person_mobile.split(" ")[0]; 
+
+        const regObj = {
+            ...req.body,
+            buyer_mobile                : buyer_mobile_number,
+            buyer_country_code          : buyerCountryCode,
+            contact_person_mobile       : person_mob_no,
+            contact_person_country_code : personCountryCode,
+            buyer_image                 : req.files['buyer_image'].map(file => path.basename(file.path)),
+            license_image               : req.files['license_image'].map(file => path.basename(file.path)),
+            tax_image                   : req.files['tax_image'].map(file => path.basename(file.path))
+        }
+
+        const errObj = validation(regObj, 'editBuyer')
 
         if(Object.values(errObj).length){
             res.send( { code : 419, message : 'All fields are required', errObj });
             return;
         }
-        const countryCode  = req.body.mobile_no.split(" ")[0]; 
-        const number       = req.body.mobile_no.split(" ").slice(1).join(" ")
+        // const countryCode  = req.body.mobile_no.split(" ")[0]; 
+        // const number       = req.body.mobile_no.split(" ").slice(1).join(" ")
         
-        const obj = {
-            ...req.body,
-            mobile: number,
-            countryCode
-        }
-        console.log('obj',obj);
+        // const obj = {
+        //     ...req.body,
+        //     mobile: number,
+        //     countryCode
+        // }
+        // console.log('obj',obj);
 
-        Controller.EditProfile(obj, result => {
+        Controller.EditProfile(regObj, result => {
             const response = handleResponse(result);
             res.send(response);
         });

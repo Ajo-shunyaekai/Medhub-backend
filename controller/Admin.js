@@ -4,7 +4,9 @@ const generator          = require('generate-password');
 const Admin              = require('../schema/adminSchema')
 const User               = require('../schema/userSchema')
 const Supplier           = require('../schema/supplierSchema')
-const Buyer              = require('../schema/buyerSchema')
+const Buyer              = require('../schema/supplierSchema')
+const BuyerEdit          = require('../schema/buyerEditSchema')
+const SupplierEdit       = require('../schema/supplierEditSchema')
 const Medicine           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 
@@ -139,9 +141,8 @@ module.exports = {
       }
     },
 
-    getSupplierList: async(reqObj, callback) => {
+    getsupplierList: async(reqObj, callback) => {
       try {
-
         const fields = {
           supplier_id                 : 1,
           supplier_name               : 1,
@@ -168,7 +169,7 @@ module.exports = {
         };
 
         Supplier.find({}).select(fields).then((data) => {
-          callback({code: 200, message : 'Supplier list fetched successfully', result: data})
+          callback({code: 200, message : 'supplier list fetched successfully', result: data})
         }).catch((error) => {
           console.error('Error:', error);
           callback({code: 400, message : 'Error in fetching suppliers list', result: error})
@@ -212,7 +213,7 @@ module.exports = {
         };
 
         Supplier.find({status : 0}).select(fields).then((data) => {
-          callback({code: 200, message : 'Supplier registration request list fetched successfully', result:data})
+          callback({code: 200, message : 'supplier registration request list fetched successfully', result:data})
       }).catch((error) => {
           console.error('Error:', error);
           callback({code: 400, message : 'Error in fetching suppliers registration request list', result: error})
@@ -222,23 +223,24 @@ module.exports = {
       }
     },
 
-    acceptRejectSupplierRegReq : async(reqObj, callback) => {
+    acceptRejectsupplierRegReq : async(reqObj, callback) => {
       try {
         const { supplier_id, action } = reqObj
 
         const supplier = await Supplier.findOne({ supplier_id : supplier_id });
   
         if (!supplier) {
-            return callback({code: 400, message: "Supplier not found" });
+            return callback({code: 400, message: "supplier not found" });
         }
 
-        const newStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+        const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+        const newProfileStatus = 1
 
        
         const updateProfile = await Supplier.findOneAndUpdate(
-            { supplier_id : supplier_id },
-            { status      : newStatus },
-            { new         : true }
+            { supplier_id    : supplier_id },
+            { account_status : newAccountStatus, profile_status : newProfileStatus },
+            { new : true }
         );
 
         if (!updateProfile) {
@@ -248,7 +250,7 @@ module.exports = {
       let password
       
         if (updateProfile) {
-           if(updateProfile.status === 1) {
+           if(updateProfile.account_status === 1) {
               password = generatePassword()
             
             const saltRounds = 10
@@ -261,14 +263,15 @@ module.exports = {
             supplier_id           : updateProfile.supplier_id,
             supplier_name         : updateProfile.supplier_name,
             supplier_email        : updateProfile.supplier_email,
-            supplier_mobile_no    : updateProfile.supplier_mobile_no,
+            supplier_mobile_no    : updateProfile.supplier_mobile,
             supplier_country_code : updateProfile.supplier_country_code,
-            status                : updateProfile.status,
+            account_status        : updateProfile.account_status,
+            profile_status        : updateProfile.profile_status,
             password              : updateProfile.password,
             generatedPassword     : password
           }
 
-          callback({ code: 200, message: `${updateProfile.status === 1 ? 'Supplier registration accepted successfully': updateProfile.status === 2 ? ' Supplier registration rejected' : ''}`,result: returnObj});
+          callback({ code: 200, message: `${updateProfile.status === 1 ? 'supplier registration accepted successfully': updateProfile.status === 2 ? ' supplier registration rejected' : ''}`,result: returnObj});
         } else {
             callback({code:400,  message: "Failed to update user status" });
         }
@@ -279,17 +282,17 @@ module.exports = {
       }
     },
 
-    getBuyerList: async(reqObj, callback) => {
+    getsupplierList: async(reqObj, callback) => {
       try {
         const { pageNo, limit } = reqObj
 
         const fields = {
-          buyer_id                 : 1,
+          supplier_id                 : 1,
           company_name             : 1,
-          buyer_name               : 1,
-          buyer_email              : 1,
-          buyer_mobile_no          : 1,
-          buyer_country_code       : 1,
+          supplier_name               : 1,
+          supplier_email              : 1,
+          supplier_mobile_no          : 1,
+          supplier_country_code       : 1,
           status                   : 1
           
           // supplier_image           : 1,
@@ -311,11 +314,11 @@ module.exports = {
          
         };
 
-        Buyer.find({}).select(fields).limit(1).then((data) => {
-          callback({code: 200, message: 'Buyer list fetched successfully', result: data})
+        Supplier.find({}).select(fields).limit(1).then((data) => {
+          callback({code: 200, message: 'supplier list fetched successfully', result: data})
         })
         .catch((err) => {
-          callback({code: 400, message:'Error while fetching buyer list', result: err })
+          callback({code: 400, message:'Error while fetching supplier list', result: err })
         })
 
       } catch (error) {
@@ -332,20 +335,20 @@ module.exports = {
         const offSet    = (page_no - 1) * page_size
 
         const fields = {
-          buyer_id                 : 1,
-          company_name             : 1,
-          buyer_name               : 1,
-          buyer_email              : 1,
-          buyer_mobile_no          : 1,
-          buyer_country_code       : 1,
-          status                   : 1
+          buyer_id             : 1,
+          // company_name             : 1,
+          supplier_name        : 1,
+          buyer_email          : 1,
+          buyer_mobile         : 1,
+          buyer_country_code   : 1,
+          account_status       : 1
         };
 
-        Buyer.find({status : 0}).select(fields).limit(2).then((data) => {
+        Buyer.find({account_status : 0}).select(fields).limit(2).then((data) => {
           callback({code: 200, message: 'Buyer Registration Request List fetched Successfully', result: data})
         })
         .catch((err) => {
-          callback({code: 400, message: 'Error while fetching buyer registration requests list', result: err})
+          callback({code: 400, message: 'Error while fetching supplier registration requests list', result: err})
         })
 
       } catch (error) {
@@ -361,25 +364,26 @@ module.exports = {
         const buyer = await Buyer.findOne({ buyer_id : buyer_id });
   
         if (!buyer) {
-            return callback({code: 400, message: "Buyer not found" });
+            return callback({code: 400, message: "supplier not found" });
         }
 
-        const newStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+        const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+        const newProfileStatus = 1
        
-        const updateStatus = await Buyer.findOneAndUpdate(
+        const updateStatus = await supplier.findOneAndUpdate(
             { buyer_id    : buyer_id },
-            { status      : newStatus },
+            { account_status : newAccountStatus, profile_status : newProfileStatus },
             { new         : true }
         );
 
         if (!updateStatus) {
-          return callback({ code: 400, message: "Failed to update buyer status" });
+          return callback({ code: 400, message: "Failed to update supplier status" });
         }
 
         let password
       
         if (updateStatus) {
-           if(updateStatus.status === 1) {
+           if(updateStatus.account_status === 1) {
               password = generatePassword()
             
             const saltRounds      = 10
@@ -390,17 +394,17 @@ module.exports = {
            }
           
           const returnObj = {
-            supplier_id           : updateStatus.supplier_id,
-            supplier_name         : updateStatus.supplier_name,
-            supplier_email        : updateStatus.supplier_email,
-            supplier_mobile_no    : updateStatus.supplier_mobile_no,
-            supplier_country_code : updateStatus.supplier_country_code,
-            status                : updateStatus.status,
-            password              : updateStatus.password,
-            generatedPassword     : password
+            buyer_id           : updateStatus.buyer_id,
+            buyer_name         : updateStatus.buyer_name,
+            buyer_email        : updateStatus.buyer_email,
+            buyer_mobile       : updateStatus.buyer_mobile,
+            buyer_country_code : updateStatus.buyer_country_code,
+            status             : updateStatus.status,
+            password           : updateStatus.password,
+            generatedPassword  : password
           }
 
-          callback({ code: 200, message: `${updateProfile.status === 1 ? 'Buyer registration accepted successfully': updateProfile.status === 2 ? 'Buyer registration rejected' : ''}`,result: returnObj});
+          callback({ code: 200, message: `${updateStatus.status === 1 ? 'buyer registration accepted successfully': updateStatus.status === 2 ? 'buyer registration rejected' : ''}`,result: returnObj});
         } else {
             callback({code:400,  message: "Failed to update buyer status" });
         }
@@ -411,8 +415,142 @@ module.exports = {
       }
     },
 
-    acceptRejeectBuyerRegReq : async(reqObj, callback) => {
+    getProfileUpdateReqList: async(reqObj, callback) => {
+      try {
+        const { pageNo, limit, user_type  } = reqObj
+
+        const fieldsToExclude = {
+          token     : 0,
+          createdAt : 0,
+          updatedAt : 0,
+          password  : 0,
+        };
+
+        const fetchUpdateProfileRequests = (Model, callback) => {
+          Model.find({}).select(fieldsToExclude).limit()
+            .then((data) => {
+              callback({ code: 200, message: 'Update Profile Req list fetched successfully', result: data });
+            })
+            .catch((err) => {
+              callback({ code: 400, message: 'Error while fetching update profile req list', result: err });
+            });
+        };
+        
+        if (user_type === 'supplier') {
+          fetchUpdateProfileRequests(supplierEdit, callback);
+        } else if (user_type === 'supplier') {
+          fetchUpdateProfileRequests(supplierEdit, callback);
+        }
+
+      } catch (error) {
+        callback({code: 500, message:'Internal Server Error', result: error })
+      }
     },
 
+    acceptRejectProfileEditRequest : async(reqObj, callback) => {
+      try {
+        const { user_id, user_type, action } = reqObj
+        
+        const status = action == 'accept' ? 1 : 'reject' ? 2 : ''
 
+        if(status === 1) {
+          if(user_type === 'supplier') {
+            const isSupplier = await SupplierEdit.findOne({supplier_id : user_id, edit_status: 0})
+  
+              if(!isSupplier) {
+                return callback({code: 402, message: 'supplier edit request not found'})
+              }
+            
+              await SupplierEdit.findOneAndUpdate({supplier_id: user_id}, {$set: {edit_status: status}})
+  
+                 const updateObj = {
+                  supplier_name               : isSupplier.supplier_name, 
+                  description                 : isSupplier.description, 
+                  supplier_address            : isSupplier.supplier_address, 
+                  supplier_email              : isSupplier.supplier_email, 
+                  supplier_mobile             : isSupplier.supplier_mobile, 
+                  supplier_country_code       : isSupplier.supplier_country_code, 
+                  contact_person_name         : isSupplier.contact_person_name,
+                  contact_person_mobile_no    : isSupplier.contact_person_mobile_no, 
+                  contact_person_country_code : isSupplier.contact_person_country_code, 
+                  contact_person_email        : isSupplier.contact_person_email, 
+                  designation                 : isSupplier.designation,
+                  country_of_origin           : isSupplier.country_of_origin, 
+                  country_of_operation        : isSupplier.country_of_operation, 
+                  license_no                  : isSupplier.license_no, 
+                  tax_no                      : isSupplier.tax_no, 
+                  payment_terms               : isSupplier.payment_terms, 
+                  tags                        : isSupplier.tags, 
+                  estimated_delivery_time     : isSupplier.estimated_delivery_time, 
+                  supplier_image              : isSupplier.supplier_image, 
+                  tax_image                   : isSupplier.tax_image, 
+                  license_image               : isSupplier.license_image,
+                  profile_status              : 1    
+                };
+
+                  Supplier.findOneAndUpdate({supplier_id: isSupplier.supplier_id}, {$set: updateObj}, {new: true})
+                  .then((result) => {
+                    callback({code: 200, message : 'Profile details updated successfully', result: result})
+                  })
+                  .catch((err) => {
+                          callback({code: 400, message : 'Error while updating profile details ', result: err})
+                  })
+  
+          } else if(user_type === 'buyer') {
+            const isBuyer = await BuyerEdit.findOne({buyer_id : user_id, edit_status : 0})
+  
+            if(!isBuyer) {
+              callback({code: 402, message: 'Buyer edit request not found'})
+            }
+
+            BuyerEdit.findOneAndUpdate({buyer_id: user_id},
+              {
+                $set: {
+                edit_status : status}
+              }).then(() => {
+  
+                const updateObj = {
+                  // buyer_id                 : isbuyer.buyer_id, 
+                  buyer_name                  : isBuyer.buyer_name, 
+                  description                 : isBuyer.description, 
+                  buyer_address               : isBuyer.buyer_address, 
+                  buyer_email                 : isBuyer.buyer_email, 
+                  buyer_mobile                : isBuyer.buyer_mobile, 
+                  buyer_country_code          : isBuyer.buyer_country_code, 
+                  contact_person_name         : isBuyer.contact_person_name,
+                  contact_person_mobile_no    : isBuyer.contact_person_mobile, 
+                  contact_person_country_code : isBuyer.contact_person_country_code, 
+                  contact_person_email        : isBuyer.contact_person_email, 
+                  designation                 : isBuyer.designation,
+                  country_of_origin           : isBuyer.country_of_origin, 
+                  country_of_operation        : isBuyer.country_of_operation, 
+                  license_no                  : isBuyer.license_no, 
+                  tax_no                      : isBuyer.tax_no, 
+                  payment_terms               : isBuyer.payment_terms, 
+                  tags                        : isBuyer.tags, 
+                  estimated_delivery_time     : isBuyer.estimated_delivery_time, 
+                  buyer_image                 : isBuyer.buyer_image, 
+                  tax_image                   : isBuyer.tax_image, 
+                  license_image               : isBuyer.license_image,
+                  profile_status              : 1    
+                };
+  
+                Buyer.findOneAndUpdate({buyer_id : isBuyer.buyer_id}, { $set: updateObj}, {new: true})
+                .then((result) => {
+                  callback({code: 200, message : 'Profile details updated successfully', result: result})
+                })
+                .catch((err) => {
+                  callback({code: 400, message : 'Error while updating profile details ', result: err})
+                })
+              })
+          }
+        } else if(status === 2) {
+          callback({code: 403, message : 'Request for edit profile details rejected'})
+        }
+        
+
+      } catch (error) {
+        callback({code: 500, message : 'Internal Server Error', result: error})
+      }
+    }
 }

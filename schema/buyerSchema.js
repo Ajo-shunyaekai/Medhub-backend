@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
+
 const buyerSchema = new Schema({
   buyer_id: {
     type: String,
@@ -84,8 +85,12 @@ const buyerSchema = new Schema({
     type: String,
     // required: true
   },
-  status: {
-    type: Number, // 0 - pending, 1 - accepted,  2 - rejected
+  account_status: {
+    type: Number, // 0 - pending, 1 - accepted || unblocked ,  2 - rejected,  3 - blocked
+    required: true
+  },
+  profile_status: {
+    type: Number,  // 0- pending, 1 - accepted, 2- rejected
     required: true
   },
   token: {
