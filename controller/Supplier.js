@@ -41,13 +41,9 @@ module.exports = {
               payment_terms               : reqObj.payment_terms,
               estimated_delivery_time     : reqObj.estimated_delivery_time,
               tags                        : reqObj.tags,
-              // password                    : reqObj.password,
               token                       : token,
               account_status              : 0,
               profile_status              : 0
-              // mobile                    : reqObj.mobile,
-              // country_code              : reqObj.countryCode,
-              // email                     : reqObj.email,
           });
 
             newSupplier.save() .then(() => {
@@ -57,17 +53,6 @@ module.exports = {
               callback({code: 400 , message: " Supplier Registration Failed"})
             })
             
-            // const saltRounds = 10
-            // bcrypt.genSalt(saltRounds).then((salt) => {
-            //   return bcrypt.hash(newSupplier.password, salt)
-            // })
-            // .then((hashedPassword) => {
-            //     newSupplier.password = hashedPassword
-               
-            // })
-            // .catch((error) => {
-            //   callback({code: 401});
-            // }) 
         } catch (error) {
           console.log('err',error);
           callback({code: 500});

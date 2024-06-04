@@ -57,7 +57,6 @@ const cpUpload = (req, res, next) => {
 module.exports = () => {
 
     routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
-
         if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
             res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
             return;
@@ -71,14 +70,6 @@ module.exports = () => {
             return;
         }
 
-        // const countryCode  = req.body.mobile_no.split(" ")[0]; 
-        // const mob_number   = req.body.mobile_no.split(" ").slice(1).join(" ")
-
-        // const regObj = {
-        //     ...req.body,
-        //     country_code   : countryCode,
-        //     supplier_image : req.files['supplier_image'].map(file => path.basename(file.path))
-        // }
         const supplierCountryCode     = req.body.supplier_mobile_no.split(" ")[0]; 
         const supplier_mobile_number  = req.body.supplier_mobile_no.split(" ").slice(1).join(" ")
         const person_mob_no           = req.body.contact_person_mobile.split(" ").slice(1).join(" ")
