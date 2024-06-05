@@ -70,8 +70,31 @@ module.exports = {
           const isMatch = await bcrypt.compare(password, buyer.password);
   
           if (isMatch) {
-              console.log('Validation successful');
-              callback({code : 200, message: "Buyer Login Successfull"});
+              const buyerData = {
+                 buyer_id                    : buyer.buyer_id,
+                 buyer_name                  : buyer.buyer_name,
+                 buyer_address               : buyer.buyer_address,
+                 description                 : buyer.description,
+                 buyer_email                 : buyer.buyer_email,
+                 buyer_country_code          : buyer.buyer_country_code,
+                 buyer_mobile                : buyer.buyer_mobile,
+                 contact_person_country_code : buyer.contact_person_country_code,
+                 contact_person_email        : buyer.contact_person_email,
+                 contact_person_mobile       : buyer.contact_person_mobile,
+                 contact_person_name         : buyer.contact_person_name,
+                 country_of_operation        : buyer.country_of_operation,
+                 designation                 : buyer.designation,
+                 buyer_image                 : buyer.buyer_image,
+                 license_image               : buyer.license_image,
+                 license_no                  : buyer.license_no,
+                 tax_image                   : buyer.tax_image,
+                 tax_no                      : buyer.tax_no,
+                 description                 : buyer.description,
+                 country_of_origin           : buyer.country_of_origin,
+                 token                       : buyer.token
+              }
+
+              callback({code : 200, message: "Buyer Login Successfull", result: buyerData});
           } else {
               callback({code: 401, message: "Incorrect Password"});
           }
@@ -174,7 +197,7 @@ module.exports = {
         const { searchKey, filterCountry } = reqObj
 
         if(searchKey === '' && filterCountry === '') {
-          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -182,7 +205,7 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else if(searchKey !== '' && filterCountry === '' ) {
-          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -199,7 +222,7 @@ module.exports = {
         });
 
         } else if((searchKey !== '' && searchKey !== undefined) && (filterCountry !== '' && filterCountry !== undefined)) {
-          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry , status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry , account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
@@ -207,7 +230,7 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else {
-          Supplier.find({status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {

@@ -45,7 +45,7 @@ const cpUpload = (req, res, next) => {
 
 module.exports = () => {
 
-    routes.post('/register', checkAuthorization, cpUpload, (req, res) => {
+    routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
       
         if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
             res.send({ code: 415, message: 'Buyer Logo is required!', errObj: {} });

@@ -73,7 +73,30 @@ module.exports = {
         const isMatch = await bcrypt.compare(password, supplier.password);
 
         if (isMatch) {
-            callback({code : 200, message: "Login Successfull"});
+          const supplierData = {
+            supplier_id                 : supplier.supplier_id,
+            supplier_name               : supplier.supplier_name,
+            supplier_address            : supplier.supplier_address,
+            description                 : supplier.description,
+            supplier_email              : supplier.supplier_email,
+            supplier_country_code       : supplier.supplier_country_code,
+            supplier_mobile             : supplier.supplier_mobile,
+            contact_person_country_code : supplier.contact_person_country_code,
+            contact_person_email        : supplier.contact_person_email,
+            contact_person_mobile       : supplier.contact_person_mobile,
+            contact_person_name         : supplier.contact_person_name,
+            country_of_operation        : supplier.country_of_operation,
+            designation                 : supplier.designation,
+            supplier_image              : supplier.supplier_image,
+            license_image               : supplier.license_image,
+            license_no                  : supplier.license_no,
+            tax_image                   : supplier.tax_image,
+            tax_no                      : supplier.tax_no,
+            description                 : supplier.description,
+            country_of_origin           : supplier.country_of_origin,
+            token                       : supplier.token
+         }
+            callback({code : 200, message: "Login Successfull", result: supplierData});
         } else {
             callback({code: 401, message: 'Incorrect Password'});
         }

@@ -448,6 +448,7 @@ module.exports = {
     },
 
     acceptRejectProfileEditRequest : async(reqObj, callback) => {
+      
       try {
         const { user_id, user_type, action } = reqObj
         
@@ -498,16 +499,17 @@ module.exports = {
   
           } else if(user_type === 'buyer') {
             const isBuyer = await BuyerEdit.findOne({buyer_id : user_id, edit_status : 0})
-  
+            console.log(isBuyer);
             if(!isBuyer) {
               callback({code: 402, message: 'Buyer edit request not found'})
             }
+              const countryOfOperationString = isBuyer.country_of_operation.join(', '); 
 
             BuyerEdit.findOneAndUpdate({buyer_id: user_id},
               {
                 $set: {
                 edit_status : status}
-              }).then(() => {
+              }).then(async() => {
   
                 const updateObj = {
                   // buyer_id                 : isbuyer.buyer_id, 
@@ -523,7 +525,7 @@ module.exports = {
                   contact_person_email        : isBuyer.contact_person_email, 
                   designation                 : isBuyer.designation,
                   country_of_origin           : isBuyer.country_of_origin, 
-                  country_of_operation        : isBuyer.country_of_operation, 
+                  country_of_operation        : countryOfOperationString,
                   license_no                  : isBuyer.license_no, 
                   tax_no                      : isBuyer.tax_no, 
                   payment_terms               : isBuyer.payment_terms, 
@@ -534,6 +536,7 @@ module.exports = {
                   license_image               : isBuyer.license_image,
                   profile_status              : 1    
                 };
+                
   
                 Buyer.findOneAndUpdate({buyer_id : isBuyer.buyer_id}, { $set: updateObj}, {new: true})
                 .then((result) => {
