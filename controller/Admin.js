@@ -223,7 +223,7 @@ module.exports = {
       }
     },
 
-    acceptRejectsupplierRegReq : async(reqObj, callback) => {
+    acceptRejectSupplierRegReq : async(reqObj, callback) => {
       try {
         const { supplier_id, action } = reqObj
 

@@ -83,7 +83,7 @@ module.exports = {
             supplier_mobile             : supplier.supplier_mobile,
             contact_person_country_code : supplier.contact_person_country_code,
             contact_person_email        : supplier.contact_person_email,
-            contact_person_mobile       : supplier.contact_person_mobile,
+            contact_person_mobile       : supplier.contact_person_mobile_no,
             contact_person_name         : supplier.contact_person_name,
             country_of_operation        : supplier.country_of_operation,
             designation                 : supplier.designation,

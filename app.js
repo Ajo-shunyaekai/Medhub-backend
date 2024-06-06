@@ -94,6 +94,7 @@ app.use('/api/guest', guestRouter);
 //-----------------order--------------------------//
 app.use('/api/order', orderRouter);
 app.use('/api/buyer/order', orderRouter);
+app.use('/api/supplier/order', orderRouter);
 //-----------------order--------------------------//
 
 //--------------- api routes ------------------//

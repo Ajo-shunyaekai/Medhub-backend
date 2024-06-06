@@ -3,7 +3,7 @@ var routes                                       = express.Router();
 const Order                                      = require('../controller/Order')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
-const {checkAuthorization, checkBuyerAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkBuyerAuthentication, checkSellerAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
 
 
 module.exports = () => {
@@ -82,8 +82,34 @@ module.exports = () => {
             const response = handleResponse(result);
             res.send(response);
         });
-});
+    });
 
-    
+    //------------------------ supplier ---------------------------//
+    routes.post('/supplier-order-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+
+        Order.supplierOrdersList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/supplier-order-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+
+        Order.supplierOrderDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });  
+    });
+
+    routes.post('/supplier-invoice-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+
+        Order.supplierInvoicesList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+     //------------------------ supplier ---------------------------//
+     
     return routes;
 }
