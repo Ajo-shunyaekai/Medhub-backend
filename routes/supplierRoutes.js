@@ -181,6 +181,22 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/orders-summary-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        
+        Controller.supplierDashboardOrderDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/orders-buyer-country', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        
+        Controller.supplierOrderSupplierCountry(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
    return routes
 }
