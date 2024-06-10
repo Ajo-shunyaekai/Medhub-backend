@@ -1,12 +1,49 @@
 const express                                    = require('express');
 var routes                                       = express.Router();
+const multer                                     = require('multer')
+const sharp                                      = require('sharp')
+const path                                       = require('path');
 const Order                                      = require('../controller/Order')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
 const {checkAuthorization, checkBuyerAuthentication, checkSellerAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
 
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        let uploadPath = './uploads/buyer/order/complaint_images';
+        if (file.fieldname === 'complaint_image') {
+            uploadPath = './uploads/buyer/order/complaint_images';
+        } else if (file.fieldname === 'feedback_image') {
+            uploadPath = './uploads/buyer/order/feedback_images';
+        }
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        const ext = file.mimetype.split("/")[1];
+        cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
+    },
+});
+
+const upload = multer({ storage: storage });
+
+const cpUpload = (req, res, next) => {
+    upload.fields([
+        { name: 'complaint_image' },
+        { name: 'feedback_image'},
+    ])(req, res, (err) => {
+        if (err) {
+            console.error('Multer Error:', err);
+            res.status(500).json({ error: 'File upload error' });
+            return;
+        }
+        next();
+    });
+};
+
+
 module.exports = () => {
+    
     routes.post('/order-request', checkAuthorization, checkBuyerAuthentication, (req, res) => {
 
         // let errObj = validation(obj, 'orderRequest');
@@ -52,17 +89,35 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-order-feedback', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/submit-order-feedback', checkAuthorization, checkBuyerAuthentication, cpUpload, (req, res) => {
 
-        Order.orderFeedback(req.body, result => {
+        if (!req.files['feedback_image'] || req.files['feedback_image'].length === 0) {
+            res.send({ code: 415, message: 'Feedback Image is required!', errObj: {} });
+            return;
+        }
+
+        let obj = {
+            ...req.body,
+            feedback_image: req.files['feedback_image'].map(file => path.basename(file.path))
+        }
+        Order.orderFeedback(obj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/submit-order-complaint', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/submit-order-complaint', checkAuthorization, checkBuyerAuthentication, cpUpload, (req, res) => {
 
-        Order.orderComplaint(req.body, result => {
+        if (!req.files['complaint_image'] || req.files['complaint_image'].length === 0) {
+            res.send({ code: 415, message: 'Complaint Image is required!', errObj: {} });
+            return;
+        }
+
+        let obj = {
+            ...req.body,
+            complaint_image: req.files['complaint_image'].map(file => path.basename(file.path))
+        }
+        Order.orderComplaint(obj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -84,7 +139,8 @@ module.exports = () => {
         });
     });
 
-    //------------------------ supplier ---------------------------//
+
+    //------------------------------------------------------ supplier order ------------------------------------------------------//
     routes.post('/supplier-order-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
 
         Order.supplierOrdersList(req.body, result => {
@@ -109,7 +165,7 @@ module.exports = () => {
         });
     });
 
-     //------------------------ supplier ---------------------------//
+     //------------------------------------------------------ supplier order ------------------------------------------------------//
      
     return routes;
 }

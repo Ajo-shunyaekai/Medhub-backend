@@ -14,11 +14,7 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  drugs_name: {
-    type: String,
-    required: true
-  },
-  country_of_origin: {
+  composition: {
     type: String,
     required: true
   },
@@ -34,34 +30,41 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  medicine_image: [{
+  shipping_time: {
     type: String,
-    trim: true
-  }],
+    required: true
+  },
+  tags: {
+    type: String,
+    required: true
+  },
+  available_for: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
   registered_in: [
     {
       type: String,
       required: true
     }
   ],
-  comments: {
-    type: String,
-    required: true
-  },
-  dosage_form: {
-    type: String,
-    required: true
-  },
-  strength: [{
-    type: String,
-    required: true
+  inventory_info: [{
+    strength: String,
+    quantity: String,
+    unit_price: String,
+    type_of_form: String,
+    est_delivery_days: String
   }],
-  category_name: {
+  medicine_image: [{
     type: String,
-    required: true
-  },
-  quantity: {
-    type: String,
+    trim: true
+  }],
+  status : {
+    type: Number,
     required: true
   },
   created_at: {
@@ -72,6 +75,29 @@ const medicineSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+
+
+  // country_of_origin: {
+  //   type: String,
+  //   required: true
+  // },
+  // dosage_form: {
+  //   type: String,
+  //   required: true
+  // },
+  // strength: [{
+  //   type: String,
+  //   required: true
+  // }],
+  // category_name: {
+  //   type: String,
+  //   required: true
+  // },
+  // quantity: {
+  //   type: String,
+  //   required: true
+  // },
+ 
   // description: {
   //   type: String,
   //   required: true

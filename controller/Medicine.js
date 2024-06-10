@@ -13,22 +13,49 @@ module.exports = {
     try {
       let medicine_id = "MED-" + Math.random().toString(16).slice(2);
 
+      const { strength, quantity, unit_price, type_of_form, est_delivery_days} = reqObj
+
+      if (!Array.isArray(quantity) || !Array.isArray(strength) || !Array.isArray(unit_price) || !Array.isArray(type_of_form) || !Array.isArray(est_delivery_days)) {
+        return res.status(400).send({ message: 'Inventory fields should be arrays' });
+      }
+  
+      if (quantity.length !== strength.length || strength.length !== unit_price.length || unit_price.length !== type_of_form.length || type_of_form.length !== est_delivery_days.length) {
+        return res.status(400).send({ message: 'All inventory arrays must have the same length' });
+      }
+  
+      const inventory_info = quantity.map((_, index) => ({
+        strength          : strength[index],
+        quantity          : quantity[index],
+        unit_price        : unit_price[index],
+        type_of_form      : type_of_form[index],
+        est_delivery_days : est_delivery_days[index]
+      }));
+
       const medicine = new Medicine({
-        medicine_id      : medicine_id,
-        supplier_id      : reqObj.supplier_id,
-        medicine_name    : reqObj.medicine_name,
-        drugs_name       : reqObj.drugs_name,
-        country_of_origin: reqObj.country_of_origin ,
-        dossier_type     : reqObj.dossier_type,
-        dossier_status   : reqObj.dossier_status,
-        gmp_approvals    : reqObj.gmp_approvals,
-        medicine_image   : reqObj.medicine_image,
-        registered_in    : reqObj.registered_in ,
-        comments         : reqObj.comments,
-        dosage_form      : reqObj.dosage_form,
-        category_name    : reqObj.category_name,
-        strength         : reqObj.strength,
-        quantity         : reqObj.quantity
+        medicine_id    : medicine_id,
+        supplier_id    : reqObj.supplier_id,
+        medicine_name  : reqObj.medicine_name,
+        composition    : reqObj.composition,
+        dossier_type   : reqObj.dossier_type,
+        dossier_status : reqObj.dossier_status,
+        gmp_approvals  : reqObj.gmp_approvals,
+        shipping_time  : reqObj.shipping_time,
+        tags           : reqObj.tags,
+        available_for  :  reqObj.available_for,
+        description    : reqObj.description,
+        registered_in  : reqObj.registered_in,
+        medicine_image : reqObj.medicine_image,
+        inventory_info : inventory_info,
+        status         : 1
+
+        // drugs_name       : reqObj.drugs_name,
+        // country_of_origin: reqObj.country_of_origin ,
+        // registered_in    : reqObj.registered_in ,
+        // comments         : reqObj.comments,
+        // dosage_form      : reqObj.dosage_form,
+        // category_name    : reqObj.category_name,
+        // strength         : reqObj.strength,
+        // quantity         : reqObj.quantity
 
         // generic_name          : reqObj.generic_name,
         // description           : reqObj.description,
@@ -38,44 +65,29 @@ module.exports = {
         // category_name         : reqObj.category_name,
         // indications           : reqObj.indications,
         // side_effects          : reqObj.side_effects,
-        // prescription_required : reqObj.prescription_required,
-        // storage_conditions    : reqObj.storage_conditions,
-        // medicine_image        : reqObj.medicine_image,
       });
 
       medicine.save().then((savedMedicine) => {
 
-        // const quantityArray  = reqObj.quantity.map((value, index) => ({strength: reqObj.strength[index], value: Number(value) }));
-        // const unitPriceArray = reqObj.unit_price.map((value, index) => ({strength: reqObj.strength[index], value: Number(value) }));
-        // const deliveryInfoArray  = reqObj.deliver_info.map((value, index) => ({quantity: reqObj.quantity[index], value: Number(value) }));
-        const { qty_range, price, estimated_delivery_days } = reqObj;
+        // const { qty_range, price, estimated_delivery_days } = reqObj;
 
-        // Check if all arrays have the same length
-        if (qty_range.length !== price.length || price.length !== estimated_delivery_days.length) {
-          return res.status(400).json({ message: 'All input arrays must have the same length' });
-        }
+        // if (qty_range.length !== price.length || price.length !== estimated_delivery_days.length) {
+        //   return res.status(400).json({ message: 'All input arrays must have the same length' });
+        // }
 
-        // Map the data to match the schema
-        const deliveryInfoArray = qty_range.map((qty, index) => ({
-          quantity: qty,
-          price: price[index],
-          est_delivery_days: estimated_delivery_days[index]
-        }));
-        // console.log('deliveryInfoArray',deliveryInfoArray);
+        // const deliveryInfoArray = qty_range.map((qty, index) => ({
+        //   quantity: qty,
+        //   price: price[index],
+        //   est_delivery_days: estimated_delivery_days[index]
+        // }));
+  
 
         const medicineInventory = new MedicineInventory({
-          medicine_id   : savedMedicine.medicine_id,
-          supplier_id   : reqObj.supplier_id,
-          delivery_info : deliveryInfoArray,
-          strength      : reqObj.strength
-
-          // batch_number  : reqObj.batch_number,
-          // expiry_date   : reqObj.expiry_date,
-          // quantity      : quantityArray,
-          // unit_price    : unitPriceArray,
-          // location      : reqObj.location,
-          // supplier      : reqObj.supplier,
-          // received_date : reqObj.received_date,
+          medicine_id    : savedMedicine.medicine_id,
+          supplier_id    : reqObj.supplier_id,
+          inventory_info : inventory_info,
+          strength       : reqObj.strength,
+          status         : 1
         });
         medicineInventory.save()
           .then((data) => {
@@ -227,20 +239,26 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id       : 1,
-            supplier_id       : 1,
-            medicine_name     : 1,
-            medicine_image    : 1,
-            drugs_name        : 1,
-            country_of_origin : 1,
-            dossier_type      : 1,
-            dossier_status    : 1,
-            gmp_approvals     : 1,
-            registered_in     : 1,
-            comments          : 1,
-            dosage_form       : 1,
-            category_name     : 1,
-            strength          : 1,
+            medicine_id    : 1,
+            supplier_id    : 1,
+            medicine_name  : 1,
+            composition    : 1,
+            dossier_type   : 1,
+            dossier_status : 1,
+            gmp_approvals  : 1,
+            shipping_time  : 1,
+            tags           : 1,
+            available_for  : 1,
+            description    : 1,
+            registered_in  : 1,
+            inventory_info : 1,
+            medicine_image : 1,
+            // medicine_image    : 1,
+            // drugs_name        : 1,
+            // country_of_origin : 1,
+            // dosage_form       : 1,
+            // category_name     : 1,
+            // strength          : 1,
             inventory : {
               $arrayElemAt: ["$inventory", 0],
             },
@@ -248,21 +266,21 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id       : 1,
-            supplier_id       : 1,
-            medicine_name     : 1,
-            medicine_image    : 1,
-            drugs_name        : 1,
-            country_of_origin : 1,
-            dossier_type      : 1,
-            dossier_status    : 1,
-            gmp_approvals     : 1,
-            registered_in     : 1,
-            comments          : 1,
-            dosage_form       : 1,
-            category_name     : 1,
-            strength          : 1,
-            "inventory.delivery_info"  : 1,
+            medicine_id    : 1,
+            supplier_id    : 1,
+            medicine_name  : 1,
+            composition    : 1,
+            dossier_type   : 1,
+            dossier_status : 1,
+            gmp_approvals  : 1,
+            shipping_time  : 1,
+            tags           : 1,
+            available_for  : 1,
+            description    : 1,
+            registered_in  : 1,
+            inventory_info : 1,
+            medicine_image : 1,
+            "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
           },
         },
@@ -276,21 +294,21 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id       : 1,
-            supplier_id       : 1,
-            medicine_name     : 1,
-            medicine_image    : 1,
-            drugs_name        : 1,
-            country_of_origin : 1,
-            dossier_type      : 1,
-            dossier_status    : 1,
-            gmp_approvals     : 1,
-            registered_in     : 1,
-            comments          : 1,
-            dosage_form       : 1,
-            category_name     : 1,
-            strength          : 1,
-            "inventory.delivery_info"  : 1,
+            medicine_id    : 1,
+            supplier_id    : 1,
+            medicine_name  : 1,
+            composition    : 1,
+            dossier_type   : 1,
+            dossier_status : 1,
+            gmp_approvals  : 1,
+            shipping_time  : 1,
+            tags           : 1,
+            available_for  : 1,
+            description    : 1,
+            registered_in  : 1,
+            inventory_info : 1,
+            medicine_image : 1,
+            "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
             supplier : {
               $arrayElemAt: ["$supplier", 0],
@@ -299,22 +317,22 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id       : 1,
-            supplier_id       : 1,
-            medicine_name     : 1,
-            medicine_image    : 1,
-            drugs_name        : 1,
-            country_of_origin : 1,
-            dossier_type      : 1,
-            dossier_status    : 1,
-            gmp_approvals     : 1,
-            registered_in     : 1,
-            comments          : 1,
-            dosage_form       : 1,
-            category_name     : 1,
-            strength          : 1,
-            "inventory.delivery_info"          : 1,
-            "inventory.strength"               : 1,
+            medicine_id    : 1,
+            supplier_id    : 1,
+            medicine_name  : 1,
+            composition    : 1,
+            dossier_type   : 1,
+            dossier_status : 1,
+            gmp_approvals  : 1,
+            shipping_time  : 1,
+            tags           : 1,
+            available_for  : 1,
+            description    : 1,
+            registered_in  : 1,
+            inventory_info : 1,
+            medicine_image : 1,
+            "inventory.inventory_info" : 1,
+            "inventory.strength"       : 1,
             "supplier.supplier_id"             : 1, 
             "supplier.supplier_name"           : 1,
             "supplier.description"             : 1,
@@ -323,6 +341,7 @@ module.exports = {
             "supplier.license_no"              : 1,
             "supplier.supplier_address"        : 1,
             "supplier.payment_terms"           : 1,
+            "supplier.country_of_origin"       : 1,
           },
         },
       ])
@@ -353,37 +372,52 @@ module.exports = {
       if (!medicineInventory) {
         return callback({ code: 404, message: "Medicine Inventory Not Found" });
       }
-      const unitPriceArray = reqObj.unit_price.map((price, index) => ({ strength: reqObj.strength[index], value: price}));
-      const quantityArray  = reqObj.quantity.map((qty, index) => ({ strength: reqObj.strength[index], value: qty}));
+      // const unitPriceArray = reqObj.unit_price.map((price, index) => ({ strength: reqObj.strength[index], value: price}));
+      // const quantityArray  = reqObj.quantity.map((qty, index) => ({ strength: reqObj.strength[index], value: qty}));
+
+      const { strength, quantity, unit_price, type_of_form, est_delivery_days} = reqObj
+
+      if (!Array.isArray(quantity) || !Array.isArray(strength) || !Array.isArray(unit_price) || 
+          !Array.isArray(type_of_form) || !Array.isArray(est_delivery_days)) {
+        return res.status(400).send({ message: 'Inventory fields should be arrays' });
+      }
+  
+      if (quantity.length !== strength.length || strength.length !== unit_price.length || 
+          unit_price.length !== type_of_form.length || type_of_form.length !== est_delivery_days.length) {
+        return res.status(400).send({ message: 'All inventory arrays must have the same length' });
+      }
+  
+      const inventory_info = quantity.map((_, index) => ({
+        strength          : strength[index],
+        quantity          : quantity[index],
+        unit_price        : unit_price[index],
+        type_of_form      : type_of_form[index],
+        est_delivery_days : est_delivery_days[index]
+      }));
 
       Medicine.findOneAndUpdate( { medicine_id: reqObj.medicine_id },
         {
           $set: {
-            medicine_name         : reqObj.medicine_name,
-            description           : reqObj.description,
-            product_image         : reqObj.product_image,
-            category_name         : reqObj.category_name,
-            generic_name          : reqObj.generic_name,
-            dosage_form           : reqObj.dosage_form,
-            manufacturer          : reqObj.manufacturer,
-            prescription_required : reqObj.prescription_required,
-            storage_conditions    : reqObj.storage_conditions,
-            strength              : reqObj.strength,
-            indications           : reqObj.indications,
-            side_effects          : reqObj.side_effects,
+            medicine_name  : reqObj.medicine_name,
+            composition    : reqObj.composition,
+            dossier_type   : reqObj.dossier_type,
+            dossier_status : reqObj.dossier_status,
+            gmp_approvals  : reqObj.gmp_approvals,
+            shipping_time  : reqObj.shipping_time,
+            tags           : reqObj.tags,
+            available_for  :  reqObj.available_for,
+            description    : reqObj.description,
+            registered_in  : reqObj.registered_in,
+            medicine_image : reqObj.medicine_image,
+            inventory_info : inventory_info
           },
         },{new: true}
       ).then((updatedMedicine) => {
         MedicineInventory.findOneAndUpdate({ medicine_id: reqObj.medicine_id },
           {
             $set: {
-              batch_number  : reqObj.batch_number,
-              location      : reqObj.location,
-              expiry_date   : reqObj.expiry_date,
-              quantity      : quantityArray,
-              received_date : reqObj.received_date,
-              supplier      : reqObj.supplier,
-              unit_price    : unitPriceArray,
+              inventory_info : inventory_info,
+              strength       : reqObj.strength
             },
           },{new: true}
         )
@@ -430,7 +464,7 @@ module.exports = {
 
   similarMedicineList: async (reqObj, callback) => {
     try {
-      const {medicine_name, medicine_id, pageNo, pageSize} = reqObj
+      const {medicine_name, medicine_id, supplier_id, pageNo, pageSize} = reqObj
 
       const page_no   = pageNo || 1
       const page_size = pageSize || 10
@@ -441,6 +475,7 @@ module.exports = {
           {
             $match : {
               medicine_name : medicine_name,
+              supplier_id   : supplier_id,
               medicine_id: { $ne: medicine_id}
             }
           },

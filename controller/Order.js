@@ -304,14 +304,16 @@ module.exports = {
 
     orderFeedback : async(reqObj, callback) => {
       try {
+        console.log(reqObj);
        const supportId    = 'SPT-' + Math.random().toString(16).slice(2);
 
        const newSupport = new Support({
-        support_id   : supportId,
-        buyer_id     : reqObj.buyer_id,
-        order_id     : reqObj.order_id,
-        support_type : reqObj.support_type,
-        reason       : reqObj.feedback
+        support_id    : supportId,
+        buyer_id      : reqObj.buyer_id,
+        order_id      : reqObj.order_id,
+        support_type  : reqObj.support_type,
+        reason        : reqObj.feedback,
+        support_image : reqObj.feedback_image
        })
         newSupport.save().then((data) => {
           callback({ code: 200, message: "Feedback submitted Successfully", result: data });
@@ -329,11 +331,12 @@ module.exports = {
         const supportId    = 'SPT-' + Math.random().toString(16).slice(2);
 
         const newSupport = new Support({
-         support_id   : supportId,
-         buyer_id     : reqObj.buyer_id,
-         order_id     : reqObj.order_id,
-         support_type : reqObj.support_type,
-         reason       : reqObj.complaint
+         support_id    : supportId,
+         buyer_id      : reqObj.buyer_id,
+         order_id      : reqObj.order_id,
+         support_type  : reqObj.support_type,
+         reason        : reqObj.complaint,
+         support_image : reqObj.complaint_image
      })
  
         newSupport.save().then((data) => {

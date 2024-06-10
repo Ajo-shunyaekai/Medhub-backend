@@ -28,22 +28,29 @@ module.exports = {
             objData.email       = 'Email Field is required';
         }
         if(type === 'addProduct' || type === 'editProduct') {
-            objData.supplier_id        = 'Supplier ID is required';
-            objData.medicine_name      = 'Medicine Name is required';
-            objData.drugs_name         = 'Drugs Name is required';
-            objData.country_of_origin  = 'Country of origin is required';
-            objData.dossier_type       = 'Dossier Type is required';
-            objData.gmp_approvals      = 'GMP Approval is required';
-            objData.registered_in      = 'Registered Countries are required';
-            objData.comments           = 'Comment is required';
-            objData.dosage_form        = 'Dossage Form is required';
-            // objData.delivery_info      = 'Delivery Info is required';
-            objData.strength           = 'Strength is required';
-            objData.category_name      = 'Category Name  is required';
-            estimated_delivery_days    = 'Estimated Delivery Days are required'
-            qty_range                  = 'Quantity range is required',
-            price                      = 'Price is required'
-
+            objData.supplier_id       = 'Supplier ID is required';
+            objData.medicine_name     = 'Medicine Name is required';
+            objData.composition       = 'composition is required';
+            objData.dossier_type      = 'Dossier Type is required';
+            objData.dossier_status    = 'Dossier Status is required';
+            objData.gmp_approvals     = 'GMP Approval is required';
+            objData.shipping_time     = 'Shipping Time is required';
+            objData.tags              = 'Tags are required';
+            objData.available_for     = 'Available For is required';
+            objData.description       = 'Description is required';
+            objData.registered_in     = 'Registered Countries are required';
+            objData.strength          = 'Strength is required';
+            objData.quantity          = 'Quantity is required';
+            objData.unit_price        = 'Unit Price is required';
+            objData.type_of_form      = 'Type of form is required';
+            objData.est_delivery_days = 'Estimated Delivery Days are required'
+            
+            // objData.comments           = 'Comment is required';
+            // objData.country_of_origin  = 'Country of origin is required';
+            // objData.dosage_form        = 'Dossage Form is required';
+            // objData.category_name      = 'Category Name  is required';
+            // qty_range                  = 'Quantity range is required',
+            // price                      = 'Price is required'
             // objData.description           = 'Description is required';
             // objData.generic_name          = 'Generic Name is required';
             // objData.manufacturer          = 'Manufacturer  is required';

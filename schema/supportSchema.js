@@ -23,6 +23,11 @@ const supportSchema = new Schema({
     type: String,
     required: true,
   },
+  support_image: [{
+    type: String,
+    // trim: true,
+    required: true
+  }],
   createdAt: {
     type: Date,
     default: Date.now

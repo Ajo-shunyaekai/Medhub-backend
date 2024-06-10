@@ -3,10 +3,10 @@ var routes                                       = express.Router();
 const path                                       = require('path');
 const multer                                     = require('multer')
 const Controller                                 = require('../controller/Medicine')
-const {checkAuthorization, checkAuthentication, checkSellerAuthentication}  = require('../middleware/Authorization');
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
+const {checkAuthorization, checkAuthentication, checkSupplierAuthentication, checkSellerAuthentication}  = require('../middleware/Authorization');
 
 
 const storage = multer.diskStorage({
@@ -36,7 +36,7 @@ const cpUpload = (req, res, next) => {
 
 module.exports = () => {
 
-    routes.post('/add-medicine', checkAuthorization, checkSellerAuthentication, cpUpload, (req, res) => {
+    routes.post('/add-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
         
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
             res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
@@ -60,7 +60,6 @@ module.exports = () => {
         Controller.addMedicine(obj, result => {
             const response = handleResponse(result);
             res.send(response);
-            // Handle the response as needed
         });
     });
 
@@ -79,7 +78,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-medicine', checkAuthorization, checkSellerAuthentication, cpUpload, (req, res) => {
+    routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
       
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
             res.send({ code: 415, message: 'Medicine Images fields are required!', errObj: {} });

@@ -14,13 +14,19 @@ const medicineInventorySchema = new mongoose.Schema({
     type: String,
     required: true,
   }],
-  delivery_info: [
+  inventory_info: [
   {
+    strength: String,
     quantity: String,
-    price: String,
+    unit_price: String,
+    type_of_form: String,
     est_delivery_days: String
   }
   ],
+  status : {
+    type: Number,
+    required: true,
+  },
   created_at: {
     type: Date,
     default: Date.now
