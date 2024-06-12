@@ -7,6 +7,10 @@ const supplierSchema = new Schema({
         required: true,
         unique: true
     },
+    supplier_type: {
+        type: String,
+        required: true,
+    },
     supplier_name: {
         type: String,
         required: true,
@@ -34,6 +38,10 @@ const supplierSchema = new Schema({
         required: true,
     },
     license_no: {
+        type: String,
+        required: true,
+    },
+    license_expiry_date: {
         type: String,
         required: true,
     },
@@ -78,6 +86,10 @@ const supplierSchema = new Schema({
         required: true,
     }],
     tax_image: [{
+        type: String,
+        required: true,
+    }],
+    certificate_image: [{
         type: String,
         required: true,
     }],

@@ -119,12 +119,14 @@ module.exports = {
         }
 
         if(type == 'supplierRegister'){
+            objData.supplier_type               = 'Company type field is required';
             objData.supplier_name               = 'Company name field is required';
             objData.supplier_address            = 'Suppplier address field is required';
             objData.supplier_email              = 'Supplier email Field is required';
             objData.supplier_mobile_no          = 'Supplier mobile Field is required';
             objData.description                 = 'Description Field is required';
             objData.license_no                  = 'License no Field is required';
+            objData.license_expiry_date         = 'License Expiry Date Field is required';
             objData.tax_no                      = 'Tax no Field is required';
             objData.country_of_origin           = 'Country of origin Field is required';
             objData.country_of_operation        = 'Country of operation Field is required';

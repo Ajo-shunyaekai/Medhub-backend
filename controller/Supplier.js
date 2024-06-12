@@ -20,6 +20,7 @@ module.exports = {
 
           const newSupplier = new Supplier({
               supplier_id                 : supplierId,
+              supplier_type               : reqObj.supplier_type,
               supplier_name               : reqObj.supplier_name,
               supplier_address            : reqObj.supplier_address,
               description                 : reqObj.description,
@@ -27,6 +28,7 @@ module.exports = {
               supplier_mobile             : reqObj.supplier_mobile,
               supplier_country_code       : reqObj.supplier_country_code,
               license_no                  : reqObj.license_no,
+              license_expiry_date        : reqObj.license_expiry_date,
               tax_no                      : reqObj.tax_no,
               country_of_origin           : reqObj.country_of_origin,
               country_of_operation        : reqObj.country_of_operation,
@@ -37,6 +39,7 @@ module.exports = {
               contact_person_email        : reqObj.contact_person_email,
               supplier_image              : reqObj.supplier_image,
               license_image               : reqObj.license_image,
+              certificate_image           : reqObj.certificate_image,
               tax_image                   : reqObj.tax_image,
               payment_terms               : reqObj.payment_terms,
               estimated_delivery_time     : reqObj.estimated_delivery_time,

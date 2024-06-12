@@ -24,10 +24,12 @@ const {checkAuthorization, checkAuthentication, checkSupplierAuthentication}  = 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let uploadPath = './uploads/supplier/supplierImage_files';
-        if (file.fieldname === 'tax_image') {
+        if (file.fieldname === 'tax_image[]') {
             uploadPath = './uploads/supplier/tax_image';
-        } else if (file.fieldname === 'license_image') {
+        } else if (file.fieldname === 'license_image[]') {
             uploadPath = './uploads/supplier/license_image';
+        }else if (file.fieldname === 'certificate_image[]') {
+            uploadPath = './uploads/supplier/certificate_image';
         }
         cb(null, uploadPath);
     },
@@ -41,9 +43,10 @@ const upload = multer({ storage: storage });
 
 const cpUpload = (req, res, next) => {
     upload.fields([
-        { name: 'supplier_image', maxCount: 1 },
-        { name: 'license_image', maxCount: 1 },
-        { name: 'tax_image', maxCount: 1 },
+        { name: 'supplier_image[]', maxCount: 1 },
+        { name: 'license_image[]' },
+        { name: 'tax_image[]'},
+        { name: 'certificate_image[]' },
     ])(req, res, (err) => {
         if (err) {
             console.error('Multer Error:', err);
@@ -57,16 +60,21 @@ const cpUpload = (req, res, next) => {
 module.exports = () => {
 
     routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
-        if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
+        if (!req.files['supplier_image[]'] || req.files['supplier_image[]'].length === 0) {
             res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
             return;
         }
-        if (!req.files['tax_image'] || req.files['tax_image'].length === 0) {
+        if (!req.files['tax_image[]'] || req.files['tax_image[]'].length === 0) {
             res.send({ code: 415, message: 'Supplier tax image is required!', errObj: {} });
             return;
         }
-        if (!req.files['license_image'] || req.files['license_image'].length === 0) {
+        if (!req.files['license_image[]'] || req.files['license_image[]'].length === 0) {
             res.send({ code: 415, message: 'Supplier license image is required!', errObj: {} });
+            return;
+        }
+
+        if (!req.files['certificate_image[]'] || req.files['certificate_image[]'].length === 0) {
+            res.send({ code: 415, message: 'Supplier Certificate image is required!', errObj: {} });
             return;
         }
 
@@ -81,10 +89,12 @@ module.exports = () => {
             supplier_country_code       : supplierCountryCode,
             contact_person_mobile_no    : person_mob_no,
             contact_person_country_code : personCountryCode,
-            supplier_image              : req.files['supplier_image'].map(file => path.basename(file.path)),
-            license_image               : req.files['license_image'].map(file => path.basename(file.path)),
-            tax_image                   : req.files['tax_image'].map(file => path.basename(file.path))
+            supplier_image              : req.files['supplier_image[]'].map(file => path.basename(file.path)),
+            license_image               : req.files['license_image[]'].map(file => path.basename(file.path)),
+            tax_image                   : req.files['tax_image[]'].map(file => path.basename(file.path)),
+            certificate_image           : req.files['certificate_image[]'].map(file => path.basename(file.path))
         }
+        console.log(regObj);
 
         const errObj = validation(regObj, 'supplierRegister')
 
