@@ -68,21 +68,25 @@ module.exports = {
             
         }
         if(type == 'buyerRegister'){
-            objData.buyer_name                  = 'Buyer Company name field is required';
-            objData.buyer_address               = 'Buyer address field is required';
-            objData.buyer_email                 = 'Buyer email Field is required';
-            objData.buyer_mobile                = 'Buyer mobile Field is required';
-            objData.buyer_country_code          = 'Supplier mobile Field is required';
-            objData.contact_person_name         = 'Contact person name Field is required';
-            objData.contact_person_mobile       = 'Contact person mobile Field is required';
-            objData.contact_person_country_code = 'Contact person country code  Field is required';
-            objData.contact_person_email        = 'Contact person email Field is required';
-            objData.designation                 = 'Designation Field is required';
-            objData.country_of_origin           = 'Country of origin Field is required';
-            objData.country_of_operation        = 'Country of operation Field is required';
-            objData.license_no                  = 'License no Field is required';
-            objData.tax_no                      = 'Tax no Field is required';
-            objData.description                 = 'Description Field is required';
+            objData.buyer_type                   = 'Buyer Type field is required';
+            objData.buyer_name                   = 'Buyer Company name field is required';
+            objData.buyer_address                = 'Buyer address field is required';
+            objData.buyer_email                  = 'Buyer email Field is required';
+            objData.buyer_mobile                 = 'Buyer mobile Field is required';
+            objData.buyer_country_code           = 'Supplier mobile Field is required';
+            objData.contact_person_name          = 'Contact person name Field is required';
+            objData.designation                  = 'Designation Field is required';
+            objData.contact_person_email         = 'Contact person email Field is required';
+            objData.contact_person_mobile        = 'Contact person mobile Field is required';
+            objData.contact_person_country_code  = 'Contact person country code  Field is required';
+            objData.country_of_origin            = 'Country of origin Field is required';
+            objData.country_of_operation         = 'Country of operation Field is required';
+            objData.approx_yearly_purchase_value = 'Yearly Purchase value Field is required';
+            objData.interested_in                = 'Interested in Field is required';
+            objData.license_no                   = 'License no Field is required';
+            objData.license_expiry_date          = 'License Expiry Date Field is required';
+            objData.tax_no                       = 'Tax no Field is required';
+            objData.description                  = 'Description Field is required';
         }
 
         if(type === 'editBuyer') {

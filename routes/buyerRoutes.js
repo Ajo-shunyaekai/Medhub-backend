@@ -16,6 +16,8 @@ const storage = multer.diskStorage({
             uploadPath = './uploads/buyer/tax_images';
         } else if (file.fieldname === 'license_image') {
             uploadPath = './uploads/buyer/license_images';
+        } else if (file.fieldname === 'certificate_image') {
+            uploadPath = './uploads/buyer/certificate_images';
         }
         cb(null, uploadPath);
     },
@@ -29,9 +31,10 @@ const upload = multer({ storage: storage });
 
 const cpUpload = (req, res, next) => {
     upload.fields([
-        { name: 'buyer_image', maxCount: 1 },
-        { name: 'license_image', maxCount: 1 },
-        { name: 'tax_image', maxCount: 1 },
+        { name: 'buyer_image'},
+        { name: 'license_image'},
+        { name: 'tax_image'},
+        { name: 'certificate_image'},
     ])(req, res, (err) => {
         if (err) {
             console.error('Multer Error:', err);
@@ -48,15 +51,19 @@ module.exports = () => {
     routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
       
         if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
-            res.send({ code: 415, message: 'Buyer Logo is required!', errObj: {} });
+            res.send({ code: 415, message: 'Company Logo is required!', errObj: {} });
             return;
         }
         if (!req.files['tax_image'] || req.files['tax_image'].length === 0) {
-            res.send({ code: 415, message: 'Buyer tax image is required!', errObj: {} });
+            res.send({ code: 415, message: 'Company tax image is required!', errObj: {} });
             return;
         }
         if (!req.files['license_image'] || req.files['license_image'].length === 0) {
-            res.send({ code: 415, message: 'Buyer license image is required!', errObj: {} });
+            res.send({ code: 415, message: 'Company license image is required!', errObj: {} });
+            return;
+        }
+        if (!req.files['certificate_image'] || req.files['certificate_image'].length === 0) {
+            res.send({ code: 415, message: 'Company certificate image is required!', errObj: {} });
             return;
         }
 
@@ -73,7 +80,8 @@ module.exports = () => {
             contact_person_country_code : personCountryCode,
             buyer_image                 : req.files['buyer_image'].map(file => path.basename(file.path)),
             license_image               : req.files['license_image'].map(file => path.basename(file.path)),
-            tax_image                   : req.files['tax_image'].map(file => path.basename(file.path))
+            tax_image                   : req.files['tax_image'].map(file => path.basename(file.path)),
+            certificate_image           : req.files['certificate_image'].map(file => path.basename(file.path))
             // mobile             : number,
         }
         const errObj = validation(regObj, 'buyerRegister')

@@ -372,8 +372,6 @@ module.exports = {
       if (!medicineInventory) {
         return callback({ code: 404, message: "Medicine Inventory Not Found" });
       }
-      // const unitPriceArray = reqObj.unit_price.map((price, index) => ({ strength: reqObj.strength[index], value: price}));
-      // const quantityArray  = reqObj.quantity.map((qty, index) => ({ strength: reqObj.strength[index], value: qty}));
 
       const { strength, quantity, unit_price, type_of_form, est_delivery_days} = reqObj
 
@@ -456,10 +454,9 @@ module.exports = {
         console.log(err);
           callback({ code: 400, message: "Error in filtering", result: err });
       });
-  } catch (error) {
+    } catch (error) {
       callback({ code: 500, message: "Internal Server Error", result: error });
-  }
-  
+    }
   },
 
   similarMedicineList: async (reqObj, callback) => {
