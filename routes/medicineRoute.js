@@ -46,8 +46,6 @@ module.exports = () => {
         let obj = {
             ...req.body,
             medicine_image: req.files['product_image'].map(file => path.basename(file.path))
-            // medicine_image: req.files['product_image'].map(file => file.path).join(',')
-            // medicine_image: req.files['product_image'].map(file => path.basename(file.path)).join(',')
         }
     
         let errObj = validation(obj, 'addProduct');

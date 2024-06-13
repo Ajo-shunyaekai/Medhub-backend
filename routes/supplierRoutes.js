@@ -94,7 +94,6 @@ module.exports = () => {
             tax_image                   : req.files['tax_image[]'].map(file => path.basename(file.path)),
             certificate_image           : req.files['certificate_image[]'].map(file => path.basename(file.path))
         }
-        console.log(regObj);
 
         const errObj = validation(regObj, 'supplierRegister')
 

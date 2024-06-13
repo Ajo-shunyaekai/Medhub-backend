@@ -4,8 +4,8 @@ const app      = express();
 
 require('dotenv').config();
 
-const uri = process.env.MONGO_ATLAS_URI
-// const uri  = 'mongodb://localhost:27017/deliver'; 
+// const uri = process.env.MONGO_ATLAS_URI
+const uri  = 'mongodb://localhost:27017/deliver'; 
 
 const connection = () => {
     // mongoose.connect(uri) 

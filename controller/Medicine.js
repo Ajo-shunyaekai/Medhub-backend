@@ -13,74 +13,51 @@ module.exports = {
     try {
       let medicine_id = "MED-" + Math.random().toString(16).slice(2);
 
-      const { strength, quantity, unit_price, type_of_form, est_delivery_days} = reqObj
+      const { strength, quantity, unit_price, total_price, shelf_life, type_of_form, est_delivery_days} = reqObj
 
-      if (!Array.isArray(quantity) || !Array.isArray(strength) || !Array.isArray(unit_price) || !Array.isArray(type_of_form) || !Array.isArray(est_delivery_days)) {
-        return res.status(400).send({ message: 'Inventory fields should be arrays' });
+      if (!Array.isArray(quantity) || !Array.isArray(strength) || !Array.isArray(unit_price) || !Array.isArray(total_price) || 
+          !Array.isArray(type_of_form) || !Array.isArray(est_delivery_days) || !Array.isArray(shelf_life) ) {
+  
+            return callback({code: 400, message: "Inventory fields should be arrays" });
       }
   
-      if (quantity.length !== strength.length || strength.length !== unit_price.length || unit_price.length !== type_of_form.length || type_of_form.length !== est_delivery_days.length) {
-        return res.status(400).send({ message: 'All inventory arrays must have the same length' });
+      if (quantity.length !== strength.length || strength.length !== unit_price.length || unit_price.length !== type_of_form.length || 
+          type_of_form.length !== est_delivery_days.length || est_delivery_days.length !== shelf_life.length || shelf_life.length !== total_price.length) {
+        
+            return callback({code: 400, message: "All inventory arrays must have the same length" });
+
       }
   
       const inventory_info = quantity.map((_, index) => ({
         strength          : strength[index],
         quantity          : quantity[index],
         unit_price        : unit_price[index],
+        total_price       : total_price[index],
+        shelf_life        : shelf_life[index],
         type_of_form      : type_of_form[index],
         est_delivery_days : est_delivery_days[index]
       }));
 
       const medicine = new Medicine({
-        medicine_id    : medicine_id,
-        supplier_id    : reqObj.supplier_id,
-        medicine_name  : reqObj.medicine_name,
-        composition    : reqObj.composition,
-        dossier_type   : reqObj.dossier_type,
-        dossier_status : reqObj.dossier_status,
-        gmp_approvals  : reqObj.gmp_approvals,
-        shipping_time  : reqObj.shipping_time,
-        tags           : reqObj.tags,
-        available_for  :  reqObj.available_for,
-        description    : reqObj.description,
-        registered_in  : reqObj.registered_in,
-        medicine_image : reqObj.medicine_image,
-        inventory_info : inventory_info,
-        status         : 1
-
-        // drugs_name       : reqObj.drugs_name,
-        // country_of_origin: reqObj.country_of_origin ,
-        // registered_in    : reqObj.registered_in ,
-        // comments         : reqObj.comments,
-        // dosage_form      : reqObj.dosage_form,
-        // category_name    : reqObj.category_name,
-        // strength         : reqObj.strength,
-        // quantity         : reqObj.quantity
-
-        // generic_name          : reqObj.generic_name,
-        // description           : reqObj.description,
-        // dosage_form           : reqObj.dosage_form,
-        // strength              : reqObj.strength,
-        // manufacturer          : reqObj.manufacturer,
-        // category_name         : reqObj.category_name,
-        // indications           : reqObj.indications,
-        // side_effects          : reqObj.side_effects,
+        medicine_id        : medicine_id,
+        supplier_id        : reqObj.supplier_id,
+        medicine_name      : reqObj.medicine_name,
+        composition        : reqObj.composition,
+        dossier_type       : reqObj.dossier_type,
+        dossier_status     : reqObj.dossier_status,
+        gmp_approvals      : reqObj.gmp_approvals,
+        shipping_time      : reqObj.shipping_time,
+        tags               : reqObj.tags,
+        available_for      :  reqObj.available_for,
+        description        : reqObj.description,
+        country_of_origin  :  reqObj.country_of_origin,
+        registered_in      : reqObj.registered_in,
+        medicine_image     : reqObj.medicine_image,
+        inventory_info     : inventory_info,
+        status             : 1
       });
 
       medicine.save().then((savedMedicine) => {
-
-        // const { qty_range, price, estimated_delivery_days } = reqObj;
-
-        // if (qty_range.length !== price.length || price.length !== estimated_delivery_days.length) {
-        //   return res.status(400).json({ message: 'All input arrays must have the same length' });
-        // }
-
-        // const deliveryInfoArray = qty_range.map((qty, index) => ({
-        //   quantity: qty,
-        //   price: price[index],
-        //   est_delivery_days: estimated_delivery_days[index]
-        // }));
-  
 
         const medicineInventory = new MedicineInventory({
           medicine_id    : savedMedicine.medicine_id,
@@ -584,6 +561,5 @@ module.exports = {
       callback({ code: 500, message: "Internal Server Error", result: error });
     }
   },
-
 
 };

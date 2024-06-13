@@ -4,6 +4,8 @@ const Buyer              = require('../schema/buyerSchema')
 const Supplier           = require('../schema/supplierSchema')
 const Order              = require('../schema/orderSchema')
 const BuyerEdit          = require('../schema/buyerEditSchema')
+const Medicine           = require('../schema/medicineSchema')
+const MedicineInventory  = require('../schema/medicineInventorySchema')
 
 module.exports = {
   
@@ -261,6 +263,98 @@ module.exports = {
       }catch (error) {
         console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error'})
+      }
+    },
+
+    supplierProductList : async(reqObj, callback) => {
+      
+      try {
+       
+        const { supplier_id, pageNo, pageSize } = reqObj
+  
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 10
+        const offset    = (page_no - 1) * page_size
+
+          Medicine.aggregate([
+            {
+              $match : {
+                // medicine_name : medicine_name,
+                supplier_id   : supplier_id,
+                // medicine_id: { $ne: medicine_id}
+              }
+            },
+            {
+              $lookup: {
+                from         : "medicineinventories",
+                localField   : "medicine_id",
+                foreignField : "medicine_id",
+                as           : "inventory",
+              },
+            },
+            // {
+            //   $project: {
+            //     medicine_id       : 1,
+            //     supplier_id       : 1,
+            //     medicine_name     : 1,
+            //     medicine_image    : 1,
+            //     drugs_name        : 1,
+            //     country_of_origin : 1,
+            //     dossier_type      : 1,
+            //     dossier_status    : 1,
+            //     gmp_approvals     : 1,
+            //     registered_in     : 1,
+            //     comments          : 1,
+            //     dosage_form       : 1,
+            //     category_name     : 1,
+            //     strength          : 1,
+            //     quantity          : 1,
+            //     inventory : {
+            //       $arrayElemAt: ["$inventory", 0],
+            //     },
+            //   },
+            // },
+            // {
+            //   $project: {
+            //     medicine_id       : 1,
+            //     supplier_id       : 1,
+            //     medicine_name     : 1,
+            //     medicine_image    : 1,
+            //     drugs_name        : 1,
+            //     country_of_origin : 1,
+            //     dossier_type      : 1,
+            //     dossier_status    : 1,
+            //     gmp_approvals     : 1,
+            //     registered_in     : 1,
+            //     comments          : 1,
+            //     dosage_form       : 1,
+            //     category_name     : 1,
+            //     strength          : 1,
+            //     quantity          : 1,
+            //     "inventory.delivery_info"  : 1,
+            //     "inventory.price"          : 1,
+            //   },
+            // },
+            // { $skip: offset },
+            // { $limit: page_size },
+            
+          ])
+            .then((data) => {
+              console.log(data.length);
+              // Medicine.countDocuments()
+              // .then(totalItems => {
+              //     const totalPages = Math.ceil(totalItems / page_size);
+              //     callback({ code: 200, message: "Medicine list fetched successfully", result: data, total_pages: totalPages });
+              // })
+              callback({code: 200, message: "Medicine list fetched successfully", result: data});
+            })
+            .catch((err) => {
+              console.log(err);
+              callback({ code: 400, message: "Error fetching medicine list", result: err});
+            });
+      } catch (error) {
+        console.log(error);
+        callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
 

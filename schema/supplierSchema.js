@@ -53,10 +53,10 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
     },
-    country_of_operation: {
+    country_of_operation: [{
         type: String,
         required: true,
-    },
+    }],
     contact_person_name: {
         type: String,
         required: true,

@@ -37,11 +37,14 @@ module.exports = {
             objData.shipping_time     = 'Shipping Time is required';
             objData.tags              = 'Tags are required';
             objData.available_for     = 'Available For is required';
+            objData.country_of_origin = 'Available For is required';
             objData.description       = 'Description is required';
             objData.registered_in     = 'Registered Countries are required';
             objData.strength          = 'Strength is required';
             objData.quantity          = 'Quantity is required';
             objData.unit_price        = 'Unit Price is required';
+            objData.total_price       = 'Total Price is required';
+            objData.shelf_life        = 'Shelf life is required';
             objData.type_of_form      = 'Type of form is required';
             objData.est_delivery_days = 'Estimated Delivery Days are required'
             

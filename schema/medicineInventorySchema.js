@@ -20,6 +20,8 @@ const medicineInventorySchema = new mongoose.Schema({
     quantity: String,
     unit_price: String,
     type_of_form: String,
+    total_price: String,
+    shelf_life: String,
     est_delivery_days: String
   }
   ],

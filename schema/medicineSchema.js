@@ -46,6 +46,10 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  country_of_origin: {
+    type: String,
+    required: true
+  },
   registered_in: [
     {
       type: String,
@@ -54,10 +58,12 @@ const medicineSchema = new mongoose.Schema({
   ],
   inventory_info: [{
     strength: String,
+    type_of_form: String,
     quantity: String,
     unit_price: String,
-    type_of_form: String,
-    est_delivery_days: String
+    total_price : String,
+    est_delivery_days: String,
+    shelf_life: String
   }],
   medicine_image: [{
     type: String,
