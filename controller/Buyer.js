@@ -253,7 +253,17 @@ module.exports = {
 
     supplierDetails : async(reqObj, callback) => {
       try {
-        Supplier.findOne({supplier_id: reqObj.supplier_id}).select('supplier_id supplier_name supplier_image supplier_email supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+        // const fields = [
+        //   'supplier_id', 'supplier_name', 'supplier_image', 'supplier_email',
+        //   'supplier_country_code', 'supplier_mobile', 'supplier_address', 
+        //   'description', 'license_no', 'country_of_origin', 'contact_person_name', 
+        //   'contact_person_mobile_no', 'contact_person_country_code', 'contact_person_email', 
+        //   'designation', 'tags', 'payment_terms', 'estimated_delivery_time'
+        // ];
+
+        Supplier.findOne({supplier_id: reqObj.supplier_id})
+        // .select(fields.join(' ')) 
+        .select()
         .then((data) => {
           callback({code: 200, message : 'Supplier details fetched successfully', result:data})
       }).catch((error) => {
@@ -267,21 +277,18 @@ module.exports = {
     },
 
     supplierProductList : async(reqObj, callback) => {
-      
       try {
        
         const { supplier_id, pageNo, pageSize } = reqObj
   
         const page_no   = pageNo || 1
-        const page_size = pageSize || 10
+        const page_size = pageSize || 2
         const offset    = (page_no - 1) * page_size
 
           Medicine.aggregate([
             {
               $match : {
-                // medicine_name : medicine_name,
                 supplier_id   : supplier_id,
-                // medicine_id: { $ne: medicine_id}
               }
             },
             {
@@ -289,31 +296,37 @@ module.exports = {
                 from         : "medicineinventories",
                 localField   : "medicine_id",
                 foreignField : "medicine_id",
-                as           : "inventory",
+                as           : "productInventory",
               },
             },
-            // {
-            //   $project: {
-            //     medicine_id       : 1,
-            //     supplier_id       : 1,
-            //     medicine_name     : 1,
-            //     medicine_image    : 1,
-            //     drugs_name        : 1,
-            //     country_of_origin : 1,
-            //     dossier_type      : 1,
-            //     dossier_status    : 1,
-            //     gmp_approvals     : 1,
-            //     registered_in     : 1,
-            //     comments          : 1,
-            //     dosage_form       : 1,
-            //     category_name     : 1,
-            //     strength          : 1,
-            //     quantity          : 1,
-            //     inventory : {
-            //       $arrayElemAt: ["$inventory", 0],
-            //     },
-            //   },
-            // },
+            {
+              $project: {
+                medicine_id       : 1,
+                supplier_id       : 1,
+                medicine_name     : 1,
+                composition       : 1,
+                dossier_type      : 1,
+                dossier_status    : 1,
+                gmp_approvals     : 1,
+                shipping_time     : 1,
+                tags              : 1,
+                available_for     : 1,
+                description       : 1,
+                medicine_image    : 1,
+                drugs_name        : 1,
+                country_of_origin : 1,
+                registered_in     : 1,
+                comments          : 1,
+                dosage_form       : 1,
+                category_name     : 1,
+                strength          : 1,
+                quantity          : 1,
+                inventory_info    : 1,
+                productInventory : {
+                  $arrayElemAt: ["$productInventory", 0],
+                },
+              },
+            },
             // {
             //   $project: {
             //     medicine_id       : 1,
@@ -335,18 +348,24 @@ module.exports = {
             //     "inventory.price"          : 1,
             //   },
             // },
-            // { $skip: offset },
-            // { $limit: page_size },
+            { $skip: offset },
+            { $limit: page_size },
             
           ])
             .then((data) => {
-              console.log(data.length);
-              // Medicine.countDocuments()
-              // .then(totalItems => {
-              //     const totalPages = Math.ceil(totalItems / page_size);
-              //     callback({ code: 200, message: "Medicine list fetched successfully", result: data, total_pages: totalPages });
-              // })
-              callback({code: 200, message: "Medicine list fetched successfully", result: data});
+              Medicine.countDocuments({supplier_id : supplier_id})
+              .then(totalItems => {
+                  const totalPages = Math.ceil(totalItems / page_size);
+
+                  const returnObj = {
+                    data,
+                    totalItems
+                  }
+                  callback({ code: 200, message: "Supplier product list fetched successfully", result: returnObj });
+              })
+              .catch((err) => {
+                callback({code: 400, message: "Error while fetching supplier product list", result: err});
+              })
             })
             .catch((err) => {
               console.log(err);
@@ -360,7 +379,13 @@ module.exports = {
 
     buyerSupplierOrdersList : async(reqObj, callback) => {
       try {
-        const {supplier_id, buyer_id} = reqObj
+        const { supplier_id, buyer_id, pageNo, pageSize, order_type } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 2
+        const offset    = (page_no - 1) * page_size
+
+        const orderTypeMatch = order_type ? { order_status: order_type } : {};
 
         Order.aggregate([
           {
@@ -383,27 +408,36 @@ module.exports = {
                 {$match: {order_status : 'pending'}},
                 {$count: 'pending'}
               ],
-              orderList : [
-                {$project: {
-                  order_id     : 1,
-                  buyer_id     : 1,
-                  supplier_id  : 1,
-                  items        : 1,
-                  order_status : 1,
-                  created_at   : 1
+              orderList: [
+                { $match : orderTypeMatch },
+                { $sort  : { created_at: -1 } },
+                { $skip  : offset },
+                { $limit : page_size },
+                {
+                  $project: {
+                    order_id     : 1,
+                    buyer_id     : 1,
+                    supplier_id  : 1,
+                    items        : 1,
+                    order_status : 1,
+                    created_at   : 1
+                  }
                 }
-              }
+              ],
+              totalOrders: [
+                { $match: orderTypeMatch },
+                { $count: 'total' }
               ]
             }
-          }
+          },
         ]).then((data) => {
           const resultObj = {
             completedCount : data[0]?.completedCount[0]?.completed || 0,
             activeCount    : data[0]?.activeCount[0]?.active || 0,
             pendingCount   : data[0]?.pendingCount[0]?.pending || 0,
-            orderList      : data[0]?.orderList
+            orderList      : data[0]?.orderList,
+            totalOrders    : data[0]?.totalOrders[0]?.total || 0
           }
-         
           callback({code: 200, message : 'buyer supplier order list fetched successfully', result: resultObj})
         })
         .catch((err) => {
@@ -419,6 +453,7 @@ module.exports = {
     buyerDashboardOrderDetails : async(reqObj, callback) => {
       try {
         const { buyer_id } = reqObj
+
         Order.aggregate([
           {
             $match : {buyer_id : buyer_id}
@@ -502,10 +537,8 @@ module.exports = {
                   }
                 }
               ]
-              
             }
           }
-
         ])
         .then((data) => {
           callback({code: 200, message : 'buyer dashoard order details fetched successfully', result: data[0]})
