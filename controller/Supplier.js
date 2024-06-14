@@ -112,7 +112,7 @@ module.exports = {
     filterValues : async(reqObj, callback) => {
       try {
         // const countryData = await Supplier.find({}, { country_of_origin: 1, _id: 0 }).exec();
-        const countryData = await Supplier.distinct("country_of_origin")
+        const countryData = await Supplier.distinct("country_of_origin", {account_status: 1})
 
         const result = {
           country: countryData,

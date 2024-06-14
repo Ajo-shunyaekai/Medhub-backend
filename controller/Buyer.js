@@ -8,7 +8,7 @@ const Medicine           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 
 module.exports = {
-  
+
     Regsiter : async(reqObj, callback) => {
         try {
             const emailExists = await Buyer.findOne({buyer_email : reqObj.buyer_email})
@@ -220,7 +220,7 @@ module.exports = {
             callback({code: 400, message : 'Error in fetching users list'})
         });
         } else if(filterCountry !== '' && searchKey === '') {
-          Supplier.find({country_of_origin: filterCountry, status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+          Supplier.find({country_of_origin: filterCountry, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
           .then((data) => {
             callback({code: 200, message : 'Supplier list fetched successfully', result:data})
         }).catch((error) => {
