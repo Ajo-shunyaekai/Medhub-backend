@@ -9,40 +9,47 @@ const {checkAuthorization, checkAuthentication, checkAdminAuthentication}  = req
 module.exports = () => {
 
     routes.post('/register', checkAuthorization,   (req, res) => {
-            Controller.register(req.body, result => {
-                res.send({ code : 200, message : 'Admin registration successfull', result });
-            });
+        Controller.register(req.body, result => {
+            res.send({ code : 200, message : 'Admin registration successfull', result });
+        });
     });
 
     routes.post('/login', checkAuthorization, (req, res) => {  
-            Controller.login(req.body, result => {
-                res.send({ code : 200, message : 'Admin login success', result });
-            });
+        Controller.login(req.body, result => {
+            res.send({ code : 200, message : 'Admin login success', result });
+        });
     });
 
     routes.post('/get-user-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
-            Controller.getUserList(req.body, result => {
-                const response = handleResponse(result);
-                res.send(response);
-            });
+        Controller.getUserList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
     });
 
     routes.post('/block-unblock-user', checkAuthorization, checkAdminAuthentication, (req, res) => {
-            Controller.blockUnblockUser(req.body, result => {
-                const response = handleResponse(result);
-                res.send(response);
-            });
+        Controller.blockUnblockUser(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
     });
 
     routes.post('/all-medicine-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
-            MedicineController.allMedicineList(req.body, result => {
-                const response = handleResponse(result);
-                res.send(response);
-            });
+        MedicineController.allMedicineList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
     });
 
     routes.post('/get-supplier-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getSupplierList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-supplier-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.supplierDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -65,6 +72,13 @@ module.exports = () => {
 
     routes.post('/get-buyer-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getBuyerList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-buyer-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.buyerDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -98,6 +112,20 @@ module.exports = () => {
             res.send(response)
         })
     })
+
+    routes.post('/get-medicine-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.allMedicineList(req.body, result => {
+            const response = handleResponse(result)
+            res.send(response)
+        })
+    })
+
+    routes.post('/medicine-details', checkAuthorization, (req, res) => {
+        Controller.getMedicineDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
     return routes;
 }

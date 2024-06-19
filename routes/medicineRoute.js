@@ -62,7 +62,6 @@ module.exports = () => {
     });
 
     routes.post('/medicine-list', checkAuthorization, (req, res) => {
-       
         Controller.allMedicineList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);

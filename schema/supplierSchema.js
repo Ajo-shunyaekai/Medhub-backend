@@ -18,7 +18,6 @@ const supplierSchema = new Schema({
     description: {
         type: String,
         required: true,
-        // minlength: [5, 'Description must be at least 5 characters long'],
     },
     supplier_address: {
         type: String,

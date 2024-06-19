@@ -4,7 +4,7 @@ const generator          = require('generate-password');
 const Admin              = require('../schema/adminSchema')
 const User               = require('../schema/userSchema')
 const Supplier           = require('../schema/supplierSchema')
-const Buyer              = require('../schema/supplierSchema')
+const Buyer              = require('../schema/buyerSchema')
 const BuyerEdit          = require('../schema/buyerEditSchema')
 const SupplierEdit       = require('../schema/supplierEditSchema')
 const Medicine           = require('../schema/medicineSchema')
@@ -12,81 +12,76 @@ const MedicineInventory  = require('../schema/medicineInventorySchema')
 
 const generatePassword = () => {
   const password = generator.generate({
-    length: 12,
-    numbers: true
+    length  : 12,
+    numbers : true
   });
   return password
 }
-
 
 module.exports = {
 
     register : async(reqObj, callback) => {
         try {
           const adminId    = 'ADM-' + Math.random().toString(16).slice(2);
-        let jwtSecretKey = process.env.APP_SECRET; 
-        let data         = {  time : Date(),  email:reqObj.email } 
-        const token      = jwt.sign(data, jwtSecretKey); 
-        const saltRounds = 10
+          let jwtSecretKey = process.env.APP_SECRET; 
+          let data         = {  time : Date(),  email:reqObj.email } 
+          const token      = jwt.sign(data, jwtSecretKey); 
+          const saltRounds = 10
 
-        const newAdmin = new Admin({
-            admin_id   : adminId,
-            user_name  : reqObj.name,
-            email      : reqObj.email,
-            password   : reqObj.password,
-            token      : token
-          });
+          const newAdmin = new Admin({
+              admin_id   : adminId,
+              user_name  : reqObj.name,
+              email      : reqObj.email,
+              password   : reqObj.password,
+              token      : token
+            });
 
-          bcrypt.genSalt(saltRounds).then((salt) => {
-            return bcrypt.hash(newAdmin.password, salt)
-          })
-          .then((hashedPassword) => {
-            newAdmin.password = hashedPassword
-
-            newAdmin.save()
-            .then((response) => {
-              callback({code: 200, message : 'Admin regisrtation successfull', result:response})
-            }) .catch((err) => {
-              console.error('Error', err);
-              callback({code: 200, message : 'Admin registration failed', result: err})
+            bcrypt.genSalt(saltRounds).then((salt) => {
+              return bcrypt.hash(newAdmin.password, salt)
             })
-          })
-          .catch((error) => {
-            console.error('Error generating salt or hashing password:', error);
-            callback({code: 400, message: 'Error in generating salt or hashing password', result: error});
-          }) 
+            .then((hashedPassword) => {
+              newAdmin.password = hashedPassword
+
+              newAdmin.save()
+              .then((response) => {
+                callback({code: 200, message : 'Admin regisrtation successfull', result:response})
+              }) .catch((err) => {
+                callback({code: 400, message : 'Admin registration failed', result: err})
+              })
+            })
+            .catch((error) => {
+              callback({code: 400, message: 'Error in generating salt or hashing password', result: error});
+            }) 
         } catch (error) {
-          console.log('Internal Server Error');
           callback({code: 500, message: 'Internal server error', result: error})
-        }
-        
+        } 
     },
 
     login : async(reqObj, callback) => {
       try {
-        const password = reqObj.password
-         const email   = reqObj.email
+         const password = reqObj.password
+         const email    = reqObj.email
 
-        const admin = await Admin.findOne({ email: email });
+         const admin = await Admin.findOne({ email: email });
 
-        if (!admin) {
-            console.log('Not found');
-            callback({code: 404, message: 'Email not found'})
-        }
+          if (!admin) {
+              console.log('Not found');
+              callback({code: 404, message: 'Email not found'})
+          }
 
-        const isMatch = await bcrypt.compare(password, admin.password);
+          const isMatch = await bcrypt.compare(password, admin.password);
 
-        if (isMatch) {
-            console.log('Validation successful');
-            callback({code: 200, message: 'Admin Login Successfull'})
-        } else {
-            console.log('Validation not successful');
-            callback({code: 401, message: 'Incorrect Password'})
-        }
-      }catch (error) {
+          if (isMatch) {
+              console.log('Validation successful');
+              callback({code: 200, message: 'Admin Login Successfull'})
+          } else {
+              console.log('Validation not successful');
+              callback({code: 401, message: 'Incorrect Password'})
+          }
+      } catch (error) {
         console.error('Error validating user:', error);
         callback({code: 500, message: 'Internal Server Error', result: error})
-    }
+      }
     },
 
     getUserList : async(reqObj, callback) => {
@@ -141,35 +136,33 @@ module.exports = {
       }
     },
 
-    getsupplierList: async(reqObj, callback) => {
+    //------------------------ buyer ------------------------//
+    getSupplierList: async(reqObj, callback) => {
       try {
+        const { pageNo, limit } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = limit || 2
+        const offSet    = (page_no -1) * page_size
+
         const fields = {
-          supplier_id                 : 1,
-          supplier_name               : 1,
-          supplier_image              : 1,
-          supplier_address            : 1,
-          description                 : 1,
-          supplier_email              : 1,
-          supplier_mobile_no          : 1,
-          supplier_country_code       : 1,
-          license_no                  : 1,
-          tax_no                      : 1,
-          country_of_origin           : 1,
-          country_of_operation        : 1,
-          contact_person_name         : 1,
-          designation                 : 1,
-          contact_person_mobile_no    : 1,
-          contact_person_country_code : 1,
-          license_image               : 1,
-          tax_image                   : 1,
-          payment_terms               : 1,
-          tags                        : 1,
-          estimated_delivery_time     : 1,
-          status                      : 1
+          token    : 0,
+          password : 0
         };
 
-        Supplier.find({}).select(fields).then((data) => {
-          callback({code: 200, message : 'supplier list fetched successfully', result: data})
+        Supplier.find({}).select(fields).skip(offSet).limit(page_size).then((data) => {
+          Supplier.countDocuments().then((totalItems) => {
+
+            const totalPages = Math.ceil(totalItems / page_size)
+            const returnObj = {
+              data,
+              totalPages
+            }
+            callback({code: 200, message : 'Supplier list fetched successfully', result: returnObj})
+          })
+          .catch((err) => {
+            callback({code: 400, message : 'Error while  fetching suppliers list count', result: error})
+          })
         }).catch((error) => {
           console.error('Error:', error);
           callback({code: 400, message : 'Error in fetching suppliers list', result: error})
@@ -179,46 +172,56 @@ module.exports = {
       }
     },
 
+    supplierDetails : async(reqObj, callback) => {
+      try {
+        const fields = {
+          token    : 0,
+          password : 0
+        }
+        Supplier.findOne({supplier_id: reqObj.supplier_id}).select(fields) 
+        .then((data) => {
+          callback({code: 200, message : 'Supplier details fetched successfully', result:data})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message : 'Error in fetching supplier details'})
+      });
+      }catch (error) {
+        callback({code: 500, message : 'Internal server error'})
+      }
+    },
+
     getRegReqList: async(reqObj, callback) => {
       try {
         const { pageNo, limit } = reqObj
 
         const page_no   = pageNo || 1
         const page_size = limit || 2
-        const offset    = (page_no -1) * page_size
+        const offSet    = (page_no -1) * page_size
 
         const fields = {
-          supplier_id                : 1,
-          supplier_name               : 1,
-          supplier_image              : 1,
-          supplier_address            : 1,
-          description                 : 1,
-          supplier_email              : 1,
-          supplier_mobile_no          : 1,
-          supplier_country_code       : 1,
-          license_no                  : 1,
-          tax_no                      : 1,
-          country_of_origin           : 1,
-          country_of_operation        : 1,
-          contact_person_name         : 1,
-          designation                 : 1,
-          contact_person_mobile_no    : 1,
-          contact_person_country_code : 1,
-          license_image               : 1,
-          tax_image                   : 1,
-          payment_terms               : 1,
-          tags                        : 1,
-          estimated_delivery_time     : 1,
-          status                      : 1
+          token    : 0,
+          password : 0
         };
 
-        Supplier.find({status : 0}).select(fields).then((data) => {
-          callback({code: 200, message : 'supplier registration request list fetched successfully', result:data})
+        Supplier.find({account_status : 0}).select(fields).skip(offSet).limit(page_size).then((data) => {
+          Supplier.countDocuments({account_status : 0}).then((totalItems) => {
+
+            const totalPages = Math.ceil( totalItems / page_size )
+            const returnObj = {
+              data,
+              totalPages
+            }
+            callback({code: 200, message : 'supplier registration request list fetched successfully', result: returnObj})
+          })
+          .catch((err) => {
+            callback({code: 400, message : 'Error while fetching supplier registration request list count', result: err})
+          }) 
       }).catch((error) => {
           console.error('Error:', error);
           callback({code: 400, message : 'Error in fetching suppliers registration request list', result: error})
       });
       }catch (err) {
+        console.error('Er:', err);
         callback({code: 500, message : 'Internal server error'})
       }
     },
@@ -281,48 +284,61 @@ module.exports = {
         callback({code: 500, message: 'Internal Server Error', result: error})
       }
     },
+    //------------------------ buyer ------------------------//
 
-    getsupplierList: async(reqObj, callback) => {
+    //------------------------ supplier ------------------------//
+    getBuyerList: async(reqObj, callback) => {
       try {
         const { pageNo, limit } = reqObj
 
+        const page_no   = pageNo || 1
+        const page_size = limit || 2
+        const offSet    = (page_no - 1) * 10
+
         const fields = {
-          supplier_id                 : 1,
-          company_name             : 1,
-          supplier_name               : 1,
-          supplier_email              : 1,
-          supplier_mobile_no          : 1,
-          supplier_country_code       : 1,
-          status                   : 1
-          
-          // supplier_image           : 1,
-          // supplier_address         : 1,
-          // description              : 1,
-          // license_no                  : 1,
-          // tax_no                      : 1,
-          // country_of_origin           : 1,
-          // country_of_operation        : 1,
-          // contact_person_name         : 1,
-          // designation                 : 1,
-          // contact_person_mobile_no    : 1,
-          // contact_person_country_code : 1,
-          // license_image               : 1,
-          // tax_image                   : 1,
-          // payment_terms               : 1,
-          // tags                        : 1,
-          // estimated_delivery_time     : 1,
-         
+          token    : 0,
+          password : 0
         };
 
-        Supplier.find({}).select(fields).limit(1).then((data) => {
-          callback({code: 200, message: 'supplier list fetched successfully', result: data})
+        Buyer.find({}).select(fields).skip(offSet).limit(page_size).then((data) => {
+          Buyer.countDocuments().then((totalItems) => {
+
+            const totalPages = Math.ceil(totalItems / page_size);
+            const resultObj = {
+              data,
+              totalPages 
+            }
+
+            callback({code: 200, message: 'Buyer list fetched successfully', result: resultObj})
+          })
+          .catch((err) => {
+            callback({code: 400, message:'Error while fetching buyer list count', result: err })
+          })
         })
         .catch((err) => {
-          callback({code: 400, message:'Error while fetching supplier list', result: err })
+          callback({code: 400, message:'Error while fetching buyer list', result: err })
         })
 
       } catch (error) {
-        
+        callback({code: 500, message:'Internal Server Error', result: error })
+      }
+    },
+
+    buyerDetails : async(reqObj, callback) => {
+      try {
+        const fields = {
+          token    : 0,
+          password : 0
+        }
+        Buyer.findOne({buyer_id: reqObj.buyer_id}).select(fields) 
+        .then((data) => {
+          callback({code: 200, message : 'Buyer details fetched successfully', result:data})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message : 'Error in fetching buyer details'})
+      });
+      }catch (error) {
+        callback({code: 500, message : 'Internal server error'})
       }
     },
 
@@ -331,28 +347,34 @@ module.exports = {
         const {pageNo, limit} = reqObj
 
         const page_no   = pageNo || 1
-        const page_size = limit | 2
+        const page_size = limit || 2
         const offSet    = (page_no - 1) * page_size
 
         const fields = {
-          buyer_id             : 1,
-          // company_name             : 1,
-          supplier_name        : 1,
-          buyer_email          : 1,
-          buyer_mobile         : 1,
-          buyer_country_code   : 1,
-          account_status       : 1
+          token    : 0,
+          password : 0
         };
 
-        Buyer.find({account_status : 0}).select(fields).limit(2).then((data) => {
-          callback({code: 200, message: 'Buyer Registration Request List fetched Successfully', result: data})
+        Buyer.find({account_status : 0}).select(fields).skip(offSet).limit(page_size).then((data) => {
+          Buyer.countDocuments({account_status : 0}).then((totalItems) => {
+            
+            const totalPages = Math.ceil(totalItems / page_size);
+            const resultObj = {
+              data,
+              totalPages
+            }
+            callback({code: 200, message: 'Buyer Registration Request List fetched Successfully', result: resultObj})
+          })
+          .catch((err) => {
+            callback({code: 400, message: 'Error in counting buyer registratiion requests count', result: err})
+          }) 
         })
         .catch((err) => {
           callback({code: 400, message: 'Error while fetching supplier registration requests list', result: err})
         })
 
       } catch (error) {
-        console.log('INternal server error')
+        console.log('Internal server error')
         callback({code: 500, message: 'Internal server error', result: error})
       }
     },
@@ -414,10 +436,16 @@ module.exports = {
         callback({code: 500, message: 'Internal Server Error', result: error})
       }
     },
+    //------------------------ supplier ------------------------//
 
+    //------------------------ supplier/buyer ------------------------//
     getProfileUpdateReqList: async(reqObj, callback) => {
       try {
         const { pageNo, limit, user_type  } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = limit || 2
+        const offSet    = (page_no -1) * page_size
 
         const fieldsToExclude = {
           token     : 0,
@@ -427,13 +455,26 @@ module.exports = {
         };
 
         const fetchUpdateProfileRequests = (Model, callback) => {
-          Model.find({}).select(fieldsToExclude).limit()
+
+          Model.find({}).select(fieldsToExclude).skip(offSet).limit(page_size)
             .then((data) => {
-              callback({ code: 200, message: 'Update Profile Req list fetched successfully', result: data });
+              Model.countDocuments().then((totalItems) => {
+
+                const totalPages = Math.ceil(totalItems / page_size)
+                const returnObj = {
+                  data,
+                  totallPages
+                }
+                callback({ code: 200, message: 'Update Profile Req list fetched successfully', result: returnObj });
+              })
+              .catch((err) => {
+                callback({ code: 400, message: 'Error while fetching update profile req list count', result: err });
+              })
             })
             .catch((err) => {
               callback({ code: 400, message: 'Error while fetching update profile req list', result: err });
             });
+
         };
         
         if (user_type === 'supplier') {
@@ -555,5 +596,323 @@ module.exports = {
       } catch (error) {
         callback({code: 500, message : 'Internal Server Error', result: error})
       }
-    }
+    },
+    //------------------------ supplier/buyer ------------------------//
+
+    //------------------------ medicine ------------------------//
+    allMedicineList: async (reqObj, callback) => {
+      try {
+        const {searchKey, pageNo, pageSize, medicine_type} = reqObj
+  
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 10
+        const offset    = (page_no - 1) * page_size
+  
+        if(searchKey === '' || searchKey === undefined) {
+          Medicine.aggregate([
+            {
+              $match: {
+                'medicine_type': medicine_type
+              }
+            },
+            {
+              $lookup: {
+                from         : "medicineinventories",
+                localField   : "medicine_id",
+                foreignField : "medicine_id",
+                as           : "inventory",
+              },
+            },
+            {
+              $project: {
+                medicine_id       : 1,
+                supplier_id       : 1,
+                medicine_name     : 1,
+                medicine_image    : 1,
+                drugs_name        : 1,
+                country_of_origin : 1,
+                dossier_type      : 1,
+                dossier_status    : 1,
+                gmp_approvals     : 1,
+                registered_in     : 1,
+                comments          : 1,
+                dosage_form       : 1,
+                category_name     : 1,
+                strength          : 1,
+                quantity          : 1,
+                medicine_type     : 1,
+                inventory : {
+                  $arrayElemAt: ["$inventory", 0],
+                },
+              },
+            },
+            {
+              $project: {
+                medicine_id       : 1,
+                supplier_id       : 1,
+                medicine_name     : 1,
+                medicine_image    : 1,
+                drugs_name        : 1,
+                country_of_origin : 1,
+                dossier_type      : 1,
+                dossier_status    : 1,
+                gmp_approvals     : 1,
+                registered_in     : 1,
+                comments          : 1,
+                dosage_form       : 1,
+                category_name     : 1,
+                strength          : 1,
+                quantity          : 1,
+                medicine_type     : 1,
+                "inventory.delivery_info"  : 1,
+                "inventory.price"          : 1,
+              },
+            },
+            { $skip: offset },
+            { $limit: page_size },
+          ])
+            .then((data) => {
+              Medicine.countDocuments({medicine_type : medicine_type})
+              .then(totalItems => {
+                  const totalPages = Math.ceil(totalItems / page_size);
+                  const returnObj = {
+                    data,
+                    totalPages
+                  }
+                  callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
+              })
+              .catch((err) => {
+                callback({ code: 400, message: "Error while fetching medicine count", result: err});
+              })
+            })
+            .catch((err) => {
+              console.log(err);
+              callback({ code: 400, message: "Error fetching medicine list", result: err});
+            });
+        } else {
+          Medicine.aggregate([
+            {
+              $match: {
+                'medicine_name': { $regex: searchKey, $options: 'i' },
+                'medicine_type': medicine_type
+              }
+            },
+            {
+              $project: {
+                medicine_id       : 1,
+                supplier_id       : 1,
+                medicine_name     : 1,
+                medicine_image    : 1,
+                drugs_name        : 1,
+                country_of_origin : 1,
+                dossier_type      : 1,
+                dossier_status    : 1,
+                gmp_approvals     : 1,
+                registered_in     : 1,
+                comments          : 1,
+                dosage_form       : 1,
+                category_name     : 1,
+                strength          : 1,
+                quantity          : 1,
+                medicine_type     : 1,
+                inventory : {
+                  $arrayElemAt: ["$inventory", 0],
+                },
+              }
+            },
+            {
+              $project: {
+                medicine_id       : 1,
+                supplier_id       : 1,
+                medicine_name     : 1,
+                medicine_image    : 1,
+                drugs_name        : 1,
+                country_of_origin : 1,
+                dossier_type      : 1,
+                dossier_status    : 1,
+                gmp_approvals     : 1,
+                registered_in     : 1,
+                comments          : 1,
+                dosage_form       : 1,
+                category_name     : 1,
+                strength          : 1,
+                quantity          : 1,
+                medicine_type     : 1,
+                "inventory.delivery_info"  : 1,
+                "inventory.price"          : 1,
+              },
+            },
+            { $skip: offset },
+            { $limit: page_size }
+          ])
+          .then((data) => {
+            Medicine.countDocuments({ 
+              medicine_name: { $regex: searchKey, $options: 'i' },
+              medicine_type: medicine_type 
+            })
+              .then(totalItems => {
+                  const totalPages = Math.ceil(totalItems / page_size);
+                  const returnObj = {
+                    data,
+                    totalPages
+                  }
+                  callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
+              })
+              .catch((err) => {
+                callback({ code: 400, message: "Error while fetching medicine count", result: err});
+              })
+            })
+          .catch((err) => {
+            callback({ code: 400, message: "Error fetching medicine list", result: err});
+          });
+  
+        }
+       
+      } catch (error) {
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+
+    getMedicineDetails: async (reqObj, callback) => {
+      try {
+        Medicine.aggregate([
+          {
+            $match: { medicine_id: reqObj.medicine_id },
+          },
+          {
+            $lookup: {
+              from         : "medicineinventories",
+              localField   : "medicine_id",
+              foreignField : "medicine_id",
+              as           : "inventory",
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              medicine_type  : 1,
+              // medicine_image    : 1,
+              // drugs_name        : 1,
+              // country_of_origin : 1,
+              // dosage_form       : 1,
+              // category_name     : 1,
+              // strength          : 1,
+              inventory : {
+                $arrayElemAt: ["$inventory", 0],
+              },
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              medicine_type  : 1,
+              "inventory.inventory_info" : 1,
+              "inventory.strength"       : 1,
+            },
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "supplier_id",
+              foreignField : "supplier_id",
+              as           : "supplier",
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              medicine_type  : 1,
+              "inventory.inventory_info" : 1,
+              "inventory.strength"       : 1,
+              supplier : {
+                $arrayElemAt: ["$supplier", 0],
+              },
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              medicine_type  : 1,
+              "inventory.inventory_info" : 1,
+              "inventory.strength"       : 1,
+              "supplier.supplier_id"             : 1, 
+              "supplier.supplier_name"           : 1,
+              "supplier.description"             : 1,
+              "supplier.estimated_delivery_time" : 1,
+              "supplier.tags"                    : 1,
+              "supplier.license_no"              : 1,
+              "supplier.supplier_address"        : 1,
+              "supplier.payment_terms"           : 1,
+              "supplier.country_of_origin"       : 1,
+            },
+          },
+        ])
+          .then((data) => {
+            if (data.length) {
+              callback({ code: 200, message: "Medicine details fetched successfully", result: data });
+            } else {
+              callback({code: 400, message: "Medicine with requested id not found", result: data });
+            }
+          })
+          .catch((err) => {
+            callback({code: 400, message: "Error fetching medicine details", result: err });
+          });
+      } catch (error) {
+        callback({ code: 500, message: "Internal server error", result: error });
+      }
+    },
+    //------------------------ medicine ------------------------//
+
 }

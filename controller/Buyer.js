@@ -278,7 +278,6 @@ module.exports = {
 
     supplierProductList : async(reqObj, callback) => {
       try {
-       
         const { supplier_id, pageNo, pageSize } = reqObj
   
         const page_no   = pageNo || 1
@@ -288,7 +287,7 @@ module.exports = {
           Medicine.aggregate([
             {
               $match : {
-                supplier_id   : supplier_id,
+                supplier_id : supplier_id,
               }
             },
             {
@@ -327,39 +326,17 @@ module.exports = {
                 },
               },
             },
-            // {
-            //   $project: {
-            //     medicine_id       : 1,
-            //     supplier_id       : 1,
-            //     medicine_name     : 1,
-            //     medicine_image    : 1,
-            //     drugs_name        : 1,
-            //     country_of_origin : 1,
-            //     dossier_type      : 1,
-            //     dossier_status    : 1,
-            //     gmp_approvals     : 1,
-            //     registered_in     : 1,
-            //     comments          : 1,
-            //     dosage_form       : 1,
-            //     category_name     : 1,
-            //     strength          : 1,
-            //     quantity          : 1,
-            //     "inventory.delivery_info"  : 1,
-            //     "inventory.price"          : 1,
-            //   },
-            // },
             { $skip: offset },
             { $limit: page_size },
-            
           ])
             .then((data) => {
               Medicine.countDocuments({supplier_id : supplier_id})
               .then(totalItems => {
-                  const totalPages = Math.ceil(totalItems / page_size);
 
+                  const totalPages = Math.ceil(totalItems / page_size);
                   const returnObj = {
                     data,
-                    totalItems
+                    totalPages
                   }
                   callback({ code: 200, message: "Supplier product list fetched successfully", result: returnObj });
               })

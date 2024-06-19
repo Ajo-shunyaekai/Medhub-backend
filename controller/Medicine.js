@@ -83,7 +83,7 @@ module.exports = {
 
   allMedicineList: async (reqObj, callback) => {
     try {
-      const {searchKey, pageNo, pageSize} = reqObj
+      const {searchKey, pageNo, pageSize, medicine_type} = reqObj
 
       const page_no   = pageNo || 1
       const page_size = pageSize || 10
@@ -91,6 +91,11 @@ module.exports = {
 
       if(searchKey === '' || searchKey === undefined) {
         Medicine.aggregate([
+          {
+            $match: {
+              'medicine_type': medicine_type
+            }
+          },
           {
             $lookup: {
               from         : "medicineinventories",
@@ -116,6 +121,7 @@ module.exports = {
               category_name     : 1,
               strength          : 1,
               quantity          : 1,
+              medicine_type     : 1,
               inventory : {
                 $arrayElemAt: ["$inventory", 0],
               },
@@ -138,21 +144,27 @@ module.exports = {
               category_name     : 1,
               strength          : 1,
               quantity          : 1,
+              medicine_type     : 1,
               "inventory.delivery_info"  : 1,
               "inventory.price"          : 1,
             },
           },
           { $skip: offset },
           { $limit: page_size },
-          
         ])
           .then((data) => {
-            Medicine.countDocuments()
+            Medicine.countDocuments({medicine_type : medicine_type})
             .then(totalItems => {
                 const totalPages = Math.ceil(totalItems / page_size);
-                callback({ code: 200, message: "Medicine list fetched successfully", result: data, total_pages: totalPages });
+                const returnObj = {
+                  data,
+                  totalPages
+                }
+                callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
             })
-            // callback({code: 200, message: "Medicine list fetched successfully", result: data});
+            .catch((err) => {
+              callback({ code: 400, message: "Error while fetching medicine count", result: err});
+            })
           })
           .catch((err) => {
             console.log(err);
@@ -161,7 +173,10 @@ module.exports = {
       } else {
         Medicine.aggregate([
           {
-            $match: {'medicine_name': { $regex: searchKey, $options: 'i' }}
+            $match: {
+              'medicine_name': { $regex: searchKey, $options: 'i' },
+              'medicine_type': medicine_type
+            }
           },
           {
             $project: {
@@ -180,6 +195,7 @@ module.exports = {
               category_name     : 1,
               strength          : 1,
               quantity          : 1,
+              medicine_type     : 1,
               inventory : {
                 $arrayElemAt: ["$inventory", 0],
               },
@@ -187,8 +203,23 @@ module.exports = {
           }
         ])
         .then((data) => {
-          callback({code: 200, message: "Medicine list fetched successfully", result: data});
-        })
+          // Medicine.countDocuments({medicine_type : medicine_type})
+          Medicine.countDocuments({ 
+            medicine_name: { $regex: searchKey, $options: 'i' },
+            medicine_type: medicine_type 
+          })
+            .then(totalItems => {
+                const totalPages = Math.ceil(totalItems / page_size);
+                const returnObj = {
+                  data,
+                  totalPages
+                }
+                callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
+            })
+            .catch((err) => {
+              callback({ code: 400, message: "Error while fetching medicine count", result: err});
+            })
+          })
         .catch((err) => {
           callback({ code: 400, message: "Error fetching medicine list", result: err});
         });
@@ -444,7 +475,6 @@ module.exports = {
       const page_size = pageSize || 10
       const offset    = (page_no - 1) * page_size
 
-      // if(searchKey === '' || searchKey === undefined) {
         Medicine.aggregate([
           {
             $match : {
@@ -512,51 +542,20 @@ module.exports = {
             Medicine.countDocuments()
             .then(totalItems => {
                 const totalPages = Math.ceil(totalItems / page_size);
-                callback({ code: 200, message: "Medicine list fetched successfully", result: data, total_pages: totalPages });
+                const returnObj = {
+                  data, 
+                  totalPages
+                }
+                callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
             })
-            // callback({code: 200, message: "Medicine list fetched successfully", result: data});
+            .catch((err) => {
+              callback({ code: 400, message:  " Error while fetching siliar medicine list count", result: returnObj });
+            })
           })
           .catch((err) => {
             console.log(err);
             callback({ code: 400, message: "Error fetching medicine list", result: err});
           });
-      // } else {
-      //   Medicine.aggregate([
-      //     {
-      //       $match: {'medicine_name': { $regex: searchKey, $options: 'i' }}
-      //     },
-      //     {
-      //       $project: {
-      //         medicine_id       : 1,
-      //         supplier_id       : 1,
-      //         medicine_name     : 1,
-      //         medicine_image    : 1,
-      //         drugs_name        : 1,
-      //         country_of_origin : 1,
-      //         dossier_type      : 1,
-      //         dossier_status    : 1,
-      //         gmp_approvals     : 1,
-      //         registered_in     : 1,
-      //         comments          : 1,
-      //         dosage_form       : 1,
-      //         category_name     : 1,
-      //         strength          : 1,
-      //         quantity          : 1,
-      //         inventory : {
-      //           $arrayElemAt: ["$inventory", 0],
-      //         },
-      //       }
-      //     }
-        // ])
-        // .then((data) => {
-        //   callback({code: 200, message: "Medicine list fetched successfully", result: data});
-        // })
-        // .catch((err) => {
-        //   callback({ code: 400, message: "Error fetching medicine list", result: err});
-        // });
-
-      
-     
     } catch (error) {
       callback({ code: 500, message: "Internal Server Error", result: error });
     }

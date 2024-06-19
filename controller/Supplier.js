@@ -212,7 +212,11 @@ module.exports = {
 
     supplierProfileDetails : async(reqObj, callback) => {
       try {
-        Supplier.findOne({supplier_id: reqObj.supplier_id}).select('supplier_id supplier_name supplier_email supplier_mobile_no supplier_image tax_image license_image email mobile country_code supplier_address description license_no country_of_origin contact_person_name designation tags payment_terms estimated_delivery_time') 
+        const fields = {
+          token : 0,
+          password : 0
+        }
+        Supplier.findOne({supplier_id: reqObj.supplier_id}).select(fields) 
         .then((data) => {
           callback({code: 200, message : 'Supplier details fetched successfully', result:data})
       }).catch((error) => {
