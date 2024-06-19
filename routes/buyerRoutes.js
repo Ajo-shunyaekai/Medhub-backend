@@ -12,11 +12,11 @@ const {checkAuthorization, checkBuyerAuthentication}  = require('../middleware/A
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let uploadPath = './uploads/buyer/buyer_images';
-        if (file.fieldname === 'tax_image[]') {
+        if (file.fieldname === 'tax_image') {
             uploadPath = './uploads/buyer/tax_images';
-        } else if (file.fieldname === 'license_image[]') {
+        } else if (file.fieldname === 'license_image') {
             uploadPath = './uploads/buyer/license_images';
-        } else if (file.fieldname === 'certificate_image[]') {
+        } else if (file.fieldname === 'certificate_image') {
             uploadPath = './uploads/buyer/certificate_images';
         }
         cb(null, uploadPath);
@@ -31,10 +31,10 @@ const upload = multer({ storage: storage });
 
 const cpUpload = (req, res, next) => {
     upload.fields([
-        { name: 'buyer_image[]'},
-        { name: 'license_image[]'},
-        { name: 'tax_image[]'},
-        { name: 'certificate_image[]'},
+        { name: 'buyer_image'},
+        { name: 'license_image'},
+        { name: 'tax_image'},
+        { name: 'certificate_image'},
     ])(req, res, (err) => {
         if (err) {
             console.error('Multer Error:', err);
@@ -45,24 +45,23 @@ const cpUpload = (req, res, next) => {
     });
 };
 
-
 module.exports = () => {
 
     routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
       
-        if (!req.files['buyer_image[]'] || req.files['buyer_image[]'].length === 0) {
+        if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
             res.send({ code: 415, message: 'Company Logo is required!', errObj: {} });
             return;
         }
-        if (!req.files['tax_image[]'] || req.files['tax_image[]'].length === 0) {
+        if (!req.files['tax_image'] || req.files['tax_image'].length === 0) {
             res.send({ code: 415, message: 'Company tax image is required!', errObj: {} });
             return;
         }
-        if (!req.files['license_image[]'] || req.files['license_image[]'].length === 0) {
+        if (!req.files['license_image'] || req.files['license_image'].length === 0) {
             res.send({ code: 415, message: 'Company license image is required!', errObj: {} });
             return;
         }
-        if (!req.files['certificate_image[]'] || req.files['certificate_image[]'].length === 0) {
+        if (!req.files['certificate_image'] || req.files['certificate_image'].length === 0) {
             res.send({ code: 415, message: 'Company certificate image is required!', errObj: {} });
             return;
         }
@@ -78,10 +77,10 @@ module.exports = () => {
             buyer_country_code          : buyerCountryCode,
             contact_person_mobile       : person_mob_no,
             contact_person_country_code : personCountryCode,
-            buyer_image                 : req.files['buyer_image[]'].map(file => path.basename(file.path)),
-            license_image               : req.files['license_image[]'].map(file => path.basename(file.path)),
-            tax_image                   : req.files['tax_image[]'].map(file => path.basename(file.path)),
-            certificate_image           : req.files['certificate_image[]'].map(file => path.basename(file.path))
+            buyer_image                 : req.files['buyer_image'].map(file => path.basename(file.path)),
+            license_image               : req.files['license_image'].map(file => path.basename(file.path)),
+            tax_image                   : req.files['tax_image'].map(file => path.basename(file.path)),
+            certificate_image           : req.files['certificate_image'].map(file => path.basename(file.path))
             // mobile             : number,
         }
         const errObj = validation(regObj, 'buyerRegister')
@@ -90,6 +89,8 @@ module.exports = () => {
             res.send( { code : 419, message : 'All fields are required', errObj });
             return;
         }
+
+        console.log(regObj);
         
         Controller.Regsiter(regObj, result => {
             const response = handleResponse(result);
