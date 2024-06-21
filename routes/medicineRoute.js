@@ -42,9 +42,11 @@ module.exports = () => {
             res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
             return;
         }
+        const tags = req.body.tags.split(',');
     
         let obj = {
             ...req.body,
+            tags : tags,
             medicine_image: req.files['product_image'].map(file => path.basename(file.path))
         }
     

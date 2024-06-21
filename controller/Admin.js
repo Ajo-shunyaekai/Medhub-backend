@@ -463,7 +463,7 @@ module.exports = {
                 const totalPages = Math.ceil(totalItems / page_size)
                 const returnObj = {
                   data,
-                  totallPages
+                  totalPages
                 }
                 callback({ code: 200, message: 'Update Profile Req list fetched successfully', result: returnObj });
               })

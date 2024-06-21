@@ -34,10 +34,10 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  tags: {
+  tags: [{
     type: String,
     required: true
-  },
+  }],
   available_for: {
     type: String,
     required: true

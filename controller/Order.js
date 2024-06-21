@@ -46,7 +46,6 @@ module.exports = {
         })
 
         newOrder.save().then(() => {
-
             return callback({code: 200, message: "Order Request send successfully"});
         })
         .catch((err) => {
