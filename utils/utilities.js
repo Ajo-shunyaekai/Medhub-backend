@@ -28,11 +28,18 @@ module.exports = {
             objData.email       = 'Email Field is required';
         }
         if(type === 'addProduct' || type === 'editProduct') {
+            if(objData.product_type === 'new') {
             objData.supplier_id       = 'Supplier ID is required';
             objData.medicine_name     = 'Medicine Name is required';
+            objData.product_type       = 'product type is required';
             objData.composition       = 'composition is required';
+            objData.strength    = 'Strength is required';
+            objData.type_of_form     = 'Type of form is required';
+            objData.shelf_life     = 'Shelf life is required';
             objData.dossier_type      = 'Dossier Type is required';
             objData.dossier_status    = 'Dossier Status is required';
+            objData.product_category     = 'Product Category is required';
+            objData.total_quantity     = 'Quantity is required';
             objData.gmp_approvals     = 'GMP Approval is required';
             objData.shipping_time     = 'Shipping Time is required';
             objData.tags              = 'Tags are required';
@@ -40,13 +47,37 @@ module.exports = {
             objData.country_of_origin = 'Available For is required';
             objData.description       = 'Description is required';
             objData.registered_in     = 'Registered Countries are required';
-            objData.strength          = 'Strength is required';
             objData.quantity          = 'Quantity is required';
             objData.unit_price        = 'Unit Price is required';
             objData.total_price       = 'Total Price is required';
-            objData.shelf_life        = 'Shelf life is required';
-            objData.type_of_form      = 'Type of form is required';
             objData.est_delivery_days = 'Estimated Delivery Days are required'
+
+            } else if(objData.product_type === 'secondary market') {
+
+            objData.supplier_id       = 'Supplier ID is required';
+            objData.medicine_name     = 'Medicine Name is required';
+            objData.product_type       = 'product type is required';
+            objData.purchased_on      = 'purchased on is required';
+            objData.country_available_in       = 'country available in is required';
+            objData.min_purchase_unit       = 'min.purchase unit is required';
+            objData.composition       = 'composition is required';
+            objData.strength    = 'Strength is required';
+            objData.type_of_form     = 'Type of form is required';
+            objData.shelf_life     = 'Shelf life is required';
+            objData.dossier_type      = 'Dossier Type is required';
+            objData.dossier_status    = 'Dossier Status is required';
+            objData.product_category     = 'Product Category is required';
+            objData.gmp_approvals     = 'GMP Approval is required';
+            objData.shipping_time     = 'Shipping Time is required';
+            objData.tags              = 'Tags are required';
+            objData.available_for     = 'Available For is required';
+            objData.country_of_origin = 'Available For is required';
+            objData.description       = 'Description is required';
+            objData.registered_in     = 'Registered Countries are required';
+            objData.quantity          = 'Quantity is required';
+            objData.unit_price        = 'Unit Price is required';
+            objData.condition        = 'condition is required';
+            }
             
             // objData.comments           = 'Comment is required';
             // objData.country_of_origin  = 'Country of origin is required';

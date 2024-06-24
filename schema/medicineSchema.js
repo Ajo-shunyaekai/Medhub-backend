@@ -14,7 +14,37 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  medicine_type : {
+    type: String,
+    required: true
+  },
+  purchased_on : { //for secondary market
+    type: String,
+    // required: true
+  },
+  country_available_in: [ //for secondary market
+    {
+      type: String,
+      // required: true
+    }
+  ],
+  min_purchase_unit: { //for secondary market
+    type: String,
+    // required: true
+  },
   composition: {
+    type: String,
+    required: true
+  },
+  strength: {
+    type: String,
+    required: true
+  },
+  type_of_form : {
+    type: String,
+    required: true
+  },
+  shelf_life : {
     type: String,
     required: true
   },
@@ -23,6 +53,14 @@ const medicineSchema = new mongoose.Schema({
     required: true
   },
   dossier_status: {
+    type: String,
+    required: true
+  },
+  medicine_category: {
+    type: String,
+    required: true
+  },
+  total_quantity: {
     type: String,
     required: true
   },
@@ -38,14 +76,6 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
-  available_for: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
   country_of_origin: {
     type: String,
     required: true
@@ -56,16 +86,37 @@ const medicineSchema = new mongoose.Schema({
       required: true
     }
   ],
+  available_for: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  //for secondary market
+  unit_price: {
+    type: String,
+    // required: true
+  },
+  condition: {
+    type: String,
+    // required: true
+  },
+ //for secondary market
+ 
+  
   inventory_info: [{
-    strength: String,
-    type_of_form: String,
     quantity: String,
     unit_price: String,
     total_price : String,
     est_delivery_days: String,
-    shelf_life: String
   }],
   medicine_image: [{
+    type: String,
+    trim: true
+  }],
+  invoice_image: [{ //for secondary market
     type: String,
     trim: true
   }],
@@ -81,51 +132,6 @@ const medicineSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-
-
-  // country_of_origin: {
-  //   type: String,
-  //   required: true
-  // },
-  // dosage_form: {
-  //   type: String,
-  //   required: true
-  // },
-  // strength: [{
-  //   type: String,
-  //   required: true
-  // }],
-  // category_name: {
-  //   type: String,
-  //   required: true
-  // },
-  // quantity: {
-  //   type: String,
-  //   required: true
-  // },
- 
-  // description: {
-  //   type: String,
-  //   required: true
-  // },
-  // manufacturer: {
-  //   type: String,
-  //   required: true
-  // },
-  // indications: [{
-  //   type: String
-  // }],
-  // side_effects: [{
-  //   type: String
-  // }],
-  // prescription_required: {
-  //   type: Boolean,
-  //   default: false
-  // },
-  // storage_conditions: {
-  //   type: String,
-  //   required: true
-  // },
 });
 
 const Medicine = mongoose.model('Medicine', medicineSchema);
