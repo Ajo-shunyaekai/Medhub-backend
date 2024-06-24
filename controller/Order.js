@@ -17,8 +17,8 @@ module.exports = {
        try {
         await initializeInvoiceNumber();
 
-        const orderId    = 'ORD-' + Math.random().toString(16).slice(2);
-        const itemIds    = reqObj.items.map(item => item.product_id);
+        const orderId = 'ORD-' + Math.random().toString(16).slice(2);
+        const itemIds = reqObj.items.map(item => item.product_id);
 
         const invoiceNumberDoc = await Invoice.findOneAndUpdate(
           {},
@@ -33,7 +33,7 @@ module.exports = {
         const newOrder = new Order({
             order_id          : orderId,
             buyer_id          : reqObj.buyer_id,
-            buyer_company     : reqObj.company_name,
+            buyer_company     : reqObj.buyer_company,
             supplier_id       : reqObj.supplier_id,
             items             : reqObj.items,
             payment_terms     : reqObj.payment_terms,
@@ -228,7 +228,7 @@ module.exports = {
                   $addFields: {
                     "items.medicine_image" : {$arrayElemAt : ["$medicine.medicine_image", 0] },
                     "items.drugs_name"     : {$arrayElemAt  : ["$medicine.drugs_name",0]},
-                    "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+                    "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
                   }
                 },
                 {

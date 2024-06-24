@@ -588,7 +588,7 @@ module.exports = {
   similarMedicineList: async (reqObj, callback) => {
     try {
       const {medicine_name, medicine_id, medicine_type, supplier_id, pageNo, pageSize} = reqObj
-
+      
       const page_no   = pageNo || 1
       const page_size = pageSize || 10
       const offset    = (page_no - 1) * page_size

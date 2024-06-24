@@ -6,6 +6,7 @@ const Order              = require('../schema/orderSchema')
 const BuyerEdit          = require('../schema/buyerEditSchema')
 const Medicine           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
+const Support            = require('../schema/supportSchema')
 
 module.exports = {
 
@@ -585,7 +586,54 @@ module.exports = {
         console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error', result: error})
       }
+    },
+
+    //----------------------------- support -------------------------------------//
+    supportList : async(reqObj, callback) => {
+     try {
+        const { buyer_id, pageNo, pageSize } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 1
+        const offset    = (page_no - 1) * page_size 
+
+        Support.find({buyer_id : buyer_id}).skip(offset).limit(page_size).then((data) => {
+          Support.countDocuments({buyer_id : buyer_id}).then((totalItems) => {
+            const totalPages = Math.ceil(totalItems / page_size)
+            const returnObj =  {
+              data,
+              totalPages
+            }
+            callback({code: 200, message : 'buyer support list fetched successfully', result: returnObj})
+          })
+          .catch((err) => {
+            console.log(err);
+            callback({code: 400, message : 'error while fetching buyer support list count', result: err})
+          })
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer support list', result: err})
+        })
+
+     } catch (error) {
+      callback({code: 500, message : 'Internal Server Error', result: error})
+     }
+    },
+
+    supportDetails : async (reqObj, callback) => {
+      try {
+         const { buyer_id , support_id } = reqObj
+
+         Support.find({buyer_id, support_id : support_id}).select().then((data) => {
+          callback({code: 200, message : 'buyer support list fetched successfully', result: data})
+         })
+      } catch (error) {
+        
+      }
     }
+
+    //----------------------------- support --------------------------------------//
 
 
 }

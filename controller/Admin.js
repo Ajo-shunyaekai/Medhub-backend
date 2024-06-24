@@ -915,4 +915,51 @@ module.exports = {
     },
     //------------------------ medicine ------------------------//
 
+
+    //----------------------------- support -------------------------------------//
+    supportList : async(reqObj, callback) => {
+      try {
+         const {pageNo, pageSize } = reqObj
+ 
+         const page_no   = pageNo || 1
+         const page_size = pageSize || 1
+         const offset    = (page_no - 1) * page_size 
+ 
+         Support.find().skip(offset).limit(page_size).then((data) => {
+           Support.countDocuments().then((totalItems) => {
+             const totalPages = Math.ceil(totalItems / page_size)
+             const returnObj =  {
+               data,
+               totalPages
+             }
+             callback({code: 200, message : 'support list fetched successfully', result: returnObj})
+           })
+           .catch((err) => {
+             console.log(err);
+             callback({code: 400, message : 'error while fetching support list count', result: err})
+           })
+         })
+         .catch((err) => {
+           console.log(err);
+           callback({code: 400, message : 'error while fetching support list', result: err})
+         })
+ 
+      } catch (error) {
+       callback({code: 500, message : 'Internal Server Error', result: error})
+      }
+     },
+ 
+    supportDetails : async (reqObj, callback) => {
+      try {
+          const { supplier_id , support_id } = reqObj
+
+          Support.find({support_id : support_id}).select().then((data) => {
+          callback({code: 200, message : 'support details fetched successfully', result: data})
+          })
+      } catch (error) {
+        
+      }
+    }
+    //----------------------------- support -------------------------------------//
+
 }

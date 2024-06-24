@@ -220,6 +220,20 @@ module.exports = () => {
         });
     });
 
+    routes.post('/support-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.supportList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/support-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.supportDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     return routes;
 
 }

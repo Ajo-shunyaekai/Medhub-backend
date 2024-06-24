@@ -126,6 +126,20 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/support-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.supportList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/support-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.supportDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
     return routes;
 }
