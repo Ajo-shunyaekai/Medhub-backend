@@ -84,6 +84,48 @@ module.exports = {
       }
     },
 
+    editAdminProfile : async (reqObj, callback) => {
+      try {
+        const { admin_id, user_name, email } = reqObj
+
+        const admin = await Admin.findOne({admin_id : admin_id})
+
+        if(!admin) {
+          callback({code: 404, message : 'User not found'})
+        }
+
+        const updateProfile = await Admin.findOneAndUpdate({admin_id : admin_id},  { user_name: user_name, email: email }, {new: true})
+
+        if(updateProfile) {
+          callback({code: 200, message: 'Profile Updated Successfully', result: updateProfile})
+        } else {
+          callback({code: 400, message: 'Error while updating profile details', result: updateProfile})
+        }
+      } catch (error) {
+        console.log("error", error)
+        callback({code: 500, message: 'Internal Server Error', result: error})
+      }
+    },
+
+    adminProfileDetails : async (reqObj, callback) => {
+      try {
+        const fields = {
+          password  : 0,
+          token     : 0,
+          createdAt : 0,
+          updatedAt : 0
+        }
+        Admin.find({admin_id : reqObj.admin_id}).select(fields).then((data) => {
+          callback({code: 200, message: 'Admin Profile Details', result: data})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message: 'Error in fetching admin profile details', result: error})
+      });
+      }catch (error) {
+        callback({code: 500, message: 'Internal Server Error', result: error})
+    }
+    },
+
     getUserList : async(reqObj, callback) => {
       try {
         User.find({}).select('user_id first_name last_name email status').limit(5).then((data) => {
@@ -94,8 +136,7 @@ module.exports = {
       });
       }catch (error) {
         console.error('Internal Server Error', error);
-        callback({code: 500, message : 'Internal server error'})
-        // callback(500);
+        callback({code: 500, message : 'Internal server error', result: error})
       }
     },
 
@@ -161,7 +202,7 @@ module.exports = {
             callback({code: 200, message : 'Supplier list fetched successfully', result: returnObj})
           })
           .catch((err) => {
-            callback({code: 400, message : 'Error while  fetching suppliers list count', result: error})
+            callback({code: 400, message : 'Error while  fetching suppliers list count', result: err})
           })
         }).catch((error) => {
           console.error('Error:', error);
@@ -285,6 +326,7 @@ module.exports = {
       }
     },
     //------------------------ buyer ------------------------//
+
 
     //------------------------ supplier ------------------------//
     getBuyerList: async(reqObj, callback) => {
@@ -437,6 +479,8 @@ module.exports = {
       }
     },
     //------------------------ supplier ------------------------//
+
+
 
     //------------------------ supplier/buyer ------------------------//
     getProfileUpdateReqList: async(reqObj, callback) => {
@@ -598,6 +642,8 @@ module.exports = {
       }
     },
     //------------------------ supplier/buyer ------------------------//
+
+
 
     //------------------------ medicine ------------------------//
     allMedicineList: async (reqObj, callback) => {
@@ -913,7 +959,8 @@ module.exports = {
         callback({ code: 500, message: "Internal server error", result: error });
       }
     },
-    //------------------------ medicine ------------------------//
+    //-------------------------- medicine ----------------------------//
+
 
 
     //----------------------------- support -------------------------------------//

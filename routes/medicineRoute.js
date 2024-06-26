@@ -9,31 +9,6 @@ const {imageUpload}                              = require('../utils/imageUpload
 const {checkAuthorization, checkAuthentication, checkSupplierAuthentication, checkSellerAuthentication}  = require('../middleware/Authorization');
 
 
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, './uploads/medicine/product_files');
-//     },
-//     filename: (req, file, cb) => {
-//         const ext = file.mimetype.split("/")[1];
-//         cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-//     },
-// });
-
-// const upload = multer({ storage: storage });
-
-// const cpUpload = (req, res, next) => {
-//     upload.fields([
-//         { name: 'product_image', maxCount: 4 },
-//     ])(req, res, (err) => {
-//         if (err) {
-//             console.error('Multer Error:', err);
-//             res.status(500).json({ error: 'File upload error' });
-//             return;
-//         }
-//         next();
-//     });
-// };
-
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let uploadPath = './uploads/medicine/product_files';
@@ -53,9 +28,7 @@ const upload = multer({ storage: storage });
 const cpUpload = (req, res, next) => {
     upload.fields([
         { name: 'product_image'},
-        { name: 'invoice_image'},
-        // { name: 'tax_image'},
-        // { name: 'certificate_image'},
+        { name: 'invoice_image'}
     ])(req, res, (err) => {
         if (err) {
             console.error('Multer Error:', err);
@@ -91,13 +64,22 @@ module.exports = () => {
             obj.invoice_image = req.files['invoice_image'].map(file => path.basename(file.path));
         }
     
-        let errObj = validation(obj, 'addProduct');
+        if(obj.product_type === 'new') {
+            let errObj = validation(obj, 'addNewProduct');
     
         if (Object.values(errObj).length) {
             res.send({ code: 422, message: 'All fields are required', errObj });
             return;
         }
+        } else if(obj.product_type === 'secondary market') {
+            let errObj = validation(obj, 'addSecondaryProduct');
     
+            if (Object.values(errObj).length) {
+                res.send({ code: 422, message: 'All fields are required', errObj });
+                return;
+            }
+        }
+        
         Controller.addMedicine(obj, result => {
             const response = handleResponse(result);
             res.send(response);

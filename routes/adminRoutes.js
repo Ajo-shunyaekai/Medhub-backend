@@ -20,6 +20,20 @@ module.exports = () => {
         });
     });
 
+    routes.post('/edit-profile', checkAuthorization, checkAdminAuthentication, async(req, res) => {
+        Controller.editAdminProfile(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        }) 
+    })
+
+    routes.post('/profile-details', checkAuthorization, checkAdminAuthentication, async(req, res) => {
+        Controller.adminProfileDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        })
+    })
+
     routes.post('/get-user-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getUserList(req.body, result => {
             const response = handleResponse(result);

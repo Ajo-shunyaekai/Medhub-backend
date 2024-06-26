@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+const baseOptions = {
+  discriminatorKey : 'medicine_type', 
+  collection       : 'medicines',          
+};
+
 const medicineSchema = new mongoose.Schema({
   medicine_id: {
     type: String,
@@ -14,23 +19,9 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  medicine_type : {
+  medicine_type: {
     type: String,
     required: true
-  },
-  purchased_on : { //for secondary market
-    type: String,
-    // required: true
-  },
-  country_available_in: [ //for secondary market
-    {
-      type: String,
-      // required: true
-    }
-  ],
-  min_purchase_unit: { //for secondary market
-    type: String,
-    // required: true
   },
   composition: {
     type: String,
@@ -40,11 +31,11 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  type_of_form : {
+  type_of_form: {
     type: String,
     required: true
   },
-  shelf_life : {
+  shelf_life: {
     type: String,
     required: true
   },
@@ -80,12 +71,10 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  registered_in: [
-    {
-      type: String,
-      required: true
-    }
-  ],
+  registered_in: [{
+    type: String,
+    required: true
+  }],
   available_for: {
     type: String,
     required: true
@@ -94,33 +83,13 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  //for secondary market
-  unit_price: {
-    type: String,
-    // required: true
-  },
-  condition: {
-    type: String,
-    // required: true
-  },
- //for secondary market
- 
   
-  inventory_info: [{
-    quantity: String,
-    unit_price: String,
-    total_price : String,
-    est_delivery_days: String,
-  }],
   medicine_image: [{
     type: String,
-    trim: true
+    trim: true,
+    required: true
   }],
-  invoice_image: [{ //for secondary market
-    type: String,
-    trim: true
-  }],
-  status : {
+  status: {
     type: Number,
     required: true
   },
@@ -132,8 +101,47 @@ const medicineSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-});
+}, baseOptions);
 
 const Medicine = mongoose.model('Medicine', medicineSchema);
 
-module.exports = Medicine;
+const newMedicineSchema = new mongoose.Schema({
+  inventory_info: [{
+    quantity          : String,
+    unit_price        : String,
+    total_price       : String,
+    est_delivery_days : String,
+  }],
+});
+
+const NewMedicine = Medicine.discriminator('new', newMedicineSchema);
+
+const secondaryMarketMedicineSchema = new mongoose.Schema({
+  purchased_on: {
+    type: String,
+  },
+  country_available_in: [{
+    type: String,
+  }],
+  min_purchase_unit: {
+    type: String,
+  },
+  unit_price: {
+    type: String,
+  },
+  condition: {
+    type: String,
+  },
+  invoice_image: [{
+    type: String,
+    trim: true
+  }]
+});
+
+const SecondaryMarketMedicine = Medicine.discriminator('secondary market', secondaryMarketMedicineSchema);
+
+module.exports = {
+  Medicine,
+  NewMedicine,
+  SecondaryMarketMedicine
+};

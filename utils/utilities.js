@@ -3,43 +3,44 @@ const randomstring = require('randomstring');
 module.exports = {
     
     validation : (reqObj, type) => {
-
+        
         let objData = { }
         
         if(type == 'Register'){
-            objData.first_name  = 'First Name field is required';
-            objData.last_name   = 'Last Name field is required';
-            objData.mobile_no   = 'Mobile No field is required';
-            objData.email       = 'Email Field is required';
-            objData.password    = 'Password Field is required'
+            objData.first_name = 'First Name field is required';
+            objData.last_name  = 'Last Name field is required';
+            objData.mobile_no  = 'Mobile No field is required';
+            objData.email      = 'Email Field is required';
+            objData.password   = 'Password Field is required'
         }
         if(type == 'Login'){
-            objData.email     = 'Email Field is required';
-            objData.password  = 'Password Field is required'
+            objData.email    = 'Email Field is required';
+            objData.password = 'Password Field is required'
         }
         if(type === 'updatePassword') {
             objData.current_password = 'Current Password field is required';
             objData.new_password     = 'New Password field is required'
         }
         if(type === 'editProfile') {
-            objData.first_name  = 'First Name field is required';
-            objData.last_name   = 'Last Name field is required';
-            objData.mobile_no   = 'Mobile No field is required';
-            objData.email       = 'Email Field is required';
+            objData.first_name = 'First Name field is required';
+            objData.last_name  = 'Last Name field is required';
+            objData.mobile_no  = 'Mobile No field is required';
+            objData.email      = 'Email Field is required';
         }
-        if(type === 'addProduct' || type === 'editProduct') {
-            if(objData.product_type === 'new') {
+
+        //------------------------------------Medicine------------------------------------//
+        if(type === 'addNewProduct' || type === 'editNewProduct') {
             objData.supplier_id       = 'Supplier ID is required';
             objData.medicine_name     = 'Medicine Name is required';
-            objData.product_type       = 'product type is required';
+            objData.product_type      = 'product type is required';
             objData.composition       = 'composition is required';
-            objData.strength    = 'Strength is required';
-            objData.type_of_form     = 'Type of form is required';
-            objData.shelf_life     = 'Shelf life is required';
+            objData.strength          = 'Strength is required';
+            objData.type_of_form      = 'Type of form is required';
+            objData.shelf_life        = 'Shelf life is required';
             objData.dossier_type      = 'Dossier Type is required';
             objData.dossier_status    = 'Dossier Status is required';
-            objData.product_category     = 'Product Category is required';
-            objData.total_quantity     = 'Quantity is required';
+            objData.product_category  = 'Product Category is required';
+            objData.total_quantity    = 'Quantity is required';
             objData.gmp_approvals     = 'GMP Approval is required';
             objData.shipping_time     = 'Shipping Time is required';
             objData.tags              = 'Tags are required';
@@ -51,56 +52,35 @@ module.exports = {
             objData.unit_price        = 'Unit Price is required';
             objData.total_price       = 'Total Price is required';
             objData.est_delivery_days = 'Estimated Delivery Days are required'
-
-            } else if(objData.product_type === 'secondary market') {
-
-            objData.supplier_id       = 'Supplier ID is required';
-            objData.medicine_name     = 'Medicine Name is required';
-            objData.product_type       = 'product type is required';
-            objData.purchased_on      = 'purchased on is required';
-            objData.country_available_in       = 'country available in is required';
-            objData.min_purchase_unit       = 'min.purchase unit is required';
-            objData.composition       = 'composition is required';
-            objData.strength    = 'Strength is required';
-            objData.type_of_form     = 'Type of form is required';
-            objData.shelf_life     = 'Shelf life is required';
-            objData.dossier_type      = 'Dossier Type is required';
-            objData.dossier_status    = 'Dossier Status is required';
-            objData.product_category     = 'Product Category is required';
-            objData.gmp_approvals     = 'GMP Approval is required';
-            objData.shipping_time     = 'Shipping Time is required';
-            objData.tags              = 'Tags are required';
-            objData.available_for     = 'Available For is required';
-            objData.country_of_origin = 'Available For is required';
-            objData.description       = 'Description is required';
-            objData.registered_in     = 'Registered Countries are required';
-            objData.quantity          = 'Quantity is required';
-            objData.unit_price        = 'Unit Price is required';
-            objData.condition        = 'condition is required';
-            }
-            
-            // objData.comments           = 'Comment is required';
-            // objData.country_of_origin  = 'Country of origin is required';
-            // objData.dosage_form        = 'Dossage Form is required';
-            // objData.category_name      = 'Category Name  is required';
-            // qty_range                  = 'Quantity range is required',
-            // price                      = 'Price is required'
-            // objData.description           = 'Description is required';
-            // objData.generic_name          = 'Generic Name is required';
-            // objData.manufacturer          = 'Manufacturer  is required';
-            // objData.prescription_required = 'Prescriptions is required';
-            // objData.storage_conditions    = 'Storage Conditions is required';
-            // objData.batch_number          = 'Batch Number is required';
-            // objData.expiry_date           = 'Expirty Date  is required';
-            // objData.location              = 'Location is required';
-            // objData.supplier              = 'Supplier is required';
-            // objData.received_date         = 'Recieved Date  is required';
-            // objData.quantity              = 'Qantity is required';
-            // objData.unit_price            = 'Unit Price is required';
-            // objData.indications           = 'Indications is required';
-            // objData.side_effects          = 'Side Effects is required';
-            
         }
+
+        if(type === 'addSecondaryProduct' || type === 'editSecondaryProduct') {
+            objData.supplier_id          = 'Supplier ID is required';
+            objData.medicine_name        = 'Medicine Name is required';
+            objData.product_type         = 'product type is required';
+            objData.purchased_on         = 'purchased on is required';
+            objData.country_available_in = 'country available in is required';
+            objData.min_purchase_unit    = 'min.purchase unit is required';
+            objData.composition          = 'composition is required';
+            objData.strength             = 'Strength is required';
+            objData.type_of_form         = 'Type of form is required';
+            objData.shelf_life           = 'Shelf life is required';
+            objData.dossier_type         = 'Dossier Type is required';
+            objData.dossier_status       = 'Dossier Status is required';
+            objData.product_category     = 'Product Category is required';
+            objData.gmp_approvals        = 'GMP Approval is required';
+            objData.shipping_time        = 'Shipping Time is required';
+            objData.tags                 = 'Tags are required';
+            objData.available_for        = 'Available For is required';
+            objData.country_of_origin    = 'Available For is required';
+            objData.description          = 'Description is required';
+            objData.registered_in        = 'Registered Countries are required';
+            objData.quantity             = 'Quantity is required';
+            objData.unit_price           = 'Unit Price is required';
+            objData.condition            = 'condition is required';
+        }
+        //------------------------------------Medicine------------------------------------//
+            
         if(type == 'buyerRegister'){
             objData.buyer_type                   = 'Buyer Type field is required';
             objData.buyer_name                   = 'Buyer Company name field is required';
@@ -143,13 +123,13 @@ module.exports = {
 
         
         if(type == 'sellerRegister'){
-            objData.company_name      = 'Company Name field is required';
-            objData.company_address   = 'Address field is required';
-            objData.email             = 'Email Field is required';
-            objData.password          = 'Password Field is required'
-            objData.mobile_no         = 'Mobile Field is required';
-            objData.business_type     = 'Business Type Field is required'
-            objData.license_no        = 'License No Field is required';
+            objData.company_name    = 'Company Name field is required';
+            objData.company_address = 'Address field is required';
+            objData.email           = 'Email Field is required';
+            objData.password        = 'Password Field is required'
+            objData.mobile_no       = 'Mobile Field is required';
+            objData.business_type   = 'Business Type Field is required'
+            objData.license_no      = 'License No Field is required';
         }
 
         if(type == 'supplierRegister'){
@@ -202,10 +182,10 @@ module.exports = {
         }
 
         if(type === 'orderRequest') {
-            objData.items               = 'Order Item is required',
-            objData.payment_terms       = "Payment term is reqiured",
-            objData.est_delivery_time   = "Estimated delivery time is required",
-            objData.shipping_details    = "Shipping Details is required"
+            objData.items             = 'Order Item is required',
+            objData.payment_terms     = "Payment term is reqiured",
+            objData.est_delivery_time = "Estimated delivery time is required",
+            objData.shipping_details  = "Shipping Details is required"
         }
 
         if(type === 'cancelOrder') {
@@ -253,7 +233,6 @@ module.exports = {
                 message = result.message;
                 break;
         }
-    
         return { code: result.code, message: message, result: result.result };
     },
 
