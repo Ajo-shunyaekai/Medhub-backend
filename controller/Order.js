@@ -11,6 +11,7 @@ const initializeInvoiceNumber = async () => {
   }
 };
 
+
 module.exports = {
 
     orderRequest : async(reqObj, callback) => {
@@ -817,16 +818,16 @@ module.exports = {
 
     supplierInvoicesList: async (reqObj, callback) => {
       try {
-        const {page_no, limit, filterKey, buyer_id} = reqObj
+        const {page_no, limit, filterKey, supplier_id} = reqObj
   
-        const pageNo   = page_no || 1
-        const pageSize = limit || 1
+        const pageNo   = page_no || 2
+        const pageSize = limit || 2
         const offset   = (pageNo - 1) * pageSize     
         
         Order.aggregate([
             {
                 $match: { 
-                    buyer_id     : reqObj.buyer_id,
+                    supplier_id    : supplier_id,
                     order_status : reqObj.filterKey
                 }
             },
@@ -912,11 +913,11 @@ module.exports = {
                 }
             },
             { $sort : { created_at: -1 } },
-            // { $skip  : offset },
-            // { $limit : pageSize },
+            { $skip  : offset },
+            { $limit : pageSize },
         ])
         .then((data) => {
-            Order.countDocuments({order_status : filterKey, buyer_id: buyer_id})
+            Order.countDocuments({order_status : filterKey, supplier_id: supplier_id})
             .then(totalItems => {
                 const totalPages = Math.ceil(totalItems / pageSize);
 

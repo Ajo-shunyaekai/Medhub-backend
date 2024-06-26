@@ -329,6 +329,7 @@ module.exports = {
             medicine_name     : 1,
             medicine_image    : 1,
             drugs_name        : 1,
+            composition       : 1,
             country_of_origin : 1,
             dossier_type      : 1,
             tags              : 1,
@@ -351,6 +352,7 @@ module.exports = {
             medicine_name     : 1,
             medicine_image    : 1,
             drugs_name        : 1,
+            composition       : 1,
             country_of_origin : 1,
             dossier_type      : 1,
             tags              : 1,
@@ -370,7 +372,7 @@ module.exports = {
         { $skip  : offset },
         { $limit : page_size },
       ];
-    
+    console.log(matchCondition);
       Medicine.aggregate(pipeline)
         .then((data) => {
           Medicine.countDocuments(matchCondition)
@@ -378,7 +380,8 @@ module.exports = {
               const totalPages = Math.ceil(totalItems / page_size);
               const returnObj = {
                 data,
-                totalPages
+                totalPages,
+                totalItems
               };
               callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
             })
@@ -512,7 +515,7 @@ module.exports = {
       ])
         .then((data) => {
           if (data.length) {
-            callback({ code: 200, message: "Medicine details fetched successfully", result: data });
+            callback({ code: 200, message: "Medicine details fetched successfully", result: data[0] });
           } else {
             callback({code: 400, message: "Medicine with requested id not found", result: data });
           }
