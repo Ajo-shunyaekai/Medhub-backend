@@ -4,7 +4,7 @@ const Buyer              = require('../schema/buyerSchema')
 const Supplier           = require('../schema/supplierSchema')
 const Order              = require('../schema/orderSchema')
 const BuyerEdit          = require('../schema/buyerEditSchema')
-const Medicine           = require('../schema/medicineSchema')
+const{ Medicine}           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
 
@@ -200,57 +200,99 @@ module.exports = {
       }
     },
 
-    supplierList : async(reqObj, callback) => {
+    // supplierList : async(reqObj, callback) => {
+    //   try {
+    //     const { searchKey, filterCountry, pageNo, pageSize } = reqObj
+
+    //     const page_no   = pageNo || 1
+    //     const page_size = pageSize || 1
+    //     const offset    = (page_no - 1) * page_size 
+
+    //     if(searchKey === '' && filterCountry === '') {
+    //       Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+    //       .then((data) => {
+    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+    //     }).catch((error) => {
+    //         console.error('Error:', error);
+    //         callback({code: 400, message : 'Error in fetching users list'})
+    //     });
+    //     } else if(searchKey !== '' && filterCountry === '' ) {
+    //       Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+    //       .then((data) => {
+    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+    //     }).catch((error) => {
+    //         console.error('Error:', error);
+    //         callback({code: 400, message : 'Error in fetching users list'})
+    //     });
+    //     } else if(filterCountry !== '' && searchKey === '') {
+    //       Supplier.find({country_of_origin: filterCountry, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+    //       .then((data) => {
+    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+    //     }).catch((error) => {
+    //         console.error('Error:', error);
+    //         callback({code: 400, message : 'Error in fetching users list'})
+    //     });
+
+    //     } else if((searchKey !== '' && searchKey !== undefined) && (filterCountry !== '' && filterCountry !== undefined)) {
+    //       Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry , account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+    //       .then((data) => {
+    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+    //     }).catch((error) => {
+    //         console.error('Error:', error);
+    //         callback({code: 400, message : 'Error in fetching users list'})
+    //     });
+    //     } else {
+    //       Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
+    //       .then((data) => {
+    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
+    //     }).catch((error) => {
+    //         console.error('Error:', error);
+    //         callback({code: 400, message : 'Error in fetching users list'})
+    //     });
+    //     }
+    //   }catch (error) {
+    //     console.log('Internal Server Error', error)
+    //     callback({code: 500, message : 'Internal server error'})
+    //   }
+    // },
+
+    supplierList: async (reqObj, callback) => {
       try {
-        const { searchKey, filterCountry } = reqObj
-
-        if(searchKey === '' && filterCountry === '') {
-          Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-          .then((data) => {
-            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-        }).catch((error) => {
-            console.error('Error:', error);
-            callback({code: 400, message : 'Error in fetching users list'})
-        });
-        } else if(searchKey !== '' && filterCountry === '' ) {
-          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-          .then((data) => {
-            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-        }).catch((error) => {
-            console.error('Error:', error);
-            callback({code: 400, message : 'Error in fetching users list'})
-        });
-        } else if(filterCountry !== '' && searchKey === '') {
-          Supplier.find({country_of_origin: filterCountry, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-          .then((data) => {
-            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-        }).catch((error) => {
-            console.error('Error:', error);
-            callback({code: 400, message : 'Error in fetching users list'})
-        });
-
-        } else if((searchKey !== '' && searchKey !== undefined) && (filterCountry !== '' && filterCountry !== undefined)) {
-          Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry , account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-          .then((data) => {
-            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-        }).catch((error) => {
-            console.error('Error:', error);
-            callback({code: 400, message : 'Error in fetching users list'})
-        });
-        } else {
-          Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-          .then((data) => {
-            callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-        }).catch((error) => {
-            console.error('Error:', error);
-            callback({code: 400, message : 'Error in fetching users list'})
-        });
+        const { searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = reqObj;
+        const offset = (pageNo - 1) * pageSize;
+    
+        let query = { account_status: 1 };
+        
+        if (searchKey) {
+          query.supplier_name = { $regex: new RegExp(searchKey, 'i') };
         }
-      }catch (error) {
-        console.log('Internal Server Error', error)
-        callback({code: 500, message : 'Internal server error'})
+        
+        if (filterCountry) {
+          query.country_of_origin = filterCountry;
+        }
+    
+        // Count total items matching the query
+        const totalItems = await Supplier.countDocuments(query);
+    
+        // Fetch the suppliers with pagination
+        const suppliers = await Supplier.find(query)
+          .select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time, license_expiry_date tax_no')
+          .skip(offset)
+          .limit(pageSize);
+          const totalPages = Math.ceil(totalItems / pageSize)
+          const returnObj = {
+            suppliers,
+            totalPages,
+            totalItems
+          }
+        callback({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
+      } catch (error) {
+        console.error('Error:', error);
+        callback({ code: 400, message: 'Error in fetching supplier list' });
       }
     },
+  
+    
 
     supplierDetails : async(reqObj, callback) => {
       try {
@@ -337,7 +379,8 @@ module.exports = {
                   const totalPages = Math.ceil(totalItems / page_size);
                   const returnObj = {
                     data,
-                    totalPages
+                    totalPages,
+                    totalItems
                   }
                   callback({ code: 200, message: "Supplier product list fetched successfully", result: returnObj });
               })
