@@ -3,12 +3,14 @@ const jwt                = require('jsonwebtoken');
 const generator          = require('generate-password');
 const Admin              = require('../schema/adminSchema')
 const User               = require('../schema/userSchema')
+const Order              = require('../schema/orderSchema')
 const Supplier           = require('../schema/supplierSchema')
 const Buyer              = require('../schema/buyerSchema')
 const BuyerEdit          = require('../schema/buyerEditSchema')
 const SupplierEdit       = require('../schema/supplierEditSchema')
 const Medicine           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
+const Support            = require('../schema/supportSchema')
 
 const generatePassword = () => {
   const password = generator.generate({
@@ -177,39 +179,77 @@ module.exports = {
       }
     },
 
-    //------------------------ buyer ------------------------//
-    getSupplierList: async(reqObj, callback) => {
+    //------------------------ supplier ------------------------//
+
+    // getSupplierList: async(reqObj, callback) => {
+    //   try {
+    //     const { pageNo, limit, filterKey } = reqObj
+
+    //     const page_no   = pageNo || 1
+    //     const page_size = limit || 2
+    //     const offSet    = (page_no -1) * page_size
+
+    //     const fields = {
+    //       token    : 0,
+    //       password : 0
+    //     };
+
+    //     Supplier.find({}).select(fields).skip(offSet).limit(page_size).then((data) => {
+    //       Supplier.countDocuments().then((totalItems) => {
+
+    //         const totalPages = Math.ceil(totalItems / page_size)
+    //         const returnObj = {
+    //           data,
+    //           totalPages
+    //         }
+    //         callback({code: 200, message : 'Supplier list fetched successfully', result: returnObj})
+    //       })
+    //       .catch((err) => {
+    //         callback({code: 400, message : 'Error while  fetching suppliers list count', result: err})
+    //       })
+    //     }).catch((error) => {
+    //       console.error('Error:', error);
+    //       callback({code: 400, message : 'Error in fetching suppliers list', result: error})
+    //     });
+    //   }catch (err) {
+    //     callback({code: 500, message : 'Internal server error', result: err})
+    //   }
+    // },
+
+    getSupplierList: async (reqObj, callback) => {
       try {
-        const { pageNo, limit } = reqObj
-
-        const page_no   = pageNo || 1
-        const page_size = limit || 2
-        const offSet    = (page_no -1) * page_size
-
+        const { pageNo, limit, filterKey } = reqObj;
+    
+        const page_no   = pageNo || 1;
+        const page_size = limit || 2;
+        const offSet    = (page_no - 1) * page_size;
+    
         const fields = {
           token    : 0,
           password : 0
         };
 
-        Supplier.find({}).select(fields).skip(offSet).limit(page_size).then((data) => {
-          Supplier.countDocuments().then((totalItems) => {
-
-            const totalPages = Math.ceil(totalItems / page_size)
-            const returnObj = {
-              data,
-              totalPages
-            }
-            callback({code: 200, message : 'Supplier list fetched successfully', result: returnObj})
-          })
-          .catch((err) => {
-            callback({code: 400, message : 'Error while  fetching suppliers list count', result: err})
-          })
-        }).catch((error) => {
-          console.error('Error:', error);
-          callback({code: 400, message : 'Error in fetching suppliers list', result: error})
-        });
-      }catch (err) {
-        callback({code: 500, message : 'Internal server error', result: err})
+        let filterCondition = {};
+        if (filterKey === 'pending') {
+          filterCondition = { account_status: 0 };
+        } else if (filterKey === 'accepted') {
+          filterCondition = { account_status: 1 };
+        }
+    
+        const data       = await Supplier.find(filterCondition).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
+        const totalItems = await Supplier.countDocuments(filterCondition);
+    
+        const totalPages = Math.ceil(totalItems / page_size);
+        const returnObj = {
+          data,
+          totalPages,
+          totalItems
+        };
+    
+        callback({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
+      } catch (error) {
+        console.error('Error:', error);
+        callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
 
@@ -325,44 +365,112 @@ module.exports = {
         callback({code: 500, message: 'Internal Server Error', result: error})
       }
     },
-    //------------------------ buyer ------------------------//
 
-
-    //------------------------ supplier ------------------------//
-    getBuyerList: async(reqObj, callback) => {
+    supplierSupportList : async(reqObj, callback) => {
       try {
-        const { pageNo, limit } = reqObj
+         const {pageNo, pageSize } = reqObj
+ 
+         const page_no   = pageNo || 1
+         const page_size = pageSize || 1
+         const offset    = (page_no - 1) * page_size 
+ 
+         Support.find({user_type : 'supplier'}).sort({createdAt: -1}).skip(offset).limit(page_size).then((data) => {
+           Support.countDocuments().then((totalItems) => {
+             const totalPages = Math.ceil(totalItems / page_size)
+             const returnObj =  {
+               data,
+               totalPages
+             }
+             callback({code: 200, message : 'support list fetched successfully', result: returnObj})
+           })
+           .catch((err) => {
+             console.log(err);
+             callback({code: 400, message : 'error while fetching support list count', result: err})
+           })
+         })
+         .catch((err) => {
+           console.log(err);
+           callback({code: 400, message : 'error while fetching support list', result: err})
+         })
+ 
+      } catch (error) {
+       callback({code: 500, message : 'Internal Server Error', result: error})
+      }
+    },
+    //------------------------ supplier ------------------------//
 
-        const page_no   = pageNo || 1
-        const page_size = limit || 2
-        const offSet    = (page_no - 1) * 10
 
+    //------------------------ buyer ------------------------//
+    // getBuyerList: async(reqObj, callback) => {
+    //   try {
+    //     const { pageNo, limit } = reqObj
+
+    //     const page_no   = pageNo || 1
+    //     const page_size = limit || 2
+    //     const offSet    = (page_no - 1) * 10
+
+    //     const fields = {
+    //       token    : 0,
+    //       password : 0
+    //     };
+
+    //     Buyer.find({}).select(fields).skip(offSet).limit(page_size).then((data) => {
+    //       Buyer.countDocuments().then((totalItems) => {
+
+    //         const totalPages = Math.ceil(totalItems / page_size);
+    //         const resultObj = {
+    //           data,
+    //           totalPages 
+    //         }
+
+    //         callback({code: 200, message: 'Buyer list fetched successfully', result: resultObj})
+    //       })
+    //       .catch((err) => {
+    //         callback({code: 400, message:'Error while fetching buyer list count', result: err })
+    //       })
+    //     })
+    //     .catch((err) => {
+    //       callback({code: 400, message:'Error while fetching buyer list', result: err })
+    //     })
+
+    //   } catch (error) {
+    //     callback({code: 500, message:'Internal Server Error', result: error })
+    //   }
+    // },
+    getBuyerList: async (reqObj, callback) => {
+      try {
+        const { pageNo, limit, filterKey } = reqObj;
+    
+        const page_no   = pageNo || 1;
+        const page_size = limit || 2;
+        const offSet    = (page_no - 1) * page_size;
+    
         const fields = {
           token    : 0,
           password : 0
         };
 
-        Buyer.find({}).select(fields).skip(offSet).limit(page_size).then((data) => {
-          Buyer.countDocuments().then((totalItems) => {
-
-            const totalPages = Math.ceil(totalItems / page_size);
-            const resultObj = {
-              data,
-              totalPages 
-            }
-
-            callback({code: 200, message: 'Buyer list fetched successfully', result: resultObj})
-          })
-          .catch((err) => {
-            callback({code: 400, message:'Error while fetching buyer list count', result: err })
-          })
-        })
-        .catch((err) => {
-          callback({code: 400, message:'Error while fetching buyer list', result: err })
-        })
-
+        let filterCondition = {};
+        if (filterKey === 'pending') {
+          filterCondition = { account_status: 0 };
+        } else if (filterKey === 'accepted') {
+          filterCondition = { account_status: 1 };
+        }
+    
+        const data       = await Buyer.find(filterCondition).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
+        const totalItems = await Buyer.countDocuments(filterCondition);
+    
+        const totalPages = Math.ceil(totalItems / page_size);
+        const returnObj = {
+          data,
+          totalPages,
+          totalItems
+        };
+    
+        callback({ code: 200, message: 'Buyer list fetched successfully', result: returnObj });
       } catch (error) {
-        callback({code: 500, message:'Internal Server Error', result: error })
+        console.error('Error:', error);
+        callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
 
@@ -478,8 +586,158 @@ module.exports = {
         callback({code: 500, message: 'Internal Server Error', result: error})
       }
     },
-    //------------------------ supplier ------------------------//
 
+    buyerOrdersList: async (reqObj, callback) => {
+      try {
+        const {page_no, limit, filterKey, buyer_id} = reqObj
+  
+        const pageNo   = page_no || 1
+        const pageSize = limit || 2
+        const offset   = (pageNo - 1) * pageSize     
+        
+      Order.aggregate([
+          {
+              $match: { 
+                  buyer_id     : reqObj.buyer_id,
+                  order_status : reqObj.filterKey
+              }
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "supplier_id",
+              foreignField : "supplier_id",
+              as           : "supplier"
+            }
+          },
+          {
+            $project: {
+              order_id          : 1,
+              buyer_id          : 1,
+              buyer_company     : 1,
+              supplier_id       : 1,
+              items             : 1,
+              payment_terms     : 1,
+              est_delivery_time : 1,
+              shipping_details  : 1,
+              remarks           : 1,
+              order_status      : 1,
+              created_at        : 1,
+              supplier          : { $arrayElemAt : ["$supplier", 0] }
+            }
+          },
+          {
+            $unwind : "$items" 
+          },
+          {
+            $lookup: {
+              from         : "medicines",
+              localField   : "items.product_id",
+              foreignField : "medicine_id",
+              as           : "medicine"
+            }
+          },
+          {
+            $addFields: {
+              "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
+              "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+            }
+          },
+          {
+            $group: {
+              _id               : "$_id",
+              order_id          : { $first: "$order_id" },
+              buyer_id          : { $first: "$buyer_id" },
+              buyer_company     : { $first: "$buyer_company" },
+              supplier_id       : { $first: "$supplier_id" },
+              items             : { $push: "$items" },
+              payment_terms     : { $first: "$payment_terms" },
+              est_delivery_time : { $first: "$est_delivery_time" },
+              shipping_details  : { $first: "$shipping_details" },
+              remarks           : { $first: "$remarks" },
+              order_status      : { $first: "$order_status" },
+              created_at        : { $first: "$created_at" },
+              supplier          : { $first: "$supplier" },
+              totalPrice        : { $sum: "$items.item_price" }
+            }
+          },
+          {
+              $project: {
+                  order_id          : 1,
+                  buyer_id          : 1,
+                  buyer_company     : 1,
+                  supplier_id       : 1,
+                  items             : 1,
+                  payment_terms     : 1,
+                  est_delivery_time : 1,
+                  shipping_details  : 1,
+                  remarks           : 1,
+                  order_status      : 1,
+                  created_at        : 1,
+                  totalPrice        : 1,
+                  "supplier.supplier_image" : 1,
+                  "supplier.supplier_name"  : 1,
+              }
+          },
+          { $sort : { created_at: -1 } },
+          { $skip  : offset },
+          { $limit : pageSize },
+      ])
+      .then((data) => {
+          Order.countDocuments({order_status : filterKey, buyer_id: buyer_id})
+          .then(totalItems => {
+              const totalPages = Math.ceil(totalItems / pageSize);
+
+              const responseData = {
+                  data,
+                  totalPages,
+                  totalItems
+              }
+              callback({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
+          })
+      })
+      .catch((err) => {
+          console.log('Error in fetching order list',err);
+          callback({ code: 400, message: "Error in fetching order list", result: err });
+      })
+      } catch (error) {
+        console.log('Intenal Server Error',error)
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+
+    buyerSupportList : async(reqObj, callback) => {
+      try {
+         const {pageNo, pageSize } = reqObj
+ 
+         const page_no   = pageNo || 1
+         const page_size = pageSize || 1
+         const offset    = (page_no - 1) * page_size 
+ 
+         Support.find({user_type : 'buyer'}).sort({createdAt: -1}).skip(offset).limit(page_size).then((data) => {
+           Support.countDocuments().then((totalItems) => {
+             const totalPages = Math.ceil(totalItems / page_size)
+             const returnObj =  {
+               data,
+               totalPages
+             }
+             callback({code: 200, message : 'support list fetched successfully', result: returnObj})
+           })
+           .catch((err) => {
+             console.log(err);
+             callback({code: 400, message : 'error while fetching support list count', result: err})
+           })
+         })
+         .catch((err) => {
+           console.log(err);
+           callback({code: 400, message : 'error while fetching support list', result: err})
+         })
+ 
+      } catch (error) {
+       callback({code: 500, message : 'Internal Server Error', result: error})
+      }
+    },
+    //------------------------ buyer ------------------------//
 
 
     //------------------------ supplier/buyer ------------------------//
@@ -642,7 +900,6 @@ module.exports = {
       }
     },
     //------------------------ supplier/buyer ------------------------//
-
 
 
     //------------------------ medicine ------------------------//
@@ -964,37 +1221,70 @@ module.exports = {
 
 
     //----------------------------- support -------------------------------------//
-    supportList : async(reqObj, callback) => {
+    
+    // supportList : async(reqObj, callback) => {
+    //   try {
+    //      const {pageNo, pageSize } = reqObj
+ 
+    //      const page_no   = pageNo || 1
+    //      const page_size = pageSize || 1
+    //      const offset    = (page_no - 1) * page_size 
+ 
+    //      Support.find().skip(offset).limit(page_size).then((data) => {
+    //        Support.countDocuments().then((totalItems) => {
+    //          const totalPages = Math.ceil(totalItems / page_size)
+    //          const returnObj =  {
+    //            data,
+    //            totalPages
+    //          }
+    //          callback({code: 200, message : 'support list fetched successfully', result: returnObj})
+    //        })
+    //        .catch((err) => {
+    //          console.log(err);
+    //          callback({code: 400, message : 'error while fetching support list count', result: err})
+    //        })
+    //      })
+    //      .catch((err) => {
+    //        console.log(err);
+    //        callback({code: 400, message : 'error while fetching support list', result: err})
+    //      })
+ 
+    //   } catch (error) {
+    //    callback({code: 500, message : 'Internal Server Error', result: error})
+    //   }
+    // },
+
+    supportList: async (reqObj, callback) => {
       try {
-         const {pageNo, pageSize } = reqObj
- 
-         const page_no   = pageNo || 1
-         const page_size = pageSize || 1
-         const offset    = (page_no - 1) * page_size 
- 
-         Support.find().skip(offset).limit(page_size).then((data) => {
-           Support.countDocuments().then((totalItems) => {
-             const totalPages = Math.ceil(totalItems / page_size)
-             const returnObj =  {
-               data,
-               totalPages
-             }
-             callback({code: 200, message : 'support list fetched successfully', result: returnObj})
-           })
-           .catch((err) => {
-             console.log(err);
-             callback({code: 400, message : 'error while fetching support list count', result: err})
-           })
-         })
-         .catch((err) => {
-           console.log(err);
-           callback({code: 400, message : 'error while fetching support list', result: err})
-         })
- 
+        const { pageNo, limit, filterKey } = reqObj;
+    
+        const page_no   = pageNo || 1;
+        const page_size = limit || 2;
+        const offSet    = (page_no - 1) * page_size;
+
+        let filterCondition = {};
+        if (filterKey === 'buyer') {
+          filterCondition = { user_type: 'buyer' };
+        } else if (filterKey === 'supplier') {
+          filterCondition = { user_type: 'supplier' };
+        }
+    
+        const data       = await Support.find(filterCondition).select().sort({createdAt: -1}).skip(offSet).limit(page_size);
+        const totalItems = await Support.countDocuments(filterCondition);
+    
+        const totalPages = Math.ceil(totalItems / page_size);
+        const returnObj = {
+          data,
+          totalPages,
+          totalItems
+        };
+    
+        callback({ code: 200, message: 'Support list fetched successfully', result: returnObj });
       } catch (error) {
-       callback({code: 500, message : 'Internal Server Error', result: error})
+        console.error('Error:', error);
+        callback({ code: 500, message: 'Internal server error', result: error });
       }
-     },
+    },
  
     supportDetails : async (reqObj, callback) => {
       try {
@@ -1006,7 +1296,189 @@ module.exports = {
       } catch (error) {
         
       }
-    }
+    },
+
     //----------------------------- support -------------------------------------//
+
+
+    //----------------------------- dashboard details -------------------------------------//
+    adminDashboardDataList: async (reqObj, callback) => {
+      try {
+        const { buyer_id } = reqObj;
+    
+        const orderDataList = Order.aggregate([
+          {
+            $addFields: {
+              numeric_total_price: {
+                $toDouble: {
+                  $arrayElemAt: [{ $split: ["$total_price", " "] }, 0]
+                }
+              }
+            }
+          },
+          {
+            $facet: {
+              completedCount: [
+                { $match: { order_status: 'completed' } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
+                  }
+                }
+              ],
+              activeCount: [
+                { $match: { order_status: 'active' } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
+                  }
+                }
+              ],
+              pendingCount: [
+                { $match: { order_status: 'pending' } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
+                  }
+                }
+              ],
+              totalPurchaseAmount: [
+                {
+                  $group: {
+                    _id: null,
+                    total_purchase: { $sum: "$numeric_total_price" }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    total_purchase: 1
+                  }
+                }
+              ]
+            }
+          }
+        ]);
+    
+        const buyerRegReqList = Buyer.aggregate([
+          {
+            $facet: {
+              regReqCount: [
+                { $match: { account_status: 0 } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1
+                  }
+                }
+              ],
+              acceptedReqCount: [
+                { $match: { account_status: 1 } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1
+                  }
+                }
+              ]
+            }
+          }
+        ]);
+
+        const supplierrRegReqList = Supplier.aggregate([
+          {
+            $facet: {
+              regReqCount: [
+                { $match: { account_status: 0 } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1
+                  }
+                }
+              ],
+              acceptedReqCount: [
+                { $match: { account_status: 1 } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1
+                  }
+                }
+              ]
+            }
+          }
+        ]);
+    
+        const [orderData, buyerData, supplierData] = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList]);
+    
+        const result = {
+          ...orderData[0],
+          buyerRegisReqCount: (buyerData[0].regReqCount && buyerData[0].regReqCount[0]) ? buyerData[0].regReqCount[0] : { count: 0 },
+          buyerAcceptedReqCount: (buyerData[0].acceptedReqCount && buyerData[0].acceptedReqCount[0]) ? buyerData[0].acceptedReqCount[0] : { count: 0 },
+          supplierRegisReqCount: (supplierData[0].regReqCount && supplierData[0].regReqCount[0]) ? supplierData[0].regReqCount[0] : { count: 0 },
+          supplierAcceptedReqCount: (supplierData[0].acceptedReqCount && supplierData[0].acceptedReqCount[0]) ? supplierData[0].acceptedReqCount[0] : { count: 0 },
+        };
+    
+        callback({ code: 200, message: 'Dashboard data list fetched successfully', result });
+      } catch (error) {
+        console.log('Internal Server Error', error);
+        callback({ code: 500, message: 'Internal server error', result: error });
+      }
+    },
+    
+
+    //----------------------------- dashboard details -------------------------------------//
 
 }

@@ -309,7 +309,8 @@ module.exports = {
 
        const newSupport = new Support({
         support_id    : supportId,
-        buyer_id      : reqObj.buyer_id,
+        user_id       : reqObj.buyer_id || reqObj.supplier_id ,
+        user_type     : reqObj.user_type,
         order_id      : reqObj.order_id,
         support_type  : reqObj.support_type,
         reason        : reqObj.feedback,
@@ -332,7 +333,8 @@ module.exports = {
 
         const newSupport = new Support({
          support_id    : supportId,
-         buyer_id      : reqObj.buyer_id,
+         user_id       : reqObj.buyer_id || reqObj.supplier_id,
+         user_type     : reqObj.user_type,
          order_id      : reqObj.order_id,
          support_type  : reqObj.support_type,
          reason        : reqObj.complaint,

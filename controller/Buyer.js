@@ -292,8 +292,6 @@ module.exports = {
       }
     },
   
-    
-
     supplierDetails : async(reqObj, callback) => {
       try {
         // const fields = [

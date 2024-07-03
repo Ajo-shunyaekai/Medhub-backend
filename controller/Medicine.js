@@ -12,7 +12,7 @@ module.exports = {
   addMedicine: async (reqObj, callback) => {
       try {
         let medicine_id = "MED-" + Math.random().toString(16).slice(2);
-    
+        
         const { product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
                 dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
                 country_of_origin, registered_in, available_for, description, medicine_image } = reqObj;
@@ -26,7 +26,7 @@ module.exports = {
             }
     
             if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
-               callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, set_delivery_days) must have the same length" });
+               callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
           }
           
             const inventory_info = quantity.map((_, index) => ({

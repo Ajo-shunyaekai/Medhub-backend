@@ -162,4 +162,44 @@ module.exports = {
         }
     },
 
+    commonAuthentication : async (req, res, next) => {
+        const access_token  = req.headers.access_token;
+        const buyer_id      = req.headers.buyer_id;
+        const supplier_id   = req.headers.supplier_id;
+        
+        try {
+            if(buyer_id) {
+                console.log('buyer');
+                const buyer = await Buyer.findOne({token: access_token});
+                if (!buyer ) {
+                    return res.status(400).send({ message: "Invalid Access Token" });
+                }
+    
+                if (buyer.account_status === 0 ) {
+                    return res.status(400).send({ message: "Access Denied" });
+                }
+                next();
+                
+            } else if(supplier_id) {
+                console.log('supplier');
+                const supplier = await Supplier.findOne({token: access_token});
+
+                if (!supplier ) {
+                    return res.status(400).send({ message: "Invalid Access Token" });
+                }
+    
+                if (supplier.account_status === 0) {
+                    return res.status(400).send({ message: "Access Denied" });
+                }
+                next();
+            } else {
+                return res.status(404).send({ message: "Invalid Access" });
+            }
+
+        } catch (error) {
+            console.error('Error checking access token:', error);
+            return res.status(500).send({ message: "Internal Server Error" });
+        } 
+    }
+
 }

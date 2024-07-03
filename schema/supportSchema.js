@@ -11,11 +11,15 @@ const supportSchema = new Schema({
     type: String,
     required: true
   },
-  buyer_id: {
+  user_id: {
     type: String,
     required: true,
   },
   order_id: {
+    type: String,
+    required: true,
+  },
+  user_type: {
     type: String,
     required: true,
   },

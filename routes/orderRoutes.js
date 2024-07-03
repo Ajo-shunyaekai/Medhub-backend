@@ -6,7 +6,7 @@ const path                                       = require('path');
 const Order                                      = require('../controller/Order')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
-const {checkAuthorization, checkBuyerAuthentication, checkSellerAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
 
 
 const storage = multer.diskStorage({
@@ -89,7 +89,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-order-feedback', checkAuthorization, checkBuyerAuthentication, cpUpload, (req, res) => {
+    routes.post('/submit-order-feedback', checkAuthorization, commonAuthentication, cpUpload, (req, res) => {
 
         if (!req.files['feedback_image'] || req.files['feedback_image'].length === 0) {
             res.send({ code: 415, message: 'Feedback Image is required!', errObj: {} });
@@ -106,7 +106,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-order-complaint', checkAuthorization, checkBuyerAuthentication, cpUpload, (req, res) => {
+    routes.post('/submit-order-complaint', checkAuthorization, commonAuthentication, cpUpload, (req, res) => {
 
         if (!req.files['complaint_image'] || req.files['complaint_image'].length === 0) {
             res.send({ code: 415, message: 'Complaint Image is required!', errObj: {} });

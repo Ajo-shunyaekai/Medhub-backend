@@ -154,6 +154,27 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/dashboard-data-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.adminDashboardDataList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/buyer-order-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.buyerOrdersList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    // routes.post('/buyer-support-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+    //     Controller.buyerSupportList(req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
     
     return routes;
 }
