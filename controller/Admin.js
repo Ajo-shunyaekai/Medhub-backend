@@ -8,7 +8,7 @@ const Supplier           = require('../schema/supplierSchema')
 const Buyer              = require('../schema/buyerSchema')
 const BuyerEdit          = require('../schema/buyerEditSchema')
 const SupplierEdit       = require('../schema/supplierEditSchema')
-const Medicine           = require('../schema/medicineSchema')
+const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
 
@@ -536,13 +536,13 @@ module.exports = {
         const buyer = await Buyer.findOne({ buyer_id : buyer_id });
   
         if (!buyer) {
-            return callback({code: 400, message: "supplier not found" });
+            return callback({code: 400, message: "buyer not found" });
         }
 
         const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
         const newProfileStatus = 1
        
-        const updateStatus = await supplier.findOneAndUpdate(
+        const updateStatus = await Buyer.findOneAndUpdate(
             { buyer_id    : buyer_id },
             { account_status : newAccountStatus, profile_status : newProfileStatus },
             { new         : true }
@@ -903,6 +903,38 @@ module.exports = {
 
 
     //------------------------ medicine ------------------------//
+
+    acceptRejectAddMedicineReq : async(reqObj, callback) => {
+      try {
+        const { medicine_id, supplier_id, action } = reqObj
+
+        const medicine = await Medicine.findOne({ medicine_id : medicine_id, supplier_id: supplier_id});
+  
+        if (!medicine) {
+            return callback({code: 400, message: "medicine not found" });
+        }
+
+        const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+       
+        const updateStatus = await Medicine.findOneAndUpdate(
+            { medicine_id : medicine_id, supplier_id : supplier_id },
+            { status      : newMedicineStatus },
+            { new         : true }
+        );
+
+        if (!updateStatus) {
+          return callback({ code: 400, message: "Failed to update medicine status" });
+        } else {
+          callback({ code: 200, message: `${updateStatus.status === 1 ? 'Medicine Added successfully': updateStatus.status === 2 ? 'Add medicine request rejected' : ''}`,result: updateStatus});
+        }
+
+      } catch (error) {
+        console.log('Internal Sever Error:',error)
+        callback({code: 500, message: 'Internal Server Error', result: error})
+      }
+    },
+    
+
     allMedicineList: async (reqObj, callback) => {
       try {
         const {searchKey, pageNo, pageSize, medicine_type} = reqObj

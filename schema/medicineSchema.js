@@ -83,13 +83,12 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
   medicine_image: [{
     type: String,
     trim: true,
     required: true
   }],
-  status: {
+  status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 
     type: Number,
     required: true
   },

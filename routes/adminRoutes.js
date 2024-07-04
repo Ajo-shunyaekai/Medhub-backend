@@ -127,6 +127,13 @@ module.exports = () => {
         })
     })
 
+    routes.post('/accept-reject-add-medicine', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.acceptRejectAddMedicineReq(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     routes.post('/get-medicine-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.allMedicineList(req.body, result => {
             const response = handleResponse(result)
