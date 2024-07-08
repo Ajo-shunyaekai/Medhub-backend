@@ -48,12 +48,8 @@ module.exports = () => {
         });
     });
 
-    routes.post('/all-medicine-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
-        MedicineController.allMedicineList(req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
+
+    //------------------------------------------ supplier ------------------------------------------//
 
     routes.post('/get-supplier-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getSupplierList(req.body, result => {
@@ -76,13 +72,17 @@ module.exports = () => {
         });
     });
 
-
     routes.post('/accept-reject-supplier-registration', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.acceptRejectSupplierRegReq(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
+
+    //------------------------------------------ supplier ------------------------------------------//
+
+
+    //------------------------------------------ buyer ------------------------------------------//
 
     routes.post('/get-buyer-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getBuyerList(req.body, result => {
@@ -112,6 +112,10 @@ module.exports = () => {
         });
     });
 
+    //------------------------------------------ buyer ------------------------------------------//
+
+ 
+    //------------------------------------------ buyer/supplier ------------------------------------------//
 
     routes.post('/get-profile-edit-request-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getProfileUpdateReqList(req.body, result => {
@@ -127,8 +131,26 @@ module.exports = () => {
         })
     })
 
+    //------------------------------------------ buyer/supplier ------------------------------------------//
+
+    //------------------------------------------ medicine ------------------------------------------//
+
     routes.post('/accept-reject-add-medicine', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.acceptRejectAddMedicineReq(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/accept-reject-edit-medicine', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.acceptRejectEditMedicineReq(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-medicine-edit-request-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.medicineEditList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -148,6 +170,18 @@ module.exports = () => {
         });
     });
 
+    routes.post('/all-medicine-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        MedicineController.allMedicineList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    //------------------------------------------ medicine ------------------------------------------//
+
+
+     //------------------------------------------ support ------------------------------------------//
+
     routes.post('/support-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.supportList(req.body, result => {
             const response = handleResponse(result);
@@ -161,6 +195,8 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+     //------------------------------------------ support ------------------------------------------//
 
     routes.post('/dashboard-data-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.adminDashboardDataList(req.body, result => {
@@ -176,12 +212,6 @@ module.exports = () => {
         });
     });
 
-    // routes.post('/buyer-support-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
-    //     Controller.buyerSupportList(req.body, result => {
-    //         const response = handleResponse(result);
-    //         res.send(response);
-    //     });
-    // });
     
     return routes;
 }

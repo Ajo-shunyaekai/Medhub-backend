@@ -2,9 +2,11 @@ const bcrypt            = require("bcrypt");
 const jwt               = require("jsonwebtoken");
 const Admin             = require("../schema/adminSchema");
 const User              = require("../schema/userSchema");
-const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
 const MedicineInventory = require("../schema/medicineInventorySchema");
 const { aggregation }   = require("../common/common")
+const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
+const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
+
 
 module.exports = {
   
@@ -14,7 +16,7 @@ module.exports = {
         
         const { product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
                 dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
-                country_of_origin, registered_in, available_for, description, medicine_image } = reqObj;
+                country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
     
         if (product_type === 'new') {
             const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
@@ -53,6 +55,7 @@ module.exports = {
                 tags,
                 country_of_origin,
                 registered_in,
+                stocked_in,
                 available_for,
                 description,
                 medicine_image,
@@ -92,6 +95,7 @@ module.exports = {
                 tags,
                 country_of_origin,
                 registered_in,
+                stocked_in,
                 available_for,
                 description,
                 total_quantity : quantity,
@@ -239,7 +243,7 @@ module.exports = {
 
   allMedicineList: async (reqObj, callback) => {
     try {
-        const { searchKey, pageNo, pageSize, medicine_type, category_name, medicine_status } = reqObj;
+        const { searchKey, pageNo, pageSize, medicine_type, category_name, medicine_status, price_range, delivery_time, in_stock } = reqObj;
 
         const page_no   = pageNo || 1;
         const page_size = pageSize || 10;
@@ -339,8 +343,6 @@ module.exports = {
             { $limit : page_size },
         ];
 
-        console.log(matchCondition);
-        
         Medicine.aggregate(pipeline)
             .then((data) => {
                 Medicine.countDocuments(matchCondition)
@@ -363,8 +365,9 @@ module.exports = {
     } catch (error) {
         callback({ code: 500, message: "Internal Server Error", result: error });
     }
-},
 
+   
+  },
 
   getMedicineDetails: async (reqObj, callback) => {
     try {
@@ -497,78 +500,218 @@ module.exports = {
     }
   },
 
-  editMedicine: async (reqObj, callback) => {
+  // editMedicine: async (reqObj, callback) => {
+  //   try {
+  //     const medicine          = await Medicine.findOne({ medicine_id: reqObj.medicine_id});
+  //     const medicineInventory = await MedicineInventory.findOne({medicine_id: reqObj.medicine_id,});
+
+  //     if (!medicine) {
+  //       return callback({ code: 404, message: "Medicine Not Found" });
+  //     }
+
+  //     if (!medicineInventory) {
+  //       return callback({ code: 404, message: "Medicine Inventory Not Found" });
+  //     }
+
+  //     const { strength, quantity, unit_price, type_of_form, est_delivery_days} = reqObj
+
+  //     if (!Array.isArray(quantity) || !Array.isArray(strength) || !Array.isArray(unit_price) || 
+  //         !Array.isArray(type_of_form) || !Array.isArray(est_delivery_days)) {
+  //       return res.status(400).send({ message: 'Inventory fields should be arrays' });
+  //     }
+  
+  //     if (quantity.length !== strength.length || strength.length !== unit_price.length || 
+  //         unit_price.length !== type_of_form.length || type_of_form.length !== est_delivery_days.length) {
+  //       return res.status(400).send({ message: 'All inventory arrays must have the same length' });
+  //     }
+  
+  //     const inventory_info = quantity.map((_, index) => ({
+  //       strength          : strength[index],
+  //       quantity          : quantity[index],
+  //       unit_price        : unit_price[index],
+  //       type_of_form      : type_of_form[index],
+  //       est_delivery_days : est_delivery_days[index]
+  //     }));
+
+  //     Medicine.findOneAndUpdate( { medicine_id: reqObj.medicine_id },
+  //       {
+  //         $set: {
+  //           medicine_name  : reqObj.medicine_name,
+  //           composition    : reqObj.composition,
+  //           dossier_type   : reqObj.dossier_type,
+  //           dossier_status : reqObj.dossier_status,
+  //           gmp_approvals  : reqObj.gmp_approvals,
+  //           shipping_time  : reqObj.shipping_time,
+  //           tags           : reqObj.tags,
+  //           available_for  :  reqObj.available_for,
+  //           description    : reqObj.description,
+  //           registered_in  : reqObj.registered_in,
+  //           medicine_image : reqObj.medicine_image,
+  //           inventory_info : inventory_info
+  //         },
+  //       },{new: true}
+  //     ).then((updatedMedicine) => {
+  //       MedicineInventory.findOneAndUpdate({ medicine_id: reqObj.medicine_id },
+  //         {
+  //           $set: {
+  //             inventory_info : inventory_info,
+  //             strength       : reqObj.strength
+  //           },
+  //         },{new: true}
+  //       )
+  //         .then((updatedMedicineInventory) => {
+  //           const resultObj = {updatedMedicine,updatedMedicineInventory}
+  //           callback({code: 200, message: "Medicine Details updated successfully", result: resultObj});
+  //         })
+  //         .catch((err) => {
+  //           callback({ code: 400, message: "Error in updating the Medicine Details", error: err });
+  //         });
+  //     });
+     
+  //   } catch (error) {
+  //     callback({ code: 500, message: "Internal server error" });
+  //   }
+  // },
+
+
+  editMedicine : async(reqObj, callback) => {
     try {
-      const medicine          = await Medicine.findOne({ medicine_id: reqObj.medicine_id});
-      const medicineInventory = await MedicineInventory.findOne({medicine_id: reqObj.medicine_id,});
+        const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
+                dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
+                country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
 
-      if (!medicine) {
-        return callback({ code: 404, message: "Medicine Not Found" });
-      }
+        if (product_type === 'new') {
+            const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
 
-      if (!medicineInventory) {
-        return callback({ code: 404, message: "Medicine Inventory Not Found" });
-      }
+            if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
+                !Array.isArray(total_price) ||  !Array.isArray(est_delivery_days) ) {
+                callback({ code: 400, message: "Inventory fields should be arrays" });
+            }
 
-      const { strength, quantity, unit_price, type_of_form, est_delivery_days} = reqObj
+            if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+              callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
+          }
+          
+            const inventory_info = quantity.map((_, index) => ({
+              quantity          : quantity[index],
+              unit_price        : unit_price[index],
+              total_price       : total_price[index],
+              est_delivery_days : est_delivery_days[index],
+            }));
 
-      if (!Array.isArray(quantity) || !Array.isArray(strength) || !Array.isArray(unit_price) || 
-          !Array.isArray(type_of_form) || !Array.isArray(est_delivery_days)) {
-        return res.status(400).send({ message: 'Inventory fields should be arrays' });
-      }
-  
-      if (quantity.length !== strength.length || strength.length !== unit_price.length || 
-          unit_price.length !== type_of_form.length || type_of_form.length !== est_delivery_days.length) {
-        return res.status(400).send({ message: 'All inventory arrays must have the same length' });
-      }
-  
-      const inventory_info = quantity.map((_, index) => ({
-        strength          : strength[index],
-        quantity          : quantity[index],
-        unit_price        : unit_price[index],
-        type_of_form      : type_of_form[index],
-        est_delivery_days : est_delivery_days[index]
-      }));
+            const newMedicineObj = {
+                medicine_id,
+                supplier_id,
+                medicine_name,
+                medicine_type : 'new_medicine',
+                composition,
+                strength,
+                type_of_form,
+                shelf_life,
+                dossier_type,
+                dossier_status,
+                medicine_category : product_category,
+                total_quantity,
+                gmp_approvals,
+                shipping_time,
+                tags,
+                country_of_origin,
+                registered_in,
+                stocked_in,
+                available_for,
+                description,
+                medicine_image,
+                inventory_info,
+                edit_status : 0
+            };
 
-      Medicine.findOneAndUpdate( { medicine_id: reqObj.medicine_id },
-        {
-          $set: {
-            medicine_name  : reqObj.medicine_name,
-            composition    : reqObj.composition,
-            dossier_type   : reqObj.dossier_type,
-            dossier_status : reqObj.dossier_status,
-            gmp_approvals  : reqObj.gmp_approvals,
-            shipping_time  : reqObj.shipping_time,
-            tags           : reqObj.tags,
-            available_for  :  reqObj.available_for,
-            description    : reqObj.description,
-            registered_in  : reqObj.registered_in,
-            medicine_image : reqObj.medicine_image,
-            inventory_info : inventory_info
-          },
-        },{new: true}
-      ).then((updatedMedicine) => {
-        MedicineInventory.findOneAndUpdate({ medicine_id: reqObj.medicine_id },
-          {
-            $set: {
-              inventory_info : inventory_info,
-              strength       : reqObj.strength
-            },
-          },{new: true}
-        )
-          .then((updatedMedicineInventory) => {
-            const resultObj = {updatedMedicine,updatedMedicineInventory}
-            callback({code: 200, message: "Medicine Details updated successfully", result: resultObj});
+            const medicine = await Medicine.findOne({ supplier_id: supplier_id, medicine_id: medicine_id });
+
+              if (!medicine) {
+                  return callback({ code: 404, message: 'Medicine Not Found' });
+              }
+
+              const newMedEdit = new NewMedicineEdit(newMedicineObj)
+
+              newMedEdit.save()
+              .then((savedMedicine) => {
+                  callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
+              })
+              .catch((err) => {
+                  console.log(err);
+                  callback({ code: 400, message: "Error while submitting request" });
+              });
+   
+      } else if(product_type === 'secondary market') {
+          const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
+
+          const secondaryMarketMedicineObj = {
+              medicine_id,
+              supplier_id,
+              medicine_name,
+              medicine_type : 'secondary_medicine',
+              purchased_on,
+              country_available_in,
+              min_purchase_unit,
+              composition,
+              strength,
+              type_of_form,
+              shelf_life,
+              dossier_type,
+              dossier_status,
+              medicine_category : product_category,
+              gmp_approvals,
+              shipping_time,
+              tags,
+              country_of_origin,
+              registered_in,
+              stocked_in,
+              available_for,
+              description,
+              total_quantity : quantity,
+              unit_price,
+              condition,
+              medicine_image,
+              invoice_image,
+              edit_status : 0
+          };
+
+          const secondaryMedEdit = new SecondaryMarketMedicineEdit(secondaryMarketMedicineObj)
+
+          secondaryMedEdit.save()
+          .then((savedMedicine) => {
+              callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
           })
           .catch((err) => {
-            callback({ code: 400, message: "Error in updating the Medicine Details", error: err });
+              console.log(err);
+              callback({ code: 400, message: "Error while submitting request" });
           });
-      });
-     
-    } catch (error) {
-      callback({ code: 500, message: "Internal server error" });
-    }
+      }
+    }catch (error) {
+      console.error('Error:', error);
+      callback({ code: 500, message: 'Internal Server Error', error: error});
+   }
   },
+
+   medicineEditList : async (reqObj, callback) => {
+      try {
+        const { status, pageNo, pageSize, medicine_id, supplier_id } = reqObj
+  
+         const page_no   = pageNo || 1
+         const page_size = pageSize || 10
+         const offset    = (page_no - 1) * page_size
+  
+         EditMedicine.find({edit_status: status, supplier_id: supplier_id}).sort({createdAt: -1}).skip(offset).limit(page_size)
+         .then((data) => {
+            callback({code: 200, message: 'Medicine Edit List', result: data})
+         })
+         .catch((err) => {
+          callback({code: 400, message: 'Error while fetching medicine edit list', result: err})
+         })
+      } catch (error) {
+        callback({code: 500, message: 'Internal server error', result: error})
+      }
+    },
 
   filterMedicine: async (reqObj, callback) => {  
     try {

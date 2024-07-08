@@ -103,13 +103,23 @@ module.exports = () => {
     routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
       
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
-            res.send({ code: 415, message: 'Medicine Images fields are required!', errObj: {} });
+            res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
             return;
         }
+        const tags = req.body.tags.split(',');
     
         let obj = {
             ...req.body,
-            medicine_image: req.files['product_image'].map(file => file.path).join(',')
+            tags : tags,
+            medicine_image: req.files['product_image'].map(file => path.basename(file.path))
+        }
+
+        if(req.body.product_type === 'secondary market') {
+            if (!req.files['invoice_image'] || req.files['invoice_image'].length === 0) {
+                res.send({ code: 415, message: 'Invoice Images fields are required for secondary market!', errObj: {} });
+                return;
+            }
+            obj.invoice_image = req.files['invoice_image'].map(file => path.basename(file.path));
         }
     
         let errObj = validation(obj, 'editProduct');
@@ -120,6 +130,14 @@ module.exports = () => {
         }
     
         Controller.editMedicine(obj, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/medicine-edit-req-list', checkAuthorization, (req, res) => {
+       
+        Controller.medicineEditList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

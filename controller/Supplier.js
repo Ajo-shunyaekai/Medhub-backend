@@ -5,6 +5,8 @@ const Supplier     = require('../schema/supplierSchema')
 const Order        = require('../schema/orderSchema')
 const SupplierEdit = require('../schema/supplierEditSchema')
 const Support      = require('../schema/supportSchema')
+const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
+const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 
 module.exports = {
     
@@ -426,6 +428,127 @@ module.exports = {
         callback({code: 500, message : 'Internal server error', result: error})
       }
     },
+
+    editMedicine : async(reqObj, callback) => {
+      try {
+        const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
+          dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
+          country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
+
+  if (product_type === 'new') {
+      const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
+
+      if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
+          !Array.isArray(total_price) ||  !Array.isArray(est_delivery_days) ) {
+          callback({ code: 400, message: "Inventory fields should be arrays" });
+      }
+
+      if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+         callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
+    }
+    
+      const inventory_info = quantity.map((_, index) => ({
+        quantity          : quantity[index],
+        unit_price        : unit_price[index],
+        total_price       : total_price[index],
+        est_delivery_days : est_delivery_days[index],
+      }));
+
+      const newMedicineObj = {
+          medicine_id,
+          supplier_id,
+          medicine_name,
+          medicine_type : 'new_medicine',
+          composition,
+          strength,
+          type_of_form,
+          shelf_life,
+          dossier_type,
+          dossier_status,
+          medicine_category : product_category,
+          total_quantity,
+          gmp_approvals,
+          shipping_time,
+          tags,
+          country_of_origin,
+          registered_in,
+          stocked_in,
+          available_for,
+          description,
+          medicine_image,
+          inventory_info,
+          edit_status : 0
+      };
+
+      const medicine = await Medicine.findOne({ supplier_id: supplier_id, medicine_id: medicine_id });
+  
+        if (!medicine) {
+            return callback({ code: 404, message: 'Medicine Not Found' });
+        }
+
+        const newMedEdit = new NewMedicineEdit(newMedicineObj)
+
+        newMedEdit.save()
+        .then((savedMedicine) => {
+            callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
+        })
+        .catch((err) => {
+            console.log(err);
+             callback({ code: 400, message: "Error while submitting request" });
+        });
+     
+  } else if(product_type === 'secondary market') {
+      const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
+
+      const secondaryMarketMedicineObj = {
+          medicine_id,
+          supplier_id,
+          medicine_name,
+          medicine_type : 'secondary_medicine',
+          purchased_on,
+          country_available_in,
+          min_purchase_unit,
+          composition,
+          strength,
+          type_of_form,
+          shelf_life,
+          dossier_type,
+          dossier_status,
+          medicine_category : product_category,
+          gmp_approvals,
+          shipping_time,
+          tags,
+          country_of_origin,
+          registered_in,
+          stocked_in,
+          available_for,
+          description,
+          total_quantity : quantity,
+          unit_price,
+          condition,
+          medicine_image,
+          invoice_image,
+          edit_status : 0
+      };
+
+      const secondaryMedEdit = new SecondaryMarketMedicineEdit(secondaryMarketMedicineObj)
+
+      secondaryMedEdit.save()
+      .then((savedMedicine) => {
+          callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
+      })
+      .catch((err) => {
+          console.log(err);
+           callback({ code: 400, message: "Error while submitting request" });
+      });
+  }
+      }catch (error) {
+        console.error('Error:', error);
+        callback({ code: 500, message: 'Internal Server Error', error: error});
+     }
+    },
+
+   
 
     //----------------------------- support -------------------------------------//
     

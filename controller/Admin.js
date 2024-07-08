@@ -8,9 +8,11 @@ const Supplier           = require('../schema/supplierSchema')
 const Buyer              = require('../schema/buyerSchema')
 const BuyerEdit          = require('../schema/buyerEditSchema')
 const SupplierEdit       = require('../schema/supplierEditSchema')
-const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
+const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
+const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
+
 
 const generatePassword = () => {
   const password = generator.generate({
@@ -800,7 +802,7 @@ module.exports = {
         if(status === 1) {
           if(user_type === 'supplier') {
             const isSupplier = await SupplierEdit.findOne({supplier_id : user_id, edit_status: 0})
-  
+
               if(!isSupplier) {
                 return callback({code: 402, message: 'supplier edit request not found'})
               }
@@ -830,7 +832,7 @@ module.exports = {
                   tax_image                   : isSupplier.tax_image, 
                   license_image               : isSupplier.license_image,
                   profile_status              : 1    
-                };
+                 };
 
                   Supplier.findOneAndUpdate({supplier_id: isSupplier.supplier_id}, {$set: updateObj}, {new: true})
                   .then((result) => {
@@ -901,7 +903,6 @@ module.exports = {
     },
     //------------------------ supplier/buyer ------------------------//
 
-
     //------------------------ medicine ------------------------//
 
     acceptRejectAddMedicineReq : async(reqObj, callback) => {
@@ -934,7 +935,6 @@ module.exports = {
       }
     },
     
-
     allMedicineList: async (reqObj, callback) => {
       try {
         const {searchKey, pageNo, pageSize, medicine_type} = reqObj
@@ -1248,7 +1248,148 @@ module.exports = {
         callback({ code: 500, message: "Internal server error", result: error });
       }
     },
-    //-------------------------- medicine ----------------------------//
+
+    acceptRejectEditMedicineReq : async(reqObj, callback) => {
+      try {
+            const { medicine_id, supplier_id, action } = reqObj;
+
+            const medicine = await EditMedicine.findOne({ medicine_id: medicine_id, supplier_id: supplier_id });
+
+            if (!medicine) {
+              return callback({ code: 400, message: "Medicine edit request not found" });
+            }
+
+            const editMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+
+            if (editMedicineStatus === 1) {
+              let updateObj = {
+                medicine_id       : medicine.medicine_id,
+                supplier_id       : medicine.supplier_id,
+                medicine_name     : medicine.medicine_name,
+                composition       : medicine.composition,
+                strength          : medicine.strength,
+                type_of_form      : medicine.type_of_form,
+                shelf_life        : medicine.shelf_life,
+                dossier_type      : medicine.dossier_type,
+                dossier_status    : medicine.dossier_status,
+                medicine_category : medicine.medicine_category,
+                total_quantity    : medicine.total_quantity,
+                gmp_approvals     : medicine.gmp_approvals,
+                shipping_time     : medicine.shipping_time,
+                tags              : medicine.tags,
+                country_of_origin : medicine.country_of_origin,
+                registered_in     : medicine.registered_in,
+                stocked_in        : medicine.stocked_in,
+                available_for     : medicine.available_for,
+                description       : medicine.description,
+                medicine_image    : medicine.medicine_image,
+              };
+
+              if (medicine.medicine_type === 'new_medicine') {
+                updateObj.medicine_type  = 'new';
+                updateObj.inventory_info = medicine.inventory_info ;
+              } else if (medicine.medicine_type === 'secondary_medicine') {
+                updateObj.medicine_type        = 'secondary market';
+                updateObj.purchased_on         = medicine.purchased_on;
+                updateObj.country_available_in = medicine.country_available_in;
+                updateObj.min_purchase_unit    = medicine.min_purchase_unit;
+                updateObj.unit_price           = medicine.unit_price;
+                updateObj.invoice_image        = medicine.invoice_image;
+              }
+
+              try {
+                await EditMedicine.findOneAndUpdate(
+                  { supplier_id: supplier_id, medicine_id: medicine_id },
+                  { $set: { edit_status: editMedicineStatus } }
+                );
+
+                let updatedMedicine
+
+                if(medicine.medicine_type === 'new_medicine') {
+                updatedMedicine = await NewMedicine.findOneAndUpdate(
+                    { supplier_id: supplier_id, medicine_id: medicine_id },
+                    { $set: updateObj },
+                    { new: true }
+                  );
+                } else if(medicine.medicine_type === 'secondary_medicine') {
+                  updatedMedicine = await SecondaryMarketMedicine.findOneAndUpdate(
+                    { supplier_id: supplier_id, medicine_id: medicine_id },
+                    { $set: updateObj },
+                    { new: true }
+                  );
+                }
+
+                if (!updatedMedicine) {
+                  return callback({ code: 400, message: "Medicine not found for update" });
+                }
+
+                return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} medicine details updated successfully`, result: updatedMedicine });
+
+              } catch (error) {
+                console.error('Error updating medicine details:', error);
+                return callback({ code: 400, message: 'Error while updating medicine details', result: error });
+              }
+            } else if (editMedicineStatus === 2) {
+              try {
+                const result = await EditMedicine.findOneAndUpdate(
+                  { supplier_id: supplier_id, medicine_id: medicine_id },
+                  { $set: { edit_status: editMedicineStatus } }
+                );
+
+                return callback({ code: 200, message: 'Edit medicine request rejected', result: result });
+
+              } catch (error) {
+                console.error('Error rejecting edit request:', error);
+                return callback({ code: 400, message: 'Error while rejecting the edit request', result: error });
+              }
+            }
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        return callback({ code: 500, message: 'Unexpected error', result: error });
+      }
+    },
+
+    medicineEditList : async (reqObj, callback) => {
+      try {
+        const { status, pageNo, pageSize, medicine_id, supplier_id } = reqObj
+
+         const page_no   = pageNo || 1
+         const page_size = pageSize || 10
+         const offset    = (page_no - 1) * page_size
+
+         EditMedicine.find({edit_status: status}).sort({createdAt: -1}).skip(offset).limit(page_size)
+         .then((data) => {
+            callback({code: 200, message: 'Medicine Edit List', result: data})
+         })
+         .catch((err) => {
+          callback({code: 400, message: 'Error while fetching medicine edit list', result: err})
+         })
+      } catch (error) {
+        callback({code: 500, message: 'Internal server error', result: error})
+      }
+    },
+
+    deleteMedicine : async(reqObj, callback) => {
+      try {
+        const { medicine_id, supplier_id } = reqObj
+          
+        Medicine.findOneAndUpdate(
+          { medicine_id: medicine_id, supplier_id: supplier_id },
+          { $set: { status: 3 } },
+          { new: true }
+        )
+        .then((result) => {
+          callback({ code: 200, message: 'Updated successfully', result: result });
+        })
+        .catch((err) => {
+          callback({ code: 400, message: 'Error while updating', result: err });
+        });
+      } catch (error) {
+        console.log('Internal server error',err);
+        callback({ code: 500, message: 'Internal server error', result: error });
+      }
+    },
+   //------------------------------ medicine -------------------------------//
 
 
 
@@ -1510,7 +1651,6 @@ module.exports = {
       }
     },
     
-
     //----------------------------- dashboard details -------------------------------------//
 
 }

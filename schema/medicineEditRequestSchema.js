@@ -2,18 +2,18 @@ const mongoose = require('mongoose');
 
 const baseOptions = {
   discriminatorKey : 'medicine_type', 
-  collection       : 'medicines',          
+  collection       : 'medicineeditrequest',          
 };
 
-const medicineSchema = new mongoose.Schema({
+const medicineEditRequest = new mongoose.Schema({
   medicine_id: {
     type: String,
     required: true,
-    unique: true
+    // unique: true
   },
   supplier_id: {
     type: String,
-    required: true,
+    // required: true,
   },
   medicine_name: {
     type: String,
@@ -92,7 +92,11 @@ const medicineSchema = new mongoose.Schema({
     trim: true,
     required: true
   }],
-  status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 3 - deleted
+  status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 
+    type: Number,
+    
+  },
+  edit_status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 
     type: Number,
     required: true
   },
@@ -106,9 +110,9 @@ const medicineSchema = new mongoose.Schema({
   }
 }, baseOptions);
 
-const Medicine = mongoose.model('Medicine', medicineSchema);
+const EditMedicine = mongoose.model('MedicineEditRequest', medicineEditRequest);
 
-const newMedicineSchema = new mongoose.Schema({
+const newMedicineEditRequestSchema = new mongoose.Schema({
   inventory_info: [{
     quantity          : String,
     unit_price        : String,
@@ -117,9 +121,9 @@ const newMedicineSchema = new mongoose.Schema({
   }],
 });
 
-const NewMedicine = Medicine.discriminator('new', newMedicineSchema);
+const NewMedicineEdit = EditMedicine.discriminator('new_medicine', newMedicineEditRequestSchema);
 
-const secondaryMarketMedicineSchema = new mongoose.Schema({
+const secondaryMarketMedicineEditRequestSchema = new mongoose.Schema({
   purchased_on: {
     type: String,
   },
@@ -141,10 +145,10 @@ const secondaryMarketMedicineSchema = new mongoose.Schema({
   }]
 });
 
-const SecondaryMarketMedicine = Medicine.discriminator('secondary market', secondaryMarketMedicineSchema);
+const SecondaryMarketMedicineEdit = EditMedicine.discriminator('secondary_medicine', secondaryMarketMedicineEditRequestSchema);
 
 module.exports = {
-  Medicine,
-  NewMedicine,
-  SecondaryMarketMedicine
+  EditMedicine,
+  NewMedicineEdit,
+  SecondaryMarketMedicineEdit
 };
