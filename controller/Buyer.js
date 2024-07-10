@@ -1,5 +1,7 @@
 const bcrypt             = require('bcrypt');
 const jwt                = require('jsonwebtoken');
+const mongoose           = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 const Buyer              = require('../schema/buyerSchema')
 const Supplier           = require('../schema/supplierSchema')
 const Order              = require('../schema/orderSchema')
@@ -7,6 +9,8 @@ const BuyerEdit          = require('../schema/buyerEditSchema')
 const{ Medicine}           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
+const List               = require('../schema/addToListSchema');
+
 
 module.exports = {
 
@@ -672,9 +676,198 @@ module.exports = {
       } catch (error) {
         
       }
-    }
+    },
 
     //----------------------------- support --------------------------------------//
 
 
+    addToList : async (reqObj, callback) => {
+      try {
+        const existingList = await List.findOne({
+          buyer_id: reqObj.buyer_id,
+          supplier_id: reqObj.supplier_id,
+        });
+    
+        if (existingList) {
+          existingList.item_details.push({
+            medicine_id: reqObj.medicine_id,
+            quantity: reqObj.quantity,
+            unit_price: reqObj.unit_price,
+            quantity_required: reqObj.quantity_required,
+            target_price: reqObj.target_price
+          });
+    
+          existingList.save()
+            .then((data) => {
+              callback({ code: 200, message: "Added to existing list successfully", result: data });
+            })
+            .catch((err) => {
+              callback({ code: 400, message: "Error while adding to existing list", result: err });
+            });
+        } else {
+
+          const listId = 'LST-' + Math.random().toString(16).slice(2);
+    
+          const newList = new List({
+            list_id: listId,
+            buyer_id: reqObj.buyer_id,
+            supplier_id: reqObj.supplier_id,
+            item_details: [{
+              medicine_id: reqObj.medicine_id,
+              quantity: reqObj.quantity,
+              unit_price: reqObj.unit_price,
+              quantity_required: reqObj.quantity_required,
+              target_price: reqObj.target_price
+            }]
+          });
+    
+          newList.save()
+            .then((data) => {
+              callback({ code: 200, message: "Added to new list successfully", result: data });
+            })
+            .catch((err) => {
+              callback({ code: 400, message: "Error while adding to new list", result: err });
+            });
+        }
+      } catch (error) {
+        console.log('Internal server error', error);
+        callback({ code: 500, message: "Internal server error", result: error });
+      }
+    },
+
+    showList : async(reqObj, callback) => {
+      try {
+        const { buyer_id, pageNo, pageSize } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 1
+        const offset    = (page_no - 1) * page_size 
+
+        List.aggregate([
+          {
+            $match: {
+              buyer_id: buyer_id
+            }
+          },
+          {
+            $unwind: "$item_details"
+          },
+          {
+            $lookup: {
+              from         : "medicines",
+              localField   : "item_details.medicine_id",
+              foreignField : "medicine_id",
+              as           : "medicine_details"
+            }
+          },
+          {
+            $unwind : "$medicine_details"
+          },
+          {
+            $group: {
+              _id: "$_id",
+              list_id      : { $first: "$list_id" },
+              buyer_id     : { $first: "$buyer_id" },
+              supplier_id  : { $first: "$supplier_id" },
+              item_details : {
+                $push: {
+                  _id               : "$item_details._id",
+                  medicine_id       : "$item_details.medicine_id",
+                  quantity          : "$item_details.quantity",
+                  unit_price        : "$item_details.unit_price",
+                  quantity_required : "$item_details.quantity_required",
+                  target_price      : "$item_details.target_price",
+                  medicine_image    : "$medicine_details.medicine_image",
+                  medicine_name     : "$medicine_details.medicine_name"
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              _id          : 0,
+              list_id      : 1,
+              buyer_id     : 1,
+              supplier_id  : 1,
+              item_details : 1
+            }
+          },
+          { $skip  : offset },
+          { $limit : page_size }
+         
+        ])
+        .then( async(data) => {
+          const totalItems = await List.countDocuments({buyer_id: buyer_id});
+          const totalPages = Math.ceil(totalItems / page_size);
+
+          const returnObj = {
+              data,
+              totalPages,
+              totalItems
+          };
+          callback({code: 200, message: "List fetched successfully", result: returnObj})
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer list', result: err})
+        })
+      } catch (error) {
+        
+      }
+    },
+
+    deleteListItem : async (reqObj, callback) => {
+      try {
+         const {buyer_id, medicine_id, supplier_id, item_id } = reqObj
+         const itemIds = item_id.map(id => id.trim()).filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id));
+
+          if (itemIds.length === 0) {
+            return callback({ code: 400, message: "No valid item IDs provided", result: null });
+          }
+
+          const updateQuery = {
+            $pull: { item_details: { _id: { $in: itemIds } } }
+          };
+
+          console.log('Update Query:', JSON.stringify(updateQuery, null, 2));
+
+          const updateResult = await List.updateMany({ buyer_id: buyer_id },updateQuery
+          
+          );
+      
+          if (updateResult.modifiedCount === 0) {
+            return callback({ code: 400, message: "No items were updated", result: updateResult });
+          }
+
+          // const document = await List.find({buyer_id: buyer_id, supplier_id: supplier_id})
+
+          // if(document && document[0].item_details.length === 0) {
+          //   await List.deleteOne({buyer_id, supplier_id})
+          // }
+
+          callback({ code: 200, message: "updated", result: updateResult });
+      } catch (error) {
+        console.log('Internal server error', error);
+        callback({ code: 500, message: "Internal server error", result: error });
+      }
+    },
+
+    
 }
+
+
+//----code to remove the items ------//
+     // List.updateOne({ buyer_id: buyer_id },updateQuery)
+          // .then((data) => {
+          //   callback({ code: 200, message: "updated", result: data });
+          // })
+          // .catch((err) => {
+          //   console.log('error in updating', err);
+          //   callback({ code: 400, message: "error in updating", result: err });
+          // });
+
+
+
+          // if (updateResult.modifiedCount === 0) {
+          //   return callback({ code: 400, message: "No items were updated", result: updateResult });
+          // }

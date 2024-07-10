@@ -234,6 +234,28 @@ module.exports = () => {
         });
     });
 
+    //---------------------------------- add-to-list ---------------------------------//
+    routes.post('/add-to-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.addToList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/show-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.showList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/delete-list-item', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.deleteListItem(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     return routes;
 
 }
