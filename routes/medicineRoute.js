@@ -158,6 +158,14 @@ module.exports = () => {
         });
     });
 
+    routes.post('/other-medicine-list', checkAuthorization, (req, res) => {
+       
+        Controller.otherMedicineList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     // routes.post('/filter', checkAuthorization, (req, res) => {
     //     Controller.filterMedicine(req.body, result => {
     //         const response = handleResponse(result);
