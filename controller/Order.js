@@ -314,7 +314,8 @@ module.exports = {
         order_id      : reqObj.order_id,
         support_type  : reqObj.support_type,
         reason        : reqObj.feedback,
-        support_image : reqObj.feedback_image
+        support_image : reqObj.feedback_image,
+        status        : 0
        })
         newSupport.save().then((data) => {
           callback({ code: 200, message: "Feedback submitted Successfully", result: data });
@@ -338,7 +339,8 @@ module.exports = {
          order_id      : reqObj.order_id,
          support_type  : reqObj.support_type,
          reason        : reqObj.complaint,
-         support_image : reqObj.complaint_image
+         support_image : reqObj.complaint_image,
+         status        : 0,
      })
  
         newSupport.save().then((data) => {

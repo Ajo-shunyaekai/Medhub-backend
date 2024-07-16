@@ -16,7 +16,8 @@ module.exports = () => {
 
     routes.post('/login', checkAuthorization, (req, res) => {  
         Controller.login(req.body, result => {
-            res.send({ code : 200, message : 'Admin login success', result });
+            const response = handleResponse(result);
+            res.send(response);
         });
     });
 
@@ -207,6 +208,13 @@ module.exports = () => {
 
     routes.post('/buyer-order-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.buyerOrdersList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/buyer-supplier-invoices-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.invoicesList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

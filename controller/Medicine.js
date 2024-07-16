@@ -1309,13 +1309,6 @@ module.exports = {
     }
   },
   
-
-
-
-
-
-
-
   
   otherMedicineList: async (reqObj, callback) => {
     console.log('Fetching other medicine list...');

@@ -32,6 +32,9 @@ const supportSchema = new Schema({
     // trim: true,
     required: true
   }],
+  status : {
+    type: Number
+  },
   createdAt: {
     type: Date,
     default: Date.now

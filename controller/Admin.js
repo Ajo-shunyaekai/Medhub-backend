@@ -69,21 +69,25 @@ module.exports = {
          const admin = await Admin.findOne({ email: email });
 
           if (!admin) {
-              console.log('Not found');
-              callback({code: 404, message: 'Email not found'})
+              callback({code: 404, message: 'Email not found', result: admin})
           }
 
           const isMatch = await bcrypt.compare(password, admin.password);
 
+          const adminDetails = {
+            admin_id  : admin.admin_id,
+            user_name : admin.user_name,
+            email     : admin.email,
+            token     : admin.token
+          }
+          
           if (isMatch) {
-              console.log('Validation successful');
-              callback({code: 200, message: 'Admin Login Successfull'})
+              callback({code: 200, message: 'Admin Login Successfull', result: adminDetails})
           } else {
-              console.log('Validation not successful');
-              callback({code: 401, message: 'Incorrect Password'})
+              callback({code: 401, message: 'Incorrect Password', })
           }
       } catch (error) {
-        console.error('Error validating user:', error);
+        console.error('Internal Server Error:', error);
         callback({code: 500, message: 'Internal Server Error', result: error})
       }
     },
@@ -220,10 +224,10 @@ module.exports = {
 
     getSupplierList: async (reqObj, callback) => {
       try {
-        const { pageNo, limit, filterKey } = reqObj;
+        const { pageNo, pageSize, filterKey } = reqObj;
     
         const page_no   = pageNo || 1;
-        const page_size = limit || 2;
+        const page_size = pageSize || 2;
         const offSet    = (page_no - 1) * page_size;
     
         const fields = {
@@ -236,6 +240,8 @@ module.exports = {
           filterCondition = { account_status: 0 };
         } else if (filterKey === 'accepted') {
           filterCondition = { account_status: 1 };
+        } else if (filterKey === 'rejected') {
+          filterCondition = { account_status: 2 };
         }
     
         const data       = await Supplier.find(filterCondition).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
@@ -441,12 +447,12 @@ module.exports = {
     // },
     getBuyerList: async (reqObj, callback) => {
       try {
-        const { pageNo, limit, filterKey } = reqObj;
+        const { pageNo, pageSize, filterKey } = reqObj;
     
         const page_no   = pageNo || 1;
-        const page_size = limit || 2;
+        const page_size = pageSize || 2;
         const offSet    = (page_no - 1) * page_size;
-    
+
         const fields = {
           token    : 0,
           password : 0
@@ -457,6 +463,8 @@ module.exports = {
           filterCondition = { account_status: 0 };
         } else if (filterKey === 'accepted') {
           filterCondition = { account_status: 1 };
+        } else if (filterKey === 'rejected') {
+          filterCondition = { account_status: 2 };
         }
     
         const data       = await Buyer.find(filterCondition).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
@@ -739,6 +747,128 @@ module.exports = {
        callback({code: 500, message : 'Internal Server Error', result: error})
       }
     },
+
+    buyerInvoicesList: async (reqObj, callback) => {
+      try {
+        const {page_no, limit, filterKey, buyer_id} = reqObj
+  
+        const pageNo   = page_no || 1
+        const pageSize = limit || 1
+        const offset   = (pageNo - 1) * pageSize     
+        
+        Order.aggregate([
+            {
+                $match: { 
+                    // buyer_id     : reqObj.buyer_id,
+                    order_status : reqObj.filterKey
+                }
+            },
+            {
+              $lookup: {
+                from         : "suppliers",
+                localField   : "supplier_id",
+                foreignField : "supplier_id",
+                as           : "supplier"
+              }
+            },
+            {
+              $project: {
+                order_id          : 1,
+                buyer_id          : 1,
+                buyer_company     : 1,
+                supplier_id       : 1,
+                items             : 1,
+                payment_terms     : 1,
+                est_delivery_time : 1,
+                shipping_details  : 1,
+                remarks           : 1,
+                order_status      : 1,
+                invoice_number    : 1,
+                created_at        : 1,
+                supplier          : { $arrayElemAt : ["$supplier", 0] }
+              }
+            },
+            {
+              $unwind : "$items" 
+            },
+            {
+              $lookup: {
+                from         : "medicines",
+                localField   : "items.product_id",
+                foreignField : "medicine_id",
+                as           : "medicine"
+              }
+            },
+            {
+              $addFields: {
+                "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+              }
+            },
+            {
+              $group: {
+                _id               : "$_id",
+                order_id          : { $first: "$order_id" },
+                buyer_id          : { $first: "$buyer_id" },
+                buyer_company     : { $first: "$buyer_company" },
+                supplier_id       : { $first: "$supplier_id" },
+                items             : { $push: "$items" },
+                payment_terms     : { $first: "$payment_terms" },
+                est_delivery_time : { $first: "$est_delivery_time" },
+                shipping_details  : { $first: "$shipping_details" },
+                remarks           : { $first: "$remarks" },
+                order_status      : { $first: "$order_status" },
+                invoice_number    : { $first: "$invoice_number" },
+                created_at        : { $first: "$created_at" },
+                supplier          : { $first: "$supplier" },
+                totalPrice        : { $sum: "$items.item_price" }
+              }
+            },
+            {
+                $project: {
+                    order_id          : 1,
+                    buyer_id          : 1,
+                    buyer_company     : 1,
+                    supplier_id       : 1,
+                    items             : 1,
+                    payment_terms     : 1,
+                    est_delivery_time : 1,
+                    shipping_details  : 1,
+                    remarks           : 1,
+                    order_status      : 1,
+                    invoice_number    : 1,
+                    created_at        : 1,
+                    totalPrice        : 1,
+                    "supplier.supplier_image" : 1,
+                    "supplier.supplier_name"     : 1,
+                    "supplier.supplier_address"  : 1,
+                }
+            },
+            { $sort : { created_at: -1 } },
+            { $skip  : offset },
+            { $limit : pageSize },
+        ])
+        .then((data) => {
+            Order.countDocuments({order_status : filterKey})
+            .then(totalItems => {
+                const totalPages = Math.ceil(totalItems / pageSize);
+
+                const responseData = {
+                    data,
+                    totalPages,
+                    totalItems
+                }
+                callback({ code: 200, message: "List Fetched successfully", result: responseData });
+            })
+        })
+        .catch((err) => {
+            console.log(err);
+            callback({ code: 400, message: "Error in fetching order list", result: err });
+        })
+      } catch (error) {
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
     //------------------------ buyer ------------------------//
 
 
@@ -901,6 +1031,128 @@ module.exports = {
         callback({code: 500, message : 'Internal Server Error', result: error})
       }
     },
+
+    invoicesList: async (reqObj, callback) => {
+      try {
+        const {pageNo, pageSize, filterKey, buyer_id} = reqObj
+  
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 1
+        const offset   = (page_no - 1) * page_size     
+        
+        Order.aggregate([
+            {
+                $match: { 
+                    // buyer_id     : reqObj.buyer_id,
+                    order_status : reqObj.filterKey
+                }
+            },
+            {
+              $lookup: {
+                from         : "suppliers",
+                localField   : "supplier_id",
+                foreignField : "supplier_id",
+                as           : "supplier"
+              }
+            },
+            {
+              $project: {
+                order_id          : 1,
+                buyer_id          : 1,
+                buyer_company     : 1,
+                supplier_id       : 1,
+                items             : 1,
+                payment_terms     : 1,
+                est_delivery_time : 1,
+                shipping_details  : 1,
+                remarks           : 1,
+                order_status      : 1,
+                invoice_number    : 1,
+                created_at        : 1,
+                supplier          : { $arrayElemAt : ["$supplier", 0] }
+              }
+            },
+            {
+              $unwind : "$items" 
+            },
+            {
+              $lookup: {
+                from         : "medicines",
+                localField   : "items.product_id",
+                foreignField : "medicine_id",
+                as           : "medicine"
+              }
+            },
+            {
+              $addFields: {
+                "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+              }
+            },
+            {
+              $group: {
+                _id               : "$_id",
+                order_id          : { $first: "$order_id" },
+                buyer_id          : { $first: "$buyer_id" },
+                buyer_company     : { $first: "$buyer_company" },
+                supplier_id       : { $first: "$supplier_id" },
+                items             : { $push: "$items" },
+                payment_terms     : { $first: "$payment_terms" },
+                est_delivery_time : { $first: "$est_delivery_time" },
+                shipping_details  : { $first: "$shipping_details" },
+                remarks           : { $first: "$remarks" },
+                order_status      : { $first: "$order_status" },
+                invoice_number    : { $first: "$invoice_number" },
+                created_at        : { $first: "$created_at" },
+                supplier          : { $first: "$supplier" },
+                totalPrice        : { $sum: "$items.item_price" }
+              }
+            },
+            {
+                $project: {
+                    order_id          : 1,
+                    buyer_id          : 1,
+                    buyer_company     : 1,
+                    supplier_id       : 1,
+                    items             : 1,
+                    payment_terms     : 1,
+                    est_delivery_time : 1,
+                    shipping_details  : 1,
+                    remarks           : 1,
+                    order_status      : 1,
+                    invoice_number    : 1,
+                    created_at        : 1,
+                    totalPrice        : 1,
+                    "supplier.supplier_image" : 1,
+                    "supplier.supplier_name"     : 1,
+                    "supplier.supplier_address"  : 1,
+                }
+            },
+            { $sort : { created_at: -1 } },
+            { $skip  : offset },
+            { $limit : page_size },
+        ])
+        .then((data) => {
+            Order.countDocuments({order_status : filterKey})
+            .then(totalItems => {
+                const totalPages = Math.ceil(totalItems / page_size);
+
+                const responseData = {
+                    data,
+                    totalPages,
+                    totalItems
+                }
+                callback({ code: 200, message: "List Fetched successfully", result: responseData });
+            })
+        })
+        .catch((err) => {
+            console.log(err);
+            callback({ code: 400, message: "Error in fetching order list", result: err });
+        })
+      } catch (error) {
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
     //------------------------ supplier/buyer ------------------------//
 
     //------------------------ medicine ------------------------//
@@ -937,7 +1189,7 @@ module.exports = {
     
     allMedicineList: async (reqObj, callback) => {
       try {
-        const {searchKey, pageNo, pageSize, medicine_type} = reqObj
+        const {searchKey, pageNo, pageSize, medicine_type, status} = reqObj
   
         const page_no   = pageNo || 1
         const page_size = pageSize || 10
@@ -947,7 +1199,8 @@ module.exports = {
           Medicine.aggregate([
             {
               $match: {
-                'medicine_type': medicine_type
+                // 'medicine_type': medicine_type,
+                'status'       : status
               }
             },
             {
@@ -976,6 +1229,7 @@ module.exports = {
                 strength          : 1,
                 quantity          : 1,
                 medicine_type     : 1,
+                status            : 1,
                 inventory : {
                   $arrayElemAt: ["$inventory", 0],
                 },
@@ -999,6 +1253,7 @@ module.exports = {
                 strength          : 1,
                 quantity          : 1,
                 medicine_type     : 1,
+                status            : 1,
                 "inventory.delivery_info"  : 1,
                 "inventory.price"          : 1,
               },
@@ -1007,12 +1262,13 @@ module.exports = {
             { $limit: page_size },
           ])
             .then((data) => {
-              Medicine.countDocuments({medicine_type : medicine_type})
+              Medicine.countDocuments({status: status})
               .then(totalItems => {
                   const totalPages = Math.ceil(totalItems / page_size);
                   const returnObj = {
                     data,
-                    totalPages
+                    totalPages,
+                    totalItems
                   }
                   callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
               })
@@ -1429,17 +1685,22 @@ module.exports = {
 
     supportList: async (reqObj, callback) => {
       try {
-        const { pageNo, limit, filterKey } = reqObj;
+        const { pageNo, pageSize, filterKey, supportType } = reqObj;
     
         const page_no   = pageNo || 1;
-        const page_size = limit || 2;
+        const page_size = pageSize || 2;
         const offSet    = (page_no - 1) * page_size;
 
         let filterCondition = {};
+       
         if (filterKey === 'buyer') {
           filterCondition = { user_type: 'buyer' };
         } else if (filterKey === 'supplier') {
           filterCondition = { user_type: 'supplier' };
+        }
+
+        if (supportType) {
+          filterCondition.support_type = supportType;
         }
     
         const data       = await Support.find(filterCondition).select().sort({createdAt: -1}).skip(offSet).limit(page_size);
@@ -1633,15 +1894,66 @@ module.exports = {
             }
           }
         ]);
-    
-        const [orderData, buyerData, supplierData] = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList]);
+
+        const countryOrders = Order.aggregate([
+          {
+            $addFields: {
+              numeric_total_price: {
+                $toDouble: {
+                  $arrayElemAt: [
+                    { $split: ["$total_price", " "] },
+                    0
+                  ]
+                }
+              },
+              combined_countries: [
+                "$supplier.country_of_origin",
+                "$buyer.country.country_of_origin"
+              ]
+            }
+          },
+          // {
+          //   $unwind: "$combined_countries"
+          // },
+          // {
+          //   $match: {
+          //     combined_countries: { $ne: null }
+          //   }
+          // },
+          // {
+          //   $group: {
+          //     _id: "$combined_countries",
+          //     total_purchase: { $sum: "$numeric_total_price" }
+          //   }
+          // },
+          // {
+          //   $project: {
+          //     _id: 0,
+          //     country: "$_id",
+          //     totalPrice: "$total_purchase"
+          //   }
+          // }
+        ]);
+        
+        // To format the result as { country: { totalPrice: value } }
+        countryOrders.then(results => {
+          const formattedResults = results.reduce((acc, { country, totalPrice }) => {
+            acc[country] = { totalPrice };
+            return acc;
+          }, {});
+        
+          console.log(formattedResults);
+        });
+        
+        const [orderData, buyerData, supplierData, countryOrderss] = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList, countryOrders]);
     
         const result = {
           ...orderData[0],
-          buyerRegisReqCount: (buyerData[0].regReqCount && buyerData[0].regReqCount[0]) ? buyerData[0].regReqCount[0] : { count: 0 },
-          buyerAcceptedReqCount: (buyerData[0].acceptedReqCount && buyerData[0].acceptedReqCount[0]) ? buyerData[0].acceptedReqCount[0] : { count: 0 },
-          supplierRegisReqCount: (supplierData[0].regReqCount && supplierData[0].regReqCount[0]) ? supplierData[0].regReqCount[0] : { count: 0 },
-          supplierAcceptedReqCount: (supplierData[0].acceptedReqCount && supplierData[0].acceptedReqCount[0]) ? supplierData[0].acceptedReqCount[0] : { count: 0 },
+          countryOrderss,
+          buyerRegisReqCount       : (buyerData[0].regReqCount && buyerData[0].regReqCount[0]) ? buyerData[0].regReqCount[0] : { count: 0 },
+          buyerAcceptedReqCount    : (buyerData[0].acceptedReqCount && buyerData[0].acceptedReqCount[0]) ? buyerData[0].acceptedReqCount[0] : { count: 0 },
+          supplierRegisReqCount    : (supplierData[0].regReqCount && supplierData[0].regReqCount[0]) ? supplierData[0].regReqCount[0] : { count: 0 },
+          supplierAcceptedReqCount : (supplierData[0].acceptedReqCount && supplierData[0].acceptedReqCount[0]) ? supplierData[0].acceptedReqCount[0] : { count: 0 },
         };
     
         callback({ code: 200, message: 'Dashboard data list fetched successfully', result });
@@ -1652,5 +1964,136 @@ module.exports = {
     },
     
     //----------------------------- dashboard details -------------------------------------//
+
+
+    //----------------------------- order -------------------------------------//
+
+    // buyerInvoicesList: async (reqObj, callback) => {
+    //   try {
+    //     const {page_no, limit, filterKey, buyer_id} = reqObj
+  
+    //     const pageNo   = page_no || 1
+    //     const pageSize = limit || 1
+    //     const offset   = (pageNo - 1) * pageSize     
+        
+    //     Order.aggregate([
+    //         {
+    //             $match: { 
+    //                 // buyer_id     : reqObj.buyer_id,
+    //                 // order_status : reqObj.filterKey
+    //                 order_status : 'pending'
+    //             }
+    //         },
+    //         {
+    //           $lookup: {
+    //             from         : "suppliers",
+    //             localField   : "supplier_id",
+    //             foreignField : "supplier_id",
+    //             as           : "supplier"
+    //           }
+    //         },
+    //         {
+    //           $project: {
+    //             order_id          : 1,
+    //             buyer_id          : 1,
+    //             buyer_company     : 1,
+    //             supplier_id       : 1,
+    //             items             : 1,
+    //             payment_terms     : 1,
+    //             est_delivery_time : 1,
+    //             shipping_details  : 1,
+    //             remarks           : 1,
+    //             order_status      : 1,
+    //             invoice_number    : 1,
+    //             created_at        : 1,
+    //             supplier          : { $arrayElemAt : ["$supplier", 0] }
+    //           }
+    //         },
+    //         {
+    //           $unwind : "$items" 
+    //         },
+    //         {
+    //           $lookup: {
+    //             from         : "medicines",
+    //             localField   : "items.product_id",
+    //             foreignField : "medicine_id",
+    //             as           : "medicine"
+    //           }
+    //         },
+    //         {
+    //           $addFields: {
+    //             "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+    //             "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+    //           }
+    //         },
+    //         {
+    //           $group: {
+    //             _id               : "$_id",
+    //             order_id          : { $first: "$order_id" },
+    //             buyer_id          : { $first: "$buyer_id" },
+    //             buyer_company     : { $first: "$buyer_company" },
+    //             supplier_id       : { $first: "$supplier_id" },
+    //             items             : { $push: "$items" },
+    //             payment_terms     : { $first: "$payment_terms" },
+    //             est_delivery_time : { $first: "$est_delivery_time" },
+    //             shipping_details  : { $first: "$shipping_details" },
+    //             remarks           : { $first: "$remarks" },
+    //             order_status      : { $first: "$order_status" },
+    //             invoice_number    : { $first: "$invoice_number" },
+    //             created_at        : { $first: "$created_at" },
+    //             supplier          : { $first: "$supplier" },
+    //             totalPrice        : { $sum: "$items.item_price" }
+    //           }
+    //         },
+    //         {
+    //             $project: {
+    //                 order_id          : 1,
+    //                 buyer_id          : 1,
+    //                 buyer_company     : 1,
+    //                 supplier_id       : 1,
+    //                 items             : 1,
+    //                 payment_terms     : 1,
+    //                 est_delivery_time : 1,
+    //                 shipping_details  : 1,
+    //                 remarks           : 1,
+    //                 order_status      : 1,
+    //                 invoice_number    : 1,
+    //                 created_at        : 1,
+    //                 totalPrice        : 1,
+    //                 "supplier.supplier_image" : 1,
+    //                 "supplier.supplier_name"     : 1,
+    //                 "supplier.supplier_address"  : 1,
+    //             }
+    //         },
+    //         { $sort : { created_at: -1 } },
+    //         // { $skip  : offset },
+    //         // { $limit : pageSize },
+    //     ])
+    //     .then((data) => {
+    //         Order.countDocuments({order_status : filterKey, buyer_id: buyer_id})
+    //         .then(totalItems => {
+    //             const totalPages = Math.ceil(totalItems / pageSize);
+
+    //             const responseData = {
+    //                 data,
+    //                 totalPages,
+    //                 totalItems
+    //             }
+    //             callback({ code: 200, message: "List Fetched successfully", result: responseData });
+    //         })
+    //     })
+    //     .catch((err) => {
+    //         console.log(err);
+    //         callback({ code: 400, message: "Error in fetching order list", result: err });
+    //     })
+    //   } catch (error) {
+    //     callback({ code: 500, message: "Internal Server Error", result: error });
+    //   }
+    // },
+
+   
+    
+
+    //----------------------------- order -------------------------------------//
 
 }
