@@ -204,62 +204,6 @@ module.exports = {
       }
     },
 
-    // supplierList : async(reqObj, callback) => {
-    //   try {
-    //     const { searchKey, filterCountry, pageNo, pageSize } = reqObj
-
-    //     const page_no   = pageNo || 1
-    //     const page_size = pageSize || 1
-    //     const offset    = (page_no - 1) * page_size 
-
-    //     if(searchKey === '' && filterCountry === '') {
-    //       Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-    //       .then((data) => {
-    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-    //     }).catch((error) => {
-    //         console.error('Error:', error);
-    //         callback({code: 400, message : 'Error in fetching users list'})
-    //     });
-    //     } else if(searchKey !== '' && filterCountry === '' ) {
-    //       Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-    //       .then((data) => {
-    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-    //     }).catch((error) => {
-    //         console.error('Error:', error);
-    //         callback({code: 400, message : 'Error in fetching users list'})
-    //     });
-    //     } else if(filterCountry !== '' && searchKey === '') {
-    //       Supplier.find({country_of_origin: filterCountry, account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-    //       .then((data) => {
-    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-    //     }).catch((error) => {
-    //         console.error('Error:', error);
-    //         callback({code: 400, message : 'Error in fetching users list'})
-    //     });
-
-    //     } else if((searchKey !== '' && searchKey !== undefined) && (filterCountry !== '' && filterCountry !== undefined)) {
-    //       Supplier.find({ supplier_name: { $regex: new RegExp(searchKey, 'i') }, country_of_origin: filterCountry , account_status : 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-    //       .then((data) => {
-    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-    //     }).catch((error) => {
-    //         console.error('Error:', error);
-    //         callback({code: 400, message : 'Error in fetching users list'})
-    //     });
-    //     } else {
-    //       Supplier.find({account_status: 1}).select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time') 
-    //       .then((data) => {
-    //         callback({code: 200, message : 'Supplier list fetched successfully', result:data})
-    //     }).catch((error) => {
-    //         console.error('Error:', error);
-    //         callback({code: 400, message : 'Error in fetching users list'})
-    //     });
-    //     }
-    //   }catch (error) {
-    //     console.log('Internal Server Error', error)
-    //     callback({code: 500, message : 'Internal server error'})
-    //   }
-    // },
-
     supplierList: async (reqObj, callback) => {
       try {
         const { searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = reqObj;

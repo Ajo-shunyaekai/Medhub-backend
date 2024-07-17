@@ -6,7 +6,7 @@ const Controller                                 = require('../controller/Medici
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
-const {checkAuthorization, checkAuthentication, checkSupplierAuthentication, checkSellerAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkAuthentication, checkSupplierAuthentication, commonAuthentication}  = require('../middleware/Authorization');
 
 
 const storage = multer.diskStorage({
@@ -86,7 +86,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/medicine-list', checkAuthorization, (req, res) => {
+    routes.post('/medicine-list', checkAuthorization, commonAuthentication, (req, res) => {
         Controller.allMedicineList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);

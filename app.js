@@ -54,9 +54,18 @@ app.get('/*', function (req, res) {
 // });
 
 const corsOptions = {
-    origins     : [ 'http://192.168.1.31:2221/', 'http://localhost:2221/', 'http://localhost:3030/', '192.168.1.59:3000/','http://localhost:3000/','http://localhost:3001/', 'https://deliver.shunyaekai.com','http://192.168.1.59:3000/'], 
-    methods     : 'GET, POST', // HTTP methods to allow
-    credentials : true, // Allow sending cookies and HTTP authentication information
+  origin: [
+    'http://192.168.1.31:2221',
+    'http://localhost:2221',
+    'http://localhost:3030',
+    'http://192.168.1.59:3000',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'https://deliver.shunyaekai.com'
+  ],
+  methods: 'GET, POST',
+  credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -99,19 +108,6 @@ app.use('/api/supplier/order', orderRouter);
 //-----------------order--------------------------//
 
 //--------------- api routes ------------------//
-
-// function generatePassword() {
-//   var length = 12,
-//       charset = 
-// "@#$&*0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$&*0123456789abcdefghijklmnopqrstuvwxyz",
-//       password = "";
-//   for (var i = 0, n = charset.length; i < length; ++i) {
-//       password += charset.charAt(Math.floor(Math.random() * n));
-//   }
-//   return password;
-// }
-
-// const password = generatePassword()
 
 const PORT = process.env.PORT || 3333;
 
