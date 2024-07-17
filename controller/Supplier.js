@@ -435,7 +435,7 @@ module.exports = {
           dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
           country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
 
-  if (product_type === 'new') {
+    if (product_type === 'new') {
       const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
 
       if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
@@ -547,8 +547,6 @@ module.exports = {
         callback({ code: 500, message: 'Internal Server Error', error: error});
      }
     },
-
-   
 
     //----------------------------- support -------------------------------------//
     

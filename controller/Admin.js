@@ -80,7 +80,7 @@ module.exports = {
             email     : admin.email,
             token     : admin.token
           }
-          
+
           if (isMatch) {
               callback({code: 200, message: 'Admin Login Successfull', result: adminDetails})
           } else {
@@ -1735,10 +1735,10 @@ module.exports = {
     //----------------------------- support -------------------------------------//
 
 
+
     //----------------------------- dashboard details -------------------------------------//
     adminDashboardDataList: async (reqObj, callback) => {
       try {
-        const { buyer_id } = reqObj;
     
         const orderDataList = Order.aggregate([
           {
@@ -1895,61 +1895,56 @@ module.exports = {
           }
         ]);
 
-        const countryOrders = Order.aggregate([
+        const supplierCountry = Supplier.aggregate([
           {
-            $addFields: {
-              numeric_total_price: {
-                $toDouble: {
-                  $arrayElemAt: [
-                    { $split: ["$total_price", " "] },
-                    0
-                  ]
-                }
-              },
-              combined_countries: [
-                "$supplier.country_of_origin",
-                "$buyer.country.country_of_origin"
-              ]
+            $group: {
+              _id: "$country_of_origin",
+              count: { $sum: 1 }
             }
           },
-          // {
-          //   $unwind: "$combined_countries"
-          // },
-          // {
-          //   $match: {
-          //     combined_countries: { $ne: null }
-          //   }
-          // },
-          // {
-          //   $group: {
-          //     _id: "$combined_countries",
-          //     total_purchase: { $sum: "$numeric_total_price" }
-          //   }
-          // },
-          // {
-          //   $project: {
-          //     _id: 0,
-          //     country: "$_id",
-          //     totalPrice: "$total_purchase"
-          //   }
-          // }
-        ]);
-        
-        // To format the result as { country: { totalPrice: value } }
-        countryOrders.then(results => {
-          const formattedResults = results.reduce((acc, { country, totalPrice }) => {
-            acc[country] = { totalPrice };
-            return acc;
-          }, {});
-        
-          console.log(formattedResults);
-        });
-        
-        const [orderData, buyerData, supplierData, countryOrderss] = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList, countryOrders]);
-    
+          {
+            $sort: { count: -1 }
+          },
+          {
+            $limit: 3
+          },
+          {
+            $project: {
+              _id: 0,
+              country: "$_id",
+              count: 1
+            }
+          }
+        ])
+
+        const buyerCountry = Buyer.aggregate([
+          {
+            $group: {
+              _id: "$country_of_origin",
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $sort: { count: -1 }
+          },
+          {
+            $limit: 3
+          },
+          {
+            $project: {
+              _id: 0,
+              country: "$_id",
+              count: 1
+            }
+          }
+        ])
+
+        const [orderData, buyerData, supplierData, supplierCountryData, buyerCountryData ] = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList, supplierCountry, buyerCountry]);
+
         const result = {
           ...orderData[0],
-          countryOrderss,
+          supplierCountryData,
+          buyerCountryData,
           buyerRegisReqCount       : (buyerData[0].regReqCount && buyerData[0].regReqCount[0]) ? buyerData[0].regReqCount[0] : { count: 0 },
           buyerAcceptedReqCount    : (buyerData[0].acceptedReqCount && buyerData[0].acceptedReqCount[0]) ? buyerData[0].acceptedReqCount[0] : { count: 0 },
           supplierRegisReqCount    : (supplierData[0].regReqCount && supplierData[0].regReqCount[0]) ? supplierData[0].regReqCount[0] : { count: 0 },
