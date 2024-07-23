@@ -69,7 +69,7 @@ module.exports = {
          const admin = await Admin.findOne({ email: email });
 
           if (!admin) {
-              callback({code: 404, message: 'Email not found', result: admin})
+              return callback({code: 404, message: 'Email not found', result: admin})
           }
 
           const isMatch = await bcrypt.compare(password, admin.password);

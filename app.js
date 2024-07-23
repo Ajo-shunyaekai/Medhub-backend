@@ -30,23 +30,8 @@ app.use(express.static(path.join(__dirname, 'build')));
 // app.use('/buyer', express.static(path.join(__dirname, 'buyerBuild')));
 // app.use('/supplier', express.static(path.join(__dirname, 'supplierBuild')));
 
-// Fallback for buyer route (SPA handling)
-// app.get('/buyer/*', function (req, res) {
-//   res.sendFile(path.join(__dirname, 'buyerBuild', 'index.html'));
-// });
-
-// // Fallback for supplier route (SPA handling)
-// app.get('/supplier/*', function (req, res) {
-//   res.sendFile(path.join(__dirname, 'supplierBuild', 'index.html'));
-// });
-
-// // Fallback for admin route (SPA handling)
-// app.get('/admin/*', function (req, res) {
-//   res.sendFile(path.join(__dirname, 'adminBuild', 'index.html'));
-// });
-
 app.get('/*', function (req, res) {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 // app.get('/admin/*', function (req, res) {
@@ -58,10 +43,12 @@ const corsOptions = {
     'http://192.168.1.31:2221',
     'http://localhost:2221',
     'http://localhost:3030',
-    'http://192.168.1.59:3000',
+    'http://192.168.1.34:3333',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
+    'https://supplierdeliver.shunyaekai.com',
+    'https://buyerdeliver.shunyaekai.com',
     'https://deliver.shunyaekai.com'
   ],
   methods: 'GET, POST',

@@ -65,7 +65,7 @@ module.exports = {
     
             newMedicine.save()
               .then((savedMedicine) => {
-                  callback({ code: 200, message: "Add Medicine Request Submitted Medicine Successfully", result: savedMedicine });
+                  callback({ code: 200, message: "Add medicine request submitted successfully", result: savedMedicine });
               })
               .catch((err) => {
                   console.log(err);
@@ -108,7 +108,7 @@ module.exports = {
     
             secondaryMarketMedicine.save()
               .then((savedMedicine) => {
-                callback({ code: 200, message: "Add Medicine Request Submitted Medicine Successfully", result: savedMedicine });
+                callback({ code: 200, message: "Add Medicine Request Submitted Successfully", result: savedMedicine });
               })
               .catch((err) => {
                   console.log(err);

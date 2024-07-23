@@ -99,6 +99,7 @@ module.exports = () => {
     });
 
     routes.post('/login', checkAuthorization, (req, res) => {
+        console.log(req);
         const errObj = validation(req.body, 'Login')
         if(Object.values(errObj).length){
             res.send( { code : 419, message : 'All fields are required', errObj });

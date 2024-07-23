@@ -68,12 +68,13 @@ module.exports = {
     },
 
     Login : async(reqObj, callback) => {
+     
         const password = reqObj.password
         const email    = reqObj.email
   
         try {
           const buyer = await Buyer.findOne({ buyer_email: email });
-  
+ 
           if (!buyer) {
               console.log('Not found');
               return callback({code: 404, message: "Buyer Not Found"});
@@ -295,6 +296,8 @@ module.exports = {
                 composition       : 1,
                 dossier_type      : 1,
                 dossier_status    : 1,
+                stocked_in        : 1,
+                medicine_type     : 1,
                 gmp_approvals     : 1,
                 shipping_time     : 1,
                 tags              : 1,
@@ -637,6 +640,7 @@ module.exports = {
             medicine_id: reqObj.medicine_id,
             quantity: reqObj.quantity,
             unit_price: reqObj.unit_price,
+            est_delivery_days : reqObj.est_delivery_time,
             quantity_required: reqObj.quantity_required,
             target_price: reqObj.target_price
           });
@@ -660,6 +664,7 @@ module.exports = {
               medicine_id: reqObj.medicine_id,
               quantity: reqObj.quantity,
               unit_price: reqObj.unit_price,
+              est_delivery_days : reqObj.est_delivery_time,
               quantity_required: reqObj.quantity_required,
               target_price: reqObj.target_price
             }]
@@ -705,20 +710,30 @@ module.exports = {
             }
           },
           {
-            $unwind : "$medicine_details"
+            $unwind: "$medicine_details"
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "medicine_details.supplier_id",
+              foreignField : "supplier_id",
+              as           : "supplier_details"
+            }
           },
           {
             $group: {
               _id: "$_id",
-              list_id      : { $first: "$list_id" },
-              buyer_id     : { $first: "$buyer_id" },
-              supplier_id  : { $first: "$supplier_id" },
+              list_id     : { $first : "$list_id" },
+              buyer_id    : { $first : "$buyer_id" },
+              supplier_id : { $first : "$supplier_id" },
+              supplier_details : { $first: { $arrayElemAt: ["$supplier_details", 0] } }, 
               item_details : {
                 $push: {
                   _id               : "$item_details._id",
                   medicine_id       : "$item_details.medicine_id",
                   quantity          : "$item_details.quantity",
                   unit_price        : "$item_details.unit_price",
+                  est_delivery_days : "$item_details.est_delivery_days",
                   quantity_required : "$item_details.quantity_required",
                   target_price      : "$item_details.target_price",
                   medicine_image    : "$medicine_details.medicine_image",
@@ -733,14 +748,17 @@ module.exports = {
               list_id      : 1,
               buyer_id     : 1,
               supplier_id  : 1,
-              item_details : 1
+              item_details : 1,
+              "supplier_details.supplier_name"  : 1,
+              "supplier_details.supplier_image" : 1,
             }
           },
           { $skip  : offset },
           { $limit : page_size }
-         
         ])
+        
         .then( async(data) => {
+          console.log('DATA',data);
           const totalItems = await List.countDocuments({buyer_id: buyer_id});
           const totalPages = Math.ceil(totalItems / page_size);
 
@@ -760,42 +778,81 @@ module.exports = {
       }
     },
 
-    deleteListItem : async (reqObj, callback) => {
-      try {
-         const {buyer_id, medicine_id, supplier_id, item_id } = reqObj
-         const itemIds = item_id.map(id => id.trim()).filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id));
+    // deleteListItem : async (reqObj, callback) => {
+    //   try {
+    //      const {buyer_id, medicine_id, supplier_id, item_id, list_id } = reqObj
+    //      const itemIds = item_id.map(id => id.trim()).filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id));
 
-          if (itemIds.length === 0) {
-            return callback({ code: 400, message: "No valid item IDs provided", result: null });
-          }
+    //       if (itemIds.length === 0) {
+    //         return callback({ code: 400, message: "No valid item IDs provided", result: null });
+    //       }
 
-          const updateQuery = {
-            $pull: { item_details: { _id: { $in: itemIds } } }
-          };
+    //       const updateQuery = {
+    //         $pull: { item_details: { _id: { $in: itemIds } } }
+    //       };
 
-          console.log('Update Query:', JSON.stringify(updateQuery, null, 2));
+    //       console.log('Update Query:', JSON.stringify(updateQuery, null, 2));
 
-          const updateResult = await List.updateMany({ buyer_id: buyer_id },updateQuery
+    //       const updateResult = await List.updateMany({ buyer_id: buyer_id },updateQuery
           
-          );
+    //       );
       
-          if (updateResult.modifiedCount === 0) {
-            return callback({ code: 400, message: "No items were updated", result: updateResult });
+    //       if (updateResult.modifiedCount === 0) {
+    //         return callback({ code: 400, message: "No items were updated", result: updateResult });
+    //       }
+
+    //       const document = await List.find({buyer_id: buyer_id, supplier_id: supplier_id})
+
+    //       if(document && document[0].item_details.length === 0) {
+    //         await List.deleteOne({buyer_id, supplier_id})
+    //       }
+
+    //       callback({ code: 200, message: "updated", result: updateResult });
+    //   } catch (error) {
+    //     console.log('Internal server error', error);
+    //     callback({ code: 500, message: "Internal server error", result: error });
+    //   }
+    // },
+
+    deleteListItem: async (reqObj, callback) => {
+      try {
+        const { buyer_id, medicine_id, supplier_id, item_id, list_id } = reqObj;
+        const itemIds = item_id.map(id => id.trim()).filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id));
+    
+        if (itemIds.length === 0) {
+          return callback({ code: 400, message: "No valid item IDs provided", result: null });
+        }
+    
+        // Update query to pull items from item_details
+        const updateQuery = {
+          $pull: { item_details: { _id: { $in: itemIds } } }
+        };
+    
+        console.log('Update Query:', JSON.stringify(updateQuery, null, 2));
+    
+        // Update the document
+        const updateResult = await List.updateMany({ buyer_id: buyer_id }, updateQuery);
+    
+        if (updateResult.modifiedCount === 0) {
+          return callback({ code: 400, message: "No items were updated", result: updateResult });
+        }
+    
+        // Find documents to check if they have empty item_details
+        const updatedDocuments = await List.find({ buyer_id: buyer_id });
+    
+        // Delete documents with empty item_details
+        for (const doc of updatedDocuments) {
+          if (doc.item_details.length === 0) {
+            await List.deleteOne({ _id: doc._id });
           }
-
-          // const document = await List.find({buyer_id: buyer_id, supplier_id: supplier_id})
-
-          // if(document && document[0].item_details.length === 0) {
-          //   await List.deleteOne({buyer_id, supplier_id})
-          // }
-
-          callback({ code: 200, message: "updated", result: updateResult });
+        }
+    
+        callback({ code: 200, message: "Updated and cleaned up", result: updateResult });
       } catch (error) {
         console.log('Internal server error', error);
         callback({ code: 500, message: "Internal server error", result: error });
       }
     },
-
     
 }
 
