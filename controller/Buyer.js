@@ -10,6 +10,7 @@ const{ Medicine}           = require('../schema/medicineSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
 const List               = require('../schema/addToListSchema');
+const Enquiry            = require('../schema/enquiryListSchema')
 
 
 module.exports = {
@@ -624,10 +625,9 @@ module.exports = {
         
       }
     },
-
     //----------------------------- support --------------------------------------//
 
-
+    
     addToList : async (reqObj, callback) => {
       try {
         const existingList = await List.findOne({
@@ -749,6 +749,7 @@ module.exports = {
               buyer_id     : 1,
               supplier_id  : 1,
               item_details : 1,
+              "supplier_details.supplier_id"    : 1,
               "supplier_details.supplier_name"  : 1,
               "supplier_details.supplier_image" : 1,
             }
@@ -778,42 +779,6 @@ module.exports = {
       }
     },
 
-    // deleteListItem : async (reqObj, callback) => {
-    //   try {
-    //      const {buyer_id, medicine_id, supplier_id, item_id, list_id } = reqObj
-    //      const itemIds = item_id.map(id => id.trim()).filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id));
-
-    //       if (itemIds.length === 0) {
-    //         return callback({ code: 400, message: "No valid item IDs provided", result: null });
-    //       }
-
-    //       const updateQuery = {
-    //         $pull: { item_details: { _id: { $in: itemIds } } }
-    //       };
-
-    //       console.log('Update Query:', JSON.stringify(updateQuery, null, 2));
-
-    //       const updateResult = await List.updateMany({ buyer_id: buyer_id },updateQuery
-          
-    //       );
-      
-    //       if (updateResult.modifiedCount === 0) {
-    //         return callback({ code: 400, message: "No items were updated", result: updateResult });
-    //       }
-
-    //       const document = await List.find({buyer_id: buyer_id, supplier_id: supplier_id})
-
-    //       if(document && document[0].item_details.length === 0) {
-    //         await List.deleteOne({buyer_id, supplier_id})
-    //       }
-
-    //       callback({ code: 200, message: "updated", result: updateResult });
-    //   } catch (error) {
-    //     console.log('Internal server error', error);
-    //     callback({ code: 500, message: "Internal server error", result: error });
-    //   }
-    // },
-
     deleteListItem: async (reqObj, callback) => {
       try {
         const { buyer_id, medicine_id, supplier_id, item_id, list_id } = reqObj;
@@ -823,31 +788,104 @@ module.exports = {
           return callback({ code: 400, message: "No valid item IDs provided", result: null });
         }
     
-        // Update query to pull items from item_details
         const updateQuery = {
           $pull: { item_details: { _id: { $in: itemIds } } }
         };
-    
-        console.log('Update Query:', JSON.stringify(updateQuery, null, 2));
-    
-        // Update the document
+
         const updateResult = await List.updateMany({ buyer_id: buyer_id }, updateQuery);
     
         if (updateResult.modifiedCount === 0) {
           return callback({ code: 400, message: "No items were updated", result: updateResult });
         }
-    
-        // Find documents to check if they have empty item_details
+
         const updatedDocuments = await List.find({ buyer_id: buyer_id });
     
-        // Delete documents with empty item_details
         for (const doc of updatedDocuments) {
           if (doc.item_details.length === 0) {
             await List.deleteOne({ _id: doc._id });
           }
         }
     
-        callback({ code: 200, message: "Updated and cleaned up", result: updateResult });
+        callback({ code: 200, message: "Deleted Successfully", result: updateResult });
+      } catch (error) {
+        console.log('Internal server error', error);
+        callback({ code: 500, message: "Internal server error", result: error });
+      }
+    },
+
+    sendEnquiry: async (reqObj, callback) => {
+      try {
+        const { buyer_id, items } = reqObj;
+        if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
+            throw new Error('Invalid request object');
+        }
+
+        const groupedItems = items.reduce((acc, item) => {
+            const { supplier_id, list_id, item_details } = item;
+            if (!supplier_id || !item_details || !Array.isArray(item_details) || item_details.length === 0) {
+                throw new Error('Missing required item details');
+            }
+
+            item_details.forEach(detail => {
+                const { medicine_id, unit_price, quantity_required, est_delivery_days, target_price, item_id } = detail;
+                if (!medicine_id || !unit_price || !quantity_required || !est_delivery_days || !target_price) {
+                    throw new Error('Missing required item fields');
+                }
+                if (!acc[supplier_id]) {
+                    acc[supplier_id] = [];
+                }
+                acc[supplier_id].push({
+                    item_id,
+                    medicine_id,
+                    unit_price,
+                    quantity_required,
+                    est_delivery_days,
+                    target_price,
+                    counter_price: detail.counter_price || undefined,
+                    status: detail.status || 'pending'
+                });
+            });
+            return acc;
+        }, {});
+
+        const enquiries = Object.keys(groupedItems).map(supplier_id => ({
+            enquiry_id: 'ENQ-' + Math.random().toString(16).slice(2),
+            buyer_id,
+            supplier_id,
+            items: groupedItems[supplier_id]
+        }));
+
+        // enquiries.forEach(enquiry => {
+        //     console.log('Enquiry:', enquiry);
+        //     enquiry.items.forEach(item => {
+        //         console.log('Item:', item);
+        //     });
+        // });
+
+        const enquiryDocs = await Enquiry.insertMany(enquiries);
+
+        await Promise.all(items.map(async item => {
+            const { list_id, item_details } = item;
+
+            for (const detail of item_details) {
+                const { item_id } = detail;
+                
+                const objectId = ObjectId.isValid(item_id) ? new ObjectId(item_id) : null;
+
+                await List.updateOne(
+                    { list_id },
+                    { $pull: { item_details: { _id: objectId } } }
+                );
+
+                const updatedList = await List.findOne({ list_id });
+                if (updatedList && updatedList.item_details.length === 0) {
+                    await List.deleteOne({ list_id });
+                }
+            }
+        }));
+
+        callback({ code: 200, message: "Enquiries sent successfully", result: enquiryDocs });
+
       } catch (error) {
         console.log('Internal server error', error);
         callback({ code: 500, message: "Internal server error", result: error });
@@ -856,19 +894,3 @@ module.exports = {
     
 }
 
-
-//----code to remove the items ------//
-     // List.updateOne({ buyer_id: buyer_id },updateQuery)
-          // .then((data) => {
-          //   callback({ code: 200, message: "updated", result: data });
-          // })
-          // .catch((err) => {
-          //   console.log('error in updating', err);
-          //   callback({ code: 400, message: "error in updating", result: err });
-          // });
-
-
-
-          // if (updateResult.modifiedCount === 0) {
-          //   return callback({ code: 400, message: "No items were updated", result: updateResult });
-          // }

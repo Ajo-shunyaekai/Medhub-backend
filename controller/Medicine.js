@@ -791,7 +791,6 @@ module.exports = {
     }
   },
 
-
   similarMedicineList: async (reqObj, callback) => {
     try {
       const {

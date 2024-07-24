@@ -2,6 +2,7 @@ require('dotenv').config();
 const bcrypt       = require('bcrypt');
 const jwt          = require('jsonwebtoken');
 const Supplier     = require('../schema/supplierSchema')
+const Buyer     = require('../schema/buyerSchema')
 const Order        = require('../schema/orderSchema')
 const SupplierEdit = require('../schema/supplierEditSchema')
 const Support      = require('../schema/supportSchema')
@@ -227,6 +228,31 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching supplier details'})
       });
       }catch (error) {
+        callback({code: 500, message : 'Internal server error'})
+      }
+    },
+
+    buyerDetails : async(reqObj, callback) => {
+      try {
+        // const fields = [
+        //   'supplier_id', 'supplier_name', 'supplier_image', 'supplier_email',
+        //   'supplier_country_code', 'supplier_mobile', 'supplier_address', 
+        //   'description', 'license_no', 'country_of_origin', 'contact_person_name', 
+        //   'contact_person_mobile_no', 'contact_person_country_code', 'contact_person_email', 
+        //   'designation', 'tags', 'payment_terms', 'estimated_delivery_time'
+        // ];
+
+        Buyer.findOne({buyer_id: reqObj.buyer_id})
+        // .select(fields.join(' ')) 
+        .select()
+        .then((data) => {
+          callback({code: 200, message : 'Buyer details fetched successfully', result:data})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message : 'Error in fetching Buyer details'})
+      });
+      }catch (error) {
+        console.log('Internal Server Error', error)
         callback({code: 500, message : 'Internal server error'})
       }
     },

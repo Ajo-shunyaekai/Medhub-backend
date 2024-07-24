@@ -7,7 +7,7 @@ const Controller                                 = require('../controller/Buyer'
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
-const {checkAuthorization, checkBuyerAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkBuyerAuthentication, commonAuthentication}  = require('../middleware/Authorization');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -99,7 +99,6 @@ module.exports = () => {
     });
 
     routes.post('/login', checkAuthorization, (req, res) => {
-        console.log(req);
         const errObj = validation(req.body, 'Login')
         if(Object.values(errObj).length){
             res.send( { code : 419, message : 'All fields are required', errObj });
@@ -197,7 +196,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/buyer-supplier-orders', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/buyer-supplier-orders', checkAuthorization, commonAuthentication, (req, res) => {
         
         Controller.buyerSupplierOrdersList(req.body, result => {
             const response = handleResponse(result);
@@ -252,6 +251,13 @@ module.exports = () => {
 
     routes.post('/delete-list-item', checkAuthorization, checkBuyerAuthentication, (req, res) => {
         Controller.deleteListItem(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/send-enquiry', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.sendEnquiry(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

@@ -7,7 +7,6 @@ const cookieParser    = require('cookie-parser');
 const bodyParser      = require('body-parser');
 const connect         = require('./utils/dbConnection')
 
-
 //-----------------   routes   -----------------------//
 const userRouter      = require('./routes/userRoutes')()
 const adminRouter     = require('./routes/adminRoutes')()
@@ -18,25 +17,19 @@ const sellerRouter    = require('./routes/sellerRoutes')()
 const supplierRouter  = require('./routes/supplierRoutes')()
 const guestRouter     = require('./routes/guestRoutes')()
 const orderRouter     = require('./routes/orderRoutes')()
+const enquiryRouter   = require('./routes/enquiryRoutes')()
 //-----------------   routes   -----------------------//
-
 
 //db-connection
 connect()
 
 app.use('/uploads', express.static('uploads'));
 app.use(express.static(path.join(__dirname, 'build')));
-// app.use(express.static(path.join(__dirname, 'adminBuild')));
-// app.use('/buyer', express.static(path.join(__dirname, 'buyerBuild')));
-// app.use('/supplier', express.static(path.join(__dirname, 'supplierBuild')));
 
 app.get('/*', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// app.get('/admin/*', function (req, res) {
-//    res.sendFile(path.join(__dirname, 'adminBuild', 'index.html'));
-// });
 
 const corsOptions = {
   origin: [
@@ -93,6 +86,12 @@ app.use('/api/order', orderRouter);
 app.use('/api/buyer/order', orderRouter);
 app.use('/api/supplier/order', orderRouter);
 //-----------------order--------------------------//
+
+//-----------------enquiry--------------------------//
+app.use('/api/enquiry', enquiryRouter);
+app.use('/api/buyer/enquiry', enquiryRouter);
+app.use('/api/supplier/enquiry', enquiryRouter);
+//-----------------enquiry--------------------------//
 
 //--------------- api routes ------------------//
 

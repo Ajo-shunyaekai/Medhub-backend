@@ -173,6 +173,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/buyer-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.buyerDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     routes.post('/change-password', checkAuthorization, checkSupplierAuthentication, (req, res) => {
         Controller.changePassword(req.body, result => {
             const response = handleResponse(result);
