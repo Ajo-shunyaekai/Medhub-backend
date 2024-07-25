@@ -316,13 +316,25 @@ module.exports = {
       
     submitQuotation : async(reqObj, callback) => {
         try {
-            const {enquiry_id, buyer_id, supplier_id} = reqObj
+            const {enquiry_id, buyer_id, supplier_id, quotation_details, payment_terms} = reqObj
 
-            Enquiry.findOneAndUpdate().then((data) => {
-
-            })
+            console.log(reqObj);
+            // Enquiry.findOneAndUpdate({enquiry_id: enquiry_id},
+            //   {
+            //     $set: {
+            //       quotation_items: quotation_details,
+            //       payment_terms: payment_terms
+            //     }
+            //   }
+            // ).then((data) => {
+            //   callback({ code: 200, message: 'Quotation successfully submitted', result: data });
+            // })
+            // .catch((err) => {
+            //   callback({ code: 400, message: 'Error while submitting quotation', result: err });
+            // })
         } catch (error) {
-            
+          console.log('error',error);
+          callback({ code: 500, message: 'Internal server error', result: error });
         }
     }
 }    

@@ -33,6 +33,37 @@ const enquiryItemSchema = new Schema({
     },
 });
 
+const enquiryQuotationchema = new Schema({
+    medicine_id: {
+        type: String,
+        required: true
+    },
+    unit_price: {
+        type: String,
+        required: true
+    },
+    quantity_required: {
+        type: String,
+        required: true
+    },
+    est_delivery_days: {
+        type: String,
+        required: true
+    },
+    target_price: {
+        type: String,
+        required: true
+    },
+    counter_price: {
+        type: String,
+    },
+    status: {
+        type: String,
+        enum: ['proceeded' ],
+        default: 'proceeded'
+    },
+});
+
 const enquirySchema = new Schema({
     enquiry_id: {
         type: String,
@@ -50,6 +81,7 @@ const enquirySchema = new Schema({
         required: true
     },
     items: [enquiryItemSchema],
+    quotation_items : [enquiryQuotationchema],
     payment_terms: {
         type: String,
     },

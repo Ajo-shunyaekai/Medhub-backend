@@ -466,6 +466,7 @@ module.exports = {
             medicine_id    : 1,
             supplier_id    : 1,
             medicine_name  : 1,
+            medicine_type  : 1,
             composition    : 1,
             dossier_type   : 1,
             dossier_status : 1,
@@ -499,6 +500,7 @@ module.exports = {
             medicine_id    : 1,
             supplier_id    : 1,
             medicine_name  : 1,
+            medicine_type  : 1,
             composition    : 1,
             dossier_type   : 1,
             dossier_status : 1,
@@ -539,6 +541,7 @@ module.exports = {
             medicine_id    : 1,
             supplier_id    : 1,
             medicine_name  : 1,
+            medicine_type  : 1,
             composition    : 1,
             dossier_type   : 1,
             dossier_status : 1,
@@ -574,6 +577,7 @@ module.exports = {
             medicine_id    : 1,
             supplier_id    : 1,
             medicine_name  : 1,
+            medicine_type  : 1,
             composition    : 1,
             dossier_type   : 1,
             dossier_status : 1,
@@ -806,7 +810,7 @@ module.exports = {
         medicine_type: medicine_type,
         medicine_name: medicine_name,
         status: status,
-        medicine_id: { $ne: medicine_id }
+        // medicine_id: { $ne: medicine_id }
       };
       
   

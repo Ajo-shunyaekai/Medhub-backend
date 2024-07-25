@@ -27,6 +27,14 @@ module.exports = () => {
             });
     });
 
+    routes.post('/submit-quotation', checkAuthorization, commonAuthentication, async(req, res) => {
+
+        Enquiry.submitQuotation(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+});
+
     return routes;
 }
 
