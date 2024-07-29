@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
-
 const enquiryItemSchema = new Schema({
     medicine_id: {
         type: String,
@@ -82,9 +81,10 @@ const enquirySchema = new Schema({
     },
     items: [enquiryItemSchema],
     quotation_items : [enquiryQuotationchema],
-    payment_terms: {
+    payment_terms: [{
         type: String,
-    },
+        required: true,
+    }],
     est_delivery_time: {
         type: String,
     },

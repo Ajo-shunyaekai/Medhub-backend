@@ -11,7 +11,7 @@ const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, check
 
 module.exports = () => {
     
-    routes.post('/enquiry-list', checkAuthorization, commonAuthentication, async(req, res) => {
+    routes.post('/enquiry-list', checkAuthorization, commonAuthentication,(req, res) => {
 
             Enquiry.getEnquiryList(req.body, result => {
                 const response = handleResponse(result);
@@ -33,8 +33,8 @@ module.exports = () => {
             const response = handleResponse(result);
             res.send(response);
         });
-});
+    });
 
-    return routes;
+    return routes
 }
 

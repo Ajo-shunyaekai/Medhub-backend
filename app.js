@@ -1,11 +1,11 @@
 require('dotenv').config();
-const express         = require('express');
-let app               = express();
-const path            = require('path');
-const cors            = require('cors');
-const cookieParser    = require('cookie-parser');
-const bodyParser      = require('body-parser');
-const connect         = require('./utils/dbConnection')
+const express        = require('express');
+let app              = express();
+const path           = require('path');
+const cors           = require('cors');
+const cookieParser   = require('cookie-parser');
+const bodyParser     = require('body-parser');
+const connect        = require('./utils/dbConnection')
 
 //-----------------   routes   -----------------------//
 const userRouter      = require('./routes/userRoutes')()
@@ -30,7 +30,6 @@ app.get('/*', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-
 const corsOptions = {
   origin: [
     'http://192.168.1.31:2221',
@@ -39,7 +38,7 @@ const corsOptions = {
     'http://192.168.1.34:3333',
     'http://localhost:3000',
     'http://localhost:3001',
-    'http://localhost:3002',
+    'http://localhost:3333',
     'https://supplierdeliver.shunyaekai.com',
     'https://buyerdeliver.shunyaekai.com',
     'https://deliver.shunyaekai.com'
@@ -58,7 +57,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 //------------------------------ api routes ------------------//
 app.use('/api/user', userRouter);
@@ -87,7 +85,7 @@ app.use('/api/buyer/order', orderRouter);
 app.use('/api/supplier/order', orderRouter);
 //-----------------order--------------------------//
 
-//-----------------enquiry--------------------------//
+//-----------------enquiry--------------------------// 
 app.use('/api/enquiry', enquiryRouter);
 app.use('/api/buyer/enquiry', enquiryRouter);
 app.use('/api/supplier/enquiry', enquiryRouter);
@@ -110,11 +108,12 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error   = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send('error');
+  // res.status(err.status || 500).json({ error: err.message });
 });
 
 module.exports = app;

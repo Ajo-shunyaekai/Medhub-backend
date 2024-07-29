@@ -263,6 +263,22 @@ module.exports = () => {
         });
     });
 
+    // routes.post('/enquiry-list', checkAuthorization, commonAuthentication, async(req, res) => {
+
+    //     Controller.getEnquiryList(req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    //  });
+
+    // routes.post('/enquiry-details', checkAuthorization, commonAuthentication, async(req, res) => {
+
+    //     Controller.getEnquiryDetails(req.body, result => {
+    //             const response = handleResponse(result);
+    //             res.send(response);
+    //         });
+    // });
+
     return routes;
 
 }

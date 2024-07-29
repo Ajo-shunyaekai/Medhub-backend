@@ -1,7 +1,8 @@
 const Enquiry              = require('../schema/enquiryListSchema')
 const Support            = require('../schema/supportSchema')
 const Invoice            = require('../schema/invoiceNumberSchema')
-
+const mongoose           = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = {
 
@@ -32,26 +33,6 @@ module.exports = {
         if (status) {
             matchCondition.enquiry_status = status;
         }
-
-            // Enquiry.find(query).skip(offset).limit(pageSize).sort({created_at : -1}).then((enquiries) => {
-            // Enquiry.countDocuments(query).then((totalItems) => {
-            //     const totalPages = Math.ceil(totalItems / pageSize)
-            //     const returnObj = {
-            //         enquiries,
-            //         totalPages,
-            //         totalItems
-            //     }
-            //     callback({code: 200, message: 'Enquiry list', result: returnObj})
-            // })
-            // .catch((err) => {
-            //     callback({code: 400, message: 'Error while fetching enquiry list count', result: err})
-            // })
-            
-            // })
-
-            // inventory : {
-            //     $arrayElemAt: ["$inventory", 0],
-            //   },
             Enquiry.aggregate([
                 {
                     $match: matchCondition
@@ -128,88 +109,6 @@ module.exports = {
         callback({code: 500, message: 'Internal Server Error'})
         }
     },
-
-    // getEnquiryDetails : async(reqObj, callback) => {
-    //     try {
-    //         const { enquiry_id } = reqObj
-
-            
-    //         Enquiry.aggregate([
-    //             {
-    //                 $match: {enquiry_id: enquiry_id}
-    //             },
-    //             {
-    //                 $lookup : {
-    //                     from         : "buyers",
-    //                     localField   : "buyer_id",
-    //                     foreignField : "buyer_id",
-    //                     as           : "buyer_details",
-    //                 }
-    //             },
-    //             {
-    //                 $lookup : {
-    //                     from         : "suppliers",
-    //                     localField   : "supplier_id",
-    //                     foreignField : "supplier_id",
-    //                     as           : "supplier_details",
-    //                 }
-    //             },
-    //             {
-    //                 $lookup : {
-    //                     from         : "medicines",
-    //                     localField   : "medicine_id",
-    //                     foreignField : "$items.medicine_id",
-    //                     as           : "medicine_details",
-    //                 }
-    //             },
-    //             {
-    //                 $project: {
-    //                     enquiry_id : 1,
-    //                     created_at : 1,
-    //                     items : 1,
-    //                     buyer : {
-    //                         $arrayElemAt : ["$buyer_details", 0]
-    //                     },
-    //                     supplier : {
-    //                         $arrayElemAt : ["$supplier_details", 0]
-    //                     },
-    //                     medicine : {
-    //                         $arrayElemAt : ["$medicine_details", 0]
-    //                     },
-    //                 }
-    //             },
-    //             {
-    //                 $project: {
-    //                     enquiry_id : 1,
-    //                     created_at : 1,
-    //                     items : 1,
-    //                     "buyer.buyer_id": 1,
-    //                     "buyer.buyer_name": 1,
-    //                     "buyer.buyer_type": 1,
-    //                     "buyer.buyer_mobile": 1,
-    //                     "buyer.country_of_origin": 1,
-    //                     "supplier.supplier_id": 1,
-    //                     "supplier.supplier_name": 1,
-    //                     "supplier.supplier_type": 1,
-    //                     "supplier.supplier_mobile": 1,
-    //                     "supplier.country_of_origin": 1,
-    //                     "medicine" :1
-    //                 }
-    //             },
-               
-    //         ])
-    //         .then((data) => {
-    //             callback({code: 200, message: 'Enquiry details', result: data[0]})
-    //         })
-    //         .catch((err) => {
-    //             callback({code: 400, message: 'Error while fetching enquiry details', result: err})
-    //         })
-    //     } catch (error) {
-    //         console.log(error);
-    //         callback({code: 500, message: 'Internal Server Error'})
-    //     }
-    // },
-
 
     getEnquiryDetails: async (reqObj, callback) => {
         try {
@@ -313,28 +212,42 @@ module.exports = {
           callback({ code: 500, message: 'Internal Server Error' });
         }
     },
-      
-    submitQuotation : async(reqObj, callback) => {
-        try {
-            const {enquiry_id, buyer_id, supplier_id, quotation_details, payment_terms} = reqObj
 
-            console.log(reqObj);
-            // Enquiry.findOneAndUpdate({enquiry_id: enquiry_id},
-            //   {
-            //     $set: {
-            //       quotation_items: quotation_details,
-            //       payment_terms: payment_terms
-            //     }
-            //   }
-            // ).then((data) => {
-            //   callback({ code: 200, message: 'Quotation successfully submitted', result: data });
-            // })
-            // .catch((err) => {
-            //   callback({ code: 400, message: 'Error while submitting quotation', result: err });
-            // })
-        } catch (error) {
-          console.log('error',error);
+    submitQuotation: async (reqObj, callback) => {
+      try {
+          const { enquiry_id, quotation_details, payment_terms } = reqObj;
+  
+          const updatedEnquiry = await Enquiry.findOneAndUpdate(
+              { enquiry_id: enquiry_id },
+              {
+                  $set: {
+                      quotation_items : quotation_details,
+                      payment_terms   : payment_terms
+                  }
+              },
+              { new: true } 
+          );
+  
+          if (!updatedEnquiry) {
+              return callback({ code: 404, message: 'Enquiry not found', result: null });
+          }
+  
+          
+          for (const detail of quotation_details) {
+              if (detail.accepted) {
+                  const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
+                  
+                  await Enquiry.updateOne(
+                      { enquiry_id: enquiry_id, 'items._id': itemId },
+                      { $set: { 'items.$.status': 'accepted' } }
+                  );
+              }
+          }
+  
+          callback({ code: 200, message: 'Quotation successfully submitted', result: updatedEnquiry });
+      } catch (error) {
+          console.log('error', error);
           callback({ code: 500, message: 'Internal server error', result: error });
-        }
+      }
     }
 }    
