@@ -122,185 +122,6 @@ module.exports = {
     // }
   },
 
-//   allMedicineList: async (reqObj, callback) => {
-//     try {
-//         const { searchKey, pageNo, pageSize, medicine_type, category_name, 
-//                 medicine_status, price_range, delivery_time, in_stock } = reqObj;
-
-//         const page_no   = pageNo || 1;
-//         const page_size = pageSize || 10;
-//         const offset    = (page_no - 1) * page_size;
-
-//         let matchCondition = {
-//             medicine_type: medicine_type,
-//         };
-
-//         if (medicine_status === 'accepted') {
-//             matchCondition.status = 1;
-//         } else if (medicine_status === 'rejected') {
-//             matchCondition.status = 2;
-//         } else {
-//             matchCondition.status = 0;
-//         }
-
-//         if (searchKey && category_name) {
-//             matchCondition.$and = [
-//                 {
-//                     $or: [
-//                         { medicine_name: { $regex: searchKey, $options: 'i' } },
-//                         { tags: { $elemMatch: { $regex: searchKey, $options: 'i' } } }
-//                     ]
-//                 },
-//                 { category_name: category_name }
-//             ];
-//         } else if (searchKey) {
-//             matchCondition.$or = [
-//                 { medicine_name: { $regex: searchKey, $options: 'i' } },
-//                 { tags: { $elemMatch: { $regex: searchKey, $options: 'i' } } }
-//             ];
-//         } else if (category_name) {
-//             matchCondition.medicine_category = category_name;
-//         }
-
-// // Apply price range filter
-// if (price_range && price_range.length > 0) {
-//   const ranges = price_range[0].split(',').map(range => range.trim());
-
-//   const priceConditions = ranges.map(range => {
-//       if (range.includes('greater than')) {
-//           const value = parseFloat(range.split('greater than')[1].trim());
-//           return { "inventory_info.unit_price": { $gt: value } };
-//       } else {
-//           const [min, max] = range.split('AED')[0].trim().split('-').map(num => parseFloat(num.trim()));
-//           return { 
-//               "inventory_info.unit_price": { $gte: min, $lte: max } 
-//           };
-//       }
-//   });
-
-//   matchCondition.$or = matchCondition.$or || [];
-//   matchCondition.$or.push(...priceConditions);
-// }
-
-// // Apply delivery time filter
-// if (delivery_time && delivery_time.length > 0) {
-//   const ranges = delivery_time[0].split(',').map(range => range.trim());
-
-//   const deliveryConditions = ranges.map(range => {
-//       if (range.includes('greater than')) {
-//           const value = parseInt(range.split('greater than')[1].trim());
-//           return { "inventory_info.est_delivery_days": { $gt: value } };
-//       } else {
-//           const [min, max] = range.split('-').map(num => parseInt(num.trim()));
-//           return { 
-//               "inventory_info.est_delivery_days": { $gte: min, $lte: max } 
-//           };
-//       }
-//   });
-
-//   matchCondition.$or = matchCondition.$or || [];
-//   matchCondition.$or.push(...deliveryConditions);
-// }
-
-// if (in_stock && in_stock.length > 0) {
-//   const stockedCountries = in_stock[0].split(',').map(country => country.trim());
-//   matchCondition.stocked_in = { $in: stockedCountries };
-// }
-
-// console.log('matchCondition', matchCondition);
-// console.log('matchCondition', JSON.stringify(matchCondition, null, 2));
-
-
-//         let pipeline = [
-//             {
-//                 $match: matchCondition,
-//             },
-//             {
-//                 $lookup: {
-//                     from         : "medicineinventories",
-//                     localField   : "medicine_id",
-//                     foreignField : "medicine_id",
-//                     as           : "inventory",
-//                 },
-//             },
-//             {
-//                 $project: {
-//                     medicine_id       : 1,
-//                     supplier_id       : 1,
-//                     medicine_name     : 1,
-//                     medicine_image    : 1,
-//                     drugs_name        : 1,
-//                     composition       : 1,
-//                     country_of_origin : 1,
-//                     dossier_type      : 1,
-//                     tags              : 1,
-//                     dossier_status    : 1,
-//                     gmp_approvals     : 1,
-//                     registered_in     : 1,
-//                     comments          : 1,
-//                     dosage_form       : 1,
-//                     category_name     : 1,
-//                     strength          : 1,
-//                     quantity          : 1,
-//                     medicine_type     : 1,
-//                     inventory         : { $arrayElemAt: ["$inventory", 0] },
-//                 },
-//             },
-//             {
-//                 $project: {
-//                     medicine_id       : 1,
-//                     supplier_id       : 1,
-//                     medicine_name     : 1,
-//                     medicine_image    : 1,
-//                     drugs_name        : 1,
-//                     composition       : 1,
-//                     country_of_origin : 1,
-//                     dossier_type      : 1,
-//                     tags              : 1,
-//                     dossier_status    : 1,
-//                     gmp_approvals     : 1,
-//                     registered_in     : 1,
-//                     comments          : 1,
-//                     dosage_form       : 1,
-//                     category_name     : 1,
-//                     strength          : 1,
-//                     quantity          : 1,
-//                     medicine_type     : 1,
-//                     "inventory.delivery_info" : 1,
-//                     "inventory.price"         : 1,
-//                 },
-//             },
-//             // { $skip  : offset },
-//             // { $limit : page_size },
-//         ];
-  
-
-//         Medicine.aggregate(pipeline)
-//             .then((data) => {
-//                 Medicine.countDocuments(matchCondition)
-//                     .then(totalItems => {
-//                         const totalPages = Math.ceil(totalItems / page_size);
-//                         const returnObj = {
-//                             data,
-//                             totalPages,
-//                             totalItems
-//                         };
-//                         callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
-//                     })
-//                     .catch((err) => {
-//                         callback({ code: 400, message: "Error while fetching medicine count", result: err });
-//                     });
-//             })
-//             .catch((err) => {
-//                 callback({ code: 400, message: "Error fetching medicine list", result: err });
-//             });
-//     } catch (error) {
-//         callback({ code: 500, message: "Internal Server Error", result: error });
-//     }
-
-   
-//   },
-
   allMedicineList: async (reqObj, callback) => {
     
     try {
@@ -615,9 +436,14 @@ module.exports = {
           },
         },
       ])
-        .then((data) => {
+        .then(async(data) => {
           if (data.length) {
-            callback({ code: 200, message: "Medicine details fetched successfully", result: data[0] });
+            const distinctCountries = await Medicine.distinct("country_available_in");
+            const responseData = {
+              data: data[0],
+              countryAvailable: distinctCountries
+            }
+            callback({ code: 200, message: "Medicine details fetched successfully", result: responseData });
           } else {
             callback({code: 400, message: "Medicine with requested id not found", result: data });
           }
@@ -813,7 +639,6 @@ module.exports = {
         // medicine_id: { $ne: medicine_id }
       };
       
-  
       if (in_stock && in_stock.length > 0) {
         const stockedCountries = in_stock[0].split(',').map(country => country.trim());
         matchCondition.stocked_in = { $in: stockedCountries };
@@ -954,11 +779,11 @@ module.exports = {
         { $limit: page_size }
       );
 
-      // console.log('pipeline', JSON.stringify(pipeline, null, 2));
+      console.log('pipeline', JSON.stringify(pipeline, null, 2));
   
       Medicine.aggregate(pipeline)
         .then((data) => {
-          // console.log('matchCondition', matchCondition);
+          console.log('matchCondition', matchCondition);
           Medicine.countDocuments({
             medicine_type: medicine_type,
             medicine_name: medicine_name,
@@ -988,7 +813,6 @@ module.exports = {
       callback({ code: 500, message: "Internal Server Error", result: error });
     }
   },
-  
   
   otherMedicineList: async (reqObj, callback) => {
     console.log('Fetching other medicine list...');

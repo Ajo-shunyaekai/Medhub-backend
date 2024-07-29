@@ -92,7 +92,6 @@ module.exports = {
             return res.status(500).send({ message: "Internal Server Error" });
         }
     },
-    
     //this is working fine
     checkBuyerAuthentication : async (req, res, next) => {
         const access_token  = req.headers.access_token;
@@ -169,7 +168,6 @@ module.exports = {
         
         try {
             if(buyer_id) {
-                console.log('buyer');
                 const buyer = await Buyer.findOne({token: access_token});
                 if (!buyer ) {
                     return res.status(400).send({ message: "Invalid Access Token" });
@@ -181,7 +179,6 @@ module.exports = {
                 next();
                 
             } else if(supplier_id) {
-                console.log('supplier');
                 const supplier = await Supplier.findOne({token: access_token});
 
                 if (!supplier ) {

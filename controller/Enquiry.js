@@ -33,6 +33,7 @@ module.exports = {
         if (status) {
             matchCondition.enquiry_status = status;
         }
+        
             Enquiry.aggregate([
                 {
                     $match: matchCondition
@@ -88,6 +89,9 @@ module.exports = {
                 },
                 {
                     $limit: page_size
+                },
+                {
+                  $sort: { created_at: -1 }
                 }
             ])
             .then(async(data) => {
@@ -156,6 +160,8 @@ module.exports = {
                 _id: "$_id",
                 enquiry_id: { $first: "$enquiry_id" },
                 created_at: { $first: "$created_at" },
+                quotation_items: {$first: "$quotation_items"},
+                payment_terms: {$first: "$payment_terms"},
                 items: { $push: { 
                     _id :  "$items._id",
                   item_id: "$items.item_id",
@@ -165,38 +171,46 @@ module.exports = {
                   est_delivery_days: "$items.est_delivery_days",
                   target_price: "$items.target_price",
                   counter_price: "$items.counter_price",
-                  status: "$items.status",
-                  medicine_details: "$medicine_details"
+                  status           : "$items.status",
+                  medicine_details : "$medicine_details"
                 }},
-                buyer_details: { $first: "$buyer_details" },
-                supplier_details: { $first: "$supplier_details" }
+                buyer_details    : { $first: "$buyer_details" },
+                supplier_details : { $first: "$supplier_details" }
               }
             },
             {
               $project: {
-                enquiry_id: 1,
-                created_at: 1,
-                items: 1,
-                buyer: { $arrayElemAt: ["$buyer_details", 0] },
-                supplier: { $arrayElemAt: ["$supplier_details", 0] }
+                enquiry_id      : 1,
+                created_at      : 1,
+                quotation_items : 1,
+                payment_terms   : 1,
+                items           : 1,
+                buyer    : { $arrayElemAt: ["$buyer_details", 0] },
+                supplier : { $arrayElemAt: ["$supplier_details", 0] }
               }
             },
             {
               $project: {
-                enquiry_id: 1,
-                created_at: 1,
-                items: 1,
-                "buyer.buyer_id": 1,
-                "buyer.buyer_name": 1,
-                "buyer.buyer_type": 1,
-                "buyer.buyer_mobile": 1,
-                "buyer.country_of_origin": 1,
-                "supplier.supplier_id": 1,
-                "supplier.supplier_name": 1,
-                "supplier.supplier_type": 1,
-                "supplier.supplier_mobile": 1,
-                "supplier.country_of_origin": 1,
-                "supplier.estimated_delivery_time": 1,
+                enquiry_id      : 1,
+                created_at      : 1,
+                quotation_items : 1,
+                payment_terms   : 1,
+                items           : 1,
+                "buyer.buyer_id"                   : 1,
+                "buyer.buyer_name"                 : 1,
+                "buyer.buyer_email"                : 1,
+                "buyer.contact_person_email"       : 1,
+                "buyer.buyer_type"                 : 1,
+                "buyer.buyer_mobile"               : 1,
+                "buyer.country_of_origin"          : 1,
+                "supplier.supplier_id"             : 1,
+                "supplier.supplier_name"           : 1,
+                "supplier.supplier_type"           : 1,
+                "supplier.supplier_mobile"         : 1,
+                "supplier.supplier_email"          : 1,
+                "supplier.contact_person_email"    : 1,
+                "supplier.country_of_origin"       : 1,
+                "supplier.estimated_delivery_time" : 1,
                 
               }
             }
@@ -231,8 +245,7 @@ module.exports = {
           if (!updatedEnquiry) {
               return callback({ code: 404, message: 'Enquiry not found', result: null });
           }
-  
-          
+
           for (const detail of quotation_details) {
               if (detail.accepted) {
                   const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
@@ -250,4 +263,6 @@ module.exports = {
           callback({ code: 500, message: 'Internal server error', result: error });
       }
     }
+
+    
 }    
