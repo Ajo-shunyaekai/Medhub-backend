@@ -107,7 +107,8 @@ module.exports = {
                  country_of_origin           : buyer.country_of_origin,
                  token                       : buyer.token
               }
-
+              const listCount = await List.countDocuments({buyer_id: buyer.buyer_id})
+              buyerData.list_count = listCount
               callback({code : 200, message: "Buyer Login Successfull", result: buyerData});
           } else {
               callback({code: 401, message: "Incorrect Password"});
@@ -244,13 +245,6 @@ module.exports = {
   
     supplierDetails : async(reqObj, callback) => {
       try {
-        // const fields = [
-        //   'supplier_id', 'supplier_name', 'supplier_image', 'supplier_email',
-        //   'supplier_country_code', 'supplier_mobile', 'supplier_address', 
-        //   'description', 'license_no', 'country_of_origin', 'contact_person_name', 
-        //   'contact_person_mobile_no', 'contact_person_country_code', 'contact_person_email', 
-        //   'designation', 'tags', 'payment_terms', 'estimated_delivery_time'
-        // ];
 
         Supplier.findOne({supplier_id: reqObj.supplier_id})
         // .select(fields.join(' ')) 
@@ -627,26 +621,28 @@ module.exports = {
     },
     //----------------------------- support --------------------------------------//
 
-    
     addToList : async (reqObj, callback) => {
       try {
         const existingList = await List.findOne({
-          buyer_id: reqObj.buyer_id,
-          supplier_id: reqObj.supplier_id,
+          buyer_id    : reqObj.buyer_id,
+          supplier_id : reqObj.supplier_id,
         });
     
         if (existingList) {
           existingList.item_details.push({
-            medicine_id: reqObj.medicine_id,
-            quantity: reqObj.quantity,
-            unit_price: reqObj.unit_price,
+            medicine_id       : reqObj.medicine_id,
+            quantity          : reqObj.quantity,
+            unit_price        : reqObj.unit_price,
             est_delivery_days : reqObj.est_delivery_time,
-            quantity_required: reqObj.quantity_required,
-            target_price: reqObj.target_price
+            quantity_required : reqObj.quantity_required,
+            target_price      : reqObj.target_price
           });
     
           existingList.save()
-            .then((data) => {
+            .then(async(data) => {
+              const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
+              // console.log("listCount",listCount)
+              // data.list_count = listCount
               callback({ code: 200, message: "Added to existing list successfully", result: data });
             })
             .catch((err) => {
@@ -657,21 +653,23 @@ module.exports = {
           const listId = 'LST-' + Math.random().toString(16).slice(2);
     
           const newList = new List({
-            list_id: listId,
-            buyer_id: reqObj.buyer_id,
-            supplier_id: reqObj.supplier_id,
+            list_id     : listId,
+            buyer_id    : reqObj.buyer_id,
+            supplier_id : reqObj.supplier_id,
             item_details: [{
-              medicine_id: reqObj.medicine_id,
-              quantity: reqObj.quantity,
-              unit_price: reqObj.unit_price,
+              medicine_id       : reqObj.medicine_id,
+              quantity          : reqObj.quantity,
+              unit_price        : reqObj.unit_price,
               est_delivery_days : reqObj.est_delivery_time,
-              quantity_required: reqObj.quantity_required,
-              target_price: reqObj.target_price
+              quantity_required : reqObj.quantity_required,
+              target_price      : reqObj.target_price
             }]
           });
     
           newList.save()
-            .then((data) => {
+            .then(async(data) => {
+              const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
+              data.list_count = listCount
               callback({ code: 200, message: "Added to new list successfully", result: data });
             })
             .catch((err) => {
@@ -760,7 +758,6 @@ module.exports = {
         ])
         
         .then( async(data) => {
-          console.log('DATA',data);
           const totalItems = await List.countDocuments({buyer_id: buyer_id});
           const totalPages = Math.ceil(totalItems / page_size);
 

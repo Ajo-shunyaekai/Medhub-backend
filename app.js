@@ -18,6 +18,7 @@ const supplierRouter  = require('./routes/supplierRoutes')()
 const guestRouter     = require('./routes/guestRoutes')()
 const orderRouter     = require('./routes/orderRoutes')()
 const enquiryRouter   = require('./routes/enquiryRoutes')()
+const purchaseRouter  = require('./routes/purchaseOrderRoutes')()
 //-----------------   routes   -----------------------//
 
 //db-connection
@@ -90,6 +91,12 @@ app.use('/api/enquiry', enquiryRouter);
 app.use('/api/buyer/enquiry', enquiryRouter);
 app.use('/api/supplier/enquiry', enquiryRouter);
 //-----------------enquiry--------------------------//
+
+//-----------------purchaseorder--------------------------// 
+app.use('/api/purchaseorder', purchaseRouter);
+app.use('/api/buyer/purchaseorder', purchaseRouter);
+app.use('/api/supplier/purchaseorder', purchaseRouter);
+//-----------------purchaseorder--------------------------//
 
 //--------------- api routes ------------------//
 
