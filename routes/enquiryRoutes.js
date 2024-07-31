@@ -35,6 +35,14 @@ module.exports = () => {
         });
     });
 
+    routes.post('/accept-reject-quotation', checkAuthorization, commonAuthentication, async(req, res) => {
+
+        Enquiry.acceptRejectQuotation(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     return routes
 }
 

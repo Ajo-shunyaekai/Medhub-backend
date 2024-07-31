@@ -8,8 +8,8 @@ module.exports = {
         try {
             console.log(reqObj);
         } catch (error) {
-            console.log(error);
-        callback({code: 500, message: 'Internal Server Error'})
+            console.log('Internal Server Error',error);
+            callback({code: 500, message: 'Internal Server Error'})
         }
     },
     
