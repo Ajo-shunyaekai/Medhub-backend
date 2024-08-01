@@ -37,42 +37,11 @@ const orderItemSchema = new Schema({
     // },
 });
 
-// const enquiryQuotationchema = new Schema({
-//     medicine_id: {
-//         type: String,
-//         required: true
-//     },
-//     unit_price: {
-//         type: String,
-//         required: true
-//     },
-//     quantity_required: {
-//         type: String,
-//         required: true
-//     },
-//     est_delivery_days: {
-//         type: String,
-//         required: true
-//     },
-//     target_price: {
-//         type: String,
-//         required: true
-//     },
-//     counter_price: {
-//         type: String,
-//     },
-//     status: {
-//         type: String,
-//         enum: ['proceeded' ],
-//         default: 'proceeded'
-//     },
-// });
-
 const purchaseOrderSchema = new Schema({
-    purchase_id: {
+    purchaseOrder_id: {
         type: String,
-        ref: 'Enquiry',
-        required: true
+        required: true,
+        unique: true
     },
     enquiry_id: {
         type: String,
@@ -89,12 +58,59 @@ const purchaseOrderSchema = new Schema({
         ref: 'Supplier',
         required: true
     },
-    items: [orderItemSchema],
+    po_number: {
+        type: String,
+        required: true
+    },
+    po_date: {
+        type: String,
+        required: true
+    },
+    buyer_name: {
+        type: String,
+        required: true
+    },
+    buyer_address: {
+        type: String,
+        required: true
+    },
+    buyer_mobile: {
+        type: String,
+        required: true
+    },
+    buyer_email: {
+        type: String,
+        required: true
+    },
+    buyer_regNo: {
+        type: String,
+        required: true
+    },
+    supplier_name: {
+        type: String,
+        required: true
+    },
+    supplier_address: {
+        type: String,
+        required: true
+    },
+    supplier_mobile: {
+        type: String,
+        required: true
+    },
+    supplier_email: {
+        type: String,
+        required: true
+    },
+    supplier_regNo: {
+        type: String,
+        required: true
+    },
+    order_items: [orderItemSchema],
     additional_instructions: {
         type: String,
-        
     },
-    ondragover_status: {
+    po_status: {
         type: String,
         enum: ['pending', 'active', 'completed', 'cancelled'],
         default: 'active'
@@ -107,28 +123,6 @@ const purchaseOrderSchema = new Schema({
         type: Date,
         default: Date.now
     },
-     // quotation_items : [enquiryQuotationchema],
-    // payment_terms: [{
-    //     type: String,
-    //     required: true,
-    // }],
-    // est_delivery_time: {
-    //     type: String,
-    // },
-    // shipping_details: {
-    //     type: {
-    //         consignor_name: {
-    //             type: String,
-    //         },
-    //         mobile_no: {
-    //             type: String,      
-    //         },
-    //         address: {
-    //             type: String,
-    //         }
-    //     },
-       
-    // },
 });
 
 module.exports = mongoose.model('PurchaseOrder', purchaseOrderSchema);

@@ -278,27 +278,27 @@ module.exports = {
                         quotation_items : 1,
                         payment_terms   : 1,
                         items           : 1,
-                        "buyer.buyer_id"                   : "$buyer_details.buyer_id",
-                        "buyer.buyer_name"                 : "$buyer_details.buyer_name",
-                        "buyer.buyer_address"              : "$buyer_details.buyer_address",
-                        "buyer.buyer_email"                : "$buyer_details.buyer_email",
-                        "buyer.contact_person_email"       : "$buyer_details.contact_person_email",
-                        "buyer.contact_person_mobile_no"   : "$buyer_details.contact_person_mobile_no",
-                        "buyer.contact_person_country_code": "$buyer_details.contact_person_country_code",
-                        "buyer.buyer_type"                 : "$buyer_details.buyer_type",
-                        "buyer.buyer_mobile"               : "$buyer_details.buyer_mobile",
-                        "buyer.country_of_origin"          : "$buyer_details.country_of_origin",
-                        "buyer.buyer_image"                : "$buyer_details.buyer_image",
-                        "supplier.supplier_id"             : "$supplier_details.supplier_id",
-                        "supplier.supplier_name"           : "$supplier_details.supplier_name",
-                        "supplier.supplier_type"           : "$supplier_details.supplier_type",
-                        "supplier.supplier_mobile"         : "$supplier_details.supplier_mobile",
-                        "supplier.supplier_email"          : "$supplier_details.supplier_email",
-                        "supplier.contact_person_email"    : "$supplier_details.contact_person_email",
-                        "supplier.country_of_origin"       : "$supplier_details.country_of_origin",
-                        "supplier.estimated_delivery_time" : "$supplier_details.estimated_delivery_time",
-                        "supplier.supplier_address"        : "$supplier_details.supplier_address",
-                        "supplier.supplier_image"          : "$supplier_details.supplier_image",
+                        "buyer.buyer_id"                      : "$buyer_details.buyer_id",
+                        "buyer.buyer_name"                    : "$buyer_details.buyer_name",
+                        "buyer.buyer_address"                 : "$buyer_details.buyer_address",
+                        "buyer.buyer_email"                   : "$buyer_details.buyer_email",
+                        "buyer.contact_person_email"          : "$buyer_details.contact_person_email",
+                        "buyer.contact_person_mobile"         : "$buyer_details.contact_person_mobile",
+                        "buyer.contact_person_country_code"   : "$buyer_details.contact_person_country_code",
+                        "buyer.buyer_type"                    : "$buyer_details.buyer_type",
+                        "buyer.buyer_mobile"                  : "$buyer_details.buyer_mobile",
+                        "buyer.country_of_origin"             : "$buyer_details.country_of_origin",
+                        "buyer.buyer_image"                   : "$buyer_details.buyer_image",
+                        "supplier.supplier_id"                : "$supplier_details.supplier_id",
+                        "supplier.supplier_name"              : "$supplier_details.supplier_name",
+                        "supplier.supplier_type"              : "$supplier_details.supplier_type",
+                        "supplier.supplier_mobile"            : "$supplier_details.supplier_mobile",
+                        "supplier.supplier_email"             : "$supplier_details.supplier_email",
+                        "supplier.contact_person_email"       : "$supplier_details.contact_person_email",
+                        "supplier.country_of_origin"          : "$supplier_details.country_of_origin",
+                        "supplier.estimated_delivery_time"    : "$supplier_details.estimated_delivery_time",
+                        "supplier.supplier_address"           : "$supplier_details.supplier_address",
+                        "supplier.supplier_image"             : "$supplier_details.supplier_image",
                         "supplier.contact_person_mobile_no"   : "$supplier_details.contact_person_mobile_no",
                         "supplier.contact_person_country_code": "$supplier_details.contact_person_country_code",
                     }
@@ -356,42 +356,31 @@ module.exports = {
 
     acceptRejectQuotation: async (reqObj, callback) => {
         try {
-            console.log("reqObj", reqObj)
-            // const { enquiry_id, quotation_details, payment_terms, item_id, buyer_id, supplier_id } = reqObj;
+            const { enquiry_id, item_id, buyer_id, new_status } = reqObj;
+
+            const itemId = ObjectId.isValid(item_id) ? new ObjectId(item_id) : null;
     
-            // const updatedEnquiry = await Enquiry.findOneAndUpdate(
-            //     { enquiry_id: enquiry_id },
-            //     {
-            //         $set: {
-            //             quotation_items : quotation_details,
-            //             payment_terms   : payment_terms
-            //         }
-            //     },
-            //     { new: true } 
-            // );
+            const updatedEnquiry = await Enquiry.findOneAndUpdate(
+                { enquiry_id: enquiry_id, buyer_id: buyer_id, 'quotation_items._id': itemId },
+                {
+                    $set: {
+                        'quotation_items.$.status': new_status,
+                    }
+                },
+                {
+                    new: true,
+                    // arrayFilters: [{ 'quotation_items._id': itemId }] 
+                }
+            );
+            if (!updatedEnquiry) {
+                return callback({ code: 404, message: 'Enquiry not found', result: null });
+            }
     
-            // if (!updatedEnquiry) {
-            //     return callback({ code: 404, message: 'Enquiry not found', result: null });
-            // }
-  
-            // for (const detail of quotation_details) {
-            //     if (detail.accepted) {
-            //         const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
-                    
-            //         await Enquiry.updateOne(
-            //             { enquiry_id: enquiry_id, 'items._id': itemId },
-            //             { $set: { 'items.$.status': 'accepted' } }
-            //         );
-            //     }
-            // }
-    
-            // callback({ code: 200, message: 'Quotation successfully submitted', result: updatedEnquiry });
+            callback({ code: 200, message: 'Quotation updated submitted', result: updatedEnquiry });
         } catch (error) {
             console.log('error', error);
             callback({ code: 500, message: 'Internal server error', result: error });
         }
     }
-    
-
     
 }    

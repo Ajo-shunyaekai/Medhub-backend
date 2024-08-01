@@ -58,8 +58,8 @@ const enquiryQuotationchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['proceeded' ],
-        default: 'proceeded'
+        enum: ['pending' ],
+        default: 'pending'
     },
 });
 

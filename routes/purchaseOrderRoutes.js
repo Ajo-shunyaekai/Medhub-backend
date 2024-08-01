@@ -11,15 +11,26 @@ const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, check
 
 module.exports = () => {
     
-    routes.post('/create-po', checkAuthorization, checkBuyerAuthentication,(req, res) => {
-
+    routes.post('/create-po', checkAuthorization, commonAuthentication,(req, res) => {
             Controller.createPO(req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
-    
+    routes.post('/get-po-list', checkAuthorization, commonAuthentication,(req, res) => {
+        Controller.getPOList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-po-details', checkAuthorization, commonAuthentication,(req, res) => {
+        Controller.getPODetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
 
     
 
