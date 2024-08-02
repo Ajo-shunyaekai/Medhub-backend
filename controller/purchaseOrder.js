@@ -7,7 +7,7 @@ module.exports = {
     createPO : async(reqObj, callback) => {
         try {
             console.log(reqObj);
-            const { buyer_id, enquiry_id, supplier_id,
+            const { buyer_id, enquiry_id, supplier_id, itemIds,
                     data: {
                         poDate,
                         poNumber,
@@ -25,6 +25,8 @@ module.exports = {
                         description
                     }
             } = reqObj;
+
+
     
             const formattedOrderItems = orderItems.map(item => ({
                 medicine_id       : item.medicine_id,
@@ -58,6 +60,7 @@ module.exports = {
             });
 
             await newPO.save();
+            // const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
             callback({ code: 200, message: 'Purchase Order created successfully', data: newPO });
         } catch (error) {
             console.log('Internal Server Error', error);
@@ -212,27 +215,57 @@ module.exports = {
             PurchaseOrder.aggregate([
                 {
                     $match: {
-                        purchaseOrder_id : purchaseOrder_id,
-                        buyer_id         : buyer_id,
-                        enquiry_id       : enquiry_id
+                        purchaseOrder_id: purchaseOrder_id,
+                        buyer_id: buyer_id,
+                        // enquiry_id: enquiry_id
                     }
                 },
                 {
                     $lookup: {
-                        from         : "buyers",
-                        localField   : "buyer_id",
-                        foreignField : "buyer_id",
-                        as           : "buyer_details",
+                        from: "buyers",
+                        localField: "buyer_id",
+                        foreignField: "buyer_id",
+                        as: "buyer_details"
                     }
                 },
                 {
                     $lookup: {
-                        from         : "suppliers",
-                        localField   : "supplier_id",
-                        foreignField : "supplier_id",
-                        as           : "supplier_details",
+                        from: "suppliers",
+                        localField: "supplier_id",
+                        foreignField: "supplier_id",
+                        as: "supplier_details"
                     }
                 },
+                {
+                    $unwind: "$order_items"
+                },
+                {
+                    $lookup: {
+                        from: "medicines",
+                        localField: "order_items.medicine_id",
+                        foreignField: "medicine_id",
+                        as: "medicine_details"
+                    }
+                },
+                {
+                    $unwind: "$medicine_details"
+                },
+                {
+                    $addFields: {
+                        "order_items.medicine_details": "$medicine_details"
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        purchaseOrder_id: { $first: "$purchaseOrder_id" },
+                        buyer_id: { $first: "$buyer_id" },
+                        supplier_id: { $first: "$supplier_id" },
+                        order_items: { $push: "$order_items" },
+                        buyer_details: { $first: "$buyer_details" },
+                        supplier_details: { $first: "$supplier_details" },
+                    }
+                }
             ])
             .then((data) => {
                 callback({ code: 200, message: 'Purchase Order details' , result: data[0]});

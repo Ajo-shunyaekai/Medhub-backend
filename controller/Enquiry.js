@@ -376,7 +376,7 @@ module.exports = {
                 return callback({ code: 404, message: 'Enquiry not found', result: null });
             }
     
-            callback({ code: 200, message: 'Quotation updated submitted', result: updatedEnquiry });
+            callback({ code: 200, message: 'Quotation updated successfully', result: updatedEnquiry });
         } catch (error) {
             console.log('error', error);
             callback({ code: 500, message: 'Internal server error', result: error });

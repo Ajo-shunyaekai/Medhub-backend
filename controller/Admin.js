@@ -298,7 +298,8 @@ module.exports = {
             const totalPages = Math.ceil( totalItems / page_size )
             const returnObj = {
               data,
-              totalPages
+              totalPages,
+              totalItems
             }
             callback({code: 200, message : 'supplier registration request list fetched successfully', result: returnObj})
           })
@@ -504,10 +505,10 @@ module.exports = {
 
     getBuyerRegReqList: async(reqObj, callback) => {
       try {
-        const {pageNo, limit} = reqObj
+        const {pageNo, pageSize} = reqObj
 
         const page_no   = pageNo || 1
-        const page_size = limit || 2
+        const page_size = pageSize || 2
         const offSet    = (page_no - 1) * page_size
 
         const fields = {
@@ -521,7 +522,8 @@ module.exports = {
             const totalPages = Math.ceil(totalItems / page_size);
             const resultObj = {
               data,
-              totalPages
+              totalPages,
+              totalItems
             }
             callback({code: 200, message: 'Buyer Registration Request List fetched Successfully', result: resultObj})
           })
@@ -608,7 +610,7 @@ module.exports = {
       Order.aggregate([
           {
               $match: { 
-                  buyer_id     : reqObj.buyer_id,
+                  // buyer_id     : reqObj.buyer_id,
                   order_status : reqObj.filterKey
               }
           },
@@ -621,9 +623,18 @@ module.exports = {
             }
           },
           {
+            $lookup: {
+              from         : "buyers",
+              localField   : "buyer_id",
+              foreignField : "buyer_id",
+              as           : "buyer"
+            }
+          },
+          {
             $project: {
               order_id          : 1,
               buyer_id          : 1,
+              buyer_name        : 1,
               buyer_company     : 1,
               supplier_id       : 1,
               items             : 1,
@@ -633,7 +644,8 @@ module.exports = {
               remarks           : 1,
               order_status      : 1,
               created_at        : 1,
-              supplier          : { $arrayElemAt : ["$supplier", 0] }
+              supplier          : { $arrayElemAt : ["$supplier", 0] },
+              buyer             : { $arrayElemAt : ["$buyer", 0] }
             }
           },
           {
@@ -658,6 +670,7 @@ module.exports = {
               _id               : "$_id",
               order_id          : { $first: "$order_id" },
               buyer_id          : { $first: "$buyer_id" },
+              buyer_name        : { $first: "$buyer_name" },
               buyer_company     : { $first: "$buyer_company" },
               supplier_id       : { $first: "$supplier_id" },
               items             : { $push: "$items" },
@@ -668,6 +681,7 @@ module.exports = {
               order_status      : { $first: "$order_status" },
               created_at        : { $first: "$created_at" },
               supplier          : { $first: "$supplier" },
+              buyer             : { $first: "$buyer" },
               totalPrice        : { $sum: "$items.item_price" }
             }
           },
@@ -675,6 +689,7 @@ module.exports = {
               $project: {
                   order_id          : 1,
                   buyer_id          : 1,
+                  buyer_name        : 1,
                   buyer_company     : 1,
                   supplier_id       : 1,
                   items             : 1,
@@ -685,6 +700,8 @@ module.exports = {
                   order_status      : 1,
                   created_at        : 1,
                   totalPrice        : 1,
+                  "buyer.buyer_image"       : 1,
+                  "buyer.buyer_name"        : 1,
                   "supplier.supplier_image" : 1,
                   "supplier.supplier_name"  : 1,
               }
@@ -694,7 +711,7 @@ module.exports = {
           { $limit : pageSize },
       ])
       .then((data) => {
-          Order.countDocuments({order_status : filterKey, buyer_id: buyer_id})
+          Order.countDocuments({order_status : filterKey})
           .then(totalItems => {
               const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -1155,7 +1172,7 @@ module.exports = {
     },
     //------------------------ supplier/buyer ------------------------//
 
-    //------------------------ medicine ------------------------//
+   //------------------------ medicine ------------------------//
 
     acceptRejectAddMedicineReq : async(reqObj, callback) => {
       try {
@@ -1200,7 +1217,7 @@ module.exports = {
             {
               $match: {
                 // 'medicine_type': medicine_type,
-                'status'       : status
+                status       : status
               }
             },
             {
@@ -1645,8 +1662,7 @@ module.exports = {
         callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
-   //------------------------------ medicine -------------------------------//
-
+    //------------------------------ medicine -------------------------------//
 
 
     //----------------------------- support -------------------------------------//
