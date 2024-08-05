@@ -337,7 +337,6 @@ module.exports = {
           }
 
           for (const detail of quotation_details) {
-            console.log(detail)
               if (detail.accepted) {
                   const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
                   

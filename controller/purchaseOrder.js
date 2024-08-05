@@ -1,33 +1,106 @@
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
+const Enquiry       = require('../schema/enquiryListSchema')
 const mongoose      = require('mongoose');
 const ObjectId      = mongoose.Types.ObjectId;
 
 module.exports = {
 
-    createPO : async(reqObj, callback) => {
+    // createPO : async(reqObj, callback) => {
+    //     try {
+    //         console.log(reqObj);
+    //         const { buyer_id, enquiry_id, supplier_id, itemIds,
+    //                 data: {
+    //                     poDate,
+    //                     poNumber,
+    //                     supplierName,
+    //                     supplierAddress,
+    //                     supplierEmail,
+    //                     supplierMobile,
+    //                     supplierRegNo,
+    //                     buyerName,
+    //                     buyerAddress,
+    //                     buyerEmail,
+    //                     buyerMobile,
+    //                     buyerRegNo,
+    //                     orderItems,
+    //                     description
+    //                 }
+    //         } = reqObj;
+    
+    //         const formattedOrderItems = orderItems.map(item => ({
+    //             medicine_id       : item.medicine_id,
+    //             medicine_name     : item.medicine_details.medicine_name,
+    //             quantity_required : item.quantity_required,
+    //             unit_price        : item.unit_price,
+    //             total_amount      : item.counter_price || item.target_price,
+    //             status            : 'pending'
+    //         }));
+    
+    //         const newPO = new PurchaseOrder({
+    //             purchaseOrder_id : 'PO-' + Math.random().toString(16).slice(2), 
+    //             enquiry_id,
+    //             buyer_id,
+    //             supplier_id,
+    //             po_number               : poNumber,
+    //             po_date                 : poDate,
+    //             buyer_name              : buyerName,
+    //             buyer_address           : buyerAddress,
+    //             buyer_mobile            : buyerMobile,
+    //             buyer_email             : buyerEmail,
+    //             buyer_regNo             : buyerRegNo,
+    //             supplier_name           : supplierName,
+    //             supplier_address        : supplierAddress,
+    //             supplier_mobile         : supplierMobile,
+    //             supplier_email          : supplierEmail,
+    //             supplier_regNo          : supplierRegNo,
+    //             order_items             : formattedOrderItems,
+    //             additional_instructions : description,
+    //             po_status               : 'pending', 
+    //         });
+            
+           
+    //         const itemId = ObjectId.isValid(itemId) ? new ObjectId(itemId) : null;
+
+    //         // await newPO.save();
+    //         // callback({ code: 200, message: 'Purchase Order created successfully', data: newPO });
+    //     } catch (error) {
+    //         console.log('Internal Server Error', error);
+    //         callback({ code: 500, message: 'Internal Server Error' });
+    //     }
+    // },
+ 
+
+    createPO: async (reqObj, callback) => {
         try {
-            console.log(reqObj);
             const { buyer_id, enquiry_id, supplier_id, itemIds,
-                    data: {
-                        poDate,
-                        poNumber,
-                        supplierName,
-                        supplierAddress,
-                        supplierEmail,
-                        supplierMobile,
-                        supplierRegNo,
-                        buyerName,
-                        buyerAddress,
-                        buyerEmail,
-                        buyerMobile,
-                        buyerRegNo,
-                        orderItems,
-                        description
-                    }
+                data: {
+                    poDate,
+                    poNumber,
+                    supplierName,
+                    supplierAddress,
+                    supplierEmail,
+                    supplierMobile,
+                    supplierRegNo,
+                    buyerName,
+                    buyerAddress,
+                    buyerEmail,
+                    buyerMobile,
+                    buyerRegNo,
+                    orderItems,
+                    description
+                }
             } = reqObj;
 
-
+            const enquiry = await Enquiry.findOne({enquiry_id});
     
+            if (!enquiry) {
+                return callback({ code: 404, message: 'Enquiry not found' });
+            }
+            enquiry.quotation_items = enquiry.quotation_items.filter(detail => {
+                return !itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted');
+            });
+            await enquiry.save();
+
             const formattedOrderItems = orderItems.map(item => ({
                 medicine_id       : item.medicine_id,
                 medicine_name     : item.medicine_details.medicine_name,
@@ -36,9 +109,9 @@ module.exports = {
                 total_amount      : item.counter_price || item.target_price,
                 status            : 'pending'
             }));
-    
+
             const newPO = new PurchaseOrder({
-                purchaseOrder_id : 'PO-' + Math.random().toString(16).slice(2), 
+                purchaseOrder_id: 'PO-' + Math.random().toString(16).slice(2),
                 enquiry_id,
                 buyer_id,
                 supplier_id,
@@ -56,17 +129,17 @@ module.exports = {
                 supplier_regNo          : supplierRegNo,
                 order_items             : formattedOrderItems,
                 additional_instructions : description,
-                po_status               : 'pending', 
+                po_status               : 'pending',
             });
-
+    
             await newPO.save();
-            // const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
             callback({ code: 200, message: 'Purchase Order created successfully', data: newPO });
         } catch (error) {
             console.log('Internal Server Error', error);
             callback({ code: 500, message: 'Internal Server Error' });
         }
     },
+    
 
     getPOList : async(reqObj, callback) => {
         try {
@@ -278,5 +351,5 @@ module.exports = {
             callback({ code: 500, message: 'Internal Server Error', result: error });
         }
     },
-    
+
 }    

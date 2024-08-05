@@ -27,7 +27,7 @@ const enquiryItemSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending',  ,'accepted', 'cancelled', 'rejected' ],
+        enum: ['pending',  ,'accepted', 'cancelled', 'rejected','Quotation submitted' ],
         default: 'pending'
     },
 });
@@ -58,7 +58,7 @@ const enquiryQuotationchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending' ],
+        enum: ['pending', 'accepted', 'rejected' ],
         default: 'pending'
     },
 });
@@ -108,7 +108,7 @@ const enquirySchema = new Schema({
     },
     enquiry_status: {
         type: String,
-        enum: ['pending', 'active', 'completed', 'cancelled'],
+        enum: ['pending', 'active', 'completed', 'cancelled', 'Quotation submitted', 'rejected'],
         default: 'pending'
     },
     created_at: {
