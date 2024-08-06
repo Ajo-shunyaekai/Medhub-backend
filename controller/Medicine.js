@@ -53,6 +53,7 @@ module.exports = {
                 gmp_approvals,
                 shipping_time,
                 tags,
+                unit_tax,
                 country_of_origin,
                 registered_in,
                 stocked_in,
@@ -93,6 +94,7 @@ module.exports = {
                 gmp_approvals,
                 shipping_time,
                 tags,
+                unit_tax,
                 country_of_origin,
                 registered_in,
                 stocked_in,
@@ -243,6 +245,9 @@ module.exports = {
                     "inventory_info.est_delivery_days" : 1,
                     "inventory_info.total_price"       : 1,
                 }
+            },
+            {
+              $sort: { created_at: -1 }
             },
             { $skip  : offset },
             { $limit : page_size }
@@ -1011,6 +1016,9 @@ module.exports = {
             supplier             : '$_id.supplier',
             inventory_info       : 1, 
           }
+        },
+        {
+          $sort: { created_at: -1 }
         },
         { $skip  : offset },
         { $limit : page_size }

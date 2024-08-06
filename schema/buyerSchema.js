@@ -81,6 +81,10 @@ const buyerSchema = new Schema({
     type: String,
     required: true
   },
+  registration_no: {
+    type: String,
+    required: true
+  },
   description: {
     type: String,
     required: true

@@ -43,6 +43,14 @@ module.exports = () => {
         });
     });
 
+    routes.post('/cancel-enquiry', checkAuthorization, commonAuthentication,(req, res) => {
+
+        Enquiry.cancelEnquiry(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+});
+
     return routes
 }
 

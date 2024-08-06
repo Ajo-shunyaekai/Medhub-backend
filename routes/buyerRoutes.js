@@ -182,6 +182,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/my-supplier-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.mySupplierList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     routes.post('/supplier-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
         Controller.supplierDetails(req.body, result => {
             const response = handleResponse(result);

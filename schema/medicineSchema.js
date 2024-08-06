@@ -67,6 +67,10 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
+  unit_tax : {
+    type: String,
+    required: true
+  },
   country_of_origin: {
     type: String,
     required: true

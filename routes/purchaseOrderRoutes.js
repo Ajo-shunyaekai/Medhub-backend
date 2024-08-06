@@ -32,6 +32,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/edit-po', checkAuthorization, commonAuthentication,(req, res) => {
+        Controller.editPO(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+});
+
     
 
     return routes

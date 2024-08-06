@@ -100,6 +100,7 @@ module.exports = {
             objData.license_no                   = 'License no Field is required';
             objData.license_expiry_date          = 'License Expiry Date Field is required';
             objData.tax_no                       = 'Tax no Field is required';
+            objData.registration_no              = 'Registration no Field is required';
             objData.description                  = 'Description Field is required';
         }
 
@@ -118,6 +119,7 @@ module.exports = {
             objData.country_of_operation        = 'Country of operation Field is required';
             objData.license_no                  = 'License no Field is required';
             objData.tax_no                      = 'Tax no Field is required';
+            objData.registration_no             = 'Registration no Field is required';
             objData.description                 = 'Description Field is required';
         }
 
@@ -142,6 +144,7 @@ module.exports = {
             objData.license_no                  = 'License no Field is required';
             objData.license_expiry_date         = 'License Expiry Date Field is required';
             objData.tax_no                      = 'Tax no Field is required';
+            objData.registration_no             = 'Registration no Field is required';
             objData.country_of_origin           = 'Country of origin Field is required';
             objData.country_of_operation        = 'Country of operation Field is required';
             objData.contact_person_name         = 'Contact person name Field is required';
@@ -163,6 +166,7 @@ module.exports = {
             objData.description                 = 'Description Field is required';
             objData.license_no                  = 'License no Field is required';
             objData.tax_no                      = 'Tax no Field is required';
+            objData.registration_no             = 'Registration no Field is required';
             objData.country_of_origin           = 'Country of origin Field is required';
             objData.country_of_operation        = 'Country of operation Field is required';
             objData.contact_person_name         = 'Contact person name Field is required';

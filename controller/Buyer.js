@@ -46,6 +46,7 @@ module.exports = {
                 license_no                   : reqObj.license_no,
                 license_expiry_date          : reqObj.license_expiry_date,
                 tax_no                       : reqObj.tax_no,
+                registration_no              : reqobj.registration_no,
                 description                  : reqObj.description,
                 buyer_image                  : reqObj.buyer_image,
                 tax_image                    : reqObj.tax_image,
@@ -242,7 +243,50 @@ module.exports = {
         callback({ code: 400, message: 'Error in fetching supplier list' });
       }
     },
-  
+
+    mySupplierList: async (reqObj, callback) => {
+      try {
+        const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 2
+        const offset    = (page_no - 1) * page_size
+    
+        let query = { account_status: 1 };
+
+        if (!buyer_id) {
+          callback({ code: 400, message: 'buyer_id is required' });
+          return;
+        }
+    
+        // Step 1: Fetch all orders for the given buyer_id
+        const orders = await Order.find({ buyer_id }).toArray();
+    
+        // Step 2: Extract unique supplier_ids from the orders
+        const supplierIds = [...new Set(orders.map(order => order.supplier_id))];
+    
+        if (supplierIds.length === 0) {
+          callback({ code: 200, data: [], message: 'No suppliers found' });
+          return;
+        }
+    
+        // Step 3: Fetch supplier details for these supplier_ids
+        const suppliers = await Supplier.find({
+          supplier_id: { $in: supplierIds },
+          account_status: 1 // Assuming you want to filter by account_status as well
+        })
+        .skip(offset)
+        .limit(page_size)
+        // .toArray();
+    
+        callback({ code: 200, message: 'supplier list', data: suppliers });
+        
+       
+      } catch (error) {
+        console.error('Error:', error);
+        callback({ code: 400, message: 'Error in fetching supplier list' });
+      }
+    },
+
     supplierDetails : async(reqObj, callback) => {
       try {
 

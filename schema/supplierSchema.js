@@ -48,6 +48,10 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
     },
+    registration_no: {
+        type: String,
+        required: true,
+    },
     country_of_origin: {
         type: String,
         required: true,

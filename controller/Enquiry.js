@@ -85,14 +85,15 @@ module.exports = {
                     }
                 },
                 {
+                    $sort: { created_at: -1 }
+                },
+                {
                     $skip: offset
                 },
                 {
                     $limit: page_size
                 },
-                {
-                  $sort: { created_at: -1 }
-                }
+                
             ])
             .then(async(data) => {
                 const totalItems = await Enquiry.countDocuments(matchCondition);
@@ -289,6 +290,7 @@ module.exports = {
                         "buyer.buyer_mobile"                  : "$buyer_details.buyer_mobile",
                         "buyer.country_of_origin"             : "$buyer_details.country_of_origin",
                         "buyer.buyer_image"                   : "$buyer_details.buyer_image",
+                        "buyer.registration_no"               : "$buyer_details.registration_no",
                         "supplier.supplier_id"                : "$supplier_details.supplier_id",
                         "supplier.supplier_name"              : "$supplier_details.supplier_name",
                         "supplier.supplier_type"              : "$supplier_details.supplier_type",
@@ -299,6 +301,7 @@ module.exports = {
                         "supplier.estimated_delivery_time"    : "$supplier_details.estimated_delivery_time",
                         "supplier.supplier_address"           : "$supplier_details.supplier_address",
                         "supplier.supplier_image"             : "$supplier_details.supplier_image",
+                        "supplier.registration_no"            : "$supplier_details.registration_no",
                         "supplier.contact_person_mobile_no"   : "$supplier_details.contact_person_mobile_no",
                         "supplier.contact_person_country_code": "$supplier_details.contact_person_country_code",
                     }
@@ -379,6 +382,30 @@ module.exports = {
         } catch (error) {
             console.log('error', error);
             callback({ code: 500, message: 'Internal server error', result: error });
+        }
+    },
+
+    cancelEnquiry: async(reqObj, callback) => {
+        try {
+            const { supplier_id, buyer_id, status, enquiry_id} = reqObj
+
+            const updatedEnquiry = await Enquiry.findOneAndUpdate(
+                { enquiry_id : enquiry_id },
+                {
+                    $set: {
+                        enquiry_status  : 'cancelled'
+                    }
+                },
+                { new: true } 
+            );
+
+            if (!updatedEnquiry) {
+                return callback({ code: 404, message: 'Enquiry not found', result: null });
+            }
+            callback({ code: 200, message: 'Inquiry Cancelled successfully', result: updatedEnquiry });
+        } catch (error) {
+            console.log(error)
+            callback({ code: 500, message: 'Internal Server Error', result: error });
         }
     }
     
