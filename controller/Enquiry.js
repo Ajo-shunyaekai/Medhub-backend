@@ -16,11 +16,11 @@ module.exports = {
         
 
         if(!supplier_id) {
-            query.buyer_id = buyer_id,
-            query.enquiry_status = status 
+            query.buyer_id = buyer_id
+            // query.enquiry_status = status 
         } else if(!buyer_id) {
-            query.supplier_id = supplier_id,
-            query.enquiry_status = status 
+            query.supplier_id = supplier_id
+            // query.enquiry_status = status 
         }
 
         const matchCondition = {};
@@ -30,9 +30,9 @@ module.exports = {
             matchCondition.supplier_id = supplier_id;
         }
 
-        if (status) {
-            matchCondition.enquiry_status = status;
-        }
+        // if (status) {
+        //     matchCondition.enquiry_status = status;
+        // }
         
             Enquiry.aggregate([
                 {
@@ -340,14 +340,14 @@ module.exports = {
           }
 
           for (const detail of quotation_details) {
-              if (detail.accepted) {
+            //   if (detail.accepted) {
                   const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
                   
                   await Enquiry.updateOne(
                       { enquiry_id: enquiry_id, 'items._id': itemId },
                       { $set: { 'items.$.status': 'Quotation submitted' } }
                   );
-              }
+            //   }
           }
           callback({ code: 200, message: 'Quotation successfully submitted', result: updatedEnquiry });
       } catch (error) {
@@ -385,28 +385,32 @@ module.exports = {
         }
     },
 
-    cancelEnquiry: async(reqObj, callback) => {
+    cancelEnquiry: async (reqObj, callback) => {
         try {
-            const { supplier_id, buyer_id, status, enquiry_id} = reqObj
+            const { supplier_id, buyer_id, status, enquiry_id } = reqObj;
 
             const updatedEnquiry = await Enquiry.findOneAndUpdate(
-                { enquiry_id : enquiry_id },
+                { enquiry_id: enquiry_id },
                 {
                     $set: {
-                        enquiry_status  : 'cancelled'
+                        enquiry_status         : 'cancelled',
+                        'items.$[elem].status' : 'cancelled'
                     }
                 },
-                { new: true } 
+                {
+                    arrayFilters: [{ 'elem.status': { $ne: 'cancelled' } }],
+                    new: true
+                }
             );
-
             if (!updatedEnquiry) {
                 return callback({ code: 404, message: 'Enquiry not found', result: null });
             }
-            callback({ code: 200, message: 'Inquiry Cancelled successfully', result: updatedEnquiry });
+            callback({ code: 200, message: 'Enquiry cancelled successfully', result: updatedEnquiry });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             callback({ code: 500, message: 'Internal Server Error', result: error });
         }
     }
+    
     
 }    

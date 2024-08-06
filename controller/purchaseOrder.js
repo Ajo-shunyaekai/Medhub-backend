@@ -34,6 +34,12 @@ module.exports = {
             enquiry.quotation_items = enquiry.quotation_items.filter(detail => {
                 return !itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted');
             });
+            orderItems.forEach(orderItem => {
+                const enquiryItem = enquiry.items.find(item => item.medicine_id === orderItem.medicine_id);
+                if (enquiryItem) {
+                    enquiryItem.status = 'PO created';
+                }
+            });
             await enquiry.save();
 
             const formattedOrderItems = orderItems.map(item => ({
@@ -265,11 +271,23 @@ module.exports = {
                 {
                     $group: {
                         _id                     : "$_id",
+                        enquiry_id              : { $first: "$enquiry_id" },
                         purchaseOrder_id        : { $first: "$purchaseOrder_id" },
                         po_date                 : { $first: "$po_date" },
                         po_number               : { $first: "$po_number" },
                         additional_instructions : { $first: "$additional_instructions" },
                         po_status               : { $first: "$po_status" },
+                        buyer_name              : { $first: "$buyer_name" },
+                        buyer_address           : { $first: "$buyer_address" },
+                        buyer_mobile            : { $first: "$buyer_mobile" },
+                        buyer_email             : { $first: "$buyer_email" },
+                        buyer_regNo             : { $first: "$buyer_regNo" },
+                        supplier_name           : { $first: "$supplier_name" },
+                        supplier_address        : { $first: "$supplier_address" },
+                        supplier_mobile         : { $first: "$supplier_mobile" },
+                        supplier_email          : { $first: "$supplier_email" },
+                        supplier_regNo          : { $first: "$supplier_regNo" },
+                        supplier_name           : { $first: "$supplier_name" },
                         buyer_id                : { $first: "$buyer_id" },
                         supplier_id             : { $first: "$supplier_id" },
                         order_items             : { $push: "$order_items" },
@@ -342,7 +360,7 @@ module.exports = {
                 purchaseOrder.order_items = orderItems.map(item => ({
                     medicine_id       : item.medicine_id,
                     medicine_name     : item.medicine_name,
-                    quantity_required : item.quantity,
+                    quantity_required : item.quantity_required,
                     unit_price        : item.unit_price,
                     total_amount      : item.counter_price || item.target_price || item.total_amount ,
                     status            : 'pending'

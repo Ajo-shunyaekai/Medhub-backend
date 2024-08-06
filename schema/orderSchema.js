@@ -25,6 +25,37 @@ const orderItemSchema = new Schema({
     },
 });
 
+const logisticsSchema = new Schema({
+    type: {
+        type: String,
+        required: true
+    },
+    prefered_mode: {
+        type: String,
+        required: true
+    },
+    drop_location: [{
+        name: {
+            type: Number,
+            required: true
+        },
+        mobile: {
+            type: String,
+            required: true
+        },
+        address: {
+            type: String,
+            required: true
+        },
+    }],
+    
+    status: {
+        type: String,
+        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled', 'rejected' ],
+        default: 'pending'
+    },
+});
+
 const orderSchema = new Schema({
     order_id: {
         type: String,
@@ -44,7 +75,18 @@ const orderSchema = new Schema({
         ref: 'Supplier',
         required: true
     },
+    enquiry_id: {
+        type: String,
+        ref: 'Enquiry',
+        // required: true
+    },
+    purchaseOrder_id: {
+        type: String,
+        ref: 'purchaseorder',
+        // required: true
+    },
     items: [orderItemSchema],
+    logistics_details: [logisticsSchema],
     payment_terms: {
         type: String,
         required: true
@@ -74,10 +116,6 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
-    // total_price: {
-    //     type: Number,
-    //     required: true
-    // },
     order_status: {
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
