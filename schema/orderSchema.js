@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
 const orderItemSchema = new Schema({
-    product_id: {
+    medicine_id: {
         type: String,
         required: true
     },
-    product_name: {
+    medicine_name: {
         type: String,
         required: true
     },
@@ -14,38 +14,46 @@ const orderItemSchema = new Schema({
         type: Number,
         required: true
     },
-    price: {
+    unit_price: {
+        type: String,
+        required: true
+    },
+    unit_tax: {
+        type: String,
+        required: true
+    },
+    total_amount: {
         type: String,
         required: true
     },
     status: {
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled', 'rejected' ],
-        default: 'pending'
+        default: 'active'
     },
 });
 
 const logisticsSchema = new Schema({
     type: {
         type: String,
-        required: true
+        // required: true
     },
     prefered_mode: {
         type: String,
-        required: true
+        // required: true
     },
     drop_location: [{
         name: {
             type: Number,
-            required: true
+            // required: true
         },
         mobile: {
             type: String,
-            required: true
+            // required: true
         },
         address: {
             type: String,
-            required: true
+            // required: true
         },
     }],
     
@@ -61,13 +69,19 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
+    enquiry_id: {
+        type: String,
+        ref: 'Enquiry',
+        required: true
+    },
+    purchaseOrder_id: {
+        type: String,
+        ref: 'purchaseorder',
+        required: true
+    },
     buyer_id: {
         type: String,
         ref: 'Buyer',
-        required: true
-    },
-    buyer_company: {
-        type: String,
         required: true
     },
     supplier_id: {
@@ -75,55 +89,61 @@ const orderSchema = new Schema({
         ref: 'Supplier',
         required: true
     },
-    enquiry_id: {
+    invoice_no: {
         type: String,
-        ref: 'Enquiry',
-        // required: true
+        required: true
     },
-    purchaseOrder_id: {
+    invoice_date: {
         type: String,
-        ref: 'purchaseorder',
-        // required: true
+        required: true
+    },
+    payment_due_date: {
+        type: String,
+        required: true
+    },
+    buyer_name: {
+        type: String,
+        required: true
+    },
+    buyer_email: {
+        type: String,
+        required: true
+    },
+    buyer_mobile: {
+        type: String,
+        required: true
+    },
+    buyer_address: {
+        type: String,
+        required: true
+    },
+    supplier_name: {
+        type: String,
+        required: true
+    },
+    supplier_email: {
+        type: String,
+        required: true
+    },
+    supplier_mobile: {
+        type: String,
+        required: true
+    },
+    supplier_address: {
+        type: String,
+        required: true
     },
     items: [orderItemSchema],
+    total_due_amount: {
+        type: String,
+        required: true
+    },
     logistics_details: [logisticsSchema],
-    payment_terms: {
-        type: String,
-        required: true
-    },
-    est_delivery_time: {
-        type: String,
-        required: true
-    },
-    shipping_details: {
-        type: {
-            consignor_name: {
-                type: String,
-                required: true
-            },
-            mobile_no: {
-                type: String,
-                required: true
-            },
-            address: {
-                type: String,
-                required: true
-            }
-        },
-        required: true
-    },
-    remarks: {
-        type: String,
-        required: true
-    },
+    
     order_status: {
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
-        default: 'pending'
-    },
-    invoice_number: {
-        type: String,
-        required: true
+        default: 'active'
     },
     created_at: {
         type: Date,
@@ -133,6 +153,38 @@ const orderSchema = new Schema({
         type: Date,
         default: Date.now
     }
+
+    // payment_terms: {
+    //     type: String,
+    //     // required: true
+    // },
+    // est_delivery_time: {
+    //     type: String,
+    //     // required: true
+    // },
+  
+    // remarks: {
+    //     type: String,
+    //     // required: true
+    // },
+
+      // shipping_details: {
+    //     type: {
+    //         consignor_name: {
+    //             type: String,
+    //             required: true
+    //         },
+    //         mobile_no: {
+    //             type: String,
+    //             required: true
+    //         },
+    //         address: {
+    //             type: String,
+    //             required: true
+    //         }
+    //     },
+    //     required: true
+    // },
 });
 
 module.exports = mongoose.model('Order', orderSchema);

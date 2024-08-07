@@ -373,7 +373,6 @@ module.exports = {
             console.log('Internal Server Error', error);
             callback({ code: 500, message: 'Internal Server Error' });
         }
-    }
+    },
     
-
 }    

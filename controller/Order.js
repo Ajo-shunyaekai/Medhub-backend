@@ -1,7 +1,7 @@
 const Order              = require('../schema/orderSchema')
 const Support            = require('../schema/supportSchema')
 const Invoice            = require('../schema/invoiceNumberSchema')
-
+const Enquiry  = require('../schema/enquiryListSchema')
 
 const initializeInvoiceNumber = async () => {
   const count = await Invoice.countDocuments();
@@ -11,47 +11,71 @@ const initializeInvoiceNumber = async () => {
   }
 };
 
-
 module.exports = {
 
-    orderRequest : async(reqObj, callback) => {
+    createOrder : async(reqObj, callback) => {
        try {
-        await initializeInvoiceNumber();
+        // await initializeInvoiceNumber();
 
         const orderId = 'ORD-' + Math.random().toString(16).slice(2);
-        const itemIds = reqObj.items.map(item => item.product_id);
+      //   const itemIds = reqObj.items.map(item => item.product_id);
 
-        const invoiceNumberDoc = await Invoice.findOneAndUpdate(
-          {},
-          { $inc: { last_invoice_number: 1 } },
-          { new: true }
-      );
+      //   const invoiceNumberDoc = await Invoice.findOneAndUpdate(
+      //     {},
+      //     { $inc: { last_invoice_number: 1 } },
+      //     { new: true }
+      // );
 
-      if (!invoiceNumberDoc) {
-          return callback({ code: 500, message: 'Failed to generate invoice number' });
-      }
+      // if (!invoiceNumberDoc) {
+      //     return callback({ code: 500, message: 'Failed to generate invoice number' });
+      // }
 
         const newOrder = new Order({
-            order_id          : orderId,
-            buyer_id          : reqObj.buyer_id,
-            buyer_company     : reqObj.buyer_company,
-            supplier_id       : reqObj.supplier_id,
-            items             : reqObj.items,
-            payment_terms     : reqObj.payment_terms,
-            est_delivery_time : reqObj.est_delivery_time,
-            shipping_details  : reqObj.shipping_details,
-            remarks           : reqObj.remarks,
-            order_status      : reqObj.status,
-            invoice_number    : invoiceNumberDoc.last_invoice_number
+            order_id         : orderId,
+            enquiry_id       : reqObj.enquiry_id,
+            purchaseOrder_id : reqObj.purchaseOrder_id,
+            buyer_id         : reqObj.buyer_id,
+            supplier_id      : reqObj.supplier_id,
+            invoice_no       : reqObj.invoice_no,
+            invoice_date     : reqObj.invoice_date,
+            payment_due_date : reqObj.payment_due_date,
+            buyer_name       : reqObj.buyer_name,
+            buyer_email      : reqObj.buyer_email,
+            buyer_mobile     : reqObj.buyer_mobile,
+            buyer_address    : reqObj.buyer_address,
+            supplier_name    : reqObj.supplier_name,
+            supplier_email   : reqObj.supplier_email,
+            supplier_mobile  : reqObj.supplier_mobile,
+            supplier_address : reqObj.supplier_address,       
+            items            : reqObj.order_items,
+            total_due_amount : reqObj.total_due_amount,
+            order_status     : 'active',
+            // payment_terms     : reqObj.payment_terms,
+            // est_delivery_time : reqObj.est_delivery_time,
+            // shipping_details  : reqObj.shipping_details,
+            // remarks           : reqObj.remarks,
+            // invoice_number    : invoiceNumberDoc.last_invoice_number
             // total_price  : reqObj.total_price,
         })
 
-        newOrder.save().then(() => {
-            return callback({code: 200, message: "Order Request send successfully"});
+        newOrder.save().then(async() => {
+          const updatedEnquiry = await Enquiry.findOneAndUpdate(
+            { enquiry_id : reqObj.enquiry_id },
+            {
+                $set: {
+                    enquiry_status  : 'order created'
+                }
+            },
+            { new: true } 
+        );
+        if (!updatedEnquiry) {
+            return callback({ code: 404, message: 'Enquiry not found', result: null });
+        }
+            return callback({code: 200, message: "Order created successfully"});
         })
         .catch((err) => {
             console.log('err in order request',err);
-            return callback({code: 400, message: 'Error in Order Creation'})
+            return callback({code: 400, message: 'Error while creating the order'})
         })
        } catch (error) {
         callback({code: 500, message: 'Internal Server Error'})
@@ -284,7 +308,7 @@ module.exports = {
         }
     },
 
-    
+  
     cancelOrder : async(reqObj, callback) => {
        try {
         const {order_id, buyer_id, reason, order_type} = reqObj

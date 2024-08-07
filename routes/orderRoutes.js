@@ -44,15 +44,15 @@ const cpUpload = (req, res, next) => {
 
 module.exports = () => {
     
-    routes.post('/order-request', checkAuthorization, checkBuyerAuthentication, async(req, res) => {
+    routes.post('/order-request', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
 
-        let errObj = validation(req.body, 'orderRequest');
+        // let errObj = validation(req.body, 'orderRequest');
     
-        if (Object.values(errObj).length) {
-            res.send({ code: 422, message: 'All fields are required', errObj });
-            return;
-        }
-            Order.orderRequest(req.body, result => {
+        // if (Object.values(errObj).length) {
+        //     res.send({ code: 422, message: 'All fields are required', errObj });
+        //     return;
+        // }
+            Order.createOrder(req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });

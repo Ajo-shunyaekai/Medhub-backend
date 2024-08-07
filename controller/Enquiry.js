@@ -1,7 +1,7 @@
-const Enquiry              = require('../schema/enquiryListSchema')
-const Support            = require('../schema/supportSchema')
-const Invoice            = require('../schema/invoiceNumberSchema')
-const mongoose           = require('mongoose');
+const Enquiry  = require('../schema/enquiryListSchema')
+const Support  = require('../schema/supportSchema')
+const Invoice  = require('../schema/invoiceNumberSchema')
+const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = {
@@ -12,18 +12,17 @@ module.exports = {
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
         const offset    = (page_no - 1) * page_size
-        const query = {}
+        // const query     = {enquiry_status: {$ne: 'order created'}}
         
+        // if(!supplier_id) {
+        //     query.buyer_id = buyer_id
+        //     // query.enquiry_status = status 
+        // } else if(!buyer_id) {
+        //     query.supplier_id = supplier_id
+        //     // query.enquiry_status = status 
+        // }
 
-        if(!supplier_id) {
-            query.buyer_id = buyer_id
-            // query.enquiry_status = status 
-        } else if(!buyer_id) {
-            query.supplier_id = supplier_id
-            // query.enquiry_status = status 
-        }
-
-        const matchCondition = {};
+        const matchCondition = {enquiry_status: {$ne: 'order created'}};
         if (buyer_id && !supplier_id) {
             matchCondition.buyer_id = buyer_id;
         } else if (supplier_id && !buyer_id) {
@@ -33,7 +32,6 @@ module.exports = {
         // if (status) {
         //     matchCondition.enquiry_status = status;
         // }
-        
             Enquiry.aggregate([
                 {
                     $match: matchCondition
@@ -58,7 +56,7 @@ module.exports = {
                     $project: {
                         enquiry_id : 1,
                         created_at : 1,
-                        items : 1,
+                        items      : 1,
                         buyer : {
                             $arrayElemAt : ["$buyer_details", 0]
                         },
@@ -72,16 +70,16 @@ module.exports = {
                         enquiry_id : 1,
                         created_at : 1,
                         items : 1,
-                        "buyer.buyer_id": 1,
-                        "buyer.buyer_name": 1,
-                        "buyer.buyer_type": 1,
-                        "buyer.buyer_mobile": 1,
-                        "buyer.country_of_origin": 1,
-                        "supplier.supplier_id": 1,
-                        "supplier.supplier_name": 1,
-                        "supplier.supplier_type": 1,
-                        "supplier.supplier_mobile": 1,
-                        "supplier.country_of_origin": 1,
+                        "buyer.buyer_id"             : 1,
+                        "buyer.buyer_name"           : 1,
+                        "buyer.buyer_type"           : 1,
+                        "buyer.buyer_mobile"         : 1,
+                        "buyer.country_of_origin"    : 1,
+                        "supplier.supplier_id"       : 1,
+                        "supplier.supplier_name"     : 1,
+                        "supplier.supplier_type"     : 1,
+                        "supplier.supplier_mobile"   : 1,
+                        "supplier.country_of_origin" : 1,
                     }
                 },
                 {
