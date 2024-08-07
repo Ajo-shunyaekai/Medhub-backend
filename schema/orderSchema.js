@@ -42,9 +42,9 @@ const logisticsSchema = new Schema({
         type: String,
         // required: true
     },
-    drop_location: [{
+    drop_location: {
         name: {
-            type: Number,
+            type: String,
             // required: true
         },
         mobile: {
@@ -55,8 +55,7 @@ const logisticsSchema = new Schema({
             type: String,
             // required: true
         },
-    }],
-    
+    },
     status: {
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled', 'rejected' ],
@@ -138,7 +137,7 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
-    logistics_details: [logisticsSchema],
+    logistics_details: logisticsSchema,
     
     order_status: {
         type: String,

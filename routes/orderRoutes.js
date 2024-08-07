@@ -58,6 +58,13 @@ module.exports = () => {
             });
     });
 
+    routes.post('/book-logistics', checkAuthorization, checkBuyerAuthentication, async(req, res) => {
+            Order.bookLogistics(req.body, result => {
+                const response = handleResponse(result);
+                res.send(response);
+            });
+    });
+
     routes.post('/buyer-order-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
 
             Order.buyerOrdersList(req.body, result => {
@@ -167,5 +174,14 @@ module.exports = () => {
 
      //------------------------------------------------------ supplier order ------------------------------------------------------//
      
+     routes.post('/proforma-invoice-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+
+        Order.proformaInvoiceList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+
     return routes;
 }
