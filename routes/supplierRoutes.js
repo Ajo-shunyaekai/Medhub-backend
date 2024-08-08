@@ -216,6 +216,13 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/get-notification-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.getNotificationList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
    return routes
 }

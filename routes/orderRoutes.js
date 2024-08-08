@@ -44,7 +44,7 @@ const cpUpload = (req, res, next) => {
 
 module.exports = () => {
     
-    routes.post('/order-request', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
+    routes.post('/create-order', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
 
         // let errObj = validation(req.body, 'orderRequest');
     

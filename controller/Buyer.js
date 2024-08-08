@@ -11,6 +11,7 @@ const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
 const List               = require('../schema/addToListSchema');
 const Enquiry            = require('../schema/enquiryListSchema')
+const Notification       = require('../schema/notificationSchema')
 
 
 module.exports = {
@@ -926,11 +927,94 @@ module.exports = {
             }
         }));
 
+        const notifications = enquiries.map(enquiry => {
+          const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+          return {
+            notification_id: notificationId,
+            event_type: 'Enquiry Request',
+            event : 'enquiry',
+            from: 'buyer',
+            to: 'supplier',
+            from_id: buyer_id,
+            to_id: enquiry.supplier_id,
+            event_id: enquiry.enquiry_id,  // Use the enquiry_id here
+            message: 'New enquiry request',
+            status: 0
+          };
+        });
+    
+        await Notification.insertMany(notifications);
+
         callback({ code: 200, message: "Enquiries sent successfully", result: enquiryDocs });
 
       } catch (error) {
         console.log('Internal server error', error);
         callback({ code: 500, message: "Internal server error", result: error });
+      }
+    },
+
+
+    getNotificationList : async(reqObj, callback) => {
+      try {
+        const { buyer_id, pageNo, pageSize } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 1
+        const offset    = (page_no - 1) * page_size 
+
+        Notification.aggregate([
+          {
+            $match: {
+              to_id: buyer_id,
+              to : 'buyer'
+              
+            }
+          },
+          { $sort  : {created_at: -1} },
+          { $skip  : offset },
+          { $limit : page_size },
+          
+        ])
+        
+        .then( async(data) => {
+          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer'});
+          const totalPages = Math.ceil(totalItems / page_size);
+
+          const returnObj = {
+              data,
+              totalPages,
+              totalItems
+          };
+          callback({code: 200, message: "List fetched successfully", result: returnObj})
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer list', result: err})
+        })
+      } catch (error) {
+        
+      }
+    },
+
+    updateStatus : async(reqObj, callback) => {
+      try {
+        const { notification_id, status } = reqObj
+
+        const updateNotification = await Notification.findOneAndUpdate(
+          { notification_id : notification_id },
+          {
+              $set: {
+                status: status,
+                // status            : 'Awaiting Details from Seller'
+              }
+          },
+          { new: true } 
+      );
+      if (!updatedOrder) {
+          return callback({ code: 404, message: 'Order not found', result: null });
+      }
+      } catch (error) {
+        
       }
     },
     

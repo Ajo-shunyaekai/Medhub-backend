@@ -270,6 +270,20 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-notification-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.getNotificationList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/update-notification-status', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.updateStatus(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     // routes.post('/enquiry-list', checkAuthorization, commonAuthentication, async(req, res) => {
 
     //     Controller.getEnquiryList(req.body, result => {

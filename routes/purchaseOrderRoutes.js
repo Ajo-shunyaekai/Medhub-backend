@@ -8,7 +8,6 @@ const { handleResponse }  = require('../utils/utilities');
 const { validation }      = require('../utils/utilities')
 const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
 
-
 module.exports = () => {
     
     routes.post('/create-po', checkAuthorization, commonAuthentication,(req, res) => {

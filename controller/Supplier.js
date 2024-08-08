@@ -8,6 +8,7 @@ const SupplierEdit = require('../schema/supplierEditSchema')
 const Support      = require('../schema/supportSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
+const Notification       = require('../schema/notificationSchema')
 
 module.exports = {
     
@@ -619,8 +620,51 @@ module.exports = {
       } catch (error) {
         
       }
-    }
+    },
  
      //----------------------------- support --------------------------------------//
+
+
+     getNotificationList : async(reqObj, callback) => {
+      try {
+        const { supplier_id, pageNo, pageSize } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 5
+        const offset    = (page_no - 1) * page_size 
+
+        Notification.aggregate([
+          {
+            $match: {
+              to_id: supplier_id,
+              to : 'supplier'
+              
+            }
+          },
+          { $sort  : {created_at: -1} },
+          { $skip  : offset },
+          { $limit : page_size },
+          
+        ])
+        
+        .then( async(data) => {
+          const totalItems = await Notification.countDocuments({to_id: supplier_id, to: 'supplier'});
+          const totalPages = Math.ceil(totalItems / page_size);
+
+          const returnObj = {
+              data,
+              totalPages,
+              totalItems
+          };
+          callback({code: 200, message: "List fetched successfully", result: returnObj})
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer list', result: err})
+        })
+      } catch (error) {
+        
+      }
+    },
 
    }

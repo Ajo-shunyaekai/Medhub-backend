@@ -3,6 +3,7 @@ const Support  = require('../schema/supportSchema')
 const Invoice  = require('../schema/invoiceNumberSchema')
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
+const Notification       = require('../schema/notificationSchema')
 
 module.exports = {
 
@@ -319,7 +320,7 @@ module.exports = {
 
     submitQuotation: async (reqObj, callback) => {
       try {
-          const { enquiry_id, quotation_details, payment_terms } = reqObj;
+          const { enquiry_id, quotation_details, payment_terms, buyer_id, supplier_id } = reqObj;
   
           const updatedEnquiry = await Enquiry.findOneAndUpdate(
               { enquiry_id : enquiry_id },
@@ -347,6 +348,20 @@ module.exports = {
                   );
             //   }
           }
+          const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+      const newNotification = new Notification({
+        notification_id         : notificationId,
+        event_type   : 'Enquiry quotation',
+        event : 'enquiry',
+        from : 'supplier',
+        to : 'buyer',
+        from_id : supplier_id,
+        to_id : buyer_id,
+        event_id : enquiry_id,
+        message : 'Enquiry quotation submitted',
+        status : 0
+    })
+    await newNotification.save()
           callback({ code: 200, message: 'Quotation successfully submitted', result: updatedEnquiry });
       } catch (error) {
           console.log('error', error);
