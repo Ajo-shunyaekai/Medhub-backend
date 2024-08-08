@@ -85,13 +85,14 @@ module.exports = {
     bookLogistics : async(reqObj, callback) => {
       try {
         console.log(reqObj)
-        const {buyer_id, order_id, logistics_details} = reqObj
+        const { buyer_id, order_id, logistics_details } = reqObj
 
         const updatedOrder = await Order.findOneAndUpdate(
           { order_id : order_id },
           {
               $set: {
-                logistics_details : logistics_details
+                logistics_details : logistics_details,
+                status            : 'Awaiting Details from Seller'
               }
           },
           { new: true } 

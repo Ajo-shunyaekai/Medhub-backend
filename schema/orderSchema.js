@@ -144,6 +144,11 @@ const orderSchema = new Schema({
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
         default: 'active'
     },
+    status: {
+        type: String,
+        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
+        default: 'active'
+    },
     created_at: {
         type: Date,
         default: Date.now

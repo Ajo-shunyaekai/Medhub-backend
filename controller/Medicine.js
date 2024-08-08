@@ -16,7 +16,7 @@ module.exports = {
         
         const { product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
                 dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
-                country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
+                unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
     
         if (product_type === 'new') {
             const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
@@ -473,7 +473,7 @@ module.exports = {
   editMedicine : async(reqObj, callback) => {
     try {
         const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
-                dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
+                dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, unit_tax,
                 country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
 
         if (product_type === 'new') {
@@ -511,6 +511,7 @@ module.exports = {
                 gmp_approvals,
                 shipping_time,
                 tags,
+                unit_tax,
                 country_of_origin,
                 registered_in,
                 stocked_in,
@@ -559,6 +560,7 @@ module.exports = {
               gmp_approvals,
               shipping_time,
               tags,
+              unit_tax,
               country_of_origin,
               registered_in,
               stocked_in,
@@ -634,219 +636,6 @@ module.exports = {
       callback({ code: 500, message: "Internal Server Error", result: error });
     }
   },
-
-  // similarMedicineList: async (reqObj, callback) => {
-  //   try {
-  //     const {
-  //       medicine_name, medicine_id, medicine_type, status, supplier_id,
-  //       pageNo, pageSize, price_range, quantity_range, delivery_time, in_stock, searchKey
-  //     } = reqObj;
-  
-  //     const page_no = pageNo || 1;
-  //     const page_size = pageSize || 10;
-  //     const offset = (page_no - 1) * page_size;
-  
-  //     let matchCondition = {
-  //       medicine_type: medicine_type,
-  //       medicine_name: medicine_name,
-  //       status: status,
-        
-  //       // medicine_id: { $ne: medicine_id }
-  //     };
-
-  //   //   if (searchKey) {
-  //   //     matchCondition.$or = [
-  //   //         { medicine_name : { $regex: searchKey, $options: 'i' } },
-  //   //         // { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
-  //   //     ];
-  //   // }
-      
-  //     if (in_stock && in_stock.length > 0) {
-  //       const stockedCountries = in_stock[0].split(',').map(country => country.trim());
-  //       matchCondition.stocked_in = { $in: stockedCountries };
-  //     }
-  
-  //     let pipeline = [
-  //       {
-  //         $match: matchCondition,
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "suppliers",
-  //           localField: "supplier_id",
-  //           foreignField: "supplier_id",
-  //           as: "supplier",
-  //         },
-  //       },
-  //       {
-  //         $unwind: "$inventory_info"
-  //       },
-  //       {
-  //         $addFields: {
-  //           "inventory_info.unit_price_numeric_str": {
-  //             $regexFind: { input: "$inventory_info.unit_price", regex: "[0-9.]+" }
-  //           },
-  //           "inventory_info.est_delivery_days_numeric_str": {
-  //             $regexFind: { input: "$inventory_info.est_delivery_days", regex: "[0-9]+" }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $addFields: {
-  //           "inventory_info.unit_price_num": {
-  //             $toDouble: "$inventory_info.unit_price_numeric_str.match"
-  //           },
-  //           "inventory_info.est_delivery_days_num": {
-  //             $toInt: "$inventory_info.est_delivery_days_numeric_str.match"
-  //           }
-  //         }
-  //       },
-  //     ];
-
-  //     if (searchKey) {
-  //       pipeline.push({
-  //         $match: {
-  //           $or: [
-  //             { "supplier.supplier_name": { $regex: searchKey, $options: 'i' } }
-  //           ]
-  //         }
-  //       });
-  //     }
-  
-  //     if (price_range && price_range.length > 0) {
-  //       const ranges = price_range[0].split(',').map(range => range.trim());
-  //       const priceConditions = ranges.map(range => {
-  //         if (range.includes('greater than')) {
-  //           const value = parseFloat(range.split('greater than')[1].trim());
-  //           return { "inventory_info.unit_price_num": { $gt: value } };
-  //         } else {
-  //           const [min, max] = range.split('AED')[0].trim().split('-').map(num => parseFloat(num.trim()));
-  //           return { "inventory_info.unit_price_num": { $gte: min, $lt: max } };
-  //         }
-  //       });
-  //       pipeline.push({ $match: { $or: priceConditions } });
-  //     }
-
-  //     if (quantity_range && quantity_range.length > 0) {
-  //       const ranges = quantity_range[0].split(',').map(range => range.trim());
-  //       const quantityConditions = ranges.map(range => {
-  //         if (range.includes('greater than')) {
-  //           const value = parseFloat(range.split('greater than')[1].trim());
-  //           return { "inventory_info.quantity": { $gt: value.toString() } };
-  //         } else {
-  //           const [min, max] = range.split('-').map(num => parseFloat(num.trim()));
-  //           return { "inventory_info.quantity": { $gte: min.toString(), $lt: max.toString() } };
-  //         }
-  //       });
-  //       pipeline.push({ $match: { $or: quantityConditions } });
-  //     }
-      
-  //     if (delivery_time && delivery_time.length > 0) {
-  //       const ranges = delivery_time[0].split(',').map(range => range.trim());
-  //       const deliveryConditions = ranges.map(range => {
-  //         if (range.includes('greater than')) {
-  //           const value = parseInt(range.split('greater than')[1].trim());
-  //           return { "inventory_info.est_delivery_days_num": { $gt: value } };
-  //         } else {
-  //           const [min, max] = range.split('-').map(num => parseInt(num.trim()));
-  //           return { "inventory_info.est_delivery_days_num": { $gte: min, $lt: max } };
-  //         }
-  //       });
-  //       pipeline.push({ $match: { $or: deliveryConditions } });
-  //     }
-  
-  //     pipeline.push(
-  //       {
-  //         $group: {
-  //           _id: {
-  //             medicine_id          : '$medicine_id',
-  //             medicine_type        : '$medicine_type',
-  //             medicine_name        : '$medicine_name',
-  //             status               : '$status',
-  //             supplier_id          : '$supplier_id',
-  //             country_of_origin    : '$country_of_origin',
-  //             dossier_type         : '$dossier_type',
-  //             dossier_status       : '$dossier_status',
-  //             tags                 : '$tags',
-  //             gmp_approvals        : '$gmp_approvals',
-  //             registered_in        : '$registered_in',
-  //             comments             : '$comments',
-  //             dosage_form          : '$dosage_form',
-  //             category_name        : '$category_name',
-  //             strength             : '$strength',
-  //             total_quantity       : '$total_quantity',
-  //             shipping_time        : '$shipping_time',
-  //             country_available_in : '$country_available_in',
-  //             medicine_image       : '$medicine_image',
-  //              supplier            : '$supplier'
-  //           },
-  //           inventory_info : { $push: '$inventory_info' }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           _id                  : 0,
-  //           medicine_id          : '$_id.medicine_id',
-  //           medicine_type        : '$_id.medicine_type',
-  //           medicine_name        : '$_id.medicine_name',
-  //           status               : '$_id.status',
-  //           supplier_id          : '$_id.supplier_id',
-  //           country_of_origin    : '$_id.country_of_origin',
-  //           tags                 : '$_id.tags',
-  //           dossier_type         : '$_id.dossier_type',
-  //           dossier_status       : '$_id.dossier_status',
-  //           gmp_approvals        : '$_id.gmp_approvals',
-  //           registered_in        : '$_id.registered_in',
-  //           comments             : '$_id.comments',
-  //           dosage_form          : '$_id.dosage_form',
-  //           category_name        : '$_id.category_name',
-  //           strength             : '$_id.strength',
-  //           total_quantity       : '$_id.total_quantity',
-  //           shipping_time        : '$_id.shipping_time',
-  //           country_available_in : '$_id.country_available_in',
-  //           medicine_image       : '$_id.medicine_image',
-  //           supplier             : '$_id.supplier',
-  //           inventory_info       : 1, 
-  //         }
-  //       },
-  //       { $skip  : offset },
-  //       { $limit : page_size }
-  //     );
-  //     console.log('pipeline', JSON.stringify(pipeline, null, 2));
-  
-  //     Medicine.aggregate(pipeline)
-  //       .then((data) => {
-  //         // console.log('matchCondition', matchCondition);
-  //         Medicine.countDocuments({
-  //           medicine_type : medicine_type,
-  //           medicine_name : medicine_name,
-  //           status        : status,
-  //           // medicine_id   : { $ne: medicine_id },
-  //           ...matchCondition,
-          
-  //         })
-  //         .then(totalItems => {
-  //           const totalPages = Math.ceil(totalItems / page_size);
-  //           const returnObj = {
-  //             data,
-  //             totalPages,
-  //             totalItems
-  //           }
-  //           callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
-  //         })
-  //         .catch((err) => {
-  //           callback({ code: 400, message: "Error while fetching similar medicine list count", result: err });
-  //         });
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //         callback({ code: 400, message: "Error fetching medicine list", result: err });
-  //       });
-  //   } catch (error) {
-  //     callback({ code: 500, message: "Internal Server Error", result: error });
-  //   }
-  // },
-  
 
   similarMedicineList: async (reqObj, callback) => {
     try {
@@ -1071,7 +860,6 @@ module.exports = {
       callback({ code: 500, message: "Internal Server Error", result: error });
     }
   },
-
 
   otherMedicineList: async (reqObj, callback) => {
     // console.log('Fetching other medicine list...');
