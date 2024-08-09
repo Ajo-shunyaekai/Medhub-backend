@@ -40,6 +40,12 @@ const cpUpload = (req, res, next) => {
 };
 
 module.exports = () => {
+    routes.post('/get-medicine-by-name', checkAuthorization, (req, res) => {
+        Controller.getMedicineByName(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
 
     routes.post('/add-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
         

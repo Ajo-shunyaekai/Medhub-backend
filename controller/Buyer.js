@@ -959,7 +959,7 @@ module.exports = {
         const { buyer_id, pageNo, pageSize } = reqObj
 
         const page_no   = pageNo || 1
-        const page_size = pageSize || 1
+        const page_size = pageSize || 100
         const offset    = (page_no - 1) * page_size 
 
         Notification.aggregate([

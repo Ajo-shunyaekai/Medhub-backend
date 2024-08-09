@@ -55,6 +55,18 @@ const logisticsSchema = new Schema({
             type: String,
             // required: true
         },
+        p: {
+            type: String,
+            // required: true
+        },
+        state: {
+            type: String,
+            // required: true
+        },
+        pincode: {
+            type: String,
+            // required: true
+        },
     },
     status: {
         type: String,
@@ -64,15 +76,8 @@ const logisticsSchema = new Schema({
 });
 
 const shipmentSchema = new Schema({
-    type: {
-        type: String,
-        // required: true
-    },
-    prefered_mode: {
-        type: String,
-        // required: true
-    },
-    drop_location: {
+   
+    supplier_details: {
         name: {
             type: String,
             // required: true
@@ -81,7 +86,73 @@ const shipmentSchema = new Schema({
             type: String,
             // required: true
         },
+        email: {
+            type: String,
+            // required: true
+        },
         address: {
+            type: String,
+            // required: true
+        },
+        ciyt_disctrict: {
+            type: String,
+            // required: true
+        },
+        pincode: {
+            type: String,
+            // required: true
+        },
+        prefered_pickup_time: {
+            type: String,
+            // required: true
+        },
+    },
+    shipment_details : {
+        no_of_packages: {
+            type: String,
+        },
+        length: {
+            type: String,
+        },
+        breadth: {
+            type: String,
+        },
+        height: {
+            type: String,
+        },
+        total_weight: {
+            type: String,
+        },
+        total_volume: {
+            type: String,
+        },
+    },
+    buyer_details: {
+        name: {
+            type: String,
+            // required: true
+        },
+        mobile: {
+            type: String,
+            // required: true
+        },
+        email: {
+            type: String,
+            // required: true
+        },
+        address: {
+            type: String,
+            // required: true
+        },
+        ciyt_disctrict: {
+            type: String,
+            // required: true
+        },
+        pincode: {
+            type: String,
+            // required: true
+        },
+        buyer_type: {
             type: String,
             // required: true
         },
@@ -168,7 +239,7 @@ const orderSchema = new Schema({
         required: true
     },
     logistics_details: [logisticsSchema],
-    shipment_details: [shipmentSchema],
+    shipment_details: shipmentSchema,
     
     order_status: {
         type: String,

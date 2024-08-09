@@ -96,6 +96,22 @@ const medicineSchema = new mongoose.Schema({
     trim: true,
     required: true
   }],
+  // manufacturer_name: {
+  //   type: String,
+  //   required: true
+  // },
+  // manufacturer_country_of_origin: {
+  //   type: String,
+  //   required: true
+  // },
+  // manufacturer_description: {
+  //   type: String,
+  //   required: true
+  // },
+  // stockedIn_details: [{
+  //   stocked_in_country : String,
+  //   stocked_quantity   : String,
+  // }],
   status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 3 - deleted
     type: Number,
     required: true

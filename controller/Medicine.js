@@ -9,6 +9,25 @@ const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('..
 
 
 module.exports = {
+
+  getMedicineByName: async(reqObj, callback) => {
+    try {
+      Medicine.aggregate([
+        {
+          $match: { medicine_name: reqObj.medicine_name },
+        },
+      ])
+      .then((data) => {
+        callback({ code: 200, message: "Medicine details fetched successfully", result: data[0] });
+      })
+      .catch((err) => {
+        callback({ code: 400, message: "Medicine details fetched successfully", result: err });
+      })
+    } catch (error) {
+      console.log(error);
+      callback({ code: 500, message: "Internal Server error", result: error });
+    }
+  },
   
   addMedicine: async (reqObj, callback) => {
       try {
@@ -16,7 +35,9 @@ module.exports = {
         
         const { product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
                 dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
-                unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
+                unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
+                manufacturer_name, manufacturer_country_of_origin, manufacturer_description
+               } = reqObj;
     
         if (product_type === 'new') {
             const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
@@ -28,7 +49,7 @@ module.exports = {
     
             if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
                callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
-          }
+            }
           
             const inventory_info = quantity.map((_, index) => ({
               quantity          : quantity[index],
@@ -61,6 +82,9 @@ module.exports = {
                 description,
                 medicine_image,
                 inventory_info,
+                manufacturer_name,
+                manufacturer_country_of_origin,
+                manufacturer_description,
                 status : 0
             });
     
@@ -105,6 +129,9 @@ module.exports = {
                 condition,
                 medicine_image,
                 invoice_image,
+                manufacturer_name,
+                manufacturer_country_of_origin,
+                manufacturer_description,
                 status : 0
             });
     

@@ -58,6 +58,7 @@ module.exports = {
                         enquiry_id : 1,
                         created_at : 1,
                         items      : 1,
+                        enquiry_status     : 1,
                         buyer : {
                             $arrayElemAt : ["$buyer_details", 0]
                         },
@@ -70,7 +71,8 @@ module.exports = {
                     $project: {
                         enquiry_id : 1,
                         created_at : 1,
-                        items : 1,
+                        items      : 1,
+                        enquiry_status     : 1,
                         "buyer.buyer_id"             : 1,
                         "buyer.buyer_name"           : 1,
                         "buyer.buyer_type"           : 1,
@@ -328,7 +330,7 @@ module.exports = {
                   $set: {
                       quotation_items : quotation_details,
                       payment_terms   : payment_terms,
-                    //   enquiry_status  : 'Quotation submitted'
+                      enquiry_status  : 'Quotation submitted'
                   }
               },
               { new: true } 

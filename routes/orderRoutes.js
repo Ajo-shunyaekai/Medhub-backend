@@ -65,6 +65,13 @@ module.exports = () => {
             });
     });
 
+    routes.post('/submit-details', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
+        Order.submitPickupDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+});
+
     routes.post('/buyer-order-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
 
             Order.buyerOrdersList(req.body, result => {
