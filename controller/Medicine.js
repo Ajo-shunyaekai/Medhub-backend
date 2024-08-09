@@ -85,6 +85,7 @@ module.exports = {
                 manufacturer_name,
                 manufacturer_country_of_origin,
                 manufacturer_description,
+                stockedIn_details: simplifiedStockedInSections,
                 status : 0
             });
     
