@@ -32,11 +32,20 @@ module.exports = {
   addMedicine: async (reqObj, callback) => {
       try {
         let medicine_id = "MED-" + Math.random().toString(16).slice(2);
-        
+
+        let stockedInDetails = reqObj.stocked_in_details;
+
+        if (typeof stockedInDetails === 'string') {
+            try {
+                stockedInDetails = JSON.parse(stockedInDetails);
+            } catch (err) {
+                return callback({ code: 400, message: "Invalid format for stocked_in_details" });
+            }
+        }
         const { product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
                 dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
                 unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
-                manufacturer_name, manufacturer_country_of_origin, manufacturer_description
+                manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details
                } = reqObj;
     
         if (product_type === 'new') {
@@ -85,7 +94,7 @@ module.exports = {
                 manufacturer_name,
                 manufacturer_country_of_origin,
                 manufacturer_description,
-                stockedIn_details: simplifiedStockedInSections,
+                stockedIn_details: stockedInDetails,
                 status : 0
             });
     
@@ -146,10 +155,10 @@ module.exports = {
               });
         }
       } catch (error) {
-        console.error("Error", error);
+          console.error("Error", error);
           callback({ code: 500, message: "Internal Server Error" });
       }
-    // }
+    
   },
 
   allMedicineList: async (reqObj, callback) => {
@@ -480,7 +489,7 @@ module.exports = {
       ])
         .then(async(data) => {
           if (data.length) {
-            const distinctCountries = await Medicine.distinct("country_available_in");
+            const distinctCountries = await Medicine.distinct("stocked_in");
             const responseData = {
               data: data[0],
               countryAvailable: distinctCountries
@@ -802,6 +811,7 @@ module.exports = {
               total_quantity       : '$total_quantity',
               shipping_time        : '$shipping_time',
               country_available_in : '$country_available_in',
+              stocked_in           : '$stocked_in',
               medicine_image       : '$medicine_image',
                supplier            : '$supplier'
             },
@@ -829,6 +839,7 @@ module.exports = {
             total_quantity       : '$_id.total_quantity',
             shipping_time        : '$_id.shipping_time',
             country_available_in : '$_id.country_available_in',
+            stocked_in           : '$_id.stocked_in',
             medicine_image       : '$_id.medicine_image',
             supplier             : '$_id.supplier',
             inventory_info       : 1, 

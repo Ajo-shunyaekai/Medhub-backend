@@ -111,6 +111,7 @@ const medicineSchema = new mongoose.Schema({
   stockedIn_details: [{
     stocked_in_country : String,
     stocked_quantity   : String,
+    stocked_in_type    : String,
   }],
   status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 3 - deleted
     type: Number,

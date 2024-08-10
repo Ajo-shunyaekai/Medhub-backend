@@ -164,6 +164,7 @@ module.exports = {
                         created_at      : { $first: "$created_at" },
                         quotation_items : { $first: "$quotation_items" },
                         payment_terms   : { $first: "$payment_terms" },
+                        enquiry_status  : { $first: "$enquiry_status" },
                         items: {
                             $push: {
                                 _id               : "$items._id",
@@ -226,6 +227,7 @@ module.exports = {
                                         }
                                     },
                                     payment_terms    : { $first: "$payment_terms" },
+                                    enquiry_status  : { $first: "$enquiry_status" },
                                     items            : { $first: "$items" },
                                     buyer_details    : { $first: "$buyer_details" },
                                     supplier_details : { $first: "$supplier_details" }
@@ -279,6 +281,7 @@ module.exports = {
                         created_at      : 1,
                         quotation_items : 1,
                         payment_terms   : 1,
+                        enquiry_status  : 1,
                         items           : 1,
                         "buyer.buyer_id"                      : "$buyer_details.buyer_id",
                         "buyer.buyer_name"                    : "$buyer_details.buyer_name",

@@ -402,6 +402,7 @@ module.exports = {
             $match: {
               buyer_id    : buyer_id,
               supplier_id : supplier_id,
+              order_status : 'completed',
             }
           },
           {
