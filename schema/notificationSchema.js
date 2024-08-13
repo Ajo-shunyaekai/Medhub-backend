@@ -38,6 +38,9 @@ const notificationSchema = new Schema({
   connected_id : {
     type: String,
   },
+  link_id : {
+    type: String,
+  },
   message: {
     type: String,
     required: true,

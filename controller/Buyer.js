@@ -944,7 +944,7 @@ module.exports = {
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
           return {
             notification_id: notificationId,
-            event_type: 'Enquiry Request',
+            event_type: 'Enquiry request',
             event : 'enquiry',
             from: 'buyer',
             to: 'supplier',
@@ -983,6 +983,33 @@ module.exports = {
               to_id: buyer_id,
               to : 'buyer'
               
+            }
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "from_id",
+              foreignField : "supplier_id",
+              as           : "supplier"
+            }
+          },
+          {
+            $project: {
+              notification_id: 1,
+              event: 1,
+              event_type: 1,
+              from: 1,
+              to: 1,
+              from_id: 1,
+              to_id: 1,
+              event_id: 1,
+              connected_id: 1,
+              message: 1,
+              status : 1,
+              createdAt: 1,
+              updatedAt: 1,
+              supplier          : { $arrayElemAt: ["$supplier", 0] },
+              // buyer          : { $arrayElemAt: ["$buyer", 0] },
             }
           },
           { $sort  : {createdAt: -1} },

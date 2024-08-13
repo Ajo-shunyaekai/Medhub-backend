@@ -38,6 +38,9 @@ const logisticsSchema = new Schema({
         type: String,
         // required: true
     },
+    custom_clearance: {
+        type: String
+    },
     prefered_mode: {
         type: String,
         // required: true

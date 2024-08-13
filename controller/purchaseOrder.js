@@ -8,6 +8,7 @@ module.exports = {
  
     createPO: async (reqObj, callback) => {
         try {
+            const purchaseOrderId = 'PO-' + Math.random().toString(16).slice(2)
             const { buyer_id, enquiry_id, supplier_id, itemIds,
                 data: {
                     poDate,
@@ -32,15 +33,22 @@ module.exports = {
             if (!enquiry) {
                 return callback({ code: 404, message: 'Enquiry not found' });
             }
-            enquiry.quotation_items = enquiry.quotation_items.filter(detail => {
-                return !itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted');
+            // enquiry.quotation_items = enquiry.quotation_items.filter(detail => {
+            //     return !itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted');
+            // });
+            enquiry.quotation_items.forEach(detail => {
+                if (itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted')) {
+                    detail.status = 'PO created';
+                }
             });
+    
             orderItems.forEach(orderItem => {
                 const enquiryItem = enquiry.items.find(item => item.medicine_id === orderItem.medicine_id);
                 if (enquiryItem) {
                     enquiryItem.status = 'PO created';
                 }
             });
+            enquiry.enquiry_status = 'PO created';
             await enquiry.save();
 
             const formattedOrderItems = orderItems.map(item => ({
@@ -53,7 +61,7 @@ module.exports = {
             }));
 
             const newPO = new PurchaseOrder({
-                purchaseOrder_id: 'PO-' + Math.random().toString(16).slice(2),
+                purchaseOrder_id: purchaseOrderId,
                 enquiry_id,
                 buyer_id,
                 supplier_id,
@@ -84,6 +92,7 @@ module.exports = {
                 from_id          : buyer_id,
                 to_id            : supplier_id,
                 event_id         : enquiry_id,
+                link_id          : purchaseOrderId,
                 message          : 'Purchase order created',
                 status           : 0
             })

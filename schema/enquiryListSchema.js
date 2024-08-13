@@ -58,10 +58,10 @@ const enquiryQuotationchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected' ],
+        enum: ['pending', 'accepted', 'rejected' ,'PO created'],
         default: 'pending'
     },
-});
+},{ timestamps: true });
 
 const enquirySchema = new Schema({
     enquiry_id: {
@@ -116,6 +116,14 @@ const enquirySchema = new Schema({
         default: Date.now
     },
     updated_at: {
+        type: Date,
+        default: Date.now
+    },
+    quotation_items_created_at: {
+        type: Date,
+        default: Date.now
+    },
+    quotation_items_updated_at: {
         type: Date,
         default: Date.now
     }
