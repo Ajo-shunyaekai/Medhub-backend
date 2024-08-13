@@ -223,6 +223,19 @@ module.exports = () => {
             res.send(response);
         });
     });
+    routes.post('/get-notification-details-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.getNotificationDetailsList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/update-notification-status', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.updateStatus(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
    return routes
 }

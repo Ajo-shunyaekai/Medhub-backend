@@ -14,8 +14,14 @@ module.exports = {
     try {
       Medicine.aggregate([
         {
-          $match: { medicine_name: reqObj.medicine_name },
+          $match: { 
+            medicine_name : reqObj.medicine_name ,
+            medicine_type : reqObj.medicine_type
+          },
         },
+        {
+          $limit: 1
+        }
       ])
       .then((data) => {
         callback({ code: 200, message: "Medicine details fetched successfully", result: data[0] });
@@ -353,6 +359,11 @@ module.exports = {
             country_available_in : 1,
             min_purchase_unit : 1,
             condition : 1,
+            unit_tax : 1,
+            manufacturer_country_of_origin: 1,
+            manufacturer_description: 1,
+            manufacturer_name: 1,
+            stockedIn_details: 1,
             inventory : {
               $arrayElemAt: ["$inventory", 0],
             },
@@ -387,6 +398,11 @@ module.exports = {
             country_available_in : 1,
             min_purchase_unit : 1,
             condition : 1,
+            unit_tax : 1,
+            manufacturer_country_of_origin: 1,
+            manufacturer_description: 1,
+            manufacturer_name: 1,
+            stockedIn_details: 1,
             "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
           },
@@ -428,6 +444,11 @@ module.exports = {
             country_available_in : 1,
             min_purchase_unit : 1,
             condition : 1,
+            unit_tax : 1,
+            manufacturer_country_of_origin: 1,
+            manufacturer_description: 1,
+            manufacturer_name: 1,
+            stockedIn_details: 1,
             "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
             supplier : {
@@ -464,6 +485,11 @@ module.exports = {
             country_available_in : 1,
             min_purchase_unit : 1,
             condition : 1,
+            unit_tax : 1,
+            manufacturer_country_of_origin: 1,
+            manufacturer_description: 1,
+            manufacturer_name: 1,
+            stockedIn_details: 1,
             "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
             "supplier.supplier_id"             : 1, 
@@ -483,6 +509,7 @@ module.exports = {
             "supplier.contact_person_mobile_no"       : 1,
             "supplier.contact_person_country_code"       : 1,
             "supplier.tax_no"              : 1,
+            "supplier.supplier_type"              : 1,
             "supplier.country_of_operation"              : 1,
           },
         },
@@ -675,6 +702,7 @@ module.exports = {
   },
 
   similarMedicineList: async (reqObj, callback) => {
+    console.log('reqObj',reqObj);
     try {
       const {
         medicine_name, medicine_id, medicine_type, status, supplier_id,
@@ -901,7 +929,6 @@ module.exports = {
   },
 
   otherMedicineList: async (reqObj, callback) => {
-    // console.log('Fetching other medicine list...');
     try {
         const { medicine_name, medicine_id, medicine_type, status, supplier_id, pageNo, pageSize } = reqObj;
         const page_no = pageNo || 1;

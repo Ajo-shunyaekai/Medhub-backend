@@ -35,6 +35,9 @@ const notificationSchema = new Schema({
     type: String,
     required: true,
   },
+  connected_id : {
+    type: String,
+  },
   message: {
     type: String,
     required: true,

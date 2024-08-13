@@ -2,6 +2,7 @@ const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Enquiry       = require('../schema/enquiryListSchema')
 const mongoose      = require('mongoose');
 const ObjectId      = mongoose.Types.ObjectId;
+const Notification = require('../schema/notificationSchema')
 
 module.exports = {
  
@@ -73,6 +74,20 @@ module.exports = {
                 po_status               : 'pending',
             });
             await newPO.save();
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+            const newNotification = new Notification({
+                notification_id  : notificationId,
+                event_type       : 'PO created',
+                event            : 'purchaseorder',
+                from             : 'buyer',
+                to               : 'supplier',
+                from_id          : buyer_id,
+                to_id            : supplier_id,
+                event_id         : enquiry_id,
+                message          : 'Purchase order created',
+                status           : 0
+            })
+            await newNotification.save()
             callback({ code: 200, message: 'Purchase Order created successfully', data: newPO });
         } catch (error) {
             console.log('Internal Server Error', error);

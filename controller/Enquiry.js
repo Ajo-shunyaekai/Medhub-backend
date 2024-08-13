@@ -354,19 +354,19 @@ module.exports = {
             //   }
           }
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
-      const newNotification = new Notification({
-        notification_id         : notificationId,
-        event_type   : 'Enquiry quotation',
-        event : 'enquiry',
-        from : 'supplier',
-        to : 'buyer',
-        from_id : supplier_id,
-        to_id : buyer_id,
-        event_id : enquiry_id,
-        message : 'Enquiry quotation submitted',
-        status : 0
-    })
-    await newNotification.save()
+            const newNotification = new Notification({
+                notification_id         : notificationId,
+                event_type   : 'Enquiry quotation',
+                event : 'enquiry',
+                from : 'supplier',
+                to : 'buyer',
+                from_id : supplier_id,
+                to_id : buyer_id,
+                event_id : enquiry_id,
+                message : 'Enquiry quotation submitted',
+                status : 0
+            })
+            await newNotification.save()
           callback({ code: 200, message: 'Quotation successfully submitted', result: updatedEnquiry });
       } catch (error) {
           console.log('error', error);
@@ -423,6 +423,20 @@ module.exports = {
             if (!updatedEnquiry) {
                 return callback({ code: 404, message: 'Enquiry not found', result: null });
             }
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+            const newNotification = new Notification({
+                notification_id  : notificationId,
+                event_type       : 'Enquiry request cancelled',
+                event            : 'enquiry',
+                from             : 'buyer',
+                to               : 'supplier',
+                from_id          : buyer_id,
+                to_id            : supplier_id,
+                event_id         : enquiry_id,
+                message          : 'Enquiry cancelled',
+                status           : 0
+            })
+            await newNotification.save()
             callback({ code: 200, message: 'Enquiry cancelled successfully', result: updatedEnquiry });
         } catch (error) {
             console.log(error);

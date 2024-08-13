@@ -687,9 +687,14 @@ module.exports = {
           existingList.save()
             .then(async(data) => {
               const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
+              // data.list_count = listCount
+              const obj = {
+                data,
+                listCount
+              }
               // console.log("listCount",listCount)
               // data.list_count = listCount
-              callback({ code: 200, message: "Added to existing list successfully", result: data });
+              callback({ code: 200, message: "Added to existing list successfully", result: obj});
             })
             .catch((err) => {
               callback({ code: 400, message: "Error while adding to existing list", result: err });
@@ -715,8 +720,11 @@ module.exports = {
           newList.save()
             .then(async(data) => {
               const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
-              data.list_count = listCount
-              callback({ code: 200, message: "Added to new list successfully", result: data });
+              const obj = {
+                data,
+                listCount
+              }
+              callback({ code: 200, message: "Added to new list successfully", result: obj });
             })
             .catch((err) => {
               callback({ code: 400, message: "Error while adding to new list", result: err });
@@ -849,8 +857,12 @@ module.exports = {
             await List.deleteOne({ _id: doc._id });
           }
         }
-    
-        callback({ code: 200, message: "Deleted Successfully", result: updateResult });
+        const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
+        const returnObj = {
+          updateResult,
+          listCount
+        }
+        callback({ code: 200, message: "Deleted Successfully", result: returnObj });
       } catch (error) {
         console.log('Internal server error', error);
         callback({ code: 500, message: "Internal server error", result: error });
@@ -938,22 +950,24 @@ module.exports = {
             to: 'supplier',
             from_id: buyer_id,
             to_id: enquiry.supplier_id,
-            event_id: enquiry.enquiry_id,  // Use the enquiry_id here
+            event_id: enquiry.enquiry_id,
             message: 'New enquiry request',
             status: 0
           };
         });
     
         await Notification.insertMany(notifications);
-
-        callback({ code: 200, message: "Enquiries sent successfully", result: enquiryDocs });
-
+        const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
+        const returnObj = {
+          enquiryDocs,
+          listCount
+        }
+        callback({ code: 200, message: "Enquiries sent successfully", result: returnObj });
       } catch (error) {
         console.log('Internal server error', error);
         callback({ code: 500, message: "Internal server error", result: error });
       }
     },
-
 
     getNotificationList : async(reqObj, callback) => {
       try {
@@ -971,9 +985,86 @@ module.exports = {
               
             }
           },
-          { $sort  : {created_at: -1} },
+          { $sort  : {createdAt: -1} },
           { $skip  : offset },
           { $limit : page_size },
+          
+        ])
+        
+        .then( async(data) => {
+          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer', status: 0});
+          const totalPages = Math.ceil(totalItems / page_size);
+
+          const returnObj = {
+              data,
+              totalPages,
+              totalItems
+          };
+          callback({code: 200, message: "List fetched successfully", result: returnObj})
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer list', result: err})
+        })
+      } catch (error) {
+        
+      }
+    },
+
+    getNotificationDetailsList : async(reqObj, callback) => {
+      try {
+        const { buyer_id, pageNo, pageSize } = reqObj
+
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 5
+        const offset    = (page_no - 1) * page_size 
+
+        Notification.aggregate([
+          {
+            $match: {
+              to_id: buyer_id,
+              to : 'buyer'
+              
+            }
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "from_id",
+              foreignField : "supplier_id",
+              as           : "supplier"
+            }
+          },
+          {
+            $lookup: {
+              from         : "buyers",
+              localField   : "to_id",
+              foreignField : "buyer_id",
+              as           : "buyer"
+            }
+          },
+          {
+            $project: {
+              notification_id: 1,
+              event: 1,
+              event_type: 1,
+              from: 1,
+              to: 1,
+              from_id: 1,
+              to_id: 1,
+              event_id: 1,
+              connected_id: 1,
+              message: 1,
+              status : 1,
+              createdAt: 1,
+              updatedAt: 1,
+              supplier          : { $arrayElemAt: ["$supplier", 0] },
+              buyer          : { $arrayElemAt: ["$buyer", 0] },
+            }
+          },
+          { $sort  : {createdAt: -1} },
+          // { $skip  : offset },
+          // { $limit : page_size },
           
         ])
         
@@ -995,9 +1086,10 @@ module.exports = {
       } catch (error) {
         
       }
-    },
+     },
 
     updateStatus : async(reqObj, callback) => {
+      console.log(reqObj);
       try {
         const { notification_id, status } = reqObj
 
@@ -1011,11 +1103,14 @@ module.exports = {
           },
           { new: true } 
       );
-      if (!updatedOrder) {
-          return callback({ code: 404, message: 'Order not found', result: null });
+      if (!updateNotification) {
+          return callback({ code: 404, message: 'Notification not found', result: null });
       }
+      callback({ code: 200, message: "Status Updated", result: updateNotification });
+
       } catch (error) {
-        
+        console.log(error);
+        callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
     

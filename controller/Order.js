@@ -71,6 +71,7 @@ module.exports = {
             from_id : reqObj.supplier_id,
             to_id : reqObj.buyer_id,
             event_id : orderId,
+            connected_id : reqObj.enquiry_id,
             message : 'Order created',
             status : 0
         })
@@ -138,7 +139,7 @@ module.exports = {
           {
               $set: {
                 shipment_details : shipment_details,
-                status            : 'Shipment details submitted'
+                status           : 'Shipment details submitted'
               }
           },
           { new: true } 
@@ -156,7 +157,7 @@ module.exports = {
             from_id : supplier_id,
             to_id : buyer_id,
             event_id : order_id,
-            message : 'Shipment details submitted',
+            message  : 'Shipment details submitted',
             status : 0
         })
         await newNotification.save()

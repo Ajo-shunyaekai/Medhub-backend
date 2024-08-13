@@ -277,6 +277,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-notification-details-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.getNotificationDetailsList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     routes.post('/update-notification-status', checkAuthorization, checkBuyerAuthentication, (req, res) => {
         Controller.updateStatus(req.body, result => {
             const response = handleResponse(result);

@@ -6,6 +6,7 @@ const cors           = require('cors');
 const cookieParser   = require('cookie-parser');
 const bodyParser     = require('body-parser');
 const connect        = require('./utils/dbConnection')
+const { Server } = require('socket.io'); 
 
 //-----------------   routes   -----------------------//
 const userRouter      = require('./routes/userRoutes')()
@@ -107,6 +108,57 @@ const server = app.listen(PORT, (req, res) => {
   console.log(`server is runnig http://localhost:${PORT}/`);
 });
 
-module.exports = app;
+const socketCorsOptions = {
+  origin: [
+    'http://192.168.1.31:2221',
+    'http://localhost:2221',
+    'http://localhost:3030',
+    'http://192.168.1.34:3333',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3333',
+    'https://supplierdeliver.shunyaekai.com',
+    'https://buyerdeliver.shunyaekai.com',
+    'https://deliver.shunyaekai.com'
+  ],
+  methods: ['GET', 'POST'],
+  credentials: true
+};
 
+const io = new Server(server, {
+  cors: socketCorsOptions,
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  socket.on('connect_error', (err) => {
+    console.log('Connect error:', err);
+  });
+
+  socket.on('sendInquiry', (inquiryData) => {
+    console.log('inquiryData', inquiryData);
+    // io.to(inquiryData.supplierId).emit('receiveNotification', inquiryData);
+    // socket.emit('receiveNotification', inquiryData);
+    io.emit('receiveNotification', inquiryData);
+  });
+  
+  socket.on('orderCreated', (logiscticsData) => {
+    console.log('logiscticsData', logiscticsData);
+    io.emit('logiscticsSubmitted', logiscticsData);
+  });
+
+  socket.on('bookLogisctics', (logiscticsData) => {
+    console.log('logiscticsData', logiscticsData);
+    io.emit('logiscticsSubmitted', logiscticsData);
+  });
+
+ 
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+module.exports = app;
 
