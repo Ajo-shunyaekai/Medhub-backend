@@ -1104,6 +1104,7 @@ module.exports = {
                     totalPrice        : 1,
                     "supplier.supplier_image" : 1,
                     "supplier.supplier_name"  : 1,
+                    "supplier.estimated_delivery_time"  : 1,
                     "enquiry.enquiry_id"  : 1,
                     "enquiry.payment_terms"  : 1,
                     "buyer.buyer_image" : 1,

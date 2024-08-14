@@ -111,6 +111,7 @@ module.exports = {
               }
               const listCount = await List.countDocuments({buyer_id: buyer.buyer_id})
               buyerData.list_count = listCount
+              
               callback({code : 200, message: "Buyer Login Successfull", result: buyerData});
           } else {
               callback({code: 401, message: "Incorrect Password"});
@@ -461,110 +462,6 @@ module.exports = {
       }
     },
 
-    // buyerDashboardOrderDetails : async(reqObj, callback) => {
-    //   try {
-    //     const { buyer_id } = reqObj
-
-    //     Order.aggregate([
-    //       {
-    //         $match : {buyer_id : buyer_id}
-    //       },
-    //       {
-    //         $addFields: {
-    //           numeric_total_price: {
-    //             $toDouble: {
-    //               $arrayElemAt: [
-    //                 { $split: ["$total_price", " "] },
-    //                 0
-    //               ]
-    //             }
-    //           }
-    //         }
-    //       },
-    //       {
-    //         $facet: {
-    //           completedCount: [
-    //             {$match: {order_status : 'completed'}},
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 count          : { $sum: 1 },
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 count          : 1,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ],
-    //           activeCount: [
-    //             {$match: {order_status : 'active'}},
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 count          : { $sum: 1 },
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 count          : 1,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ],
-    //           pendingCount: [
-    //             {$match: {order_status : 'pending'}},
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 count          : { $sum: 1 },
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 count          : 1,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ],
-    //           totalPurchaseAmount: [
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ]
-    //         }
-    //       }
-    //     ])
-    //     .then((data) => {
-    //       callback({code: 200, message : 'buyer dashoard order details fetched successfully', result: data[0]})
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //       callback({code: 400, message : 'error while fetching buyer dashboard order details', result: err})
-    //     })
-    //   } catch (error) {
-    //     console.log('Internal Server Error', error)
-    //     callback({code: 500, message : 'Internal server error', result: error})
-    //   }
-    // },
-
-
 
     buyerDashboardOrderDetails : async(reqObj, callback) => {
       try {
@@ -725,7 +622,6 @@ module.exports = {
         callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
-    
     
 
     buyerOrderSellerCountry : async(reqObj, callback) => {
@@ -1168,6 +1064,7 @@ module.exports = {
               to_id: 1,
               event_id: 1,
               connected_id: 1,
+              link_id : 1,
               message: 1,
               status : 1,
               createdAt: 1,
@@ -1245,6 +1142,7 @@ module.exports = {
               to_id: 1,
               event_id: 1,
               connected_id: 1,
+              link_id : 1,
               message: 1,
               status : 1,
               createdAt: 1,
