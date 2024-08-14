@@ -259,6 +259,14 @@ module.exports = {
                 },
                 {
                     $lookup: {
+                        from         : "enquiries",
+                        localField   : "enquiry_id",
+                        foreignField : "enquiry_id",
+                        as           : "enquiry_details"
+                    }
+                },
+                {
+                    $lookup: {
                         from         : "buyers",
                         localField   : "buyer_id",
                         foreignField : "buyer_id",
@@ -317,6 +325,7 @@ module.exports = {
                         order_items             : { $push: "$order_items" },
                         buyer_details           : { $first: "$buyer_details" },
                         supplier_details        : { $first: "$supplier_details" },
+                        enquiry_details        : { $first: "$enquiry_details" },
                     }
                 }
             ])

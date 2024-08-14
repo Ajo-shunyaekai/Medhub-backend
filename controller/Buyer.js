@@ -461,13 +461,118 @@ module.exports = {
       }
     },
 
+    // buyerDashboardOrderDetails : async(reqObj, callback) => {
+    //   try {
+    //     const { buyer_id } = reqObj
+
+    //     Order.aggregate([
+    //       {
+    //         $match : {buyer_id : buyer_id}
+    //       },
+    //       {
+    //         $addFields: {
+    //           numeric_total_price: {
+    //             $toDouble: {
+    //               $arrayElemAt: [
+    //                 { $split: ["$total_price", " "] },
+    //                 0
+    //               ]
+    //             }
+    //           }
+    //         }
+    //       },
+    //       {
+    //         $facet: {
+    //           completedCount: [
+    //             {$match: {order_status : 'completed'}},
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           activeCount: [
+    //             {$match: {order_status : 'active'}},
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           pendingCount: [
+    //             {$match: {order_status : 'pending'}},
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           totalPurchaseAmount: [
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ]
+    //         }
+    //       }
+    //     ])
+    //     .then((data) => {
+    //       callback({code: 200, message : 'buyer dashoard order details fetched successfully', result: data[0]})
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //       callback({code: 400, message : 'error while fetching buyer dashboard order details', result: err})
+    //     })
+    //   } catch (error) {
+    //     console.log('Internal Server Error', error)
+    //     callback({code: 500, message : 'Internal server error', result: error})
+    //   }
+    // },
+
+
+
     buyerDashboardOrderDetails : async(reqObj, callback) => {
       try {
-        const { buyer_id } = reqObj
-
+        const { buyer_id } = reqObj;
+    
         Order.aggregate([
           {
-            $match : {buyer_id : buyer_id}
+            $match : { buyer_id: buyer_id }
           },
           {
             $addFields: {
@@ -484,7 +589,7 @@ module.exports = {
           {
             $facet: {
               completedCount: [
-                {$match: {order_status : 'completed'}},
+                { $match: { order_status: 'completed' } },
                 { 
                   $group: {
                     _id            : null,
@@ -501,7 +606,7 @@ module.exports = {
                 }
               ],
               activeCount: [
-                {$match: {order_status : 'active'}},
+                { $match: { order_status: 'active' } },
                 { 
                   $group: {
                     _id            : null,
@@ -518,7 +623,7 @@ module.exports = {
                 }
               ],
               pendingCount: [
-                {$match: {order_status : 'pending'}},
+                { $match: { order_status: 'pending' } },
                 { 
                   $group: {
                     _id            : null,
@@ -547,22 +652,81 @@ module.exports = {
                     total_purchase : 1
                   }
                 }
+              ],
+              enquiryCount: [
+                {
+                  $lookup: {
+                    from: 'enquiries',
+                    let: { buyerId: buyer_id },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $eq: ["$buyer_id", "$$buyerId"] }
+                        }
+                      },
+                      {
+                        $match: { enquiry_status: { $ne: 'order created' } }
+                      },
+                      {
+                        $count: "count"
+                      }
+                    ],
+                    as: 'enquiries'
+                  }
+                },
+                {
+                  $unwind: "$enquiries"
+                },
+                {
+                  $project: {
+                    count: "$enquiries.count"
+                  }
+                }
+              ],
+              purchaseOrderCount: [
+                {
+                  $lookup: {
+                    from: 'purchaseorders',
+                    let: { buyerId: buyer_id },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: { $eq: ["$buyer_id", "$$buyerId"] }
+                        }
+                      },
+                      {
+                        $count: "count"
+                      }
+                    ],
+                    as: 'purchaseorders'
+                  }
+                },
+                {
+                  $unwind: "$purchaseorders"
+                },
+                {
+                  $project: {
+                    count: "$purchaseorders.count"
+                  }
+                }
               ]
             }
           }
         ])
         .then((data) => {
-          callback({code: 200, message : 'buyer dashoard order details fetched successfully', result: data[0]})
+          callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result: data[0] });
         })
         .catch((err) => {
           console.log(err);
-          callback({code: 400, message : 'error while fetching buyer dashboard order details', result: err})
-        })
+          callback({ code: 400, message: 'Error while fetching buyer dashboard order details', result: err });
+        });
       } catch (error) {
-        console.log('Internal Server Error', error)
-        callback({code: 500, message : 'Internal server error', result: error})
+        console.log('Internal Server Error', error);
+        callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
+    
+    
 
     buyerOrderSellerCountry : async(reqObj, callback) => {
       try {
@@ -1019,7 +1183,7 @@ module.exports = {
         ])
         
         .then( async(data) => {
-          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer', status: 0});
+          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer', status: 1});
           const totalPages = Math.ceil(totalItems / page_size);
 
           const returnObj = {

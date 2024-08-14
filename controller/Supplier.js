@@ -9,6 +9,8 @@ const Support      = require('../schema/supportSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 const Notification       = require('../schema/notificationSchema')
+const PurchaseOrder = require('../schema/purchaseOrderSchema')
+const Enquiry = require('../schema/enquiryListSchema')
 
 module.exports = {
     
@@ -297,12 +299,118 @@ module.exports = {
       }
     },
 
-    supplierDashboardOrderDetails : async(reqObj, callback) => {
+    // supplierDashboardOrderDetails : async(reqObj, callback) => {
+    //   try {
+    //     const { supplier_id } = reqObj
+    //     Order.aggregate([
+    //       {
+    //         $match : {supplier_id : supplier_id}
+    //       },
+    //       {
+    //         $addFields: {
+    //           numeric_total_price: {
+    //             $toDouble: {
+    //               $arrayElemAt: [
+    //                 { $split: ["$total_price", " "] },
+    //                 0
+    //               ]
+    //             }
+    //           }
+    //         }
+    //       },
+    //       {
+    //         $facet: {
+    //           completedCount: [
+    //             {$match: {order_status : 'completed'}},
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           activeCount: [
+    //             {$match: {order_status : 'active'}},
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           pendingCount: [
+    //             {$match: {order_status : 'pending'}},
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           totalPurchaseAmount: [
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ]
+              
+    //         }
+    //       }
+    //     ])
+    //     .then((data) => {
+    //       callback({code: 200, message : 'supplier dashoard order details fetched successfully', result: data[0]})
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //       callback({code: 400, message : 'error while fetching supplier dashboard order details', result: err})
+    //     })
+    //   } catch (error) {
+    //     console.log('Internal Server Error', error)
+    //     callback({code: 500, message : 'Internal server error', result: error})
+    //   }
+    // },
+
+
+    supplierDashboardOrderDetails: async (reqObj, callback) => {
       try {
-        const { supplier_id } = reqObj
-        Order.aggregate([
+        const { supplier_id } = reqObj;
+    
+        // Aggregation for Orders
+        const ordersAggregation = [
           {
-            $match : {supplier_id : supplier_id}
+            $match: { supplier_id: supplier_id }
           },
           {
             $addFields: {
@@ -319,86 +427,138 @@ module.exports = {
           {
             $facet: {
               completedCount: [
-                {$match: {order_status : 'completed'}},
-                { 
+                { $match: { order_status: 'completed' } },
+                {
                   $group: {
-                    _id            : null,
-                    count          : { $sum: 1 },
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    count          : 1,
-                    total_purchase : 1
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
                   }
                 }
               ],
               activeCount: [
-                {$match: {order_status : 'active'}},
-                { 
+                { $match: { order_status: 'active' } },
+                {
                   $group: {
-                    _id            : null,
-                    count          : { $sum: 1 },
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    count          : 1,
-                    total_purchase : 1
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
                   }
                 }
               ],
               pendingCount: [
-                {$match: {order_status : 'pending'}},
-                { 
+                { $match: { order_status: 'pending' } },
+                {
                   $group: {
-                    _id            : null,
-                    count          : { $sum: 1 },
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    count          : 1,
-                    total_purchase : 1
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
                   }
                 }
               ],
               totalPurchaseAmount: [
-                { 
+                {
                   $group: {
-                    _id            : null,
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    total_purchase : 1
+                    _id: 0,
+                    total_purchase: 1
                   }
                 }
               ]
-              
             }
           }
-        ])
-        .then((data) => {
-          callback({code: 200, message : 'supplier dashoard order details fetched successfully', result: data[0]})
-        })
-        .catch((err) => {
-          console.log(err);
-          callback({code: 400, message : 'error while fetching supplier dashboard order details', result: err})
-        })
+        ];
+    
+        // Aggregation for Purchase Orders
+        const purchaseOrdersAggregation = [
+          {
+            $match: { supplier_id: supplier_id }
+          },
+          {
+            $group: {
+              _id: null,
+              count: { $sum: 1 },
+              total_amount: { $sum: "$amount" }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              count: 1,
+              total_amount: 1
+            }
+          }
+        ];
+    
+        // Aggregation for Enquiries
+        const enquiriesAggregation = [
+          {
+            $match: { supplier_id: supplier_id }
+          },
+          {
+            $match: { enquiry_status: { $ne: 'order created' } }
+          },
+          {
+            $group: {
+              _id: null,
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              count: 1
+            }
+          }
+        ];
+    
+        const [ordersData, purchaseOrdersData, enquiriesData] = await Promise.all([
+          Order.aggregate(ordersAggregation),
+          PurchaseOrder.aggregate(purchaseOrdersAggregation),
+          Enquiry.aggregate(enquiriesAggregation)
+        ]);
+    
+        // Prepare the final result
+        const result = {
+          orderDetails: ordersData[0],
+          purchaseOrderCount: purchaseOrdersData[0]?.count || 0,
+          purchaseOrderTotalAmount: purchaseOrdersData[0]?.total_amount || 0,
+          enquiryCount: enquiriesData[0]?.count || 0
+        };
+    
+        callback({ code: 200, message: 'Supplier dashboard order details fetched successfully', result });
       } catch (error) {
-        console.log('Internal Server Error', error)
-        callback({code: 500, message : 'Internal server error', result: error})
+        console.log('Internal Server Error', error);
+        callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
+    
 
     supplierOrderSupplierCountry : async(reqObj, callback) => {
       try {
@@ -683,7 +843,7 @@ module.exports = {
         ])
         
         .then( async(data) => {
-          const totalItems = await Notification.countDocuments({to_id: supplier_id, to: 'supplier', status: 0});
+          const totalItems = await Notification.countDocuments({to_id: supplier_id, to: 'supplier', status: 1});
           const totalPages = Math.ceil(totalItems / page_size);
 
           const returnObj = {

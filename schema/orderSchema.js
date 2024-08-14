@@ -204,6 +204,18 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
+    deposit_requested: {
+        type: String,
+        required: true
+    },
+    deposit_due: {
+        type: String,
+        required: true
+    },
+    payment_terms: {
+        type: String,
+        required: true
+    },
     buyer_name: {
         type: String,
         required: true
