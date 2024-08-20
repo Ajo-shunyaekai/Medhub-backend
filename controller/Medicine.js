@@ -15,8 +15,9 @@ module.exports = {
       Medicine.aggregate([
         {
           $match: { 
-            medicine_name : reqObj.medicine_name ,
-            medicine_type : reqObj.medicine_type
+            medicine_name : { $regex: `^${reqObj.medicine_name}$`, $options: 'i' },
+            medicine_type : reqObj.medicine_type,
+            status        : 1
           },
         },
         {
@@ -148,6 +149,7 @@ module.exports = {
                 manufacturer_name,
                 manufacturer_country_of_origin,
                 manufacturer_description,
+                stockedIn_details: stockedInDetails,
                 status : 0
             });
     

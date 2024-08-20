@@ -349,6 +349,8 @@ module.exports = {
                     supplier_mobile: 1,
                     items             : 1,
                     payment_terms     : 1,
+                    deposit_requested: 1,
+                    deposit_due : 1,
                     est_delivery_time : 1,
                     shipping_details  : 1,
                     remarks           : 1,
@@ -383,6 +385,7 @@ module.exports = {
                   $addFields: {
                     "items.medicine_image" : {$arrayElemAt : ["$medicine.medicine_image", 0] },
                     "items.drugs_name"     : {$arrayElemAt  : ["$medicine.drugs_name",0]},
+                    "items.strength"     : {$arrayElemAt  : ["$medicine.strength",0]},
                     "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
                   }
                 },
@@ -405,6 +408,11 @@ module.exports = {
                     supplier_id       : { $first: "$supplier_id" },
                     items             : { $push: "$items" },
                     payment_terms     : { $first: "$payment_terms" },
+
+                    deposit_requested     : { $first: "$deposit_requested" },
+                    deposit_due     : { $first: "$deposit_due" },
+                    // payment_terms     : { $first: "$payment_terms" },
+
                     est_delivery_time : { $first: "$est_delivery_time" },
                     shipping_details  : { $first: "$shipping_details" },
                     remarks           : { $first: "$remarks" },
@@ -444,6 +452,8 @@ module.exports = {
                       supplier_type: 1,
                       items             : 1,
                       payment_terms     : 1,
+                      deposit_requested: 1,
+                      deposit_due : 1,
                       est_delivery_time : 1,
                       shipping_details  : 1,
                       remarks           : 1,
@@ -994,6 +1004,8 @@ module.exports = {
                 supplier_mobile: 1,
                 items             : 1,
                 payment_terms     : 1,
+                deposit_requested: 1,
+                deposit_due : 1,
                 est_delivery_time : 1,
                 shipping_details  : 1,
                 remarks           : 1,
@@ -1028,6 +1040,7 @@ module.exports = {
               $addFields: {
                 "items.medicine_image" : {$arrayElemAt : ["$medicine.medicine_image", 0] },
                 "items.drugs_name"     : {$arrayElemAt  : ["$medicine.drugs_name",0]},
+                "items.strength"     : {$arrayElemAt  : ["$medicine.strength",0]},
                 "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
               }
             },
@@ -1049,6 +1062,8 @@ module.exports = {
                 supplier_id       : { $first: "$supplier_id" },
                 items             : { $push: "$items" },
                 payment_terms     : { $first: "$payment_terms" },
+                deposit_requested     : { $first: "$deposit_requested" },
+                deposit_due     : { $first: "$deposit_due" },
                 est_delivery_time : { $first: "$est_delivery_time" },
                 shipping_details  : { $first: "$shipping_details" },
                 remarks           : { $first: "$remarks" },
@@ -1087,6 +1102,8 @@ module.exports = {
                   supplier_mobile: 1,
                   items             : 1,
                   payment_terms     : 1,
+                  deposit_requested: 1,
+                  deposit_due : 1,
                   est_delivery_time : 1,
                   shipping_details  : 1,
                   remarks           : 1,
@@ -1127,8 +1144,6 @@ module.exports = {
         
     }
     },
-
-
 
     supplierInvoicesList: async (reqObj, callback) => {
       try {
