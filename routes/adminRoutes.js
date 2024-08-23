@@ -5,7 +5,6 @@ const MedicineController                         = require('../controller/Medici
 const { handleResponse }                         = require('../utils/utilities');
 const {checkAuthorization, checkAuthentication, checkAdminAuthentication}  = require('../middleware/Authorization');
 
-
 module.exports = () => {
 
     routes.post('/register', checkAuthorization,   (req, res) => {
@@ -213,8 +212,36 @@ module.exports = () => {
         });
     });
 
+    routes.post('/order-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.orderDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     routes.post('/buyer-supplier-invoices-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.invoicesList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-notification-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getNotificationList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-notification-details-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getNotificationDetailsList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/update-notification-status', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.updateStatus(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

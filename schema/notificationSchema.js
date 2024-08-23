@@ -29,7 +29,7 @@ const notificationSchema = new Schema({
   },
   to_id: {
     type: String,
-    required: true,
+    // required: true,
   },
   event_id: {
     type: String,
@@ -44,6 +44,9 @@ const notificationSchema = new Schema({
   message: {
     type: String,
     required: true,
+  },
+  cancel_reason: {
+    type: String,
   },
   status : {
     type: Number

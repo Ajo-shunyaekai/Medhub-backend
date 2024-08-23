@@ -52,6 +52,10 @@ const supplierSchema = new Schema({
         type: String,
         required: true,
     },
+    vat_reg_no: {
+        type: String,
+        required: true,
+    },
     country_of_origin: {
         type: String,
         required: true,

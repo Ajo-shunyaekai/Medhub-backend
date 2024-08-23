@@ -88,6 +88,12 @@ const enquirySchema = new Schema({
     est_delivery_time: {
         type: String,
     },
+    cancellation_reason: {
+        type: String,
+    },
+    additional_comments : {
+        type: String,
+    },
     shipping_details: {
         type: {
             consignor_name: {

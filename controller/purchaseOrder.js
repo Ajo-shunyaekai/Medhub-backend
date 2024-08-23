@@ -9,7 +9,7 @@ module.exports = {
     createPO: async (reqObj, callback) => {
         try {
             const purchaseOrderId = 'PO-' + Math.random().toString(16).slice(2)
-            const { buyer_id, enquiry_id, supplier_id, itemIds,
+            const { buyer_id, enquiry_id, supplier_id, itemIds, grandTotalAmount,
                 data: {
                     poDate,
                     poNumber,
@@ -17,11 +17,13 @@ module.exports = {
                     supplierAddress,
                     supplierEmail,
                     supplierMobile,
+                    supplier_country_code,
                     supplierRegNo,
                     buyerName,
                     buyerAddress,
                     buyerEmail,
                     buyerMobile,
+                    buyer_country_code,
                     buyerRegNo,
                     orderItems,
                     description
@@ -56,7 +58,9 @@ module.exports = {
                 medicine_name     : item.medicine_details.medicine_name,
                 quantity_required : item.quantity_required,
                 unit_price        : item.unit_price,
-                total_amount      : item.counter_price || item.target_price,
+                total_amount      : item.totalAmount,
+                counter_price     : item.counter_price,
+                target_price      : item.target_price,
                 status            : 'pending'
             }));
 
@@ -70,14 +74,17 @@ module.exports = {
                 buyer_name              : buyerName,
                 buyer_address           : buyerAddress,
                 buyer_mobile            : buyerMobile,
+                buyer_country_code      : buyer_country_code,
                 buyer_email             : buyerEmail,
                 buyer_regNo             : buyerRegNo,
                 supplier_name           : supplierName,
                 supplier_address        : supplierAddress,
                 supplier_mobile         : supplierMobile,
+                supplier_country_code   : supplier_country_code,
                 supplier_email          : supplierEmail,
                 supplier_regNo          : supplierRegNo,
                 order_items             : formattedOrderItems,
+                total_amount            : grandTotalAmount,
                 additional_instructions : description,
                 po_status               : 'pending',
             });
@@ -168,6 +175,7 @@ module.exports = {
                         additional_instructions : 1,
                         po_status               : 1,
                         order_items             : 1,
+                        total_amount            : 1,
                         enquiry_id              : 1,
                         created_at              : 1,
                         updated_at              : 1,
@@ -198,6 +206,7 @@ module.exports = {
                         additional_instructions : 1,
                         po_status               : 1,
                         order_items             : 1,
+                        total_amount            : 1,
                         enquiry_id              : 1,
                         created_at              : 1,
                         updated_at              : 1,
@@ -309,14 +318,17 @@ module.exports = {
                         po_number               : { $first: "$po_number" },
                         additional_instructions : { $first: "$additional_instructions" },
                         po_status               : { $first: "$po_status" },
+                        total_amount            : { $first: "$total_amount" },
                         buyer_name              : { $first: "$buyer_name" },
                         buyer_address           : { $first: "$buyer_address" },
                         buyer_mobile            : { $first: "$buyer_mobile" },
+                        buyer_country_code         : { $first: "$buyer_country_code" },
                         buyer_email             : { $first: "$buyer_email" },
                         buyer_regNo             : { $first: "$buyer_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
                         supplier_address        : { $first: "$supplier_address" },
                         supplier_mobile         : { $first: "$supplier_mobile" },
+                        supplier_country_code         : { $first: "$supplier_country_code" },
                         supplier_email          : { $first: "$supplier_email" },
                         supplier_regNo          : { $first: "$supplier_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
@@ -344,9 +356,11 @@ module.exports = {
     editPO: async (reqObj, callback) => {
         try {
             const { 
+                buyer_id,
                 purchaseOrder_id, 
                 supplier_id, 
                 enquiry_id,
+                grandTotalAmount,
                 data: {
                     poDate,
                     poNumber,
@@ -395,12 +409,32 @@ module.exports = {
                     medicine_name     : item.medicine_name,
                     quantity_required : item.quantity_required,
                     unit_price        : item.unit_price,
-                    total_amount      : item.counter_price || item.target_price || item.total_amount ,
+                    // total_amount      : item.counter_price || item.target_price || item.total_amount ,
+                    total_amount      : item.totalAmount,
+                    counter_price     : item.counter_price,
+                    target_price      : item.target_price,
                     status            : 'pending'
                 }));
             }
             
             await purchaseOrder.save();
+
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+            const newNotification = new Notification({
+                notification_id  : notificationId,
+                event_type       : 'PO edited',
+                event            : 'purchaseorder',
+                from             : 'buyer',
+                to               : 'supplier',
+                from_id          : buyer_id,
+                to_id            : supplier_id,
+                event_id         : enquiry_id,
+                link_id          : purchaseOrder_id,
+                message          : 'Purchase order edited',
+                status           : 0
+            })
+            await newNotification.save()
+
             callback({ code: 200, message: 'Purchase Order updated successfully', data: purchaseOrder });
         } catch (error) {
             console.log('Internal Server Error', error);

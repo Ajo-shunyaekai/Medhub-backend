@@ -15,6 +15,7 @@ const initializeInvoiceNumber = async () => {
 module.exports = {
 
     createOrder : async(reqObj, callback) => {
+      console.log(reqObj);
        try {
 
         const orderId = 'ORD-' + Math.random().toString(16).slice(2);
@@ -94,13 +95,14 @@ module.exports = {
         
         const { buyer_id, supplier_id, order_id, logistics_details } = reqObj
         const logisticsArray = Array.isArray(logistics_details) ? logistics_details : [logistics_details];
+        console.log('logisticsArray',logisticsArray);
 
         const updatedOrder = await Order.findOneAndUpdate(
           { order_id : order_id },
           {
               $set: {
                 logistics_details : logisticsArray,
-                status            : 'Awaiting details from supplier'
+                status            : 'Awaiting Details from Supplier'
               }
           },
           { new: true } 
@@ -132,6 +134,7 @@ module.exports = {
     },
 
     submitPickupDetails : async(reqObj, callback) => {
+      // console.log(reqObj);
       try {
         
         const { buyer_id, supplier_id, order_id, shipment_details } = reqObj
@@ -141,7 +144,7 @@ module.exports = {
           {
               $set: {
                 shipment_details : shipment_details,
-                status           : 'Shipment details submitted'
+                status           : 'Shipment Details Submitted'
               }
           },
           { new: true } 
@@ -376,7 +379,7 @@ module.exports = {
                 {
                   $lookup: {
                     from         : "medicines",
-                    localField   : "items.product_id",
+                     localField   : "items.medicine_id",
                     foreignField : "medicine_id",
                     as           : "medicine"
                   }
@@ -570,7 +573,7 @@ module.exports = {
         const {page_no, limit, filterKey, buyer_id} = reqObj
   
         const pageNo   = page_no || 1
-        const pageSize = limit || 1
+        const pageSize = limit || 5
         const offset   = (pageNo - 1) * pageSize     
         
         Order.aggregate([
@@ -1031,7 +1034,7 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                localField   : "items.product_id",
+                localField   : "items.medicine_id",
                 foreignField : "medicine_id",
                 as           : "medicine"
               }
@@ -1040,7 +1043,7 @@ module.exports = {
               $addFields: {
                 "items.medicine_image" : {$arrayElemAt : ["$medicine.medicine_image", 0] },
                 "items.drugs_name"     : {$arrayElemAt  : ["$medicine.drugs_name",0]},
-                "items.strength"     : {$arrayElemAt  : ["$medicine.strength",0]},
+                "items.strength"       : {$arrayElemAt  : ["$medicine.strength",0]},
                 "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
               }
             },
@@ -1054,6 +1057,7 @@ module.exports = {
                 buyer_email        : { $first: "$buyer_email" },
                 buyer_address        : { $first: "$buyer_address" },
                 buyer_mobile        : { $first: "$buyer_mobile" },
+                buyer_country_code        : { $first: "$buyer_country_code" },
                 supplier_name        : { $first: "$supplier_name" },
                 supplier_email        : { $first: "$supplier_email" },
                 supplier_mobile        : { $first: "$supplier_mobile" },
@@ -1095,6 +1099,7 @@ module.exports = {
                   buyer_name : 1,
                   buyer_email : 1,
                   buyer_mobile:1,
+                  buyer_country_code:1,
                   buyer_address : 1,
                   supplier_name : 1,
                   supplier_email: 1,
@@ -1128,6 +1133,7 @@ module.exports = {
                         "buyer.buyer_name" : 1,
                         "buyer.buyer_email" : 1,
                         "buyer.buyer_mobile" : 1,
+                        "buyer.buyer_country_code" : 1,
                         "buyer.buyer_type" : 1,
                 }
             }
@@ -1445,6 +1451,100 @@ module.exports = {
       } catch (error) {
         
       }
-    }
+    },
+
+    orderSalesFilterList: async (reqObj, callback) => {
+      try {
+        const {page_no, limit, filterKey, buyer_id, supplier_id} = reqObj
+  
+        const pageNo   = page_no || 1
+        const pageSize = limit || 1
+        const offset   = (pageNo - 1) * pageSize     
+
+        let matchCondition = {
+          order_status: 'completed'
+        };
+
+        if (buyer_id) {
+            matchCondition.buyer_id = buyer_id;
+        } else if (supplier_id) {
+            matchCondition.supplier_id = supplier_id;
+        }
+
+        Order.aggregate([
+          {
+            $match: matchCondition
+        },
+          {
+              $facet: {
+                  yearlyData: [
+                      {
+                          $group: {
+                              _id: { year: { $year: "$created_at" } },
+                              orderCount: { $sum: 1 }
+                          }
+                      },
+                      {
+                          $sort: { "_id.year": 1 } // Sorting the result by year in ascending order
+                      }
+                  ],
+                  monthlyData: [
+                      {
+                          $match: {
+                              created_at: {
+                                  $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // First day of the current month
+                                  $lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1) // First day of the next month
+                              }
+                          }
+                      },
+                      {
+                          $group: {
+                              _id: { year: { $year: "$created_at" }, month: { $month: "$created_at" } },
+                              orderCount: { $sum: 1 }
+                          }
+                      }
+                  ],
+                  weeklyData: [
+                      {
+                          $match: {
+                              created_at: {
+                                  $gte: new Date(new Date().setDate(new Date().getDate() - new Date().getDay())), // First day of the current week (Sunday)
+                                  $lt: new Date(new Date().setDate(new Date().getDate() + (6 - new Date().getDay()))) // First day of the next week (Sunday)
+                              }
+                          }
+                      },
+                      {
+                          $group: {
+                              _id: { year: { $year: "$created_at" }, week: { $week: "$created_at" } },
+                              orderCount: { $sum: 1 }
+                          }
+                      }
+                  ]
+              }
+          }
+      ])
+        .then((data) => {
+          
+            // Order.countDocuments({order_status : filterKey, buyer_id: buyer_id})
+            // .then(totalItems => {
+            //     const totalPages = Math.ceil(totalItems / pageSize);
+
+            //     const responseData = {
+            //         data,
+            //         totalPages,
+            //         totalItems
+            //     }
+            //     callback({ code: 200, message: "List Fetched successfully", result: responseData });
+            // })
+            callback({ code: 200, message: "List Fetched successfully", result: data });
+        })
+        .catch((err) => {
+            console.log(err);
+            callback({ code: 400, message: "Error in fetching order list", result: err });
+        })
+      } catch (error) {
+        
+      }
+    },
 
 }

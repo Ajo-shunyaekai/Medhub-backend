@@ -22,6 +22,14 @@ const orderItemSchema = new Schema({
         type: String,
         required: true
     },
+    target_price: {
+        type: String,
+        required: true
+    },
+    counter_price: {
+        type: String,
+        // required: true
+    },
     status: {
         type: String,
         enum: ['pending',  ,'accepted', 'completed', 'cancelled', 'rejected' ],
@@ -78,6 +86,10 @@ const purchaseOrderSchema = new Schema({
         type: String,
         required: true
     },
+    buyer_country_code: {
+        type: String,
+        required: true
+    },
     buyer_email: {
         type: String,
         required: true
@@ -98,6 +110,10 @@ const purchaseOrderSchema = new Schema({
         type: String,
         required: true
     },
+    supplier_country_code: {
+        type: String,
+        required: true
+    },
     supplier_email: {
         type: String,
         required: true
@@ -107,6 +123,10 @@ const purchaseOrderSchema = new Schema({
         required: true
     },
     order_items: [orderItemSchema],
+    total_amount: {
+        type: String,
+        required: true
+    },
     additional_instructions: {
         type: String,
     },

@@ -1,9 +1,9 @@
-const Enquiry  = require('../schema/enquiryListSchema')
-const Support  = require('../schema/supportSchema')
-const Invoice  = require('../schema/invoiceNumberSchema')
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
-const Notification       = require('../schema/notificationSchema')
+const mongoose     = require('mongoose');
+const ObjectId     = mongoose.Types.ObjectId;
+const Enquiry      = require('../schema/enquiryListSchema')
+const Support      = require('../schema/supportSchema')
+const Invoice      = require('../schema/invoiceNumberSchema')
+const Notification = require('../schema/notificationSchema')
 
 module.exports = {
 
@@ -613,7 +613,7 @@ module.exports = {
                 {
                     $set: {
                         'quotation_items.$.status': new_status,
-                        quotation_items_updated_at: new Date()
+                         quotation_items_updated_at: new Date()
                     }
                 },
                 {
@@ -625,7 +625,7 @@ module.exports = {
                 return callback({ code: 404, message: 'Enquiry not found', result: null });
             }
     
-            callback({ code: 200, message: 'Quotation updated successfully', result: updatedEnquiry });
+            callback({ code: 200, message: `Quotation ${new_status} successfully`, result: updatedEnquiry });
         } catch (error) {
             console.log('error', error);
             callback({ code: 500, message: 'Internal server error', result: error });
@@ -634,12 +634,14 @@ module.exports = {
 
     cancelEnquiry: async (reqObj, callback) => {
         try {
-            const { supplier_id, buyer_id, status, enquiry_id } = reqObj;
+            const { supplier_id, buyer_id, status, enquiry_id, reason, comment } = reqObj;
 
             const updatedEnquiry = await Enquiry.findOneAndUpdate(
                 { enquiry_id: enquiry_id },
                 {
                     $set: {
+                        cancellation_reason    : reason,
+                        additional_comments    : comment,
                         enquiry_status         : 'cancelled',
                         'items.$[elem].status' : 'cancelled'
                     }
@@ -663,6 +665,7 @@ module.exports = {
                 to_id            : supplier_id,
                 event_id         : enquiry_id,
                 message          : 'Enquiry cancelled',
+                cancel_reason    : reason,
                 status           : 0
             })
             await newNotification.save()

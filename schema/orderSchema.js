@@ -34,7 +34,7 @@ const orderItemSchema = new Schema({
 });
 
 const logisticsSchema = new Schema({
-    type: {
+    door_to_door: {
         type: String,
         // required: true
     },
@@ -50,6 +50,9 @@ const logisticsSchema = new Schema({
             type: String,
             // required: true
         },
+        email: {
+            type: String,
+        },
         mobile: {
             type: String,
             // required: true
@@ -58,11 +61,15 @@ const logisticsSchema = new Schema({
             type: String,
             // required: true
         },
-        p: {
+        country: {
             type: String,
             // required: true
         },
         state: {
+            type: String,
+            // required: true
+        },
+        city_district: {
             type: String,
             // required: true
         },
@@ -97,6 +104,14 @@ const shipmentSchema = new Schema({
             type: String,
             // required: true
         },
+        country: {
+            type: String,
+            // required: true
+        },
+        state: {
+            type: String,
+            // required: true
+        },
         ciyt_disctrict: {
             type: String,
             // required: true
@@ -104,6 +119,9 @@ const shipmentSchema = new Schema({
         pincode: {
             type: String,
             // required: true
+        },
+        prefered_pickup_date: {
+            type: String,
         },
         prefered_pickup_time: {
             type: String,
@@ -146,6 +164,12 @@ const shipmentSchema = new Schema({
         address: {
             type: String,
             // required: true
+        },
+        country: {
+            type: String,
+        },
+        state: {
+            type: String,
         },
         ciyt_disctrict: {
             type: String,
@@ -263,8 +287,8 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
-        default: 'active'
+        enum: ['pending', 'Active', 'in-transit', 'delivered','completed', 'cancelled'],
+        default: 'Active'
     },
     created_at: {
         type: Date,

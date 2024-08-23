@@ -47,18 +47,35 @@ module.exports = {
                 license_no                   : reqObj.license_no,
                 license_expiry_date          : reqObj.license_expiry_date,
                 tax_no                       : reqObj.tax_no,
-                registration_no              : reqobj.registration_no,
+                registration_no              : reqObj.registration_no,
                 description                  : reqObj.description,
                 buyer_image                  : reqObj.buyer_image,
                 tax_image                    : reqObj.tax_image,
                 license_image                : reqObj.license_image,
                 certificate_image            : reqObj.certificate_image,
+                // registration_no             : reqObj.registration_no ,
+                // vat_reg_no                  : reqObj.vat_reg_no,
                 token                        : token,
                 account_status               : 0,
                 profile_status               : 0
               });
 
-              newBuyer.save().then(() => {
+              newBuyer.save().then(async() => {
+                const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+                const newNotification = new Notification({
+                  notification_id  : notificationId,
+                  event_type   : 'New Registration Request',
+                  event : 'registration',
+                  from : 'buyer',
+                  to : 'admin',
+                  from_id : buyerId,
+                  // to_id : reqObj.buyer_id,
+                  event_id : buyerId,
+                  // connected_id : reqObj.enquiry_id,
+                  message : 'New buyer registration request',
+                  status  : 0
+              })
+               await newNotification.save()
                 callback({code: 200, message: "Buyer registration request submitted successfully"})
               }).catch((err) => {
                 console.log('err',err);

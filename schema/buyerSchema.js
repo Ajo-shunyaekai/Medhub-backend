@@ -33,6 +33,14 @@ const buyerSchema = new Schema({
     type: String,
     required : true,
   },
+  // registration_no: {
+  //   type: String,
+  //   required: true,
+  // },
+  // vat_reg_no: {
+  //     type: String,
+  //     required: true,
+  // },
   contact_person_name: {
     type: String,
     required: true,
@@ -81,10 +89,14 @@ const buyerSchema = new Schema({
     type: String,
     required: true
   },
-  registration_no: {
-    type: String,
-    required: true
-  },
+  // registration_no: {
+  //   type: String,
+  //   required: true
+  // },
+//   vat_reg_no: {
+//     type: String,
+//     required: true,
+// },
   description: {
     type: String,
     required: true

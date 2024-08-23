@@ -6,6 +6,7 @@ const MedicineInventory = require("../schema/medicineInventorySchema");
 const { aggregation }   = require("../common/common")
 const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
+const Notification = require('../schema/notificationSchema')
 
 
 module.exports = {
@@ -106,7 +107,22 @@ module.exports = {
             });
     
             newMedicine.save()
-              .then((savedMedicine) => {
+              .then(async(savedMedicine) => {
+                const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+                const newNotification = new Notification({
+                  notification_id  : notificationId,
+                  event_type   : 'New Medicine',
+                  event : 'addmedicine',
+                  from : 'supplier',
+                  to : 'admin',
+                  from_id : supplier_id,
+                  // to_id : reqObj.buyer_id,
+                  event_id : medicine_id,
+                  // connected_id : reqObj.enquiry_id,
+                  message : 'New medicine request',
+                  status : 0
+              })
+               await newNotification.save()
                   callback({ code: 200, message: "Add medicine request submitted successfully", result: savedMedicine });
               })
               .catch((err) => {
@@ -154,7 +170,22 @@ module.exports = {
             });
     
             secondaryMarketMedicine.save()
-              .then((savedMedicine) => {
+              .then(async(savedMedicine) => {
+                const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+                const newNotification = new Notification({
+                  notification_id  : notificationId,
+                  event_type   : 'New Medicine',
+                  event : 'addmedicine',
+                  from : 'supplier',
+                  to : 'admin',
+                  from_id : supplier_id,
+                  // to_id : reqObj.buyer_id,
+                  event_id : medicine_id,
+                  // connected_id : reqObj.enquiry_id,
+                  message : 'New secondary medicine request',
+                  status  : 0
+              })
+               await newNotification.save()
                 callback({ code: 200, message: "Add Medicine Request Submitted Successfully", result: savedMedicine });
               })
               .catch((err) => {
@@ -349,6 +380,7 @@ module.exports = {
             registered_in  : 1,
             inventory_info : 1,
             medicine_image : 1,
+            invoice_image  : 1,
             strength : 1,
             medicine_category : 1,
             total_quantity : 1,
@@ -388,6 +420,7 @@ module.exports = {
             registered_in  : 1,
             inventory_info : 1,
             medicine_image : 1,
+            invoice_image  : 1,
             strength : 1,
             medicine_category : 1,
             total_quantity : 1,
@@ -434,6 +467,7 @@ module.exports = {
             registered_in  : 1,
             inventory_info : 1,
             medicine_image : 1,
+            invoice_image  : 1,
             strength : 1,
             medicine_category : 1,
             total_quantity : 1,
@@ -475,6 +509,7 @@ module.exports = {
             registered_in  : 1,
             inventory_info : 1,
             medicine_image : 1,
+            invoice_image  : 1,
             strength : 1,
             medicine_category : 1,
             total_quantity : 1,

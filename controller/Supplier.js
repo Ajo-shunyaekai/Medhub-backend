@@ -37,7 +37,7 @@ module.exports = {
               license_no                  : reqObj.license_no,
               license_expiry_date         : reqObj.license_expiry_date,
               tax_no                      : reqObj.tax_no,
-              registration_no             : reqobj.registration_no,
+              // registration_no             : reqobj.registration_no,
               country_of_origin           : reqObj.country_of_origin,
               country_of_operation        : reqObj.country_of_operation,
               contact_person_name         : reqObj.contact_person_name,
@@ -52,12 +52,29 @@ module.exports = {
               payment_terms               : reqObj.payment_terms,
               estimated_delivery_time     : reqObj.estimated_delivery_time,
               tags                        : reqObj.tags,
+              registration_no             : reqObj.registration_no ,
+              vat_reg_no                  : reqObj.vat_reg_no,
               token                       : token,
               account_status              : 0,
               profile_status              : 0
           });
 
-            newSupplier.save() .then(() => {
+            newSupplier.save() .then(async() => {
+              const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+                const newNotification = new Notification({
+                  notification_id  : notificationId,
+                  event_type   : 'New Registration Request',
+                  event : 'registration',
+                  from : 'supplier',
+                  to : 'admin',
+                  from_id : supplierId,
+                  // to_id : reqObj.buyer_id,
+                  event_id : supplierId,
+                  // connected_id : reqObj.enquiry_id,
+                  message : 'New supplier registration request',
+                  status  : 0
+              })
+               await newNotification.save()
               callback({code: 200, message: "Supplier Registration Successfull"})
             }).catch((err) => {
               console.log('err',err);

@@ -20,6 +20,7 @@ const guestRouter     = require('./routes/guestRoutes')()
 const orderRouter     = require('./routes/orderRoutes')()
 const enquiryRouter   = require('./routes/enquiryRoutes')()
 const purchaseRouter  = require('./routes/purchaseOrderRoutes')()
+const invoiceRouter   = require('./routes/invoiceRoutes')()
 //-----------------   routes   -----------------------//
 
 //db-connection
@@ -35,6 +36,8 @@ app.get('/*', function (req, res) {
 const corsOptions = {
   origin: [
     'http://192.168.1.31:2221',
+    'http://192.168.1.82:3000',
+    'http://192.168.1.42:3000',
     'http://localhost:2221',
     'http://localhost:3030',
     'http://192.168.1.34:3333',
@@ -98,6 +101,12 @@ app.use('/api/supplier/enquiry', enquiryRouter);
 app.use('/api/purchaseorder', purchaseRouter);
 app.use('/api/buyer/purchaseorder', purchaseRouter);
 app.use('/api/supplier/purchaseorder', purchaseRouter);
+//-----------------purchaseorder--------------------------//
+
+//-----------------invoice--------------------------// 
+app.use('/api/invoice', invoiceRouter);
+app.use('/api/buyer/invoice', invoiceRouter);
+app.use('/api/supplier/invoice', invoiceRouter);
 //-----------------purchaseorder--------------------------//
 
 //--------------- api routes ------------------//

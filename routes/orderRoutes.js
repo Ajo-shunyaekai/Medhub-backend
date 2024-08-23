@@ -190,5 +190,13 @@ module.exports = () => {
     });
 
 
+    routes.post('/sales-filter', checkAuthorization, commonAuthentication, (req, res) => {
+        Order.orderSalesFilterList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+
     return routes;
 }

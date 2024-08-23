@@ -1,5 +1,6 @@
 const bcrypt             = require('bcrypt');
 const jwt                = require('jsonwebtoken');
+const nodemailer         = require('nodemailer');
 const generator          = require('generate-password');
 const Admin              = require('../schema/adminSchema')
 const User               = require('../schema/userSchema')
@@ -10,6 +11,7 @@ const BuyerEdit          = require('../schema/buyerEditSchema')
 const SupplierEdit       = require('../schema/supplierEditSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
+const Notification       = require('../schema/notificationSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 
@@ -21,6 +23,32 @@ const generatePassword = () => {
   });
   return password
 }
+
+
+var transporter = nodemailer.createTransport({
+    host   : "smtp.gmail.com",
+    port   : 587,
+    secure : false, // true for 465, false for other ports
+    type   : "oauth2",
+    // service : 'gmail',
+    auth : {
+        user : process.env.SMTP_USER_ID,
+        pass : process.env.SMTP_USER_PASSWORD
+    }
+});
+const sendMailFunc = (email, subject, body) =>{
+    
+    var mailOptions = {
+        from    : process.env.SMTP_USER_ID,
+        to      : email,
+        subject : subject,
+        // text    : 'This is text mail, and sending for testing purpose'
+        html:body
+        
+    };
+    transporter.sendMail(mailOptions);
+}
+
 
 module.exports = {
 
@@ -316,64 +344,155 @@ module.exports = {
       }
     },
 
-    acceptRejectSupplierRegReq : async(reqObj, callback) => {
-      try {
-        const { supplier_id, action } = reqObj
+    // acceptRejectSupplierRegReq : async(reqObj, callback) => {
+    //   try {
+    //     const { supplier_id, action } = reqObj
 
-        const supplier = await Supplier.findOne({ supplier_id : supplier_id });
+    //     const supplier = await Supplier.findOne({ supplier_id : supplier_id });
   
-        if (!supplier) {
-            return callback({code: 400, message: "supplier not found" });
-        }
+    //     if (!supplier) {
+    //         return callback({code: 400, message: "supplier not found" });
+    //     }
 
-        const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
-        const newProfileStatus = 1
+    //     const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+    //     const newProfileStatus = 1
 
        
-        const updateProfile = await Supplier.findOneAndUpdate(
-            { supplier_id    : supplier_id },
-            { account_status : newAccountStatus, profile_status : newProfileStatus },
-            { new : true }
-        );
+    //     const updateProfile = await Supplier.findOneAndUpdate(
+    //         { supplier_id    : supplier_id },
+    //         { account_status : newAccountStatus, profile_status : newProfileStatus },
+    //         { new : true }
+    //     );
 
+    //     if (!updateProfile) {
+    //       return callback({ code: 400, message: "Failed to update supplier status" });
+    //   }
+
+    //   let password
+      
+    //     if (updateProfile) {
+    //        if(updateProfile.account_status === 1) {
+    //           password = generatePassword()
+            
+    //         const saltRounds = 10
+    //         const hashedPassword = await bcrypt.hash(password, saltRounds);
+    //         updateProfile.password = hashedPassword;
+    //         await updateProfile.save();
+    //        }
+          
+    //       const returnObj = {
+    //         supplier_id           : updateProfile.supplier_id,
+    //         supplier_name         : updateProfile.supplier_name,
+    //         supplier_email        : updateProfile.supplier_email,
+    //         supplier_mobile_no    : updateProfile.supplier_mobile,
+    //         supplier_country_code : updateProfile.supplier_country_code,
+    //         account_status        : updateProfile.account_status,
+    //         profile_status        : updateProfile.profile_status,
+    //         password              : updateProfile.password,
+    //         generatedPassword     : password
+    //       }
+    //       let body = "Hello "+updateProfile.supplier_name+", <br />" 
+    //       +"Your Registration Request has been Approved  "
+    //       +"Your Login Email is: "+updateProfile.supplier_email+"" 
+    //       +"Your Login Password is : "+password +", <br />" 
+    //       +"<br /><br />"
+    //       +" Thanks & Regards"
+    //       +" <br />"
+    //       +" Team. Deliver";
+    //   sendMailFunc('ajo@shunyaekai.tech', 'Login Credentials for Deliver', body)
+    //       callback({ code: 200, message: `${updateProfile.status === 1 ? 'supplier registration accepted successfully': updateProfile.status === 2 ? ' supplier registration rejected' : ''}`,result: returnObj});
+    //     } else {
+    //         callback({code:400,  message: "Failed to update user status" });
+    //     }
+
+    //   } catch (error) {
+    //     console.log('Internal Sever Error:',error)
+    //     callback({code: 500, message: 'Internal Server Error', result: error})
+    //   }
+    // },
+
+
+    acceptRejectSupplierRegReq: async (reqObj, callback) => {
+      try {
+        const { supplier_id, action } = reqObj;
+    
+        const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+    
+        if (!supplier) {
+          return callback({ code: 400, message: "Supplier not found" });
+        }
+    
+        const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+        const newProfileStatus = 1;
+    
+        const updateProfile = await Supplier.findOneAndUpdate(
+          { supplier_id: supplier_id },
+          { account_status: newAccountStatus, profile_status: newProfileStatus },
+          { new: true }
+        );
+    
         if (!updateProfile) {
           return callback({ code: 400, message: "Failed to update supplier status" });
-      }
-
-      let password
-      
-        if (updateProfile) {
-           if(updateProfile.account_status === 1) {
-              password = generatePassword()
-            
-            const saltRounds = 10
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
-            updateProfile.password = hashedPassword;
-            await updateProfile.save();
-           }
-          
-          const returnObj = {
-            supplier_id           : updateProfile.supplier_id,
-            supplier_name         : updateProfile.supplier_name,
-            supplier_email        : updateProfile.supplier_email,
-            supplier_mobile_no    : updateProfile.supplier_mobile,
-            supplier_country_code : updateProfile.supplier_country_code,
-            account_status        : updateProfile.account_status,
-            profile_status        : updateProfile.profile_status,
-            password              : updateProfile.password,
-            generatedPassword     : password
-          }
-
-          callback({ code: 200, message: `${updateProfile.status === 1 ? 'supplier registration accepted successfully': updateProfile.status === 2 ? ' supplier registration rejected' : ''}`,result: returnObj});
-        } else {
-            callback({code:400,  message: "Failed to update user status" });
         }
-
+    
+        if (action === 'accept') {
+          let password = generatePassword();
+          const saltRounds = 10;
+          const hashedPassword = await bcrypt.hash(password, saltRounds);
+          updateProfile.password = hashedPassword;
+          await updateProfile.save();
+    
+          const returnObj = {
+            supplier_id: updateProfile.supplier_id,
+            supplier_name: updateProfile.supplier_name,
+            supplier_email: updateProfile.supplier_email,
+            supplier_mobile_no: updateProfile.supplier_mobile,
+            supplier_country_code: updateProfile.supplier_country_code,
+            account_status: updateProfile.account_status,
+            profile_status: updateProfile.profile_status,
+            password: updateProfile.password,
+            generatedPassword: password
+          };
+    
+          const body = `Hello ${updateProfile.supplier_name}, <br />
+            Your Registration Request has been Approved. <br />
+            Your Login Email is: ${updateProfile.supplier_email} <br />
+            Your Login Password is: ${password} <br />
+            <br /><br />
+            Thanks & Regards <br />
+            Team Deliver`;
+    
+          sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Deliver', body);
+    
+          return callback({
+            code: 200,
+            message: 'Supplier registration accepted successfully',
+            result: returnObj
+          });
+        } else if (action === 'reject') {
+          const body = `Hello ${updateProfile.supplier_name}, <br />
+            We regret to inform you that your registration request has been rejected. <br />
+            If you believe this is an error, please contact our support team. <br />
+            <br /><br />
+            Thanks & Regards <br />
+            Team Deliver`;
+    
+          sendMailFunc('ajo@shunyaekai.tech', 'Registration Request Rejected', body);
+    
+          return callback({
+            code: 200,
+            message: 'Supplier registration rejected',
+            result: null
+          });
+        } else {
+          return callback({ code: 400, message: "Invalid action" });
+        }
       } catch (error) {
-        console.log('Internal Sever Error:',error)
-        callback({code: 500, message: 'Internal Server Error', result: error})
+        console.log('Internal Server Error:', error);
+        callback({ code: 500, message: 'Internal Server Error', result: error });
       }
     },
+    
 
     supplierSupportList : async(reqObj, callback) => {
       try {
@@ -541,63 +660,147 @@ module.exports = {
       }
     },
 
-    acceptRejectBuyerRegReq : async(reqObj, callback) => {
-      try {
-        const { buyer_id, action } = reqObj
+    // acceptRejectBuyerRegReq : async(reqObj, callback) => {
+    //   try {
+    //     const { buyer_id, action } = reqObj
 
-        const buyer = await Buyer.findOne({ buyer_id : buyer_id });
+    //     const buyer = await Buyer.findOne({ buyer_id : buyer_id });
   
-        if (!buyer) {
-            return callback({code: 400, message: "buyer not found" });
-        }
+    //     if (!buyer) {
+    //         return callback({code: 400, message: "buyer not found" });
+    //     }
 
-        const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
-        const newProfileStatus = 1
+    //     const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+    //     const newProfileStatus = 1
        
-        const updateStatus = await Buyer.findOneAndUpdate(
-            { buyer_id    : buyer_id },
-            { account_status : newAccountStatus, profile_status : newProfileStatus },
-            { new         : true }
-        );
+    //     const updateStatus = await Buyer.findOneAndUpdate(
+    //         { buyer_id    : buyer_id },
+    //         { account_status : newAccountStatus, profile_status : newProfileStatus },
+    //         { new         : true }
+    //     );
 
-        if (!updateStatus) {
-          return callback({ code: 400, message: "Failed to update supplier status" });
-        }
+    //     if (!updateStatus) {
+    //       return callback({ code: 400, message: "Failed to update supplier status" });
+    //     }
 
-        let password
+        
+    //     let password
       
-        if (updateStatus) {
-           if(updateStatus.account_status === 1) {
-              password = generatePassword()
+    //     if (updateStatus) {
+    //        if(updateStatus.account_status === 1) {
+    //           password = generatePassword()
             
-            const saltRounds      = 10
-            const hashedPassword  = await bcrypt.hash(password, saltRounds);
-            updateStatus.password = hashedPassword;
+    //         const saltRounds      = 10
+    //         const hashedPassword  = await bcrypt.hash(password, saltRounds);
+    //         updateStatus.password = hashedPassword;
 
-            await updateStatus.save();
-           }
+    //         await updateStatus.save();
+    //        }
           
-          const returnObj = {
-            buyer_id           : updateStatus.buyer_id,
-            buyer_name         : updateStatus.buyer_name,
-            buyer_email        : updateStatus.buyer_email,
-            buyer_mobile       : updateStatus.buyer_mobile,
-            buyer_country_code : updateStatus.buyer_country_code,
-            status             : updateStatus.status,
-            password           : updateStatus.password,
-            generatedPassword  : password
-          }
+    //       const returnObj = {
+    //         buyer_id           : updateStatus.buyer_id,
+    //         buyer_name         : updateStatus.buyer_name,
+    //         buyer_email        : updateStatus.buyer_email,
+    //         buyer_mobile       : updateStatus.buyer_mobile,
+    //         buyer_country_code : updateStatus.buyer_country_code,
+    //         status             : updateStatus.account_status,
+    //         password           : updateStatus.password,
+    //         generatedPassword  : password
+    //       }
 
-          callback({ code: 200, message: `${updateStatus.status === 1 ? 'buyer registration accepted successfully': updateStatus.status === 2 ? 'buyer registration rejected' : ''}`,result: returnObj});
-        } else {
-            callback({code:400,  message: "Failed to update buyer status" });
+    //       callback({ code: 200, message: `${updateStatus.account_status === 1 ? 'Buyer Registration Accepted Successfully': updateStatus.account_status === 2 ? 'Buyer Registration Rejected' : ''}`,result: returnObj});
+    //     } else {
+    //         callback({code:400,  message: "Failed to update buyer status" });
+    //     }
+
+    //   } catch (error) {
+    //     console.log('Internal Sever Error:',error)
+    //     callback({code: 500, message: 'Internal Server Error', result: error})
+    //   }
+    // },
+
+
+    acceptRejectBuyerRegReq: async (reqObj, callback) => {
+      try {
+        const { buyer_id, action } = reqObj;
+    
+        const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+    
+        if (!buyer) {
+          return callback({ code: 400, message: "Buyer not found" });
         }
-
+    
+        const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+        const newProfileStatus = 1;
+    
+        const updateStatus = await Buyer.findOneAndUpdate(
+          { buyer_id: buyer_id },
+          { account_status: newAccountStatus, profile_status: newProfileStatus },
+          { new: true }
+        );
+    
+        if (!updateStatus) {
+          return callback({ code: 400, message: "Failed to update buyer status" });
+        }
+    
+        if (action === 'accept') {
+          let password = generatePassword();
+          const saltRounds = 10;
+          const hashedPassword = await bcrypt.hash(password, saltRounds);
+          updateStatus.password = hashedPassword;
+          await updateStatus.save();
+    
+          const returnObj = {
+            buyer_id: updateStatus.buyer_id,
+            buyer_name: updateStatus.buyer_name,
+            buyer_email: updateStatus.buyer_email,
+            buyer_mobile: updateStatus.buyer_mobile,
+            buyer_country_code: updateStatus.buyer_country_code,
+            status: updateStatus.account_status,
+            password: updateStatus.password,
+            generatedPassword: password
+          };
+    
+          const body = `Hello ${updateStatus.buyer_name}, <br />
+            Your Registration Request has been Approved. <br />
+            Your Login Email is: ${updateStatus.buyer_email} <br />
+            Your Login Password is: ${password} <br />
+            <br /><br />
+            Thanks & Regards <br />
+            Team Deliver`;
+    
+          sendMailFunc(updateStatus.buyer_email, 'Login Credentials for Deliver', body);
+    
+          return callback({
+            code: 200,
+            message: 'Buyer Registration Accepted Successfully',
+            result: returnObj
+          });
+        } else if (action === 'reject') {
+          const body = `Hello ${updateStatus.buyer_name}, <br />
+            We regret to inform you that your registration request has been rejected. <br />
+            If you believe this is an error, please contact our support team. <br />
+            <br /><br />
+            Thanks & Regards <br />
+            Team Deliver`;
+    
+          sendMailFunc(updateStatus.buyer_email, 'Registration Request Rejected', body);
+    
+          return callback({
+            code: 200,
+            message: 'Buyer Registration Rejected',
+            result: null
+          });
+        } else {
+          return callback({ code: 400, message: "Invalid action" });
+        }
       } catch (error) {
-        console.log('Internal Sever Error:',error)
-        callback({code: 500, message: 'Internal Server Error', result: error})
+        console.log('Internal Server Error:', error);
+        callback({ code: 500, message: 'Internal Server Error', result: error });
       }
     },
+    
+
 
     buyerOrdersList: async (reqObj, callback) => {
       try {
@@ -607,109 +810,214 @@ module.exports = {
         const pageSize = limit || 2
         const offset   = (pageNo - 1) * pageSize     
         
+      // Order.aggregate([
+      //     {
+      //         $match: { 
+      //             // buyer_id     : reqObj.buyer_id,
+      //             order_status : reqObj.filterKey
+      //         }
+      //     },
+      //     {
+      //       $lookup: {
+      //         from         : "suppliers",
+      //         localField   : "supplier_id",
+      //         foreignField : "supplier_id",
+      //         as           : "supplier"
+      //       }
+      //     },
+      //     {
+      //       $lookup: {
+      //         from         : "buyers",
+      //         localField   : "buyer_id",
+      //         foreignField : "buyer_id",
+      //         as           : "buyer"
+      //       }
+      //     },
+      //     {
+      //       $project: {
+      //         order_id          : 1,
+      //         buyer_id          : 1,
+      //         buyer_name        : 1,
+      //         buyer_company     : 1,
+      //         supplier_id       : 1,
+      //         items             : 1,
+      //         payment_terms     : 1,
+      //         est_delivery_time : 1,
+      //         shipping_details  : 1,
+      //         remarks           : 1,
+      //         order_status      : 1,
+      //         created_at        : 1,
+      //         supplier          : { $arrayElemAt : ["$supplier", 0] },
+      //         buyer             : { $arrayElemAt : ["$buyer", 0] }
+      //       }
+      //     },
+      //     {
+      //       $unwind : "$items" 
+      //     },
+      //     {
+      //       $lookup: {
+      //         from         : "medicines",
+      //         localField   : "items.medicine_id",
+      //         foreignField : "medicine_id",
+      //         as           : "medicine"
+      //       }
+      //     },
+      //     {
+      //       $addFields: {
+      //         "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
+      //         "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+      //       }
+      //     },
+      //     {
+      //       $group: {
+      //         _id               : "$_id",
+      //         order_id          : { $first: "$order_id" },
+      //         buyer_id          : { $first: "$buyer_id" },
+      //         buyer_name        : { $first: "$buyer_name" },
+      //         buyer_company     : { $first: "$buyer_company" },
+      //         supplier_id       : { $first: "$supplier_id" },
+      //         items             : { $push: "$items" },
+      //         payment_terms     : { $first: "$payment_terms" },
+      //         est_delivery_time : { $first: "$est_delivery_time" },
+      //         shipping_details  : { $first: "$shipping_details" },
+      //         remarks           : { $first: "$remarks" },
+      //         order_status      : { $first: "$order_status" },
+      //         created_at        : { $first: "$created_at" },
+      //         supplier          : { $first: "$supplier" },
+      //         buyer             : { $first: "$buyer" },
+      //         totalPrice        : { $sum: "$items.item_price" }
+      //       }
+      //     },
+      //     {
+      //         $project: {
+      //             order_id          : 1,
+      //             buyer_id          : 1,
+      //             buyer_name        : 1,
+      //             buyer_company     : 1,
+      //             supplier_id       : 1,
+      //             items             : 1,
+      //             payment_terms     : 1,
+      //             est_delivery_time : 1,
+      //             shipping_details  : 1,
+      //             remarks           : 1,
+      //             order_status      : 1,
+      //             created_at        : 1,
+      //             totalPrice        : 1,
+      //             "buyer.buyer_image"       : 1,
+      //             "buyer.buyer_name"        : 1,
+      //             "supplier.supplier_image" : 1,
+      //             "supplier.supplier_name"  : 1,
+      //         }
+      //     },
+      //     { $sort : { created_at: -1 } },
+      //     { $skip  : offset },
+      //     { $limit : pageSize },
+      // ])
       Order.aggregate([
-          {
-              $match: { 
-                  // buyer_id     : reqObj.buyer_id,
-                  order_status : reqObj.filterKey
-              }
-          },
-          {
-            $lookup: {
-              from         : "suppliers",
-              localField   : "supplier_id",
-              foreignField : "supplier_id",
-              as           : "supplier"
+        {
+            $match: { 
+                // buyer_id     : reqObj.buyer_id,
+                order_status : reqObj.filterKey
             }
-          },
-          {
-            $lookup: {
-              from         : "buyers",
-              localField   : "buyer_id",
-              foreignField : "buyer_id",
-              as           : "buyer"
-            }
-          },
-          {
+        },
+        {
+          $lookup: {
+            from         : "suppliers",
+            localField   : "supplier_id",
+            foreignField : "supplier_id",
+            as           : "supplier"
+          }
+        },
+        {
+          $lookup: {
+            from         : "buyers",
+            localField   : "buyer_id",
+            foreignField : "buyer_id",
+            as           : "buyer"
+          }
+        },
+        {
+          $project: {
+            order_id          : 1,
+            buyer_id          : 1,
+            buyer_company     : 1,
+            supplier_id       : 1,
+            items             : 1,
+            payment_terms     : 1,
+            est_delivery_time : 1,
+            shipping_details  : 1,
+            remarks           : 1,
+            order_status      : 1,
+            status            : 1,
+            created_at        : 1,
+            supplier          : { $arrayElemAt : ["$supplier", 0] },
+            buyer             : { $arrayElemAt : ["$buyer", 0] }
+          }
+        },
+        {
+          $unwind : "$items" 
+        },
+        {
+          $lookup: {
+            from         : "medicines",
+            localField   : "items.product_id",
+            foreignField : "medicine_id",
+            as           : "medicine"
+          }
+        },
+        {
+          $addFields: {
+            "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
+            "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+          }
+        },
+        {
+          $group: {
+            _id               : "$_id",
+            order_id          : { $first: "$order_id" },
+            buyer_id          : { $first: "$buyer_id" },
+            buyer_company     : { $first: "$buyer_company" },
+            supplier_id       : { $first: "$supplier_id" },
+            items             : { $push: "$items" },
+            payment_terms     : { $first: "$payment_terms" },
+            est_delivery_time : { $first: "$est_delivery_time" },
+            shipping_details  : { $first: "$shipping_details" },
+            remarks           : { $first: "$remarks" },
+            order_status      : { $first: "$order_status" },
+            status            : { $first: "$status" },
+            created_at        : { $first: "$created_at" },
+            supplier          : { $first: "$supplier" },
+            buyer             : { $first: "$buyer" },
+            totalPrice        : { $sum: "$items.item_price" }
+          }
+        },
+        {
             $project: {
-              order_id          : 1,
-              buyer_id          : 1,
-              buyer_name        : 1,
-              buyer_company     : 1,
-              supplier_id       : 1,
-              items             : 1,
-              payment_terms     : 1,
-              est_delivery_time : 1,
-              shipping_details  : 1,
-              remarks           : 1,
-              order_status      : 1,
-              created_at        : 1,
-              supplier          : { $arrayElemAt : ["$supplier", 0] },
-              buyer             : { $arrayElemAt : ["$buyer", 0] }
+                order_id          : 1,
+                buyer_id          : 1,
+                buyer_company     : 1,
+                supplier_id       : 1,
+                items             : 1,
+                payment_terms     : 1,
+                est_delivery_time : 1,
+                shipping_details  : 1,
+                remarks           : 1,
+                order_status      : 1,
+                status            : 1,
+                created_at        : 1,
+                totalPrice        : 1,
+                "supplier.supplier_image" : 1,
+                "supplier.supplier_name"  : 1,
+                "supplier.supplier_type"  : 1,
+                "buyer.buyer_image" : 1,
+                "buyer.buyer_name"  : 1,
+                "buyer.buyer_type"  : 1,
             }
-          },
-          {
-            $unwind : "$items" 
-          },
-          {
-            $lookup: {
-              from         : "medicines",
-              localField   : "items.product_id",
-              foreignField : "medicine_id",
-              as           : "medicine"
-            }
-          },
-          {
-            $addFields: {
-              "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
-              "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
-            }
-          },
-          {
-            $group: {
-              _id               : "$_id",
-              order_id          : { $first: "$order_id" },
-              buyer_id          : { $first: "$buyer_id" },
-              buyer_name        : { $first: "$buyer_name" },
-              buyer_company     : { $first: "$buyer_company" },
-              supplier_id       : { $first: "$supplier_id" },
-              items             : { $push: "$items" },
-              payment_terms     : { $first: "$payment_terms" },
-              est_delivery_time : { $first: "$est_delivery_time" },
-              shipping_details  : { $first: "$shipping_details" },
-              remarks           : { $first: "$remarks" },
-              order_status      : { $first: "$order_status" },
-              created_at        : { $first: "$created_at" },
-              supplier          : { $first: "$supplier" },
-              buyer             : { $first: "$buyer" },
-              totalPrice        : { $sum: "$items.item_price" }
-            }
-          },
-          {
-              $project: {
-                  order_id          : 1,
-                  buyer_id          : 1,
-                  buyer_name        : 1,
-                  buyer_company     : 1,
-                  supplier_id       : 1,
-                  items             : 1,
-                  payment_terms     : 1,
-                  est_delivery_time : 1,
-                  shipping_details  : 1,
-                  remarks           : 1,
-                  order_status      : 1,
-                  created_at        : 1,
-                  totalPrice        : 1,
-                  "buyer.buyer_image"       : 1,
-                  "buyer.buyer_name"        : 1,
-                  "supplier.supplier_image" : 1,
-                  "supplier.supplier_name"  : 1,
-              }
-          },
-          { $sort : { created_at: -1 } },
-          { $skip  : offset },
-          { $limit : pageSize },
-      ])
+        },
+        { $sort : { created_at: -1 } },
+        { $skip  : offset },
+        { $limit : pageSize },
+    ])
       .then((data) => {
           Order.countDocuments({order_status : filterKey})
           .then(totalItems => {
@@ -811,7 +1119,7 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                localField   : "items.product_id",
+                localField   : "items.medicine_id",
                 foreignField : "medicine_id",
                 as           : "medicine"
               }
@@ -1095,7 +1403,7 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                localField   : "items.product_id",
+                localField   : "items.medicine_id",
                 foreignField : "medicine_id",
                 as           : "medicine"
               }
@@ -1170,6 +1478,400 @@ module.exports = {
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
+
+    orderDetails : async (reqObj, callback) => {
+      try {
+          const {buyer_id, order_id, filterKey} = reqObj
+
+          Order.aggregate([
+              {
+                  $match: { 
+                      order_id     : order_id,
+                      // buyer_id     : buyer_id,
+                      // order_status : filterKey
+                  }
+              },
+              {
+                $lookup: {
+                  from         : "suppliers",
+                  localField   : "supplier_id",
+                  foreignField : "supplier_id",
+                  as           : "supplier"
+                }
+              },
+              {
+                $lookup: {
+                  from         : "buyers",
+                  localField   : "buyer_id",
+                  foreignField : "buyer_id",
+                  as           : "buyer"
+                }
+              },
+              {
+                $lookup: {
+                  from         : "enquiries",
+                  localField   : "enquiry_id",
+                  foreignField : "enquiry_id",
+                  as           : "enquiry"
+                }
+              },
+              {
+                $project: {
+                  order_id          : 1,
+                  enquiry_id :1,
+                  purchaseOrder_id : 1,
+                  buyer_id          : 1,
+                  buyer_company     : 1,
+                  supplier_id       : 1,
+                  buyer_name : 1,
+                  buyer_email : 1,
+                  buyer_mobile:1,
+                  buyer_address : 1,
+                  supplier_name : 1,
+                  supplier_email: 1,
+                  supplier_address: 1,
+                  supplier_mobile: 1,
+                  items             : 1,
+                  payment_terms     : 1,
+                  deposit_requested: 1,
+                  deposit_due : 1,
+                  est_delivery_time : 1,
+                  shipping_details  : 1,
+                  remarks           : 1,
+                  order_status      : 1,
+                  status : 1,
+                  invoice_number    : 1,
+                  invoice_no        : 1,
+                  invoice_date : 1,
+                  payment_due_date: 1,
+                  total_due_amount: 1,
+                  logistics_details : 1,
+                  coordinators : 1,
+                  shipment_details : 1,
+                  created_at        : 1,
+                  supplier          : { $arrayElemAt: ["$supplier", 0] },
+                  buyer          : { $arrayElemAt: ["$buyer", 0] },
+                  enquiry          : { $arrayElemAt: ["$enquiry", 0] }
+                }
+              },
+              {
+                $unwind: "$items"
+              },
+              {
+                $lookup: {
+                  from         : "medicines",
+                   localField   : "items.medicine_id",
+                  foreignField : "medicine_id",
+                  as           : "medicine"
+                }
+              },
+              {
+                $addFields: {
+                  "items.medicine_image" : {$arrayElemAt : ["$medicine.medicine_image", 0] },
+                  "items.drugs_name"     : {$arrayElemAt  : ["$medicine.drugs_name",0]},
+                  "items.strength"     : {$arrayElemAt  : ["$medicine.strength",0]},
+                  "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+                }
+              },
+              {
+                $group: {
+                  _id               : "$_id",
+                  order_id          : { $first: "$order_id" },
+                  buyer_id          : { $first: "$buyer_id" },
+                  buyer_company     : { $first: "$buyer_company" },
+                  buyer_name        : { $first: "$buyer_name" },
+                  buyer_email        : { $first: "$buyer_email" },
+                  buyer_address        : { $first: "$buyer_address" },
+                  buyer_mobile        : { $first: "$buyer_mobile" },
+                  supplier_name        : { $first: "$supplier_name" },
+                  supplier_email        : { $first: "$supplier_email" },
+                  supplier_mobile        : { $first: "$supplier_mobile" },
+                  supplier_address  : { $first: "$supplier_address" },
+                  supplier_type  : { $first: "$supplier_type" },
+                  country_of_origin :  { $first: "$country_of_origin" },
+                  supplier_id       : { $first: "$supplier_id" },
+                  items             : { $push: "$items" },
+                  payment_terms     : { $first: "$payment_terms" },
+
+                  deposit_requested     : { $first: "$deposit_requested" },
+                  deposit_due     : { $first: "$deposit_due" },
+                  // payment_terms     : { $first: "$payment_terms" },
+
+                  est_delivery_time : { $first: "$est_delivery_time" },
+                  shipping_details  : { $first: "$shipping_details" },
+                  remarks           : { $first: "$remarks" },
+                  order_status      : { $first: "$order_status" },
+                  status            : { $first: "$status" },
+                  invoice_number    : { $first: "$invoice_number" },
+                  invoice_no        : { $first: "$invoice_no" },
+                  invoice_date : { $first: "$invoice_date" },
+                  payment_due_date: { $first: "$payment_due_date" },
+                  logistics_details : { $first: "$logistics_details" },
+                  shipment_details : { $first: "$shipment_details" },
+                  coordinators : { $first: "$coordinators" },
+                  total_due_amount: { $first: "$total_due_amount" },
+                  created_at        : {$first: "$created_at"},
+                  supplier          : { $first: "$supplier" },
+                  buyer         : { $first: "$buyer" },
+                  enquiry         : { $first: "$enquiry" },
+                  totalPrice        : { $sum: "$items.item_price" }
+                }
+              },
+              {
+                  $project: {
+                    order_id          : 1,
+                    enquiry_id :1,
+                    purchaseOrder_id : 1,
+                    buyer_id          : 1,
+                    buyer_company     : 1,
+                    supplier_id       : 1,
+                    buyer_name : 1,
+                    buyer_email : 1,
+                    buyer_mobile:1,
+                    buyer_address : 1,
+                    supplier_name : 1,
+                    supplier_email: 1,
+                    supplier_address: 1,
+                    supplier_mobile: 1,
+                    supplier_type: 1,
+                    items             : 1,
+                    payment_terms     : 1,
+                    deposit_requested: 1,
+                    deposit_due : 1,
+                    est_delivery_time : 1,
+                    shipping_details  : 1,
+                    remarks           : 1,
+                    order_status      : 1,
+                    status : 1,
+                    invoice_number    : 1,
+                    invoice_no        : 1,
+                    invoice_date : 1,
+                    payment_due_date: 1,
+                    logistics_details: { $arrayElemAt: ["$logistics_details", 0] },
+                    shipment_details : 1,
+                    coordinators : 1,
+                    total_due_amount : 1,
+                    created_at        : 1,
+                      totalPrice        : 1,
+                      "supplier.supplier_image" : 1,
+                      "supplier.supplier_name"  : 1,
+                      "supplier.supplier_type"  : 1,
+                      "supplier.estimated_delivery_time"  : 1,
+                      "enquiry.enquiry_id"  : 1,
+                      "enquiry.payment_terms"  : 1,
+                      "buyer.buyer_image" : 1,
+                      "buyer.buyer_name" : 1,
+                      "buyer.buyer_email" : 1,
+                      "buyer.buyer_mobile" : 1,
+                      "buyer.buyer_type" : 1,
+                  }
+              }
+          ])
+          .then((data) => {
+              callback({ code: 200, message: "Details Fetched successfully", result: data[0] });
+          })
+          .catch((err) => {
+              console.log(err);
+              callback({ code: 400, message: "Error in fetching order details", result: err });
+          })
+          
+      } catch (error) {
+          
+      }
+    },
+
+
+  //   orderDetails: async (reqObj, callback) => {
+  //     try {
+  //         const { buyer_id, order_id, filterKey } = reqObj;
+  
+  //         Order.aggregate([
+  //             {
+  //                 $match: {
+  //                     order_id: order_id,
+  //                     // Uncomment if needed
+  //                     // buyer_id: buyer_id,
+  //                     // order_status: filterKey
+  //                 }
+  //             },
+  //             {
+  //                 $lookup: {
+  //                     from: "suppliers",
+  //                     localField: "supplier_id",
+  //                     foreignField: "supplier_id",
+  //                     as: "supplier"
+  //                 }
+  //             },
+  //             {
+  //                 $lookup: {
+  //                     from: "buyers",
+  //                     localField: "buyer_id",
+  //                     foreignField: "buyer_id",
+  //                     as: "buyer"
+  //                 }
+  //             },
+  //             {
+  //                 $lookup: {
+  //                     from: "enquiries",
+  //                     localField: "enquiry_id",
+  //                     foreignField: "enquiry_id",
+  //                     as: "enquiry"
+  //                 }
+  //             },
+  //             {
+  //                 $unwind: "$items"
+  //             },
+  //             {
+  //                 $lookup: {
+  //                     from: "medicines",
+  //                     localField: "items.medicine_id",
+  //                     foreignField: "medicine_id",
+  //                     as: "medicine"
+  //                 }
+  //             },
+  //             {
+  //                 $addFields: {
+  //                     "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+  //                     "items.drugs_name": { $arrayElemAt: ["$medicine.drugs_name", 0] },
+  //                     "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
+  //                     "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } }
+  //                 }
+  //             },
+  //             {
+  //                 $addFields: {
+  //                     "quantityRequiredInt": { $toInt: "$items.quantity_required" }
+  //                 }
+  //             },
+  //             {
+  //                 $addFields: {
+  //                     "matchingInventory": {
+  //                         $filter: {
+  //                             input: "$medicine.inventory_info",
+  //                             as: "info",
+  //                             cond: {
+  //                                 $and: [
+  //                                     { $gte: ["$quantityRequiredInt", { $toInt: { $arrayElemAt: [{ $split: ["$$info.quantity", "-"] }, 0] } }] },
+  //                                     { $lte: ["$quantityRequiredInt", { $toInt: { $arrayElemAt: [{ $split: ["$$info.quantity", "-"] }, 1] } }] }
+  //                                 ]
+  //                             }
+  //                         }
+  //                     }
+  //                 }
+  //             },
+  //             {
+  //                 $addFields: {
+  //                     "items.est_delivery_days": {
+  //                         $arrayElemAt: ["$matchingInventory.est_delivery_days", 0]
+  //                     }
+  //                 }
+  //             },
+  //             {
+  //                 $group: {
+  //                     _id: "$_id",
+  //                     order_id: { $first: "$order_id" },
+  //                     buyer_id: { $first: "$buyer_id" },
+  //                     buyer_company: { $first: "$buyer_company" },
+  //                     buyer_name: { $first: "$buyer_name" },
+  //                     buyer_email: { $first: "$buyer_email" },
+  //                     buyer_mobile: { $first: "$buyer_mobile" },
+  //                     buyer_address: { $first: "$buyer_address" },
+  //                     supplier_name: { $first: "$supplier_name" },
+  //                     supplier_email: { $first: "$supplier_email" },
+  //                     supplier_mobile: { $first: "$supplier_mobile" },
+  //                     supplier_address: { $first: "$supplier_address" },
+  //                     supplier_type: { $first: "$supplier_type" },
+  //                     country_of_origin: { $first: "$country_of_origin" },
+  //                     supplier_id: { $first: "$supplier_id" },
+  //                     items: { $push: "$items" },
+  //                     payment_terms: { $first: "$payment_terms" },
+  //                     deposit_requested: { $first: "$deposit_requested" },
+  //                     deposit_due: { $first: "$deposit_due" },
+  //                     est_delivery_time: { $first: "$est_delivery_time" },
+  //                     shipping_details: { $first: "$shipping_details" },
+  //                     remarks: { $first: "$remarks" },
+  //                     order_status: { $first: "$order_status" },
+  //                     status: { $first: "$status" },
+  //                     invoice_number: { $first: "$invoice_number" },
+  //                     invoice_no: { $first: "$invoice_no" },
+  //                     invoice_date: { $first: "$invoice_date" },
+  //                     payment_due_date: { $first: "$payment_due_date" },
+  //                     logistics_details: { $first: "$logistics_details" },
+  //                     shipment_details: { $first: "$shipment_details" },
+  //                     coordinators: { $first: "$coordinators" },
+  //                     total_due_amount: { $first: "$total_due_amount" },
+  //                     created_at: { $first: "$created_at" },
+  //                     supplier: { $first: "$supplier" },
+  //                     buyer: { $first: "$buyer" },
+  //                     enquiry: { $first: "$enquiry" },
+  //                     totalPrice: { $sum: "$items.item_price" }
+  //                 }
+  //             },
+  //             {
+  //                 $project: {
+  //                     order_id: 1,
+  //                     enquiry_id: 1,
+  //                     purchaseOrder_id: 1,
+  //                     buyer_id: 1,
+  //                     buyer_company: 1,
+  //                     supplier_id: 1,
+  //                     buyer_name: 1,
+  //                     buyer_email: 1,
+  //                     buyer_mobile: 1,
+  //                     buyer_address: 1,
+  //                     supplier_name: 1,
+  //                     supplier_email: 1,
+  //                     supplier_mobile: 1,
+  //                     supplier_address: 1,
+  //                     supplier_type: 1,
+  //                     items: 1,
+  //                     payment_terms: 1,
+  //                     deposit_requested: 1,
+  //                     deposit_due: 1,
+  //                     est_delivery_time: 1,
+  //                     shipping_details: 1,
+  //                     remarks: 1,
+  //                     order_status: 1,
+  //                     status: 1,
+  //                     invoice_number: 1,
+  //                     invoice_no: 1,
+  //                     invoice_date: 1,
+  //                     payment_due_date: 1,
+  //                     logistics_details: { $arrayElemAt: ["$logistics_details", 0] },
+  //                     shipment_details: 1,
+  //                     coordinators: 1,
+  //                     total_due_amount: 1,
+  //                     created_at: 1,
+  //                     totalPrice: 1,
+  //                     "supplier.supplier_image": 1,
+  //                     "supplier.supplier_name": 1,
+  //                     "supplier.supplier_type": 1,
+  //                     "enquiry.enquiry_id": 1,
+  //                     "enquiry.payment_terms": 1,
+  //                     "buyer.buyer_image": 1,
+  //                     "buyer.buyer_name": 1,
+  //                     "buyer.buyer_email": 1,
+  //                     "buyer.buyer_mobile": 1,
+  //                     "buyer.buyer_type": 1
+  //                 }
+  //             }
+  //         ])
+  //             .then((data) => {
+  //                 callback({ code: 200, message: "Details Fetched successfully", result: data[0] });
+  //             })
+  //             .catch((err) => {
+  //                 console.log(err);
+  //                 callback({ code: 400, message: "Error in fetching order details", result: err });
+  //             });
+  //     } catch (error) {
+  //         callback({ code: 500, message: "Server error", result: error });
+  //     }
+  // },
+  
+  
+  
+  
+
+
     //------------------------ supplier/buyer ------------------------//
 
    //------------------------ medicine ------------------------//
@@ -2107,4 +2809,194 @@ module.exports = {
 
     //----------------------------- order -------------------------------------//
 
+
+    getNotificationList : async(reqObj, callback) => {
+      try {
+        const { buyer_id, pageNo, pageSize } = reqObj;
+    
+        const page_no   = pageNo || 1;
+        const page_size = pageSize || 100;
+        const offset    = (page_no - 1) * page_size;
+    
+        Notification.aggregate([
+          {
+            $match: {
+              // to_id: buyer_id,
+              to : 'admin'
+            }
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "from_id",
+              foreignField : "supplier_id",
+              as           : "supplier"
+            }
+          },
+          {
+            $lookup: {
+              from         : "buyers",
+              localField   : "from_id",
+              foreignField : "buyer_id",
+              as           : "buyer"
+            }
+          },
+          {
+            $project: {
+              notification_id: 1,
+              event: 1,
+              event_type: 1,
+              from: 1,
+              to: 1,
+              from_id: 1,
+              to_id: 1,
+              event_id: 1,
+              connected_id: 1,
+              link_id : 1,
+              message: 1,
+              status : 1,
+              createdAt: 1,
+              updatedAt: 1,
+              fromDetails: {
+                $cond: {
+                  if: { $gt: [{ $size: "$supplier" }, 0] },
+                  then: { $arrayElemAt: ["$supplier", 0] },
+                  else: { $arrayElemAt: ["$buyer", 0] }
+                }
+              }
+            }
+          },
+          { $sort  : { createdAt: -1 } },
+          { $skip  : offset },
+          { $limit : page_size },
+        ])
+        .then(async (data) => {
+          const totalItems = await Notification.countDocuments({ to: 'admin'});
+          const totalPages = Math.ceil(totalItems / page_size);
+    
+          const returnObj = {
+            data,
+            totalPages,
+            totalItems
+          };
+          callback({code: 200, message: "List fetched successfully", result: returnObj});
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message: 'Error while fetching buyer list', result: err});
+        });
+      } catch (error) {
+        console.error(error);
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+    
+
+    getNotificationDetailsList : async(reqObj, callback) => {
+      try {
+        const { buyer_id, pageNo, pageSize } = reqObj
+    
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 5
+        const offset    = (page_no - 1) * page_size 
+    
+        Notification.aggregate([
+          {
+            $match: {
+              to : 'admin'
+            }
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "from_id",
+              foreignField : "supplier_id",
+              as           : "supplier"
+            }
+          },
+          {
+            $lookup: {
+              from         : "buyers",
+              localField   : "from_id",
+              foreignField : "buyer_id",
+              as           : "buyer"
+            }
+          },
+          {
+            $project: {
+              notification_id: 1,
+              event: 1,
+              event_type: 1,
+              from: 1,
+              to: 1,
+              from_id: 1,
+              to_id: 1,
+              event_id: 1,
+              connected_id: 1,
+              link_id : 1,
+              message: 1,
+              status : 1,
+              createdAt: 1,
+              updatedAt: 1,
+              fromDetails: {
+                $cond: {
+                  if: { $gt: [{ $size: "$supplier" }, 0] },
+                  then: { $arrayElemAt: ["$supplier", 0] },
+                  else: { $arrayElemAt: ["$buyer", 0] }
+                }
+              }
+            }
+          },
+          { $sort  : {createdAt: -1} },
+          { $skip  : offset },
+          { $limit : page_size },
+          
+        ])
+        .then( async(data) => {
+          const totalItems = await Notification.countDocuments({ to: 'admin'});
+          const totalPages = Math.ceil(totalItems / page_size);
+    
+          const returnObj = {
+              data,
+              totalPages,
+              totalItems
+          };
+          callback({code: 200, message: "List fetched successfully", result: returnObj})
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({code: 400, message : 'error while fetching buyer list', result: err})
+        })
+      } catch (error) {
+        console.error(error);
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+    
+
+    updateStatus : async(reqObj, callback) => {
+      console.log(reqObj);
+      try {
+        const { notification_id, status } = reqObj
+
+        const updateNotification = await Notification.findOneAndUpdate(
+          { notification_id : notification_id },
+          {
+              $set: {
+                status: status,
+                // status            : 'Awaiting Details from Seller'
+              }
+          },
+          { new: true } 
+      );
+      if (!updateNotification) {
+          return callback({ code: 404, message: 'Notification not found', result: null });
+      }
+      callback({ code: 200, message: "Status Updated", result: updateNotification });
+
+      } catch (error) {
+        console.log(error);
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
 }
