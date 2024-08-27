@@ -320,7 +320,7 @@ module.exports = {
           password : 0
         };
 
-        Supplier.find({account_status : 0}).select(fields).skip(offSet).limit(page_size).then((data) => {
+        Supplier.find({account_status : 0}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
           Supplier.countDocuments({account_status : 0}).then((totalItems) => {
 
             const totalPages = Math.ceil( totalItems / page_size )
@@ -567,6 +567,7 @@ module.exports = {
     // },
     getBuyerList: async (reqObj, callback) => {
       try {
+        console.log(reqObj);
         const { pageNo, pageSize, filterKey } = reqObj;
     
         const page_no   = pageNo || 1;
@@ -635,7 +636,7 @@ module.exports = {
           password : 0
         };
 
-        Buyer.find({account_status : 0}).select(fields).skip(offSet).limit(page_size).then((data) => {
+        Buyer.find({account_status : 0}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
           Buyer.countDocuments({account_status : 0}).then((totalItems) => {
             
             const totalPages = Math.ceil(totalItems / page_size);
@@ -1878,7 +1879,7 @@ module.exports = {
 
     acceptRejectAddMedicineReq : async(reqObj, callback) => {
       try {
-        const { medicine_id, supplier_id, action } = reqObj
+        const { medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action } = reqObj
 
         const medicine = await Medicine.findOne({ medicine_id : medicine_id, supplier_id: supplier_id});
   
@@ -1896,9 +1897,43 @@ module.exports = {
 
         if (!updateStatus) {
           return callback({ code: 400, message: "Failed to update medicine status" });
+        } 
+
+        let body;
+        let subject;
+
+        if (action === 'accept') {
+            subject = 'Medicine Added Successfully';
+            body = `Hello ${supplier_name}, <br />
+                Your medicine request has been approved and added successfully. <br />
+                Medicine ID: ${updateStatus.medicine_id} <br />
+                Supplier ID: ${updateStatus.supplier_id} <br />
+                <br /><br />
+                Thanks & Regards <br />
+                Team Deliver`;
+
+            // Send email for acceptance
+            sendMailFunc(supplier_email, subject, body);
+            
+        } else if (action === 'reject') {
+            subject = 'Medicine Request Rejected';
+            body = `Hello ${supplier_name}, <br />
+                We regret to inform you that your medicine request has been rejected. <br />
+                Medicine ID: ${updateStatus.medicine_id} <br />
+                Supplier ID: ${updateStatus.supplier_id} <br />
+                Reason: ${rejectionReason || 'Data Mismatch'} <br />
+                <br /><br />
+                Thanks & Regards <br />
+                Team Deliver`;
+
+            // Send email for rejection
+            sendMailFunc(supplier_email, subject, body);
+
         } else {
-          callback({ code: 200, message: `${updateStatus.status === 1 ? 'Medicine Added successfully': updateStatus.status === 2 ? 'Add medicine request rejected' : ''}`,result: updateStatus});
+            return callback({ code: 400, message: "Invalid action" });
         }
+
+        callback({ code: 200, message: `${updateStatus.status === 1 ? 'Medicine Added successfully': updateStatus.status === 2 ? 'Add medicine request rejected' : ''}`,result: updateStatus});
 
       } catch (error) {
         console.log('Internal Sever Error:',error)

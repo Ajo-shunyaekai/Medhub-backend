@@ -54,7 +54,7 @@ module.exports = {
                 license_image                : reqObj.license_image,
                 certificate_image            : reqObj.certificate_image,
                 // registration_no             : reqObj.registration_no ,
-                // vat_reg_no                  : reqObj.vat_reg_no,
+                vat_reg_no                  : reqObj.vat_reg_no,
                 token                        : token,
                 account_status               : 0,
                 profile_status               : 0
@@ -76,10 +76,10 @@ module.exports = {
                   status  : 0
               })
                await newNotification.save()
-                callback({code: 200, message: "Buyer registration request submitted successfully"})
+                callback({code: 200, message: "Buyer Registration Request Submitted Successfully"})
               }).catch((err) => {
                 console.log('err',err);
-                callback({code: 400 , message: "Error in submiiting buyer eegistration request"})
+                callback({code: 400 , message: "Error While Submiiting Buyer Registration Request"})
               })
           } catch (error) {
             console.log('error',error);
@@ -263,48 +263,99 @@ module.exports = {
       }
     },
 
-    mySupplierList: async (reqObj, callback) => {
-      try {
-        const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
-        const page_no   = pageNo || 1
-        const page_size = pageSize || 2
-        const offset    = (page_no - 1) * page_size
+    // mySupplierList: async (reqObj, callback) => {
+    //   try {
+    //     const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
+    //     const page_no   = pageNo || 1
+    //     const page_size = pageSize || 2
+    //     const offset    = (page_no - 1) * page_size
     
-        let query = { account_status: 1 };
+    //     let query = { account_status: 1 };
 
-        if (!buyer_id) {
-          callback({ code: 400, message: 'buyer_id is required' });
-          return;
-        }
+    //     Buyer.aggregate([
+    //       {
+    //         $match: {buyer_id: buyer_id}
+    //       },
+    //       {
+    //         $lookup : {
+    //             from         : "orders",
+    //             localField   : "buyer_id",
+    //             foreignField : "buyer_id",
+    //             as           : "my_suppliers",
+    //         }
+    //     },
+    //     ])
+    //     .then((data) => {
+    //       callback({ code: 200, message: 'list', result: data });
+    //     })
+    //     .catch((err) => {
+    //       callback({ code: 400, message: 'list', result: err });
+    //     })
     
-        // Step 1: Fetch all orders for the given buyer_id
-        const orders = await Order.find({ buyer_id }).toArray();
-    
-        // Step 2: Extract unique supplier_ids from the orders
-        const supplierIds = [...new Set(orders.map(order => order.supplier_id))];
-    
-        if (supplierIds.length === 0) {
-          callback({ code: 200, data: [], message: 'No suppliers found' });
-          return;
-        }
-    
-        // Step 3: Fetch supplier details for these supplier_ids
-        const suppliers = await Supplier.find({
-          supplier_id: { $in: supplierIds },
-          account_status: 1 // Assuming you want to filter by account_status as well
-        })
-        .skip(offset)
-        .limit(page_size)
-        // .toArray();
-    
-        callback({ code: 200, message: 'supplier list', data: suppliers });
         
        
+    //   } catch (error) {
+    //     console.error('Error:', error);
+    //     callback({ code: 400, message: 'Error in fetching supplier list' });
+    //   }
+    // },
+
+    mySupplierList: async (reqObj, callback) => {
+      try {
+          const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
+          const page_no = pageNo || 1;
+          const page_size = pageSize || 2;
+          const offset = (page_no - 1) * page_size;
+  
+          let query = { account_status: 1 };
+  
+          // Define the aggregation pipeline
+          const pipeline = [
+              {
+                  $match: { buyer_id: buyer_id }
+              },
+              {
+                  $lookup: {
+                      from: 'orders',
+                      let: { buyerId: "$buyer_id" },
+                      pipeline: [
+                          {
+                              $match: {
+                                  $expr: {
+                                      $and: [
+                                          { $eq: ["$buyer_id", "$$buyerId"] },
+                                          { $eq: ["$status", "Completed"] }
+                                      ]
+                                  }
+                              }
+                          }
+                      ],
+                      as: 'my_suppliers'
+                  }
+              },
+              {
+                  $skip: offset
+              },
+              {
+                  $limit: page_size
+              }
+          ];
+  
+          // Execute the aggregation pipeline
+          Buyer.aggregate(pipeline)
+              .then((data) => {
+                  callback({ code: 200, message: 'List fetched successfully', result: data });
+              })
+              .catch((err) => {
+                  callback({ code: 400, message: 'Error fetching list', result: err });
+              });
+  
       } catch (error) {
-        console.error('Error:', error);
-        callback({ code: 400, message: 'Error in fetching supplier list' });
+          console.error('Error:', error);
+          callback({ code: 400, message: 'Error in fetching supplier list' });
       }
-    },
+  },
+  
 
     supplierDetails : async(reqObj, callback) => {
       try {
@@ -871,21 +922,23 @@ module.exports = {
               }
             }
           },
+          { $sort  : {createdAt: -1} },
           {
             $project: {
               _id          : 0,
               list_id      : 1,
               buyer_id     : 1,
               supplier_id  : 1,
-              item_details : 1,
+              // item_details : 1,
+              item_details : { $reverseArray: "$item_details" },  
               "supplier_details.supplier_id"    : 1,
               "supplier_details.supplier_name"  : 1,
               "supplier_details.supplier_image" : 1,
             }
           },
+          
           { $skip  : offset },
           { $limit : page_size },
-          { $sort  : {created_at: -1} }
         ])
         
         .then( async(data) => {
@@ -1097,7 +1150,7 @@ module.exports = {
         ])
         
         .then( async(data) => {
-          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer', status: 1});
+          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer'});
           const totalPages = Math.ceil(totalItems / page_size);
 
           const returnObj = {

@@ -201,7 +201,7 @@ module.exports = {
   },
 
   allMedicineList: async (reqObj, callback) => {
-    
+    console.log(reqObj);
     try {
         const { searchKey, pageNo, pageSize, medicine_type, supplier_id, category_name, 
                 medicine_status, price_range, delivery_time, in_stock } = reqObj;
@@ -295,7 +295,11 @@ module.exports = {
         }
 
         pipeline.push(
+          {
+            $sort: { created_at: -1 }
+        },
             {
+              
                 $project: {
                     medicine_id       : 1,
                     supplier_id       : 1,
@@ -322,9 +326,9 @@ module.exports = {
                     "inventory_info.total_price"       : 1,
                 }
             },
-            {
-              $sort: { created_at: -1 }
-            },
+            // {
+            //   $sort: { created_at: -1 }
+            // },
             { $skip  : offset },
             { $limit : page_size }
         );
@@ -345,6 +349,7 @@ module.exports = {
 
         callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
     } catch (error) {
+      console.log('internal erro',error);
         callback({ code: 500, message: "Internal Server Error", result: error });
     }
   },
@@ -531,6 +536,7 @@ module.exports = {
             "inventory.strength"       : 1,
             "supplier.supplier_id"             : 1, 
             "supplier.supplier_name"           : 1,
+            "supplier.supplier_email"          : 1,
             "supplier.description"             : 1,
             "supplier.estimated_delivery_time" : 1,
             "supplier.tags"                    : 1,

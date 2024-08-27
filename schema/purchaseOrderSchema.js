@@ -14,6 +14,10 @@ const orderItemSchema = new Schema({
         type: String,
         required: true
     },
+    est_delivery_days: {
+        type: String,
+        required: true
+    },
     unit_price: {
         type: String,
         required: true

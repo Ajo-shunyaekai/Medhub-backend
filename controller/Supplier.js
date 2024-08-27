@@ -78,12 +78,12 @@ module.exports = {
               callback({code: 200, message: "Supplier Registration Successfull"})
             }).catch((err) => {
               console.log('err',err);
-              callback({code: 400 , message: " Supplier Registration Failed"})
+              callback({code: 400 , message: "Error While Registering the Supplier"})
             })
             
         } catch (error) {
           console.log('err',error);
-          callback({code: 500});
+          callback({code: 500, message: 'Internal Server Error'});
         }
     },
 
@@ -861,7 +861,7 @@ module.exports = {
         ])
         
         .then( async(data) => {
-          const totalItems = await Notification.countDocuments({to_id: supplier_id, to: 'supplier', status: 1});
+          const totalItems = await Notification.countDocuments({to_id: supplier_id, to: 'supplier'});
           const totalPages = Math.ceil(totalItems / page_size);
 
           const returnObj = {

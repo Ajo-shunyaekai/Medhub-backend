@@ -57,6 +57,7 @@ module.exports = {
                 medicine_id       : item.medicine_id,
                 medicine_name     : item.medicine_details.medicine_name,
                 quantity_required : item.quantity_required,
+                est_delivery_days : item.est_delivery_days,
                 unit_price        : item.unit_price,
                 total_amount      : item.totalAmount,
                 counter_price     : item.counter_price,

@@ -89,7 +89,6 @@ module.exports = () => {
             res.send( { code : 419, message : 'All fields are required', errObj });
             return;
         }
-        console.log(regObj);
         
         Controller.register(regObj, result => {
             const response = handleResponse(result);
