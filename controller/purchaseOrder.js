@@ -409,9 +409,10 @@ module.exports = {
                     medicine_id       : item.medicine_id,
                     medicine_name     : item.medicine_name,
                     quantity_required : item.quantity_required,
+                    est_delivery_days : item.est_delivery_days,
                     unit_price        : item.unit_price,
                     // total_amount      : item.counter_price || item.target_price || item.total_amount ,
-                    total_amount      : item.totalAmount,
+                    total_amount      : item.total_amount,
                     counter_price     : item.counter_price,
                     target_price      : item.target_price,
                     status            : 'pending'

@@ -248,6 +248,7 @@ module.exports = {
         // Fetch the suppliers with pagination
         const suppliers = await Supplier.find(query)
           .select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time, license_expiry_date tax_no')
+          .sort({createdAt: -1})
           .skip(offset)
           .limit(pageSize);
           const totalPages = Math.ceil(totalItems / pageSize)
@@ -531,13 +532,186 @@ module.exports = {
     },
 
 
-    buyerDashboardOrderDetails : async(reqObj, callback) => {
+    // buyerDashboardOrderDetails : async(reqObj, callback) => {
+    //   try {
+    //     const { buyer_id } = reqObj;
+    
+    //     Order.aggregate([
+    //       {
+    //         $match : { buyer_id: buyer_id }
+    //       },
+    //       {
+    //         $addFields: {
+    //           numeric_total_price: {
+    //             $toDouble: {
+    //               $arrayElemAt: [
+    //                 { $split: ["$total_price", " "] },
+    //                 0
+    //               ]
+    //             }
+    //           }
+    //         }
+    //       },
+    //       {
+    //         $facet: {
+    //           completedCount: [
+    //             { $match: { order_status: 'completed' } },
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           activeCount: [
+    //             { $match: { order_status: 'active' } },
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           pendingCount: [
+    //             { $match: { order_status: 'pending' } },
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 count          : { $sum: 1 },
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 count          : 1,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           totalPurchaseAmount: [
+    //             { 
+    //               $group: {
+    //                 _id            : null,
+    //                 total_purchase : { $sum: "$numeric_total_price" }
+    //               }
+    //             },
+    //             { 
+    //               $project: {
+    //                 _id            : 0,
+    //                 total_purchase : 1
+    //               }
+    //             }
+    //           ],
+    //           enquiryCount: [
+    //             {
+    //               $lookup: {
+    //                 from: 'enquiries',
+    //                 let: { buyerId: buyer_id },
+    //                 pipeline: [
+    //                   {
+    //                     $match: {
+    //                       $expr: { $eq: ["$buyer_id", "$$buyerId"] }
+    //                     }
+    //                   },
+    //                   {
+    //                     $match: { enquiry_status: { $ne: 'order created' } }
+    //                   },
+    //                   {
+    //                     $count: "count"
+    //                   }
+    //                 ],
+    //                 as: 'enquiries'
+    //               }
+    //             },
+    //             {
+    //               $unwind: "$enquiries"
+    //             },
+    //             {
+    //               $project: {
+    //                 count: "$enquiries.count"
+    //               }
+    //             }
+    //           ],
+    //           purchaseOrderCount: [
+    //             {
+    //               $lookup: {
+    //                 from: 'purchaseorders',
+    //                 let: { buyerId: buyer_id },
+    //                 pipeline: [
+    //                   {
+    //                     $match: {
+    //                       $expr: { $eq: ["$buyer_id", "$$buyerId"] }
+    //                     }
+    //                   },
+    //                   {
+    //                     $count: "count"
+    //                   }
+    //                 ],
+    //                 as: 'purchaseorders'
+    //               }
+    //             },
+    //             {
+    //               $unwind: "$purchaseorders"
+    //             },
+    //             {
+    //               $project: {
+    //                 count: "$purchaseorders.count"
+    //               }
+    //             }
+    //           ]
+    //         }
+    //       }
+    //     ])
+    //     .then((data) => {
+    //       callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result: data[0] });
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //       callback({ code: 400, message: 'Error while fetching buyer dashboard order details', result: err });
+    //     });
+    //   } catch (error) {
+    //     console.log('Internal Server Error', error);
+    //     callback({ code: 500, message: 'Internal server error', result: error });
+    //   }
+    // },
+    
+
+    buyerDashboardOrderDetails: async (reqObj, callback) => {
       try {
         const { buyer_id } = reqObj;
-    
+        
+        // Get today's start and end timestamps
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+        
         Order.aggregate([
           {
-            $match : { buyer_id: buyer_id }
+            $match: {
+              buyer_id: buyer_id,
+              created_at: {
+                $gte: startOfDay,
+                $lte: endOfDay
+              }
+            }
           },
           {
             $addFields: {
@@ -555,66 +729,66 @@ module.exports = {
             $facet: {
               completedCount: [
                 { $match: { order_status: 'completed' } },
-                { 
+                {
                   $group: {
-                    _id            : null,
-                    count          : { $sum: 1 },
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    count          : 1,
-                    total_purchase : 1
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
                   }
                 }
               ],
               activeCount: [
                 { $match: { order_status: 'active' } },
-                { 
+                {
                   $group: {
-                    _id            : null,
-                    count          : { $sum: 1 },
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    count          : 1,
-                    total_purchase : 1
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
                   }
                 }
               ],
               pendingCount: [
                 { $match: { order_status: 'pending' } },
-                { 
+                {
                   $group: {
-                    _id            : null,
-                    count          : { $sum: 1 },
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    count: { $sum: 1 },
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    count          : 1,
-                    total_purchase : 1
+                    _id: 0,
+                    count: 1,
+                    total_purchase: 1
                   }
                 }
               ],
               totalPurchaseAmount: [
-                { 
+                {
                   $group: {
-                    _id            : null,
-                    total_purchase : { $sum: "$numeric_total_price" }
+                    _id: null,
+                    total_purchase: { $sum: "$numeric_total_price" }
                   }
                 },
-                { 
+                {
                   $project: {
-                    _id            : 0,
-                    total_purchase : 1
+                    _id: 0,
+                    total_purchase: 1
                   }
                 }
               ],
@@ -626,7 +800,11 @@ module.exports = {
                     pipeline: [
                       {
                         $match: {
-                          $expr: { $eq: ["$buyer_id", "$$buyerId"] }
+                          $expr: { $eq: ["$buyer_id", "$$buyerId"] },
+                          created_at: {
+                            $gte: startOfDay,
+                            $lte: endOfDay
+                          }
                         }
                       },
                       {
@@ -656,7 +834,11 @@ module.exports = {
                     pipeline: [
                       {
                         $match: {
-                          $expr: { $eq: ["$buyer_id", "$$buyerId"] }
+                          $expr: { $eq: ["$buyer_id", "$$buyerId"] },
+                          created_at: {
+                            $gte: startOfDay,
+                            $lte: endOfDay
+                          }
                         }
                       },
                       {
