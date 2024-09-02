@@ -30,6 +30,13 @@ const orderItemSchema = new Schema({
         type: String,
         required: true
     },
+    target_price: {
+        type: String,
+        required: true
+    },
+    counter_price: {
+        type: String,
+    },
     status: {
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled', 'rejected' ],
@@ -281,6 +288,10 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
+    total_amount_paid: {
+        type: String,
+        required: true
+    },
     logistics_details: [logisticsSchema],
     shipment_details: shipmentSchema,
     
@@ -293,6 +304,11 @@ const orderSchema = new Schema({
         type: String,
         enum: ['pending', 'Active', 'in-transit', 'delivered','completed', 'cancelled'],
         default: 'Active'
+    },
+    invoice_status: {
+        type: String,
+        enum: ['pending', 'Active', 'in-transit', 'delivered','completed', 'cancelled', 'Invoice Created','Paid'],
+        default: 'Invoice Created'
     },
     created_at: {
         type: Date,

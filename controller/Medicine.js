@@ -103,7 +103,8 @@ module.exports = {
                 manufacturer_country_of_origin,
                 manufacturer_description,
                 stockedIn_details: stockedInDetails,
-                status : 0
+                status : 0,
+                edit_status: 0
             });
     
             newMedicine.save()
@@ -166,7 +167,8 @@ module.exports = {
                 manufacturer_country_of_origin,
                 manufacturer_description,
                 stockedIn_details: stockedInDetails,
-                status : 0
+                status : 0,
+                edit_status: 0
             });
     
             secondaryMarketMedicine.save()
@@ -579,11 +581,23 @@ module.exports = {
 
   editMedicine : async(reqObj, callback) => {
     try {
-        const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
-                dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, unit_tax,
-                country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
+      let stockedInDetails = reqObj.stocked_in_details;
+
+      if (typeof stockedInDetails === 'string') {
+          try {
+              stockedInDetails = JSON.parse(stockedInDetails);
+          } catch (err) {
+              return callback({ code: 400, message: "Invalid format for stocked_in_details" });
+          }
+      }
+      const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
+              dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
+              unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
+              manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details
+             } = reqObj;
 
         if (product_type === 'new') {
+          console.log('thiss');
             const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
 
             if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
@@ -603,30 +617,34 @@ module.exports = {
             }));
 
             const newMedicineObj = {
-                medicine_id,
-                supplier_id,
-                medicine_name,
-                medicine_type : 'new_medicine',
-                composition,
-                strength,
-                type_of_form,
-                shelf_life,
-                dossier_type,
-                dossier_status,
-                medicine_category : product_category,
-                total_quantity,
-                gmp_approvals,
-                shipping_time,
-                tags,
-                unit_tax,
-                country_of_origin,
-                registered_in,
-                stocked_in,
-                available_for,
-                description,
-                medicine_image,
-                inventory_info,
-                edit_status : 0
+              medicine_id,
+              supplier_id,
+              medicine_name,
+              medicine_type : 'new_medicine',
+              composition,
+              strength,
+              type_of_form,
+              shelf_life,
+              dossier_type,
+              dossier_status,
+              medicine_category : product_category,
+              total_quantity,
+              gmp_approvals,
+              shipping_time,
+              tags,
+              unit_tax,
+              country_of_origin,
+              registered_in,
+              stocked_in,
+              available_for,
+              description,
+              medicine_image,
+              inventory_info,
+              manufacturer_name,
+              manufacturer_country_of_origin,
+              manufacturer_description,
+              stockedIn_details: stockedInDetails,
+              edit_status: 0
             };
 
             const medicine = await Medicine.findOne({ supplier_id: supplier_id, medicine_id: medicine_id });
@@ -638,7 +656,16 @@ module.exports = {
               const newMedEdit = new NewMedicineEdit(newMedicineObj)
 
               newMedEdit.save()
-              .then((savedMedicine) => {
+              .then(async(savedMedicine) => {
+                const updatedMedicine = await Medicine.findOneAndUpdate(
+                  { supplier_id: supplier_id, medicine_id: medicine_id },
+                  { edit_status: 1 },
+                  { new: true }
+                );
+              
+                if (!updatedMedicine) {
+                  return callback({ code: 404, message: 'Medicine Not Found' });
+                }
                   callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
               })
               .catch((err) => {
@@ -646,7 +673,8 @@ module.exports = {
                   callback({ code: 400, message: "Error while submitting request" });
               });
    
-      } else if(product_type === 'secondary market') {
+      } 
+      else if(product_type === 'secondary market') {
           const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
 
           const secondaryMarketMedicineObj = {
@@ -678,13 +706,26 @@ module.exports = {
               condition,
               medicine_image,
               invoice_image,
+              manufacturer_name,
+              manufacturer_country_of_origin,
+              manufacturer_description,
+              stockedIn_details: stockedInDetails,
               edit_status : 0
           };
 
           const secondaryMedEdit = new SecondaryMarketMedicineEdit(secondaryMarketMedicineObj)
-
+          
           secondaryMedEdit.save()
-          .then((savedMedicine) => {
+          .then(async(savedMedicine) => {
+            const updatedMedicine = await Medicine.findOneAndUpdate(
+              { supplier_id: supplier_id, medicine_id: medicine_id },
+              { edit_status: 1 },
+              { new: true }
+            );
+          
+            if (!updatedMedicine) {
+              return callback({ code: 404, message: 'Medicine Not Found' });
+            }
               callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
           })
           .catch((err) => {

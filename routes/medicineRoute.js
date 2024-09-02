@@ -108,34 +108,40 @@ module.exports = () => {
 
     routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
       
-        if (!req.files['product_image'] || req.files['product_image'].length === 0) {
-            res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
-            return;
-        }
+        // if (!req.files['product_image'] || req.files['product_image'].length === 0) {
+        //     res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
+        //     return;
+        // }
+        console.log('REQBODY',req.body);
         const tags = req.body.tags.split(',');
-    
-        let obj = {
-            ...req.body,
-            tags : tags,
-            medicine_image: req.files['product_image'].map(file => path.basename(file.path))
+    let obj
+        if(req.files['product_image']) {
+            console.log('herer');
+                req.body.tags = tags,
+                req.body.medicine_image =req.files['product_image'].map(file => path.basename(file.path))
+            
         }
+        
 
         if(req.body.product_type === 'secondary market') {
-            if (!req.files['invoice_image'] || req.files['invoice_image'].length === 0) {
-                res.send({ code: 415, message: 'Invoice Images fields are required for secondary market!', errObj: {} });
-                return;
+            // if (!req.files['invoice_image'] || req.files['invoice_image'].length === 0) {
+            //     res.send({ code: 415, message: 'Invoice Images fields are required for secondary market!', errObj: {} });
+            //     return;
+            // }
+            if(req.files['invoice_image']) {
+                req.body.invoice_image = req.files['invoice_image'].map(file => path.basename(file.path));
             }
-            obj.invoice_image = req.files['invoice_image'].map(file => path.basename(file.path));
+            
         }
     
-        let errObj = validation(obj, 'editProduct');
+        let errObj = validation(req.body, 'editProduct');
     
         if (Object.values(errObj).length) {
             res.send({ code: 422, message: 'All fields are required', errObj });
             return;
         }
     
-        Controller.editMedicine(obj, result => {
+        Controller.editMedicine(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

@@ -14,7 +14,11 @@ const orderItemSchema = new Schema({
         type: Number,
         required: true
     },
-    price: {
+    est_delivery_days: {
+        type: String,
+        required: true
+    },
+    unit_price: {
         type: String,
         required: true
     },
@@ -25,6 +29,13 @@ const orderItemSchema = new Schema({
     total_amount: {
         type: String,
         required: true
+    },
+    target_price: {
+        type: String,
+        required: true
+    },
+    counter_price: {
+        type: String,
     },
     status: {
         type: String,
@@ -90,7 +101,6 @@ const invoiceSchema = new Schema({
         type: String,
         required: true
     },
-
     supplier_name: {
         type: String,
         required: true
@@ -112,10 +122,10 @@ const invoiceSchema = new Schema({
         type: String,
         required: true
     }],
-    vat: {
-        type: String,
-        required: true
-    },
+    // vat: {
+    //     type: String,
+    //     required: true
+    // },
     total_payable_amount: {
         type: String,
         required: true
@@ -136,6 +146,21 @@ const invoiceSchema = new Schema({
         type: String,
         required: true
     },
+    mode_of_payment: {
+        type: String,
+    },
+    amount_paid: {
+        type: String,
+    },
+    transaction_id: {
+        type: String,
+    },
+    payment_date: {
+        type: String,
+    },
+    transaction_image: [{
+        type: String,
+    }],
     // logistics_details: [logisticsSchema],
     // shipment_details: shipmentSchema,
     
@@ -150,7 +175,9 @@ const invoiceSchema = new Schema({
         default: 'pending'
     },
     payment_status : {
-
+        type: String,
+        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
+        default: 'pending'
     },
     created_at: {
         type: Date,

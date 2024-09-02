@@ -117,6 +117,10 @@ const medicineSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  edit_status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 3 - deleted
+    type: Number,
+    required: true
+  },
   created_at: {
     type: Date,
     default: Date.now

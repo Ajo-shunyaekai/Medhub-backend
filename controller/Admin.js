@@ -1989,6 +1989,7 @@ module.exports = {
                 },
               },
             },
+            
             {
               $project: {
                 medicine_id       : 1,
@@ -2011,6 +2012,9 @@ module.exports = {
                 "inventory.delivery_info"  : 1,
                 "inventory.price"          : 1,
               },
+            },
+            {
+              $sort: { created_at: -1 } 
             },
             { $skip: offset },
             { $limit: page_size },
@@ -2086,6 +2090,9 @@ module.exports = {
                 "inventory.delivery_info"  : 1,
                 "inventory.price"          : 1,
               },
+            },
+            {
+              $sort: { created_at: -1 } 
             },
             { $skip: offset },
             { $limit: page_size }
@@ -2268,7 +2275,7 @@ module.exports = {
             if (!medicine) {
               return callback({ code: 400, message: "Medicine edit request not found" });
             }
-
+console.log('medicine',medicine);
             const editMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
 
             if (editMedicineStatus === 1) {
@@ -2287,13 +2294,23 @@ module.exports = {
                 gmp_approvals     : medicine.gmp_approvals,
                 shipping_time     : medicine.shipping_time,
                 tags              : medicine.tags,
+                unit_tax : medicine.unit_tax,
                 country_of_origin : medicine.country_of_origin,
                 registered_in     : medicine.registered_in,
                 stocked_in        : medicine.stocked_in,
                 available_for     : medicine.available_for,
                 description       : medicine.description,
-                medicine_image    : medicine.medicine_image,
+                manufacturer_name: medicine.manufacturer_name,
+                manufacturer_country_of_origin: medicine.manufacturer_country_of_origin,
+                manufacturer_description: medicine.manufacturer_description,
+                stockedIn_details: medicine.stockedIn_details,
+                // inventory_info: medicine.inventory_info,
+                // medicine_image    : medicine.medicine_image,
               };
+
+              if (medicine.medicine_image && medicine.medicine_image.length > 0) {
+                updateObj.medicine_image = medicine.medicine_image;
+              }
 
               if (medicine.medicine_type === 'new_medicine') {
                 updateObj.medicine_type  = 'new';
@@ -2305,6 +2322,10 @@ module.exports = {
                 updateObj.min_purchase_unit    = medicine.min_purchase_unit;
                 updateObj.unit_price           = medicine.unit_price;
                 updateObj.invoice_image        = medicine.invoice_image;
+              }
+
+              if (medicine.invoice_image && medicine.invoice_image.length > 0) {
+                updateObj.invoice_image = medicine.invoice_image;
               }
 
               try {
@@ -2333,7 +2354,7 @@ module.exports = {
                   return callback({ code: 400, message: "Medicine not found for update" });
                 }
 
-                return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} medicine details updated successfully`, result: updatedMedicine });
+                return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} Medicine Details Updated Successfully`, result: updatedMedicine });
 
               } catch (error) {
                 console.error('Error updating medicine details:', error);

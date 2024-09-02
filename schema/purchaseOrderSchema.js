@@ -136,7 +136,7 @@ const purchaseOrderSchema = new Schema({
     },
     po_status: {
         type: String,
-        enum: ['pending', 'active', 'completed', 'cancelled'],
+        enum: ['pending', 'active', 'completed', 'cancelled', 'order created'],
         default: 'active'
     },
     created_at: {

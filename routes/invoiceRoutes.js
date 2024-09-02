@@ -3,7 +3,7 @@ var routes                                       = express.Router();
 const multer                                     = require('multer')
 const sharp                                      = require('sharp')
 const path                                       = require('path');
-const Order                                      = require('../controller/Order')
+const Controller                                      = require('../controller/Order')
 const Invoice                                    = require('../controller/Invoice')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
@@ -83,6 +83,13 @@ module.exports = () => {
             const response = handleResponse(result);
             res.send(response);
         });
+    });
+
+    routes.post('/invoice-details', checkAuthorization, commonAuthentication, async(req, res) => {
+            Invoice.invoiceDetails(req.body, result => {
+                const response = handleResponse(result);
+                res.send(response);
+            });
     });
  
 

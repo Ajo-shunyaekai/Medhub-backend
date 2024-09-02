@@ -13,16 +13,13 @@ const medicineEditRequest = new mongoose.Schema({
   },
   supplier_id: {
     type: String,
-    // required: true,
+    required: true,
   },
   medicine_name: {
     type: String,
     required: true
   },
-  medicine_type: {
-    type: String,
-    required: true
-  },
+  
   composition: {
     type: String,
     required: true
@@ -67,6 +64,10 @@ const medicineEditRequest = new mongoose.Schema({
     type: String,
     required: true
   }],
+  unit_tax : {
+    type: String,
+    required: true
+  },
   country_of_origin: {
     type: String,
     required: true
@@ -91,6 +92,23 @@ const medicineEditRequest = new mongoose.Schema({
     type: String,
     trim: true,
     required: true
+  }],
+  manufacturer_name: {
+    type: String,
+    required: true
+  },
+  manufacturer_country_of_origin: {
+    type: String,
+    required: true
+  },
+  manufacturer_description: {
+    type: String,
+    required: true
+  },
+  stockedIn_details: [{
+    stocked_in_country : String,
+    stocked_quantity   : String,
+    stocked_in_type    : String,
   }],
   status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 
     type: Number,

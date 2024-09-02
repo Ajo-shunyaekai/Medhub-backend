@@ -171,6 +171,14 @@ module.exports = () => {
         });  
     });
 
+    // routes.post('/proforma-invoice-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+
+    //     Order.supplierInvoicesList(req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+
     routes.post('/supplier-invoice-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
 
         Order.supplierInvoicesList(req.body, result => {
