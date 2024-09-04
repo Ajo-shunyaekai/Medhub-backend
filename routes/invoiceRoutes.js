@@ -71,7 +71,7 @@ module.exports = () => {
             // tags : tags,
             transaction_image: req.files['transaction_image'].map(file => path.basename(file.path))
         }
-        console.log(obj);
+        
             Invoice.updatePaymentStatus(obj, result => {
                 const response = handleResponse(result);
                 res.send(response);

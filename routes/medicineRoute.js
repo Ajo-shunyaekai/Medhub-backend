@@ -106,34 +106,129 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
+    // routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
       
-        // if (!req.files['product_image'] || req.files['product_image'].length === 0) {
-        //     res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
-        //     return;
-        // }
-        console.log('REQBODY',req.body);
-        const tags = req.body.tags.split(',');
-    let obj
-        if(req.files['product_image']) {
-            console.log('herer');
-                req.body.tags = tags,
-                req.body.medicine_image =req.files['product_image'].map(file => path.basename(file.path))
+    //     console.log('REQBODY',req.body);
+    //     const tags = req.body.tags.split(',');
+    // let obj
+    //     if(req.files['product_image']) {
+    //         console.log('herer');
+    //             req.body.tags = tags,
+    //             req.body.medicine_image =req.files['product_image'].map(file => path.basename(file.path))
             
-        }
+    //     }
         
 
-        if(req.body.product_type === 'secondary market') {
-            // if (!req.files['invoice_image'] || req.files['invoice_image'].length === 0) {
-            //     res.send({ code: 415, message: 'Invoice Images fields are required for secondary market!', errObj: {} });
-            //     return;
-            // }
-            if(req.files['invoice_image']) {
-                req.body.invoice_image = req.files['invoice_image'].map(file => path.basename(file.path));
-            }
+    //     if(req.body.product_type === 'secondary market') {
+    //         // if (!req.files['invoice_image'] || req.files['invoice_image'].length === 0) {
+    //         //     res.send({ code: 415, message: 'Invoice Images fields are required for secondary market!', errObj: {} });
+    //         //     return;
+    //         // }
+    //         if(req.files['invoice_image']) {
+    //             req.body.invoice_image = req.files['invoice_image'].map(file => path.basename(file.path));
+    //         }
             
+    //     }
+    
+    //     let errObj = validation(req.body, 'editProduct');
+    
+    //     if (Object.values(errObj).length) {
+    //         res.send({ code: 422, message: 'All fields are required', errObj });
+    //         return;
+    //     }
+    
+    //     // Controller.editMedicine(req.body, result => {
+    //     //     const response = handleResponse(result);
+    //     //     res.send(response);
+    //     // });
+    // });
+
+
+    // routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
+    //     console.log('REQBODY', req.body);
+    
+    //     // Initialize an array to hold all images (existing + new)
+    //     let allImages = [];
+    
+    //     // Handle existing images from req.body.product_image
+    //     if (Array.isArray(req.body.product_image)) {
+    //         allImages = [...req.body.product_image];
+    //     }
+    
+    //     // Handle new images from req.files['product_image']
+    //     if (req.files['product_image']) {
+    //         const newImages = req.files['product_image'].map(file => path.basename(file.path));
+    //         allImages = [...allImages, ...newImages];
+    //     }
+    
+    //     // Store the consolidated image list in the req.body
+    //     req.body.medicine_image = allImages;
+    
+    //     // Handle invoice images if applicable
+    //     if (req.body.product_type === 'secondary market') {
+    //         if (req.files['invoice_image']) {
+    //             req.body.invoice_image = req.files['invoice_image'].map(file => path.basename(file.path));
+    //         }
+    //     }
+    
+    //     // Validation (assuming you have a validation function)
+    //     let errObj = validation(req.body, 'editProduct');
+    
+    //     if (Object.values(errObj).length) {
+    //         res.send({ code: 422, message: 'All fields are required', errObj });
+    //         return;
+    //     }
+    
+    //     // Pass the final data to your controller for further processing
+    //     Controller.editMedicine(req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    
+
+
+    routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
+        console.log('REQBODY', req.body);
+    
+        // Initialize arrays to hold all images (existing + new)
+        let allProductImages = [];
+        let allInvoiceImages = [];
+    
+        // Handle existing product images from req.body.product_image
+        if (Array.isArray(req.body.product_image)) {
+            allProductImages = [...req.body.product_image];
         }
     
+        // Handle new product images from req.files['product_image']
+        if (req.files['product_image']) {
+            const newProductImages = req.files['product_image'].map(file => path.basename(file.path));
+            allProductImages = [...allProductImages, ...newProductImages];
+        }
+    
+        // Store the consolidated product image list in the req.body
+        req.body.medicine_image = allProductImages;
+    
+        // Handle invoice images if applicable
+        if (req.body.product_type === 'secondary market') {
+            // Convert invoice_image to an array if it's a string
+            if (typeof req.body.invoice_image === 'string') {
+                allInvoiceImages = [req.body.invoice_image];
+            } else if (Array.isArray(req.body.invoice_image)) {
+                allInvoiceImages = [...req.body.invoice_image];
+            }
+    
+            // Handle new invoice images from req.files['invoice_image']
+            if (req.files['invoice_image']) {
+                const newInvoiceImages = req.files['invoice_image'].map(file => path.basename(file.path));
+                allInvoiceImages = [...allInvoiceImages, ...newInvoiceImages];
+            }
+    
+            // Store the consolidated invoice image list in the req.body
+            req.body.invoice_image = allInvoiceImages;
+        }
+    
+        // Validation (assuming you have a validation function)
         let errObj = validation(req.body, 'editProduct');
     
         if (Object.values(errObj).length) {
@@ -141,11 +236,15 @@ module.exports = () => {
             return;
         }
     
+        // Pass the final data to your controller for further processing
         Controller.editMedicine(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
+    
+    
+    
 
     routes.post('/medicine-edit-req-list', checkAuthorization, (req, res) => {
        

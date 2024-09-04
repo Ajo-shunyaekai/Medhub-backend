@@ -17,11 +17,12 @@ const initializeInvoiceNumber = async () => {
 module.exports = {
 
     createOrder : async(reqObj, callback) => {
-      console.log(reqObj);
+      
        try {
 
-        const orderId = 'ORD-' + Math.random().toString(16).slice(2);
-      
+        const orderId = 'ORD-' + Math.random().toString(16).slice(2, 10);
+        const paymentTermsArray = reqObj.data.paymentTerms.split('\n').map(term => term.trim());
+
         const newOrder = new Order({
             order_id         : orderId,
             enquiry_id       : reqObj.enquiry_id,
@@ -32,8 +33,8 @@ module.exports = {
             invoice_date     : reqObj.data.invoiceDate,
             deposit_requested : reqObj.data.depositRequested,
             deposit_due : reqObj.data.depositDue,
-            payment_due_date : reqObj.data.invoiceDueDate,
-            payment_terms    : reqObj.data.paymentTerms,
+            payment_due_date : reqObj.data.dueDate,
+            payment_terms    : paymentTermsArray,
             buyer_name       : reqObj.data.buyerName,
             buyer_email      : reqObj.data.buyerEmail,
             buyer_mobile     : reqObj.data.buyerMobile,
@@ -45,6 +46,7 @@ module.exports = {
             items            : reqObj.orderItems || reqObj.data.orderItems,
             total_due_amount : reqObj.data.totalDueAmount,
             total_amount_paid : 0,
+            pending_amount    : reqObj.data.totalDueAmount,
             order_status     : 'active',
             // payment_terms     : reqObj.payment_terms,
             // est_delivery_time : reqObj.est_delivery_time,
@@ -79,7 +81,7 @@ module.exports = {
         if (!updatedPO) {
           return callback({ code: 404, message: 'Purchase Order not found', result: null });
       }
-          const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+          const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
             notification_id  : notificationId,
             event_type   : 'Order created',
@@ -90,7 +92,7 @@ module.exports = {
             to_id : reqObj.buyer_id,
             event_id : orderId,
             connected_id : reqObj.enquiry_id,
-            message : 'Order created',
+            message : `Order Created! Your order has been created for ${reqObj.enquiry_id}`,
             status : 0
         })
         await newNotification.save()
@@ -124,7 +126,7 @@ module.exports = {
       if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
       }
-      const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+      const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
       const newNotification = new Notification({
         notification_id   : notificationId,
         event_type   : 'Logistics booking request',
@@ -165,7 +167,7 @@ module.exports = {
       if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
       }
-          const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+          const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
             notification_id  : notificationId,
             event_type   : 'Shipment details submitted',
@@ -1120,6 +1122,7 @@ module.exports = {
                 payment_due_date  : 1,
                 total_due_amount  : 1,
                 total_amount_paid : 1,
+                pending_amount    : 1,
                 logistics_details : 1,
                 shipment_details  : 1,
                 coordinators      : 1,
@@ -1186,6 +1189,7 @@ module.exports = {
                 coordinators       : { $first: "$coordinators" },
                 total_due_amount   : { $first: "$total_due_amount" },
                 total_amount_paid  : { $first: "$total_amount_paid" },
+                pending_amount     : { $first: "$pending_amount" },
                 created_at         : {$first: "$created_at"},
                 supplier           : { $first: "$supplier" },
                 buyer              : { $first: "$buyer" },
@@ -1229,6 +1233,7 @@ module.exports = {
                   coordinators      : 1,
                   total_due_amount  : 1,
                   total_amount_paid : 1,
+                  pending_amount    : 1,
                   created_at        : 1,
                   totalPrice        : 1,
                   "supplier.supplier_image"              : 1,

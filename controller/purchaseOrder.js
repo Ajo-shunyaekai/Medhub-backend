@@ -8,7 +8,7 @@ module.exports = {
  
     createPO: async (reqObj, callback) => {
         try {
-            const purchaseOrderId = 'PO-' + Math.random().toString(16).slice(2)
+            const purchaseOrderId = 'PO-' + Math.random().toString(16).slice(2,10)
             const { buyer_id, enquiry_id, supplier_id, itemIds, grandTotalAmount,
                 data: {
                     poDate,
@@ -39,16 +39,19 @@ module.exports = {
             //     return !itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted');
             // });
             enquiry.quotation_items.forEach(detail => {
+                console.log('detail',detail);
                 if (itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted')) {
                     detail.status = 'PO created';
                 }
             });
     
             orderItems.forEach(orderItem => {
+                console.log('orderItem',orderItem);
                 const enquiryItem = enquiry.items.find(item => item.medicine_id === orderItem.medicine_id);
                 if (enquiryItem) {
+                    console.log('enquiryItem',enquiryItem);
                     enquiryItem.status = 'PO created';
-                }
+                } 
             });
             enquiry.enquiry_status = 'PO created';
             await enquiry.save();
@@ -87,10 +90,10 @@ module.exports = {
                 order_items             : formattedOrderItems,
                 total_amount            : grandTotalAmount,
                 additional_instructions : description,
-                po_status               : 'pending',
+                po_status               : 'active',
             });
             await newPO.save();
-            const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
                 notification_id  : notificationId,
                 event_type       : 'PO created',
@@ -101,11 +104,11 @@ module.exports = {
                 to_id            : supplier_id,
                 event_id         : enquiry_id,
                 link_id          : purchaseOrderId,
-                message          : 'Purchase order created',
+                message          : `Purchase order created for ${enquiry_id}`,
                 status           : 0
             })
             await newNotification.save()
-            callback({ code: 200, message: 'Purchase Order created successfully', data: newPO });
+            callback({ code: 200, message: 'Purchase Order Created Successfully', data: newPO });
         } catch (error) {
             console.log('Internal Server Error', error);
             callback({ code: 500, message: 'Internal Server Error' });
@@ -369,11 +372,13 @@ module.exports = {
                     supplierAddress,
                     supplierEmail,
                     supplierMobile,
+                    supplier_country_code,
                     supplierRegNo,
                     buyerName,
                     buyerAddress,
                     buyerEmail,
                     buyerMobile,
+                    buyer_country_code,
                     buyerRegNo,
                     orderItems,
                     description
@@ -396,11 +401,13 @@ module.exports = {
             purchaseOrder.supplier_address        = supplierAddress || purchaseOrder.supplier_address;
             purchaseOrder.supplier_email          = supplierEmail || purchaseOrder.supplier_email;
             purchaseOrder.supplier_mobile         = supplierMobile || purchaseOrder.supplier_mobile;
+            purchaseOrder.supplier_country_code   = supplier_country_code || purchaseOrder.supplier_country_code;
             purchaseOrder.supplier_regNo          = supplierRegNo || purchaseOrder.supplier_regNo;
             purchaseOrder.buyer_name              = buyerName || purchaseOrder.buyer_name;
             purchaseOrder.buyer_address           = buyerAddress || purchaseOrder.buyer_address;
             purchaseOrder.buyer_email             = buyerEmail || purchaseOrder.buyer_email;
             purchaseOrder.buyer_mobile            = buyerMobile || purchaseOrder.buyer_mobile;
+            purchaseOrder.buyer_country_code      = buyer_country_code || purchaseOrder.buyer_country_code;
             purchaseOrder.buyer_regNo             = buyerRegNo || purchaseOrder.buyer_regNo;
             purchaseOrder.additional_instructions = description || purchaseOrder.additional_instructions;
             
@@ -421,7 +428,7 @@ module.exports = {
             
             await purchaseOrder.save();
 
-            const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
                 notification_id  : notificationId,
                 event_type       : 'PO edited',

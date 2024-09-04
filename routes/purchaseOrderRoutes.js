@@ -46,6 +46,18 @@ module.exports = () => {
     });
 
     routes.post('/edit-po', checkAuthorization, commonAuthentication,(req, res) => {
+        const { supplierMobile, buyerMobile } = req.body.data;
+        const countryCodeRegex = /^\+\d+/;
+
+        const supplierCountryCode = supplierMobile.match(countryCodeRegex)[0];
+        const supplierPhoneNumber = supplierMobile.replace(supplierCountryCode, '').replace(/\D/g, '');
+        const buyerCountryCode = buyerMobile.match(countryCodeRegex)[0];
+        const buyerPhoneNumber = buyerMobile.replace(buyerCountryCode, '').replace(/\D/g, '');
+    
+        req.body.data.supplier_country_code = supplierCountryCode;
+        req.body.data.supplierMobile = supplierPhoneNumber;
+        req.body.data.buyer_country_code = buyerCountryCode;
+        req.body.data.buyerMobile = buyerPhoneNumber;
         Controller.editPO(req.body, result => {
             const response = handleResponse(result);
             res.send(response);

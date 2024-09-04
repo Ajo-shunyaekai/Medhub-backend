@@ -247,10 +247,10 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
-    payment_terms: {
+    payment_terms: [{
         type: String,
         required: true
-    },
+    }],
     buyer_name: {
         type: String,
         required: true
@@ -289,6 +289,10 @@ const orderSchema = new Schema({
         required: true
     },
     total_amount_paid: {
+        type: String,
+        required: true
+    },
+    pending_amount: {
         type: String,
         required: true
     },

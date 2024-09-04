@@ -37,170 +37,315 @@ module.exports = {
     }
   },
   
-  addMedicine: async (reqObj, callback) => {
-      try {
-        let medicine_id = "MED-" + Math.random().toString(16).slice(2);
+  // addMedicine: async (reqObj, callback) => {
+  //     try {
+  //       let medicine_id = "MED-" + Math.random().toString(16).slice(2);
 
-        let stockedInDetails = reqObj.stocked_in_details;
+  //       let stockedInDetails = reqObj.stocked_in_details;
 
-        if (typeof stockedInDetails === 'string') {
-            try {
-                stockedInDetails = JSON.parse(stockedInDetails);
-            } catch (err) {
-                return callback({ code: 400, message: "Invalid format for stocked_in_details" });
-            }
-        }
-        const { product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
-                dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
-                unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
-                manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details
-               } = reqObj;
+  //       if (typeof stockedInDetails === 'string') {
+  //           try {
+  //               stockedInDetails = JSON.parse(stockedInDetails);
+  //           } catch (err) {
+  //               return callback({ code: 400, message: "Invalid format for stocked_in_details" });
+  //           }
+  //       }
+  //       const { product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
+  //               dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
+  //               unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
+  //               manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details
+  //              } = reqObj;
     
-        if (product_type === 'new') {
-            const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
+  //       if (product_type === 'new') {
+  //           const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
     
-            if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
-                !Array.isArray(total_price) ||  !Array.isArray(est_delivery_days) ) {
-                callback({ code: 400, message: "Inventory fields should be arrays" });
-            }
+  //           if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
+  //               !Array.isArray(total_price) ||  !Array.isArray(est_delivery_days) ) {
+  //               callback({ code: 400, message: "Inventory fields should be arrays" });
+  //           }
     
-            if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
-               callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
-            }
+  //           if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+  //              callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
+  //           }
           
-            const inventory_info = quantity.map((_, index) => ({
-              quantity          : quantity[index],
-              unit_price        : unit_price[index],
-              total_price       : total_price[index],
-              est_delivery_days : est_delivery_days[index],
-            }));
+  //           const inventory_info = quantity.map((_, index) => ({
+  //             quantity          : quantity[index],
+  //             unit_price        : unit_price[index],
+  //             total_price       : total_price[index],
+  //             est_delivery_days : est_delivery_days[index],
+  //           }));
     
-            const newMedicine = new NewMedicine({
-                medicine_id,
-                supplier_id,
-                medicine_name,
-                medicine_type : product_type,
-                composition,
-                strength,
-                type_of_form,
-                shelf_life,
-                dossier_type,
-                dossier_status,
-                medicine_category : product_category,
-                total_quantity,
-                gmp_approvals,
-                shipping_time,
-                tags,
-                unit_tax,
-                country_of_origin,
-                registered_in,
-                stocked_in,
-                available_for,
-                description,
-                medicine_image,
-                inventory_info,
-                manufacturer_name,
-                manufacturer_country_of_origin,
-                manufacturer_description,
-                stockedIn_details: stockedInDetails,
-                status : 0,
-                edit_status: 0
-            });
+  //           const newMedicine = new NewMedicine({
+  //               medicine_id,
+  //               supplier_id,
+  //               medicine_name,
+  //               medicine_type : product_type,
+  //               composition,
+  //               strength,
+  //               type_of_form,
+  //               shelf_life,
+  //               dossier_type,
+  //               dossier_status,
+  //               medicine_category : product_category,
+  //               total_quantity,
+  //               gmp_approvals,
+  //               shipping_time,
+  //               tags,
+  //               unit_tax,
+  //               country_of_origin,
+  //               registered_in,
+  //               stocked_in,
+  //               available_for,
+  //               description,
+  //               medicine_image,
+  //               inventory_info,
+  //               manufacturer_name,
+  //               manufacturer_country_of_origin,
+  //               manufacturer_description,
+  //               stockedIn_details: stockedInDetails,
+  //               status : 0,
+  //               edit_status: 0
+  //           });
     
-            newMedicine.save()
-              .then(async(savedMedicine) => {
-                const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
-                const newNotification = new Notification({
-                  notification_id  : notificationId,
-                  event_type   : 'New Medicine',
-                  event : 'addmedicine',
-                  from : 'supplier',
-                  to : 'admin',
-                  from_id : supplier_id,
-                  // to_id : reqObj.buyer_id,
-                  event_id : medicine_id,
-                  // connected_id : reqObj.enquiry_id,
-                  message : 'New medicine request',
-                  status : 0
-              })
-               await newNotification.save()
-                  callback({ code: 200, message: "Add medicine request submitted successfully", result: savedMedicine });
-              })
-              .catch((err) => {
-                  console.log(err);
-                   callback({ code: 400, message: "Error while adding submitting request" });
-              });
+  //           newMedicine.save()
+  //             .then(async(savedMedicine) => {
+  //               const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+  //               const newNotification = new Notification({
+  //                 notification_id  : notificationId,
+  //                 event_type   : 'New Medicine',
+  //                 event : 'addmedicine',
+  //                 from : 'supplier',
+  //                 to : 'admin',
+  //                 from_id : supplier_id,
+  //                 // to_id : reqObj.buyer_id,
+  //                 event_id : medicine_id,
+  //                 // connected_id : reqObj.enquiry_id,
+  //                 message : 'New medicine request',
+  //                 status : 0
+  //             })
+  //              await newNotification.save()
+  //                 callback({ code: 200, message: "Add medicine request submitted successfully", result: savedMedicine });
+  //             })
+  //             .catch((err) => {
+  //                 console.log(err);
+  //                  callback({ code: 400, message: "Error while adding submitting request" });
+  //             });
            
-        } else if(product_type === 'secondary market') {
-            const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
+  //       } else if(product_type === 'secondary market') {
+  //           const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
     
-            const secondaryMarketMedicine = new SecondaryMarketMedicine({
-                medicine_id,
-                supplier_id,
-                medicine_name,
-                medicine_type : product_type,
-                purchased_on,
-                country_available_in,
-                min_purchase_unit,
-                composition,
-                strength,
-                type_of_form,
-                shelf_life,
-                dossier_type,
-                dossier_status,
-                medicine_category : product_category,
-                gmp_approvals,
-                shipping_time,
-                tags,
-                unit_tax,
-                country_of_origin,
-                registered_in,
-                stocked_in,
-                available_for,
-                description,
-                total_quantity : quantity,
-                unit_price,
-                condition,
-                medicine_image,
-                invoice_image,
-                manufacturer_name,
-                manufacturer_country_of_origin,
-                manufacturer_description,
-                stockedIn_details: stockedInDetails,
-                status : 0,
-                edit_status: 0
-            });
+  //           const secondaryMarketMedicine = new SecondaryMarketMedicine({
+  //               medicine_id,
+  //               supplier_id,
+  //               medicine_name,
+  //               medicine_type : product_type,
+  //               purchased_on,
+  //               country_available_in,
+  //               min_purchase_unit,
+  //               composition,
+  //               strength,
+  //               type_of_form,
+  //               shelf_life,
+  //               dossier_type,
+  //               dossier_status,
+  //               medicine_category : product_category,
+  //               gmp_approvals,
+  //               shipping_time,
+  //               tags,
+  //               unit_tax,
+  //               country_of_origin,
+  //               registered_in,
+  //               stocked_in,
+  //               available_for,
+  //               description,
+  //               total_quantity : quantity,
+  //               unit_price,
+  //               condition,
+  //               medicine_image,
+  //               invoice_image,
+  //               manufacturer_name,
+  //               manufacturer_country_of_origin,
+  //               manufacturer_description,
+  //               stockedIn_details: stockedInDetails,
+  //               status : 0,
+  //               edit_status: 0
+  //           });
     
-            secondaryMarketMedicine.save()
-              .then(async(savedMedicine) => {
-                const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
-                const newNotification = new Notification({
-                  notification_id  : notificationId,
-                  event_type   : 'New Medicine',
-                  event : 'addmedicine',
-                  from : 'supplier',
-                  to : 'admin',
-                  from_id : supplier_id,
-                  // to_id : reqObj.buyer_id,
-                  event_id : medicine_id,
-                  // connected_id : reqObj.enquiry_id,
-                  message : 'New secondary medicine request',
-                  status  : 0
-              })
-               await newNotification.save()
-                callback({ code: 200, message: "Add Medicine Request Submitted Successfully", result: savedMedicine });
-              })
-              .catch((err) => {
-                  console.log(err);
-                  callback({ code: 400, message: "Error while adding submitting request" });
-              });
+  //           secondaryMarketMedicine.save()
+  //             .then(async(savedMedicine) => {
+  //               const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+  //               const newNotification = new Notification({
+  //                 notification_id  : notificationId,
+  //                 event_type   : 'New Medicine',
+  //                 event : 'addmedicine',
+  //                 from : 'supplier',
+  //                 to : 'admin',
+  //                 from_id : supplier_id,
+  //                 // to_id : reqObj.buyer_id,
+  //                 event_id : medicine_id,
+  //                 // connected_id : reqObj.enquiry_id,
+  //                 message : 'New secondary medicine request',
+  //                 status  : 0
+  //             })
+  //              await newNotification.save()
+  //               callback({ code: 200, message: "Add Medicine Request Submitted Successfully", result: savedMedicine });
+  //             })
+  //             .catch((err) => {
+  //                 console.log(err);
+  //                 callback({ code: 400, message: "Error while adding submitting request" });
+  //             });
+  //       }
+  //     } catch (error) {
+  //         console.error("Error", error);
+  //         callback({ code: 500, message: "Internal Server Error" });
+  //     }
+    
+  // },
+
+
+
+  addMedicine: async (reqObj, callback) => {
+    try {
+      let medicine_id = "MED-" + Math.random().toString(16).slice(2, 10);
+      
+      let stockedInDetails = reqObj.stocked_in_details;
+  
+      if (typeof stockedInDetails === 'string') {
+        try {
+          stockedInDetails = JSON.parse(stockedInDetails);
+        } catch (err) {
+          return callback({ code: 400, message: "Invalid format for stocked_in_details" });
         }
-      } catch (error) {
-          console.error("Error", error);
-          callback({ code: 500, message: "Internal Server Error" });
       }
-    
+  
+      const {
+        product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life,
+        dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags,
+        unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
+        manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details,
+        quantity, unit_price, total_price, est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
+      } = reqObj;
+  
+      if (!Array.isArray(quantity) || !Array.isArray(unit_price) ||
+        !Array.isArray(total_price) || !Array.isArray(est_delivery_days)) {
+        return callback({ code: 400, message: "Inventory fields should be arrays" });
+      }
+  
+      if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+        return callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
+      }
+  
+      const inventory_info = quantity.map((_, index) => ({
+        quantity: quantity[index],
+        unit_price: unit_price[index],
+        total_price: total_price[index],
+        est_delivery_days: est_delivery_days[index],
+      }));
+  
+      let newMedicine;
+  
+      if (product_type === 'new') {
+        newMedicine = new NewMedicine({
+          medicine_id,
+          supplier_id,
+          medicine_name,
+          medicine_type: product_type,
+          composition,
+          strength,
+          type_of_form,
+          shelf_life,
+          dossier_type,
+          dossier_status,
+          medicine_category: product_category,
+          total_quantity,
+          gmp_approvals,
+          shipping_time,
+          tags,
+          unit_tax,
+          country_of_origin,
+          registered_in,
+          stocked_in,
+          available_for,
+          description,
+          medicine_image,
+          inventory_info,
+          manufacturer_name,
+          manufacturer_country_of_origin,
+          manufacturer_description,
+          stockedIn_details: stockedInDetails,
+          status: 0,
+          edit_status: 0
+        });
+      } else if (product_type === 'secondary market') {
+        newMedicine = new SecondaryMarketMedicine({
+          medicine_id,
+          supplier_id,
+          medicine_name,
+          medicine_type: product_type,
+          purchased_on,
+          country_available_in,
+          min_purchase_unit,
+          composition,
+          strength,
+          type_of_form,
+          shelf_life,
+          dossier_type,
+          dossier_status,
+          medicine_category: product_category,
+          gmp_approvals,
+          shipping_time,
+          tags,
+          unit_tax,
+          country_of_origin,
+          registered_in,
+          stocked_in,
+          available_for,
+          description,
+          total_quantity,
+          // unit_price,                // Can be used directly for secondary market
+          condition,
+          inventory_info,
+          medicine_image,
+          invoice_image,
+          manufacturer_name,
+          manufacturer_country_of_origin,
+          manufacturer_description,
+          stockedIn_details: stockedInDetails,
+          // inventory_info,
+          status: 0,
+          edit_status: 0
+        });
+      }
+  
+      newMedicine.save()
+        .then(async (savedMedicine) => {
+          const notificationId = 'NOT-' + Math.random().toString(16).slice(2,10);
+          
+          const newNotification = new Notification({
+            notification_id: notificationId,
+            event_type: 'New Medicine',
+            event: 'addmedicine',
+            from: 'supplier',
+            to: 'admin',
+            from_id: supplier_id,
+            event_id: medicine_id,
+            message: product_type === 'new' ? 'New medicine request' : 'New secondary medicine request',
+            status: 0
+          });
+          await newNotification.save();
+          callback({ code: 200, message: "Add medicine request submitted successfully", result: savedMedicine });
+        })
+        .catch((err) => {
+          console.log(err);
+          callback({ code: 400, message: "Error while adding submitting request" });
+        });
+  
+    } catch (error) {
+      console.error("Error", error);
+      callback({ code: 500, message: "Internal Server Error" });
+    }
   },
+  
 
   allMedicineList: async (reqObj, callback) => {
     console.log(reqObj);
@@ -405,6 +550,7 @@ module.exports = {
             manufacturer_description: 1,
             manufacturer_name: 1,
             stockedIn_details: 1,
+            edit_status : 1,
             inventory : {
               $arrayElemAt: ["$inventory", 0],
             },
@@ -445,6 +591,7 @@ module.exports = {
             manufacturer_description: 1,
             manufacturer_name: 1,
             stockedIn_details: 1,
+            edit_status : 1,
             "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
           },
@@ -492,6 +639,7 @@ module.exports = {
             manufacturer_description: 1,
             manufacturer_name: 1,
             stockedIn_details: 1,
+            edit_status : 1,
             "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
             supplier : {
@@ -534,6 +682,7 @@ module.exports = {
             manufacturer_description: 1,
             manufacturer_name: 1,
             stockedIn_details: 1,
+            edit_status : 1,
             "inventory.inventory_info" : 1,
             "inventory.strength"       : 1,
             "supplier.supplier_id"             : 1, 
@@ -593,28 +742,48 @@ module.exports = {
       const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
               dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
               unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
-              manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details
+              manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details,
+              quantity, unit_price, total_price, est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
              } = reqObj;
 
+
+             if (!Array.isArray(quantity) || !Array.isArray(unit_price) ||
+             !Array.isArray(total_price) || !Array.isArray(est_delivery_days)) {
+             return callback({ code: 400, message: "Inventory fields should be arrays" });
+           }
+       
+           if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+             return callback({ code: 400, message: "All inventory fields are required" });
+           }
+       
+           const inventory_info = quantity.map((_, index) => ({
+             quantity: quantity[index],
+             unit_price: unit_price[index],
+             total_price: total_price[index],
+             est_delivery_days: est_delivery_days[index],
+           }));
+       
+           let newMedicine;
+
         if (product_type === 'new') {
-          console.log('thiss');
-            const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
+          // console.log('thiss');
+          //   const { quantity, unit_price, total_price, est_delivery_days } = reqObj;
 
-            if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
-                !Array.isArray(total_price) ||  !Array.isArray(est_delivery_days) ) {
-                callback({ code: 400, message: "Inventory fields should be arrays" });
-            }
+          //   if (!Array.isArray(quantity) || !Array.isArray(unit_price) || 
+          //       !Array.isArray(total_price) ||  !Array.isArray(est_delivery_days) ) {
+          //       callback({ code: 400, message: "Inventory fields should be arrays" });
+          //   }
 
-            if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
-              callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
-          }
+          //   if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+          //     callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
+          // }
           
-            const inventory_info = quantity.map((_, index) => ({
-              quantity          : quantity[index],
-              unit_price        : unit_price[index],
-              total_price       : total_price[index],
-              est_delivery_days : est_delivery_days[index],
-            }));
+          //   const inventory_info = quantity.map((_, index) => ({
+          //     quantity          : quantity[index],
+          //     unit_price        : unit_price[index],
+          //     total_price       : total_price[index],
+          //     est_delivery_days : est_delivery_days[index],
+          //   }));
 
             const newMedicineObj = {
               medicine_id,
@@ -659,13 +828,27 @@ module.exports = {
               .then(async(savedMedicine) => {
                 const updatedMedicine = await Medicine.findOneAndUpdate(
                   { supplier_id: supplier_id, medicine_id: medicine_id },
-                  { edit_status: 1 },
+                  { edit_status: 0 },
                   { new: true }
                 );
               
                 if (!updatedMedicine) {
                   return callback({ code: 404, message: 'Medicine Not Found' });
                 }
+
+                const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10)
+                const newNotification = new Notification({
+                  notification_id: notificationId,
+                  event_type: 'Edit Medicine',
+                  event: 'editmedicine',
+                  from: 'supplier',
+                  to: 'admin',
+                  from_id: supplier_id,
+                  event_id: medicine_id,
+                  message: `New Edit Medicine Request from ${supplier_id} for ${medicine_id}`,
+                  status: 0
+                });
+                await newNotification.save();
                   callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
               })
               .catch((err) => {
@@ -675,7 +858,7 @@ module.exports = {
    
       } 
       else if(product_type === 'secondary market') {
-          const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
+          // const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
 
           const secondaryMarketMedicineObj = {
               medicine_id,
@@ -701,9 +884,10 @@ module.exports = {
               stocked_in,
               available_for,
               description,
-              total_quantity : quantity,
-              unit_price,
+              total_quantity,
+              // unit_price,
               condition,
+              inventory_info,
               medicine_image,
               invoice_image,
               manufacturer_name,
@@ -719,13 +903,26 @@ module.exports = {
           .then(async(savedMedicine) => {
             const updatedMedicine = await Medicine.findOneAndUpdate(
               { supplier_id: supplier_id, medicine_id: medicine_id },
-              { edit_status: 1 },
+              { edit_status: 0 },
               { new: true }
             );
           
             if (!updatedMedicine) {
               return callback({ code: 404, message: 'Medicine Not Found' });
             }
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10)
+            const newNotification = new Notification({
+              notification_id: notificationId,
+              event_type: 'Edit Medicine',
+              event: 'editmedicine',
+              from: 'supplier',
+              to: 'admin',
+              from_id: supplier_id,
+              event_id: medicine_id,
+              message: `New Edit Medicine Request from ${supplier_id} for ${medicine_id}`,
+              status: 0
+            });
+            await newNotification.save();
               callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
           })
           .catch((err) => {

@@ -517,6 +517,7 @@ module.exports = {
                         "buyer.contact_person_country_code": "$buyer_details.contact_person_country_code",
                         "buyer.buyer_type": "$buyer_details.buyer_type",
                         "buyer.buyer_mobile": "$buyer_details.buyer_mobile",
+                        "buyer.buyer_country_code": "$buyer_details.buyer_country_code",
                         "buyer.country_of_origin": "$buyer_details.country_of_origin",
                         "buyer.buyer_image": "$buyer_details.buyer_image",
                         "buyer.registration_no": "$buyer_details.registration_no",
@@ -524,6 +525,7 @@ module.exports = {
                         "supplier.supplier_name": "$supplier_details.supplier_name",
                         "supplier.supplier_type": "$supplier_details.supplier_type",
                         "supplier.supplier_mobile": "$supplier_details.supplier_mobile",
+                        "supplier.supplier_country_code": "$supplier_details.supplier_country_code",
                         "supplier.supplier_email": "$supplier_details.supplier_email",
                         "supplier.contact_person_email": "$supplier_details.contact_person_email",
                         "supplier.country_of_origin": "$supplier_details.country_of_origin",
@@ -581,7 +583,7 @@ module.exports = {
                   );
             //   }
           }
-          const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+          const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
                 notification_id         : notificationId,
                 event_type   : 'Enquiry quotation',
@@ -591,7 +593,7 @@ module.exports = {
                 from_id : supplier_id,
                 to_id : buyer_id,
                 event_id : enquiry_id,
-                message : 'Enquiry quotation submitted',
+                message : `Quotation Received!! You’ve received a quote from the supplier for ${enquiry_id}`,
                 status : 0
             })
             await newNotification.save()
@@ -654,7 +656,7 @@ module.exports = {
             if (!updatedEnquiry) {
                 return callback({ code: 404, message: 'Enquiry not found', result: null });
             }
-            const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
                 notification_id  : notificationId,
                 event_type       : 'Enquiry request cancelled',
@@ -664,7 +666,7 @@ module.exports = {
                 from_id          : buyer_id,
                 to_id            : supplier_id,
                 event_id         : enquiry_id,
-                message          : 'Enquiry cancelled',
+                message          : `Inquiry Reuquest Cancelled! Inquiry request has been cancelled for ${enquiry_id}`,
                 cancel_reason    : reason,
                 status           : 0
             })

@@ -20,7 +20,7 @@ module.exports = {
           if(emailExists) {
             return callback({code : 409, message: "Email already exists"})
           }
-          const supplierId  = 'SUP-' + Math.random().toString(16).slice(2);
+          const supplierId  = 'SUP-' + Math.random().toString(16).slice(10,2);
           let jwtSecretKey  = process.env.APP_SECRET; 
           let data          = {  time : Date(),  supplierId : supplierId } 
           const token       = jwt.sign(data, jwtSecretKey); 
@@ -315,16 +315,23 @@ module.exports = {
             callback({code: 500 , message: "Internal Server Error", error: error})
       }
     },
-
+    
 
     // supplierDashboardOrderDetails: async (reqObj, callback) => {
     //   try {
     //     const { supplier_id } = reqObj;
     
+    //     // Get today's date at midnight
+    //     const today = new Date();
+    //     today.setHours(0, 0, 0, 0);
+    
     //     // Aggregation for Orders
     //     const ordersAggregation = [
     //       {
-    //         $match: { supplier_id: supplier_id }
+    //         $match: {
+    //           supplier_id: supplier_id,
+    //           created_at: { $gte: today }  // Match only today's data
+    //         }
     //       },
     //       {
     //         $addFields: {
@@ -412,7 +419,10 @@ module.exports = {
     //     // Aggregation for Purchase Orders
     //     const purchaseOrdersAggregation = [
     //       {
-    //         $match: { supplier_id: supplier_id }
+    //         $match: {
+    //           supplier_id: supplier_id,
+    //           created_at: { $gte: today }  // Match only today's data
+    //         }
     //       },
     //       {
     //         $group: {
@@ -433,7 +443,10 @@ module.exports = {
     //     // Aggregation for Enquiries
     //     const enquiriesAggregation = [
     //       {
-    //         $match: { supplier_id: supplier_id }
+    //         $match: {
+    //           supplier_id: supplier_id,
+    //           created_at: { $gte: today }  // Match only today's data
+    //         }
     //       },
     //       {
     //         $match: { enquiry_status: { $ne: 'order created' } }
@@ -472,7 +485,6 @@ module.exports = {
     //     callback({ code: 500, message: 'Internal server error', result: error });
     //   }
     // },
-    
 
     supplierDashboardOrderDetails: async (reqObj, callback) => {
       try {
@@ -578,7 +590,8 @@ module.exports = {
           {
             $match: {
               supplier_id: supplier_id,
-              created_at: { $gte: today }  // Match only today's data
+              created_at: { $gte: today },  // Match only today's data
+              po_status: 'active'  // Filter for active purchase orders
             }
           },
           {
@@ -642,6 +655,7 @@ module.exports = {
         callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
+    
 
     supplierOrderSupplierCountry : async(reqObj, callback) => {
       try {

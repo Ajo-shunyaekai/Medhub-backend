@@ -37,7 +37,7 @@ const orderItemSchema = new Schema({
     status: {
         type: String,
         enum: ['pending',  ,'accepted', 'completed', 'cancelled', 'rejected' ],
-        default: 'active'
+        default: 'pending'
     },
      // est_delivery_days: {
     //     type: String,

@@ -12,6 +12,32 @@ const Support            = require('../schema/supportSchema')
 const List               = require('../schema/addToListSchema');
 const Enquiry            = require('../schema/enquiryListSchema')
 const Notification       = require('../schema/notificationSchema')
+const nodemailer         = require('nodemailer');
+
+
+var transporter = nodemailer.createTransport({
+  host   : "smtp.gmail.com",
+  port   : 587,
+  secure : false, // true for 465, false for other ports
+  type   : "oauth2",
+  // service : 'gmail',
+  auth : {
+      user : process.env.SMTP_USER_ID,
+      pass : process.env.SMTP_USER_PASSWORD
+  }
+});
+const sendMailFunc = (email, subject, body) =>{
+  
+  var mailOptions = {
+      from    : process.env.SMTP_USER_ID,
+      to      : email,
+      subject : subject,
+      // text    : 'This is text mail, and sending for testing purpose'
+      html:body
+      
+  };
+  transporter.sendMail(mailOptions);
+}
 
 
 module.exports = {
@@ -22,7 +48,7 @@ module.exports = {
             if(emailExists) {
               return callback({code : 409, message: "Email already exists"})
             }
-            const buyerId     = 'BYR-' + Math.random().toString(16).slice(2);
+            const buyerId     = 'BYR-' + Math.random().toString(16).slice(2, 10);
             let jwtSecretKey  = process.env.APP_SECRET; 
             let data          = {  time : Date(),  buyerId : buyerId } 
             const token       = jwt.sign(data, jwtSecretKey); 
@@ -61,7 +87,7 @@ module.exports = {
               });
 
               newBuyer.save().then(async() => {
-                const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+                const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
                 const newNotification = new Notification({
                   notification_id  : notificationId,
                   event_type   : 'New Registration Request',
@@ -930,6 +956,38 @@ module.exports = {
                   }
                 }
               ],
+              // purchaseOrderCount: [
+              //   {
+              //     $lookup: {
+              //       from: 'purchaseorders',
+              //       let: { buyerId: buyer_id },
+              //       pipeline: [
+              //         {
+              //           $match: {
+              //             $expr: { $eq: ["$buyer_id", "$$buyerId"] },
+              //             created_at: {
+              //               $gte: startOfDay,
+              //               $lte: endOfDay
+              //             }
+              //           }
+              //         },
+              //         {
+              //           $count: "count"
+              //         }
+              //       ],
+              //       as: 'purchaseorders'
+              //     }
+              //   },
+              //   {
+              //     $unwind: "$purchaseorders"
+              //   },
+              //   {
+              //     $project: {
+              //       count: "$purchaseorders.count"
+              //     }
+              //   }
+              // ]
+
               purchaseOrderCount: [
                 {
                   $lookup: {
@@ -942,7 +1000,8 @@ module.exports = {
                           created_at: {
                             $gte: startOfDay,
                             $lte: endOfDay
-                          }
+                          },
+                          po_status: 'active'  // Filter for active purchase orders
                         }
                       },
                       {
@@ -1108,7 +1167,7 @@ module.exports = {
               }
               // console.log("listCount",listCount)
               // data.list_count = listCount
-              callback({ code: 200, message: "Added to existing list successfully", result: obj});
+              callback({ code: 200, message: "Product Added to Your Cart!", result: obj});
             })
             .catch((err) => {
               callback({ code: 400, message: "Error while adding to existing list", result: err });
@@ -1138,7 +1197,7 @@ module.exports = {
                 data,
                 listCount
               }
-              callback({ code: 200, message: "Added to new list successfully", result: obj });
+              callback({ code: 200, message: "Product Added to Your Cart!", result: obj });
             })
             .catch((err) => {
               callback({ code: 400, message: "Error while adding to new list", result: err });
@@ -1217,12 +1276,13 @@ module.exports = {
               supplier_id  : 1,
               // item_details : 1,
               item_details : { $reverseArray: "$item_details" },  
-              "supplier_details.supplier_id"    : 1,
-              "supplier_details.supplier_name"  : 1,
-              "supplier_details.supplier_image" : 1,
+              "supplier_details.supplier_id"          : 1,
+              "supplier_details.supplier_name"        : 1,
+              "supplier_details.supplier_email"       : 1,
+              "supplier_details.contact_person_email" : 1,
+              "supplier_details.supplier_image"       : 1,
             }
           },
-          
           { $skip  : offset },
           { $limit : page_size },
         ])
@@ -1285,105 +1345,131 @@ module.exports = {
       }
     },
 
+   
+
     sendEnquiry: async (reqObj, callback) => {
       try {
-        const { buyer_id, items } = reqObj;
-        if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
-            throw new Error('Invalid request object');
-        }
-
-        const groupedItems = items.reduce((acc, item) => {
-            const { supplier_id, list_id, item_details } = item;
-            if (!supplier_id || !item_details || !Array.isArray(item_details) || item_details.length === 0) {
-                throw new Error('Missing required item details');
-            }
-
-            item_details.forEach(detail => {
-                const { medicine_id, unit_price, quantity_required, est_delivery_days, target_price, item_id } = detail;
-                if (!medicine_id || !unit_price || !quantity_required || !est_delivery_days || !target_price) {
-                    throw new Error('Missing required item fields');
-                }
-                if (!acc[supplier_id]) {
-                    acc[supplier_id] = [];
-                }
-                acc[supplier_id].push({
-                    item_id,
-                    medicine_id,
-                    unit_price,
-                    quantity_required,
-                    est_delivery_days,
-                    target_price,
-                    counter_price: detail.counter_price || undefined,
-                    status: detail.status || 'pending'
-                });
-            });
-            return acc;
-        }, {});
-
-        const enquiries = Object.keys(groupedItems).map(supplier_id => ({
-            enquiry_id: 'ENQ-' + Math.random().toString(16).slice(2),
-            buyer_id,
-            supplier_id,
-            items: groupedItems[supplier_id]
-        }));
-
-        // enquiries.forEach(enquiry => {
-        //     console.log('Enquiry:', enquiry);
-        //     enquiry.items.forEach(item => {
-        //         console.log('Item:', item);
-        //     });
-        // });
-
-        const enquiryDocs = await Enquiry.insertMany(enquiries);
-
-        await Promise.all(items.map(async item => {
-            const { list_id, item_details } = item;
-
-            for (const detail of item_details) {
-                const { item_id } = detail;
-                
-                const objectId = ObjectId.isValid(item_id) ? new ObjectId(item_id) : null;
-
-                await List.updateOne(
-                    { list_id },
-                    { $pull: { item_details: { _id: objectId } } }
-                );
-
-                const updatedList = await List.findOne({ list_id });
-                if (updatedList && updatedList.item_details.length === 0) {
-                    await List.deleteOne({ list_id });
-                }
-            }
-        }));
-
-        const notifications = enquiries.map(enquiry => {
-          const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
-          return {
-            notification_id: notificationId,
-            event_type: 'Enquiry request',
-            event : 'enquiry',
-            from: 'buyer',
-            to: 'supplier',
-            from_id: buyer_id,
-            to_id: enquiry.supplier_id,
-            event_id: enquiry.enquiry_id,
-            message: 'New enquiry request',
-            status: 0
+          const { buyer_id, buyer_name, items } = reqObj;
+          if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
+              throw new Error('Invalid request');
+          }
+          // let enquiryId = 'INQ-' + Math.random().toString(16).slice(2)
+          let enquiryId = 'INQ-' + Math.random().toString(16).slice(2, 10);
+          // Grouping items by supplier_id and including supplier details
+          const groupedItems = items.reduce((acc, item) => {
+              const { supplier_id, supplier_name, supplier_email, supplier_contact_email, list_id, item_details } = item;
+              if (!supplier_id || !item_details || !Array.isArray(item_details) || item_details.length === 0) {
+                  throw new Error('Missing required item details');
+              }
+  
+              if (!acc[supplier_id]) {
+                  acc[supplier_id] = {
+                      supplier_name,
+                      supplier_email,
+                      supplier_contact_email,
+                      items: []
+                  };
+              }
+  
+              item_details.forEach(detail => {
+                  const { medicine_id, unit_price, quantity_required, est_delivery_days, target_price, item_id } = detail;
+                  if (!medicine_id || !unit_price || !quantity_required || !est_delivery_days || !target_price) {
+                      throw new Error('Missing required item fields');
+                  }
+                  acc[supplier_id].items.push({
+                      item_id,
+                      medicine_id,
+                      unit_price,
+                      quantity_required,
+                      est_delivery_days,
+                      target_price,
+                      counter_price: detail.counter_price || undefined,
+                      status: detail.status || 'pending'
+                  });
+              });
+  
+              return acc;
+          }, {});
+  
+          const enquiries = Object.keys(groupedItems).map(supplier_id => ({
+              enquiry_id: enquiryId,
+              buyer_id,
+              supplier_id,
+              items: groupedItems[supplier_id].items
+          }));
+  
+          const enquiryDocs = await Enquiry.insertMany(enquiries);
+  
+          // Update lists and remove items from the List collection
+          await Promise.all(items.map(async item => {
+              const { list_id, item_details } = item;
+  
+              for (const detail of item_details) {
+                  const { item_id } = detail;
+                  
+                  const objectId = ObjectId.isValid(item_id) ? new ObjectId(item_id) : null;
+  
+                  await List.updateOne(
+                      { list_id },
+                      { $pull: { item_details: { _id: objectId } } }
+                  );
+  
+                  const updatedList = await List.findOne({ list_id });
+                  if (updatedList && updatedList.item_details.length === 0) {
+                      await List.deleteOne({ list_id });
+                  }
+              }
+          }));
+  
+          // Send notifications to suppliers
+          const notifications = enquiries.map(enquiry => {
+              const notificationId = 'NOT-' + Math.random().toString(16).slice(2,10);
+              return {
+                  notification_id: notificationId,
+                  event_type: 'Enquiry request',
+                  event: 'enquiry',
+                  from: 'buyer',
+                  to: 'supplier',
+                  from_id: buyer_id,
+                  to_id: enquiry.supplier_id,
+                  event_id: enquiry.enquiry_id,
+                  message: `Inquiry Alert! You’ve received an inquiry about ${enquiryId}`,
+                  status: 0
+              };
+          });
+  
+          await Notification.insertMany(notifications);
+  
+          // Send emails to suppliers
+          await Promise.all(Object.keys(groupedItems).map(async supplier_id => {
+              const { supplier_name, supplier_email, supplier_contact_email, items } = groupedItems[supplier_id];
+              if (supplier_contact_email) {
+                  const itemsList = items.map(item => `Medicine ID: ${item.medicine_id}`).join('<br />');
+                  const body = `Hello ${supplier_name}, <br />
+                                You have received a new enquiry request from the buyer <strong>${buyer_name}</strong>.<br />
+                                Enquiry Details:<br />
+                                ${itemsList}<br />
+                                <br /><br />
+                                Thanks & Regards <br />
+                                Team Deliver`;
+  
+                  await sendMailFunc(supplier_contact_email, 'New Enquiry Request Received', body);
+              }
+          }));
+  
+          const listCount = await List.countDocuments({ buyer_id: reqObj.buyer_id });
+          const returnObj = {
+              enquiryDocs,
+              listCount
           };
-        });
-    
-        await Notification.insertMany(notifications);
-        const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
-        const returnObj = {
-          enquiryDocs,
-          listCount
-        }
-        callback({ code: 200, message: "Enquiries sent successfully", result: returnObj });
+  
+          callback({ code: 200, message: "Enquiries sent successfully", result: returnObj });
       } catch (error) {
-        console.log('Internal server error', error);
-        callback({ code: 500, message: "Internal server error", result: error });
+          console.log('Internal server error', error);
+          callback({ code: 500, message: "Internal server error", result: error });
       }
-    },
+  },
+  
 
     getNotificationList : async(reqObj, callback) => {
       try {

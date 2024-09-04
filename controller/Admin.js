@@ -54,7 +54,7 @@ module.exports = {
 
     register : async(reqObj, callback) => {
         try {
-          const adminId    = 'ADM-' + Math.random().toString(16).slice(2);
+          const adminId    = 'ADM-' + Math.random().toString(16).slice(2, 10);
           let jwtSecretKey = process.env.APP_SECRET; 
           let data         = {  time : Date(),  email:reqObj.email } 
           const token      = jwt.sign(data, jwtSecretKey); 
@@ -453,6 +453,21 @@ module.exports = {
             password: updateProfile.password,
             generatedPassword: password
           };
+
+          // const notificationId = 'NOT-' + Math.random().toString(16).slice(10,2);
+          // const newNotification = new Notification({
+          //     notification_id         : notificationId,
+          //     event_type   : 'Buyer Registration accepted',
+          //     event : 'enquiry',
+          //     from : 'supplier',
+          //     to : 'buyer',
+          //     from_id : supplier_id,
+          //     to_id : buyer_id,
+          //     event_id : enquiry_id,
+          //     message : `!! You’ve received a quote from the supplier for ${enquiry_id}`,
+          //     status : 0
+          // })
+          // await newNotification.save()
     
           const body = `Hello ${updateProfile.supplier_name}, <br />
             Your Registration Request has been Approved. <br />
@@ -1879,7 +1894,7 @@ module.exports = {
 
     acceptRejectAddMedicineReq : async(reqObj, callback) => {
       try {
-        const { medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action } = reqObj
+        const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action } = reqObj
 
         const medicine = await Medicine.findOne({ medicine_id : medicine_id, supplier_id: supplier_id});
   
@@ -1914,6 +1929,21 @@ module.exports = {
 
             // Send email for acceptance
             sendMailFunc(supplier_email, subject, body);
+
+             const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+              const newNotification = new Notification({
+                  notification_id         : notificationId,
+                  event_type   : 'Medicine Request Accepted',
+                  event : 'addmedicine',
+                  from : 'admin',
+                  to : 'supplier',
+                  from_id : admin_id,
+                  to_id : supplier_id,
+                  event_id : medicine_id,
+                  message : ` ${medicine_id}: Your listing has been approved and is now live!`,
+                  status : 0
+              })
+              await newNotification.save()
             
         } else if (action === 'reject') {
             subject = 'Medicine Request Rejected';
@@ -1928,6 +1958,21 @@ module.exports = {
 
             // Send email for rejection
             sendMailFunc(supplier_email, subject, body);
+
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+            const newNotification = new Notification({
+                notification_id         : notificationId,
+                event_type   : 'Medicine Request Rejected',
+                event : 'addmedicine',
+                from : 'admin',
+                to : 'supplier',
+                from_id : admin_id,
+                to_id : supplier_id,
+                event_id : medicine_id,
+                message : ` ${medicine_id}: Your listing has been disapproved.`,
+                status : 0
+            })
+            await newNotification.save()
 
         } else {
             return callback({ code: 400, message: "Invalid action" });
@@ -2266,119 +2311,254 @@ module.exports = {
       }
     },
 
-    acceptRejectEditMedicineReq : async(reqObj, callback) => {
-      try {
-            const { medicine_id, supplier_id, action } = reqObj;
+//     acceptRejectEditMedicineReq : async(reqObj, callback) => {
+//       try {
+//             const { medicine_id, supplier_id, action } = reqObj;
 
-            const medicine = await EditMedicine.findOne({ medicine_id: medicine_id, supplier_id: supplier_id });
+//             const medicine = await EditMedicine.findOne({ medicine_id: medicine_id, supplier_id: supplier_id });
 
-            if (!medicine) {
-              return callback({ code: 400, message: "Medicine edit request not found" });
-            }
-console.log('medicine',medicine);
-            const editMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+//             if (!medicine) {
+//               return callback({ code: 400, message: "Medicine edit request not found" });
+//             }
+// console.log('medicine',medicine);
+//             const editMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
 
-            if (editMedicineStatus === 1) {
-              let updateObj = {
-                medicine_id       : medicine.medicine_id,
-                supplier_id       : medicine.supplier_id,
-                medicine_name     : medicine.medicine_name,
-                composition       : medicine.composition,
-                strength          : medicine.strength,
-                type_of_form      : medicine.type_of_form,
-                shelf_life        : medicine.shelf_life,
-                dossier_type      : medicine.dossier_type,
-                dossier_status    : medicine.dossier_status,
-                medicine_category : medicine.medicine_category,
-                total_quantity    : medicine.total_quantity,
-                gmp_approvals     : medicine.gmp_approvals,
-                shipping_time     : medicine.shipping_time,
-                tags              : medicine.tags,
-                unit_tax : medicine.unit_tax,
-                country_of_origin : medicine.country_of_origin,
-                registered_in     : medicine.registered_in,
-                stocked_in        : medicine.stocked_in,
-                available_for     : medicine.available_for,
-                description       : medicine.description,
-                manufacturer_name: medicine.manufacturer_name,
-                manufacturer_country_of_origin: medicine.manufacturer_country_of_origin,
-                manufacturer_description: medicine.manufacturer_description,
-                stockedIn_details: medicine.stockedIn_details,
-                // inventory_info: medicine.inventory_info,
-                // medicine_image    : medicine.medicine_image,
-              };
+//             if (editMedicineStatus === 1) {
+//               let updateObj = {
+//                 medicine_id       : medicine.medicine_id,
+//                 supplier_id       : medicine.supplier_id,
+//                 medicine_name     : medicine.medicine_name,
+//                 composition       : medicine.composition,
+//                 strength          : medicine.strength,
+//                 type_of_form      : medicine.type_of_form,
+//                 shelf_life        : medicine.shelf_life,
+//                 dossier_type      : medicine.dossier_type,
+//                 dossier_status    : medicine.dossier_status,
+//                 medicine_category : medicine.medicine_category,
+//                 total_quantity    : medicine.total_quantity,
+//                 gmp_approvals     : medicine.gmp_approvals,
+//                 shipping_time     : medicine.shipping_time,
+//                 tags              : medicine.tags,
+//                 unit_tax : medicine.unit_tax,
+//                 country_of_origin : medicine.country_of_origin,
+//                 registered_in     : medicine.registered_in,
+//                 stocked_in        : medicine.stocked_in,
+//                 available_for     : medicine.available_for,
+//                 description       : medicine.description,
+//                 manufacturer_name: medicine.manufacturer_name,
+//                 manufacturer_country_of_origin: medicine.manufacturer_country_of_origin,
+//                 manufacturer_description: medicine.manufacturer_description,
+//                 stockedIn_details: medicine.stockedIn_details,
+//                 // inventory_info: medicine.inventory_info,
+//                 // medicine_image    : medicine.medicine_image,
+//               };
 
-              if (medicine.medicine_image && medicine.medicine_image.length > 0) {
-                updateObj.medicine_image = medicine.medicine_image;
-              }
+//               if (medicine.medicine_image && medicine.medicine_image.length > 0) {
+//                 updateObj.medicine_image = medicine.medicine_image;
+//               }
 
-              if (medicine.medicine_type === 'new_medicine') {
-                updateObj.medicine_type  = 'new';
-                updateObj.inventory_info = medicine.inventory_info ;
-              } else if (medicine.medicine_type === 'secondary_medicine') {
-                updateObj.medicine_type        = 'secondary market';
-                updateObj.purchased_on         = medicine.purchased_on;
-                updateObj.country_available_in = medicine.country_available_in;
-                updateObj.min_purchase_unit    = medicine.min_purchase_unit;
-                updateObj.unit_price           = medicine.unit_price;
-                updateObj.invoice_image        = medicine.invoice_image;
-              }
+//               if (medicine.medicine_type === 'new_medicine') {
+//                 updateObj.medicine_type  = 'new';
+//                 updateObj.inventory_info = medicine.inventory_info ;
+//               } else if (medicine.medicine_type === 'secondary_medicine') {
+//                 updateObj.medicine_type        = 'secondary market';
+//                 updateObj.purchased_on         = medicine.purchased_on;
+//                 updateObj.country_available_in = medicine.country_available_in;
+//                 updateObj.min_purchase_unit    = medicine.min_purchase_unit;
+//                 updateObj.unit_price           = medicine.unit_price;
+//                 updateObj.invoice_image        = medicine.invoice_image;
+//               }
 
-              if (medicine.invoice_image && medicine.invoice_image.length > 0) {
-                updateObj.invoice_image = medicine.invoice_image;
-              }
+//               if (medicine.invoice_image && medicine.invoice_image.length > 0) {
+//                 updateObj.invoice_image = medicine.invoice_image;
+//               }
 
-              try {
-                await EditMedicine.findOneAndUpdate(
-                  { supplier_id: supplier_id, medicine_id: medicine_id },
-                  { $set: { edit_status: editMedicineStatus } }
-                );
+//               try {
+//                 await EditMedicine.findOneAndUpdate(
+//                   { supplier_id: supplier_id, medicine_id: medicine_id },
+//                   { $set: { edit_status: editMedicineStatus } }
+//                 );
 
-                let updatedMedicine
+//                 let updatedMedicine
 
-                if(medicine.medicine_type === 'new_medicine') {
-                updatedMedicine = await NewMedicine.findOneAndUpdate(
-                    { supplier_id: supplier_id, medicine_id: medicine_id },
-                    { $set: updateObj },
-                    { new: true }
-                  );
-                } else if(medicine.medicine_type === 'secondary_medicine') {
-                  updatedMedicine = await SecondaryMarketMedicine.findOneAndUpdate(
-                    { supplier_id: supplier_id, medicine_id: medicine_id },
-                    { $set: updateObj },
-                    { new: true }
-                  );
-                }
+//                 if(medicine.medicine_type === 'new_medicine') {
+//                 updatedMedicine = await NewMedicine.findOneAndUpdate(
+//                     { supplier_id: supplier_id, medicine_id: medicine_id },
+//                     { $set: updateObj },
+//                     { new: true }
+//                   );
+//                 } else if(medicine.medicine_type === 'secondary_medicine') {
+//                   updatedMedicine = await SecondaryMarketMedicine.findOneAndUpdate(
+//                     { supplier_id: supplier_id, medicine_id: medicine_id },
+//                     { $set: updateObj },
+//                     { new: true }
+//                   );
+//                 }
 
-                if (!updatedMedicine) {
-                  return callback({ code: 400, message: "Medicine not found for update" });
-                }
+//                 if (!updatedMedicine) {
+//                   return callback({ code: 400, message: "Medicine not found for update" });
+//                 }
 
-                return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} Medicine Details Updated Successfully`, result: updatedMedicine });
+//                 return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} Medicine Details Updated Successfully`, result: updatedMedicine });
 
-              } catch (error) {
-                console.error('Error updating medicine details:', error);
-                return callback({ code: 400, message: 'Error while updating medicine details', result: error });
-              }
-            } else if (editMedicineStatus === 2) {
-              try {
-                const result = await EditMedicine.findOneAndUpdate(
-                  { supplier_id: supplier_id, medicine_id: medicine_id },
-                  { $set: { edit_status: editMedicineStatus } }
-                );
+//               } catch (error) {
+//                 console.error('Error updating medicine details:', error);
+//                 return callback({ code: 400, message: 'Error while updating medicine details', result: error });
+//               }
+//             } else if (editMedicineStatus === 2) {
+//               try {
+//                 const result = await EditMedicine.findOneAndUpdate(
+//                   { supplier_id: supplier_id, medicine_id: medicine_id },
+//                   { $set: { edit_status: editMedicineStatus } }
+//                 );
 
-                return callback({ code: 200, message: 'Edit medicine request rejected', result: result });
+//                 return callback({ code: 200, message: 'Edit medicine request rejected', result: result });
 
-              } catch (error) {
-                console.error('Error rejecting edit request:', error);
-                return callback({ code: 400, message: 'Error while rejecting the edit request', result: error });
-              }
-            }
-      } catch (error) {
-        console.error('Unexpected error:', error);
-        return callback({ code: 500, message: 'Unexpected error', result: error });
+//               } catch (error) {
+//                 console.error('Error rejecting edit request:', error);
+//                 return callback({ code: 400, message: 'Error while rejecting the edit request', result: error });
+//               }
+//             }
+//       } catch (error) {
+//         console.error('Unexpected error:', error);
+//         return callback({ code: 500, message: 'Unexpected error', result: error });
+//       }
+//   },
+
+
+
+acceptRejectEditMedicineReq: async (reqObj, callback) => {
+  try {
+    const { medicine_id, supplier_id, action } = reqObj;
+
+    const medicine = await EditMedicine.findOne({ medicine_id, supplier_id });
+
+    if (!medicine) {
+      return callback({ code: 400, message: "Medicine edit request not found" });
+    }
+
+    const editMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+
+    if (editMedicineStatus === 1) {
+      let updateObj = {
+        medicine_id: medicine.medicine_id,
+        supplier_id: medicine.supplier_id,
+        medicine_name: medicine.medicine_name,
+        composition: medicine.composition,
+        strength: medicine.strength,
+        type_of_form: medicine.type_of_form,
+        shelf_life: medicine.shelf_life,
+        dossier_type: medicine.dossier_type,
+        dossier_status: medicine.dossier_status,
+        medicine_category: medicine.medicine_category,
+        total_quantity: medicine.total_quantity,
+        gmp_approvals: medicine.gmp_approvals,
+        shipping_time: medicine.shipping_time,
+        tags: medicine.tags,
+        unit_tax: medicine.unit_tax,
+        country_of_origin: medicine.country_of_origin,
+        registered_in: medicine.registered_in,
+        stocked_in: medicine.stocked_in,
+        available_for: medicine.available_for,
+        description: medicine.description,
+        manufacturer_name: medicine.manufacturer_name,
+        manufacturer_country_of_origin: medicine.manufacturer_country_of_origin,
+        manufacturer_description: medicine.manufacturer_description,
+        stockedIn_details: medicine.stockedIn_details,
+        edit_status: editMedicineStatus,  // Ensure edit_status is updated
+      };
+
+      if (medicine.medicine_image && medicine.medicine_image.length > 0) {
+        updateObj.medicine_image = medicine.medicine_image;
       }
-    },
+
+      if (medicine.medicine_type === 'new_medicine') {
+        updateObj.medicine_type = 'new';
+        updateObj.inventory_info = medicine.inventory_info;
+      } else if (medicine.medicine_type === 'secondary_medicine') {
+        updateObj.medicine_type = 'secondary market';
+        updateObj.purchased_on = medicine.purchased_on;
+        updateObj.country_available_in = medicine.country_available_in;
+        updateObj.min_purchase_unit = medicine.min_purchase_unit;
+        updateObj.unit_price = medicine.unit_price;
+        updateObj.invoice_image = medicine.invoice_image;
+      }
+
+      if (medicine.invoice_image && medicine.invoice_image.length > 0) {
+        updateObj.invoice_image = medicine.invoice_image;
+      }
+
+      try {
+        // Update the edit status in the EditMedicine collection
+        await EditMedicine.findOneAndUpdate(
+          { supplier_id, medicine_id },
+          { $set: { edit_status: editMedicineStatus } }
+        );
+
+        let updatedMedicine;
+
+        if (medicine.medicine_type === 'new_medicine') {
+          updatedMedicine = await NewMedicine.findOneAndUpdate(
+            { supplier_id, medicine_id },
+            { $set: updateObj },
+            { new: true }
+          );
+        } else if (medicine.medicine_type === 'secondary_medicine') {
+          updatedMedicine = await SecondaryMarketMedicine.findOneAndUpdate(
+            { supplier_id, medicine_id },
+            { $set: updateObj },
+            { new: true }
+          );
+        }
+
+        if (!updatedMedicine) {
+          return callback({ code: 400, message: "Medicine not found for update" });
+        }
+
+        // Delete the edit request from the EditMedicine collection after successful update
+        await EditMedicine.deleteOne({ medicine_id, supplier_id });
+
+        return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} Medicine Details Updated Successfully`, result: updatedMedicine });
+
+      } catch (error) {
+        console.error('Error updating medicine details:', error);
+        return callback({ code: 400, message: 'Error while updating medicine details', result: error });
+      }
+    } else if (editMedicineStatus === 2) {
+      try {
+        // Update the edit status to rejected in the EditMedicine collection
+        const result = await EditMedicine.findOneAndUpdate(
+          { supplier_id, medicine_id },
+          { $set: { edit_status: editMedicineStatus } }
+        );
+
+        // Update the edit status in the respective medicine collection
+        if (medicine.medicine_type === 'new_medicine') {
+          await Medicine.findOneAndUpdate(
+            { supplier_id, medicine_id },
+            { $set: { edit_status: editMedicineStatus } }
+          );
+        } else if (medicine.medicine_type === 'secondary_medicine') {
+          await Medicine.findOneAndUpdate(
+            { supplier_id, medicine_id },
+            { $set: { edit_status: editMedicineStatus } }
+          );
+        }
+
+        return callback({ code: 200, message: 'Edit medicine request rejected', result });
+
+      } catch (error) {
+        console.error('Error rejecting edit request:', error);
+        return callback({ code: 400, message: 'Error while rejecting the edit request', result: error });
+      }
+    }
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return callback({ code: 500, message: 'Unexpected error', result: error });
+  }
+},
+
+
 
     medicineEditList : async (reqObj, callback) => {
       try {

@@ -90,63 +90,107 @@ module.exports = {
        }
     },
 
-    updatePaymentStatus : async(reqObj, callback) => {
-      try {
+    // updatePaymentStatus : async(reqObj, callback) => {
+    //   try {
         
-        const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj
+    //     const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj
 
-        const updateInvoice  = await Invoice.findOneAndUpdate(
-          {  invoice_id : invoice_id ,
-            order_id : order_id
+    //     const updateInvoice  = await Invoice.findOneAndUpdate(
+    //       {  invoice_id : invoice_id ,
+    //          order_id : order_id
 
-          },
-          {
-            $set: {
-              mode_of_payment   : mode_of_payment,
-              amount_paid       : amount_paid,
-              transaction_id    : transaction_id,
-              payment_date      : payment_date,
-              transaction_image : transaction_image,
-            }
-          }
-        )
-      //   const logisticsArray = Array.isArray(logistics_details) ? logistics_details : [logistics_details];
-
-      //   const updatedOrder = await Order.findOneAndUpdate(
-      //     { order_id : order_id },
-      //     {
-      //         $set: {
-      //           logistics_details : logisticsArray,
-      //           status            : 'Awaiting details from supplier'
-      //         }
-      //     },
-      //     { new: true } 
-      // );
-      // if (!updatedOrder) {
-      //     return callback({ code: 404, message: 'Order not found', result: null });
-      // }
-      const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
-      const newNotification = new Notification({
-        notification_id         : notificationId,
-        event_type   : 'Logistics booking request',
-        event : 'order',
-        from : 'buyer',
-        to : 'supplier',
-        from_id : buyer_id,
-        to_id : supplier_id,
-        event_id : order_id,
-        message : 'Request for logisctics booking',
-        status : 0
-    })
-    await newNotification.save()
+    //       },
+    //       {
+    //         $set: {
+    //           mode_of_payment   : mode_of_payment,
+    //           amount_paid       : amount_paid,
+    //           transaction_id    : transaction_id,
+    //           payment_date      : payment_date,
+    //           transaction_image : transaction_image,
+    //           total_amount_paid : total_amount_paid + amount_paid,
+    //           pending_amount    : total_amount_paid - amount_paid
+    //         }
+    //       }
+    //     )
+      
+    
      
-          callback({code: 200, message: 'Updated', result: updatedOrder})
+    //       callback({code: 200, message: 'Updated', result: updatedOrder})
 
+    //   } catch (error) {
+    //     console.log(error)
+    //    callback({code: 500, message: 'Internal Server Error'})
+    //   }
+    // },
+
+
+    updatePaymentStatus: async (reqObj, callback) => {
+      try {
+          const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj;
+  
+          // Fetch the existing invoice and order to calculate the new amounts
+          const invoice = await Invoice.findOne({ invoice_id, order_id });
+          const order = await Order.findOne({ order_id });
+  
+          if (!invoice || !order) {
+              return callback({ code: 404, message: 'Invoice or Order not found' });
+          }
+  
+          // Calculate the new amounts
+          const newTotalAmountPaid = parseFloat(invoice.total_amount_paid) + parseFloat(amount_paid);
+          const newPendingAmount = parseFloat(invoice.total_payable_amount) - newTotalAmountPaid;
+  
+          console.log('newTotalAmountPaid',newTotalAmountPaid);
+          console.log('newPendingAmount',newPendingAmount);
+          // Determine the new status based on the payment
+          const invoiceStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
+          const orderStatus = newTotalAmountPaid === parseFloat(order.total_due_amount) ? 'completed' : order.order_status;
+          const newOrderStatus = newTotalAmountPaid === parseFloat(order.total_due_amount) ? 'completed' : order.status;
+  console.log('invoiceStatus',invoiceStatus);
+  console.log('orderStatus',orderStatus);
+  console.log('newOrderStatus',newOrderStatus);
+          // Update the invoice
+          const updatedInvoice = await Invoice.findOneAndUpdate(
+              { invoice_id, order_id },
+              {
+                  $set: {
+                      mode_of_payment,
+                      amount_paid,
+                      transaction_id,
+                      payment_date,
+                      transaction_image,
+                      total_amount_paid : newTotalAmountPaid.toFixed(2),
+                      pending_amount    : newPendingAmount.toFixed(2),
+                      status            : invoiceStatus
+                  }
+              },
+              { new: true }
+          );
+  
+          // // Update the order
+          const updatedOrder = await Order.findOneAndUpdate(
+              { order_id },
+              {
+                  $set: {
+                      total_amount_paid : newTotalAmountPaid.toFixed(2),
+                      pending_amount    : newPendingAmount.toFixed(2),
+                      status            : orderStatus
+                  }
+              },
+              { new: true }
+          );
+  
+          const response = {
+            updatedInvoice,
+            updatedOrder
+          }
+          callback({ code: 200, message: 'Updated', result: response });
       } catch (error) {
-        console.log(error)
-       callback({code: 500, message: 'Internal Server Error'})
+          console.error(error);
+          callback({ code: 500, message: 'Internal Server Error' });
       }
-    },
+  },
+  
 
     invoiceDetails: async (reqObj, callback) => {
       try {
