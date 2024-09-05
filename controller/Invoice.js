@@ -78,7 +78,7 @@ module.exports = {
             status          : 0
         })
         await newNotification.save()
-            return callback({code: 200, message: "Invoice created successfully"});
+            return callback({code: 200, message: "Invoice Created Successfully"});
         })
         .catch((err) => {
             console.log('err in invoice creation',err);

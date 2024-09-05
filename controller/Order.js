@@ -96,7 +96,7 @@ module.exports = {
             status : 0
         })
         await newNotification.save()
-            return callback({code: 200, message: "Order created successfully"});
+            return callback({code: 200, message: "Order Created Successfully"});
         })
         .catch((err) => {
             console.log('err in order request',err);

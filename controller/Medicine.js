@@ -334,7 +334,7 @@ module.exports = {
             status: 0
           });
           await newNotification.save();
-          callback({ code: 200, message: "Add medicine request submitted successfully", result: savedMedicine });
+          callback({ code: 200, message: "Add Medicine Request Submitted Successfully", result: savedMedicine });
         })
         .catch((err) => {
           console.log(err);

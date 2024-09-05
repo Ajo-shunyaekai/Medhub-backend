@@ -11,6 +11,7 @@ const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
 const List               = require('../schema/addToListSchema');
 const Enquiry            = require('../schema/enquiryListSchema')
+const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Notification       = require('../schema/notificationSchema')
 const nodemailer         = require('nodemailer');
 
@@ -529,6 +530,9 @@ module.exports = {
               },
             },
             {
+              $sort: { created_at: -1 } 
+            },
+            {
               $project: {
                 medicine_id       : 1,
                 supplier_id       : 1,
@@ -663,185 +667,20 @@ module.exports = {
     },
 
 
-    // buyerDashboardOrderDetails : async(reqObj, callback) => {
-    //   try {
-    //     const { buyer_id } = reqObj;
-    
-    //     Order.aggregate([
-    //       {
-    //         $match : { buyer_id: buyer_id }
-    //       },
-    //       {
-    //         $addFields: {
-    //           numeric_total_price: {
-    //             $toDouble: {
-    //               $arrayElemAt: [
-    //                 { $split: ["$total_price", " "] },
-    //                 0
-    //               ]
-    //             }
-    //           }
-    //         }
-    //       },
-    //       {
-    //         $facet: {
-    //           completedCount: [
-    //             { $match: { order_status: 'completed' } },
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 count          : { $sum: 1 },
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 count          : 1,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ],
-    //           activeCount: [
-    //             { $match: { order_status: 'active' } },
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 count          : { $sum: 1 },
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 count          : 1,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ],
-    //           pendingCount: [
-    //             { $match: { order_status: 'pending' } },
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 count          : { $sum: 1 },
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 count          : 1,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ],
-    //           totalPurchaseAmount: [
-    //             { 
-    //               $group: {
-    //                 _id            : null,
-    //                 total_purchase : { $sum: "$numeric_total_price" }
-    //               }
-    //             },
-    //             { 
-    //               $project: {
-    //                 _id            : 0,
-    //                 total_purchase : 1
-    //               }
-    //             }
-    //           ],
-    //           enquiryCount: [
-    //             {
-    //               $lookup: {
-    //                 from: 'enquiries',
-    //                 let: { buyerId: buyer_id },
-    //                 pipeline: [
-    //                   {
-    //                     $match: {
-    //                       $expr: { $eq: ["$buyer_id", "$$buyerId"] }
-    //                     }
-    //                   },
-    //                   {
-    //                     $match: { enquiry_status: { $ne: 'order created' } }
-    //                   },
-    //                   {
-    //                     $count: "count"
-    //                   }
-    //                 ],
-    //                 as: 'enquiries'
-    //               }
-    //             },
-    //             {
-    //               $unwind: "$enquiries"
-    //             },
-    //             {
-    //               $project: {
-    //                 count: "$enquiries.count"
-    //               }
-    //             }
-    //           ],
-    //           purchaseOrderCount: [
-    //             {
-    //               $lookup: {
-    //                 from: 'purchaseorders',
-    //                 let: { buyerId: buyer_id },
-    //                 pipeline: [
-    //                   {
-    //                     $match: {
-    //                       $expr: { $eq: ["$buyer_id", "$$buyerId"] }
-    //                     }
-    //                   },
-    //                   {
-    //                     $count: "count"
-    //                   }
-    //                 ],
-    //                 as: 'purchaseorders'
-    //               }
-    //             },
-    //             {
-    //               $unwind: "$purchaseorders"
-    //             },
-    //             {
-    //               $project: {
-    //                 count: "$purchaseorders.count"
-    //               }
-    //             }
-    //           ]
-    //         }
-    //       }
-    //     ])
-    //     .then((data) => {
-    //       callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result: data[0] });
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //       callback({ code: 400, message: 'Error while fetching buyer dashboard order details', result: err });
-    //     });
-    //   } catch (error) {
-    //     console.log('Internal Server Error', error);
-    //     callback({ code: 500, message: 'Internal server error', result: error });
-    //   }
-    // },
-    
-
     buyerDashboardOrderDetails: async (reqObj, callback) => {
       try {
         const { buyer_id } = reqObj;
-        
-        // Get today's start and end timestamps
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
-        
-        Order.aggregate([
+    
+        // Get today's date at midnight
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+    
+        // Aggregation for Orders
+        const ordersAggregation = [
           {
             $match: {
               buyer_id: buyer_id,
-              created_at: {
-                $gte: startOfDay,
-                $lte: endOfDay
-              }
+              created_at: { $gte: today }  // Match only today's data
             }
           },
           {
@@ -922,115 +761,76 @@ module.exports = {
                     total_purchase: 1
                   }
                 }
-              ],
-              enquiryCount: [
-                {
-                  $lookup: {
-                    from: 'enquiries',
-                    let: { buyerId: buyer_id },
-                    pipeline: [
-                      {
-                        $match: {
-                          $expr: { $eq: ["$buyer_id", "$$buyerId"] },
-                          created_at: {
-                            $gte: startOfDay,
-                            $lte: endOfDay
-                          }
-                        }
-                      },
-                      {
-                        $match: { enquiry_status: { $ne: 'order created' } }
-                      },
-                      {
-                        $count: "count"
-                      }
-                    ],
-                    as: 'enquiries'
-                  }
-                },
-                {
-                  $unwind: "$enquiries"
-                },
-                {
-                  $project: {
-                    count: "$enquiries.count"
-                  }
-                }
-              ],
-              // purchaseOrderCount: [
-              //   {
-              //     $lookup: {
-              //       from: 'purchaseorders',
-              //       let: { buyerId: buyer_id },
-              //       pipeline: [
-              //         {
-              //           $match: {
-              //             $expr: { $eq: ["$buyer_id", "$$buyerId"] },
-              //             created_at: {
-              //               $gte: startOfDay,
-              //               $lte: endOfDay
-              //             }
-              //           }
-              //         },
-              //         {
-              //           $count: "count"
-              //         }
-              //       ],
-              //       as: 'purchaseorders'
-              //     }
-              //   },
-              //   {
-              //     $unwind: "$purchaseorders"
-              //   },
-              //   {
-              //     $project: {
-              //       count: "$purchaseorders.count"
-              //     }
-              //   }
-              // ]
-
-              purchaseOrderCount: [
-                {
-                  $lookup: {
-                    from: 'purchaseorders',
-                    let: { buyerId: buyer_id },
-                    pipeline: [
-                      {
-                        $match: {
-                          $expr: { $eq: ["$buyer_id", "$$buyerId"] },
-                          created_at: {
-                            $gte: startOfDay,
-                            $lte: endOfDay
-                          },
-                          po_status: 'active'  // Filter for active purchase orders
-                        }
-                      },
-                      {
-                        $count: "count"
-                      }
-                    ],
-                    as: 'purchaseorders'
-                  }
-                },
-                {
-                  $unwind: "$purchaseorders"
-                },
-                {
-                  $project: {
-                    count: "$purchaseorders.count"
-                  }
-                }
               ]
             }
           }
-        ])
-        .then((data) => {
-          callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result: data[0] });
-        })
-        .catch((err) => {
-          console.log(err);
-          callback({ code: 400, message: 'Error while fetching buyer dashboard order details', result: err });
-        });
+        ];
+    
+        // Aggregation for Purchase Orders
+        const purchaseOrdersAggregation = [
+          {
+            $match: {
+              buyer_id: buyer_id,
+              created_at: { $gte: today },  // Match only today's data
+              po_status: 'active'  // Filter for active purchase orders
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              count: { $sum: 1 },
+              total_amount: { $sum: "$amount" }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              count: 1,
+              total_amount: 1
+            }
+          }
+        ];
+    
+        // Aggregation for Enquiries
+        const enquiriesAggregation = [
+          {
+            $match: {
+              buyer_id: buyer_id,
+              created_at: { $gte: today }  // Match only today's data
+            }
+          },
+          {
+            $match: { enquiry_status: { $ne: 'order created' } }
+          },
+          {
+            $group: {
+              _id: null,
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              count: 1
+            }
+          }
+        ];
+    
+        const [ordersData, purchaseOrdersData, enquiriesData] = await Promise.all([
+          Order.aggregate(ordersAggregation),
+          PurchaseOrder.aggregate(purchaseOrdersAggregation),
+          Enquiry.aggregate(enquiriesAggregation)
+        ]);
+    
+        // Prepare the final result
+        const result = {
+          orderDetails: ordersData[0],
+          purchaseOrderCount: purchaseOrdersData[0]?.count || 0,
+          purchaseOrderTotalAmount: purchaseOrdersData[0]?.total_amount || 0,
+          enquiryCount: enquiriesData[0]?.count || 0
+        };
+    
+        callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result });
       } catch (error) {
         console.log('Internal Server Error', error);
         callback({ code: 500, message: 'Internal server error', result: error });
