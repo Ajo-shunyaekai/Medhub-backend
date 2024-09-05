@@ -9,7 +9,7 @@ module.exports = {
     createPO: async (reqObj, callback) => {
         try {
             const purchaseOrderId = 'PO-' + Math.random().toString(16).slice(2,10)
-            const { buyer_id, enquiry_id, supplier_id, itemIds, grandTotalAmount,
+            const { buyer_id, enquiry_id, supplier_id, itemIds, grandTotalAmount,rejectedIds,
                 data: {
                     poDate,
                     poNumber,
@@ -26,9 +26,12 @@ module.exports = {
                     buyer_country_code,
                     buyerRegNo,
                     orderItems,
-                    description
+                    description,
+                    rejectedItems
                 }
             } = reqObj;
+
+            console.log(reqObj);
 
             const enquiry = await Enquiry.findOne({enquiry_id});
     
@@ -44,6 +47,13 @@ module.exports = {
                     detail.status = 'PO created';
                 }
             });
+
+            enquiry.quotation_items.forEach(detail => {
+                console.log('detail',detail);
+                if (rejectedIds.some(rejectedItemId => detail._id.equals(new ObjectId(rejectedItemId)) && detail.status === 'rejected')) {
+                    detail.status = 'rejected';
+                }
+            });
     
             orderItems.forEach(orderItem => {
                 console.log('orderItem',orderItem);
@@ -51,6 +61,15 @@ module.exports = {
                 if (enquiryItem) {
                     console.log('enquiryItem',enquiryItem);
                     enquiryItem.status = 'PO created';
+                } 
+            });
+
+            rejectedItems.forEach(rejectedItem => {
+                console.log('rejectedItem',rejectedItem);
+                const enquiryItem = enquiry.items.find(item => item.medicine_id === rejectedItem.medicine_id);
+                if (enquiryItem) {
+                    console.log('enquiryItem',enquiryItem);
+                    enquiryItem.status = 'rejected';
                 } 
             });
             enquiry.enquiry_status = 'PO created';

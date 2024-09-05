@@ -91,14 +91,14 @@ module.exports = {
                 const newNotification = new Notification({
                   notification_id  : notificationId,
                   event_type   : 'New Registration Request',
-                  event : 'registration',
+                  event : 'buyerregistration',
                   from : 'buyer',
                   to : 'admin',
                   from_id : buyerId,
                   // to_id : reqObj.buyer_id,
                   event_id : buyerId,
                   // connected_id : reqObj.enquiry_id,
-                  message : 'New buyer registration request',
+                  message : 'New Buyer Registration Request',
                   status  : 0
               })
                await newNotification.save()
@@ -506,7 +506,7 @@ module.exports = {
 
     supplierProductList : async(reqObj, callback) => {
       try {
-        const { supplier_id, pageNo, pageSize } = reqObj
+        const { supplier_id, pageNo, pageSize, medicine_type } = reqObj
   
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
@@ -517,6 +517,7 @@ module.exports = {
               $match : {
                 supplier_id : supplier_id,
                 status : 1,
+                medicine_type : medicine_type
               }
             },
             {
@@ -561,7 +562,7 @@ module.exports = {
             { $limit: page_size },
           ])
             .then((data) => {
-              Medicine.countDocuments({supplier_id : supplier_id, status: 1})
+              Medicine.countDocuments({supplier_id : supplier_id, status: 1, medicine_type: medicine_type})
               .then(totalItems => {
 
                   const totalPages = Math.ceil(totalItems / page_size);

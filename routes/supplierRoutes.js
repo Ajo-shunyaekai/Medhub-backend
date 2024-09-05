@@ -235,6 +235,14 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+
+    routes.post('/medicine-request-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.medicinRequestList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
    return routes
 }

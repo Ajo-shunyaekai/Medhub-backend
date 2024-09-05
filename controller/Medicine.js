@@ -320,16 +320,17 @@ module.exports = {
       newMedicine.save()
         .then(async (savedMedicine) => {
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2,10);
-          
+          const event = product_type === 'new' ? 'addnewmedicinerequest' : 'addsecondarymedicinerequest';
+
           const newNotification = new Notification({
             notification_id: notificationId,
-            event_type: 'New Medicine',
-            event: 'addmedicine',
+            event_type: product_type === 'new' ? 'New Medicine Request' : 'New Secondary Medicine Request',
+            event,
             from: 'supplier',
             to: 'admin',
             from_id: supplier_id,
             event_id: medicine_id,
-            message: product_type === 'new' ? 'New medicine request' : 'New secondary medicine request',
+            message: product_type === 'new' ? `New medicine request from ${supplier_id}` : `New secondary medicine request from ${supplier_id}`,
             status: 0
           });
           await newNotification.save();
@@ -837,15 +838,16 @@ module.exports = {
                 }
 
                 const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10)
+                const event = product_type === 'new' ? 'editnewmedicinerequest' : 'editsecondarymedicinerequest';
                 const newNotification = new Notification({
                   notification_id: notificationId,
-                  event_type: 'Edit Medicine',
-                  event: 'editmedicine',
+                  event_type:  'New Medicine Edit Request',
+                  event : 'editnewmedicinerequest',
                   from: 'supplier',
                   to: 'admin',
                   from_id: supplier_id,
                   event_id: medicine_id,
-                  message: `New Edit Medicine Request from ${supplier_id} for ${medicine_id}`,
+                  message: `New Edit Medicine Request from ${supplier_id}`,
                   status: 0
                 });
                 await newNotification.save();
@@ -913,13 +915,13 @@ module.exports = {
             const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10)
             const newNotification = new Notification({
               notification_id: notificationId,
-              event_type: 'Edit Medicine',
-              event: 'editmedicine',
+              event_type: 'Secondary Medicine Edit Request',
+              event: 'editsecondarymedicinerequest',
               from: 'supplier',
               to: 'admin',
               from_id: supplier_id,
               event_id: medicine_id,
-              message: `New Edit Medicine Request from ${supplier_id} for ${medicine_id}`,
+              message: `New Secondary Medicine Edit Request from ${supplier_id}`,
               status: 0
             });
             await newNotification.save();

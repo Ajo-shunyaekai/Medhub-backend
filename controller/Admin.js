@@ -1892,99 +1892,208 @@ module.exports = {
 
    //------------------------ medicine ------------------------//
 
+    // acceptRejectAddMedicineReq : async(reqObj, callback) => {
+    //   try {
+    //     const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action } = reqObj
+
+    //     const medicine = await Medicine.findOne({ medicine_id : medicine_id, supplier_id: supplier_id});
+  
+    //     if (!medicine) {
+    //         return callback({code: 400, message: "medicine not found" });
+    //     }
+
+    //     const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
+       
+    //     const updateStatus = await Medicine.findOneAndUpdate(
+    //         { medicine_id : medicine_id, supplier_id : supplier_id },
+    //         { status      : newMedicineStatus },
+    //         { new         : true }
+    //     );
+
+    //     if (!updateStatus) {
+    //       return callback({ code: 400, message: "Failed to update medicine status" });
+    //     } 
+
+    //     let body;
+    //     let subject;
+
+    //     if (action === 'accept') {
+    //         subject = 'Medicine Added Successfully';
+    //         body = `Hello ${supplier_name}, <br />
+    //             Your medicine request has been approved and added successfully. <br />
+    //             Medicine ID: ${updateStatus.medicine_id} <br />
+    //             Supplier ID: ${updateStatus.supplier_id} <br />
+    //             <br /><br />
+    //             Thanks & Regards <br />
+    //             Team Deliver`;
+
+    //         // Send email for acceptance
+    //         sendMailFunc(supplier_email, subject, body);
+
+    //          const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+    //           const newNotification = new Notification({
+    //               notification_id         : notificationId,
+    //               event_type   : 'Medicine Request Accepted',
+    //               event : 'addnewmedicine',
+    //               from : 'admin',
+    //               to : 'supplier',
+    //               from_id : admin_id,
+    //               to_id : supplier_id,
+    //               event_id : medicine_id,
+    //               message : ` ${medicine_id}: Your listing has been approved and is now live!`,
+    //               status : 0
+    //           })
+    //           await newNotification.save()
+            
+    //     } else if (action === 'reject') {
+    //         subject = 'Medicine Request Rejected';
+    //         body = `Hello ${supplier_name}, <br />
+    //             We regret to inform you that your medicine request has been rejected. <br />
+    //             Medicine ID: ${updateStatus.medicine_id} <br />
+    //             Supplier ID: ${updateStatus.supplier_id} <br />
+    //             Reason: ${rejectionReason || 'Data Mismatch'} <br />
+    //             <br /><br />
+    //             Thanks & Regards <br />
+    //             Team Deliver`;
+
+    //         // Send email for rejection
+    //         sendMailFunc(supplier_email, subject, body);
+
+    //         const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+    //         const newNotification = new Notification({
+    //             notification_id         : notificationId,
+    //             event_type   : 'Medicine Request Rejected',
+    //             event : 'addmedicine',
+    //             from : 'admin',
+    //             to : 'supplier',
+    //             from_id : admin_id,
+    //             to_id : supplier_id,
+    //             event_id : medicine_id,
+    //             message : ` ${medicine_id}: Your listing has been disapproved.`,
+    //             status : 0
+    //         })
+    //         await newNotification.save()
+
+    //     } else {
+    //         return callback({ code: 400, message: "Invalid action" });
+    //     }
+
+    //     callback({ code: 200, message: `${updateStatus.status === 1 ? 'Medicine Added successfully': updateStatus.status === 2 ? 'Add medicine request rejected' : ''}`,result: updateStatus});
+
+    //   } catch (error) {
+    //     console.log('Internal Sever Error:',error)
+    //     callback({code: 500, message: 'Internal Server Error', result: error})
+    //   }
+    // },
+
     acceptRejectAddMedicineReq : async(reqObj, callback) => {
       try {
-        const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action } = reqObj
-
-        const medicine = await Medicine.findOne({ medicine_id : medicine_id, supplier_id: supplier_id});
+          const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action } = reqObj;
   
-        if (!medicine) {
-            return callback({code: 400, message: "medicine not found" });
-        }
-
-        const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : ''
-       
-        const updateStatus = await Medicine.findOneAndUpdate(
-            { medicine_id : medicine_id, supplier_id : supplier_id },
-            { status      : newMedicineStatus },
-            { new         : true }
-        );
-
-        if (!updateStatus) {
-          return callback({ code: 400, message: "Failed to update medicine status" });
-        } 
-
-        let body;
-        let subject;
-
-        if (action === 'accept') {
-            subject = 'Medicine Added Successfully';
-            body = `Hello ${supplier_name}, <br />
-                Your medicine request has been approved and added successfully. <br />
-                Medicine ID: ${updateStatus.medicine_id} <br />
-                Supplier ID: ${updateStatus.supplier_id} <br />
-                <br /><br />
-                Thanks & Regards <br />
-                Team Deliver`;
-
-            // Send email for acceptance
-            sendMailFunc(supplier_email, subject, body);
-
-             const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+          const medicine = await Medicine.findOne({ medicine_id, supplier_id });
+  
+          if (!medicine) {
+              return callback({ code: 400, message: "Medicine not found" });
+          }
+  
+          const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
+  
+          const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+  
+          const updateStatus = await Medicine.findOneAndUpdate(
+              { medicine_id, supplier_id },
+              { status: newMedicineStatus },
+              { new: true }
+          );
+  
+          if (!updateStatus) {
+              return callback({ code: 400, message: "Failed to update medicine status" });
+          } 
+  
+          let body;
+          let subject;
+          let event;
+  
+          if (action === 'accept') {
+              subject = 'Medicine Added Successfully';
+              body = `Hello ${supplier_name}, <br />
+                  Your medicine request has been approved and added successfully. <br />
+                  Medicine ID: ${updateStatus.medicine_id} <br />
+                  Supplier ID: ${updateStatus.supplier_id} <br />
+                  <br /><br />
+                  Thanks & Regards <br />
+                  Team Deliver`;
+  
+              // Determine event type based on medicine_type
+              if (medicine_type === 'new') {
+                  event = 'addnewmedicine';
+              } else if (medicine_type === 'secondary market') {
+                  event = 'addsecondarymedicine';
+              }
+  
+              // Send email for acceptance
+              sendMailFunc(supplier_email, subject, body);
+  
+              const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
               const newNotification = new Notification({
-                  notification_id         : notificationId,
-                  event_type   : 'Medicine Request Accepted',
-                  event : 'addmedicine',
-                  from : 'admin',
-                  to : 'supplier',
-                  from_id : admin_id,
-                  to_id : supplier_id,
-                  event_id : medicine_id,
-                  message : ` ${medicine_id}: Your listing has been approved and is now live!`,
-                  status : 0
-              })
-              await newNotification.save()
-            
-        } else if (action === 'reject') {
-            subject = 'Medicine Request Rejected';
-            body = `Hello ${supplier_name}, <br />
-                We regret to inform you that your medicine request has been rejected. <br />
-                Medicine ID: ${updateStatus.medicine_id} <br />
-                Supplier ID: ${updateStatus.supplier_id} <br />
-                Reason: ${rejectionReason || 'Data Mismatch'} <br />
-                <br /><br />
-                Thanks & Regards <br />
-                Team Deliver`;
-
-            // Send email for rejection
-            sendMailFunc(supplier_email, subject, body);
-
-            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-            const newNotification = new Notification({
-                notification_id         : notificationId,
-                event_type   : 'Medicine Request Rejected',
-                event : 'addmedicine',
-                from : 'admin',
-                to : 'supplier',
-                from_id : admin_id,
-                to_id : supplier_id,
-                event_id : medicine_id,
-                message : ` ${medicine_id}: Your listing has been disapproved.`,
-                status : 0
-            })
-            await newNotification.save()
-
-        } else {
-            return callback({ code: 400, message: "Invalid action" });
-        }
-
-        callback({ code: 200, message: `${updateStatus.status === 1 ? 'Medicine Added successfully': updateStatus.status === 2 ? 'Add medicine request rejected' : ''}`,result: updateStatus});
-
+                  notification_id: notificationId,
+                  event_type: 'Medicine Request Accepted',
+                  event,
+                  from: 'admin',
+                  to: 'supplier',
+                  from_id: admin_id,
+                  to_id: supplier_id,
+                  event_id: medicine_id,
+                  message: ` ${medicine_id}: Your listing has been approved and is now live!`,
+                  status: 0
+              });
+              await newNotification.save();
+  
+          } else if (action === 'reject') {
+              subject = 'Medicine Request Rejected';
+              body = `Hello ${supplier_name}, <br />
+                  We regret to inform you that your medicine request has been rejected. <br />
+                  Medicine ID: ${updateStatus.medicine_id} <br />
+                  Supplier ID: ${updateStatus.supplier_id} <br />
+                  Reason: ${rejectionReason || 'Data Mismatch'} <br />
+                  <br /><br />
+                  Thanks & Regards <br />
+                  Team Deliver`;
+  
+              // Send email for rejection
+              sendMailFunc(supplier_email, subject, body);
+  
+              const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+              const newNotification = new Notification({
+                  notification_id: notificationId,
+                  event_type: 'Medicine Request Rejected',
+                  event: 'addmedicine',  // This can remain general as the event type
+                  from: 'admin',
+                  to: 'supplier',
+                  from_id: admin_id,
+                  to_id: supplier_id,
+                  event_id: medicine_id,
+                  message: ` ${medicine_id}: Your listing has been disapproved.`,
+                  status: 0
+              });
+              await newNotification.save();
+  
+          } else {
+              return callback({ code: 400, message: "Invalid action" });
+          }
+  
+          callback({
+              code: 200,
+              message: `${updateStatus.status === 1 ? 'Medicine Added successfully' : updateStatus.status === 2 ? 'Add medicine request rejected' : ''}`,
+              result: updateStatus
+          });
+  
       } catch (error) {
-        console.log('Internal Sever Error:',error)
-        callback({code: 500, message: 'Internal Server Error', result: error})
+          console.log('Internal Server Error:', error);
+          callback({ code: 500, message: 'Internal Server Error', result: error });
       }
-    },
+  },
+  
     
     allMedicineList: async (reqObj, callback) => {
       try {
@@ -2009,6 +2118,9 @@ module.exports = {
                 foreignField : "medicine_id",
                 as           : "inventory",
               },
+            },
+            {
+              $sort: { created_at: -1 } 
             },
             {
               $project: {
@@ -2058,9 +2170,7 @@ module.exports = {
                 "inventory.price"          : 1,
               },
             },
-            {
-              $sort: { created_at: -1 } 
-            },
+            
             { $skip: offset },
             { $limit: page_size },
           ])
