@@ -291,202 +291,142 @@ module.exports = {
       }
     },
 
+
+    mySupplierList: async (reqObj, callback) => {
+      try {
+        const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
+        const page_no = pageNo || 1;
+        const page_size = pageSize || 2;
+        const offset = (page_no - 1) * page_size;
     
-
-  //   mySupplierList: async (reqObj, callback) => {
-  //     try {
-  //         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
-  //         const page_no = pageNo || 1;
-  //         const page_size = pageSize || 2;
-  //         const offset = (page_no - 1) * page_size;
-  
-  //         let query = { account_status: 1 };
-  
-  //         // Define the aggregation pipeline
-  //         const pipeline = [
-  //             {
-  //                 $match: { buyer_id: buyer_id }
-  //             },
-  //             {
-  //                 $lookup: {
-  //                     from: 'orders',
-  //                     let: { buyerId: "$buyer_id" },
-  //                     pipeline: [
-  //                         {
-  //                             $match: {
-  //                                 $expr: {
-  //                                     $and: [
-  //                                         { $eq: ["$buyer_id", "$$buyerId"] },
-  //                                         { $eq: ["$status", "Completed"] }
-  //                                     ]
-  //                                 }
-  //                             }
-  //                         }
-  //                     ],
-  //                     as: 'my_suppliers'
-  //                 }
-  //             },
-  //             {
-  //                 $skip: offset
-  //             },
-  //             {
-  //                 $limit: page_size
-  //             }
-  //         ];
-  
-  //         // Execute the aggregation pipeline
-  //         Buyer.aggregate(pipeline)
-  //             .then((data) => {
-  //                 callback({ code: 200, message: 'List fetched successfully', result: data });
-  //             })
-  //             .catch((err) => {
-  //                 callback({ code: 400, message: 'Error fetching list', result: err });
-  //             });
-  
-  //     } catch (error) {
-  //         console.error('Error:', error);
-  //         callback({ code: 400, message: 'Error in fetching supplier list' });
-  //     }
-  // },
-
-  mySupplierList: async (reqObj, callback) => {
-    try {
-      const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
-      const page_no = pageNo || 1;
-      const page_size = pageSize || 2;
-      const offset = (page_no - 1) * page_size;
-  
-      // Define the aggregation pipeline for counting total items
-      const countPipeline = [
-        {
-          $match: { buyer_id: buyer_id }
-        },
-        {
-          $lookup: {
-            from: 'orders',
-            let: { buyerId: "$buyer_id" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$buyer_id", "$$buyerId"] },
-                      { $eq: ["$status", "Completed"] }
-                    ]
+        // Define the aggregation pipeline for counting total items
+        const countPipeline = [
+          {
+            $match: { buyer_id: buyer_id }
+          },
+          {
+            $lookup: {
+              from: 'orders',
+              let: { buyerId: "$buyer_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$buyer_id", "$$buyerId"] },
+                        { $eq: ["$status", "Completed"] }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $group: {
+                    _id: "$supplier_id" // Group by supplier_id to get unique suppliers
                   }
                 }
-              },
-              {
-                $group: {
-                  _id: "$supplier_id" // Group by supplier_id to get unique suppliers
-                }
-              }
-            ],
-            as: 'my_suppliers'
+              ],
+              as: 'my_suppliers'
+            }
+          },
+          {
+            $unwind: "$my_suppliers" // Unwind the array of my_suppliers
+          },
+          {
+            $lookup: {
+              from: 'suppliers', // Lookup in the suppliers collection
+              localField: 'my_suppliers._id', // Match supplier_id from the orders group
+              foreignField: 'supplier_id', // Match with supplier_id in suppliers collection
+              as: 'supplier_details'
+            }
+          },
+          {
+            $unwind: "$supplier_details" // Unwind the supplier details array
+          },
+          {
+            $count: "total_items" // Count the total number of documents
           }
-        },
-        {
-          $unwind: "$my_suppliers" // Unwind the array of my_suppliers
-        },
-        {
-          $lookup: {
-            from: 'suppliers', // Lookup in the suppliers collection
-            localField: 'my_suppliers._id', // Match supplier_id from the orders group
-            foreignField: 'supplier_id', // Match with supplier_id in suppliers collection
-            as: 'supplier_details'
-          }
-        },
-        {
-          $unwind: "$supplier_details" // Unwind the supplier details array
-        },
-        {
-          $count: "total_items" // Count the total number of documents
-        }
-      ];
-  
-      // Define the aggregation pipeline for paginated results
-      const paginatedPipeline = [
-        {
-          $match: { buyer_id: buyer_id }
-        },
-        {
-          $lookup: {
-            from: 'orders',
-            let: { buyerId: "$buyer_id" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$buyer_id", "$$buyerId"] },
-                      { $eq: ["$status", "Completed"] }
-                    ]
+        ];
+    
+        // Define the aggregation pipeline for paginated results
+        const paginatedPipeline = [
+          {
+            $match: { buyer_id: buyer_id }
+          },
+          {
+            $lookup: {
+              from: 'orders',
+              let: { buyerId: "$buyer_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$buyer_id", "$$buyerId"] },
+                        { $eq: ["$status", "Completed"] }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $group: {
+                    _id: "$supplier_id" // Group by supplier_id to get unique suppliers
                   }
                 }
-              },
-              {
-                $group: {
-                  _id: "$supplier_id" // Group by supplier_id to get unique suppliers
-                }
-              }
-            ],
-            as: 'my_suppliers'
+              ],
+              as: 'my_suppliers'
+            }
+          },
+          {
+            $unwind: "$my_suppliers" // Unwind the array of my_suppliers
+          },
+          {
+            $lookup: {
+              from: 'suppliers', // Lookup in the suppliers collection
+              localField: 'my_suppliers._id', // Match supplier_id from the orders group
+              foreignField: 'supplier_id', // Match with supplier_id in suppliers collection
+              as: 'supplier_details'
+            }
+          },
+          {
+            $unwind: "$supplier_details" // Unwind the supplier details array
+          },
+          {
+            $skip: offset
+          },
+          {
+            $limit: page_size
+          },
+          {
+            $project: {
+              supplier_details: 1, // Project only supplier details
+              _id: 0 // Optionally, exclude the default _id field
+            }
           }
-        },
-        {
-          $unwind: "$my_suppliers" // Unwind the array of my_suppliers
-        },
-        {
-          $lookup: {
-            from: 'suppliers', // Lookup in the suppliers collection
-            localField: 'my_suppliers._id', // Match supplier_id from the orders group
-            foreignField: 'supplier_id', // Match with supplier_id in suppliers collection
-            as: 'supplier_details'
+        ];
+    
+        // Run the count query
+        const totalItemsResult = await Buyer.aggregate(countPipeline);
+        const totalItems = totalItemsResult.length > 0 ? totalItemsResult[0].total_items : 0;
+    
+        // Run the paginated query
+        const paginatedResults = await Buyer.aggregate(paginatedPipeline);
+    
+        callback({
+          code: 200,
+          message: 'List fetched successfully',
+          result: {
+            totalItems: totalItems,
+            totalItemsPerPage: page_size,
+            data: paginatedResults
           }
-        },
-        {
-          $unwind: "$supplier_details" // Unwind the supplier details array
-        },
-        {
-          $skip: offset
-        },
-        {
-          $limit: page_size
-        },
-        {
-          $project: {
-            supplier_details: 1, // Project only supplier details
-            _id: 0 // Optionally, exclude the default _id field
-          }
-        }
-      ];
+        });
+    
+      } catch (error) {
+        console.error('Error:', error);
+        callback({ code: 400, message: 'Error in fetching supplier list' });
+      }
+    },
   
-      // Run the count query
-      const totalItemsResult = await Buyer.aggregate(countPipeline);
-      const totalItems = totalItemsResult.length > 0 ? totalItemsResult[0].total_items : 0;
-  
-      // Run the paginated query
-      const paginatedResults = await Buyer.aggregate(paginatedPipeline);
-  
-      callback({
-        code: 200,
-        message: 'List fetched successfully',
-        result: {
-          totalItems: totalItems,
-          totalItemsPerPage: page_size,
-          data: paginatedResults
-        }
-      });
-  
-    } catch (error) {
-      console.error('Error:', error);
-      callback({ code: 400, message: 'Error in fetching supplier list' });
-    }
-  },
-  
-  
-  
-
     supplierDetails : async(reqObj, callback) => {
       try {
 
@@ -1146,8 +1086,6 @@ module.exports = {
       }
     },
 
-   
-
     sendEnquiry: async (reqObj, callback) => {
       try {
           const { buyer_id, buyer_name, items } = reqObj;
@@ -1254,7 +1192,7 @@ module.exports = {
                                 Thanks & Regards <br />
                                 Team Deliver`;
   
-                  await sendMailFunc(supplier_contact_email, 'New Enquiry Request Received', body);
+                  await sendMailFunc(supplier_email, 'New Enquiry Request Received', body);
               }
           }));
   
@@ -1271,7 +1209,6 @@ module.exports = {
       }
   },
   
-
     getNotificationList : async(reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj

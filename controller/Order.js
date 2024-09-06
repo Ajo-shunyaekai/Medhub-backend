@@ -3,25 +3,55 @@ const Support  = require('../schema/supportSchema')
 const Invoice  = require('../schema/invoiceNumberSchema')
 const Invoices = require('../schema/invoiceSchema')
 const Enquiry  = require('../schema/enquiryListSchema')
+const Buyer        = require('../schema/buyerSchema')
+const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
+const nodemailer         = require('nodemailer');
 
-const initializeInvoiceNumber = async () => {
-  const count = await Invoice.countDocuments();
-  if (count === 0) {
-      const initialInvoiceNumber = new Invoice({ last_invoice_number: 18000 });
-      await initialInvoiceNumber.save();
+
+  const transporter = nodemailer.createTransport({
+    host   : "smtp.gmail.com",
+    port   : 587,
+    secure : false, // true for 465, false for other ports
+    type   : "oauth2",
+    // service : 'gmail',
+    auth : {
+        user : process.env.SMTP_USER_ID,
+        pass : process.env.SMTP_USER_PASSWORD
+    }
+  });
+  const sendMailFunc = (email, subject, body) =>{
+    
+    const mailOptions = {
+        from    : process.env.SMTP_USER_ID,
+        to      : email,
+        subject : subject,
+        // text    : 'This is text mail, and sending for testing purpose'
+        html:body
+        
+    };
+    transporter.sendMail(mailOptions);
   }
-};
+
+  const initializeInvoiceNumber = async () => {
+    const count = await Invoice.countDocuments();
+    if (count === 0) {
+        const initialInvoiceNumber = new Invoice({ last_invoice_number: 18000 });
+        await initialInvoiceNumber.save();
+    }
+  };
 
 module.exports = {
 
     createOrder : async(reqObj, callback) => {
-      
        try {
 
         const orderId = 'ORD-' + Math.random().toString(16).slice(2, 10);
         const paymentTermsArray = reqObj.data.paymentTerms.split('\n').map(term => term.trim());
+
+        const supplier = await Supplier.findOne({ supplier_id: reqObj.supplier_id });
+        const buyer = await Buyer.findOne({ buyer_id: reqObj.buyer_id });
 
         const newOrder = new Order({
             order_id         : orderId,
@@ -96,6 +126,15 @@ module.exports = {
             status : 0
         })
         await newNotification.save()
+
+
+        const body = `Hello ${buyer.buyer_name}, <br />
+        Your Order has been created for  for <strong>${reqObj.enquiry_id}</strong>.<br />
+        <br /><br />
+        Thanks & Regards <br />
+        Team Deliver`;
+
+       await sendMailFunc(buyer.buyer_email, 'Order Created!', body);
             return callback({code: 200, message: "Order Created Successfully"});
         })
         .catch((err) => {
@@ -112,6 +151,9 @@ module.exports = {
         
         const { buyer_id, supplier_id, order_id, logistics_details } = reqObj
         const logisticsArray = Array.isArray(logistics_details) ? logistics_details : [logistics_details];
+
+        const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+        const buyer = await Buyer.findOne({ buyer_id: buyer_id });
 
         const updatedOrder = await Order.findOneAndUpdate(
           { order_id : order_id },
@@ -140,8 +182,16 @@ module.exports = {
         status : 0
     })
     await newNotification.save()
+
+    const body = `Hello ${supplier.supplier_name}, <br />
+                  Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
+                  <br /><br />
+                  Thanks & Regards <br />
+                  Team Deliver`;
+
+    await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
      
-          callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
+    callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
 
       } catch (error) {
         console.log(error)
@@ -153,6 +203,10 @@ module.exports = {
       try {
         
         const { buyer_id, supplier_id, order_id, shipment_details } = reqObj
+
+         const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+            const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+
 
         const updatedOrder = await Order.findOneAndUpdate(
           { order_id : order_id },
@@ -181,6 +235,14 @@ module.exports = {
             status : 0
         })
         await newNotification.save()
+
+        const body = `Hello ${buyer.buyer_name}, <br />
+        Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
+        <br /><br />
+        Thanks & Regards <br />
+        Team Deliver`;
+
+await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
      
           callback({code: 200, message: 'Updated', result: updatedOrder})
 
@@ -536,8 +598,7 @@ module.exports = {
 
     orderFeedback : async(reqObj, callback) => {
       try {
-        console.log(reqObj);
-       const supportId    = 'SPT-' + Math.random().toString(16).slice(2);
+       const supportId    = 'SPT-' + Math.random().toString(16).slice(2, 10);
 
        const newSupport = new Support({
         support_id    : supportId,
@@ -1640,7 +1701,7 @@ module.exports = {
                           }
                       },
                       {
-                          $sort: { "_id.year": 1 } // Sorting the result by year in ascending order
+                          $sort: { "_id.year": 1 } 
                       }
                   ],
                   monthlyData: [

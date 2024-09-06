@@ -24,7 +24,6 @@ const generatePassword = () => {
   return password
 }
 
-
 var transporter = nodemailer.createTransport({
     host   : "smtp.gmail.com",
     port   : 587,
@@ -48,7 +47,6 @@ const sendMailFunc = (email, subject, body) =>{
     };
     transporter.sendMail(mailOptions);
 }
-
 
 module.exports = {
 
@@ -212,7 +210,6 @@ module.exports = {
           callback(500, { message: "Internal server error" });
       }
     },
-
     //------------------------ supplier ------------------------//
 
     getSupplierList: async (reqObj, callback) => {
@@ -389,7 +386,7 @@ module.exports = {
             Thanks & Regards <br />
             Team Deliver`;
     
-          sendMailFunc('ajo@shunyaekai.tech', 'Registration Request Rejected', body);
+          sendMailFunc(updateProfile.supplier_email, 'Registration Request Rejected', body);
     
           return callback({
             code: 200,
@@ -536,7 +533,6 @@ module.exports = {
       }
     },
 
-
     acceptRejectBuyerRegReq: async (reqObj, callback) => {
       try {
         const { buyer_id, action } = reqObj;
@@ -617,8 +613,6 @@ module.exports = {
       }
     },
     
-
-
     buyerOrdersList: async (reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, buyer_id} = reqObj
@@ -627,109 +621,6 @@ module.exports = {
         const pageSize = limit || 2
         const offset   = (pageNo - 1) * pageSize     
         
-      // Order.aggregate([
-      //     {
-      //         $match: { 
-      //             // buyer_id     : reqObj.buyer_id,
-      //             order_status : reqObj.filterKey
-      //         }
-      //     },
-      //     {
-      //       $lookup: {
-      //         from         : "suppliers",
-      //         localField   : "supplier_id",
-      //         foreignField : "supplier_id",
-      //         as           : "supplier"
-      //       }
-      //     },
-      //     {
-      //       $lookup: {
-      //         from         : "buyers",
-      //         localField   : "buyer_id",
-      //         foreignField : "buyer_id",
-      //         as           : "buyer"
-      //       }
-      //     },
-      //     {
-      //       $project: {
-      //         order_id          : 1,
-      //         buyer_id          : 1,
-      //         buyer_name        : 1,
-      //         buyer_company     : 1,
-      //         supplier_id       : 1,
-      //         items             : 1,
-      //         payment_terms     : 1,
-      //         est_delivery_time : 1,
-      //         shipping_details  : 1,
-      //         remarks           : 1,
-      //         order_status      : 1,
-      //         created_at        : 1,
-      //         supplier          : { $arrayElemAt : ["$supplier", 0] },
-      //         buyer             : { $arrayElemAt : ["$buyer", 0] }
-      //       }
-      //     },
-      //     {
-      //       $unwind : "$items" 
-      //     },
-      //     {
-      //       $lookup: {
-      //         from         : "medicines",
-      //         localField   : "items.medicine_id",
-      //         foreignField : "medicine_id",
-      //         as           : "medicine"
-      //       }
-      //     },
-      //     {
-      //       $addFields: {
-      //         "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
-      //         "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
-      //       }
-      //     },
-      //     {
-      //       $group: {
-      //         _id               : "$_id",
-      //         order_id          : { $first: "$order_id" },
-      //         buyer_id          : { $first: "$buyer_id" },
-      //         buyer_name        : { $first: "$buyer_name" },
-      //         buyer_company     : { $first: "$buyer_company" },
-      //         supplier_id       : { $first: "$supplier_id" },
-      //         items             : { $push: "$items" },
-      //         payment_terms     : { $first: "$payment_terms" },
-      //         est_delivery_time : { $first: "$est_delivery_time" },
-      //         shipping_details  : { $first: "$shipping_details" },
-      //         remarks           : { $first: "$remarks" },
-      //         order_status      : { $first: "$order_status" },
-      //         created_at        : { $first: "$created_at" },
-      //         supplier          : { $first: "$supplier" },
-      //         buyer             : { $first: "$buyer" },
-      //         totalPrice        : { $sum: "$items.item_price" }
-      //       }
-      //     },
-      //     {
-      //         $project: {
-      //             order_id          : 1,
-      //             buyer_id          : 1,
-      //             buyer_name        : 1,
-      //             buyer_company     : 1,
-      //             supplier_id       : 1,
-      //             items             : 1,
-      //             payment_terms     : 1,
-      //             est_delivery_time : 1,
-      //             shipping_details  : 1,
-      //             remarks           : 1,
-      //             order_status      : 1,
-      //             created_at        : 1,
-      //             totalPrice        : 1,
-      //             "buyer.buyer_image"       : 1,
-      //             "buyer.buyer_name"        : 1,
-      //             "supplier.supplier_image" : 1,
-      //             "supplier.supplier_name"  : 1,
-      //         }
-      //     },
-      //     { $sort : { created_at: -1 } },
-      //     { $skip  : offset },
-      //     { $limit : pageSize },
-      // ])
       Order.aggregate([
         {
             $match: { 
@@ -1499,7 +1390,6 @@ module.exports = {
     //------------------------ supplier/buyer ------------------------//
 
 
-
    //------------------------ medicine ------------------------//
 
     acceptRejectAddMedicineReq : async(reqObj, callback) => {
@@ -1519,6 +1409,7 @@ module.exports = {
           const updateStatus = await Medicine.findOneAndUpdate(
               { medicine_id, supplier_id },
               { status: newMedicineStatus },
+              {edit_status : newMedicineStatus},
               { new: true }
           );
   
@@ -1936,12 +1827,12 @@ module.exports = {
       }
     },
 
-
     acceptRejectEditMedicineReq: async (reqObj, callback) => {
       try {
         const { medicine_id, supplier_id, action } = reqObj;
 
         const medicine = await EditMedicine.findOne({ medicine_id, supplier_id });
+        const supplier = await Supplier.findOne({ supplier_id: supplier_id });
 
         if (!medicine) {
           return callback({ code: 400, message: "Medicine edit request not found" });
@@ -2028,6 +1919,18 @@ module.exports = {
             // Delete the edit request from the EditMedicine collection after successful update
             await EditMedicine.deleteOne({ medicine_id, supplier_id });
 
+            const subject = 'Medicine Edit Request Accepted Successfully';
+            const body = `Hello ${medicine.supplier_name}, <br />
+                          Your medicine edit request has been approved and changes are live now. <br />
+                          Medicine ID: ${updatedMedicine.medicine_id} <br />
+                          Supplier ID: ${updatedMedicine.supplier_id} <br />
+                          <br /><br />
+                          Thanks & Regards, <br />
+                          Team Deliver`;
+
+            // Send the email to the supplier
+            await sendMailToSupplier(supplier.supplier_email, subject, body);
+
             return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} Medicine Details Updated Successfully`, result: updatedMedicine });
 
           } catch (error) {
@@ -2055,6 +1958,17 @@ module.exports = {
               );
             }
 
+            const subject = 'Medicine Edit Request Rejected';
+            const body = `Hello ${medicine.supplier_name}, <br />
+                          Your medicine edit request has been rejected. <br />
+                          Medicine ID: ${updatedMedicine.medicine_id} <br />
+                          Supplier ID: ${updatedMedicine.supplier_id} <br />
+                          <br /><br />
+                          Thanks & Regards, <br />
+                          Team Deliver`;
+
+            // Send the email to the supplier
+            await sendMailToSupplier(supplier.supplier_email, subject, body);
             return callback({ code: 200, message: 'Edit medicine request rejected', result });
 
           } catch (error) {
@@ -2112,38 +2026,6 @@ module.exports = {
 
 
     //----------------------------- support -------------------------------------//
-    
-    // supportList : async(reqObj, callback) => {
-    //   try {
-    //      const {pageNo, pageSize } = reqObj
- 
-    //      const page_no   = pageNo || 1
-    //      const page_size = pageSize || 1
-    //      const offset    = (page_no - 1) * page_size 
- 
-    //      Support.find().skip(offset).limit(page_size).then((data) => {
-    //        Support.countDocuments().then((totalItems) => {
-    //          const totalPages = Math.ceil(totalItems / page_size)
-    //          const returnObj =  {
-    //            data,
-    //            totalPages
-    //          }
-    //          callback({code: 200, message : 'support list fetched successfully', result: returnObj})
-    //        })
-    //        .catch((err) => {
-    //          console.log(err);
-    //          callback({code: 400, message : 'error while fetching support list count', result: err})
-    //        })
-    //      })
-    //      .catch((err) => {
-    //        console.log(err);
-    //        callback({code: 400, message : 'error while fetching support list', result: err})
-    //      })
- 
-    //   } catch (error) {
-    //    callback({code: 500, message : 'Internal Server Error', result: error})
-    //   }
-    // },
 
     supportList: async (reqObj, callback) => {
       try {
@@ -2195,7 +2077,6 @@ module.exports = {
     },
 
     //----------------------------- support -------------------------------------//
-
 
 
     //----------------------------- dashboard details -------------------------------------//
@@ -2419,141 +2300,10 @@ module.exports = {
         callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
-    
     //----------------------------- dashboard details -------------------------------------//
 
 
-    //----------------------------- order -------------------------------------//
-
-    // buyerInvoicesList: async (reqObj, callback) => {
-    //   try {
-    //     const {page_no, limit, filterKey, buyer_id} = reqObj
-  
-    //     const pageNo   = page_no || 1
-    //     const pageSize = limit || 1
-    //     const offset   = (pageNo - 1) * pageSize     
-        
-    //     Order.aggregate([
-    //         {
-    //             $match: { 
-    //                 // buyer_id     : reqObj.buyer_id,
-    //                 // order_status : reqObj.filterKey
-    //                 order_status : 'pending'
-    //             }
-    //         },
-    //         {
-    //           $lookup: {
-    //             from         : "suppliers",
-    //             localField   : "supplier_id",
-    //             foreignField : "supplier_id",
-    //             as           : "supplier"
-    //           }
-    //         },
-    //         {
-    //           $project: {
-    //             order_id          : 1,
-    //             buyer_id          : 1,
-    //             buyer_company     : 1,
-    //             supplier_id       : 1,
-    //             items             : 1,
-    //             payment_terms     : 1,
-    //             est_delivery_time : 1,
-    //             shipping_details  : 1,
-    //             remarks           : 1,
-    //             order_status      : 1,
-    //             invoice_number    : 1,
-    //             created_at        : 1,
-    //             supplier          : { $arrayElemAt : ["$supplier", 0] }
-    //           }
-    //         },
-    //         {
-    //           $unwind : "$items" 
-    //         },
-    //         {
-    //           $lookup: {
-    //             from         : "medicines",
-    //             localField   : "items.product_id",
-    //             foreignField : "medicine_id",
-    //             as           : "medicine"
-    //           }
-    //         },
-    //         {
-    //           $addFields: {
-    //             "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
-    //             "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
-    //           }
-    //         },
-    //         {
-    //           $group: {
-    //             _id               : "$_id",
-    //             order_id          : { $first: "$order_id" },
-    //             buyer_id          : { $first: "$buyer_id" },
-    //             buyer_company     : { $first: "$buyer_company" },
-    //             supplier_id       : { $first: "$supplier_id" },
-    //             items             : { $push: "$items" },
-    //             payment_terms     : { $first: "$payment_terms" },
-    //             est_delivery_time : { $first: "$est_delivery_time" },
-    //             shipping_details  : { $first: "$shipping_details" },
-    //             remarks           : { $first: "$remarks" },
-    //             order_status      : { $first: "$order_status" },
-    //             invoice_number    : { $first: "$invoice_number" },
-    //             created_at        : { $first: "$created_at" },
-    //             supplier          : { $first: "$supplier" },
-    //             totalPrice        : { $sum: "$items.item_price" }
-    //           }
-    //         },
-    //         {
-    //             $project: {
-    //                 order_id          : 1,
-    //                 buyer_id          : 1,
-    //                 buyer_company     : 1,
-    //                 supplier_id       : 1,
-    //                 items             : 1,
-    //                 payment_terms     : 1,
-    //                 est_delivery_time : 1,
-    //                 shipping_details  : 1,
-    //                 remarks           : 1,
-    //                 order_status      : 1,
-    //                 invoice_number    : 1,
-    //                 created_at        : 1,
-    //                 totalPrice        : 1,
-    //                 "supplier.supplier_image" : 1,
-    //                 "supplier.supplier_name"     : 1,
-    //                 "supplier.supplier_address"  : 1,
-    //             }
-    //         },
-    //         { $sort : { created_at: -1 } },
-    //         // { $skip  : offset },
-    //         // { $limit : pageSize },
-    //     ])
-    //     .then((data) => {
-    //         Order.countDocuments({order_status : filterKey, buyer_id: buyer_id})
-    //         .then(totalItems => {
-    //             const totalPages = Math.ceil(totalItems / pageSize);
-
-    //             const responseData = {
-    //                 data,
-    //                 totalPages,
-    //                 totalItems
-    //             }
-    //             callback({ code: 200, message: "List Fetched successfully", result: responseData });
-    //         })
-    //     })
-    //     .catch((err) => {
-    //         console.log(err);
-    //         callback({ code: 400, message: "Error in fetching order list", result: err });
-    //     })
-    //   } catch (error) {
-    //     callback({ code: 500, message: "Internal Server Error", result: error });
-    //   }
-    // },
-
-   
-    
-
-    //----------------------------- order -------------------------------------//
-
-
+    //------------------------------ notifications -------------------------------//
     getNotificationList : async(reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj;
@@ -2634,7 +2384,6 @@ module.exports = {
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
-    
 
     getNotificationDetailsList : async(reqObj, callback) => {
       try {
@@ -2716,7 +2465,6 @@ module.exports = {
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
-    
 
     updateStatus : async(reqObj, callback) => {
       console.log(reqObj);
@@ -2743,4 +2491,108 @@ module.exports = {
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
+     //------------------------------ notifications -------------------------------//
+
+    //------------------------------ inquiries -------------------------------//
+    inquiriesList: async (reqObj, callback) => {
+      try {
+        const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 2
+        const offset    = (page_no - 1) * page_size
+        
+
+        const matchCondition = {enquiry_status: {$ne: 'order created'}};
+        if (buyer_id && !supplier_id) {
+            matchCondition.buyer_id = buyer_id;
+        } else if (supplier_id && !buyer_id) {
+            matchCondition.supplier_id = supplier_id;
+        }
+
+        // if (status) {
+        //     matchCondition.enquiry_status = status;
+        // }
+            Enquiry.aggregate([
+                {
+                    $match: matchCondition
+                },
+                {
+                    $lookup : {
+                        from         : "buyers",
+                        localField   : "buyer_id",
+                        foreignField : "buyer_id",
+                        as           : "buyer_details",
+                    }
+                },
+                {
+                    $lookup : {
+                        from         : "suppliers",
+                        localField   : "supplier_id",
+                        foreignField : "supplier_id",
+                        as           : "supplier_details",
+                    }
+                },
+                {
+                    $project: {
+                        enquiry_id : 1,
+                        created_at : 1,
+                        items      : 1,
+                        enquiry_status     : 1,
+                        buyer : {
+                            $arrayElemAt : ["$buyer_details", 0]
+                        },
+                        supplier : {
+                            $arrayElemAt : ["$supplier_details", 0]
+                        },
+                    }
+                },
+                {
+                    $project: {
+                        enquiry_id : 1,
+                        created_at : 1,
+                        items      : 1,
+                        enquiry_status     : 1,
+                        "buyer.buyer_id"             : 1,
+                        "buyer.buyer_name"           : 1,
+                        "buyer.buyer_type"           : 1,
+                        "buyer.buyer_mobile"         : 1,
+                        "buyer.country_of_origin"    : 1,
+                        "supplier.supplier_id"       : 1,
+                        "supplier.supplier_name"     : 1,
+                        "supplier.supplier_type"     : 1,
+                        "supplier.supplier_mobile"   : 1,
+                        "supplier.country_of_origin" : 1,
+                    }
+                },
+                {
+                    $sort: { created_at: -1 }
+                },
+                {
+                    $skip: offset
+                },
+                {
+                    $limit: page_size
+                },
+                
+            ])
+            .then(async(data) => {
+                const totalItems = await Enquiry.countDocuments(matchCondition);
+                const totalPages = Math.ceil(totalItems / page_size);
+
+                const returnObj = {
+                    data,
+                    totalPages,
+                    totalItems
+                };
+                callback({code: 200, message: 'Enquiry list', result: returnObj})
+            })
+            .catch((err) => {
+            callback({code: 400, message: 'Error while fetching enquiry list', result: err})
+            })
+        } catch (error) {
+            console.log(error);
+        callback({code: 500, message: 'Internal Server Error'})
+        }
+    },
+    //------------------------------ inquiries -------------------------------//
 }

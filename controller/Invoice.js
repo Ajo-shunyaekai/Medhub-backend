@@ -90,40 +90,6 @@ module.exports = {
        }
     },
 
-    // updatePaymentStatus : async(reqObj, callback) => {
-    //   try {
-        
-    //     const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj
-
-    //     const updateInvoice  = await Invoice.findOneAndUpdate(
-    //       {  invoice_id : invoice_id ,
-    //          order_id : order_id
-
-    //       },
-    //       {
-    //         $set: {
-    //           mode_of_payment   : mode_of_payment,
-    //           amount_paid       : amount_paid,
-    //           transaction_id    : transaction_id,
-    //           payment_date      : payment_date,
-    //           transaction_image : transaction_image,
-    //           total_amount_paid : total_amount_paid + amount_paid,
-    //           pending_amount    : total_amount_paid - amount_paid
-    //         }
-    //       }
-    //     )
-      
-    
-     
-    //       callback({code: 200, message: 'Updated', result: updatedOrder})
-
-    //   } catch (error) {
-    //     console.log(error)
-    //    callback({code: 500, message: 'Internal Server Error'})
-    //   }
-    // },
-
-
     updatePaymentStatus: async (reqObj, callback) => {
       try {
           const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj;
@@ -146,9 +112,11 @@ module.exports = {
           const invoiceStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
           const orderStatus = newTotalAmountPaid === parseFloat(order.total_due_amount) ? 'completed' : order.order_status;
           const newOrderStatus = newTotalAmountPaid === parseFloat(order.total_due_amount) ? 'completed' : order.status;
-  console.log('invoiceStatus',invoiceStatus);
-  console.log('orderStatus',orderStatus);
-  console.log('newOrderStatus',newOrderStatus);
+
+          console.log('invoiceStatus',invoiceStatus);
+          console.log('orderStatus',orderStatus);
+          console.log('newOrderStatus',newOrderStatus);
+
           // Update the invoice
           const updatedInvoice = await Invoice.findOneAndUpdate(
               { invoice_id, order_id },
@@ -189,9 +157,8 @@ module.exports = {
           console.error(error);
           callback({ code: 500, message: 'Internal Server Error' });
       }
-  },
+    },
   
-
     invoiceDetails: async (reqObj, callback) => {
       try {
         const { order_id, invoice_id, supplier_id } = reqObj;
@@ -354,8 +321,5 @@ module.exports = {
         callback({ code: 500, message: "Internal server error", result: error });
       }
     }
-    
-
-
 
 }

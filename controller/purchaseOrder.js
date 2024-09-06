@@ -2,7 +2,33 @@ const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Enquiry       = require('../schema/enquiryListSchema')
 const mongoose      = require('mongoose');
 const ObjectId      = mongoose.Types.ObjectId;
+const Buyer        = require('../schema/buyerSchema')
+const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
+const nodemailer         = require('nodemailer');
+
+var transporter = nodemailer.createTransport({
+  host   : "smtp.gmail.com",
+  port   : 587,
+  secure : false, // true for 465, false for other ports
+  type   : "oauth2",
+  // service : 'gmail',
+  auth : {
+      user : process.env.SMTP_USER_ID,
+      pass : process.env.SMTP_USER_PASSWORD
+  }
+});
+const sendMailFunc = (email, subject, body) =>{
+  
+  var mailOptions = {
+      from    : process.env.SMTP_USER_ID,
+      to      : email,
+      subject : subject,
+      // text    : 'This is text mail, and sending for testing purpose'
+      html:body 
+  };
+  transporter.sendMail(mailOptions);
+}
 
 module.exports = {
  
@@ -31,32 +57,28 @@ module.exports = {
                 }
             } = reqObj;
 
-            console.log(reqObj);
+            const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+            const buyer = await Buyer.findOne({ buyer_id: buyer_id });
 
             const enquiry = await Enquiry.findOne({enquiry_id});
     
             if (!enquiry) {
                 return callback({ code: 404, message: 'Enquiry not found' });
             }
-            // enquiry.quotation_items = enquiry.quotation_items.filter(detail => {
-            //     return !itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted');
-            // });
+           
             enquiry.quotation_items.forEach(detail => {
-                console.log('detail',detail);
                 if (itemIds.some(itemId => detail._id.equals(new ObjectId(itemId)) && detail.status === 'accepted')) {
                     detail.status = 'PO created';
                 }
             });
 
             enquiry.quotation_items.forEach(detail => {
-                console.log('detail',detail);
                 if (rejectedIds.some(rejectedItemId => detail._id.equals(new ObjectId(rejectedItemId)) && detail.status === 'rejected')) {
                     detail.status = 'rejected';
                 }
             });
     
             orderItems.forEach(orderItem => {
-                console.log('orderItem',orderItem);
                 const enquiryItem = enquiry.items.find(item => item.medicine_id === orderItem.medicine_id);
                 if (enquiryItem) {
                     console.log('enquiryItem',enquiryItem);
@@ -65,7 +87,6 @@ module.exports = {
             });
 
             rejectedItems.forEach(rejectedItem => {
-                console.log('rejectedItem',rejectedItem);
                 const enquiryItem = enquiry.items.find(item => item.medicine_id === rejectedItem.medicine_id);
                 if (enquiryItem) {
                     console.log('enquiryItem',enquiryItem);
@@ -127,6 +148,17 @@ module.exports = {
                 status           : 0
             })
             await newNotification.save()
+
+
+            const body = `Hello ${supplier.supplier_name}, <br />
+                                Purchase Order created for <strong>${enquiry_id}</strong>.<br />
+                                <br /><br />
+                                Thanks & Regards <br />
+                                Team Deliver`;
+  
+                  await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Created!', body);
+
+
             callback({ code: 200, message: 'Purchase Order Created Successfully', data: newPO });
         } catch (error) {
             console.log('Internal Server Error', error);
@@ -403,6 +435,9 @@ module.exports = {
                     description
                 }
             } = reqObj;
+
+            const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+            const buyer = await Buyer.findOne({ buyer_id: buyer_id });
             
             const purchaseOrder = await PurchaseOrder.findOne({ purchaseOrder_id });
             
@@ -462,6 +497,15 @@ module.exports = {
                 status           : 0
             })
             await newNotification.save()
+
+
+            const body = `Hello ${supplier.supplier_name}, <br />
+                                Purchase Order edited for <strong>${purchaseOrder_id}</strong>.<br />
+                                <br /><br />
+                                Thanks & Regards <br />
+                                Team Deliver`;
+  
+                  await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Edited!', body);
 
             callback({ code: 200, message: 'Purchase Order updated successfully', data: purchaseOrder });
         } catch (error) {

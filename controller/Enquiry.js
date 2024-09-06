@@ -3,7 +3,36 @@ const ObjectId     = mongoose.Types.ObjectId;
 const Enquiry      = require('../schema/enquiryListSchema')
 const Support      = require('../schema/supportSchema')
 const Invoice      = require('../schema/invoiceNumberSchema')
+const Buyer        = require('../schema/buyerSchema')
+const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
+const nodemailer         = require('nodemailer');
+
+
+    const transporter = nodemailer.createTransport({
+    host   : "smtp.gmail.com",
+    port   : 587,
+    secure : false, // true for 465, false for other ports
+    type   : "oauth2",
+    // service : 'gmail',
+    auth : {
+        user : process.env.SMTP_USER_ID,
+        pass : process.env.SMTP_USER_PASSWORD
+    }
+    });
+    const sendMailFunc = (email, subject, body) =>{
+  
+    const mailOptions = {
+        from    : process.env.SMTP_USER_ID,
+        to      : email,
+        subject : subject,
+        // text    : 'This is text mail, and sending for testing purpose'
+        html:body
+        
+    };
+    transporter.sendMail(mailOptions);
+    }
+
 
 module.exports = {
 
@@ -13,26 +42,13 @@ module.exports = {
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
         const offset    = (page_no - 1) * page_size
-        // const query     = {enquiry_status: {$ne: 'order created'}}
-        
-        // if(!supplier_id) {
-        //     query.buyer_id = buyer_id
-        //     // query.enquiry_status = status 
-        // } else if(!buyer_id) {
-        //     query.supplier_id = supplier_id
-        //     // query.enquiry_status = status 
-        // }
 
         const matchCondition = {enquiry_status: {$ne: 'order created'}};
-        if (buyer_id && !supplier_id) {
-            matchCondition.buyer_id = buyer_id;
-        } else if (supplier_id && !buyer_id) {
-            matchCondition.supplier_id = supplier_id;
-        }
-
-        // if (status) {
-        //     matchCondition.enquiry_status = status;
-        // }
+            if (buyer_id && !supplier_id) {
+                matchCondition.buyer_id = buyer_id;
+            } else if (supplier_id && !buyer_id) {
+                matchCondition.supplier_id = supplier_id;
+            }
             Enquiry.aggregate([
                 {
                     $match: matchCondition
@@ -334,6 +350,13 @@ module.exports = {
     submitQuotation: async (reqObj, callback) => {
       try {
           const { enquiry_id, quotation_details, payment_terms, buyer_id, supplier_id } = reqObj;
+
+          const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+ 
+          if (!buyer) {
+              console.log('Not found');
+              return callback({code: 404, message: "Buyer Not Found"});
+          }
   
           const updatedEnquiry = await Enquiry.findOneAndUpdate(
               { enquiry_id : enquiry_id },
@@ -377,6 +400,15 @@ module.exports = {
                 status : 0
             })
             await newNotification.save()
+
+            const body = `Hello ${buyer.buyer_name}, <br />
+                                You’ve received a quote from the supplier for <strong>${enquiry_id}</strong>.<br />
+                                <br /><br />
+                                Thanks & Regards <br />
+                                Team Deliver`;
+  
+                  await sendMailFunc(buyer.buyer_email, 'Quotation Received!', body);
+
           callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry });
       } catch (error) {
           console.log('error', error);
@@ -420,6 +452,9 @@ module.exports = {
         try {
             const { supplier_id, buyer_id, status, enquiry_id, reason, comment } = reqObj;
 
+            const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+            const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+
             const updatedEnquiry = await Enquiry.findOneAndUpdate(
                 { enquiry_id: enquiry_id },
                 {
@@ -453,7 +488,15 @@ module.exports = {
                 status           : 0
             })
             await newNotification.save()
-            callback({ code: 200, message: 'Enquiry Cancelled Successfully', result: updatedEnquiry });
+
+            const body = `Hello ${supplier.supplier_name}, <br />
+                                Inquiry request has been cancelled by ${buyer.buyer_name} for <strong>${enquiry_id}</strong>.<br />
+                                <br /><br />
+                                Thanks & Regards <br />
+                                Team Deliver`;
+  
+            await sendMailFunc(supplier.supplier_email, 'Inquiry Cancelled!', body);
+            callback({ code: 200, message: 'Inquiry Cancelled Successfully', result: updatedEnquiry });
         } catch (error) {
             console.log(error);
             callback({ code: 500, message: 'Internal Server Error', result: error });
