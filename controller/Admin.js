@@ -12,6 +12,8 @@ const SupplierEdit       = require('../schema/supplierEditSchema')
 const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
 const Notification       = require('../schema/notificationSchema')
+const Enquiry            = require('../schema/enquiryListSchema')
+const Invoices           = require('../schema/invoiceSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 
@@ -1068,17 +1070,24 @@ module.exports = {
     invoicesList: async (reqObj, callback) => {
       try {
         const {pageNo, pageSize, filterKey, buyer_id} = reqObj
-  
-        const page_no   = pageNo || 1
-        const page_size = pageSize || 1
+        const page_no   = pageNo || 2
+        const page_size = pageSize || 2
         const offset   = (page_no - 1) * page_size     
         
-        Order.aggregate([
+        Invoices.aggregate([
             {
                 $match: { 
-                    // buyer_id     : reqObj.buyer_id,
-                    order_status : reqObj.filterKey
+                    // buyer_id : buyer_id,
+                    status      : filterKey
                 }
+            },
+            {
+              $lookup: {
+                from         : "buyers",
+                localField   : "buyer_id",
+                foreignField : "buyer_id",
+                as           : "buyer"
+              }
             },
             {
               $lookup: {
@@ -1090,19 +1099,36 @@ module.exports = {
             },
             {
               $project: {
+                invoice_id : 1,
                 order_id          : 1,
+                enquiry_id :1,
+                purchaseOrder_id : 1,
                 buyer_id          : 1,
-                buyer_company     : 1,
                 supplier_id       : 1,
-                items             : 1,
-                payment_terms     : 1,
-                est_delivery_time : 1,
-                shipping_details  : 1,
-                remarks           : 1,
-                order_status      : 1,
-                invoice_number    : 1,
+                invoice_no : 1,
+                invoice_date  :1,
+                buyer_name : 1,
+                buyer_address : 1,
+                buyer_country  :1,
+                buyer_vat_reg_no : 1,
+                supplier_name : 1,
+                supplier_address : 1,
+                supplier_country : 1,
+                supplier_vat_reg_no : 1,
+                items : 1,
+                payment_terms : 1,
+                total_payable_amount : 1,
+                total_amount_paid : 1,
+                pending_amount : 1,
+                account_number : 1,
+                sort_code : 1,
+                transaction_image : 1,
+                invoice_status : 1,
+                status : 1,
+                payment_status : 1,
                 created_at        : 1,
-                supplier          : { $arrayElemAt : ["$supplier", 0] }
+                buyer          : { $arrayElemAt : ["$buyer", 0] },
+                supplier       : { $arrayElemAt : ["$supplier", 0] }
               }
             },
             {
@@ -1124,49 +1150,87 @@ module.exports = {
             },
             {
               $group: {
-                _id               : "$_id",
-                order_id          : { $first: "$order_id" },
-                buyer_id          : { $first: "$buyer_id" },
-                buyer_company     : { $first: "$buyer_company" },
-                supplier_id       : { $first: "$supplier_id" },
-                items             : { $push: "$items" },
-                payment_terms     : { $first: "$payment_terms" },
-                est_delivery_time : { $first: "$est_delivery_time" },
-                shipping_details  : { $first: "$shipping_details" },
-                remarks           : { $first: "$remarks" },
-                order_status      : { $first: "$order_status" },
-                invoice_number    : { $first: "$invoice_number" },
-                created_at        : { $first: "$created_at" },
-                supplier          : { $first: "$supplier" },
-                totalPrice        : { $sum: "$items.item_price" }
+                _id: "$_id",
+                invoice_id: { $first: "$invoice_id" },
+                order_id: { $first: "$order_id" },
+                enquiry_id: { $first: "$enquiry_id" },
+                purchaseOrder_id: { $first: "$purchaseOrder_id" },
+                buyer_id: { $first: "$buyer_id" },
+                supplier_id: { $first: "$supplier_id" },
+                invoice_no: { $first: "$invoice_no" },
+                invoice_date: { $first: "$invoice_date" },
+                buyer_name: { $first: "$buyer_name" },
+                buyer_address: { $first: "$buyer_address" },
+                buyer_country: { $first: "$buyer_country" },
+                buyer_vat_reg_no: { $first: "$buyer_vat_reg_no" },
+                supplier_name: { $first: "$supplier_name" },
+                supplier_address: { $first: "$supplier_address" },
+                supplier_country: { $first: "$supplier_country" },
+                supplier_vat_reg_no: { $first: "$supplier_vat_reg_no" },
+                items: { $push: "$items" },
+                payment_terms: { $first: "$payment_terms" },
+                total_payable_amount: { $first: "$total_payable_amount" },
+                total_amount_paid: { $first: "$total_amount_paid" },
+                pending_amount: { $first: "$pending_amount" },
+                account_number: { $first: "$account_number" },
+                sort_code: { $first: "$sort_code" },
+                transaction_image: { $first: "$transaction_image" },
+                invoice_status: { $first: "$invoice_status" },
+                status: { $first: "$status" },
+                payment_status: { $first: "$payment_status" },
+                created_at: { $first: "$created_at" },
+                buyer: { $first: "$buyer" },
+                supplier: { $first: "$supplier" },
+                totalPrice: { $sum: "$items.item_price" }
               }
             },
             {
-                $project: {
-                    order_id          : 1,
-                    buyer_id          : 1,
-                    buyer_company     : 1,
-                    supplier_id       : 1,
-                    items             : 1,
-                    payment_terms     : 1,
-                    est_delivery_time : 1,
-                    shipping_details  : 1,
-                    remarks           : 1,
-                    order_status      : 1,
-                    invoice_number    : 1,
-                    created_at        : 1,
-                    totalPrice        : 1,
-                    "supplier.supplier_image" : 1,
-                    "supplier.supplier_name"     : 1,
-                    "supplier.supplier_address"  : 1,
-                }
+              $project: {
+                invoice_id: 1,
+                order_id: 1,
+                enquiry_id: 1,
+                purchaseOrder_id: 1,
+                buyer_id: 1,
+                supplier_id: 1,
+                invoice_no: 1,
+                invoice_date: 1,
+                buyer_name: 1,
+                buyer_address: 1,
+                buyer_country: 1,
+                buyer_vat_reg_no: 1,
+                supplier_name: 1,
+                supplier_address: 1,
+                supplier_country: 1,
+                supplier_vat_reg_no: 1,
+                items: 1,
+                payment_terms: 1,
+                total_payable_amount: 1,
+                total_amount_paid: 1,
+                pending_amount: 1,
+                account_number: 1,
+                sort_code: 1,
+                transaction_image: 1,
+                invoice_status: 1,
+                status: 1,
+                payment_status: 1,
+                created_at: 1,
+                totalPrice: 1,
+                "buyer.buyer_image": 1,
+                "buyer.buyer_name": 1,
+                "buyer.buyer_address": 1,
+                "buyer.buyer_type": 1,
+                "supplier.supplier_image": 1,
+                "supplier.supplier_name": 1,
+                "supplier.supplier_address": 1,
+                "supplier.supplier_type": 1,
+              }
             },
             { $sort : { created_at: -1 } },
             { $skip  : offset },
             { $limit : page_size },
         ])
         .then((data) => {
-            Order.countDocuments({order_status : filterKey})
+            Invoices.countDocuments({status : filterKey})
             .then(totalItems => {
                 const totalPages = Math.ceil(totalItems / page_size);
 
@@ -1183,6 +1247,7 @@ module.exports = {
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
       } catch (error) {
+        console.log(error);
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
@@ -1866,6 +1931,7 @@ module.exports = {
             manufacturer_country_of_origin: medicine.manufacturer_country_of_origin,
             manufacturer_description: medicine.manufacturer_description,
             stockedIn_details: medicine.stockedIn_details,
+            inventory_info : medicine.inventory_info,
             edit_status: editMedicineStatus,  // Ensure edit_status is updated
           };
 
@@ -1875,7 +1941,7 @@ module.exports = {
 
           if (medicine.medicine_type === 'new_medicine') {
             updateObj.medicine_type = 'new';
-            updateObj.inventory_info = medicine.inventory_info;
+            // updateObj.inventory_info = medicine.inventory_info;
           } else if (medicine.medicine_type === 'secondary_medicine') {
             updateObj.medicine_type = 'secondary market';
             updateObj.purchased_on = medicine.purchased_on;
@@ -1929,7 +1995,7 @@ module.exports = {
                           Team Deliver`;
 
             // Send the email to the supplier
-            await sendMailToSupplier(supplier.supplier_email, subject, body);
+            await sendMailFunc(supplier.supplier_email, subject, body);
 
             return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} Medicine Details Updated Successfully`, result: updatedMedicine });
 
@@ -1968,7 +2034,7 @@ module.exports = {
                           Team Deliver`;
 
             // Send the email to the supplier
-            await sendMailToSupplier(supplier.supplier_email, subject, body);
+            await sendMailFunc(supplier.supplier_email, subject, body);
             return callback({ code: 200, message: 'Edit medicine request rejected', result });
 
           } catch (error) {

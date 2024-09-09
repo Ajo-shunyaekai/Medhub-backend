@@ -249,15 +249,15 @@ module.exports = () => {
 
 
 
-    //------------------------------------------ medicine ------------------------------------------//
-    routes.post('/inquiries-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+    //------------------------------------------ inquiry ------------------------------------------//
+    routes.post('/get-inquiry-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.inquiriesList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    //------------------------------------------ medicine ------------------------------------------//
+    //------------------------------------------ inquiry ------------------------------------------//
     
     return routes;
 }

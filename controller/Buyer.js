@@ -1182,7 +1182,7 @@ module.exports = {
           // Send emails to suppliers
           await Promise.all(Object.keys(groupedItems).map(async supplier_id => {
               const { supplier_name, supplier_email, supplier_contact_email, items } = groupedItems[supplier_id];
-              if (supplier_contact_email) {
+              if (supplier_email) {
                   const itemsList = items.map(item => `Medicine ID: ${item.medicine_id}`).join('<br />');
                   const body = `Hello ${supplier_name}, <br />
                                 You have received a new enquiry request from the buyer <strong>${buyer_name}</strong>.<br />
