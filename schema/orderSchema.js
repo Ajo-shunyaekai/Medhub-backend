@@ -284,6 +284,10 @@ const orderSchema = new Schema({
         required: true
     },
     items: [orderItemSchema],
+    grand_total : {
+        type: String,
+        required: true
+    },
     total_due_amount: {
         type: String,
         required: true

@@ -1,8 +1,37 @@
 const Order    = require('../schema/orderSchema')
 const Support  = require('../schema/supportSchema')
+const Buyer        = require('../schema/buyerSchema')
+const Supplier     = require('../schema/supplierSchema')
 const Invoice  = require('../schema/invoiceSchema')
 const Enquiry  = require('../schema/enquiryListSchema')
 const Notification = require('../schema/notificationSchema')
+const nodemailer         = require('nodemailer');
+
+
+  const transporter = nodemailer.createTransport({
+    host   : "smtp.gmail.com",
+    port   : 587,
+    secure : false, // true for 465, false for other ports
+    type   : "oauth2",
+    // service : 'gmail',
+    auth : {
+        user : process.env.SMTP_USER_ID,
+        pass : process.env.SMTP_USER_PASSWORD
+    }
+  });
+  const sendMailFunc = (email, subject, body) =>{
+    
+    const mailOptions = {
+        from    : process.env.SMTP_USER_ID,
+        to      : email,
+        subject : subject,
+        // text    : 'This is text mail, and sending for testing purpose'
+        html:body
+        
+    };
+    transporter.sendMail(mailOptions);
+  }
+
 
 const initializeInvoiceNumber = async () => {
   const count = await Invoice.countDocuments();
@@ -16,7 +45,10 @@ module.exports = {
 
     createInvoice : async(reqObj, callback) => {
        try {
-        const invoiceId = 'INV-' + Math.random().toString(16).slice(2);
+        const invoiceId = 'INV-' + Math.random().toString(16).slice(2, 10);
+
+        const supplier = await Supplier.findOne({ supplier_id: reqObj.supplierId });
+        const buyer = await Buyer.findOne({ buyer_id: reqObj.buyerId });
       
         const newInvoice = new Invoice({
             invoice_id           : invoiceId,
@@ -41,10 +73,12 @@ module.exports = {
             supplier_vat_reg_no  : (reqObj.data && reqObj.data.supplierVatRegNo) || reqObj.supplierVatRegNo,     
             items                : (reqObj.data && reqObj.orderItems) || reqObj.orderItems,
             // vat                  : (reqObj.data && reqObj.data.vat )|| reqObj.vat,
+            grand_total          : (reqObj.data && reqObj.data.grandTotal) || reqObj.grandTotal,
             total_payable_amount : (reqObj.data && reqObj.data.totalPayableAmount) || reqObj.totalPayableAmount,
             total_amount_paid    : 0,
             payment_terms        : (reqObj.data && reqObj.data.paymentTerms) || reqObj.paymentTerms,
             pending_amount       : (reqObj.data && reqObj.data.totalPayableAmount) || reqObj.totalPayableAmount,
+            bank_name            : (reqObj.data && reqObj.data.bankName) || reqObj.bankName,
             account_number       : (reqObj.data && reqObj.data.accountNo) || reqObj.accountNo,
             sort_code            : (reqObj.data && reqObj.data.sortCode) || reqObj.sortCode,
             invoice_status       : 'pending', 
@@ -63,21 +97,30 @@ module.exports = {
         if (!updatedEnquiry) {
             return callback({ code: 404, message: 'Order not found', result: null });
         }
-          const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
-          const newNotification = new Notification({
-            notification_id : notificationId,
-            event_type      : 'Invoice created',
-            event           : 'invoice',
-            from            : 'supplier',
-            to              : 'buyer',
-            from_id         : reqObj.supplierId,
-            to_id           : reqObj.buyerId,
-            event_id        : invoiceId,
-            connected_id    : reqObj.orderId,
-            message         : 'Invoice created',
-            status          : 0
-        })
-        await newNotification.save()
+        //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2);
+        //   const newNotification = new Notification({
+        //     notification_id : notificationId,
+        //     event_type      : 'Invoice created',
+        //     event           : 'invoice',
+        //     from            : 'supplier',
+        //     to              : 'buyer',
+        //     from_id         : reqObj.supplierId,
+        //     to_id           : reqObj.buyerId,
+        //     event_id        : invoiceId,
+        //     connected_id    : reqObj.orderId,
+        //     message         : 'Invoice created',
+        //     status          : 0
+        // })
+        // await newNotification.save()
+
+            const body = `Hello ${buyer.buyer_name}, <br />
+            Invoice for ${reqObj.orderId} has been generated.<br />
+            Total Payable Amount: <strong>${reqObj.totalPayableAmount}</strong><br />
+            <br /><br />
+            Thanks & Regards <br />
+            Team Deliver`;
+
+            await sendMailFunc(buyer.buyer_email, 'Invoice Created!', body);
             return callback({code: 200, message: "Invoice Created Successfully"});
         })
         .catch((err) => {
@@ -93,29 +136,27 @@ module.exports = {
     updatePaymentStatus: async (reqObj, callback) => {
       try {
           const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj;
-  
-          // Fetch the existing invoice and order to calculate the new amounts
+
+          const supplier = await Supplier.findOne({ supplier_id: reqObj.supplierId });
+          const buyer = await Buyer.findOne({ buyer_id: reqObj.buyerId });
+
           const invoice = await Invoice.findOne({ invoice_id, order_id });
           const order = await Order.findOne({ order_id });
   
           if (!invoice || !order) {
               return callback({ code: 404, message: 'Invoice or Order not found' });
           }
-  
           // Calculate the new amounts
-          const newTotalAmountPaid = parseFloat(invoice.total_amount_paid) + parseFloat(amount_paid);
-          const newPendingAmount = parseFloat(invoice.total_payable_amount) - newTotalAmountPaid;
-  
-          console.log('newTotalAmountPaid',newTotalAmountPaid);
-          console.log('newPendingAmount',newPendingAmount);
-          // Determine the new status based on the payment
-          const invoiceStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
-          const orderStatus = newTotalAmountPaid === parseFloat(order.total_due_amount) ? 'completed' : order.order_status;
-          const newOrderStatus = newTotalAmountPaid === parseFloat(order.total_due_amount) ? 'completed' : order.status;
+          const newTotalAmountPaid = parseFloat((parseFloat(order.total_amount_paid) + parseFloat(amount_paid)).toFixed(2));
+          const newPendingAmount    = parseFloat((parseFloat(order.grand_total) - newTotalAmountPaid).toFixed(2));
 
-          console.log('invoiceStatus',invoiceStatus);
-          console.log('orderStatus',orderStatus);
-          console.log('newOrderStatus',newOrderStatus);
+          // const invoiceStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
+          // const invStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
+          // const invoiceStatus = newPendingAmount === 0 ? 'completed' : 'paid';
+          // const invStatus     = newPendingAmount === 0 ? 'completed' : 'paid';
+
+          const orderStatus = parseFloat(newTotalAmountPaid).toFixed(2) === parseFloat(order.total_due_amount).toFixed(2) ? 'completed' : order.order_status;
+          const newOrderStatus = parseFloat(newTotalAmountPaid).toFixed(2) === parseFloat(order.total_due_amount).toFixed(2) ? 'Completed' : order.status;
 
           // Update the invoice
           const updatedInvoice = await Invoice.findOneAndUpdate(
@@ -129,7 +170,9 @@ module.exports = {
                       transaction_image,
                       total_amount_paid : newTotalAmountPaid.toFixed(2),
                       pending_amount    : newPendingAmount.toFixed(2),
-                      status            : invoiceStatus
+                      status            : 'paid',
+                      invoice_status    : 'paid',
+              
                   }
               },
               { new: true }
@@ -142,17 +185,28 @@ module.exports = {
                   $set: {
                       total_amount_paid : newTotalAmountPaid.toFixed(2),
                       pending_amount    : newPendingAmount.toFixed(2),
-                      status            : orderStatus
+                      status            : newOrderStatus,
+                      order_status      : orderStatus
                   }
               },
               { new: true }
           );
+
+          const body = `Hello ${supplier.supplier_name}, <br />
+            Invoice No.${invoice.invoice_no}  for ${reqObj.orderId} has been paid.<br />
+            Total Amount Paid: <strong>${amount_paid}</strong><br />
+            <br /><br />
+            Thanks & Regards <br />
+            Team Deliver`;
+
+            await sendMailFunc(supplier.supplier_email, 'Invoice Payment Done!', body);
   
           const response = {
             updatedInvoice,
             updatedOrder
           }
-          callback({ code: 200, message: 'Updated', result: response });
+
+          callback({ code: 200, message: 'Payment Status Updated', result: response });
       } catch (error) {
           console.error(error);
           callback({ code: 500, message: 'Internal Server Error' });
@@ -215,6 +269,10 @@ module.exports = {
               invoice_status: 1,
               status: 1,
               payment_status: 1,
+              transaction_id : 1,
+              amount_paid : 1,
+              payment_date : 1,
+              mode_of_payment : 1,
               created_at: 1,
               supplier: { $arrayElemAt: ["$supplier", 0] }
             }
@@ -267,6 +325,10 @@ module.exports = {
               invoice_status: { $first: "$invoice_status" },
               status: { $first: "$status" },
               payment_status: { $first: "$payment_status" },
+              mode_of_payment: { $first: "$mode_of_payment" },
+              transaction_id: { $first: "$transaction_id" },
+              payment_date: { $first: "$payment_date" },
+              amount_paid: { $first: "$amount_paid" },
               created_at: { $first: "$created_at" },
               supplier: { $first: "$supplier" },
               totalPrice: { $sum: "$items.item_price" }
@@ -301,6 +363,10 @@ module.exports = {
               invoice_status: 1,
               status: 1,
               payment_status: 1,
+              mode_of_payment : 1,
+              transaction_id : 1,
+              amount_paid : 1,
+              payment_date : 1,
               created_at: 1,
               totalPrice: 1,
               "supplier.supplier_image": 1,

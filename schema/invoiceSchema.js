@@ -126,6 +126,10 @@ const invoiceSchema = new Schema({
     //     type: String,
     //     required: true
     // },
+    grand_total: {
+        type: String,
+        required: true
+    },
     total_payable_amount: {
         type: String,
         required: true
@@ -160,18 +164,15 @@ const invoiceSchema = new Schema({
     },
     transaction_image: [{
         type: String,
-    }],
-    // logistics_details: [logisticsSchema],
-    // shipment_details: shipmentSchema,
-    
+    }],    
     invoice_status: {
         type: String,
-        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
+        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled','paid'],
         default: 'pending'
     },
     status: {
         type: String,
-        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
+        enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled','paid'],
         default: 'pending'
     },
     payment_status : {

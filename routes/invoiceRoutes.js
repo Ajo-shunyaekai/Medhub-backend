@@ -64,18 +64,16 @@ module.exports = () => {
             res.send({ code: 415, message: 'Transaction Image field is required!', errObj: {} });
             return;
         }
-        // const tags = req.body.tags.split(',');
     
         let obj = {
             ...req.body,
-            // tags : tags,
             transaction_image: req.files['transaction_image'].map(file => path.basename(file.path))
         }
         
-            Invoice.updatePaymentStatus(obj, result => {
-                const response = handleResponse(result);
-                res.send(response);
-            });
+        Invoice.updatePaymentStatus(obj, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
     });
 
     routes.post('/submit-details', checkAuthorization, checkSupplierAuthentication, async(req, res) => {

@@ -117,6 +117,11 @@ const enquirySchema = new Schema({
         enum: ['pending', 'active', 'completed', 'cancelled', 'Quotation submitted', 'PO created', 'rejected','order created'],
         default: 'pending'
     },
+    status: {
+        type: String,
+        enum: ['pending', 'active', 'completed', 'cancelled', 'Quotation submitted', 'PO created', 'rejected','order created'],
+        default: 'pending'
+    },
     created_at: {
         type: Date,
         default: Date.now
