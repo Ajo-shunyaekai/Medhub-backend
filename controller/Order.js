@@ -424,7 +424,14 @@ await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
                   }
                 },
                 {
-                  $sort: { "invoices.created_at": -1 } 
+                  $addFields: {
+                    invoices: {
+                      $sortArray: {
+                        input: "$invoices",
+                        sortBy: { created_at: -1 }
+                      }
+                    }
+                  }
                 },
                 {
                   $project: {
@@ -1133,239 +1140,6 @@ await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
       }
     },
 
-    // supplierOrderDetails : async (reqObj, callback) => {
-    //   try {
-    //     const {buyer_id, order_id, filterKey} = reqObj
-
-    //     Order.aggregate([
-    //         {
-    //             $match: { 
-    //                 order_id     : order_id,
-    //                 // buyer_id     : buyer_id,
-    //                 // order_status : filterKey
-    //             }
-    //         },
-    //         {
-    //           $lookup: {
-    //             from         : "suppliers",
-    //             localField   : "supplier_id",
-    //             foreignField : "supplier_id",
-    //             as           : "supplier"
-    //           }
-    //         },
-    //         {
-    //           $lookup: {
-    //             from         : "buyers",
-    //             localField   : "buyer_id",
-    //             foreignField : "buyer_id",
-    //             as           : "buyer"
-    //           }
-    //         },
-    //         {
-    //           $lookup: {
-    //             from         : "enquiries",
-    //             localField   : "enquiry_id",
-    //             foreignField : "enquiry_id",
-    //             as           : "enquiry"
-    //           }
-    //         },
-
-  //   {
-  //     // New lookup for the invoices collection
-  //     $lookup: {
-  //         from: "invoices",
-  //         localField: "order_id",
-  //         foreignField: "order_id",
-  //         as: "invoice"
-  //     }
-  // },
-    //         {
-    //           $project: {
-    //             order_id          : 1,
-    //             enquiry_id        : 1,
-    //             purchaseOrder_id  : 1,
-    //             buyer_id          : 1,
-    //             buyer_company     : 1,
-    //             supplier_id       : 1,
-    //             buyer_name        : 1,
-    //             buyer_email       : 1,
-    //             buyer_mobile      : 1,
-    //             buyer_address     : 1,
-    //             supplier_name     : 1,
-    //             supplier_email    : 1,
-    //             supplier_address  : 1,
-    //             supplier_mobile   : 1,
-    //             items             : 1,
-    //             payment_terms     : 1,
-    //             deposit_requested : 1,
-    //             deposit_due       : 1,
-    //             est_delivery_time : 1,
-    //             shipping_details  : 1,
-    //             remarks           : 1,
-    //             order_status      : 1,
-    //             status            : 1,
-    //             invoice_status    : 1,
-    //             invoice_number    : 1,
-    //             invoice_no        : 1,
-    //             invoice_date      : 1,
-    //             payment_due_date  : 1,
-    //             total_due_amount  : 1,
-    //             total_amount_paid : 1,
-    //             pending_amount    : 1,
-    //             logistics_details : 1,
-    //             shipment_details  : 1,
-    //             coordinators      : 1,
-    //             created_at        : 1,
-    //             supplier          : { $arrayElemAt: ["$supplier", 0] },
-    //             buyer             : { $arrayElemAt: ["$buyer", 0] },
-    //             enquiry           : { $arrayElemAt: ["$enquiry", 0] }
-    //           }
-    //         },
-    //         {
-    //           $unwind: "$items"
-    //         },
-    //         {
-    //           $lookup: {
-    //             from         : "medicines",
-    //             localField   : "items.medicine_id",
-    //             foreignField : "medicine_id",
-    //             as           : "medicine"
-    //           }
-    //         },
-    //         {
-    //           $addFields: {
-    //             "items.medicine_image" : {$arrayElemAt : ["$medicine.medicine_image", 0] },
-    //             "items.drugs_name"     : {$arrayElemAt  : ["$medicine.drugs_name",0]},
-    //             "items.strength"       : {$arrayElemAt  : ["$medicine.strength",0]},
-    //             "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
-    //           }
-    //         },
-    //         {
-    //           $group: {
-    //             _id                : "$_id",
-    //             order_id           : { $first: "$order_id" },
-    //             enquiry_id         : { $first: "$enquiry_id" },
-    //             purchaseOrder_id   : { $first: "$purchaseOrder_id" },
-    //             buyer_id           : { $first: "$buyer_id" },
-    //             buyer_company      : { $first: "$buyer_company" },
-    //             buyer_name         : { $first: "$buyer_name" },
-    //             buyer_email        : { $first: "$buyer_email" },
-    //             buyer_address      : { $first: "$buyer_address" },
-    //             buyer_mobile       : { $first: "$buyer_mobile" },
-    //             buyer_country_code : { $first: "$buyer_country_code" },
-    //             supplier_name      : { $first: "$supplier_name" },
-    //             supplier_email     : { $first: "$supplier_email" },
-    //             supplier_mobile    : { $first: "$supplier_mobile" },
-    //             supplier_address   : { $first: "$supplier_address" },
-    //             country_of_origin  :  { $first: "$country_of_origin" },
-    //             supplier_id        : { $first: "$supplier_id" },
-    //             items              : { $push: "$items" },
-    //             payment_terms      : { $first: "$payment_terms" },
-    //             deposit_requested  : { $first: "$deposit_requested" },
-    //             deposit_due        : { $first: "$deposit_due" },
-    //             est_delivery_time  : { $first: "$est_delivery_time" },
-    //             shipping_details   : { $first: "$shipping_details" },
-    //             remarks            : { $first: "$remarks" },
-    //             order_status       : { $first: "$order_status" },
-    //             status             : { $first: "$status" },
-    //             invoice_status     : { $first: "$invoice_status" },
-    //             invoice_number     : { $first: "$invoice_number" },
-    //             invoice_no         : { $first: "$invoice_no" },
-    //             invoice_date       : { $first: "$invoice_date" },
-    //             payment_due_date   : { $first: "$payment_due_date" },
-    //             logistics_details  : { $first: "$logistics_details" },
-    //             shipment_details   : { $first: "$shipment_details" },
-    //             coordinators       : { $first: "$coordinators" },
-    //             total_due_amount   : { $first: "$total_due_amount" },
-    //             total_amount_paid  : { $first: "$total_amount_paid" },
-    //             pending_amount     : { $first: "$pending_amount" },
-    //             created_at         : {$first: "$created_at"},
-    //             supplier           : { $first: "$supplier" },
-    //             buyer              : { $first: "$buyer" },
-    //             enquiry            : { $first: "$enquiry" },
-    //             totalPrice         : { $sum: "$items.item_price" }
-    //           }
-    //         },
-    //         {
-    //             $project: {
-    //               order_id          : 1,
-    //               enquiry_id        : 1,
-    //               purchaseOrder_id  : 1,
-    //               buyer_id          : 1,
-    //               buyer_company     : 1,
-    //               supplier_id       : 1,
-    //               buyer_name        : 1,
-    //               buyer_email       : 1,
-    //               buyer_mobile      : 1,
-    //               buyer_country_code: 1,
-    //               buyer_address     : 1,
-    //               supplier_name     : 1,
-    //               supplier_email    : 1,
-    //               supplier_address  : 1,
-    //               supplier_mobile   : 1,
-    //               items             : 1,
-    //               payment_terms     : 1,
-    //               deposit_requested : 1,
-    //               deposit_due       : 1,
-    //               est_delivery_time : 1,
-    //               shipping_details  : 1,
-    //               remarks           : 1,
-    //               order_status      : 1,
-    //               status            : 1,
-    //               invoice_status    : 1,
-    //               invoice_number    : 1,
-    //               invoice_no        : 1,
-    //               invoice_date      : 1,
-    //               payment_due_date  : 1,
-    //               logistics_details : { $arrayElemAt: ["$logistics_details", 0] },
-    //               shipment_details  : 1,
-    //               coordinators      : 1,
-    //               total_due_amount  : 1,
-    //               total_amount_paid : 1,
-    //               pending_amount    : 1,
-    //               created_at        : 1,
-    //               totalPrice        : 1,
-    //               "supplier.supplier_image"              : 1,
-    //               "supplier.supplier_name"               : 1,
-    //               "supplier.supplier_email"              : 1,
-    //               "supplier.supplier_mobile"             : 1,
-    //               "supplier.supplier_country_code"       : 1,
-    //               "supplier.contact_person_mobile_no"    : 1,
-    //               "supplier.contact_person_country_code" : 1,
-    //               "supplier.estimated_delivery_time"     : 1,
-    //               "supplier.supplier_address"            : 1,
-    //               "supplier.country_of_origin"           : 1,
-    //               "supplier.vat_reg_no"                  : 1,
-    //               "enquiry.enquiry_id"                   : 1,
-    //               "enquiry.payment_terms"                : 1,
-    //               "buyer.buyer_image"                    : 1,
-    //               "buyer.buyer_name"                     : 1,
-    //               "buyer.buyer_email"                    : 1,
-    //               "buyer.buyer_mobile"                   : 1,
-    //               "buyer.buyer_country_code"             : 1,
-    //               "buyer.contact_person_mobile"          : 1,
-    //               "buyer.contact_person_country_code"    : 1,
-    //               "buyer.buyer_address"                  : 1,
-    //               "buyer.buyer_type"                     : 1,
-    //               "buyer.country_of_origin"              : 1,
-    //               "buyer.vat_reg_no"                     : 1,
-    //             }
-    //         }
-    //     ])
-    //     .then((data) => {
-    //         callback({ code: 200, message: "Details Fetched successfully", result: data[0] });
-    //     })
-    //     .catch((err) => {
-    //         console.log(err);
-    //         callback({ code: 400, message: "Error in fetching order details", result: err });
-    //     })
-        
-    // } catch (error) {
-        
-    // }
-    // },
-
-
     supplierOrderDetails : async (reqObj, callback) => {
       try {
           const {buyer_id, order_id, filterKey} = reqObj
@@ -1411,7 +1185,14 @@ await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
                   }
               },
               {
-                $sort: { "invoices.created_at": -1 } 
+                $addFields: {
+                  invoices: {
+                    $sortArray: {
+                      input: "$invoices",
+                      sortBy: { created_at: -1 }
+                    }
+                  }
+                }
               },
               {
                   $project: {
@@ -1603,8 +1384,6 @@ await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
       }
     },
   
-  
-
     supplierInvoicesList: async (reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, supplier_id} = reqObj

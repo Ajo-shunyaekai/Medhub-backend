@@ -137,8 +137,8 @@ module.exports = {
       try {
           const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj;
 
-          const supplier = await Supplier.findOne({ supplier_id: reqObj.supplierId });
-          const buyer = await Buyer.findOne({ buyer_id: reqObj.buyerId });
+          const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+          const buyer = await Buyer.findOne({ buyer_id: buyer_id });
 
           const invoice = await Invoice.findOne({ invoice_id, order_id });
           const order = await Order.findOne({ order_id });

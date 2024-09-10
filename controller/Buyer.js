@@ -40,6 +40,15 @@ const sendMailFunc = (email, subject, body) =>{
   transporter.sendMail(mailOptions);
 }
 
+function formatDate(date) {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+const today = new Date();
+const formattedDate = formatDate(today);
 
 module.exports = {
 
@@ -103,6 +112,25 @@ module.exports = {
                   status  : 0
               })
                await newNotification.save()
+
+               const adminEmail = 'ajo@shunyaekai.tech';
+                const subject = `New Registration Alert: ${reqObj.buyer_name} Account Created`;
+                const body = `
+                          <p>Dear Admin,</p>
+                          <p>We hope this message finds you well.</p>
+                          <p>We are pleased to inform you that a new ${reqObj.buyer_name} has registered on Deliver. Below are the details of the new account:</p>
+                          <ul>
+                            <li>Type of Account: ${reqObj.buyer_type}</li>
+                            <li>Company Name: ${reqObj.buyer_name}</li>
+                            <li>Contact Person: ${reqObj.contact_person_name}</li>
+                            <li>Email Address: ${reqObj.contact_person_email}</li>
+                            <li>Phone Number: ${reqObj.contact_person_country_code} ${reqObj.contact_person_mobile}</li>
+                            <li>Registration Date: ${formattedDate}</li>
+                          </ul>
+                          <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
+                          <p>Best regards,<br/>Deliver.com Team</p>
+                        `;
+              sendMailFunc(adminEmail, subject, body);
                 callback({code: 200, message: "Buyer Registration Request Submitted Successfully"})
               }).catch((err) => {
                 console.log('err',err);

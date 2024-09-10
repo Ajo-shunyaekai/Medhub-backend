@@ -11,6 +11,42 @@ const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('..
 const Notification       = require('../schema/notificationSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Enquiry = require('../schema/enquiryListSchema')
+const nodemailer         = require('nodemailer');
+
+
+var transporter = nodemailer.createTransport({
+  host   : "smtp.gmail.com",
+  port   : 587,
+  secure : false, // true for 465, false for other ports
+  type   : "oauth2",
+  // service : 'gmail',
+  auth : {
+      user : process.env.SMTP_USER_ID,
+      pass : process.env.SMTP_USER_PASSWORD
+  }
+});
+const sendMailFunc = (email, subject, body) =>{
+  
+  var mailOptions = {
+      from    : process.env.SMTP_USER_ID,
+      to      : email,
+      subject : subject,
+      // text    : 'This is text mail, and sending for testing purpose'
+      html:body
+      
+  };
+  transporter.sendMail(mailOptions);
+}
+
+function formatDate(date) {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+const today = new Date();
+const formattedDate = formatDate(today);
 
 module.exports = {
     
@@ -20,7 +56,7 @@ module.exports = {
           if(emailExists) {
             return callback({code : 409, message: "Email already exists"})
           }
-          const supplierId  = 'SUP-' + Math.random().toString(16).slice(10,2);
+          const supplierId  = 'SUP-' + Math.random().toString(16).slice(2, 10);
           let jwtSecretKey  = process.env.APP_SECRET; 
           let data          = {  time : Date(),  supplierId : supplierId } 
           const token       = jwt.sign(data, jwtSecretKey); 
@@ -75,6 +111,25 @@ module.exports = {
                   status  : 0
               })
                await newNotification.save()
+
+               const adminEmail = 'ajo@shunyaekai.tech';
+                const subject = `New Registration Alert: ${reqObj.supplier_name} Account Created`;
+                const body = `
+                          <p>Dear Admin,</p>
+                          <p>We hope this message finds you well.</p>
+                          <p>We are pleased to inform you that a new ${reqObj.supplier_name} has registered on Deliver. Below are the details of the new account:</p>
+                          <ul>
+                            <li>Type of Account: ${reqObj.supplier_type}</li>
+                            <li>Company Name: ${reqObj.supplier_name}</li>
+                            <li>Contact Person: ${reqObj.contact_person_name}</li>
+                            <li>Email Address: ${reqObj.contact_person_email}</li>
+                            <li>Phone Number: ${reqObj.contact_person_country_code} ${reqObj.contact_person_mobile_no}</li>
+                            <li>Registration Date: ${formattedDate}</li>
+                          </ul>
+                          <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
+                          <p>Best regards,<br/>Deliver.com Team</p>
+                        `;
+              sendMailFunc(adminEmail, subject, body);
               callback({code: 200, message: "Supplier Registration Successfull"})
             }).catch((err) => {
               console.log('err',err);
@@ -894,7 +949,6 @@ module.exports = {
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
-
 
     medicinRequestList: async (reqObj, callback) => {
       try {
