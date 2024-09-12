@@ -27,6 +27,7 @@ const invoiceRouter   = require('./routes/invoiceRoutes')()
 connect()
 
 
+
 app.use('/uploads', express.static('uploads'));
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -118,57 +119,71 @@ const server = app.listen(PORT, (req, res) => {
   console.log(`server is runnig http://localhost:${PORT}/`);
 });
 
-const socketCorsOptions = {
-  origin: [
-    'http://192.168.1.31:2221',
-    'http://localhost:2221',
-    'http://localhost:3030',
-    'http://192.168.1.34:3333',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3333',
-    'https://supplierdeliver.shunyaekai.com',
-    'https://buyerdeliver.shunyaekai.com',
-    'https://deliver.shunyaekai.com'
-  ],
-  methods: ['GET', 'POST'],
-  credentials: true
-};
-
-const io = new Server(server, {
-  cors: socketCorsOptions,
+const io = new Server(server, { // Initialize Socket.IO
+  cors: {
+    origin: [
+      'http://192.168.1.31:2221',
+      'http://192.168.1.82:3000',
+      'http://192.168.1.42:3000',
+      'http://localhost:2221',
+      'http://localhost:3030',
+      'http://192.168.1.34:3333',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3333',
+      'https://supplierdeliver.shunyaekai.com',
+      'https://buyerdeliver.shunyaekai.com',
+      'https://deliver.shunyaekai.com'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
 });
 
+// Initialize Socket.IO
 io.on('connection', (socket) => {
-  console.log('A user connected');
-  
-  socket.on('connect_error', (err) => {
-    console.log('Connect error:', err);
+  console.log('A user connected: ', socket.id);
+
+  // Handle supplier registration (or user registration)
+  socket.on('register', (userId) => {
+      console.log(`User registered with ID: ${userId}`);
+      // Join the supplier's room
+      socket.join(userId);  
+      console.log('Current rooms:', socket.rooms);
+
+      io.to(userId).emit('testNotification', 'This is a test notification.');
   });
 
-  socket.on('sendInquiry', (inquiryData) => {
-    console.log('inquiryData', inquiryData);
-    // io.to(inquiryData.supplierId).emit('receiveNotification', inquiryData);
-    // socket.emit('receiveNotification', inquiryData);
-    io.emit('receiveNotification', inquiryData);
-  });
-  
-  socket.on('orderCreated', (logiscticsData) => {
-    console.log('logiscticsData', logiscticsData);
-    io.emit('logiscticsSubmitted', logiscticsData);
+  // Handle sending notifications to specific users/suppliers
+  socket.on('sendNotification', ({ userId, title, message }) => {
+      // Emit the notification to the supplier's room
+      io.to(userId).emit('notification', { title, message });
+      console.log(`Notification sent to user ${userId}`);
+      
   });
 
-  socket.on('bookLogisctics', (logiscticsData) => {
-    console.log('logiscticsData', logiscticsData);
-    io.emit('logiscticsSubmitted', logiscticsData);
+  // Handle sending enquiry notifications
+  socket.on('sendInquiry', (data) => {
+    
+      const { supplierId, message } = data;
+      // socket.join(supplierId);  
+      console.log('Current roomssss:', socket.rooms);
+      console.log(`Sending inquiry to supplier ${supplierId}: ${message}`);
+      
+      // Emit the enquiry notification to the supplier's room
+      io.to(supplierId).emit('newEnquiry', message);
   });
 
- 
-
+  // Handle disconnection
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+      console.log('User disconnected: ', socket.id);
   });
 });
+
+
+
+
+
 
 module.exports = app;
 
