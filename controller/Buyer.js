@@ -114,11 +114,11 @@ module.exports = {
                await newNotification.save()
 
                const adminEmail = 'ajo@shunyaekai.tech';
-                const subject = `New Registration Alert: ${reqObj.buyer_name} Account Created`;
+                const subject = `New Registration Alert: Buyer Account Created`;
                 const body = `
                           <p>Dear Admin,</p>
                           <p>We hope this message finds you well.</p>
-                          <p>We are pleased to inform you that a new ${reqObj.buyer_name} has registered on Deliver. Below are the details of the new account:</p>
+                          <p>We are pleased to inform you that a new buyer has registered on Deliver. Below are the details of the new account:</p>
                           <ul>
                             <li>Type of Account: ${reqObj.buyer_type}</li>
                             <li>Company Name: ${reqObj.buyer_name}</li>
@@ -130,7 +130,9 @@ module.exports = {
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
                           <p>Best regards,<br/>Deliver.com Team</p>
                         `;
-              sendMailFunc(adminEmail, subject, body);
+              // sendMailFunc(adminEmail, subject, body);
+              const recipientEmails = [adminEmail, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                        await sendMailFunc(recipientEmails.join(','), subject, body);
                 callback({code: 200, message: "Buyer Registration Request Submitted Successfully"})
               }).catch((err) => {
                 console.log('err',err);
@@ -349,7 +351,7 @@ module.exports = {
                 },
                 {
                   $group: {
-                    _id: "$supplier_id" // Group by supplier_id to get unique suppliers
+                    _id: "$supplier_id" 
                   }
                 }
               ],
@@ -357,33 +359,32 @@ module.exports = {
             }
           },
           {
-            $unwind: "$my_suppliers" // Unwind the array of my_suppliers
+            $unwind: "$my_suppliers" 
           },
           {
             $lookup: {
-              from: 'suppliers', // Lookup in the suppliers collection
-              localField: 'my_suppliers._id', // Match supplier_id from the orders group
-              foreignField: 'supplier_id', // Match with supplier_id in suppliers collection
-              as: 'supplier_details'
+              from         : 'suppliers', 
+              localField   : 'my_suppliers._id', 
+              foreignField : 'supplier_id', 
+              as           : 'supplier_details'
             }
           },
           {
-            $unwind: "$supplier_details" // Unwind the supplier details array
+            $unwind: "$supplier_details" 
           },
           {
-            $count: "total_items" // Count the total number of documents
+            $count: "total_items" 
           }
         ];
     
-        // Define the aggregation pipeline for paginated results
         const paginatedPipeline = [
           {
             $match: { buyer_id: buyer_id }
           },
           {
             $lookup: {
-              from: 'orders',
-              let: { buyerId: "$buyer_id" },
+              from : 'orders',
+              let  : { buyerId: "$buyer_id" },
               pipeline: [
                 {
                   $match: {
@@ -397,7 +398,7 @@ module.exports = {
                 },
                 {
                   $group: {
-                    _id: "$supplier_id" // Group by supplier_id to get unique suppliers
+                    _id: "$supplier_id"
                   }
                 }
               ],
@@ -405,36 +406,36 @@ module.exports = {
             }
           },
           {
-            $unwind: "$my_suppliers" // Unwind the array of my_suppliers
+            $unwind: "$my_suppliers" 
           },
           {
             $lookup: {
-              from: 'suppliers', // Lookup in the suppliers collection
-              localField: 'my_suppliers._id', // Match supplier_id from the orders group
-              foreignField: 'supplier_id', // Match with supplier_id in suppliers collection
-              as: 'supplier_details'
+              from         : 'suppliers', 
+              localField   : 'my_suppliers._id', 
+              foreignField : 'supplier_id', 
+              as           : 'supplier_details'
             }
           },
           {
-            $unwind: "$supplier_details" // Unwind the supplier details array
+            $unwind : "$supplier_details" 
           },
           {
-            $skip: offset
+            $skip   : offset
           },
           {
-            $limit: page_size
+            $limit  : page_size
           },
           {
             $project: {
-              supplier_details: 1, // Project only supplier details
-              _id: 0 // Optionally, exclude the default _id field
+              supplier_details : 1, 
+              _id              : 0 
             }
           }
         ];
     
         // Run the count query
         const totalItemsResult = await Buyer.aggregate(countPipeline);
-        const totalItems = totalItemsResult.length > 0 ? totalItemsResult[0].total_items : 0;
+        const totalItems       = totalItemsResult.length > 0 ? totalItemsResult[0].total_items : 0;
     
         // Run the paginated query
         const paginatedResults = await Buyer.aggregate(paginatedPipeline);
@@ -443,9 +444,9 @@ module.exports = {
           code: 200,
           message: 'List fetched successfully',
           result: {
-            totalItems: totalItems,
-            totalItemsPerPage: page_size,
-            data: paginatedResults
+            totalItems        : totalItems,
+            totalItemsPerPage : page_size,
+            data              : paginatedResults
           }
         });
     
@@ -525,7 +526,7 @@ module.exports = {
                 strength          : 1,
                 quantity          : 1,
                 inventory_info    : 1,
-                productInventory : {
+                productInventory  : {
                   $arrayElemAt: ["$productInventory", 0],
                 },
               },
@@ -580,8 +581,8 @@ module.exports = {
           {
             $facet: {
               completedCount: [
-                {$match: {order_status : 'completed'}},
-                {$count: 'completed'}
+                {$match : {order_status : 'completed'}},
+                {$count : 'completed'}
               ],
               activeCount: [
                 {$match: {order_status : 'active'}},
@@ -647,16 +648,16 @@ module.exports = {
         const ordersAggregation = [
           {
             $match: {
-              buyer_id: buyer_id,
-              created_at: { $gte: today }  // Match only today's data
+              buyer_id   : buyer_id,
+              created_at : { $gte: today }  // Match only today's data
             }
           },
           {
             $addFields: {
-              numeric_total_price: {
-                $toDouble: {
-                  $arrayElemAt: [
-                    { $split: ["$total_price", " "] },
+              numeric_total_price : {
+                $toDouble : {
+                  $arrayElemAt : [
+                    { $split : ["$total_price", " "] },
                     0
                   ]
                 }
@@ -669,16 +670,16 @@ module.exports = {
                 { $match: { order_status: 'completed' } },
                 {
                   $group: {
-                    _id: null,
-                    count: { $sum: 1 },
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    count          : { $sum: 1 },
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 {
                   $project: {
-                    _id: 0,
-                    count: 1,
-                    total_purchase: 1
+                    _id            : 0,
+                    count          : 1,
+                    total_purchase : 1
                   }
                 }
               ],
@@ -686,16 +687,16 @@ module.exports = {
                 { $match: { order_status: 'active' } },
                 {
                   $group: {
-                    _id: null,
-                    count: { $sum: 1 },
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    count          : { $sum: 1 },
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 {
                   $project: {
-                    _id: 0,
-                    count: 1,
-                    total_purchase: 1
+                    _id            : 0,
+                    count          : 1,
+                    total_purchase : 1
                   }
                 }
               ],
@@ -703,30 +704,30 @@ module.exports = {
                 { $match: { order_status: 'pending' } },
                 {
                   $group: {
-                    _id: null,
-                    count: { $sum: 1 },
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    count          : { $sum: 1 },
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 {
                   $project: {
-                    _id: 0,
-                    count: 1,
-                    total_purchase: 1
+                    _id            : 0,
+                    count          : 1,
+                    total_purchase : 1
                   }
                 }
               ],
               totalPurchaseAmount: [
                 {
                   $group: {
-                    _id: null,
-                    total_purchase: { $sum: "$numeric_total_price" }
+                    _id            : null,
+                    total_purchase : { $sum: "$numeric_total_price" }
                   }
                 },
                 {
                   $project: {
-                    _id: 0,
-                    total_purchase: 1
+                    _id            : 0,
+                    total_purchase : 1
                   }
                 }
               ]
@@ -738,23 +739,23 @@ module.exports = {
         const purchaseOrdersAggregation = [
           {
             $match: {
-              buyer_id: buyer_id,
-              created_at: { $gte: today },  // Match only today's data
-              po_status: 'active'  // Filter for active purchase orders
+              buyer_id   : buyer_id,
+              created_at : { $gte: today },  // Match only today's data
+              po_status  : 'active'  // Filter for active purchase orders
             }
           },
           {
             $group: {
-              _id: null,
-              count: { $sum: 1 },
-              total_amount: { $sum: "$amount" }
+              _id          : null,
+              count        : { $sum: 1 },
+              total_amount : { $sum : "$amount" }
             }
           },
           {
             $project: {
-              _id: 0,
-              count: 1,
-              total_amount: 1
+              _id          : 0,
+              count        : 1,
+              total_amount : 1
             }
           }
         ];
@@ -763,8 +764,8 @@ module.exports = {
         const enquiriesAggregation = [
           {
             $match: {
-              buyer_id: buyer_id,
-              created_at: { $gte: today }  // Match only today's data
+              buyer_id   : buyer_id,
+              created_at : { $gte: today }  // Match only today's data
             }
           },
           {
@@ -772,14 +773,14 @@ module.exports = {
           },
           {
             $group: {
-              _id: null,
-              count: { $sum: 1 }
+              _id   : null,
+              count : { $sum: 1 }
             }
           },
           {
             $project: {
-              _id: 0,
-              count: 1
+              _id   : 0,
+              count : 1
             }
           }
         ];
@@ -792,10 +793,10 @@ module.exports = {
     
         // Prepare the final result
         const result = {
-          orderDetails: ordersData[0],
-          purchaseOrderCount: purchaseOrdersData[0]?.count || 0,
-          purchaseOrderTotalAmount: purchaseOrdersData[0]?.total_amount || 0,
-          enquiryCount: enquiriesData[0]?.count || 0
+          orderDetails             : ordersData[0],
+          purchaseOrderCount       : purchaseOrdersData[0]?.count || 0,
+          purchaseOrderTotalAmount : purchaseOrdersData[0]?.total_amount || 0,
+          enquiryCount             : enquiriesData[0]?.count || 0
         };
     
         callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result });
@@ -1016,10 +1017,10 @@ module.exports = {
           },
           {
             $group: {
-              _id: "$_id",
-              list_id     : { $first : "$list_id" },
-              buyer_id    : { $first : "$buyer_id" },
-              supplier_id : { $first : "$supplier_id" },
+              _id              : "$_id",
+              list_id          : { $first : "$list_id" },
+              buyer_id         : { $first : "$buyer_id" },
+              supplier_id      : { $first : "$supplier_id" },
               supplier_details : { $first: { $arrayElemAt: ["$supplier_details", 0] } }, 
               item_details : {
                 $push: {
@@ -1120,6 +1121,7 @@ module.exports = {
           if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
               throw new Error('Invalid request');
           }
+          const buyer = await Buyer.findOne({ buyer_id: reqObj.buyer_id });
           // let enquiryId = 'INQ-' + Math.random().toString(16).slice(2)
           let enquiryId = 'INQ-' + Math.random().toString(16).slice(2, 10);
           // Grouping items by supplier_id and including supplier details
@@ -1159,10 +1161,10 @@ module.exports = {
           }, {});
   
           const enquiries = Object.keys(groupedItems).map(supplier_id => ({
-              enquiry_id: enquiryId,
+              enquiry_id : enquiryId,
               buyer_id,
               supplier_id,
-              items: groupedItems[supplier_id].items
+              items  : groupedItems[supplier_id].items
           }));
   
           const enquiryDocs = await Enquiry.insertMany(enquiries);
@@ -1192,16 +1194,16 @@ module.exports = {
           const notifications = enquiries.map(enquiry => {
               const notificationId = 'NOT-' + Math.random().toString(16).slice(2,10);
               return {
-                  notification_id: notificationId,
-                  event_type: 'Enquiry request',
-                  event: 'enquiry',
-                  from: 'buyer',
-                  to: 'supplier',
-                  from_id: buyer_id,
-                  to_id: enquiry.supplier_id,
-                  event_id: enquiry.enquiry_id,
-                  message: `Inquiry Alert! You’ve received an inquiry about ${enquiryId}`,
-                  status: 0
+                  notification_id : notificationId,
+                  event_type      : 'Enquiry request',
+                  event           : 'enquiry',
+                  from            : 'buyer',
+                  to              : 'supplier',
+                  from_id         : buyer_id,
+                  to_id           : enquiry.supplier_id,
+                  event_id        : enquiry.enquiry_id,
+                  message         : `Inquiry Alert! You’ve received an inquiry about ${enquiryId}`,
+                  status          : 0
               };
           });
   
@@ -1212,15 +1214,24 @@ module.exports = {
               const { supplier_name, supplier_email, supplier_contact_email, items } = groupedItems[supplier_id];
               if (supplier_email) {
                   const itemsList = items.map(item => `Medicine ID: ${item.medicine_id}`).join('<br />');
-                  const body = `Hello ${supplier_name}, <br />
-                                You have received a new enquiry request from the buyer <strong>${buyer_name}</strong>.<br />
-                                Enquiry Details:<br />
-                                ${itemsList}<br />
-                                <br /><br />
-                                Thanks & Regards <br />
-                                Team Deliver`;
+                  const subject = `New Product Inquiry Received from ${buyer.buyer_name}`
+                  const body = `Dear ${supplier_name},<br /><br />
+
+                                We are pleased to inform you that you have received a new product inquiry from <strong>${buyer.buyer_name}</strong> through our platform.<br /><br />
+
+                                <strong>Inquiry Details:</strong><br />
+                                Buyer’s Company Name: ${buyer.buyer_name}<br />
+                                Contact Person: ${buyer.contact_person_name}<br />
+                                Contact Information: ${buyer.contact_person_country_code} ${buyer.contact_person_mobile} <br /><br />
+
+                                You can view and respond to this inquiry by logging into your account on our platform. Please take the time to review the buyer's request and provide your response at your earliest convenience.<br /><br />
+
+                                 <p>Best regards,<br/>Deliver.com Team</p>
+                        `;
   
-                  await sendMailFunc(supplier_email, 'New Enquiry Request Received', body);
+                  // await sendMailFunc(supplier_email, subject, body);
+                  const recipientEmails = [supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                  await sendMailFunc(recipientEmails.join(','), subject, body);
               }
           }));
   
@@ -1248,8 +1259,8 @@ module.exports = {
         Notification.aggregate([
           {
             $match: {
-              to_id: buyer_id,
-              to : 'buyer'
+              to_id : buyer_id,
+              to    : 'buyer'
               
             }
           },
@@ -1263,21 +1274,21 @@ module.exports = {
           },
           {
             $project: {
-              notification_id: 1,
-              event: 1,
-              event_type: 1,
-              from: 1,
-              to: 1,
-              from_id: 1,
-              to_id: 1,
-              event_id: 1,
-              connected_id: 1,
-              link_id : 1,
-              message: 1,
-              status : 1,
-              createdAt: 1,
-              updatedAt: 1,
-              supplier          : { $arrayElemAt: ["$supplier", 0] },
+              notification_id : 1,
+              event           : 1,
+              event_type      : 1,
+              from            : 1,
+              to              : 1,
+              from_id         : 1,
+              to_id           : 1,
+              event_id        : 1,
+              connected_id    : 1,
+              link_id         : 1,
+              message         : 1,
+              status          : 1,
+              createdAt       : 1,
+              updatedAt       : 1,
+              supplier        : { $arrayElemAt: ["$supplier", 0] },
               // buyer          : { $arrayElemAt: ["$buyer", 0] },
             }
           },
@@ -1341,22 +1352,22 @@ module.exports = {
           },
           {
             $project: {
-              notification_id: 1,
-              event: 1,
-              event_type: 1,
-              from: 1,
-              to: 1,
-              from_id: 1,
-              to_id: 1,
-              event_id: 1,
-              connected_id: 1,
-              link_id : 1,
-              message: 1,
-              status : 1,
-              createdAt: 1,
-              updatedAt: 1,
-              supplier          : { $arrayElemAt: ["$supplier", 0] },
-              buyer          : { $arrayElemAt: ["$buyer", 0] },
+              notification_id : 1,
+              event           : 1,
+              event_type      : 1,
+              from            : 1,
+              to              : 1,
+              from_id         : 1,
+              to_id           : 1,
+              event_id        : 1,
+              connected_id    : 1,
+              link_id         : 1,
+              message         : 1,
+              status          : 1,
+              createdAt       : 1,
+              updatedAt       : 1,
+              supplier        : { $arrayElemAt: ["$supplier", 0] },
+              buyer           : { $arrayElemAt: ["$buyer", 0] },
             }
           },
           { $sort  : {createdAt: -1} },
@@ -1386,7 +1397,6 @@ module.exports = {
      },
 
     updateStatus : async(reqObj, callback) => {
-      console.log(reqObj);
       try {
         const { notification_id, status } = reqObj
 

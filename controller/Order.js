@@ -128,14 +128,38 @@ module.exports = {
         })
         await newNotification.save()
 
+       const subject = `Order Confirmation from  ${supplier.supplier_name}`
+       let itemsTable = `<table border="1" cellpadding="5" cellspacing="0">
+                              <tr>
+                                  <th>Product Name</th>
+                                  <th>Quantity</th>
+                                  <th>Price</th>
+                                  <th>Tax</th>
+                                  <th>Total Amount</th>
+                              </tr>`;
+                        reqObj.orderItems.forEach(item => {
+                        itemsTable += `<tr>
+                                  <td>${item.medicine_name}</td>
+                                  <td>${item.quantity_required}</td>
+                                  <td>${item.counter_price || item.target_price} AED</td>
+                                  <td>${item.unit_tax}%</td>
+                                  <td>${item.total_amount} AED</td>
+                              </tr>`;
+                        });
+                        itemsTable += `</table>`;
 
-        const body = `Hello ${buyer.buyer_name}, <br />
-        Your Order has been created for  for <strong>${reqObj.enquiry_id}</strong>.<br />
-        <br /><br />
-        Thanks & Regards <br />
-        Team Deliver`;
+                        // Email Body
+                        const body = `
+                        <p>Dear ${buyer.buyer_name},</p>
+                        <p>Thank you for your order. We are pleased to confirm order and the details as follows:</p>
+                        ${itemsTable}
+                        <p>We have begun processing your order and will keep you informed about its status. </p>
+                        <p>Thanks & Regards,<br/>Deliver.com</p>
+                        `;
 
-       await sendMailFunc(buyer.buyer_email, 'Order Created!', body);
+                        // Sending the email to multiple recipients (supplier and buyer)
+                        const recipientEmails = [buyer.buyer_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                        await sendMailFunc(recipientEmails.join(','), subject, body);
             return callback({code: 200, message: "Order Created Successfully"});
         })
         .catch((err) => {
@@ -184,13 +208,13 @@ module.exports = {
     // })
     // await newNotification.save()
 
-    const body = `Hello ${supplier.supplier_name}, <br />
-                  Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
-                  <br /><br />
-                  Thanks & Regards <br />
-                  Team Deliver`;
+    // const body = `Hello ${supplier.supplier_name}, <br />
+    //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
+    //               <br /><br />
+    //               Thanks & Regards <br />
+    //               Team Deliver`;
 
-    await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
+    // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
      
     callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
 
@@ -237,13 +261,13 @@ module.exports = {
         // })
         // await newNotification.save()
 
-        const body = `Hello ${buyer.buyer_name}, <br />
-        Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
-        <br /><br />
-        Thanks & Regards <br />
-        Team Deliver`;
+//         const body = `Hello ${buyer.buyer_name}, <br />
+//         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
+//         <br /><br />
+//         Thanks & Regards <br />
+//         Team Deliver`;
 
-await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
+// await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
      
           callback({code: 200, message: 'Updated', result: updatedOrder})
 
@@ -645,7 +669,7 @@ await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
 
     orderComplaint : async(reqObj, callback) => {
       try {
-        const supportId    = 'SPT-' + Math.random().toString(16).slice(2);
+        const supportId    = 'SPT-' + Math.random().toString(16).slice(2, 10);
 
         const newSupport = new Support({
          support_id    : supportId,

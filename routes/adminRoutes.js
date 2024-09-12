@@ -182,14 +182,14 @@ module.exports = () => {
 
      //------------------------------------------ support ------------------------------------------//
 
-    routes.post('/support-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+    routes.post('/get-support-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.supportList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/support-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+    routes.post('/get-support-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.supportDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
@@ -219,12 +219,12 @@ module.exports = () => {
         });
     });
 
-    routes.post('/buyer-supplier-invoices-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
-        Controller.invoicesList(req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
+    // routes.post('/buyer-supplier-invoices-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+    //     Controller.invoicesList(req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
 
     routes.post('/get-notification-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getNotificationList(req.body, result => {
@@ -257,7 +257,66 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-inquiry-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.inquiryDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     //------------------------------------------ inquiry ------------------------------------------//
+
+
+     //------------------------------------------ invoice ------------------------------------------//
+     routes.post('/get-invoice-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.invoicesList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-invoice-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.invoiceDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    //------------------------------------------ invoice ------------------------------------------//
+
+     //------------------------------------------ transaction ------------------------------------------//
+     routes.post('/get-po-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getPOList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-po-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getPODetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    //------------------------------------------ transaction ------------------------------------------//
+
+    //------------------------------------------ transaction ------------------------------------------//
+    routes.post('/get-transaction-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.transactionList(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    routes.post('/get-transaction-details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.transactionDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
+    //------------------------------------------ transaction ------------------------------------------//
     
     return routes;
 }

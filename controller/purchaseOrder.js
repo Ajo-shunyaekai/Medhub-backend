@@ -150,13 +150,13 @@ module.exports = {
             await newNotification.save()
 
 
-            const body = `Hello ${supplier.supplier_name}, <br />
-                                Purchase Order created for <strong>${enquiry_id}</strong>.<br />
-                                <br /><br />
-                                Thanks & Regards <br />
-                                Team Deliver`;
+            // const body = `Hello ${supplier.supplier_name}, <br />
+            //                     Purchase Order created for <strong>${enquiry_id}</strong>.<br />
+            //                     <br /><br />
+            //                     Thanks & Regards <br />
+            //                     Team Deliver`;
   
-                  await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Created!', body);
+            //       await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Created!', body);
 
 
             callback({ code: 200, message: 'Purchase Order Created Successfully', data: newPO });
@@ -500,13 +500,13 @@ module.exports = {
             await newNotification.save()
 
 
-            const body = `Hello ${supplier.supplier_name}, <br />
-                                Purchase Order edited for <strong>${purchaseOrder_id}</strong>.<br />
-                                <br /><br />
-                                Thanks & Regards <br />
-                                Team Deliver`;
+            // const body = `Hello ${supplier.supplier_name}, <br />
+            //                     Purchase Order edited for <strong>${purchaseOrder_id}</strong>.<br />
+            //                     <br /><br />
+            //                     Thanks & Regards <br />
+            //                     Team Deliver`;
   
-                  await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Edited!', body);
+            //       await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Edited!', body);
 
             callback({ code: 200, message: 'Purchase Order updated successfully', data: purchaseOrder });
         } catch (error) {

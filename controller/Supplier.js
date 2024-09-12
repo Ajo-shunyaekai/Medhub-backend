@@ -113,11 +113,11 @@ module.exports = {
                await newNotification.save()
 
                const adminEmail = 'ajo@shunyaekai.tech';
-                const subject = `New Registration Alert: ${reqObj.supplier_name} Account Created`;
+                const subject = `New Registration Alert: Supplier Account Created`;
                 const body = `
                           <p>Dear Admin,</p>
                           <p>We hope this message finds you well.</p>
-                          <p>We are pleased to inform you that a new ${reqObj.supplier_name} has registered on Deliver. Below are the details of the new account:</p>
+                          <p>We are pleased to inform you that a new supplier has registered on Deliver. Below are the details of the new account:</p>
                           <ul>
                             <li>Type of Account: ${reqObj.supplier_type}</li>
                             <li>Company Name: ${reqObj.supplier_name}</li>
@@ -129,7 +129,9 @@ module.exports = {
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
                           <p>Best regards,<br/>Deliver.com Team</p>
                         `;
-              sendMailFunc(adminEmail, subject, body);
+                        const recipientEmails = [adminEmail, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                        await sendMailFunc(recipientEmails.join(','), subject, body);
+              // sendMailFunc(adminEmail, subject, body);
               callback({code: 200, message: "Supplier Registration Successfull"})
             }).catch((err) => {
               console.log('err',err);
