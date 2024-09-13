@@ -112,7 +112,7 @@ app.use('/api/supplier/invoice', invoiceRouter);
 //-----------------purchaseorder--------------------------//
 
 //--------------- api routes ------------------//
-
+const ADMIN_ID = process.env.ADMIN_ID
 const PORT = process.env.PORT || 3333;
 
 const server = app.listen(PORT, (req, res) => {
@@ -147,32 +147,109 @@ io.on('connection', (socket) => {
   // Handle supplier registration (or user registration)
   socket.on('register', (userId) => {
       console.log(`User registered with ID: ${userId}`);
-      // Join the supplier's room
       socket.join(userId);  
       console.log('Current rooms:', socket.rooms);
 
       io.to(userId).emit('testNotification', 'This is a test notification.');
   });
 
+//buyer registration
+  socket.on('registerBuyer', (userId) => {
+    console.log(`Buyer registered with ID: ${userId}`);
+    socket.join(userId);  
+    console.log('Currentttt rooms:', socket.rooms);
+});
+
+//admin registration
+socket.on('registerAdmin', (userId) => {
+  console.log(`Admin registered with ID: ${userId}`);
+  socket.join(userId);  
+  console.log('Currentttt admin rooms:', socket.rooms);
+});
+
   // Handle sending notifications to specific users/suppliers
   socket.on('sendNotification', ({ userId, title, message }) => {
-      // Emit the notification to the supplier's room
       io.to(userId).emit('notification', { title, message });
       console.log(`Notification sent to user ${userId}`);
       
   });
 
-  // Handle sending enquiry notifications
+  // sendInquiry
   socket.on('sendInquiry', (data) => {
-    
-      const { supplierId, message } = data;
-      // socket.join(supplierId);  
+      const { supplierId, message } = data;  
       console.log('Current roomssss:', socket.rooms);
       console.log(`Sending inquiry to supplier ${supplierId}: ${message}`);
-      
-      // Emit the enquiry notification to the supplier's room
       io.to(supplierId).emit('newEnquiry', message);
   });
+
+  // submitQuotation
+  socket.on('submitQuotation', (data) => {
+    const { buyerId, message } = data;
+    io.to(buyerId).emit('enquiryQuotation', message);
+  });
+
+  // createPO
+  socket.on('createPO', (data) => {
+    const { supplierId, message, inquiryId } = data;
+    io.to(supplierId).emit('POCreated', message);
+  });
+
+  // editPO
+  socket.on('editPO', (data) => {
+    const { supplierId, message, inquiryId } = data;
+    io.to(supplierId).emit('POEdited', message);
+  });
+
+   // createOrder
+   socket.on('createOrder', (data) => {
+    const { buyerId,inquiryId, poId, message } = data;
+    io.to(buyerId).emit('orderCreated', message);
+  });
+
+// bookLogistics
+  socket.on('bookLogistics', (data) => {
+    const { supplierId, message, orderId } = data;
+    io.to(supplierId).emit('logisticsRequest', message);
+  });
+
+   // shipmentDetailsSubmitted
+   socket.on('shipmentDetailsSubmitted', (data) => {
+    const { buyerId, orderId, message } = data;
+    io.to(buyerId).emit('shipmentDetailsSubmission', message);
+  });
+
+
+
+  socket.on('buyerRegistration', (data) => {
+    const { adminId, message } = data;
+    io.to(adminId).emit('buyerRegistered', message);
+  });
+
+  socket.on('supplierRegistration', (data) => {
+    const { adminId, message } = data;
+    io.to(adminId).emit('supplierRegistered', message);
+  });
+
+  socket.on('addMedicine', (data) => {
+    const { adminId, message } = data;
+    io.to(adminId).emit('medicineRequest', message);
+  });
+
+  socket.on('editNewMedicine', (data) => {
+    const { adminId, message } = data;
+    io.to(adminId).emit('newMedicineEditRequest', message);
+  });
+
+  socket.on('editSecondaryMedicine', (data) => {
+    const { adminId, message } = data;
+    console.log('Current roomssss:', socket.rooms);
+      console.log(`editSecondaryMedicine ${adminId}: ${message}`);
+    io.to(adminId).emit('secondaryMedicineEditRequest', message);
+  });
+
+
+
+
 
   // Handle disconnection
   socket.on('disconnect', () => {

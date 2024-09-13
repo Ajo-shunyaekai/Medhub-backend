@@ -193,20 +193,21 @@ module.exports = {
       if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
       }
-    //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-    //   const newNotification = new Notification({
-    //     notification_id   : notificationId,
-    //     event_type   : 'Logistics booking request',
-    //     event : 'order',
-    //     from : 'buyer',
-    //     to : 'supplier',
-    //     from_id : buyer_id,
-    //     to_id : supplier_id,
-    //     event_id : order_id,
-    //     message : 'Request for logisctics booking',
-    //     status : 0
-    // })
-    // await newNotification.save()
+
+      const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+      const newNotification = new Notification({
+        notification_id   : notificationId,
+        event_type   : 'Logistics booking request',
+        event : 'order',
+        from : 'buyer',
+        to : 'supplier',
+        from_id : buyer_id,
+        to_id : supplier_id,
+        event_id : order_id,
+        message : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
+        status : 0
+    })
+    await newNotification.save()
 
     // const body = `Hello ${supplier.supplier_name}, <br />
     //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
@@ -246,20 +247,20 @@ module.exports = {
       if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
       }
-        //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-        //   const newNotification = new Notification({
-        //     notification_id  : notificationId,
-        //     event_type   : 'Shipment details submitted',
-        //     event : 'order',
-        //     from : 'supplier',
-        //     to : 'buyer',
-        //     from_id : supplier_id,
-        //     to_id : buyer_id,
-        //     event_id : order_id,
-        //     message  : 'Shipment details submitted',
-        //     status : 0
-        // })
-        // await newNotification.save()
+          const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+          const newNotification = new Notification({
+            notification_id : notificationId,
+            event_type      : 'Shipment details submitted',
+            event           : 'order',
+            from            : 'supplier',
+            to              : 'buyer',
+            from_id         : supplier_id,
+            to_id           : buyer_id,
+            event_id        : order_id,
+            message         : `Submission Confirmation: The shipment details have been successfully submitted for ${order_id}`,
+            status          : 0
+        })
+        await newNotification.save()
 
 //         const body = `Hello ${buyer.buyer_name}, <br />
 //         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />

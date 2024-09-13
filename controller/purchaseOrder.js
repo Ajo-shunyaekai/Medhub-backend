@@ -494,7 +494,7 @@ module.exports = {
                 to_id            : supplier_id,
                 event_id         : enquiry_id,
                 link_id          : purchaseOrder_id,
-                message          : 'Purchase order edited',
+                message          : `Purchase order edited for ${enquiry_id}`,
                 status           : 0
             })
             await newNotification.save()
