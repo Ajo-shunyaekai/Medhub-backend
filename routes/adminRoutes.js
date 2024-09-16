@@ -156,6 +156,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-edit-medicine_details', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.editMedicineDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     routes.post('/get-medicine-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.allMedicineList(req.body, result => {
             const response = handleResponse(result)

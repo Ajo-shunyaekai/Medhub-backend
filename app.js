@@ -242,8 +242,6 @@ socket.on('registerAdmin', (userId) => {
 
   socket.on('editSecondaryMedicine', (data) => {
     const { adminId, message } = data;
-    console.log('Current roomssss:', socket.rooms);
-      console.log(`editSecondaryMedicine ${adminId}: ${message}`);
     io.to(adminId).emit('secondaryMedicineEditRequest', message);
   });
 

@@ -13,7 +13,7 @@ const MedicineInventory  = require('../schema/medicineInventorySchema')
 const Support            = require('../schema/supportSchema')
 const Notification       = require('../schema/notificationSchema')
 const Enquiry            = require('../schema/enquiryListSchema')
-const PurchaseOrder      = require('../schema/enquiryListSchema')
+const PurchaseOrder      = require('../schema/purchaseOrderSchema')
 const Invoices           = require('../schema/invoiceSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
@@ -687,7 +687,7 @@ module.exports = {
           $project: {
             order_id          : 1,
             buyer_id          : 1,
-            buyer_company     : 1,
+            buyer_name        : 1,
             supplier_id       : 1,
             items             : 1,
             payment_terms     : 1,
@@ -696,6 +696,7 @@ module.exports = {
             remarks           : 1,
             order_status      : 1,
             status            : 1,
+            invoice_no        : 1,
             created_at        : 1,
             supplier          : { $arrayElemAt : ["$supplier", 0] },
             buyer             : { $arrayElemAt : ["$buyer", 0] }
@@ -723,7 +724,7 @@ module.exports = {
             _id               : "$_id",
             order_id          : { $first: "$order_id" },
             buyer_id          : { $first: "$buyer_id" },
-            buyer_company     : { $first: "$buyer_company" },
+            buyer_name        : { $first: "$buyer_name" },
             supplier_id       : { $first: "$supplier_id" },
             items             : { $push: "$items" },
             payment_terms     : { $first: "$payment_terms" },
@@ -732,6 +733,7 @@ module.exports = {
             remarks           : { $first: "$remarks" },
             order_status      : { $first: "$order_status" },
             status            : { $first: "$status" },
+            invoice_no        : { $first: "$invoice_no" },
             created_at        : { $first: "$created_at" },
             supplier          : { $first: "$supplier" },
             buyer             : { $first: "$buyer" },
@@ -742,7 +744,7 @@ module.exports = {
             $project: {
                 order_id          : 1,
                 buyer_id          : 1,
-                buyer_company     : 1,
+                buyer_name         : 1,
                 supplier_id       : 1,
                 items             : 1,
                 payment_terms     : 1,
@@ -751,6 +753,7 @@ module.exports = {
                 remarks           : 1,
                 order_status      : 1,
                 status            : 1,
+                invoice_no        : 1,
                 created_at        : 1,
                 totalPrice        : 1,
                 "supplier.supplier_image" : 1,
@@ -1141,6 +1144,24 @@ module.exports = {
                 }
               },
               {
+                $lookup: {
+                    from: "invoices",
+                    localField: "order_id",
+                    foreignField: "order_id",
+                    as: "invoices"
+                }
+            },
+              {
+                $addFields: {
+                  invoices: {
+                    $sortArray: {
+                      input: "$invoices",
+                      sortBy: { created_at: -1 }
+                    }
+                  }
+                }
+              },
+              {
                 $project: {
                   order_id          : 1,
                   enquiry_id :1,
@@ -1176,7 +1197,8 @@ module.exports = {
                   created_at        : 1,
                   supplier          : { $arrayElemAt: ["$supplier", 0] },
                   buyer          : { $arrayElemAt: ["$buyer", 0] },
-                  enquiry          : { $arrayElemAt: ["$enquiry", 0] }
+                  enquiry          : { $arrayElemAt: ["$enquiry", 0] },
+                  invoices: 1
                 }
               },
               {
@@ -1239,6 +1261,7 @@ module.exports = {
                   supplier          : { $first: "$supplier" },
                   buyer         : { $first: "$buyer" },
                   enquiry         : { $first: "$enquiry" },
+                  invoices: { $first: "$invoices" },
                   totalPrice        : { $sum: "$items.item_price" }
                 }
               },
@@ -1278,6 +1301,7 @@ module.exports = {
                     total_due_amount : 1,
                     created_at        : 1,
                       totalPrice        : 1,
+                      invoices           : 1,
                       "supplier.supplier_image" : 1,
                       "supplier.supplier_name"  : 1,
                       "supplier.supplier_type"  : 1,
@@ -1289,6 +1313,7 @@ module.exports = {
                       "buyer.buyer_email" : 1,
                       "buyer.buyer_mobile" : 1,
                       "buyer.buyer_type" : 1,
+                      "buyer.country_of_origin" : 1,
                   }
               }
           ])
@@ -1311,128 +1336,246 @@ module.exports = {
 
    //------------------------ medicine ------------------------//
 
-    acceptRejectAddMedicineReq : async(reqObj, callback) => {
-      try {
-          const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
+  //   acceptRejectAddMedicineReq : async(reqObj, callback) => {
+  //     console.log('REQ', reqObj);
+      
+  //     try {
+  //         const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
   
-          const medicine = await Medicine.findOne({ medicine_id, supplier_id });
+  //         const medicine = await Medicine.findOne({ medicine_id, supplier_id });
   
-          if (!medicine) {
-              return callback({ code: 400, message: "Medicine not found" });
-          }
+  //         if (!medicine) {
+  //             return callback({ code: 400, message: "Medicine not found" });
+  //         }
   
-          const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
+  //         const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
   
-          const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+  //         const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
+  //         console.log(newMedicineStatus);
+  //         const updateStatus = await Medicine.findOneAndUpdate(
+  //             { medicine_id : medicine_id },
+  //             { status      : newMedicineStatus },
+  //             {edit_status  : newMedicineStatus},
+  //             { new: true }
+  //         );
+  // console.log(updateStatus);
   
-          const updateStatus = await Medicine.findOneAndUpdate(
-              { medicine_id, supplier_id },
-              { status: newMedicineStatus },
-              {edit_status : newMedicineStatus},
-              { new: true }
-          );
+  //         if (!updateStatus) {
+  //             return callback({ code: 400, message: "Failed to update medicine status" });
+  //         } 
   
-          if (!updateStatus) {
-              return callback({ code: 400, message: "Failed to update medicine status" });
-          } 
+  //         let body;
+  //         let subject;
+  //         let event;
   
-          let body;
-          let subject;
-          let event;
+  //         // if (action === 'accept') {
+  //         //     subject = 'Medicine Added Successfully';
+  //         //     body = `Hello ${supplier_name}, <br />
+  //         //         Your medicine request has been approved and added successfully. <br />
+  //         //         Medicine ID: ${updateStatus.medicine_id} <br />
+  //         //         Supplier ID: ${updateStatus.supplier_id} <br />
+  //         //         <br /><br />
+  //         //         Thanks & Regards <br />
+  //         //         Team Deliver`;
   
-          if (action === 'accept') {
-              subject = 'Medicine Added Successfully';
-              body = `Hello ${supplier_name}, <br />
-                  Your medicine request has been approved and added successfully. <br />
-                  Medicine ID: ${updateStatus.medicine_id} <br />
-                  Supplier ID: ${updateStatus.supplier_id} <br />
-                  <br /><br />
-                  Thanks & Regards <br />
-                  Team Deliver`;
+  //         //     // Determine event type based on medicine_type
+  //         //     if (medicine_type === 'new') {
+  //         //         event = 'addnewmedicine';
+  //         //     } else if (medicine_type === 'secondary market') {
+  //         //         event = 'addsecondarymedicine';
+  //         //     }
   
-              // Determine event type based on medicine_type
-              if (medicine_type === 'new') {
-                  event = 'addnewmedicine';
-              } else if (medicine_type === 'secondary market') {
-                  event = 'addsecondarymedicine';
-              }
+  //         //     // Send email for acceptance
+  //         //     sendMailFunc(supplier_email, subject, body);
   
-              // Send email for acceptance
-              sendMailFunc(supplier_email, subject, body);
+  //         //     const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+  //         //     const newNotification = new Notification({
+  //         //         notification_id: notificationId,
+  //         //         event_type: 'Medicine Request Accepted',
+  //         //         event,
+  //         //         from: 'admin',
+  //         //         to: 'supplier',
+  //         //         from_id: admin_id,
+  //         //         to_id: supplier_id,
+  //         //         event_id: medicine_id,
+  //         //         message: ` ${medicine_id}: Your listing has been approved and is now live!`,
+  //         //         status: 0
+  //         //     });
+  //         //     await newNotification.save();
   
-              const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-              const newNotification = new Notification({
-                  notification_id: notificationId,
-                  event_type: 'Medicine Request Accepted',
-                  event,
-                  from: 'admin',
-                  to: 'supplier',
-                  from_id: admin_id,
-                  to_id: supplier_id,
-                  event_id: medicine_id,
-                  message: ` ${medicine_id}: Your listing has been approved and is now live!`,
-                  status: 0
-              });
-              await newNotification.save();
+  //         // } else if (action === 'reject') {
+  //         //     // subject = 'Medicine Request Rejected';
+  //         //     // body = `Hello ${supplier_name}, <br />
+  //         //     //     We regret to inform you that your medicine request has been rejected. <br />
+  //         //     //     Medicine ID: ${updateStatus.medicine_id} <br />
+  //         //     //     Supplier ID: ${updateStatus.supplier_id} <br />
+  //         //     //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
+  //         //     //     <br /><br />
+  //         //     //     Thanks & Regards <br />
+  //         //     //     Team Deliver`;
   
-          } else if (action === 'reject') {
-              // subject = 'Medicine Request Rejected';
-              // body = `Hello ${supplier_name}, <br />
-              //     We regret to inform you that your medicine request has been rejected. <br />
-              //     Medicine ID: ${updateStatus.medicine_id} <br />
-              //     Supplier ID: ${updateStatus.supplier_id} <br />
-              //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
-              //     <br /><br />
-              //     Thanks & Regards <br />
-              //     Team Deliver`;
+  //         //     // // Send email for rejection
+  //         //     // sendMailFunc(supplier_email, subject, body);
   
-              // // Send email for rejection
-              // sendMailFunc(supplier_email, subject, body);
+  //         //     const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+  //         //     const newNotification = new Notification({
+  //         //         notification_id: notificationId,
+  //         //         event_type: 'Medicine Request Rejected',
+  //         //         event: 'addmedicine',  // This can remain general as the event type
+  //         //         from: 'admin',
+  //         //         to: 'supplier',
+  //         //         from_id: admin_id,
+  //         //         to_id: supplier_id,
+  //         //         event_id: medicine_id,
+  //         //         message: ` ${medicine_id}: Your listing has been disapproved.`,
+  //         //         status: 0
+  //         //     });
+  //         //     await newNotification.save();
   
-              const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-              const newNotification = new Notification({
-                  notification_id: notificationId,
-                  event_type: 'Medicine Request Rejected',
-                  event: 'addmedicine',  // This can remain general as the event type
-                  from: 'admin',
-                  to: 'supplier',
-                  from_id: admin_id,
-                  to_id: supplier_id,
-                  event_id: medicine_id,
-                  message: ` ${medicine_id}: Your listing has been disapproved.`,
-                  status: 0
-              });
-              await newNotification.save();
+  //         // } else {
+  //         //     return callback({ code: 400, message: "Invalid action" });
+  //         // }
   
-          } else {
-              return callback({ code: 400, message: "Invalid action" });
-          }
+  //         callback({
+  //             code: 200,
+  //             message: `${updateStatus.status === 1 ? 'Medicine Added Successfully' : updateStatus.status === 2 ? 'Add Medicine Request Rejected' : ''}`,
+  //             result: updateStatus
+  //         });
   
-          callback({
-              code: 200,
-              message: `${updateStatus.status === 1 ? 'Medicine Added Successfully' : updateStatus.status === 2 ? 'Add Medicine Request Rejected' : ''}`,
-              result: updateStatus
-          });
-  
-      } catch (error) {
-          console.log('Internal Server Error:', error);
-          callback({ code: 500, message: 'Internal Server Error', result: error });
-      }
-    },
+  //     } catch (error) {
+  //         console.log('Internal Server Error:', error);
+  //         callback({ code: 500, message: 'Internal Server Error', result: error });
+  //     }
+  //   },
+
+
+
+  acceptRejectAddMedicineReq: async (reqObj, callback) => {
+    console.log('REQ', reqObj);
+
+    try {
+        const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
+
+        const medicine = await Medicine.findOne({ medicine_id, supplier_id });
+
+        if (!medicine) {
+            return callback({ code: 400, message: "Medicine not found" });
+        }
+
+        const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
+
+        const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : null;
+        console.log(newMedicineStatus);
+
+        // Ensure both status and edit_status are updated correctly
+        const updateStatus = await Medicine.findOneAndUpdate(
+            { medicine_id, supplier_id }, // Query to find the document
+            { status: newMedicineStatus, edit_status: newMedicineStatus }, // Fields to update
+            { new: true } // Return the updated document
+        );
+
+        console.log(updateStatus);
+
+        if (!updateStatus) {
+            return callback({ code: 400, message: "Failed to update medicine status" });
+        }
+
+        let body;
+        let subject;
+        let event;
+
+        // Handle the success message based on status and action
+        if (action === 'accept') {
+            subject = 'Medicine Added Successfully';
+            body = `Hello ${supplier_name}, <br />
+                Your medicine request has been approved and added successfully. <br />
+                Medicine ID: ${updateStatus.medicine_id} <br />
+                Supplier ID: ${updateStatus.supplier_id} <br />
+                <br /><br />
+                Thanks & Regards <br />
+                Team Deliver`;
+
+            // Determine event type based on medicine_type
+            event = medicine_type === 'new' ? 'addnewmedicine' : 'addsecondarymedicine';
+
+            // Send email for acceptance
+            sendMailFunc(supplier_email, subject, body);
+
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+            const newNotification = new Notification({
+                notification_id: notificationId,
+                event_type: 'Medicine Request Accepted',
+                event,
+                from: 'admin',
+                to: 'supplier',
+                from_id: admin_id,
+                to_id: supplier_id,
+                event_id: medicine_id,
+                message: `${medicine_id}: Your listing has been approved and is now live!`,
+                status: 0
+            });
+            await newNotification.save();
+
+        } else if (action === 'reject') {
+            subject = 'Medicine Request Rejected';
+            body = `Hello ${supplier_name}, <br />
+                We regret to inform you that your medicine request has been rejected. <br />
+                Medicine ID: ${updateStatus.medicine_id} <br />
+                Supplier ID: ${updateStatus.supplier_id} <br />
+                Reason: ${rejectionReason || 'Data Mismatch'} <br />
+                <br /><br />
+                Thanks & Regards <br />
+                Team Deliver`;
+
+            // Send email for rejection
+            sendMailFunc(supplier_email, subject, body);
+
+            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+            const newNotification = new Notification({
+                notification_id: notificationId,
+                event_type: 'Medicine Request Rejected',
+                event: 'addmedicine', // This can remain general as the event type
+                from: 'admin',
+                to: 'supplier',
+                from_id: admin_id,
+                to_id: supplier_id,
+                event_id: medicine_id,
+                message: `${medicine_id}: Your listing has been disapproved.`,
+                status: 0
+            });
+            await newNotification.save();
+        } else {
+            return callback({ code: 400, message: "Invalid action" });
+        }
+
+        // Correctly return the success message based on the updated status
+        callback({
+            code: 200,
+            message: `${newMedicineStatus === 1 ? 'Medicine Added Successfully' : newMedicineStatus === 2 ? 'Add Medicine Request Rejected' : ''}`,
+            result: updateStatus
+        });
+
+    } catch (error) {
+        console.log('Internal Server Error:', error);
+        callback({ code: 500, message: 'Internal Server Error', result: error });
+    }
+},
+
   
     allMedicineList: async (reqObj, callback) => {
       try {
-        const {searchKey, pageNo, pageSize, medicine_type, status} = reqObj
+        console.log('REQOBJ',reqObj);
+        
+        const {searchKey, pageNo, pageSize, medicineType, status} = reqObj
   
         const page_no   = pageNo || 1
         const page_size = pageSize || 10
         const offset    = (page_no - 1) * page_size
   
-        if(searchKey === '' || searchKey === undefined) {
           Medicine.aggregate([
             {
               $match: {
-                // 'medicine_type': medicine_type,
+                medicine_type: medicineType,
                 status       : status
               }
             },
@@ -1500,7 +1643,7 @@ module.exports = {
             { $limit: page_size },
           ])
             .then((data) => {
-              Medicine.countDocuments({status: status})
+              Medicine.countDocuments({medicine_type: medicineType, status: status})
               .then(totalItems => {
                   const totalPages = Math.ceil(totalItems / page_size);
                   const returnObj = {
@@ -1518,87 +1661,6 @@ module.exports = {
               console.log(err);
               callback({ code: 400, message: "Error fetching medicine list", result: err});
             });
-        } else {
-          Medicine.aggregate([
-            {
-              $match: {
-                'medicine_name': { $regex: searchKey, $options: 'i' },
-                'medicine_type': medicine_type
-              }
-            },
-            {
-              $project: {
-                medicine_id       : 1,
-                supplier_id       : 1,
-                medicine_name     : 1,
-                medicine_image    : 1,
-                drugs_name        : 1,
-                country_of_origin : 1,
-                dossier_type      : 1,
-                dossier_status    : 1,
-                gmp_approvals     : 1,
-                registered_in     : 1,
-                comments          : 1,
-                dosage_form       : 1,
-                category_name     : 1,
-                strength          : 1,
-                quantity          : 1,
-                medicine_type     : 1,
-                inventory : {
-                  $arrayElemAt: ["$inventory", 0],
-                },
-              }
-            },
-            {
-              $project: {
-                medicine_id       : 1,
-                supplier_id       : 1,
-                medicine_name     : 1,
-                medicine_image    : 1,
-                drugs_name        : 1,
-                country_of_origin : 1,
-                dossier_type      : 1,
-                dossier_status    : 1,
-                gmp_approvals     : 1,
-                registered_in     : 1,
-                comments          : 1,
-                dosage_form       : 1,
-                category_name     : 1,
-                strength          : 1,
-                quantity          : 1,
-                medicine_type     : 1,
-                "inventory.delivery_info"  : 1,
-                "inventory.price"          : 1,
-              },
-            },
-            {
-              $sort: { created_at: -1 } 
-            },
-            { $skip: offset },
-            { $limit: page_size }
-          ])
-          .then((data) => {
-            Medicine.countDocuments({ 
-              medicine_name: { $regex: searchKey, $options: 'i' },
-              medicine_type: medicine_type 
-            })
-              .then(totalItems => {
-                  const totalPages = Math.ceil(totalItems / page_size);
-                  const returnObj = {
-                    data,
-                    totalPages
-                  }
-                  callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
-              })
-              .catch((err) => {
-                callback({ code: 400, message: "Error while fetching medicine count", result: err});
-              })
-            })
-          .catch((err) => {
-            callback({ code: 400, message: "Error fetching medicine list", result: err});
-          });
-  
-        }
        
       } catch (error) {
         callback({ code: 500, message: "Internal Server Error", result: error });
@@ -1748,7 +1810,7 @@ module.exports = {
 
     acceptRejectEditMedicineReq: async (reqObj, callback) => {
       try {
-        const { medicine_id, supplier_id, action } = reqObj;
+        const { medicine_id, supplier_id, action, admin_id } = reqObj;
 
         const medicine = await EditMedicine.findOne({ medicine_id, supplier_id });
         const supplier = await Supplier.findOne({ supplier_id: supplier_id });
@@ -1827,7 +1889,7 @@ module.exports = {
                 { new: true }
               );
             } else if (medicine.medicine_type === 'secondary_medicine') {
-               event = 'eeditsecondarymedicinerequest'
+               event = 'editsecondarymedicinerequest'
               updatedMedicine = await SecondaryMarketMedicine.findOneAndUpdate(
                 { supplier_id, medicine_id },
                 { $set: updateObj },
@@ -1883,13 +1945,16 @@ module.exports = {
               { $set: { edit_status: editMedicineStatus } }
             );
 
+            let event
             // Update the edit status in the respective medicine collection
             if (medicine.medicine_type === 'new_medicine') {
+               event = 'editnewmedicinerequest'
               await Medicine.findOneAndUpdate(
                 { supplier_id, medicine_id },
                 { $set: { edit_status: editMedicineStatus } }
               );
             } else if (medicine.medicine_type === 'secondary_medicine') {
+               event = 'editnewmedicinerequest'
               await Medicine.findOneAndUpdate(
                 { supplier_id, medicine_id },
                 { $set: { edit_status: editMedicineStatus } }
@@ -1937,21 +2002,331 @@ module.exports = {
 
     medicineEditList : async (reqObj, callback) => {
       try {
-        const { status, pageNo, pageSize, medicine_id, supplier_id } = reqObj
-
-         const page_no   = pageNo || 1
-         const page_size = pageSize || 10
-         const offset    = (page_no - 1) * page_size
-
-         EditMedicine.find({edit_status: status}).sort({createdAt: -1}).skip(offset).limit(page_size)
-         .then((data) => {
-            callback({code: 200, message: 'Medicine Edit List', result: data})
-         })
-         .catch((err) => {
-          callback({code: 400, message: 'Error while fetching medicine edit list', result: err})
-         })
+        const {searchKey, pageNo, pageSize, medicineType, status} = reqObj
+  
+        const page_no   = pageNo || 1
+        const page_size = pageSize || 10
+        const offset    = (page_no - 1) * page_size
+  
+        EditMedicine.aggregate([
+            {
+              $match: {
+                medicine_type: medicineType,
+                // status : 1,
+                edit_status       : status
+              }
+            },
+            {
+              $lookup: {
+                from         : "medicineinventories",
+                localField   : "medicine_id",
+                foreignField : "medicine_id",
+                as           : "inventory",
+              },
+            },
+            {
+              $sort: { created_at: -1 } 
+            },
+            {
+              $project: {
+                medicine_id       : 1,
+                supplier_id       : 1,
+                medicine_name     : 1,
+                medicine_image    : 1,
+                drugs_name        : 1,
+                country_of_origin : 1,
+                dossier_type      : 1,
+                dossier_status    : 1,
+                gmp_approvals     : 1,
+                registered_in     : 1,
+                comments          : 1,
+                dosage_form       : 1,
+                category_name     : 1,
+                strength          : 1,
+                quantity          : 1,
+                medicine_type     : 1,
+                status            : 1,
+                edit_status       : 1,
+                inventory : {
+                  $arrayElemAt: ["$inventory", 0],
+                },
+              },
+            },
+            
+            {
+              $project: {
+                medicine_id       : 1,
+                supplier_id       : 1,
+                medicine_name     : 1,
+                medicine_image    : 1,
+                drugs_name        : 1,
+                country_of_origin : 1,
+                dossier_type      : 1,
+                dossier_status    : 1,
+                gmp_approvals     : 1,
+                registered_in     : 1,
+                comments          : 1,
+                dosage_form       : 1,
+                category_name     : 1,
+                strength          : 1,
+                quantity          : 1,
+                medicine_type     : 1,
+                status            : 1,
+                edit_status       : 1,
+                "inventory.delivery_info"  : 1,
+                "inventory.price"          : 1,
+              },
+            },
+            
+            { $skip: offset },
+            { $limit: page_size },
+          ])
+            .then((data) => {
+              EditMedicine.countDocuments({medicine_type: medicineType, edit_status: status})
+              .then(totalItems => {
+                  const totalPages = Math.ceil(totalItems / page_size);
+                  const returnObj = {
+                    data,
+                    totalPages,
+                    totalItems
+                  }
+                  callback({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
+              })
+              .catch((err) => {
+                callback({ code: 400, message: "Error while fetching medicine count", result: err});
+              })
+            })
+            .catch((err) => {
+              console.log(err);
+              callback({ code: 400, message: "Error fetching medicine list", result: err});
+            });
+       
       } catch (error) {
-        callback({code: 500, message: 'Internal server error', result: error})
+        callback({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+
+    editMedicineDetails: async (reqObj, callback) => {
+      console.log('here', reqObj);
+      
+      try {
+        EditMedicine.aggregate([
+          {
+            $match: { medicine_id: reqObj.medicine_id },
+          },
+          {
+            $lookup: {
+              from         : "medicineinventories",
+              localField   : "medicine_id",
+              foreignField : "medicine_id",
+              as           : "inventory",
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              medicine_type  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              invoice_image  : 1,
+              strength : 1,
+              medicine_category : 1,
+              total_quantity : 1,
+              stocked_in : 1,
+              shelf_life : 1,
+              type_of_form : 1,
+              country_of_origin: 1,
+              purchased_on : 1,
+              unit_price : 1,
+              country_available_in : 1,
+              min_purchase_unit : 1,
+              condition : 1,
+              unit_tax : 1,
+              manufacturer_country_of_origin: 1,
+              manufacturer_description: 1,
+              manufacturer_name: 1,
+              stockedIn_details: 1,
+              edit_status : 1,
+              inventory : {
+                $arrayElemAt: ["$inventory", 0],
+              },
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              medicine_type  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              invoice_image  : 1,
+              strength : 1,
+              medicine_category : 1,
+              total_quantity : 1,
+              stocked_in : 1,
+              shelf_life : 1,
+              type_of_form : 1,
+              country_of_origin: 1,
+              purchased_on : 1,
+              unit_price : 1,
+              country_available_in : 1,
+              min_purchase_unit : 1,
+              condition : 1,
+              unit_tax : 1,
+              manufacturer_country_of_origin: 1,
+              manufacturer_description: 1,
+              manufacturer_name: 1,
+              stockedIn_details: 1,
+              edit_status : 1,
+              "inventory.inventory_info" : 1,
+              "inventory.strength"       : 1,
+            },
+          },
+          {
+            $lookup: {
+              from         : "suppliers",
+              localField   : "supplier_id",
+              foreignField : "supplier_id",
+              as           : "supplier",
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              medicine_type  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              invoice_image  : 1,
+              strength : 1,
+              medicine_category : 1,
+              total_quantity : 1,
+              stocked_in : 1,
+              shelf_life : 1,
+              type_of_form : 1,
+              country_of_origin: 1,
+              purchased_on : 1,
+              unit_price : 1,
+              country_available_in : 1,
+              min_purchase_unit : 1,
+              condition : 1,
+              unit_tax : 1,
+              manufacturer_country_of_origin: 1,
+              manufacturer_description: 1,
+              manufacturer_name: 1,
+              stockedIn_details: 1,
+              edit_status : 1,
+              "inventory.inventory_info" : 1,
+              "inventory.strength"       : 1,
+              supplier : {
+                $arrayElemAt: ["$supplier", 0],
+              },
+            },
+          },
+          {
+            $project: {
+              medicine_id    : 1,
+              supplier_id    : 1,
+              medicine_name  : 1,
+              medicine_type  : 1,
+              composition    : 1,
+              dossier_type   : 1,
+              dossier_status : 1,
+              gmp_approvals  : 1,
+              shipping_time  : 1,
+              tags           : 1,
+              available_for  : 1,
+              description    : 1,
+              registered_in  : 1,
+              inventory_info : 1,
+              medicine_image : 1,
+              invoice_image  : 1,
+              strength : 1,
+              medicine_category : 1,
+              total_quantity : 1,
+              stocked_in : 1,
+              shelf_life : 1,
+              type_of_form : 1,
+              country_of_origin: 1,
+              purchased_on : 1,
+              unit_price : 1,
+              country_available_in : 1,
+              min_purchase_unit : 1,
+              condition : 1,
+              unit_tax : 1,
+              manufacturer_country_of_origin: 1,
+              manufacturer_description: 1,
+              manufacturer_name: 1,
+              stockedIn_details: 1,
+              edit_status : 1,
+              "inventory.inventory_info" : 1,
+              "inventory.strength"       : 1,
+              "supplier.supplier_id"             : 1, 
+              "supplier.supplier_name"           : 1,
+              "supplier.supplier_email"          : 1,
+              "supplier.description"             : 1,
+              "supplier.estimated_delivery_time" : 1,
+              "supplier.tags"                    : 1,
+              "supplier.license_no"              : 1,
+              "supplier.supplier_address"        : 1,
+              "supplier.payment_terms"           : 1,
+              "supplier.country_of_origin"       : 1,
+              "supplier.supplier_type"       : 1,
+              "supplier.contact_person_name"       : 1,
+              "supplier.supplier_country_code"       : 1,
+              "supplier.supplier_mobile"       : 1,
+              "supplier.contact_person_email"       : 1,
+              "supplier.contact_person_mobile_no"       : 1,
+              "supplier.contact_person_country_code"       : 1,
+              "supplier.tax_no"              : 1,
+              "supplier.supplier_type"              : 1,
+              "supplier.country_of_operation"              : 1,
+            },
+          },
+        ])
+          .then((data) => {
+            if (data.length) {
+              callback({ code: 200, message: "Medicine details fetched successfully", result: data[0] });
+            } else {
+              callback({code: 400, message: "Medicine with requested id not found", result: data[0] });
+            }
+          })
+          .catch((err) => {
+            callback({code: 400, message: "Error fetching medicine details", result: err });
+          });
+      } catch (error) {
+        callback({ code: 500, message: "Internal server error", result: error });
       }
     },
 
@@ -3054,11 +3429,12 @@ module.exports = {
         const page_no   = pageNo || 2
         const page_size = pageSize || 2
         const offset   = (page_no - 1) * page_size     
+        console.log('here', reqObj);
         
         Invoices.aggregate([
             {
                 $match: { 
-                    status      : filterKey
+                    status : filterKey
                 }
             },
             {
@@ -3103,6 +3479,8 @@ module.exports = {
                 account_number       : 1,
                 sort_code            : 1,
                 transaction_image    : 1,
+                transaction_id       : 1,
+                mode_of_payment      : 1,
                 invoice_status       : 1,
                 status               : 1,
                 payment_status       : 1,
@@ -3155,6 +3533,8 @@ module.exports = {
                 account_number       : { $first: "$account_number" },
                 sort_code            : { $first: "$sort_code" },
                 transaction_image    : { $first: "$transaction_image" },
+                transaction_id       : { $first: "$transaction_id" },
+                mode_of_payment      : { $first: "$mode_of_payment" },
                 invoice_status       : { $first: "$invoice_status" },
                 status               : { $first: "$status" },
                 payment_status       : { $first: "$payment_status" },
@@ -3190,6 +3570,8 @@ module.exports = {
                 account_number       : 1,
                 sort_code            : 1,
                 transaction_image    : 1,
+                transaction_id       : 1,
+                mode_of_payment      : 1,
                 invoice_status       : 1,
                 status               : 1,
                 payment_status       : 1,
@@ -3422,33 +3804,37 @@ module.exports = {
     //------------------------------ PO -------------------------------//
     getPOList : async(reqObj, callback) => {
       try {
+        console.log('here',reqObj);
+        
       const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
       const page_no   = pageNo || 1
-      const page_size = pageSize || 2
+      const page_size = pageSize || 10
       const offset    = (page_no - 1) * page_size
       const query     = {}
       
-      if(!supplier_id) {
-          query.buyer_id = buyer_id,
-          query.po_status = status 
-      } else if(!buyer_id) {
-          query.supplier_id = supplier_id,
-          query.po_status = status 
-      }
+      // if(!supplier_id) {
+      //     query.buyer_id = buyer_id,
+      //     query.po_status = status 
+      // } else if(!buyer_id) {
+      //     query.supplier_id = supplier_id,
+      //     query.po_status = status 
+      // }
 
-      const matchCondition = {};
-      if (buyer_id && !supplier_id) {
-          matchCondition.buyer_id = buyer_id;
-      } else if (supplier_id && !buyer_id) {
-          matchCondition.supplier_id = supplier_id;
-      }
-      if (status) {
-          matchCondition.po_status = status;
-      }
+      // const matchCondition = {};
+      // if (buyer_id && !supplier_id) {
+      //     matchCondition.buyer_id = buyer_id;
+      // } else if (supplier_id && !buyer_id) {
+      //     matchCondition.supplier_id = supplier_id;
+      // }
+      // if (status) {
+      //     matchCondition.po_status = status;
+      // }
       
           PurchaseOrder.aggregate([
               {
-                  $match: matchCondition
+                  $match: {
+                    po_status : status
+                  }
               },
               {
                   $lookup : {
@@ -3544,7 +3930,7 @@ module.exports = {
               },
           ])
           .then(async(data) => {
-              const totalItems = await PurchaseOrder.countDocuments(matchCondition);
+              const totalItems = await PurchaseOrder.countDocuments({po_status : status});
               const totalPages = Math.ceil(totalItems / page_size);
 
               const returnObj = {
@@ -3570,9 +3956,6 @@ module.exports = {
                 {
                     $match: {
                         purchaseOrder_id : purchaseOrder_id,
-                        // buyer_id         : buyer_id,
-                        // supplier_id      : supplier_id
-                        // enquiry_id: enquiry_id
                     }
                 },
                 {
@@ -3722,6 +4105,8 @@ module.exports = {
                 account_number       : 1,
                 sort_code            : 1,
                 transaction_image    : 1,
+                transaction_id       : 1,
+                mode_of_payment      : 1,
                 invoice_status       : 1,
                 status               : 1,
                 payment_status       : 1,
@@ -3774,6 +4159,8 @@ module.exports = {
                 account_number       : { $first: "$account_number" },
                 sort_code            : { $first: "$sort_code" },
                 transaction_image    : { $first: "$transaction_image" },
+                transaction_id       : { $first: "$transaction_id" },
+                mode_of_payment      : {$first: "$mode_of_payment"},
                 invoice_status       : { $first: "$invoice_status" },
                 status               : { $first: "$status" },
                 payment_status       : { $first: "$payment_status" },
@@ -3809,6 +4196,8 @@ module.exports = {
                 account_number       : 1,
                 sort_code            : 1,
                 transaction_image    : 1,
+                transaction_id       : 1,
+                mode_of_payment      : 1,
                 invoice_status       : 1,
                 status               : 1,
                 payment_status       : 1,

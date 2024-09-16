@@ -609,6 +609,7 @@ module.exports = {
                       "buyer.buyer_email" : 1,
                       "buyer.buyer_mobile" : 1,
                       "buyer.buyer_type" : 1,
+                      "buyer.country_of_origin": 1,
                     }
                 }
             ])
@@ -840,6 +841,7 @@ module.exports = {
                 "buyer.buyer_name": 1,
                 "buyer.buyer_address": 1,
                 "buyer.buyer_type": 1,
+                "buyer.country_of_origin": 1,
               }
             },
             { $sort : { created_at: -1 } },
@@ -1391,6 +1393,7 @@ module.exports = {
                                 "buyer.contact_person_country_code"    : 1,
                                 "buyer.buyer_address"                  : 1,
                                 "buyer.buyer_type"                     : 1,
+                                "buyer.country_of_origin": 1,
                                 "buyer.country_of_origin"              : 1,
                                 "buyer.vat_reg_no"                     : 1,
                               }
