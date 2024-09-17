@@ -2640,7 +2640,91 @@ module.exports = {
     //----------------------------- dashboard details -------------------------------------//
     adminDashboardDataList: async (reqObj, callback) => {
       try {
+        const startOfToday = new Date(new Date().setHours(0, 0, 0, 0)); 
+        const endOfToday   = new Date(new Date().setHours(23, 59, 59, 999));
     
+        // const orderDataList = Order.aggregate([
+        //   {
+        //     $addFields: {
+        //       numeric_total_price: {
+        //         $toDouble: {
+        //           $arrayElemAt: [{ $split: ["$total_price", " "] }, 0]
+        //         }
+        //       }
+        //     }
+        //   },
+        //   {
+        //     $facet: {
+        //       completedCount: [
+        //         { $match: { order_status: 'completed' } },
+        //         {
+        //           $group: {
+        //             _id: null,
+        //             count: { $sum: 1 },
+        //             total_purchase: { $sum: "$numeric_total_price" }
+        //           }
+        //         },
+        //         {
+        //           $project: {
+        //             _id: 0,
+        //             count: 1,
+        //             total_purchase: 1
+        //           }
+        //         }
+        //       ],
+        //       activeCount: [
+        //         { $match: { order_status: 'active' } },
+        //         {
+        //           $group: {
+        //             _id: null,
+        //             count: { $sum: 1 },
+        //             total_purchase: { $sum: "$numeric_total_price" }
+        //           }
+        //         },
+        //         {
+        //           $project: {
+        //             _id: 0,
+        //             count: 1,
+        //             total_purchase: 1
+        //           }
+        //         }
+        //       ],
+        //       pendingCount: [
+        //         { $match: { order_status: 'pending' } },
+        //         {
+        //           $group: {
+        //             _id: null,
+        //             count: { $sum: 1 },
+        //             total_purchase: { $sum: "$numeric_total_price" }
+        //           }
+        //         },
+        //         {
+        //           $project: {
+        //             _id: 0,
+        //             count: 1,
+        //             total_purchase: 1
+        //           }
+        //         }
+        //       ],
+        //       totalPurchaseAmount: [
+        //         {
+        //           $group: {
+        //             _id: null,
+        //             total_purchase: { $sum: "$numeric_total_price" }
+        //           }
+        //         },
+        //         {
+        //           $project: {
+        //             _id: 0,
+        //             total_purchase: 1
+        //           }
+        //         }
+        //       ]
+        //     }
+        //   }
+        // ]);
+    
+
         const orderDataList = Order.aggregate([
           {
             $addFields: {
@@ -2649,6 +2733,11 @@ module.exports = {
                   $arrayElemAt: [{ $split: ["$total_price", " "] }, 0]
                 }
               }
+            }
+          },
+          {
+            $match: {
+              createdAt: { $gte: startOfToday, $lt: endOfToday } // Match today's data
             }
           },
           {
@@ -2721,8 +2810,52 @@ module.exports = {
             }
           }
         ]);
-    
+
+
+        // const buyerRegReqList = Buyer.aggregate([
+        //   {
+        //     $facet: {
+        //       regReqCount: [
+        //         { $match: { account_status: 0 } },
+        //         {
+        //           $group: {
+        //             _id: null,
+        //             count: { $sum: 1 }
+        //           }
+        //         },
+        //         {
+        //           $project: {
+        //             _id: 0,
+        //             count: 1
+        //           }
+        //         }
+        //       ],
+        //       acceptedReqCount: [
+        //         { $match: { account_status: 1 } },
+        //         {
+        //           $group: {
+        //             _id: null,
+        //             count: { $sum: 1 }
+        //           }
+        //         },
+        //         {
+        //           $project: {
+        //             _id: 0,
+        //             count: 1
+        //           }
+        //         }
+        //       ]
+        //     }
+        //   }
+        // ]);
+
+
         const buyerRegReqList = Buyer.aggregate([
+          {
+            $match: {
+              createdAt: { $gte: startOfToday, $lt: endOfToday } 
+            }
+          },
           {
             $facet: {
               regReqCount: [
@@ -2761,6 +2894,11 @@ module.exports = {
 
         const supplierrRegReqList = Supplier.aggregate([
           {
+            $match: {
+              createdAt: { $gte: startOfToday, $lt: endOfToday } 
+            }
+          },
+          {
             $facet: {
               regReqCount: [
                 { $match: { account_status: 0 } },
@@ -2797,6 +2935,11 @@ module.exports = {
         ]);
 
         const supplierCountry = Supplier.aggregate([
+          // {
+          //   $match: {
+          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
+          //   }
+          // },
           {
             $group: {
               _id: "$country_of_origin",
@@ -2819,6 +2962,11 @@ module.exports = {
         ])
 
         const buyerCountry = Buyer.aggregate([
+          // {
+          //   $match: {
+          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
+          //   }
+          // },
           {
             $group: {
               _id: "$country_of_origin",
@@ -2840,7 +2988,124 @@ module.exports = {
           }
         ])
 
-        const [orderData, buyerData, supplierData, supplierCountryData, buyerCountryData ] = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList, supplierCountry, buyerCountry]);
+        const inquiryCount = Enquiry.aggregate([
+          {
+            $match: {
+              createdAt: { $gte: startOfToday, $lt: endOfToday } 
+            }
+          },
+          {
+            $match: {
+              enquiry_status: { $ne: 'order created' } 
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              count: { $sum: 1 } 
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              count: 1
+            }
+          }
+        ]);
+
+        const poCount = PurchaseOrder.aggregate([
+          // {
+          //   $match: {
+          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
+          //   }
+          // },
+          {
+            $match: {
+              po_status : 'active' 
+            }
+          },
+          {
+            $group: {
+              _id   : null,
+              count : { $sum: 1 } 
+            }
+          },
+          {
+            $project: {
+              _id   : 0,
+              count : 1
+            }
+          }
+        ]);
+
+        const orderCount = Order.aggregate([
+          // {
+          //   $match: {
+          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
+          //   }
+          // },
+          {
+            $match: {
+              order_status : 'active' 
+            }
+          },
+          {
+            $group: {
+              _id   : null,
+              count : { $sum: 1 } 
+            }
+          },
+          {
+            $project: {
+              _id   : 0,
+              count : 1
+            }
+          }
+        ]);
+
+        const totalOrderCount = Order.aggregate([
+          
+          {
+            $group: {
+              _id   : null,
+              count : { $sum: 1 } 
+            }
+          },
+          {
+            $project: {
+              _id   : 0,
+              count : 1
+            }
+          }
+        ]);
+        
+        const completedOrderCount = Order.aggregate([
+          {
+            $match: {
+              order_status: 'completed' 
+            }
+          },
+          {
+            $group: {
+              _id   : null,
+              count : { $sum: 1 } 
+            }
+          },
+          {
+            $project: {
+              _id   : 0,
+              count : 1
+            }
+          }
+        ]);
+
+        const [orderData, buyerData, supplierData, supplierCountryData, buyerCountryData, inquiryData, poData, orderCountData,totalOrders, completedOrders ] 
+        = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList, supplierCountry, buyerCountry, inquiryCount, poCount, orderCount, totalOrderCount, completedOrderCount]);
+
+        const totalOrderNumber = totalOrders.length > 0 ? totalOrders[0].count : 0;
+        const completedOrderNumber = completedOrders.length > 0 ? completedOrders[0].count : 0;
+        
+        const completedOrderPercentage = totalOrderNumber > 0 ? (completedOrderNumber / totalOrderNumber) * 100 : 0;
 
         const result = {
           ...orderData[0],
@@ -2850,6 +3115,10 @@ module.exports = {
           buyerAcceptedReqCount    : (buyerData[0].acceptedReqCount && buyerData[0].acceptedReqCount[0]) ? buyerData[0].acceptedReqCount[0] : { count: 0 },
           supplierRegisReqCount    : (supplierData[0].regReqCount && supplierData[0].regReqCount[0]) ? supplierData[0].regReqCount[0] : { count: 0 },
           supplierAcceptedReqCount : (supplierData[0].acceptedReqCount && supplierData[0].acceptedReqCount[0]) ? supplierData[0].acceptedReqCount[0] : { count: 0 },
+          inquiryCount             : inquiryData.length > 0 ? inquiryData[0].count : 0 ,
+          poCount                  : poData.length > 0 ? poData[0].count : 0 ,
+          orderCount               : orderCountData.length > 0 ?  orderCountData[0].count : 0 ,
+          completedOrderPercentage : completedOrderPercentage.toFixed(3)
         };
     
         callback({ code: 200, message: 'Dashboard data list fetched successfully', result });
