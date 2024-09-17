@@ -27,8 +27,7 @@ const sendMailFunc = (email, subject, body) =>{
       from    : process.env.SMTP_USER_ID,
       to      : email,
       subject : subject,
-      // text    : 'This is text mail, and sending for testing purpose'
-      html:body
+      html    : body
       
   };
   transporter.sendMail(mailOptions);
@@ -107,10 +106,10 @@ module.exports = {
       }
   
       const inventory_info = quantity.map((_, index) => ({
-        quantity: quantity[index],
-        unit_price: unit_price[index],
-        total_price: total_price[index],
-        est_delivery_days: est_delivery_days[index],
+        quantity          : quantity[index],
+        unit_price        : unit_price[index],
+        total_price       : total_price[index],
+        est_delivery_days : est_delivery_days[index],
       }));
   
       let newMedicine;
@@ -120,14 +119,14 @@ module.exports = {
           medicine_id,
           supplier_id,
           medicine_name,
-          medicine_type: product_type,
+          medicine_type  : product_type,
           composition,
           strength,
           type_of_form,
           shelf_life,
           dossier_type,
           dossier_status,
-          medicine_category: product_category,
+          medicine_category : product_category,
           total_quantity,
           gmp_approvals,
           shipping_time,
@@ -143,9 +142,9 @@ module.exports = {
           manufacturer_name,
           manufacturer_country_of_origin,
           manufacturer_description,
-          stockedIn_details: stockedInDetails,
-          status: 0,
-          edit_status: 0
+          stockedIn_details : stockedInDetails,
+          status            : 0,
+          edit_status       : 0
         });
       } else if (product_type === 'secondary market') {
         newMedicine = new SecondaryMarketMedicine({
@@ -162,7 +161,7 @@ module.exports = {
           shelf_life,
           dossier_type,
           dossier_status,
-          medicine_category: product_category,
+          medicine_category : product_category,
           gmp_approvals,
           shipping_time,
           tags,
@@ -173,7 +172,6 @@ module.exports = {
           available_for,
           description,
           total_quantity,
-          // unit_price,                // Can be used directly for secondary market
           condition,
           inventory_info,
           medicine_image,
@@ -181,10 +179,9 @@ module.exports = {
           manufacturer_name,
           manufacturer_country_of_origin,
           manufacturer_description,
-          stockedIn_details: stockedInDetails,
-          // inventory_info,
-          status: 0,
-          edit_status: 0
+          stockedIn_details : stockedInDetails,
+          status            : 0,
+          edit_status       : 0
         });
       }
   
@@ -195,14 +192,14 @@ module.exports = {
 
           const newNotification = new Notification({
             notification_id: notificationId,
-            event_type: product_type === 'new' ? 'New Medicine Request' : 'New Secondary Medicine Request',
+            event_type : product_type === 'new' ? 'New Medicine Request' : 'New Secondary Medicine Request',
             event,
-            from: 'supplier',
-            to: 'admin',
-            from_id: supplier_id,
-            event_id: medicine_id,
-            message: product_type === 'new' ? `New medicine request from ${supplier_id}` : `New secondary medicine request from ${supplier_id}`,
-            status: 0
+            from     : 'supplier',
+            to       : 'admin',
+            from_id  : supplier_id,
+            event_id : medicine_id,
+            message  : product_type === 'new' ? `New medicine request from ${supplier_id}` : `New secondary medicine request from ${supplier_id}`,
+            status   : 0
           });
           await newNotification.save();
 
@@ -363,9 +360,6 @@ module.exports = {
                     "inventory_info.total_price"       : 1,
                 }
             },
-            // {
-            //   $sort: { created_at: -1 }
-            // },
             { $skip  : offset },
             { $limit : page_size }
         );
@@ -407,40 +401,40 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id    : 1,
-            supplier_id    : 1,
-            medicine_name  : 1,
-            medicine_type  : 1,
-            composition    : 1,
-            dossier_type   : 1,
-            dossier_status : 1,
-            gmp_approvals  : 1,
-            shipping_time  : 1,
-            tags           : 1,
-            available_for  : 1,
-            description    : 1,
-            registered_in  : 1,
-            inventory_info : 1,
-            medicine_image : 1,
-            invoice_image  : 1,
-            strength : 1,
-            medicine_category : 1,
-            total_quantity : 1,
-            stocked_in : 1,
-            shelf_life : 1,
-            type_of_form : 1,
-            country_of_origin: 1,
-            purchased_on : 1,
-            unit_price : 1,
-            country_available_in : 1,
-            min_purchase_unit : 1,
-            condition : 1,
-            unit_tax : 1,
-            manufacturer_country_of_origin: 1,
-            manufacturer_description: 1,
-            manufacturer_name: 1,
-            stockedIn_details: 1,
-            edit_status : 1,
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
             inventory : {
               $arrayElemAt: ["$inventory", 0],
             },
@@ -448,42 +442,42 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id    : 1,
-            supplier_id    : 1,
-            medicine_name  : 1,
-            medicine_type  : 1,
-            composition    : 1,
-            dossier_type   : 1,
-            dossier_status : 1,
-            gmp_approvals  : 1,
-            shipping_time  : 1,
-            tags           : 1,
-            available_for  : 1,
-            description    : 1,
-            registered_in  : 1,
-            inventory_info : 1,
-            medicine_image : 1,
-            invoice_image  : 1,
-            strength : 1,
-            medicine_category : 1,
-            total_quantity : 1,
-            stocked_in : 1,
-            shelf_life : 1,
-            type_of_form : 1,
-            country_of_origin: 1,
-            purchased_on : 1,
-            unit_price : 1,
-            country_available_in : 1,
-            min_purchase_unit : 1,
-            condition : 1,
-            unit_tax : 1,
-            manufacturer_country_of_origin: 1,
-            manufacturer_description: 1,
-            manufacturer_name: 1,
-            stockedIn_details: 1,
-            edit_status : 1,
-            "inventory.inventory_info" : 1,
-            "inventory.strength"       : 1,
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
+            "inventory.inventory_info"     : 1,
+            "inventory.strength"           : 1,
           },
         },
         {
@@ -496,42 +490,42 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id    : 1,
-            supplier_id    : 1,
-            medicine_name  : 1,
-            medicine_type  : 1,
-            composition    : 1,
-            dossier_type   : 1,
-            dossier_status : 1,
-            gmp_approvals  : 1,
-            shipping_time  : 1,
-            tags           : 1,
-            available_for  : 1,
-            description    : 1,
-            registered_in  : 1,
-            inventory_info : 1,
-            medicine_image : 1,
-            invoice_image  : 1,
-            strength : 1,
-            medicine_category : 1,
-            total_quantity : 1,
-            stocked_in : 1,
-            shelf_life : 1,
-            type_of_form : 1,
-            country_of_origin: 1,
-            purchased_on : 1,
-            unit_price : 1,
-            country_available_in : 1,
-            min_purchase_unit : 1,
-            condition : 1,
-            unit_tax : 1,
-            manufacturer_country_of_origin: 1,
-            manufacturer_description: 1,
-            manufacturer_name: 1,
-            stockedIn_details: 1,
-            edit_status : 1,
-            "inventory.inventory_info" : 1,
-            "inventory.strength"       : 1,
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
+            "inventory.inventory_info"     : 1,
+            "inventory.strength"           : 1,
             supplier : {
               $arrayElemAt: ["$supplier", 0],
             },
@@ -539,62 +533,62 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id    : 1,
-            supplier_id    : 1,
-            medicine_name  : 1,
-            medicine_type  : 1,
-            composition    : 1,
-            dossier_type   : 1,
-            dossier_status : 1,
-            gmp_approvals  : 1,
-            shipping_time  : 1,
-            tags           : 1,
-            available_for  : 1,
-            description    : 1,
-            registered_in  : 1,
-            inventory_info : 1,
-            medicine_image : 1,
-            invoice_image  : 1,
-            strength : 1,
-            medicine_category : 1,
-            total_quantity : 1,
-            stocked_in : 1,
-            shelf_life : 1,
-            type_of_form : 1,
-            country_of_origin: 1,
-            purchased_on : 1,
-            unit_price : 1,
-            country_available_in : 1,
-            min_purchase_unit : 1,
-            condition : 1,
-            unit_tax : 1,
-            manufacturer_country_of_origin: 1,
-            manufacturer_description: 1,
-            manufacturer_name: 1,
-            stockedIn_details: 1,
-            edit_status : 1,
-            "inventory.inventory_info" : 1,
-            "inventory.strength"       : 1,
-            "supplier.supplier_id"             : 1, 
-            "supplier.supplier_name"           : 1,
-            "supplier.supplier_email"          : 1,
-            "supplier.description"             : 1,
-            "supplier.estimated_delivery_time" : 1,
-            "supplier.tags"                    : 1,
-            "supplier.license_no"              : 1,
-            "supplier.supplier_address"        : 1,
-            "supplier.payment_terms"           : 1,
-            "supplier.country_of_origin"       : 1,
-            "supplier.supplier_type"       : 1,
-            "supplier.contact_person_name"       : 1,
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
+            "inventory.inventory_info"             : 1,
+            "inventory.strength"                   : 1,
+            "supplier.supplier_id"                 : 1, 
+            "supplier.supplier_name"               : 1,
+            "supplier.supplier_email"              : 1,
+            "supplier.description"                 : 1,
+            "supplier.estimated_delivery_time"     : 1,
+            "supplier.tags"                        : 1,
+            "supplier.license_no"                  : 1,
+            "supplier.supplier_address"            : 1,
+            "supplier.payment_terms"               : 1,
+            "supplier.country_of_origin"           : 1,
+            "supplier.supplier_type"               : 1,
+            "supplier.contact_person_name"         : 1,
             "supplier.supplier_country_code"       : 1,
-            "supplier.supplier_mobile"       : 1,
-            "supplier.contact_person_email"       : 1,
-            "supplier.contact_person_mobile_no"       : 1,
-            "supplier.contact_person_country_code"       : 1,
-            "supplier.tax_no"              : 1,
-            "supplier.supplier_type"              : 1,
-            "supplier.country_of_operation"              : 1,
+            "supplier.supplier_mobile"             : 1,
+            "supplier.contact_person_email"        : 1,
+            "supplier.contact_person_mobile_no"    : 1,
+            "supplier.contact_person_country_code" : 1,
+            "supplier.tax_no"                      : 1,
+            "supplier.supplier_type"               : 1,
+            "supplier.country_of_operation"        : 1,
           },
         },
       ])
@@ -648,10 +642,10 @@ module.exports = {
            }
        
            const inventory_info = quantity.map((_, index) => ({
-             quantity: quantity[index],
-             unit_price: unit_price[index],
-             total_price: total_price[index],
-             est_delivery_days: est_delivery_days[index],
+             quantity          : quantity[index],
+             unit_price        : unit_price[index],
+             total_price       : total_price[index],
+             est_delivery_days : est_delivery_days[index],
            }));
        
            let newMedicine;
@@ -684,7 +678,7 @@ module.exports = {
               manufacturer_name,
               manufacturer_country_of_origin,
               manufacturer_description,
-              stockedIn_details: stockedInDetails,
+              stockedIn_details : stockedInDetails,
               edit_status: 0
             };
 
@@ -711,20 +705,20 @@ module.exports = {
                 const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10)
                 const event = product_type === 'new' ? 'editnewmedicinerequest' : 'editsecondarymedicinerequest';
                 const newNotification = new Notification({
-                  notification_id: notificationId,
-                  event_type:  'New Medicine Edit Request',
-                  event : 'editnewmedicinerequest',
-                  from: 'supplier',
-                  to: 'admin',
-                  from_id: supplier_id,
-                  event_id: medicine_id,
-                  message: `New Edit Medicine Request from ${supplier_id}`,
-                  status: 0
+                  notification_id : notificationId,
+                  event_type      :  'New Medicine Edit Request',
+                  event           : 'editnewmedicinerequest',
+                  from            : 'supplier',
+                  to              : 'admin',
+                  from_id         : supplier_id,
+                  event_id        : medicine_id,
+                  message         : `New Edit Medicine Request from ${supplier_id}`,
+                  status          : 0
                 });
                 await newNotification.save();
 
                 const adminEmail = 'ajo@shunyaekai.tech';
-                const subject = `New Product Edit Request: Approval Required`;
+                const subject    = `New Product Edit Request: Approval Required`;
                 const body = `
                           <p>Dear Admin,</p>
                           <p>We hope this message finds you well.</p>
@@ -750,8 +744,6 @@ module.exports = {
    
       } 
       else if(product_type === 'secondary market') {
-          // const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
-
           const secondaryMarketMedicineObj = {
               medicine_id,
               supplier_id,
@@ -777,7 +769,6 @@ module.exports = {
               available_for,
               description,
               total_quantity,
-              // unit_price,
               condition,
               inventory_info,
               medicine_image,
@@ -794,9 +785,9 @@ module.exports = {
           secondaryMedEdit.save()
           .then(async(savedMedicine) => {
             const updatedMedicine = await Medicine.findOneAndUpdate(
-              { supplier_id: supplier_id, medicine_id: medicine_id },
-              { edit_status: 0 },
-              { new: true }
+              { supplier_id : supplier_id, medicine_id: medicine_id },
+              { edit_status : 0 },
+              { new         : true }
             );
           
             if (!updatedMedicine) {
@@ -804,15 +795,15 @@ module.exports = {
             }
             const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10)
             const newNotification = new Notification({
-              notification_id: notificationId,
-              event_type: 'Secondary Medicine Edit Request',
-              event: 'editsecondarymedicinerequest',
-              from: 'supplier',
-              to: 'admin',
-              from_id: supplier_id,
-              event_id: medicine_id,
-              message: `New Secondary Medicine Edit Request from ${supplier_id}`,
-              status: 0
+              notification_id : notificationId,
+              event_type      : 'Secondary Medicine Edit Request',
+              event           : 'editsecondarymedicinerequest',
+              from            : 'supplier',
+              to              : 'admin',
+              from_id         : supplier_id,
+              event_id        : medicine_id,
+              message         : `New Secondary Medicine Edit Request from ${supplier_id}`,
+              status          : 0
             });
             await newNotification.save();
 
@@ -893,21 +884,20 @@ module.exports = {
   },
 
   similarMedicineList: async (reqObj, callback) => {
-    console.log('reqObj',reqObj);
     try {
       const {
         medicine_name, medicine_id, medicine_type, status, supplier_id,
         pageNo, pageSize, price_range, quantity_range, delivery_time, in_stock, searchKey
       } = reqObj;
   
-      const page_no = pageNo || 1;
+      const page_no   = pageNo || 1;
       const page_size = pageSize || 10;
-      const offset = (page_no - 1) * page_size;
+      const offset    = (page_no - 1) * page_size;
   
       let matchCondition = {
-        medicine_type: medicine_type,
-        medicine_name: medicine_name,
-        status: status,
+        medicine_type : medicine_type,
+        medicine_name : medicine_name,
+        status        : status,
         // medicine_id: { $ne: medicine_id }
       };
   
@@ -919,20 +909,20 @@ module.exports = {
       let pipeline = [
         {
           $lookup: {
-            from: "suppliers",
-            localField: "supplier_id",
-            foreignField: "supplier_id",
-            as: "supplier",
+            from         : "suppliers",
+            localField   : "supplier_id",
+            foreignField : "supplier_id",
+            as           : "supplier",
           },
         },
         {
-          $unwind: "$supplier"
+          $unwind : "$supplier"
         },
         {
-          $match: matchCondition,
+          $match : matchCondition,
         },
         {
-          $unwind: "$inventory_info"
+          $unwind : "$inventory_info"
         },
         {
           $addFields: {
@@ -1126,53 +1116,51 @@ module.exports = {
         const page_size = pageSize || 10;
         const offset = (page_no - 1) * page_size;
 
-        // Aggregate pipeline to fetch medicines
         Medicine.aggregate([
             {
                 $match: {
-                    medicine_type: medicine_type,
-                    supplier_id: supplier_id,
-                    status : status,
-                    medicine_id: { $ne: medicine_id }
+                    medicine_type : medicine_type,
+                    supplier_id   : supplier_id,
+                    status        : status,
+                    medicine_id   : { $ne: medicine_id }
                 }
             },
             {
                 $project: {
-                    medicine_id: 1,
-                    supplier_id: 1,
-                    medicine_name: 1,
-                    medicine_image: 1,
-                    drugs_name: 1,
-                    country_of_origin: 1,
-                    dossier_type: 1,
-                    dossier_status: 1,
-                    gmp_approvals: 1,
-                    registered_in: 1,
-                    comments: 1,
-                    dosage_form: 1,
-                    category_name: 1,
-                    stocked_in: 1,
-                    strength: 1,
-                    quantity: 1,
-                    inventory_info: 1,
-                    unit_price: 1,
-                    total_quantity: 1,
-                    est_delivery_time: 1,
-                    shipping_time: 1,
+                    medicine_id          : 1,
+                    supplier_id          : 1,
+                    medicine_name        : 1,
+                    medicine_image       : 1,
+                    drugs_name           : 1,
+                    country_of_origin    : 1,
+                    dossier_type         : 1,
+                    dossier_status       : 1,
+                    gmp_approvals        : 1,
+                    registered_in        : 1,
+                    comments             : 1,
+                    dosage_form          : 1,
+                    category_name        : 1,
+                    stocked_in           : 1,
+                    strength             : 1,
+                    quantity             : 1,
+                    inventory_info       : 1,
+                    unit_price           : 1,
+                    total_quantity       : 1,
+                    est_delivery_time    : 1,
+                    shipping_time        : 1,
                     country_available_in : 1
 
                 }
             },
-            { $skip: offset }, 
-            { $limit: page_size } 
+            { $skip  : offset }, 
+            { $limit : page_size } 
             
         ]).then((data) => {
-            // Count total documents matching the criteria for pagination
             Medicine.countDocuments({
-                medicine_type: medicine_type,
-                supplier_id: supplier_id,
-                status : status,
-                medicine_id: { $ne: medicine_id }
+                medicine_type : medicine_type,
+                supplier_id   : supplier_id,
+                status        : status,
+                medicine_id   : { $ne: medicine_id }
             }).then(totalItems => {
                 const totalPages = Math.ceil(totalItems / page_size);
                 const returnObj = {
