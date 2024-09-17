@@ -654,11 +654,11 @@ module.exports = {
     
     buyerOrdersList: async (reqObj, callback) => {
       try {
-        const {page_no, limit, filterKey, buyer_id} = reqObj
+        const {pageNo, pageSize, filterKey, buyer_id} = reqObj
   
-        const pageNo   = page_no || 1
-        const pageSize = limit || 2
-        const offset   = (pageNo - 1) * pageSize     
+        const page_no = pageNo || 1
+        const limit   = pageSize || 2
+        const offset  = (page_no - 1) * limit     
         
       Order.aggregate([
         {
@@ -689,6 +689,7 @@ module.exports = {
             buyer_id          : 1,
             buyer_name        : 1,
             supplier_id       : 1,
+            supplier_name     : 1,
             items             : 1,
             payment_terms     : 1,
             est_delivery_time : 1,
@@ -726,6 +727,7 @@ module.exports = {
             buyer_id          : { $first: "$buyer_id" },
             buyer_name        : { $first: "$buyer_name" },
             supplier_id       : { $first: "$supplier_id" },
+            supplier_name     : { $first: "$supplier_name" },
             items             : { $push: "$items" },
             payment_terms     : { $first: "$payment_terms" },
             est_delivery_time : { $first: "$est_delivery_time" },
@@ -744,8 +746,9 @@ module.exports = {
             $project: {
                 order_id          : 1,
                 buyer_id          : 1,
-                buyer_name         : 1,
+                buyer_name        : 1,
                 supplier_id       : 1,
+                supplier_name     : 1,
                 items             : 1,
                 payment_terms     : 1,
                 est_delivery_time : 1,
@@ -766,12 +769,12 @@ module.exports = {
         },
         { $sort : { created_at: -1 } },
         { $skip  : offset },
-        { $limit : pageSize },
+        { $limit : limit},
     ])
       .then((data) => {
           Order.countDocuments({order_status : filterKey})
           .then(totalItems => {
-              const totalPages = Math.ceil(totalItems / pageSize);
+              const totalPages = Math.ceil(totalItems / limit);
 
               const responseData = {
                   data,
