@@ -246,6 +246,21 @@ socket.on('registerAdmin', (userId) => {
   });
 
 
+  socket.on('updateMedicineAddRequest', (data) => {
+    const { supplierId, message } = data;
+    console.log('Current room:', socket.rooms);
+    console.log(`addMedicineRequestUpdated ${supplierId}: ${message}`);
+    io.to(supplierId).emit('addMedicineRequestUpdated', message);
+  });
+
+  socket.on('updateMedicineEditRequest', (data) => {
+    const { supplierId, message } = data;
+    console.log('Current room:', socket.rooms);
+    console.log(`addMedicineRequestUpdated ${supplierId}: ${message}`);
+    io.to(supplierId).emit('editMedicineRequestUpdated', message);
+  });
+
+
 
 
 

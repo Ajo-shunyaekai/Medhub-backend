@@ -1454,8 +1454,6 @@ module.exports = {
 
 
   acceptRejectAddMedicineReq: async (reqObj, callback) => {
-    console.log('REQ', reqObj);
-
     try {
         const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
 
@@ -1468,7 +1466,6 @@ module.exports = {
         const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
 
         const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : null;
-        console.log(newMedicineStatus);
 
         // Ensure both status and edit_status are updated correctly
         const updateStatus = await Medicine.findOneAndUpdate(
@@ -1476,8 +1473,6 @@ module.exports = {
             { status: newMedicineStatus, edit_status: newMedicineStatus }, // Fields to update
             { new: true } // Return the updated document
         );
-
-        console.log(updateStatus);
 
         if (!updateStatus) {
             return callback({ code: 400, message: "Failed to update medicine status" });
@@ -1520,18 +1515,18 @@ module.exports = {
             await newNotification.save();
 
         } else if (action === 'reject') {
-            subject = 'Medicine Request Rejected';
-            body = `Hello ${supplier_name}, <br />
-                We regret to inform you that your medicine request has been rejected. <br />
-                Medicine ID: ${updateStatus.medicine_id} <br />
-                Supplier ID: ${updateStatus.supplier_id} <br />
-                Reason: ${rejectionReason || 'Data Mismatch'} <br />
-                <br /><br />
-                Thanks & Regards <br />
-                Team Deliver`;
+            // subject = 'Medicine Request Rejected';
+            // body = `Hello ${supplier_name}, <br />
+            //     We regret to inform you that your medicine request has been rejected. <br />
+            //     Medicine ID: ${updateStatus.medicine_id} <br />
+            //     Supplier ID: ${updateStatus.supplier_id} <br />
+            //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
+            //     <br /><br />
+            //     Thanks & Regards <br />
+            //     Team Deliver`;
 
-            // Send email for rejection
-            sendMailFunc(supplier_email, subject, body);
+            // // Send email for rejection
+            // sendMailFunc(supplier_email, subject, body);
 
             const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
@@ -1562,7 +1557,7 @@ module.exports = {
         console.log('Internal Server Error:', error);
         callback({ code: 500, message: 'Internal Server Error', result: error });
     }
-},
+  },
 
   
     allMedicineList: async (reqObj, callback) => {
@@ -1885,14 +1880,14 @@ module.exports = {
             let event
 
             if (medicine.medicine_type === 'new_medicine') {
-               event = 'editnewmedicinerequest'
+               event = 'editnewmedicine'
               updatedMedicine = await NewMedicine.findOneAndUpdate(
                 { supplier_id, medicine_id },
                 { $set: updateObj },
                 { new: true }
               );
             } else if (medicine.medicine_type === 'secondary_medicine') {
-               event = 'editsecondarymedicinerequest'
+               event = 'editsecondarymedicine'
               updatedMedicine = await SecondaryMarketMedicine.findOneAndUpdate(
                 { supplier_id, medicine_id },
                 { $set: updateObj },
