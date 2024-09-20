@@ -243,6 +243,13 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/get-invoice-count', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+        Controller.getInvoiceCount(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
     
    return routes
 }

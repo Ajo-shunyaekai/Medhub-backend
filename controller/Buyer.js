@@ -13,6 +13,8 @@ const List               = require('../schema/addToListSchema');
 const Enquiry            = require('../schema/enquiryListSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Notification       = require('../schema/notificationSchema')
+const Invoice  = require('../schema/invoiceSchema')
+
 const nodemailer         = require('nodemailer');
 
 
@@ -100,16 +102,17 @@ module.exports = {
                 const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
                 const newNotification = new Notification({
                   notification_id  : notificationId,
-                  event_type   : 'New Registration Request',
-                  event : 'buyerregistration',
-                  from : 'buyer',
-                  to : 'admin',
-                  from_id : buyerId,
+                  event_type       : 'New Registration Request',
+                  event            : 'buyerregistration',
+                  from             : 'buyer',
+                  to               : 'admin',
+                  from_id          : buyerId,
+                  event_id         : buyerId,
+                  message          : 'New Buyer Registration Request',
+                  status           : 0
                   // to_id : reqObj.buyer_id,
-                  event_id : buyerId,
                   // connected_id : reqObj.enquiry_id,
-                  message : 'New Buyer Registration Request',
-                  status  : 0
+                 
               })
                await newNotification.save()
 
@@ -183,7 +186,7 @@ module.exports = {
                  country_of_origin           : buyer.country_of_origin,
                  token                       : buyer.token
               }
-              const listCount = await List.countDocuments({buyer_id: buyer.buyer_id})
+              const listCount      = await List.countDocuments({buyer_id: buyer.buyer_id})
               buyerData.list_count = listCount
               
               callback({code : 200, message: "Buyer Login Successfull", result: buyerData});
@@ -329,7 +332,6 @@ module.exports = {
         const page_size = pageSize || 2;
         const offset = (page_no - 1) * page_size;
     
-        // Define the aggregation pipeline for counting total items
         const countPipeline = [
           {
             $match: { buyer_id: buyer_id }
@@ -485,8 +487,8 @@ module.exports = {
           Medicine.aggregate([
             {
               $match : {
-                supplier_id : supplier_id,
-                status : 1,
+                supplier_id   : supplier_id,
+                status        : 1,
                 medicine_type : medicine_type
               }
             },
@@ -585,12 +587,12 @@ module.exports = {
                 {$count : 'completed'}
               ],
               activeCount: [
-                {$match: {order_status : 'active'}},
-                {$count: 'active'}
+                {$match : {order_status : 'active'}},
+                {$count : 'active'}
               ],
               pendingCount: [
-                {$match: {order_status : 'pending'}},
-                {$count: 'pending'}
+                {$match : {order_status : 'pending'}},
+                {$count : 'pending'}
               ],
               orderList: [
                 { $match : orderTypeMatch },
@@ -735,13 +737,12 @@ module.exports = {
           }
         ];
     
-        // Aggregation for Purchase Orders
         const purchaseOrdersAggregation = [
           {
             $match: {
               buyer_id   : buyer_id,
-              created_at : { $gte: today },  // Match only today's data
-              po_status  : 'active'  // Filter for active purchase orders
+              created_at : { $gte: today }, 
+              po_status  : 'active' 
             }
           },
           {
@@ -765,7 +766,7 @@ module.exports = {
           {
             $match: {
               buyer_id   : buyer_id,
-              created_at : { $gte: today }  // Match only today's data
+              created_at : { $gte: today }  
             }
           },
           {
@@ -930,13 +931,10 @@ module.exports = {
           existingList.save()
             .then(async(data) => {
               const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
-              // data.list_count = listCount
               const obj = {
                 data,
                 listCount
               }
-              // console.log("listCount",listCount)
-              // data.list_count = listCount
               callback({ code: 200, message: "Product Added to Your Cart!", result: obj});
             })
             .catch((err) => {
@@ -1122,8 +1120,9 @@ module.exports = {
               throw new Error('Invalid request');
           }
           const buyer = await Buyer.findOne({ buyer_id: reqObj.buyer_id });
-          // let enquiryId = 'INQ-' + Math.random().toString(16).slice(2)
+    
           let enquiryId = 'INQ-' + Math.random().toString(16).slice(2, 10);
+
           // Grouping items by supplier_id and including supplier details
           const groupedItems = items.reduce((acc, item) => {
               const { supplier_id, supplier_name, supplier_email, supplier_contact_email, list_id, item_details } = item;
@@ -1161,10 +1160,10 @@ module.exports = {
           }, {});
   
           const enquiries = Object.keys(groupedItems).map(supplier_id => ({
-              enquiry_id : enquiryId,
+              enquiry_id  : enquiryId,
               buyer_id,
               supplier_id,
-              items  : groupedItems[supplier_id].items
+              items       : groupedItems[supplier_id].items
           }));
   
           const enquiryDocs = await Enquiry.insertMany(enquiries);
@@ -1246,7 +1245,7 @@ module.exports = {
           console.log('Internal server error', error);
           callback({ code: 500, message: "Internal server error", result: error });
       }
-  },
+    },
   
     getNotificationList : async(reqObj, callback) => {
       try {
@@ -1420,6 +1419,35 @@ module.exports = {
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
+
+    getInvoiceCount: async (reqObj, callback) => {
+      try {
+        const { buyer_id } = reqObj; 
+    
+        Invoice.aggregate([
+          {
+            $match: {
+              buyer_id : buyer_id,  
+              status   : 'pending'    
+            }
+          },
+          {
+            $count: "pendingInvoiceCount" 
+          }
+        ])
+        .then((data) => {
+          const count = data.length > 0 ? data[0].pendingInvoiceCount : 0; 
+          callback({ code: 200, message: "Pending Invoice Count", result: count });
+        })
+        .catch((err) => {
+          callback({ code: 400, message: "Error while fetching count", result: err });
+        });
+      } catch (error) {
+        console.log('server error', error);
+        callback({ code: 500, message: "Internal server error", result: error });
+      }
+    }
+    
     
 }
 

@@ -76,12 +76,12 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-details', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
-        Order.submitPickupDetails(req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
+    // routes.post('/submit-details', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
+    //     Order.submitPickupDetails(req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
 
     routes.post('/invoice-details', checkAuthorization, commonAuthentication, async(req, res) => {
             Invoice.invoiceDetails(req.body, result => {

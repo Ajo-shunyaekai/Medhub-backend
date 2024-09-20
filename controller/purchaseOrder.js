@@ -166,7 +166,6 @@ module.exports = {
         }
     },
 
-    
     getPOList : async(reqObj, callback) => {
         try {
         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
@@ -378,13 +377,13 @@ module.exports = {
                         buyer_name              : { $first: "$buyer_name" },
                         buyer_address           : { $first: "$buyer_address" },
                         buyer_mobile            : { $first: "$buyer_mobile" },
-                        buyer_country_code         : { $first: "$buyer_country_code" },
+                        buyer_country_code      : { $first: "$buyer_country_code" },
                         buyer_email             : { $first: "$buyer_email" },
                         buyer_regNo             : { $first: "$buyer_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
                         supplier_address        : { $first: "$supplier_address" },
                         supplier_mobile         : { $first: "$supplier_mobile" },
-                        supplier_country_code         : { $first: "$supplier_country_code" },
+                        supplier_country_code   : { $first: "$supplier_country_code" },
                         supplier_email          : { $first: "$supplier_email" },
                         supplier_regNo          : { $first: "$supplier_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
@@ -393,7 +392,7 @@ module.exports = {
                         order_items             : { $push: "$order_items" },
                         buyer_details           : { $first: "$buyer_details" },
                         supplier_details        : { $first: "$supplier_details" },
-                        enquiry_details        : { $first: "$enquiry_details" },
+                        enquiry_details         : { $first: "$enquiry_details" },
                     }
                 }
             ])

@@ -233,7 +233,6 @@ module.exports = {
     }
   },
   
-
   allMedicineList: async (reqObj, callback) => {
     console.log(reqObj);
     try {
@@ -263,24 +262,44 @@ module.exports = {
             matchCondition.status = 1;
         }
 
+        // if (searchKey && category_name) {
+        //     matchCondition.$and = [
+        //         {
+        //             $or: [
+        //                 { medicine_name : { $regex: searchKey, $options: 'i' } },
+        //                 { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+        //             ]
+        //         },
+        //         { category_name: category_name }
+        //     ];
+        // } else if (searchKey) {
+        //     matchCondition.$or = [
+        //         { medicine_name : { $regex: searchKey, $options: 'i' } },
+        //         { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+        //     ];
+        // } else if (category_name) {
+        //     matchCondition.medicine_category = category_name;
+        // }
+
         if (searchKey && category_name) {
-            matchCondition.$and = [
-                {
-                    $or: [
-                        { medicine_name : { $regex: searchKey, $options: 'i' } },
-                        { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
-                    ]
-                },
-                { category_name: category_name }
-            ];
-        } else if (searchKey) {
-            matchCondition.$or = [
-                { medicine_name : { $regex: searchKey, $options: 'i' } },
-                { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
-            ];
-        } else if (category_name) {
-            matchCondition.medicine_category = category_name;
-        }
+          matchCondition.$and = [
+              {
+                  $or: [
+                      { medicine_name : { $regex: searchKey, $options: 'i' } },
+                      { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+                  ]
+              },
+              { medicine_category: category_name }  // Ensure the field name is correct
+          ];
+      } else if (searchKey) {
+          matchCondition.$or = [
+              { medicine_name : { $regex: searchKey, $options: 'i' } },
+              { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+          ];
+      } else if (category_name) {
+          matchCondition.medicine_category = category_name;  // Use correct field
+      }
+      
 
         if (in_stock && in_stock.length > 0) {
             const stockedCountries    = in_stock[0].split(',').map(country => country.trim());

@@ -40,6 +40,7 @@ const corsOptions = {
     'http://192.168.1.31:2221',
     'http://192.168.1.82:3000',
     'http://192.168.1.42:3000',
+    'http://192.168.1.14:3000',
     'http://localhost:2221',
     'http://localhost:3030',
     'http://192.168.1.34:3333',
@@ -125,6 +126,7 @@ const io = new Server(server, { // Initialize Socket.IO
       'http://192.168.1.31:2221',
       'http://192.168.1.82:3000',
       'http://192.168.1.42:3000',
+      'http://192.168.1.14:3000',
       'http://localhost:2221',
       'http://localhost:3030',
       'http://192.168.1.34:3333',
@@ -216,6 +218,17 @@ socket.on('registerAdmin', (userId) => {
    socket.on('shipmentDetailsSubmitted', (data) => {
     const { buyerId, orderId, message } = data;
     io.to(buyerId).emit('shipmentDetailsSubmission', message);
+  });
+
+  // createOrder
+  socket.on('createInvoice', (data) => {
+    const { buyerId,orderId, message } = data;
+    io.to(buyerId).emit('invoiceCreated', message);
+  });
+
+  socket.on('invoicePaymentDone', (data) => {
+    const { supplierId,orderId, message } = data;
+    io.to(supplierId).emit('invoicePaymentStatusUpdated', message);
   });
 
 

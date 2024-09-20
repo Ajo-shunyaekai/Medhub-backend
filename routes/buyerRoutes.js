@@ -291,6 +291,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-invoice-count', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+        Controller.getInvoiceCount(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+
     // routes.post('/enquiry-list', checkAuthorization, commonAuthentication, async(req, res) => {
 
     //     Controller.getEnquiryList(req.body, result => {

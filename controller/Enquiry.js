@@ -71,10 +71,10 @@ module.exports = {
                 },
                 {
                     $project: {
-                        enquiry_id : 1,
-                        created_at : 1,
-                        items      : 1,
-                        enquiry_status     : 1,
+                        enquiry_id     : 1,
+                        created_at     : 1,
+                        items          : 1,
+                        enquiry_status : 1,
                         buyer : {
                             $arrayElemAt : ["$buyer_details", 0]
                         },
@@ -85,10 +85,10 @@ module.exports = {
                 },
                 {
                     $project: {
-                        enquiry_id : 1,
-                        created_at : 1,
-                        items      : 1,
-                        enquiry_status     : 1,
+                        enquiry_id     : 1,
+                        created_at     : 1,
+                        items          : 1,
+                        enquiry_status : 1,
                         "buyer.buyer_id"             : 1,
                         "buyer.buyer_name"           : 1,
                         "buyer.buyer_type"           : 1,
@@ -176,28 +176,28 @@ module.exports = {
                 {
                     $group: {
                         _id: "$_id",
-                        enquiry_id: { $first: "$enquiry_id" },
-                        created_at: { $first: "$created_at" },
-                        quotation_items: { $first: "$quotation_items" },
-                        payment_terms: { $first: "$payment_terms" },
-                        enquiry_status: { $first: "$enquiry_status" },
-                        status: { $first: "$status" },
-                        quotation_items_created_at: { $first: "$quotation_items_created_at" },
-                        quotation_items_updated_at: { $first: "$quotation_items_updated_at" },
+                        enquiry_id                 : { $first: "$enquiry_id" },
+                        created_at                 : { $first: "$created_at" },
+                        quotation_items            : { $first: "$quotation_items" },
+                        payment_terms              : { $first: "$payment_terms" },
+                        enquiry_status             : { $first: "$enquiry_status" },
+                        status                     : { $first: "$status" },
+                        quotation_items_created_at : { $first: "$quotation_items_created_at" },
+                        quotation_items_updated_at : { $first: "$quotation_items_updated_at" },
                         items: {
                             $push: {
-                                _id: "$items._id",
-                                medicine_id: "$items.medicine_id",
-                                unit_price: "$items.unit_price",
-                                quantity_required: "$items.quantity_required",
-                                est_delivery_days: "$items.est_delivery_days",
-                                target_price: "$items.target_price",
-                                status: "$items.status",
-                                medicine_details: "$medicine_details"
+                                _id               : "$items._id",
+                                medicine_id       : "$items.medicine_id",
+                                unit_price        : "$items.unit_price",
+                                quantity_required : "$items.quantity_required",
+                                est_delivery_days : "$items.est_delivery_days",
+                                target_price      : "$items.target_price",
+                                status            : "$items.status",
+                                medicine_details  : "$medicine_details"
                             }
                         },
-                        buyer_details: { $first: "$buyer_details" },
-                        supplier_details: { $first: "$supplier_details" }
+                        buyer_details    : { $first: "$buyer_details" },
+                        supplier_details : { $first: "$supplier_details" }
                     }
                 },
                 {
@@ -212,44 +212,44 @@ module.exports = {
                             { $unwind: "$quotation_items" },
                             {
                                 $lookup: {
-                                    from: "medicines",
-                                    localField: "quotation_items.medicine_id",
-                                    foreignField: "medicine_id",
-                                    as: "quotation_medicine_details"
+                                    from         : "medicines",
+                                    localField   : "quotation_items.medicine_id",
+                                    foreignField : "medicine_id",
+                                    as           : "quotation_medicine_details"
                                 }
                             },
                             {
                                 $unwind: {
-                                    path: "$quotation_medicine_details",
-                                    preserveNullAndEmptyArrays: true
+                                    path                       : "$quotation_medicine_details",
+                                    preserveNullAndEmptyArrays : true
                                 }
                             },
                             {
                                 $group: {
-                                    _id: "$_id",
-                                    enquiry_id: { $first: "$enquiry_id" },
-                                    created_at: { $first: "$created_at" },
+                                    _id        : "$_id",
+                                    enquiry_id : { $first: "$enquiry_id" },
+                                    created_at : { $first: "$created_at" },
                                     quotation_items: {
                                         $push: {
-                                            _id: "$quotation_items._id",
-                                            medicine_id: "$quotation_items.medicine_id",
-                                            unit_price: "$quotation_items.unit_price",
-                                            quantity_required: "$quotation_items.quantity_required",
-                                            est_delivery_days: "$quotation_items.est_delivery_days",
-                                            target_price: "$quotation_items.target_price",
-                                            counter_price: "$quotation_items.counter_price",
-                                            status: "$quotation_items.status",
-                                            medicine_details: "$quotation_medicine_details"
+                                            _id               : "$quotation_items._id",
+                                            medicine_id       : "$quotation_items.medicine_id",
+                                            unit_price        : "$quotation_items.unit_price",
+                                            quantity_required : "$quotation_items.quantity_required",
+                                            est_delivery_days : "$quotation_items.est_delivery_days",
+                                            target_price      : "$quotation_items.target_price",
+                                            counter_price     : "$quotation_items.counter_price",
+                                            status            : "$quotation_items.status",
+                                            medicine_details  : "$quotation_medicine_details"
                                         }
                                     },
-                                    payment_terms: { $first: "$payment_terms" },
-                                    enquiry_status: { $first: "$enquiry_status" },
-                                    status: { $first: "$status" },
-                                    items: { $first: "$items" },
-                                    buyer_details: { $first: "$buyer_details" },
-                                    supplier_details: { $first: "$supplier_details" },
-                                    quotation_items_created_at: { $first: "$quotation_items_created_at" },
-                                    quotation_items_updated_at: { $first: "$quotation_items_updated_at" }
+                                    payment_terms              : { $first  : "$payment_terms" },
+                                    enquiry_status             : { $first : "$enquiry_status" },
+                                    status                     : { $first: "$status" },
+                                    items                      : { $first: "$items" },
+                                    buyer_details              : { $first: "$buyer_details" },
+                                    supplier_details           : { $first: "$supplier_details" },
+                                    quotation_items_created_at : { $first: "$quotation_items_created_at" },
+                                    quotation_items_updated_at : { $first: "$quotation_items_updated_at" }
                                 }
                             }
                         ],
@@ -257,18 +257,18 @@ module.exports = {
                             { $match: { hasQuotationItems: false } },
                             {
                                 $group: {
-                                    _id: "$_id",
-                                    enquiry_id: { $first: "$enquiry_id" },
-                                    created_at: { $first: "$created_at" },
-                                    quotation_items: { $first: "$quotation_items" },
-                                    payment_terms: { $first: "$payment_terms" },
-                                    enquiry_status: { $first: "$enquiry_status" },
-                                    status: { $first: "$status" },
-                                    items: { $first: "$items" },
-                                    buyer_details: { $first: "$buyer_details" },
-                                    supplier_details: { $first: "$supplier_details" },
-                                    quotation_items_created_at: { $first: "$quotation_items_created_at" },
-                                    quotation_items_updated_at: { $first: "$quotation_items_updated_at" }
+                                    _id                        : "$_id",
+                                    enquiry_id                 : { $first: "$enquiry_id" },
+                                    created_at                 : { $first: "$created_at" },
+                                    quotation_items            : { $first: "$quotation_items" },
+                                    payment_terms              : { $first: "$payment_terms" },
+                                    enquiry_status             : { $first: "$enquiry_status" },
+                                    status                     : { $first: "$status" },
+                                    items                      : { $first: "$items" },
+                                    buyer_details              : { $first: "$buyer_details" },
+                                    supplier_details           : { $first: "$supplier_details" },
+                                    quotation_items_created_at : { $first: "$quotation_items_created_at" },
+                                    quotation_items_updated_at : { $first: "$quotation_items_updated_at" }
                                 }
                             }
                         ]
@@ -294,48 +294,48 @@ module.exports = {
                 },
                 {
                     $addFields: {
-                        buyer_details: { $arrayElemAt: ["$buyer_details", 0] },
-                        supplier_details: { $arrayElemAt: ["$supplier_details", 0] }
+                        buyer_details    : { $arrayElemAt: ["$buyer_details", 0] },
+                        supplier_details : { $arrayElemAt: ["$supplier_details", 0] }
                     }
                 },
                 {
                     $project: {
-                        enquiry_id: 1,
-                        created_at: 1,
-                        quotation_items: 1,
-                        payment_terms: 1,
-                        enquiry_status: 1,
-                        status: 1,
-                        quotation_items_created_at: 1,
-                        quotation_items_updated_at: 1,
-                        items: 1,
-                        "buyer.buyer_id": "$buyer_details.buyer_id",
-                        "buyer.buyer_name": "$buyer_details.buyer_name",
-                        "buyer.buyer_address": "$buyer_details.buyer_address",
-                        "buyer.buyer_email": "$buyer_details.buyer_email",
-                        "buyer.contact_person_email": "$buyer_details.contact_person_email",
-                        "buyer.contact_person_mobile": "$buyer_details.contact_person_mobile",
-                        "buyer.contact_person_country_code": "$buyer_details.contact_person_country_code",
-                        "buyer.buyer_type": "$buyer_details.buyer_type",
-                        "buyer.buyer_mobile": "$buyer_details.buyer_mobile",
-                        "buyer.buyer_country_code": "$buyer_details.buyer_country_code",
-                        "buyer.country_of_origin": "$buyer_details.country_of_origin",
-                        "buyer.buyer_image": "$buyer_details.buyer_image",
-                        "buyer.registration_no": "$buyer_details.registration_no",
-                        "supplier.supplier_id": "$supplier_details.supplier_id",
-                        "supplier.supplier_name": "$supplier_details.supplier_name",
-                        "supplier.supplier_type": "$supplier_details.supplier_type",
-                        "supplier.supplier_mobile": "$supplier_details.supplier_mobile",
-                        "supplier.supplier_country_code": "$supplier_details.supplier_country_code",
-                        "supplier.supplier_email": "$supplier_details.supplier_email",
-                        "supplier.contact_person_email": "$supplier_details.contact_person_email",
-                        "supplier.country_of_origin": "$supplier_details.country_of_origin",
-                        "supplier.estimated_delivery_time": "$supplier_details.estimated_delivery_time",
-                        "supplier.supplier_address": "$supplier_details.supplier_address",
-                        "supplier.supplier_image": "$supplier_details.supplier_image",
-                        "supplier.registration_no": "$supplier_details.registration_no",
-                        "supplier.contact_person_mobile_no": "$supplier_details.contact_person_mobile_no",
-                        "supplier.contact_person_country_code": "$supplier_details.contact_person_country_code"
+                        enquiry_id                 : 1,
+                        created_at                 : 1,
+                        quotation_items            : 1,
+                        payment_terms              : 1,
+                        enquiry_status             : 1,
+                        status                     : 1,
+                        quotation_items_created_at : 1,
+                        quotation_items_updated_at : 1,
+                        items                      : 1,
+                        "buyer.buyer_id"                       : "$buyer_details.buyer_id",
+                        "buyer.buyer_name"                     : "$buyer_details.buyer_name",
+                        "buyer.buyer_address"                  : "$buyer_details.buyer_address",
+                        "buyer.buyer_email"                    : "$buyer_details.buyer_email",
+                        "buyer.contact_person_email"           : "$buyer_details.contact_person_email",
+                        "buyer.contact_person_mobile"          : "$buyer_details.contact_person_mobile",
+                        "buyer.contact_person_country_code"    : "$buyer_details.contact_person_country_code",
+                        "buyer.buyer_type"                     : "$buyer_details.buyer_type",
+                        "buyer.buyer_mobile"                   : "$buyer_details.buyer_mobile",
+                        "buyer.buyer_country_code"             : "$buyer_details.buyer_country_code",
+                        "buyer.country_of_origin"              : "$buyer_details.country_of_origin",
+                        "buyer.buyer_image"                    : "$buyer_details.buyer_image",
+                        "buyer.registration_no"                : "$buyer_details.registration_no",
+                        "supplier.supplier_id"                 : "$supplier_details.supplier_id",
+                        "supplier.supplier_name"               : "$supplier_details.supplier_name",
+                        "supplier.supplier_type"               : "$supplier_details.supplier_type",
+                        "supplier.supplier_mobile"             : "$supplier_details.supplier_mobile",
+                        "supplier.supplier_country_code"       : "$supplier_details.supplier_country_code",
+                        "supplier.supplier_email"              : "$supplier_details.supplier_email",
+                        "supplier.contact_person_email"        : "$supplier_details.contact_person_email",
+                        "supplier.country_of_origin"           : "$supplier_details.country_of_origin",
+                        "supplier.estimated_delivery_time"     : "$supplier_details.estimated_delivery_time",
+                        "supplier.supplier_address"            : "$supplier_details.supplier_address",
+                        "supplier.supplier_image"              : "$supplier_details.supplier_image",
+                        "supplier.registration_no"             : "$supplier_details.registration_no",
+                        "supplier.contact_person_mobile_no"    : "$supplier_details.contact_person_mobile_no",
+                        "supplier.contact_person_country_code" : "$supplier_details.contact_person_country_code"
                     }
                 }
             ])
@@ -366,11 +366,11 @@ module.exports = {
               { enquiry_id : enquiry_id },
               {
                   $set: {
-                      quotation_items : quotation_details,
-                      payment_terms   : payment_terms,
-                      enquiry_status  : 'Quotation submitted',
-                      quotation_items_created_at: new Date(),
-                      quotation_items_updated_at: new Date()
+                      quotation_items             : quotation_details,
+                      payment_terms               : payment_terms,
+                      enquiry_status              : 'Quotation submitted',
+                      quotation_items_created_at  : new Date(),
+                      quotation_items_updated_at  : new Date()
                   }
               },
               { new: true } 
@@ -385,23 +385,23 @@ module.exports = {
                   const itemId = ObjectId.isValid(detail.itemId) ? new ObjectId(detail.itemId) : null;
                   
                   await Enquiry.updateOne(
-                      { enquiry_id: enquiry_id, 'items._id': itemId },
-                      { $set: { 'items.$.status': 'Quotation submitted' } }
+                      { enquiry_id : enquiry_id, 'items._id': itemId },
+                      { $set       : { 'items.$.status': 'Quotation submitted' } }
                   );
             //   }
           }
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
-                notification_id         : notificationId,
-                event_type   : 'Enquiry quotation',
-                event : 'enquiry',
-                from : 'supplier',
-                to : 'buyer',
-                from_id : supplier_id,
-                to_id : buyer_id,
-                event_id : enquiry_id,
-                message : `Quotation Received!! You’ve received a quote from the supplier for ${enquiry_id}`,
-                status : 0
+                notification_id : notificationId,
+                event_type      : 'Enquiry quotation',
+                event           : 'enquiry',
+                from            : 'supplier',
+                to              : 'buyer',
+                from_id         : supplier_id,
+                to_id           : buyer_id,
+                event_id        : enquiry_id,
+                message         : `Quotation Received!! You’ve received a quote from the supplier for ${enquiry_id}`,
+                status          : 0
             })
             await newNotification.save()
 
@@ -432,8 +432,8 @@ module.exports = {
                 { enquiry_id: enquiry_id, buyer_id: buyer_id, 'quotation_items._id': itemId },
                 {
                     $set: {
-                        'quotation_items.$.status': new_status,
-                         quotation_items_updated_at: new Date()
+                        'quotation_items.$.status'  : new_status,
+                         quotation_items_updated_at : new Date()
                     }
                 },
                 {
