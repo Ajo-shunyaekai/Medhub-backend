@@ -1,6 +1,7 @@
 const bcrypt             = require('bcrypt');
 const jwt                = require('jsonwebtoken');
 const nodemailer         = require('nodemailer');
+const moment             = require('moment');
 const generator          = require('generate-password');
 const Admin              = require('../schema/adminSchema')
 const User               = require('../schema/userSchema')
@@ -217,7 +218,7 @@ module.exports = {
 
     getSupplierList: async (reqObj, callback) => {
       try {
-        const { pageNo, pageSize, filterKey } = reqObj;
+        const { pageNo, pageSize, filterKey, filterValue } = reqObj;
     
         const page_no   = pageNo || 1;
         const page_size = pageSize || 2;
@@ -236,9 +237,51 @@ module.exports = {
         } else if (filterKey === 'rejected') {
           filterCondition = { account_status: 2 };
         }
+
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        // Apply date filter based on filterValue (today, week, month, year, all)
+        if (filterValue === 'today') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {}; // No date filter
+        }
     
-        const data       = await Supplier.find(filterCondition).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
-        const totalItems = await Supplier.countDocuments(filterCondition);
+        // Merge dateFilter with filterCondition to apply both filters
+        const combinedFilter = { ...filterCondition, ...dateFilter };
+    
+        const data       = await Supplier.find(combinedFilter).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
+        const totalItems = await Supplier.countDocuments(combinedFilter);
     
         const totalPages = Math.ceil(totalItems / page_size);
         const returnObj = {
@@ -274,7 +317,7 @@ module.exports = {
 
     getRegReqList: async(reqObj, callback) => {
       try {
-        const { pageNo, limit } = reqObj
+        const { pageNo, limit, filterValue} = reqObj
 
         const page_no   = pageNo || 1
         const page_size = limit || 2
@@ -285,8 +328,46 @@ module.exports = {
           password : 0
         };
 
-        Supplier.find({account_status : 0}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
-          Supplier.countDocuments({account_status : 0}).then((totalItems) => {
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        if (filterValue === 'today') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {};
+        }
+
+        Supplier.find({account_status : 0, ...dateFilter}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
+          Supplier.countDocuments({account_status : 0, ...dateFilter}).then((totalItems) => {
 
             const totalPages = Math.ceil( totalItems / page_size )
             const returnObj = {
@@ -455,8 +536,7 @@ module.exports = {
     //------------------------ buyer ------------------------//
     getBuyerList: async (reqObj, callback) => {
       try {
-        console.log(reqObj);
-        const { pageNo, pageSize, filterKey } = reqObj;
+        const { pageNo, pageSize, filterKey, filterValue } = reqObj;
     
         const page_no   = pageNo || 1;
         const page_size = pageSize || 2;
@@ -475,9 +555,51 @@ module.exports = {
         } else if (filterKey === 'rejected') {
           filterCondition = { account_status: 2 };
         }
+
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        // Apply date filter based on filterValue (today, week, month, year, all)
+        if (filterValue === 'today') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {}; // No date filter
+        }
     
-        const data       = await Buyer.find(filterCondition).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
-        const totalItems = await Buyer.countDocuments(filterCondition);
+        // Merge dateFilter with filterCondition to apply both filters
+        const combinedFilter = { ...filterCondition, ...dateFilter };
+    
+        const data       = await Buyer.find(combinedFilter).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
+        const totalItems = await Buyer.countDocuments(combinedFilter);
     
         const totalPages = Math.ceil(totalItems / page_size);
         const returnObj = {
@@ -513,7 +635,7 @@ module.exports = {
 
     getBuyerRegReqList: async(reqObj, callback) => {
       try {
-        const {pageNo, pageSize} = reqObj
+        const {pageNo, pageSize, filterValue} = reqObj
 
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
@@ -524,8 +646,46 @@ module.exports = {
           password : 0
         };
 
-        Buyer.find({account_status : 0}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
-          Buyer.countDocuments({account_status : 0}).then((totalItems) => {
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        if (filterValue === 'today') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {};
+        }
+
+        Buyer.find({account_status : 0, ...dateFilter}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
+          Buyer.countDocuments({account_status : 0, ...dateFilter}).then((totalItems) => {
             
             const totalPages = Math.ceil(totalItems / page_size);
             const resultObj = {
@@ -544,7 +704,7 @@ module.exports = {
         })
 
       } catch (error) {
-        console.log('Internal server error')
+        console.log(error,'Internal server error')
         callback({code: 500, message: 'Internal server error', result: error})
       }
     },
@@ -652,147 +812,382 @@ module.exports = {
       }
     },
     
+    // buyerOrdersList: async (reqObj, callback) => {
+    //   try {
+    //     const {pageNo, pageSize, filterKey, buyer_id, filterValue} = reqObj
+  
+    //     const page_no = pageNo || 1
+    //     const limit   = pageSize || 2
+    //     const offset  = (page_no - 1) * limit   
+        
+    //     let dateFilter = {};
+    
+    // // Apply date filter based on the filterKey (today, week, month, year, all)
+    // const currentDate = new Date(); // Current date and time
+    
+    // if (filterValue === 'today') {
+    //   dateFilter = {
+    //     created_at: {
+    //       $gte: moment().startOf('day').toDate(),
+    //       $lte: moment().endOf('day').toDate()
+    //     }
+    //   };
+    // } else if (filterValue === 'week') {
+    //   dateFilter = {
+    //     created_at: {
+    //       $gte: moment().startOf('week').toDate(),
+    //       $lte: moment().endOf('week').toDate()
+    //     }
+    //   };
+    // } else if (filterValue === 'month') {
+    //   dateFilter = {
+    //     created_at: {
+    //       $gte: moment().startOf('month').toDate(),
+    //       $lte: moment().endOf('month').toDate()
+    //     }
+    //   };
+    // } else if (filterValue === 'year') {
+    //   dateFilter = {
+    //     created_at: {
+    //       $gte: moment().startOf('year').toDate(),
+    //       $lte: moment().endOf('year').toDate()
+    //     }
+    //   };
+    // } else if (filterValue === 'all') {
+    //   dateFilter = {}; // No date filter for 'all'
+    // } else {
+    //   // callback({ code: 400, message: "Invalid filterKey provided" });
+    //   // return;
+    // }
+    // console.log("DATE FILTER", dateFilter);
+    
+        
+    //   Order.aggregate([
+    //     {
+    //         $match: { 
+    //             // buyer_id     : reqObj.buyer_id,
+    //             order_status : reqObj.filterKey,
+    //             ...dateFilter
+    //         }
+    //     },
+    //     {
+    //       $lookup: {
+    //         from         : "suppliers",
+    //         localField   : "supplier_id",
+    //         foreignField : "supplier_id",
+    //         as           : "supplier"
+    //       }
+    //     },
+    //     {
+    //       $lookup: {
+    //         from         : "buyers",
+    //         localField   : "buyer_id",
+    //         foreignField : "buyer_id",
+    //         as           : "buyer"
+    //       }
+    //     },
+    //     {
+    //       $project: {
+    //         order_id          : 1,
+    //         buyer_id          : 1,
+    //         buyer_name        : 1,
+    //         supplier_id       : 1,
+    //         supplier_name     : 1,
+    //         items             : 1,
+    //         payment_terms     : 1,
+    //         est_delivery_time : 1,
+    //         shipping_details  : 1,
+    //         remarks           : 1,
+    //         order_status      : 1,
+    //         status            : 1,
+    //         invoice_no        : 1,
+    //         created_at        : 1,
+    //         supplier          : { $arrayElemAt : ["$supplier", 0] },
+    //         buyer             : { $arrayElemAt : ["$buyer", 0] }
+    //       }
+    //     },
+    //     {
+    //       $unwind : "$items" 
+    //     },
+    //     {
+    //       $lookup: {
+    //         from         : "medicines",
+    //         localField   : "items.product_id",
+    //         foreignField : "medicine_id",
+    //         as           : "medicine"
+    //       }
+    //     },
+    //     {
+    //       $addFields: {
+    //         "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
+    //         "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+    //       }
+    //     },
+    //     {
+    //       $group: {
+    //         _id               : "$_id",
+    //         order_id          : { $first: "$order_id" },
+    //         buyer_id          : { $first: "$buyer_id" },
+    //         buyer_name        : { $first: "$buyer_name" },
+    //         supplier_id       : { $first: "$supplier_id" },
+    //         supplier_name     : { $first: "$supplier_name" },
+    //         items             : { $push: "$items" },
+    //         payment_terms     : { $first: "$payment_terms" },
+    //         est_delivery_time : { $first: "$est_delivery_time" },
+    //         shipping_details  : { $first: "$shipping_details" },
+    //         remarks           : { $first: "$remarks" },
+    //         order_status      : { $first: "$order_status" },
+    //         status            : { $first: "$status" },
+    //         invoice_no        : { $first: "$invoice_no" },
+    //         created_at        : { $first: "$created_at" },
+    //         supplier          : { $first: "$supplier" },
+    //         buyer             : { $first: "$buyer" },
+    //         totalPrice        : { $sum: "$items.item_price" }
+    //       }
+    //     },
+    //     {
+    //         $project: {
+    //             order_id          : 1,
+    //             buyer_id          : 1,
+    //             buyer_name        : 1,
+    //             supplier_id       : 1,
+    //             supplier_name     : 1,
+    //             items             : 1,
+    //             payment_terms     : 1,
+    //             est_delivery_time : 1,
+    //             shipping_details  : 1,
+    //             remarks           : 1,
+    //             order_status      : 1,
+    //             status            : 1,
+    //             invoice_no        : 1,
+    //             created_at        : 1,
+    //             totalPrice        : 1,
+    //             "supplier.supplier_image" : 1,
+    //             "supplier.supplier_name"  : 1,
+    //             "supplier.supplier_type"  : 1,
+    //             "buyer.buyer_image" : 1,
+    //             "buyer.buyer_name"  : 1,
+    //             "buyer.buyer_type"  : 1,
+    //         }
+    //     },
+    //     { $sort : { created_at: -1 } },
+    //     { $skip  : offset },
+    //     { $limit : limit},
+    // ])
+    //   .then((data) => {
+    //       Order.countDocuments({order_status : filterKey, ...dateFilter})
+    //       .then(totalItems => {
+    //           const totalPages = Math.ceil(totalItems / limit);
+
+    //           const responseData = {
+    //               data,
+    //               totalPages,
+    //               totalItems
+    //           }
+    //           callback({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
+    //       })
+    //   })
+    //   .catch((err) => {
+    //       console.log('Error in fetching order list',err);
+    //       callback({ code: 400, message: "Error in fetching order list", result: err });
+    //   })
+    //   } catch (error) {
+    //     console.log('Intenal Server Error',error)
+    //     callback({ code: 500, message: "Internal Server Error", result: error });
+    //   }
+    // },
+
+
     buyerOrdersList: async (reqObj, callback) => {
       try {
-        const {pageNo, pageSize, filterKey, buyer_id} = reqObj
-  
-        const page_no = pageNo || 1
-        const limit   = pageSize || 2
-        const offset  = (page_no - 1) * limit     
-        
-      Order.aggregate([
-        {
-            $match: { 
-                // buyer_id     : reqObj.buyer_id,
-                order_status : reqObj.filterKey
-            }
-        },
-        {
-          $lookup: {
-            from         : "suppliers",
-            localField   : "supplier_id",
-            foreignField : "supplier_id",
-            as           : "supplier"
-          }
-        },
-        {
-          $lookup: {
-            from         : "buyers",
-            localField   : "buyer_id",
-            foreignField : "buyer_id",
-            as           : "buyer"
-          }
-        },
-        {
-          $project: {
-            order_id          : 1,
-            buyer_id          : 1,
-            buyer_name        : 1,
-            supplier_id       : 1,
-            supplier_name     : 1,
-            items             : 1,
-            payment_terms     : 1,
-            est_delivery_time : 1,
-            shipping_details  : 1,
-            remarks           : 1,
-            order_status      : 1,
-            status            : 1,
-            invoice_no        : 1,
-            created_at        : 1,
-            supplier          : { $arrayElemAt : ["$supplier", 0] },
-            buyer             : { $arrayElemAt : ["$buyer", 0] }
-          }
-        },
-        {
-          $unwind : "$items" 
-        },
-        {
-          $lookup: {
-            from         : "medicines",
-            localField   : "items.product_id",
-            foreignField : "medicine_id",
-            as           : "medicine"
-          }
-        },
-        {
-          $addFields: {
-            "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
-            "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
-          }
-        },
-        {
-          $group: {
-            _id               : "$_id",
-            order_id          : { $first: "$order_id" },
-            buyer_id          : { $first: "$buyer_id" },
-            buyer_name        : { $first: "$buyer_name" },
-            supplier_id       : { $first: "$supplier_id" },
-            supplier_name     : { $first: "$supplier_name" },
-            items             : { $push: "$items" },
-            payment_terms     : { $first: "$payment_terms" },
-            est_delivery_time : { $first: "$est_delivery_time" },
-            shipping_details  : { $first: "$shipping_details" },
-            remarks           : { $first: "$remarks" },
-            order_status      : { $first: "$order_status" },
-            status            : { $first: "$status" },
-            invoice_no        : { $first: "$invoice_no" },
-            created_at        : { $first: "$created_at" },
-            supplier          : { $first: "$supplier" },
-            buyer             : { $first: "$buyer" },
-            totalPrice        : { $sum: "$items.item_price" }
-          }
-        },
-        {
+        const { pageNo, pageSize, filterKey, buyer_id, filterValue } = reqObj;
+    
+        const page_no = pageNo || 1;
+        const limit = pageSize || 2;
+        const offset = (page_no - 1) * limit;
+    
+        let dateFilter = {};
+    
+        // Apply date filter based on the filterValue (today, week, month, year, all)
+        const currentDate = new Date(); // Current date and time
+    
+        if (filterValue === 'today') {
+          // Filter for today
+          dateFilter = {
+            created_at: {
+              $gte: moment().startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'week') {
+          // Filter for the last 7 days
+          dateFilter = {
+            created_at: {
+              $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'month') {
+          // Filter for the last 30 days
+          dateFilter = {
+            created_at: {
+              $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'year') {
+          // Filter for the last 365 days
+          dateFilter = {
+            created_at: {
+              $gte: moment().subtract(365, 'days').startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'all') {
+          // No date filter for 'all'
+          dateFilter = {};
+        } else {
+          // callback({ code: 400, message: "Invalid filterValue provided" });
+          // return;
+        }
+    
+        console.log("DATE FILTER", dateFilter);
+    
+        Order.aggregate([
+          {
+            $match: {
+              order_status: reqObj.filterKey,
+              ...dateFilter,
+            },
+          },
+          {
+            $lookup: {
+              from: "suppliers",
+              localField: "supplier_id",
+              foreignField: "supplier_id",
+              as: "supplier",
+            },
+          },
+          {
+            $lookup: {
+              from: "buyers",
+              localField: "buyer_id",
+              foreignField: "buyer_id",
+              as: "buyer",
+            },
+          },
+          {
             $project: {
-                order_id          : 1,
-                buyer_id          : 1,
-                buyer_name        : 1,
-                supplier_id       : 1,
-                supplier_name     : 1,
-                items             : 1,
-                payment_terms     : 1,
-                est_delivery_time : 1,
-                shipping_details  : 1,
-                remarks           : 1,
-                order_status      : 1,
-                status            : 1,
-                invoice_no        : 1,
-                created_at        : 1,
-                totalPrice        : 1,
-                "supplier.supplier_image" : 1,
-                "supplier.supplier_name"  : 1,
-                "supplier.supplier_type"  : 1,
-                "buyer.buyer_image" : 1,
-                "buyer.buyer_name"  : 1,
-                "buyer.buyer_type"  : 1,
-            }
-        },
-        { $sort : { created_at: -1 } },
-        { $skip  : offset },
-        { $limit : limit},
-    ])
-      .then((data) => {
-          Order.countDocuments({order_status : filterKey})
-          .then(totalItems => {
-              const totalPages = Math.ceil(totalItems / limit);
-
-              const responseData = {
+              order_id: 1,
+              buyer_id: 1,
+              buyer_name: 1,
+              supplier_id: 1,
+              supplier_name: 1,
+              items: 1,
+              payment_terms: 1,
+              est_delivery_time: 1,
+              shipping_details: 1,
+              remarks: 1,
+              order_status: 1,
+              status: 1,
+              invoice_no: 1,
+              created_at: 1,
+              supplier: { $arrayElemAt: ["$supplier", 0] },
+              buyer: { $arrayElemAt: ["$buyer", 0] },
+            },
+          },
+          {
+            $unwind: "$items",
+          },
+          {
+            $lookup: {
+              from: "medicines",
+              localField: "items.product_id",
+              foreignField: "medicine_id",
+              as: "medicine",
+            },
+          },
+          {
+            $addFields: {
+              "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+              "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } },
+            },
+          },
+          {
+            $group: {
+              _id: "$_id",
+              order_id: { $first: "$order_id" },
+              buyer_id: { $first: "$buyer_id" },
+              buyer_name: { $first: "$buyer_name" },
+              supplier_id: { $first: "$supplier_id" },
+              supplier_name: { $first: "$supplier_name" },
+              items: { $push: "$items" },
+              payment_terms: { $first: "$payment_terms" },
+              est_delivery_time: { $first: "$est_delivery_time" },
+              shipping_details: { $first: "$shipping_details" },
+              remarks: { $first: "$remarks" },
+              order_status: { $first: "$order_status" },
+              status: { $first: "$status" },
+              invoice_no: { $first: "$invoice_no" },
+              created_at: { $first: "$created_at" },
+              supplier: { $first: "$supplier" },
+              buyer: { $first: "$buyer" },
+              totalPrice: { $sum: "$items.item_price" },
+            },
+          },
+          {
+            $project: {
+              order_id: 1,
+              buyer_id: 1,
+              buyer_name: 1,
+              supplier_id: 1,
+              supplier_name: 1,
+              items: 1,
+              payment_terms: 1,
+              est_delivery_time: 1,
+              shipping_details: 1,
+              remarks: 1,
+              order_status: 1,
+              status: 1,
+              invoice_no: 1,
+              created_at: 1,
+              totalPrice: 1,
+              "supplier.supplier_image": 1,
+              "supplier.supplier_name": 1,
+              "supplier.supplier_type": 1,
+              "buyer.buyer_image": 1,
+              "buyer.buyer_name": 1,
+              "buyer.buyer_type": 1,
+            },
+          },
+          { $sort: { created_at: -1 } },
+          { $skip: offset },
+          { $limit: limit },
+        ])
+          .then((data) => {
+            Order.countDocuments({ order_status: filterKey, ...dateFilter })
+              .then((totalItems) => {
+                const totalPages = Math.ceil(totalItems / limit);
+    
+                const responseData = {
                   data,
                   totalPages,
-                  totalItems
-              }
-              callback({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
+                  totalItems,
+                };
+                callback({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
+              });
           })
-      })
-      .catch((err) => {
-          console.log('Error in fetching order list',err);
-          callback({ code: 400, message: "Error in fetching order list", result: err });
-      })
+          .catch((err) => {
+            console.log("Error in fetching order list", err);
+            callback({ code: 400, message: "Error in fetching order list", result: err });
+          });
       } catch (error) {
-        console.log('Intenal Server Error',error)
+        console.log("Internal Server Error", error);
         callback({ code: 500, message: "Internal Server Error", result: error });
       }
     },
+    
+
 
     buyerSupportList : async(reqObj, callback) => {
       try {
@@ -951,6 +1346,282 @@ module.exports = {
 
 
     //------------------------ supplier/buyer ------------------------//
+
+    // getTotalRegReqList: async (reqObj, callback) => {
+    //   try {
+    //     const { pageNo, pageSize } = reqObj;
+    
+    //     const page_no = pageNo || 1;
+    //     const page_size = pageSize || 2;
+    //     const offSet = (page_no - 1) * page_size;
+    
+    //     const fields = {
+    //       token: 0,
+    //       password: 0,
+    //     };
+    
+    //     // Fetch buyer and supplier registration requests simultaneously
+    //     const buyerQuery = Buyer.find({ account_status: 0 })
+    //       .select(fields)
+    //       .sort({ createdAt: -1 })
+    //       .skip(offSet)
+    //       .limit(page_size);
+    
+    //     const supplierQuery = Supplier.find({ account_status: 0 })
+    //       .select(fields)
+    //       .sort({ createdAt: -1 })
+    //       .skip(offSet)
+    //       .limit(page_size);
+    
+    //     const buyerCountQuery = Buyer.countDocuments({ account_status: 0 });
+    //     const supplierCountQuery = Supplier.countDocuments({ account_status: 0 });
+    
+    //     const [buyerData, supplierData, buyerTotalCount, supplierTotalCount] = await Promise.all([
+    //       buyerQuery,
+    //       supplierQuery,
+    //       buyerCountQuery,
+    //       supplierCountQuery,
+    //     ]);
+    
+    //     // Add a 'registration_type' field to distinguish between buyer and supplier requests
+    //     const unifiedData = [
+    //       ...buyerData.map((buyer) => ({ ...buyer._doc, registration_type: 'Buyer' })),
+    //       ...supplierData.map((supplier) => ({ ...supplier._doc, registration_type: 'Supplier' })),
+    //     ];
+    
+    //     // Calculate total pages for pagination
+    //     const totalRequests = buyerTotalCount + supplierTotalCount;
+    //     const totalPages = Math.ceil(totalRequests / page_size);
+    
+    //     // Prepare the result object
+    //     const resultObj = {
+    //       data: unifiedData,
+    //       totalPages,
+    //       totalItems: totalRequests,
+    //     };
+    
+    //     callback({
+    //       code: 200,
+    //       message: "Registration request list fetched successfully",
+    //       result: resultObj,
+    //     });
+    //   } catch (error) {
+    //     console.log("Internal server error");
+    //     callback({ code: 500, message: "Internal server error", result: error });
+    //   }
+    // },
+
+
+    getTotalRegReqList: async (reqObj, callback) => {
+      try {
+        const { pageNo, pageSize, filterValue } = reqObj;
+    
+        const page_no   = pageNo || 1;
+        const page_size = pageSize || 2;
+        const offSet    = (page_no - 1) * page_size;
+    
+        const fields = {
+          token    : 0,
+          password : 0,
+        };
+
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        if (filterValue === 'today') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {};
+        }
+    
+        // Fetch all buyer and supplier data first (no pagination applied yet)
+        const buyerQuery = Buyer.find({ account_status: 0, ...dateFilter })
+          .select(fields)
+          .sort({ createdAt: -1 });
+    
+        const supplierQuery = Supplier.find({ account_status: 0, ...dateFilter })
+          .select(fields)
+          .sort({ createdAt: -1 });
+    
+        const buyerCountQuery = Buyer.countDocuments({ account_status: 0, ...dateFilter });
+        const supplierCountQuery = Supplier.countDocuments({ account_status: 0, ...dateFilter });
+    
+        const [buyerData, supplierData, buyerTotalCount, supplierTotalCount] = await Promise.all([
+          buyerQuery,
+          supplierQuery,
+          buyerCountQuery,
+          supplierCountQuery,
+        ]);
+    
+        // Add 'registration_type' to differentiate between buyer and supplier
+        const unifiedData = [
+          ...buyerData.map((buyer) => ({ ...buyer._doc, registration_type: 'Buyer' })),
+          ...supplierData.map((supplier) => ({ ...supplier._doc, registration_type: 'Supplier' })),
+        ];
+    
+        // Sort the combined data by creation date
+        unifiedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+        // Apply pagination after combining the data
+        const paginatedData = unifiedData.slice(offSet, offSet + page_size);
+    
+        // Calculate total number of requests and pages
+        const totalRequests = buyerTotalCount + supplierTotalCount;
+        const totalPages = Math.ceil(totalRequests / page_size);
+    
+        // Prepare the result object
+        const resultObj = {
+          data: paginatedData,
+          totalPages,
+          totalItems: totalRequests,
+        };
+    
+        callback({
+          code: 200,
+          message: "Registration request list fetched successfully",
+          result: resultObj,
+        });
+      } catch (error) {
+        console.log("Internal server error", error);
+        callback({ code: 500, message: "Internal server error", result: error });
+      }
+    },
+
+    getTotalApprovedRegReqList: async (reqObj, callback) => {
+      try {
+        const { pageNo, pageSize, filterValue } = reqObj;
+    
+        const page_no = pageNo || 1;
+        const page_size = pageSize || 2;
+        const offSet = (page_no - 1) * page_size;
+    
+        const fields = {
+          token    : 0,
+          password : 0,
+        };
+
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        // Apply date filter based on filterValue (today, week, month, year, all)
+        if (filterValue === 'today') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {}; // No date filter
+        }
+    
+        // Fetch all buyer and supplier data first (no pagination applied yet)
+        const buyerQuery = Buyer.find({ account_status: 1, ...dateFilter })
+          .select(fields)
+          .sort({ createdAt: -1 });
+    
+        const supplierQuery = Supplier.find({ account_status: 1, ...dateFilter })
+          .select(fields)
+          .sort({ createdAt: -1 });
+    
+        const buyerCountQuery = Buyer.countDocuments({ account_status: 1, ...dateFilter });
+        const supplierCountQuery = Supplier.countDocuments({ account_status: 1, ...dateFilter });
+    
+        const [buyerData, supplierData, buyerTotalCount, supplierTotalCount] = await Promise.all([
+          buyerQuery,
+          supplierQuery,
+          buyerCountQuery,
+          supplierCountQuery,
+        ]);
+    
+        // Add 'registration_type' to differentiate between buyer and supplier
+        const unifiedData = [
+          ...buyerData.map((buyer) => ({ ...buyer._doc, registration_type: 'Buyer' })),
+          ...supplierData.map((supplier) => ({ ...supplier._doc, registration_type: 'Supplier' })),
+        ];
+    
+        // Sort the combined data by creation date
+        unifiedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+        // Apply pagination after combining the data
+        const paginatedData = unifiedData.slice(offSet, offSet + page_size);
+    
+        // Calculate total number of requests and pages
+        const totalRequests = buyerTotalCount + supplierTotalCount;
+        const totalPages    = Math.ceil(totalRequests / page_size);
+    
+        // Prepare the result object
+        const resultObj = {
+          data: paginatedData,
+          totalPages,
+          totalItems: totalRequests,
+        };
+    
+        callback({
+          code    : 200,
+          message : "Registration request list fetched successfully",
+          result  : resultObj,
+        });
+      } catch (error) {
+        console.log("Internal server error", error);
+        callback({ code: 500, message: "Internal server error", result: error });
+      }
+    },
+    
+    
     getProfileUpdateReqList: async(reqObj, callback) => {
       try {
         const { pageNo, limit, user_type  } = reqObj
@@ -1453,112 +2124,111 @@ module.exports = {
 
 
 
-  acceptRejectAddMedicineReq: async (reqObj, callback) => {
-    try {
-        const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
+    acceptRejectAddMedicineReq: async (reqObj, callback) => {
+      try {
+          const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
 
-        const medicine = await Medicine.findOne({ medicine_id, supplier_id });
+          const medicine = await Medicine.findOne({ medicine_id, supplier_id });
 
-        if (!medicine) {
-            return callback({ code: 400, message: "Medicine not found" });
-        }
+          if (!medicine) {
+              return callback({ code: 400, message: "Medicine not found" });
+          }
 
-        const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
+          const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
 
-        const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : null;
+          const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : null;
 
-        // Ensure both status and edit_status are updated correctly
-        const updateStatus = await Medicine.findOneAndUpdate(
-            { medicine_id, supplier_id }, // Query to find the document
-            { status: newMedicineStatus, edit_status: newMedicineStatus }, // Fields to update
-            { new: true } // Return the updated document
-        );
+          // Ensure both status and edit_status are updated correctly
+          const updateStatus = await Medicine.findOneAndUpdate(
+              { medicine_id, supplier_id }, // Query to find the document
+              { status: newMedicineStatus, edit_status: newMedicineStatus }, // Fields to update
+              { new: true } // Return the updated document
+          );
 
-        if (!updateStatus) {
-            return callback({ code: 400, message: "Failed to update medicine status" });
-        }
+          if (!updateStatus) {
+              return callback({ code: 400, message: "Failed to update medicine status" });
+          }
 
-        let body;
-        let subject;
-        let event;
+          let body;
+          let subject;
+          let event;
 
-        // Handle the success message based on status and action
-        if (action === 'accept') {
-            subject = 'Medicine Added Successfully';
-            body = `Hello ${supplier_name}, <br />
-                Your medicine request has been approved and added successfully. <br />
-                Medicine ID: ${updateStatus.medicine_id} <br />
-                Supplier ID: ${updateStatus.supplier_id} <br />
-                <br /><br />
-                Thanks & Regards <br />
-                Team Deliver`;
+          // Handle the success message based on status and action
+          if (action === 'accept') {
+              subject = 'Medicine Added Successfully';
+              body = `Hello ${supplier_name}, <br />
+                  Your medicine request has been approved and added successfully. <br />
+                  Medicine ID: ${updateStatus.medicine_id} <br />
+                  Supplier ID: ${updateStatus.supplier_id} <br />
+                  <br /><br />
+                  Thanks & Regards <br />
+                  Team Deliver`;
 
-            // Determine event type based on medicine_type
-            event = medicine_type === 'new' ? 'addnewmedicine' : 'addsecondarymedicine';
+              // Determine event type based on medicine_type
+              event = medicine_type === 'new' ? 'addnewmedicine' : 'addsecondarymedicine';
 
-            // Send email for acceptance
-            sendMailFunc(supplier_email, subject, body);
+              // Send email for acceptance
+              sendMailFunc(supplier_email, subject, body);
 
-            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-            const newNotification = new Notification({
-                notification_id: notificationId,
-                event_type: 'Medicine Request Accepted',
-                event,
-                from: 'admin',
-                to: 'supplier',
-                from_id: admin_id,
-                to_id: supplier_id,
-                event_id: medicine_id,
-                message: `${medicine_id}: Your listing has been approved and is now live!`,
-                status: 0
-            });
-            await newNotification.save();
+              const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+              const newNotification = new Notification({
+                  notification_id: notificationId,
+                  event_type: 'Medicine Request Accepted',
+                  event,
+                  from: 'admin',
+                  to: 'supplier',
+                  from_id: admin_id,
+                  to_id: supplier_id,
+                  event_id: medicine_id,
+                  message: `${medicine_id}: Your listing has been approved and is now live!`,
+                  status: 0
+              });
+              await newNotification.save();
 
-        } else if (action === 'reject') {
-            // subject = 'Medicine Request Rejected';
-            // body = `Hello ${supplier_name}, <br />
-            //     We regret to inform you that your medicine request has been rejected. <br />
-            //     Medicine ID: ${updateStatus.medicine_id} <br />
-            //     Supplier ID: ${updateStatus.supplier_id} <br />
-            //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
-            //     <br /><br />
-            //     Thanks & Regards <br />
-            //     Team Deliver`;
+          } else if (action === 'reject') {
+              // subject = 'Medicine Request Rejected';
+              // body = `Hello ${supplier_name}, <br />
+              //     We regret to inform you that your medicine request has been rejected. <br />
+              //     Medicine ID: ${updateStatus.medicine_id} <br />
+              //     Supplier ID: ${updateStatus.supplier_id} <br />
+              //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
+              //     <br /><br />
+              //     Thanks & Regards <br />
+              //     Team Deliver`;
 
-            // // Send email for rejection
-            // sendMailFunc(supplier_email, subject, body);
+              // // Send email for rejection
+              // sendMailFunc(supplier_email, subject, body);
 
-            const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-            const newNotification = new Notification({
-                notification_id: notificationId,
-                event_type: 'Medicine Request Rejected',
-                event: 'addmedicine', // This can remain general as the event type
-                from: 'admin',
-                to: 'supplier',
-                from_id: admin_id,
-                to_id: supplier_id,
-                event_id: medicine_id,
-                message: `${medicine_id}: Your listing has been disapproved.`,
-                status: 0
-            });
-            await newNotification.save();
-        } else {
-            return callback({ code: 400, message: "Invalid action" });
-        }
+              const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+              const newNotification = new Notification({
+                  notification_id: notificationId,
+                  event_type: 'Medicine Request Rejected',
+                  event: 'addmedicine', // This can remain general as the event type
+                  from: 'admin',
+                  to: 'supplier',
+                  from_id: admin_id,
+                  to_id: supplier_id,
+                  event_id: medicine_id,
+                  message: `${medicine_id}: Your listing has been disapproved.`,
+                  status: 0
+              });
+              await newNotification.save();
+          } else {
+              return callback({ code: 400, message: "Invalid action" });
+          }
 
-        // Correctly return the success message based on the updated status
-        callback({
-            code: 200,
-            message: `${newMedicineStatus === 1 ? 'Medicine Added Successfully' : newMedicineStatus === 2 ? 'Add Medicine Request Rejected' : ''}`,
-            result: updateStatus
-        });
+          // Correctly return the success message based on the updated status
+          callback({
+              code: 200,
+              message: `${newMedicineStatus === 1 ? 'Medicine Added Successfully' : newMedicineStatus === 2 ? 'Add Medicine Request Rejected' : ''}`,
+              result: updateStatus
+          });
 
-    } catch (error) {
-        console.log('Internal Server Error:', error);
-        callback({ code: 500, message: 'Internal Server Error', result: error });
-    }
-  },
-
+      } catch (error) {
+          console.log('Internal Server Error:', error);
+          callback({ code: 500, message: 'Internal Server Error', result: error });
+      }
+    },
   
     allMedicineList: async (reqObj, callback) => {
       try {
@@ -2635,90 +3305,26 @@ module.exports = {
     //----------------------------- dashboard details -------------------------------------//
     adminDashboardDataList: async (reqObj, callback) => {
       try {
-        const startOfToday = new Date(new Date().setHours(0, 0, 0, 0)); 
-        const endOfToday   = new Date(new Date().setHours(23, 59, 59, 999));
-    
-        // const orderDataList = Order.aggregate([
-        //   {
-        //     $addFields: {
-        //       numeric_total_price: {
-        //         $toDouble: {
-        //           $arrayElemAt: [{ $split: ["$total_price", " "] }, 0]
-        //         }
-        //       }
-        //     }
-        //   },
-        //   {
-        //     $facet: {
-        //       completedCount: [
-        //         { $match: { order_status: 'completed' } },
-        //         {
-        //           $group: {
-        //             _id: null,
-        //             count: { $sum: 1 },
-        //             total_purchase: { $sum: "$numeric_total_price" }
-        //           }
-        //         },
-        //         {
-        //           $project: {
-        //             _id: 0,
-        //             count: 1,
-        //             total_purchase: 1
-        //           }
-        //         }
-        //       ],
-        //       activeCount: [
-        //         { $match: { order_status: 'active' } },
-        //         {
-        //           $group: {
-        //             _id: null,
-        //             count: { $sum: 1 },
-        //             total_purchase: { $sum: "$numeric_total_price" }
-        //           }
-        //         },
-        //         {
-        //           $project: {
-        //             _id: 0,
-        //             count: 1,
-        //             total_purchase: 1
-        //           }
-        //         }
-        //       ],
-        //       pendingCount: [
-        //         { $match: { order_status: 'pending' } },
-        //         {
-        //           $group: {
-        //             _id: null,
-        //             count: { $sum: 1 },
-        //             total_purchase: { $sum: "$numeric_total_price" }
-        //           }
-        //         },
-        //         {
-        //           $project: {
-        //             _id: 0,
-        //             count: 1,
-        //             total_purchase: 1
-        //           }
-        //         }
-        //       ],
-        //       totalPurchaseAmount: [
-        //         {
-        //           $group: {
-        //             _id: null,
-        //             total_purchase: { $sum: "$numeric_total_price" }
-        //           }
-        //         },
-        //         {
-        //           $project: {
-        //             _id: 0,
-        //             total_purchase: 1
-        //           }
-        //         }
-        //       ]
-        //     }
-        //   }
-        // ]);
-    
+        const { filterValue } = reqObj
+        // const startOfToday = new Date(new Date().setHours(0, 0, 0, 0)); 
+        // const endOfToday   = new Date(new Date().setHours(23, 59, 59, 999));
+
+        let startDate = null;
+        let endDate   = moment().endOf('day'); 
+
+        if (filterValue === 'today') {
+            startDate = moment().startOf('day');
+            endDate = moment().endOf('day'); 
+        } else if (filterValue === 'week') {
+            startDate = moment().subtract(7, 'days').startOf('day');  
+        } else if (filterValue === 'month') {
+            startDate = moment().subtract(30, 'days').startOf('day');
+        } else if (filterValue === 'year') {
+            startDate = moment().subtract(365, 'days').startOf('day');
+        } else if (filterValue === 'all' || !filterValue) {
+            startDate = null;
+            endDate = null;
+        }
 
         const orderDataList = Order.aggregate([
           {
@@ -2730,9 +3336,16 @@ module.exports = {
               }
             }
           },
+          // {
+          //   $match: {
+          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
+          //   }
+          // },
+
           {
             $match: {
-              createdAt: { $gte: startOfToday, $lt: endOfToday } // Match today's data
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() }
+              ...(startDate && endDate ? { createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
             }
           },
           {
@@ -2806,49 +3419,16 @@ module.exports = {
           }
         ]);
 
-
-        // const buyerRegReqList = Buyer.aggregate([
-        //   {
-        //     $facet: {
-        //       regReqCount: [
-        //         { $match: { account_status: 0 } },
-        //         {
-        //           $group: {
-        //             _id: null,
-        //             count: { $sum: 1 }
-        //           }
-        //         },
-        //         {
-        //           $project: {
-        //             _id: 0,
-        //             count: 1
-        //           }
-        //         }
-        //       ],
-        //       acceptedReqCount: [
-        //         { $match: { account_status: 1 } },
-        //         {
-        //           $group: {
-        //             _id: null,
-        //             count: { $sum: 1 }
-        //           }
-        //         },
-        //         {
-        //           $project: {
-        //             _id: 0,
-        //             count: 1
-        //           }
-        //         }
-        //       ]
-        //     }
-        //   }
-        // ]);
-
-
         const buyerRegReqList = Buyer.aggregate([
+          // {
+          //   $match: {
+          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
+          //   }
+          // },
           {
             $match: {
-              createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } 
+              ...(startDate && endDate ? { createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
             }
           },
           {
@@ -2870,6 +3450,21 @@ module.exports = {
               ],
               acceptedReqCount: [
                 { $match: { account_status: 1 } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1
+                  }
+                }
+              ],
+              rejectedReqCount: [
+                { $match: { account_status: 2 } },
                 {
                   $group: {
                     _id: null,
@@ -2890,7 +3485,9 @@ module.exports = {
         const supplierrRegReqList = Supplier.aggregate([
           {
             $match: {
-              createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startDate?.toDate(), $lt: endDate?.toDate() } 
+              ...(startDate && endDate ? { createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
             }
           },
           {
@@ -2912,6 +3509,21 @@ module.exports = {
               ],
               acceptedReqCount: [
                 { $match: { account_status: 1 } },
+                {
+                  $group: {
+                    _id: null,
+                    count: { $sum: 1 }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    count: 1
+                  }
+                }
+              ],
+              rejectedReqCount: [
+                { $match: { account_status: 2 } },
                 {
                   $group: {
                     _id: null,
@@ -2986,7 +3598,9 @@ module.exports = {
         const inquiryCount = Enquiry.aggregate([
           {
             $match: {
-              createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startOfToday, $lt: endOfToday }
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } 
+              ...(startDate && endDate ? { created_at: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
             }
           },
           {
@@ -3009,11 +3623,13 @@ module.exports = {
         ]);
 
         const poCount = PurchaseOrder.aggregate([
-          // {
-          //   $match: {
-          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
-          //   }
-          // },
+          {
+            $match: {
+              // createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } 
+              ...(startDate && endDate ? { created_at: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
+            }
+          },
           {
             $match: {
               po_status : 'active' 
@@ -3034,11 +3650,13 @@ module.exports = {
         ]);
 
         const orderCount = Order.aggregate([
-          // {
-          //   $match: {
-          //     createdAt: { $gte: startOfToday, $lt: endOfToday } 
-          //   }
-          // },
+          {
+            $match: {
+              // createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } 
+              ...(startDate && endDate ? { createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
+            }
+          },
           {
             $match: {
               order_status : 'active' 
@@ -3059,7 +3677,13 @@ module.exports = {
         ]);
 
         const totalOrderCount = Order.aggregate([
-          
+          {
+            $match: {
+              // createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } 
+              ...(startDate && endDate ? { createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
+            }
+          },
           {
             $group: {
               _id   : null,
@@ -3075,6 +3699,13 @@ module.exports = {
         ]);
         
         const completedOrderCount = Order.aggregate([
+          {
+            $match: {
+              // createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } 
+              ...(startDate && endDate ? { createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
+            }
+          },
           {
             $match: {
               order_status: 'completed' 
@@ -3094,10 +3725,37 @@ module.exports = {
           }
         ]);
 
-        const [orderData, buyerData, supplierData, supplierCountryData, buyerCountryData, inquiryData, poData, orderCountData,totalOrders, completedOrders ] 
-        = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList, supplierCountry, buyerCountry, inquiryCount, poCount, orderCount, totalOrderCount, completedOrderCount]);
+        const invoiceCount = Invoices.aggregate([
+          {
+            $match: {
+              // createdAt: { $gte: startOfToday, $lt: endOfToday } 
+              // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } 
+              ...(startDate && endDate ? { createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() } } : {})
+            }
+          },
+          {
+            $match: {
+              invoice_status : 'pending' 
+            }
+          },
+          {
+            $group: {
+              _id   : null,
+              count : { $sum: 1 } 
+            }
+          },
+          {
+            $project: {
+              _id   : 0,
+              count : 1
+            }
+          }
+        ]);
 
-        const totalOrderNumber = totalOrders.length > 0 ? totalOrders[0].count : 0;
+        const [orderData, buyerData, supplierData, supplierCountryData, buyerCountryData, inquiryData, poData, orderCountData,totalOrders, completedOrders, invoiceData ] 
+        = await Promise.all([orderDataList, buyerRegReqList, supplierrRegReqList, supplierCountry, buyerCountry, inquiryCount, poCount, orderCount, totalOrderCount, completedOrderCount, invoiceCount]);
+
+        const totalOrderNumber     = totalOrders.length > 0 ? totalOrders[0].count : 0;
         const completedOrderNumber = completedOrders.length > 0 ? completedOrders[0].count : 0;
         
         const completedOrderPercentage = totalOrderNumber > 0 ? (completedOrderNumber / totalOrderNumber) * 100 : 0;
@@ -3108,12 +3766,16 @@ module.exports = {
           buyerCountryData,
           buyerRegisReqCount       : (buyerData[0].regReqCount && buyerData[0].regReqCount[0]) ? buyerData[0].regReqCount[0] : { count: 0 },
           buyerAcceptedReqCount    : (buyerData[0].acceptedReqCount && buyerData[0].acceptedReqCount[0]) ? buyerData[0].acceptedReqCount[0] : { count: 0 },
+          buyerRejectedReqCount    : (buyerData[0].rejectedReqCount && buyerData[0].rejectedReqCount[0]) ? buyerData[0].rejectedReqCount[0] : { count: 0 },
           supplierRegisReqCount    : (supplierData[0].regReqCount && supplierData[0].regReqCount[0]) ? supplierData[0].regReqCount[0] : { count: 0 },
           supplierAcceptedReqCount : (supplierData[0].acceptedReqCount && supplierData[0].acceptedReqCount[0]) ? supplierData[0].acceptedReqCount[0] : { count: 0 },
+          supplierRejectedReqCount : (supplierData[0].rejectedReqCount && supplierData[0].rejectedReqCount[0]) ? supplierData[0].rejectedReqCount[0] : { count: 0 },
           inquiryCount             : inquiryData.length > 0 ? inquiryData[0].count : 0 ,
           poCount                  : poData.length > 0 ? poData[0].count : 0 ,
           orderCount               : orderCountData.length > 0 ?  orderCountData[0].count : 0 ,
-          completedOrderPercentage : completedOrderPercentage.toFixed(3)
+          // completedOrderPercentage : completedOrderPercentage.toFixed(3),
+          completedOrderPercentage : completedOrderNumber,
+          invoiceCount             : invoiceData.length > 0 ?  invoiceData[0].count : 0 ,
         };
     
         callback({ code: 200, message: 'Dashboard data list fetched successfully', result });
@@ -3318,7 +3980,7 @@ module.exports = {
     //------------------------------ inquiries -------------------------------//
     inquiriesList: async (reqObj, callback) => {
       try {
-        const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
+        const { supplier_id, buyer_id, status, pageNo, pageSize, filterValue } = reqObj
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
         const offset    = (page_no - 1) * page_size
@@ -3331,12 +3993,55 @@ module.exports = {
             matchCondition.supplier_id = supplier_id;
         }
 
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        // Apply date filter based on filterValue (today, week, month, year, all)
+        if (filterValue === 'today') {
+            dateFilter = {
+                created_at: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+              created_at: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+              created_at: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+              created_at: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {}; // No date filter
+        }
+    
+        // Merge dateFilter with filterCondition to apply both filters
+        const combinedFilter = { ...matchCondition, ...dateFilter };
+
         // if (status) {
         //     matchCondition.enquiry_status = status;
         // }
             Enquiry.aggregate([
                 {
-                    $match: matchCondition
+                    // $match: matchCondition
+                     $match : combinedFilter
                 },
                 {
                     $lookup : {
@@ -3406,7 +4111,7 @@ module.exports = {
                 
             ])
             .then(async(data) => {
-                const totalItems = await Enquiry.countDocuments(matchCondition);
+                const totalItems = await Enquiry.countDocuments(combinedFilter);
                 const totalPages = Math.ceil(totalItems / page_size);
 
                 const returnObj = {
@@ -4073,7 +4778,7 @@ module.exports = {
       try {
         console.log('here',reqObj);
         
-      const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
+      const { supplier_id, buyer_id, status, pageNo, pageSize, filterValue } = reqObj
       const page_no   = pageNo || 1
       const page_size = pageSize || 10
       const offset    = (page_no - 1) * page_size
@@ -4096,11 +4801,51 @@ module.exports = {
       // if (status) {
       //     matchCondition.po_status = status;
       // }
+
+      let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+        console.log("Year filter: ", startDate, endDate); 
+
+        // Apply date filter based on filterValue (today, week, month, year, all)
+        if (filterValue === 'today') {
+            dateFilter = {
+                created_at: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+              created_at: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+              created_at: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+              created_at: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {}; // No date filter
+        }
       
           PurchaseOrder.aggregate([
               {
                   $match: {
-                    po_status : status
+                    po_status : status,
+                    ...dateFilter
                   }
               },
               {
@@ -4197,7 +4942,7 @@ module.exports = {
               },
           ])
           .then(async(data) => {
-              const totalItems = await PurchaseOrder.countDocuments({po_status : status});
+              const totalItems = await PurchaseOrder.countDocuments({po_status : status, ...dateFilter});
               const totalPages = Math.ceil(totalItems / page_size);
 
               const returnObj = {

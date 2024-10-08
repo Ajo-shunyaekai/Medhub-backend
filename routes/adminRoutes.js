@@ -117,6 +117,20 @@ module.exports = () => {
  
     //------------------------------------------ buyer/supplier ------------------------------------------//
 
+    routes.post('/get-buyer-supplier-reg-req-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getTotalRegReqList(req.body, result => {
+            const response = handleResponse(result)
+            res.send(response)
+        })
+    })
+
+    routes.post('/get-buyer-supplier-aprroved-reg-req-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
+        Controller.getTotalApprovedRegReqList(req.body, result => {
+            const response = handleResponse(result)
+            res.send(response)
+        })
+    })
+
     routes.post('/get-profile-edit-request-list', checkAuthorization, checkAdminAuthentication, (req, res) => {
         Controller.getProfileUpdateReqList(req.body, result => {
             const response = handleResponse(result)
