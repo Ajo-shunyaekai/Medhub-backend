@@ -19,7 +19,6 @@ const Invoices           = require('../schema/invoiceSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 
-
 const generatePassword = () => {
   const password = generator.generate({
     length  : 12,
