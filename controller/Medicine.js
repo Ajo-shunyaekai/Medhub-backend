@@ -879,7 +879,7 @@ module.exports = {
   filterMedicine: async (reqObj, callback) => {  
     try {
       let matchConditions = {};
-  
+
       if (reqObj.category_name && reqObj.category_name !== "") {
           matchConditions.category_name = reqObj.category_name;
       }
@@ -891,7 +891,6 @@ module.exports = {
       const aggregatePipeline = aggregation(reqObj, matchConditions)
 
       Medicine.aggregate(aggregatePipeline).then((result) => {
-          console.log(result.length);
           callback({code: 200, message: `Filtered Medicine lists`, result: result});
       }).catch((err) => {
         console.log(err);
@@ -1110,7 +1109,8 @@ module.exports = {
   
       const [data, totalItems] = await Promise.all([
         Medicine.aggregate(pipeline),
-        Medicine.aggregate(countPipeline)
+        // Medicine.aggregate(countPipeline) // this is has issue with pagination
+        Medicine.aggregate(pipeline)
           .count("totalItems")
           .then(counts => (counts[0] ? counts[0].totalItems : 0))
       ]);

@@ -1764,7 +1764,7 @@ module.exports = {
         Order.aggregate([
           {
             $match: matchCondition
-        },
+          },
           {
               $facet: {
                   yearlyData: [
