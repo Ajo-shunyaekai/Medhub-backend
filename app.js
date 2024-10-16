@@ -27,8 +27,8 @@ const invoiceRouter   = require('./routes/invoiceRoutes')()
 connect()
 
 
-
 app.use('/uploads', express.static('uploads'));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('/*', function (req, res) {
