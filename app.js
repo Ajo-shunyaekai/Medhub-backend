@@ -41,15 +41,14 @@ const corsOptions = {
     'http://192.168.1.82:3000',
     'http://192.168.1.42:3000',
     'http://192.168.1.87:3000',
+    'http://192.168.1.53:3000',
     'http://localhost:2221',
     'http://localhost:3030',
     'http://192.168.1.34:3333',
+    'http://192.168.1.53:2222',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3333',
-    'https://supplierdeliver.shunyaekai.com',
-    'https://buyerdeliver.shunyaekai.com',
-    'https://deliver.shunyaekai.com'
   ],
   methods: 'GET, POST',
   credentials: true
@@ -114,7 +113,7 @@ app.use('/api/supplier/invoice', invoiceRouter);
 
 //--------------- api routes ------------------//
 const ADMIN_ID = process.env.ADMIN_ID
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT || 2222;
 
 const server = app.listen(PORT, (req, res) => {
   console.log(`server is runnig http://localhost:${PORT}/`);

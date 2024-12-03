@@ -144,6 +144,8 @@ module.exports = {
 
           const invoice = await Invoice.findOne({ invoice_id, order_id });
           const order   = await Order.findOne({ order_id });
+          
+          
   
           if (!invoice || !order) {
               return callback({ code: 404, message: 'Invoice or Order not found' });
@@ -151,7 +153,7 @@ module.exports = {
           // Calculate the new amounts
           const newTotalAmountPaid = parseFloat((parseFloat(order.total_amount_paid) + parseFloat(amount_paid)).toFixed(2));
           const newPendingAmount   = parseFloat((parseFloat(order.grand_total) - newTotalAmountPaid).toFixed(2));
-
+          
           // const invoiceStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
           // const invStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
           // const invoiceStatus = newPendingAmount === 0 ? 'completed' : 'paid';
@@ -159,7 +161,8 @@ module.exports = {
 
           const orderStatus    = parseFloat(newTotalAmountPaid).toFixed(2) === parseFloat(order.total_due_amount).toFixed(2) ? 'completed' : order.order_status;
           const newOrderStatus = parseFloat(newTotalAmountPaid).toFixed(2) === parseFloat(order.total_due_amount).toFixed(2) ? 'Completed' : order.status;
-
+          
+          
           // Update the invoice
           const updatedInvoice = await Invoice.findOneAndUpdate(
               { invoice_id, order_id },
@@ -170,8 +173,8 @@ module.exports = {
                       transaction_id,
                       payment_date,
                       transaction_image,
-                      total_amount_paid : newTotalAmountPaid.toFixed(2),
-                      pending_amount    : newPendingAmount.toFixed(2),
+                      total_amount_paid : newTotalAmountPaid,
+                      pending_amount    : newPendingAmount,
                       status            : 'paid',
                       invoice_status    : 'paid',
               
@@ -185,8 +188,8 @@ module.exports = {
               { order_id },
               {
                   $set: {
-                      total_amount_paid : newTotalAmountPaid.toFixed(2),
-                      pending_amount    : newPendingAmount.toFixed(2),
+                      total_amount_paid : newTotalAmountPaid,
+                      pending_amount    : newPendingAmount,
                       status            : newOrderStatus,
                       order_status      : orderStatus
                   }
