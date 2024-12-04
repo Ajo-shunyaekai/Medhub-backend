@@ -3284,9 +3284,12 @@ module.exports = {
                   "order._updated_at"          : 1,
               }
           },
+         
+          
           
         ])
         .then(async(data) => {
+          console.log(data[0]);
             callback({code: 200, message: 'Support Details', result: data[0]})
         })
         .catch((err) => {
