@@ -6,7 +6,7 @@ const path                                       = require('path');
 const Order                                      = require('../controller/Order')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
-const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkCommonUserAuthentication}  = require('../middleware/Authorization');
 
 
 const storage = multer.diskStorage({
@@ -44,7 +44,7 @@ const cpUpload = (req, res, next) => {
 
 module.exports = () => {
     
-    routes.post('/create-order', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
+    routes.post('/create-order', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
         // let errObj = validation(req.body, 'orderRequest');
     
@@ -58,21 +58,21 @@ module.exports = () => {
             });
     });
 
-    routes.post('/book-logistics', checkAuthorization, checkBuyerAuthentication, async(req, res) => {
+    routes.post('/book-logistics', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
             Order.bookLogistics(req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
-    routes.post('/submit-details', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
+    routes.post('/submit-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
         Order.submitPickupDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
 });
 
-    routes.post('/buyer-order-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/buyer-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
             Order.buyerOrdersList(req.body, result => {
                 const response = handleResponse(result);
@@ -80,7 +80,7 @@ module.exports = () => {
             });
     });
 
-    routes.post('/order-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
             Order.buyerOrderDetails(req.body, result => {
                 const response = handleResponse(result);
@@ -88,7 +88,7 @@ module.exports = () => {
             });
     });
 
-    routes.post('/cancel-order', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/cancel-order', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
         // let errObj = validation(obj,'cancelOrder');
     
@@ -103,7 +103,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-order-feedback', checkAuthorization, commonAuthentication, cpUpload, (req, res) => {
+    routes.post('/submit-order-feedback', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
 
         if (!req.files['feedback_image'] || req.files['feedback_image'].length === 0) {
             res.send({ code: 415, message: 'Feedback Image is required!', errObj: {} });
@@ -120,7 +120,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-order-complaint', checkAuthorization, commonAuthentication, cpUpload, (req, res) => {
+    routes.post('/submit-order-complaint', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
 
         if (!req.files['complaint_image'] || req.files['complaint_image'].length === 0) {
             res.send({ code: 415, message: 'Complaint Image is required!', errObj: {} });
@@ -137,7 +137,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/buyer-invoice-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/buyer-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
         Order.buyerInvoicesList(req.body, result => {
             const response = handleResponse(result);
@@ -145,7 +145,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/invoice-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
         Order.buyerInvoiceDetails(req.body, result => {
             const response = handleResponse(result);
@@ -155,7 +155,7 @@ module.exports = () => {
 
 
     //------------------------------------------------------ supplier order ------------------------------------------------------//
-    routes.post('/supplier-order-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/supplier-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
         Order.supplierOrdersList(req.body, result => {
             const response = handleResponse(result);
@@ -163,7 +163,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/supplier-order-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/supplier-order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
         Order.supplierOrderDetails(req.body, result => {
             const response = handleResponse(result);
@@ -171,7 +171,7 @@ module.exports = () => {
         });  
     });
 
-    // routes.post('/proforma-invoice-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    // routes.post('/proforma-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
     //     Order.supplierInvoicesList(req.body, result => {
     //         const response = handleResponse(result);
@@ -179,7 +179,7 @@ module.exports = () => {
     //     });
     // });
 
-    routes.post('/supplier-invoice-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/supplier-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
         Order.supplierInvoicesList(req.body, result => {
             const response = handleResponse(result);
@@ -189,7 +189,7 @@ module.exports = () => {
 
      //------------------------------------------------------ supplier order ------------------------------------------------------//
      
-     routes.post('/proforma-invoice-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+     routes.post('/proforma-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
         Order.proformaInvoiceList(req.body, result => {
             const response = handleResponse(result);
@@ -198,7 +198,7 @@ module.exports = () => {
     });
 
 
-    routes.post('/sales-filter', checkAuthorization, commonAuthentication, (req, res) => {
+    routes.post('/sales-filter', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Order.orderSalesFilterList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);

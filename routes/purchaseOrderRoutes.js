@@ -6,11 +6,11 @@ const path                = require('path');
 const Controller             = require('../controller/purchaseOrder')
 const { handleResponse }  = require('../utils/utilities');
 const { validation }      = require('../utils/utilities')
-const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkCommonUserAuthentication}  = require('../middleware/Authorization');
 
 module.exports = () => {
     
-    routes.post('/create-po', checkAuthorization, commonAuthentication,(req, res) => {
+    routes.post('/create-po', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
         const { supplierMobile, buyerMobile } = req.body.data;
         const countryCodeRegex = /^\+\d+/;
 
@@ -31,21 +31,21 @@ module.exports = () => {
             });
     });
 
-    routes.post('/get-po-list', checkAuthorization, commonAuthentication,(req, res) => {
+    routes.post('/get-po-list', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
         Controller.getPOList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/get-po-details', checkAuthorization, commonAuthentication,(req, res) => {
+    routes.post('/get-po-details', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
         Controller.getPODetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/edit-po', checkAuthorization, commonAuthentication,(req, res) => {
+    routes.post('/edit-po', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
         const { supplierMobile, buyerMobile } = req.body.data;
         const countryCodeRegex = /^\+\d+/;
 

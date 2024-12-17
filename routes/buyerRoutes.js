@@ -7,7 +7,7 @@ const Controller                                 = require('../controller/Buyer'
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
-const {checkAuthorization, checkBuyerAuthentication, commonAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkCommonUserAuthentication }  = require('../middleware/Authorization');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -115,7 +115,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-profile-request', checkAuthorization, checkBuyerAuthentication, cpUpload, (req, res) => {
+    routes.post('/edit-profile-request', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
 
         if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
             res.send({ code: 415, message: 'Buyer Logo is required!', errObj: {} });
@@ -168,42 +168,42 @@ module.exports = () => {
         });
     });
 
-    routes.post('/profile-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.buyerProfileDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/supplier-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supplierList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/my-supplier-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/my-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.mySupplierList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/supplier-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supplierDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/supplier-product-list', checkAuthorization, checkBuyerAuthentication, async(req, res) => {
+    routes.post('/supplier-product-list', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
         Controller.supplierProductList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/buyer-supplier-orders', checkAuthorization, commonAuthentication, (req, res) => {
+    routes.post('/buyer-supplier-orders', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         
         Controller.buyerSupplierOrdersList(req.body, result => {
             const response = handleResponse(result);
@@ -211,7 +211,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/orders-summary-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/orders-summary-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         
         Controller.buyerDashboardOrderDetails(req.body, result => {
             const response = handleResponse(result);
@@ -219,7 +219,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/orders-seller-country', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/orders-seller-country', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         
         Controller.buyerOrderSellerCountry(req.body, result => {
             const response = handleResponse(result);
@@ -227,14 +227,14 @@ module.exports = () => {
         });
     });
 
-    routes.post('/support-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supportList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/support-details', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supportDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
@@ -242,63 +242,63 @@ module.exports = () => {
     });
 
     //---------------------------------- add-to-list ---------------------------------//
-    routes.post('/add-to-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/add-to-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.addToList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/show-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/show-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.showList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/delete-list-item', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/delete-list-item', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.deleteListItem(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/send-enquiry', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/send-enquiry', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.sendEnquiry(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/get-notification-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.getNotificationList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/get-notification-details-list', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/get-notification-details-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.getNotificationDetailsList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/update-notification-status', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.updateStatus(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/get-invoice-count', checkAuthorization, checkBuyerAuthentication, (req, res) => {
+    routes.post('/get-invoice-count', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.getInvoiceCount(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    // routes.post('/enquiry-list', checkAuthorization, commonAuthentication, async(req, res) => {
+    // routes.post('/enquiry-list', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
     //     Controller.getEnquiryList(req.body, result => {
     //         const response = handleResponse(result);
@@ -306,7 +306,7 @@ module.exports = () => {
     //     });
     //  });
 
-    // routes.post('/enquiry-details', checkAuthorization, commonAuthentication, async(req, res) => {
+    // routes.post('/enquiry-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
     //     Controller.getEnquiryDetails(req.body, result => {
     //             const response = handleResponse(result);

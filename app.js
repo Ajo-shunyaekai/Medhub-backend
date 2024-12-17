@@ -143,7 +143,7 @@ const io = new Server(server, { // Initialize Socket.IO
 
 // Initialize Socket.IO
 io.on('connection', (socket) => {
-  console.log('A user connected: ', socket.id);
+  // console.log('A user connected: ', socket.id);
 
   // Handle supplier registration (or user registration)
   socket.on('register', (userId) => {

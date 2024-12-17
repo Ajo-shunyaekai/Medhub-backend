@@ -6,7 +6,7 @@ const Controller                                 = require('../controller/Medici
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
-const {checkAuthorization, checkAuthentication, checkSupplierAuthentication, commonAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
 
 
 const storage = multer.diskStorage({
@@ -47,7 +47,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/add-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
+    routes.post('/add-medicine', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
 
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
             res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
@@ -91,7 +91,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/medicine-list', checkAuthorization, commonAuthentication, (req, res) => {
+    routes.post('/medicine-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.allMedicineList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
@@ -105,7 +105,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-medicine', checkAuthorization, checkSupplierAuthentication, cpUpload, (req, res) => {
+    routes.post('/edit-medicine', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
         let allProductImages = [];
         let allInvoiceImages = [];
     

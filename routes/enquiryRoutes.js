@@ -6,12 +6,12 @@ const path                = require('path');
 const Enquiry             = require('../controller/Enquiry')
 const { handleResponse }  = require('../utils/utilities');
 const { validation }      = require('../utils/utilities')
-const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkCommonUserAuthentication}  = require('../middleware/Authorization');
 
 
 module.exports = () => {
     
-    routes.post('/enquiry-list', checkAuthorization, commonAuthentication,(req, res) => {
+    routes.post('/enquiry-list', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
 
             Enquiry.getEnquiryList(req.body, result => {
                 const response = handleResponse(result);
@@ -19,7 +19,7 @@ module.exports = () => {
             });
     });
 
-    routes.post('/enquiry-details', checkAuthorization, commonAuthentication, async(req, res) => {
+    routes.post('/enquiry-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
             Enquiry.getEnquiryDetails(req.body, result => {
                 const response = handleResponse(result);
@@ -27,7 +27,7 @@ module.exports = () => {
             });
     });
 
-    routes.post('/submit-quotation', checkAuthorization, commonAuthentication, async(req, res) => {
+    routes.post('/submit-quotation', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
         Enquiry.submitQuotation(req.body, result => {
             const response = handleResponse(result);
@@ -35,7 +35,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/accept-reject-quotation', checkAuthorization, commonAuthentication, async(req, res) => {
+    routes.post('/accept-reject-quotation', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
         Enquiry.acceptRejectQuotation(req.body, result => {
             const response = handleResponse(result);
@@ -43,7 +43,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/cancel-enquiry', checkAuthorization, commonAuthentication,(req, res) => {
+    routes.post('/cancel-enquiry', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
 
         Enquiry.cancelEnquiry(req.body, result => {
             const response = handleResponse(result);
