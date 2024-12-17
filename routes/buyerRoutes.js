@@ -71,6 +71,7 @@ module.exports = () => {
         const person_mob_no       = req.body.contact_person_mobile.split(" ").slice(1).join(" ")
         const personCountryCode   = req.body.contact_person_mobile.split(" ")[0]; 
 
+
         const regObj = {
             ...req.body,
             buyer_mobile                : buyer_mobile_number,
