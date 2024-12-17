@@ -21,6 +21,8 @@ const orderRouter     = require('./routes/orderRoutes')()
 const enquiryRouter   = require('./routes/enquiryRoutes')()
 const purchaseRouter  = require('./routes/purchaseOrderRoutes')()
 const invoiceRouter   = require('./routes/invoiceRoutes')()
+const authRoutes = require(`./routes/authRoutes`)
+
 //-----------------   routes   -----------------------//
 
 //db-connection
@@ -66,6 +68,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //------------------------------ api routes ------------------//
+app.use(`/api/auth`,authRoutes)
 app.use('/api/user', userRouter);
 app.use('/api/admin', adminRouter);
 

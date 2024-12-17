@@ -200,7 +200,6 @@ module.exports = {
   },
 
   checkCommonUserAuthentication: async (req, res, next) => {
-    console.log(`\nCommonm Authentication function called`)
     const { access_token, user_type } = req.headers;
     const { supplier_id, seller_id, admin_id } = req?.body;
 
