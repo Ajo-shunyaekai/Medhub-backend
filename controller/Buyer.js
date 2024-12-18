@@ -55,6 +55,9 @@ const formattedDate = formatDate(today);
 module.exports = {
 
     Regsiter : async(reqObj, callback) => {
+      console.log(reqObj);
+      // return false
+      
         try {
             const emailExists = await Buyer.findOne({buyer_email : reqObj.buyer_email})
             if(emailExists) {

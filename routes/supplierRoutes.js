@@ -7,47 +7,18 @@ const sharp                                      = require('sharp')
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
+const createMulterMiddleware = require('../utils/Multer')
 
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let uploadPath = './uploads/supplier/supplierImage_files';
-        if (file.fieldname === 'tax_image') {
-            uploadPath = './uploads/supplier/tax_image';
-        } else if (file.fieldname === 'license_image') {
-            uploadPath = './uploads/supplier/license_image';
-        }else if (file.fieldname === 'certificate_image') {
-            uploadPath = './uploads/supplier/certificate_image';
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const ext = file.mimetype.split("/")[1];
-        cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-    },
-});
-
-const upload = multer({ storage: storage });
-
-const cpUpload = (req, res, next) => {
-    upload.fields([
-        { name: 'supplier_image', maxCount: 1 },
-        { name: 'license_image' },
-        { name: 'tax_image'},
-        { name: 'certificate_image' },
-    ])(req, res, (err) => {
-        if (err) {
-            console.error('Multer Error:', err);
-            res.status(500).json({ error: 'File upload error' });
-            return;
-        }
-        next();
-    });
-};
+const supplierUploadMiddleware = createMulterMiddleware([
+    { fieldName: 'buyer_image', uploadPath: './uploads/buyer/buyer_images' },
+    { fieldName: 'tax_image', uploadPath: './uploads/buyer/tax_images' },
+    { fieldName: 'license_image', uploadPath: './uploads/buyer/license_images' },
+    { fieldName: 'certificate_image', uploadPath: './uploads/buyer/certificate_images' },
+]);
 
 module.exports = () => {
 
-    routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
+    routes.post('/register', checkAuthorization, supplierUploadMiddleware, async(req, res) => {
         if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
             res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
             return;
@@ -123,7 +94,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-supplier-request', checkAuthorization, checkCommonUserAuthentication, cpUpload, async(req, res) => {
+    routes.post('/edit-supplier-request', checkAuthorization, checkCommonUserAuthentication, supplierUploadMiddleware, async(req, res) => {
 
         if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
             res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });

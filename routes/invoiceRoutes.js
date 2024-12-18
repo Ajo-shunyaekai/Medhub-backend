@@ -8,7 +8,7 @@ const Invoice                                    = require('../controller/Invoic
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
 const {checkAuthorization, checkCommonUserAuthentication, }  = require('../middleware/Authorization');
-
+const createMulterMiddleware = require('../utils/Multer')
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -43,6 +43,10 @@ const cpUpload = (req, res, next) => {
     });
 };
 
+const imageUploadMiddleware = createMulterMiddleware([
+    { fieldName: 'transaction_image', uploadPath: './uploads/buyer/order/invoice_images' },
+]);
+
 
 module.exports = () => {
     
@@ -59,7 +63,7 @@ module.exports = () => {
             });
     });
 
-    routes.post('/update-payment-status', checkAuthorization, checkCommonUserAuthentication, cpUpload, async(req, res) => {
+    routes.post('/update-payment-status', checkAuthorization, checkCommonUserAuthentication, imageUploadMiddleware, async(req, res) => {
         if (!req.files['transaction_image'] || req.files['transaction_image'].length === 0) {
             res.send({ code: 415, message: 'Transaction Image field is required!', errObj: {} });
             return;

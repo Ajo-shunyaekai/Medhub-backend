@@ -7,6 +7,7 @@ const Order                                      = require('../controller/Order'
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
 const {checkAuthorization, checkCommonUserAuthentication}  = require('../middleware/Authorization');
+const createMulterMiddleware = require('../utils/Multer')
 
 
 const storage = multer.diskStorage({
@@ -40,6 +41,13 @@ const cpUpload = (req, res, next) => {
         next();
     });
 };
+
+const imageUploadMiddleware = createMulterMiddleware([
+    { fieldName: 'complaint_image', uploadPath: './uploads/buyer/order/complaint_images' },
+    { fieldName: 'feedback_image', uploadPath: './uploads/buyer/order/feedback_images' },
+    // { fieldName: 'license_image', uploadPath: './uploads/buyer/license_images' },
+    // { fieldName: 'certificate_image', uploadPath: './uploads/buyer/certificate_images' },
+]);
 
 
 module.exports = () => {
@@ -103,7 +111,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-order-feedback', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
+    routes.post('/submit-order-feedback', checkAuthorization, checkCommonUserAuthentication, imageUploadMiddleware, (req, res) => {
 
         if (!req.files['feedback_image'] || req.files['feedback_image'].length === 0) {
             res.send({ code: 415, message: 'Feedback Image is required!', errObj: {} });
@@ -120,7 +128,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/submit-order-complaint', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
+    routes.post('/submit-order-complaint', checkAuthorization, checkCommonUserAuthentication, imageUploadMiddleware, (req, res) => {
 
         if (!req.files['complaint_image'] || req.files['complaint_image'].length === 0) {
             res.send({ code: 415, message: 'Complaint Image is required!', errObj: {} });

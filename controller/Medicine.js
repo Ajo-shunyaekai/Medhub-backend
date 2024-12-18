@@ -52,7 +52,7 @@ const sendMailFunc = (email, subject, body) =>{
     <p>Best regards,<br/>Deliver.com Team</p>
   `;
   return sendMailFunc(adminEmail, subject, body);
-}
+ }
 
 function formatDate(date) {
   const day = date.getDate().toString().padStart(2, '0');
@@ -400,24 +400,6 @@ module.exports = {
             matchCondition.status = 1;
         }
 
-        // if (searchKey && category_name) {
-        //     matchCondition.$and = [
-        //         {
-        //             $or: [
-        //                 { medicine_name : { $regex: searchKey, $options: 'i' } },
-        //                 { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
-        //             ]
-        //         },
-        //         { category_name: category_name }
-        //     ];
-        // } else if (searchKey) {
-        //     matchCondition.$or = [
-        //         { medicine_name : { $regex: searchKey, $options: 'i' } },
-        //         { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
-        //     ];
-        // } else if (category_name) {
-        //     matchCondition.medicine_category = category_name;
-        // }
 
         if (searchKey && category_name) {
           matchCondition.$and = [

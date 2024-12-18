@@ -7,37 +7,12 @@ const { handleResponse }                         = require('../utils/utilities')
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
 const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
+const createMulterMiddleware = require('../utils/Multer')
 
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let uploadPath = './uploads/medicine/product_files';
-        if (file.fieldname === 'invoice_image') {
-            uploadPath = './uploads/medicine/invoice_image';
-        } 
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const ext = file.mimetype.split("/")[1];
-        cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-    },
-});
-
-const upload = multer({ storage: storage });
-
-const cpUpload = (req, res, next) => {
-    upload.fields([
-        { name: 'product_image'},
-        { name: 'invoice_image'}
-    ])(req, res, (err) => {
-        if (err) {
-            console.error('Multer Error:', err);
-            res.status(500).json({ error: 'File upload error' });
-            return;
-        }
-        next();
-    });
-};
+const medicineUploadMiddleware = createMulterMiddleware([
+    { fieldName: 'product_image', uploadPath: './uploads/medicine/product_files' },
+    { fieldName: 'invoice_image', uploadPath: './uploads/medicine/invoice_image' },
+]);
 
 module.exports = () => {
     routes.post('/get-medicine-by-name', checkAuthorization, (req, res) => {
@@ -47,7 +22,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/add-medicine', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
+    routes.post('/add-medicine', checkAuthorization, checkCommonUserAuthentication, medicineUploadMiddleware, (req, res) => {
 
         if (!req.files['product_image'] || req.files['product_image'].length === 0) {
             res.send({ code: 415, message: 'Products Images fields are required!', errObj: {} });
@@ -105,7 +80,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-medicine', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
+    routes.post('/edit-medicine', checkAuthorization, checkCommonUserAuthentication, medicineUploadMiddleware, (req, res) => {
         let allProductImages = [];
         let allInvoiceImages = [];
     

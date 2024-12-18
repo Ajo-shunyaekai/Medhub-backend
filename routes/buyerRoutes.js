@@ -8,46 +8,19 @@ const { handleResponse }                         = require('../utils/utilities')
 const {validation}                               = require('../utils/utilities')
 const {imageUpload}                              = require('../utils/imageUpload')
 const {checkAuthorization, checkCommonUserAuthentication }  = require('../middleware/Authorization');
+const createMulterMiddleware = require('../utils/Multer')
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let uploadPath = './uploads/buyer/buyer_images';
-        if (file.fieldname === 'tax_image') {
-            uploadPath = './uploads/buyer/tax_images';
-        } else if (file.fieldname === 'license_image') {
-            uploadPath = './uploads/buyer/license_images';
-        } else if (file.fieldname === 'certificate_image') {
-            uploadPath = './uploads/buyer/certificate_images';
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const ext = file.mimetype.split("/")[1];
-        cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-    },
-});
 
-const upload = multer({ storage: storage });
-
-const cpUpload = (req, res, next) => {
-    upload.fields([
-        { name: 'buyer_image'},
-        { name: 'license_image'},
-        { name: 'tax_image'},
-        { name: 'certificate_image'},
-    ])(req, res, (err) => {
-        if (err) {
-            console.error('Multer Error:', err);
-            res.status(500).json({ error: 'File upload error' });
-            return;
-        }
-        next();
-    });
-};
+const buyerUploadMiddleware = createMulterMiddleware([
+    { fieldName: 'buyer_image', uploadPath: './uploads/buyer/buyer_images' },
+    { fieldName: 'tax_image', uploadPath: './uploads/buyer/tax_images' },
+    { fieldName: 'license_image', uploadPath: './uploads/buyer/license_images' },
+    { fieldName: 'certificate_image', uploadPath: './uploads/buyer/certificate_images' },
+]);
 
 module.exports = () => {
 
-    routes.post('/register', checkAuthorization, cpUpload, async(req, res) => {
+    routes.post('/register', checkAuthorization, buyerUploadMiddleware, async(req, res) => {
       
         if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
             res.send({ code: 415, message: 'Company Logo is required!', errObj: {} });
@@ -90,8 +63,6 @@ module.exports = () => {
             res.send( { code : 419, message : 'All fields are required', errObj });
             return;
         }
-
-        console.log(regObj);
         
         Controller.Regsiter(regObj, result => {
             const response = handleResponse(result);
@@ -116,7 +87,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-profile-request', checkAuthorization, checkCommonUserAuthentication, cpUpload, (req, res) => {
+    routes.post('/edit-profile-request', checkAuthorization, checkCommonUserAuthentication, buyerUploadMiddleware, (req, res) => {
 
         if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
             res.send({ code: 415, message: 'Buyer Logo is required!', errObj: {} });
