@@ -6,7 +6,7 @@ const multer                                     = require('multer')
 const sharp                                      = require('sharp')
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
-const {checkAuthorization, checkAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
 
 
 const storage = multer.diskStorage({
@@ -123,7 +123,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/edit-supplier-request', checkAuthorization, checkSupplierAuthentication, cpUpload, async(req, res) => {
+    routes.post('/edit-supplier-request', checkAuthorization, checkCommonUserAuthentication, cpUpload, async(req, res) => {
 
         if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
             res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
@@ -167,28 +167,28 @@ module.exports = () => {
         });
     });
 
-    routes.post('/profile-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supplierProfileDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/buyer-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/buyer-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.buyerDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/change-password', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/change-password', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.changePassword(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/orders-summary-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/orders-summary-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         
         Controller.supplierDashboardOrderDetails(req.body, result => {
             const response = handleResponse(result);
@@ -196,7 +196,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/orders-buyer-country', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/orders-buyer-country', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         
         Controller.supplierOrderSupplierCountry(req.body, result => {
             const response = handleResponse(result);
@@ -204,34 +204,34 @@ module.exports = () => {
         });
     });
 
-    routes.post('/support-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supportList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/support-details', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supportDetails(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/get-notification-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.getNotificationList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
-    routes.post('/get-notification-details-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/get-notification-details-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.getNotificationDetailsList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/update-notification-status', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.updateStatus(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
@@ -239,14 +239,14 @@ module.exports = () => {
     });
 
 
-    routes.post('/medicine-request-list', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/medicine-request-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.medicinRequestList(req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
-    routes.post('/get-invoice-count', checkAuthorization, checkSupplierAuthentication, (req, res) => {
+    routes.post('/get-invoice-count', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.getInvoiceCount(req.body, result => {
             const response = handleResponse(result);
             res.send(response);

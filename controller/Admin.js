@@ -104,6 +104,7 @@ module.exports = {
           const isMatch = await bcrypt.compare(password, admin.password);
 
           const adminDetails = {
+            _id       : admin._id,
             admin_id  : admin.admin_id,
             user_name : admin.user_name,
             email     : admin.email,

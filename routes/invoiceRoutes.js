@@ -7,7 +7,7 @@ const Controller                                 = require('../controller/Order'
 const Invoice                                    = require('../controller/Invoice')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
-const {checkAuthorization, checkBuyerAuthentication, commonAuthentication, checkSupplierAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkCommonUserAuthentication, }  = require('../middleware/Authorization');
 
 
 const storage = multer.diskStorage({
@@ -46,7 +46,7 @@ const cpUpload = (req, res, next) => {
 
 module.exports = () => {
     
-    routes.post('/create-invoice', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
+    routes.post('/create-invoice', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
         // let errObj = validation(req.body, 'orderRequest');
     
         // if (Object.values(errObj).length) {
@@ -59,7 +59,7 @@ module.exports = () => {
             });
     });
 
-    routes.post('/update-payment-status', checkAuthorization, checkBuyerAuthentication, cpUpload, async(req, res) => {
+    routes.post('/update-payment-status', checkAuthorization, checkCommonUserAuthentication, cpUpload, async(req, res) => {
         if (!req.files['transaction_image'] || req.files['transaction_image'].length === 0) {
             res.send({ code: 415, message: 'Transaction Image field is required!', errObj: {} });
             return;
@@ -76,14 +76,14 @@ module.exports = () => {
         });
     });
 
-    // routes.post('/submit-details', checkAuthorization, checkSupplierAuthentication, async(req, res) => {
+    // routes.post('/submit-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
     //     Order.submitPickupDetails(req.body, result => {
     //         const response = handleResponse(result);
     //         res.send(response);
     //     });
     // });
 
-    routes.post('/invoice-details', checkAuthorization, commonAuthentication, async(req, res) => {
+    routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
             Invoice.invoiceDetails(req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);

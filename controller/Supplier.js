@@ -160,6 +160,7 @@ module.exports = {
 
         if (isMatch) {
           const supplierData = {
+            _id                         : supplier._id,
             supplier_id                 : supplier.supplier_id,
             supplier_name               : supplier.supplier_name,
             supplier_address            : supplier.supplier_address,
