@@ -86,12 +86,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/supplier/purchaseorder/get-po-details/:id', (req, res) => {
-  const { id } = req.params;
-  console.log(`PO details requested for ID: ${id}`);
-  res.json({ message: 'Purchase Order details fetched successfully', id });
-});
-
 //------------------------------ api routes ------------------//
 app.use(`/api/auth`,authRoutes)
 app.use('/api/user', userRouter);
