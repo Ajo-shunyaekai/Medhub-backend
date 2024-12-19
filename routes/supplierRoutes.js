@@ -138,6 +138,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-supplier-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+        Controller.supplierProfileDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    })
+
     routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supplierProfileDetails(req.body, result => {
             const response = handleResponse(result);

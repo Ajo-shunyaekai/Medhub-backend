@@ -137,6 +137,13 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-buyer-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+        Controller.buyerProfileDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
+    });
+    
     routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.buyerProfileDetails(req.body, result => {
             const response = handleResponse(result);

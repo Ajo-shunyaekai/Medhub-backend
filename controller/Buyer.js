@@ -781,6 +781,7 @@ module.exports = {
     
 
     buyerOrderSellerCountry : async(reqObj, callback) => {
+      console.log('here')
       try {
         const { buyer_id } = reqObj
 
