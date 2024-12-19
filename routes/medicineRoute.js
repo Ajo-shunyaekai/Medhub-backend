@@ -1,17 +1,15 @@
 const express                                    = require('express');
 var routes                                       = express.Router();
 const path                                       = require('path');
-const multer                                     = require('multer')
 const Controller                                 = require('../controller/Medicine')
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
-const {imageUpload}                              = require('../utils/imageUpload')
 const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
-const createMulterMiddleware = require('../utils/Multer')
+const createMulterMiddleware = require('../utils/imageUpload')
 
 const medicineUploadMiddleware = createMulterMiddleware([
-    { fieldName: 'product_image', uploadPath: './uploads/medicine/product_files' },
-    { fieldName: 'invoice_image', uploadPath: './uploads/medicine/invoice_image' },
+    { fieldName: 'product_image', uploadPath: './uploads/medicine/product_files', maxCount: 10 },
+    { fieldName: 'invoice_image', uploadPath: './uploads/medicine/invoice_image', maxCount: 1 },
 ]);
 
 module.exports = () => {

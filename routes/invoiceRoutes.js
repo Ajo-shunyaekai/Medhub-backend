@@ -1,47 +1,13 @@
 const express                                    = require('express');
 var routes                                       = express.Router();
-const multer                                     = require('multer')
-const sharp                                      = require('sharp')
 const path                                       = require('path');
 const Controller                                 = require('../controller/Order')
 const Invoice                                    = require('../controller/Invoice')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
 const {checkAuthorization, checkCommonUserAuthentication, }  = require('../middleware/Authorization');
-const createMulterMiddleware = require('../utils/Multer')
+const createMulterMiddleware = require('../utils/imageUpload')
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let uploadPath = './uploads/buyer/order/invoice_images';
-        if (file.fieldname === 'transaction_image') {
-            uploadPath = './uploads/buyer/order/invoice_images';
-        }
-        //  else if (file.fieldname === 'feedback_image') {
-        //     uploadPath = './uploads/buyer/order/feedback_images';
-        // }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const ext = file.mimetype.split("/")[1];
-        cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-    },
-});
-
-const upload = multer({ storage: storage });
-
-const cpUpload = (req, res, next) => {
-    upload.fields([
-        { name: 'transaction_image' },
-        // { name: 'feedback_image'},
-    ])(req, res, (err) => {
-        if (err) {
-            console.error('Multer Error:', err);
-            res.status(500).json({ error: 'File upload error' });
-            return;
-        }
-        next();
-    });
-};
 
 const imageUploadMiddleware = createMulterMiddleware([
     { fieldName: 'transaction_image', uploadPath: './uploads/buyer/order/invoice_images' },

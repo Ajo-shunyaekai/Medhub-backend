@@ -14,43 +14,10 @@ const Enquiry            = require('../schema/enquiryListSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Notification       = require('../schema/notificationSchema')
 const Invoice  = require('../schema/invoiceSchema')
-
 const nodemailer         = require('nodemailer');
+const sendEmail = require('../utils/emailService')
+const {getTodayFormattedDate}  = require('../utils/utilities')
 
-
-var transporter = nodemailer.createTransport({
-  host   : "smtp.gmail.com",
-  port   : 587,
-  secure : false, // true for 465, false for other ports
-  type   : "oauth2",
-  // service : 'gmail',
-  auth : {
-      user : process.env.SMTP_USER_ID,
-      pass : process.env.SMTP_USER_PASSWORD
-  }
-});
-const sendMailFunc = (email, subject, body) =>{
-  
-  var mailOptions = {
-      from    : process.env.SMTP_USER_ID,
-      to      : email,
-      subject : subject,
-      // text    : 'This is text mail, and sending for testing purpose'
-      html:body
-      
-  };
-  transporter.sendMail(mailOptions);
-}
-
-function formatDate(date) {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-}
-
-const today = new Date();
-const formattedDate = formatDate(today);
 
 module.exports = {
 
@@ -131,14 +98,15 @@ module.exports = {
                             <li>Contact Person: ${reqObj.contact_person_name}</li>
                             <li>Email Address: ${reqObj.contact_person_email}</li>
                             <li>Phone Number: ${reqObj.contact_person_country_code} ${reqObj.contact_person_mobile}</li>
-                            <li>Registration Date: ${formattedDate}</li>
+                            <li>Registration Date: ${getTodayFormattedDate()}</li>
                           </ul>
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
                           <p>Best regards,<br/>MedHub Global Team</p>
                         `;
               // sendMailFunc(adminEmail, subject, body);
               const recipientEmails = [adminEmail, 'ajo@shunyaekai.tech'];  // Add more emails if needed
-                        await sendMailFunc(recipientEmails.join(','), subject, body);
+                        // await sendMailFunc(recipientEmails.join(','), subject, body);
+                 await sendEmail(recipientEmails, subject, body)
                 callback({code: 200, message: "Buyer Registration Request Submitted Successfully"})
               }).catch((err) => {
                 console.log('err',err);
@@ -1234,7 +1202,8 @@ module.exports = {
   
                   // await sendMailFunc(supplier_email, subject, body);
                   const recipientEmails = [supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
-                  await sendMailFunc(recipientEmails.join(','), subject, body);
+                  // await sendMailFunc(recipientEmails.join(','), subject, body);
+                  await sendEmail(recipientEmails, subject, body)
               }
           }));
   

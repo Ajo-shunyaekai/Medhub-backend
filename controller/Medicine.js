@@ -6,32 +6,10 @@ const MedicineInventory = require("../schema/medicineInventorySchema");
 const { aggregation }   = require("../common/common")
 const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
-const Notification = require('../schema/notificationSchema')
-const nodemailer         = require('nodemailer');
+const Notification             = require('../schema/notificationSchema')
+const sendEmail                = require('../utils/emailService')
+const {getTodayFormattedDate}  = require('../utils/utilities')
 
-
-var transporter = nodemailer.createTransport({
-  host   : "smtp.gmail.com",
-  port   : 587,
-  secure : false, // true for 465, false for other ports
-  type   : "oauth2",
-  // service : 'gmail',
-  auth : {
-      user : process.env.SMTP_USER_ID,
-      pass : process.env.SMTP_USER_PASSWORD
-  }
-});
-const sendMailFunc = (email, subject, body) =>{
-  
-  var mailOptions = {
-      from    : process.env.SMTP_USER_ID,
-      to      : email,
-      subject : subject,
-      html    : body
-      
-  };
-  transporter.sendMail(mailOptions);
-}
 
  // Send email to the admin
  const sendAdminEmail = (supplierName, medicineName, description, productCategory) => {
@@ -46,24 +24,14 @@ const sendMailFunc = (email, subject, body) =>{
       <li>Product Name: ${medicineName}</li>
       <li>Product Description: ${description}</li>
       <li>Product Category: ${productCategory}</li>
-      <li>Submission Date: ${new Date().toLocaleDateString()}</li>
+      <li>Submission Date: ${getTodayFormattedDate()}</li>
     </ul>
     <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
     <p>Best regards,<br/>MedHub Global Team</p>
   `;
-  return sendMailFunc(adminEmail, subject, body);
+  // return sendMailFunc(adminEmail, subject, body);
+  return sendEmail(adminEmail, subject, body)
  }
-
-function formatDate(date) {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-}
-
-const today = new Date();
-const formattedDate = formatDate(today);
-
 
 module.exports = {
 
@@ -92,168 +60,6 @@ module.exports = {
       callback({ code: 500, message: "Internal Server error", result: error });
     }
   },
-
-  // addMedicine: async (reqObj, callback) => {
-  //   try {
-  //     let medicine_id = "MED-" + Math.random().toString(16).slice(2, 10);
-      
-  //     let stockedInDetails = reqObj.stocked_in_details;
-  
-  //     if (typeof stockedInDetails === 'string') {
-  //       try {
-  //         stockedInDetails = JSON.parse(stockedInDetails);
-  //       } catch (err) {
-  //         return callback({ code: 400, message: "Invalid format for stocked_in_details" });
-  //       }
-  //     }
-  
-  //     const {
-  //       product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life,
-  //       dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags,
-  //       unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
-  //       manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details,
-  //       quantity, unit_price, total_price, est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
-  //     } = reqObj;
-
-  //     const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-  
-  //     if (!Array.isArray(quantity) || !Array.isArray(unit_price) ||
-  //       !Array.isArray(total_price) || !Array.isArray(est_delivery_days)) {
-  //       return callback({ code: 400, message: "Inventory fields should be arrays" });
-  //     }
-  
-  //     if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
-  //       return callback({ code: 400, message: "All inventory arrays (quantity, unit_price, total_price, est_delivery_days) must have the same length" });
-  //     }
-  
-  //     const inventory_info = quantity.map((_, index) => ({
-  //       quantity          : quantity[index],
-  //       unit_price        : unit_price[index],
-  //       total_price       : total_price[index],
-  //       est_delivery_days : est_delivery_days[index],
-  //     }));
-  
-  //     let newMedicine;
-  
-  //     if (product_type === 'new') {
-  //       newMedicine = new NewMedicine({
-  //         medicine_id,
-  //         supplier_id,
-  //         medicine_name,
-  //         medicine_type  : product_type,
-  //         composition,
-  //         strength,
-  //         type_of_form,
-  //         shelf_life,
-  //         dossier_type,
-  //         dossier_status,
-  //         medicine_category : product_category,
-  //         total_quantity,
-  //         gmp_approvals,
-  //         shipping_time,
-  //         tags,
-  //         unit_tax,
-  //         country_of_origin,
-  //         registered_in,
-  //         stocked_in,
-  //         available_for,
-  //         description,
-  //         medicine_image,
-  //         inventory_info,
-  //         manufacturer_name,
-  //         manufacturer_country_of_origin,
-  //         manufacturer_description,
-  //         stockedIn_details : stockedInDetails,
-  //         status            : 0,
-  //         edit_status       : 0
-  //       });
-  //     } else if (product_type === 'secondary market') {
-  //       newMedicine = new SecondaryMarketMedicine({
-  //         medicine_id,
-  //         supplier_id,
-  //         medicine_name,
-  //         medicine_type: product_type,
-  //         purchased_on,
-  //         country_available_in,
-  //         min_purchase_unit,
-  //         composition,
-  //         strength,
-  //         type_of_form,
-  //         shelf_life,
-  //         dossier_type,
-  //         dossier_status,
-  //         medicine_category : product_category,
-  //         gmp_approvals,
-  //         shipping_time,
-  //         tags,
-  //         unit_tax,
-  //         country_of_origin,
-  //         registered_in,
-  //         stocked_in,
-  //         available_for,
-  //         description,
-  //         total_quantity,
-  //         condition,
-  //         inventory_info,
-  //         medicine_image,
-  //         invoice_image,
-  //         manufacturer_name,
-  //         manufacturer_country_of_origin,
-  //         manufacturer_description,
-  //         stockedIn_details : stockedInDetails,
-  //         status            : 0,
-  //         edit_status       : 0
-  //       });
-  //     }
-  
-  //     newMedicine.save()
-  //       .then(async (savedMedicine) => {
-  //         const notificationId = 'NOT-' + Math.random().toString(16).slice(2,10);
-  //         const event = product_type === 'new' ? 'addnewmedicinerequest' : 'addsecondarymedicinerequest';
-
-  //         const newNotification = new Notification({
-  //           notification_id: notificationId,
-  //           event_type : product_type === 'new' ? 'New Medicine Request' : 'New Secondary Medicine Request',
-  //           event,
-  //           from     : 'supplier',
-  //           to       : 'admin',
-  //           from_id  : supplier_id,
-  //           event_id : medicine_id,
-  //           message  : product_type === 'new' ? `New medicine request from ${supplier_id}` : `New secondary medicine request from ${supplier_id}`,
-  //           status   : 0
-  //         });
-  //         await newNotification.save();
-
-  //         const adminEmail = 'ajo@shunyaekai.tech';
-  //         const subject = `New Product Submission: Approval Required`;
-  //         const body = `
-  //                   <p>Dear Admin,</p>
-  //                   <p>We hope this message finds you well.</p>
-  //                   <p>A supplier has submitted a new product for approval on Deliver. Please review the details below:</p>
-  //                   <ul>
-  //                     <li>Supplier Name: ${supplier.supplier_name}</li>
-  //                     <li>Product Name: ${medicine_name}</li>
-  //                     <li>Product Description: ${description}</li>
-  //                     <li>Product Category: ${product_category}</li>
-  //                     <li>Submission Date: ${formattedDate}</li>
-  //                   </ul>
-  //                   <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-  //                   <p>Best regards,<br/>MedHub Global Team/p>
-  //                 `;
-  //       sendMailFunc(adminEmail, subject, body);
-  //         callback({ code: 200, message: "Add Medicine Request Submitted Successfully", result: savedMedicine });
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //         callback({ code: 400, message: "Error while adding submitting request" });
-  //       });
-  
-  //   } catch (error) {
-  //     console.error("Error", error);
-  //     callback({ code: 500, message: "Internal Server Error" });
-  //   }
-  // },
-  
 
   addMedicine: async (reqObj, callback) => {
     try {
@@ -368,8 +174,6 @@ module.exports = {
       callback({ code: 500, message: "Internal Server Error" });
     }
   },
-  
-   
 
   allMedicineList: async (reqObj, callback) => {
     console.log(reqObj);
@@ -867,12 +671,13 @@ module.exports = {
                             <li>Product Name: ${medicine_name}</li>
                             <li>Product Description: ${description}</li>
                             <li>Product Category: ${product_category}</li>
-                            <li>Submission Date: ${formattedDate}</li>
+                            <li>Submission Date: ${getTodayFormattedDate()}</li>
                           </ul>
                           <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
                           <p>Best regards,<br/>MedHub Global Team</p>
                         `;
-              sendMailFunc(adminEmail, subject, body);
+              // sendMailFunc(adminEmail, subject, body);
+              await sendEmail(adminEmail, subject, body )
 
                   callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
               })
@@ -957,12 +762,13 @@ module.exports = {
                         <li>Product Name: ${medicine_name}</li>
                         <li>Product Description: ${description}</li>
                         <li>Product Category: ${product_category}</li>
-                        <li>Submission Date: ${formattedDate}</li>
+                        <li>Submission Date: ${getTodayFormattedDate()}</li>
                       </ul>
                       <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
                       <p>Best regards,<br/>MedHub Global Team</p>
                     `;
-          sendMailFunc(adminEmail, subject, body);
+          // sendMailFunc(adminEmail, subject, body);
+          await sendEmail(adminEmail, subject, body )
               callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
           })
           .catch((err) => {

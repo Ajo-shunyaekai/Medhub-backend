@@ -36,22 +36,22 @@ function initializeSocket(server) {
 
     // Notification handlers
     const notificationEvents = [
-      { event: 'sendNotification', emit: 'notification' },
-      { event: 'sendInquiry', emit: 'newEnquiry' },
-      { event: 'submitQuotation', emit: 'enquiryQuotation' },
-      { event: 'createPO', emit: 'POCreated' },
-      { event: 'editPO', emit: 'POEdited' },
-      { event: 'createOrder', emit: 'orderCreated' },
-      { event: 'bookLogistics', emit: 'logisticsRequest' },
-      { event: 'shipmentDetailsSubmitted', emit: 'shipmentDetailsSubmission' },
-      { event: 'createInvoice', emit: 'invoiceCreated' },
-      { event: 'invoicePaymentDone', emit: 'invoicePaymentStatusUpdated' },
-      { event: 'buyerRegistration', emit: 'buyerRegistered' },
-      { event: 'supplierRegistration', emit: 'supplierRegistered' },
-      { event: 'addMedicine', emit: 'medicineRequest' },
-      { event: 'editNewMedicine', emit: 'newMedicineEditRequest' },
-      { event: 'editSecondaryMedicine', emit: 'secondaryMedicineEditRequest' },
-      { event: 'updateMedicineAddRequest', emit: 'addMedicineRequestUpdated' },
+      { event: 'sendNotification',          emit: 'notification' },
+      { event: 'sendInquiry',               emit: 'newEnquiry' },
+      { event: 'submitQuotation',           emit: 'enquiryQuotation' },
+      { event: 'createPO',                  emit: 'POCreated' },
+      { event: 'editPO',                    emit: 'POEdited' },
+      { event: 'createOrder',               emit: 'orderCreated' },
+      { event: 'bookLogistics',             emit: 'logisticsRequest' },
+      { event: 'shipmentDetailsSubmitted',  emit: 'shipmentDetailsSubmission' },
+      { event: 'createInvoice',             emit: 'invoiceCreated' },
+      { event: 'invoicePaymentDone',        emit: 'invoicePaymentStatusUpdated' },
+      { event: 'buyerRegistration',         emit: 'buyerRegistered' },
+      { event: 'supplierRegistration',      emit: 'supplierRegistered' },
+      { event: 'addMedicine',               emit: 'medicineRequest' },
+      { event: 'editNewMedicine',           emit: 'newMedicineEditRequest' },
+      { event: 'editSecondaryMedicine',     emit: 'secondaryMedicineEditRequest' },
+      { event: 'updateMedicineAddRequest',  emit: 'addMedicineRequestUpdated' },
       { event: 'updateMedicineEditRequest', emit: 'editMedicineRequestUpdated' }
     ];
 

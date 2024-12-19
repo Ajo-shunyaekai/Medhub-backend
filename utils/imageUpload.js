@@ -1,22 +1,36 @@
-const multer = require('multer')
 
-module.exports = {
-    imageUpload : () => {
-        const storage = multer.diskStorage({
-            destination: (req, file, cb) => {
-                cb(null, './uploads/product_files');
-            },
-            filename: (req, file, cb) => {
-                const ext = file.mimetype.split("/")[1];
-                cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-            },
+const multer = require('multer');
+
+const createMulterMiddleware = (uploadConfig) => {
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            const fieldConfig = uploadConfig.find(config => config.fieldName === file.fieldname);
+            const uploadPath = fieldConfig ? fieldConfig.uploadPath : './uploads/default';
+            cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+            const ext = file.mimetype.split("/")[1];
+            cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
+        },
+    });
+
+    const upload = multer({ storage: storage });
+
+    return (req, res, next) => {
+        const fields = uploadConfig.map(config => ({
+            name: config.fieldName,
+            maxCount: config.maxCount || 1 // Default maxCount is 1 if not specified
+        }));
+
+        upload.fields(fields)(req, res, (err) => {
+            if (err) {
+                console.error('Multer Error:', err);
+                return res.status(500).json({ error: 'File upload error', details: err.message });
+            }
+            next();
         });
-        const upload = multer({ storage: storage });
-        const cpUpload = upload.fields([
-            { name : 'product_image', maxCount  : 4 }, 
-        ]);
-    }
-    
-}
+    };
+};
 
+module.exports = createMulterMiddleware;
 

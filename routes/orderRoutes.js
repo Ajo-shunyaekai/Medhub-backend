@@ -1,54 +1,16 @@
 const express                                    = require('express');
 var routes                                       = express.Router();
-const multer                                     = require('multer')
-const sharp                                      = require('sharp')
 const path                                       = require('path');
 const Order                                      = require('../controller/Order')
 const { handleResponse }                         = require('../utils/utilities');
 const { validation }                             = require('../utils/utilities')
 const {checkAuthorization, checkCommonUserAuthentication}  = require('../middleware/Authorization');
-const createMulterMiddleware = require('../utils/Multer')
-
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let uploadPath = './uploads/buyer/order/complaint_images';
-        if (file.fieldname === 'complaint_image') {
-            uploadPath = './uploads/buyer/order/complaint_images';
-        } else if (file.fieldname === 'feedback_image') {
-            uploadPath = './uploads/buyer/order/feedback_images';
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const ext = file.mimetype.split("/")[1];
-        cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-    },
-});
-
-const upload = multer({ storage: storage });
-
-const cpUpload = (req, res, next) => {
-    upload.fields([
-        { name: 'complaint_image' },
-        { name: 'feedback_image'},
-    ])(req, res, (err) => {
-        if (err) {
-            console.error('Multer Error:', err);
-            res.status(500).json({ error: 'File upload error' });
-            return;
-        }
-        next();
-    });
-};
+const createMulterMiddleware = require('../utils/imageUpload')
 
 const imageUploadMiddleware = createMulterMiddleware([
     { fieldName: 'complaint_image', uploadPath: './uploads/buyer/order/complaint_images' },
     { fieldName: 'feedback_image', uploadPath: './uploads/buyer/order/feedback_images' },
-    // { fieldName: 'license_image', uploadPath: './uploads/buyer/license_images' },
-    // { fieldName: 'certificate_image', uploadPath: './uploads/buyer/certificate_images' },
 ]);
-
 
 module.exports = () => {
     

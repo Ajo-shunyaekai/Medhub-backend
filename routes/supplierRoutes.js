@@ -7,13 +7,13 @@ const sharp                                      = require('sharp')
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
-const createMulterMiddleware = require('../utils/Multer')
+const createMulterMiddleware = require('../utils/imageUpload')
 
 const supplierUploadMiddleware = createMulterMiddleware([
-    { fieldName: 'buyer_image', uploadPath: './uploads/buyer/buyer_images' },
-    { fieldName: 'tax_image', uploadPath: './uploads/buyer/tax_images' },
-    { fieldName: 'license_image', uploadPath: './uploads/buyer/license_images' },
-    { fieldName: 'certificate_image', uploadPath: './uploads/buyer/certificate_images' },
+    { fieldName: 'supplier_image', uploadPath: './uploads/supplier/supplierImage_files', maxCount: 1 },
+    { fieldName: 'tax_image', uploadPath: './uploads/supplier/tax_image', maxCount: 10 },
+    { fieldName: 'license_image', uploadPath: './uploads/supplier/license_image', maxCount: 10 },
+    { fieldName: 'certificate_image', uploadPath: './uploads/supplier/certificate_image', maxCount: 10 },
 ]);
 
 module.exports = () => {

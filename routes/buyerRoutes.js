@@ -1,21 +1,18 @@
 const express                                    = require('express');
 let routes                                       = express.Router();
-const multer                                     = require('multer')
-const sharp                                      = require('sharp')
 const path                                       = require('path');
 const Controller                                 = require('../controller/Buyer')
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
-const {imageUpload}                              = require('../utils/imageUpload')
 const {checkAuthorization, checkCommonUserAuthentication }  = require('../middleware/Authorization');
-const createMulterMiddleware = require('../utils/Multer')
+const createMulterMiddleware = require('../utils/imageUpload')
 
 
 const buyerUploadMiddleware = createMulterMiddleware([
-    { fieldName: 'buyer_image', uploadPath: './uploads/buyer/buyer_images' },
-    { fieldName: 'tax_image', uploadPath: './uploads/buyer/tax_images' },
-    { fieldName: 'license_image', uploadPath: './uploads/buyer/license_images' },
-    { fieldName: 'certificate_image', uploadPath: './uploads/buyer/certificate_images' },
+    { fieldName: 'buyer_image', uploadPath: './uploads/buyer/buyer_images', maxCount: 1 },
+    { fieldName: 'tax_image', uploadPath: './uploads/buyer/tax_images', maxCount: 10 },
+    { fieldName: 'license_image', uploadPath: './uploads/buyer/license_images', maxCount: 10 },
+    { fieldName: 'certificate_image', uploadPath: './uploads/buyer/certificate_images', maxCount: 10 },
 ]);
 
 module.exports = () => {
