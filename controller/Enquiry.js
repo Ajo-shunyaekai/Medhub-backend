@@ -409,7 +409,7 @@ module.exports = {
                                 You’ve received a quote from the supplier for <strong>${enquiry_id}</strong>.<br />
                                 <br /><br />
                                 Thanks & Regards <br />
-                                Team Deliver`;
+                                MedHub Global Team`;
   
                   await sendMailFunc(buyer.buyer_email, 'Quotation Received!', body);
 
@@ -497,7 +497,7 @@ module.exports = {
                                 Inquiry request has been cancelled by ${buyer.buyer_name} for <strong>${enquiry_id}</strong>.<br />
                                 <br /><br />
                                 Thanks & Regards <br />
-                                Team Deliver`;
+                                MedHub Global Team`;
   
             await sendMailFunc(supplier.supplier_email, 'Inquiry Cancelled!', body);
             callback({ code: 200, message: 'Inquiry Cancelled Successfully', result: updatedEnquiry });

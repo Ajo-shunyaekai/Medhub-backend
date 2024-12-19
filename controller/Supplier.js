@@ -128,7 +128,7 @@ module.exports = {
                             <li>Registration Date: ${formattedDate}</li>
                           </ul>
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-                          <p>Best regards,<br/>Deliver.com Team</p>
+                          <p>Best regards,<br/>MedHub Global Team</p>
                         `;
                         const recipientEmails = [adminEmail, 'ajo@shunyaekai.tech'];  // Add more emails if needed
                         await sendMailFunc(recipientEmails.join(','), subject, body);

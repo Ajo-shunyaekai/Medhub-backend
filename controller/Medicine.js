@@ -49,7 +49,7 @@ const sendMailFunc = (email, subject, body) =>{
       <li>Submission Date: ${new Date().toLocaleDateString()}</li>
     </ul>
     <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-    <p>Best regards,<br/>Deliver.com Team</p>
+    <p>Best regards,<br/>MedHub Global Team</p>
   `;
   return sendMailFunc(adminEmail, subject, body);
  }
@@ -238,7 +238,7 @@ module.exports = {
   //                     <li>Submission Date: ${formattedDate}</li>
   //                   </ul>
   //                   <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-  //                   <p>Best regards,<br/>Deliver.com Team</p>
+  //                   <p>Best regards,<br/>MedHub Global Team/p>
   //                 `;
   //       sendMailFunc(adminEmail, subject, body);
   //         callback({ code: 200, message: "Add Medicine Request Submitted Successfully", result: savedMedicine });
@@ -870,7 +870,7 @@ module.exports = {
                             <li>Submission Date: ${formattedDate}</li>
                           </ul>
                           <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-                          <p>Best regards,<br/>Deliver.com Team</p>
+                          <p>Best regards,<br/>MedHub Global Team</p>
                         `;
               sendMailFunc(adminEmail, subject, body);
 
@@ -960,7 +960,7 @@ module.exports = {
                         <li>Submission Date: ${formattedDate}</li>
                       </ul>
                       <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-                      <p>Best regards,<br/>Deliver.com Team</p>
+                      <p>Best regards,<br/>MedHub Global Team</p>
                     `;
           sendMailFunc(adminEmail, subject, body);
               callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });

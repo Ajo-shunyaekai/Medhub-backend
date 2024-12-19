@@ -154,7 +154,7 @@ module.exports = {
                         <p>Thank you for your order. We are pleased to confirm order and the details as follows:</p>
                         ${itemsTable}
                         <p>We have begun processing your order and will keep you informed about its status. </p>
-                        <p>Thanks & Regards,<br/>Deliver.com</p>
+                        <p>Thanks & Regards,<br/>MedHub Global Team</p>
                         `;
 
                         // Sending the email to multiple recipients (supplier and buyer)
@@ -213,7 +213,7 @@ module.exports = {
     //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
     //               <br /><br />
     //               Thanks & Regards <br />
-    //               Team Deliver`;
+    //               MedHub Global Team`;
 
     // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
      
@@ -266,7 +266,7 @@ module.exports = {
 //         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
 //         <br /><br />
 //         Thanks & Regards <br />
-//         Team Deliver`;
+//         MedHub Global Team`;
 
 // await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
      

@@ -119,7 +119,7 @@ module.exports = {
             Total Payable Amount: <strong>${reqObj.totalPayableAmount} AED</strong><br />
             <br /><br />
             Thanks & Regards <br />
-            Team Deliver`;
+            MedHub Global Team`;
 
             const recipientEmails = [buyer.buyer_email, 'ajo@shunyaekai.tech'];
             await sendMailFunc(recipientEmails.join(','), subject, body);
@@ -222,7 +222,7 @@ module.exports = {
             Total Amount Paid: <strong>${amount_paid} AED</strong><br />
             <br /><br />
             Thanks & Regards <br />
-            Team Deliver`;
+            MedHub Global Team`;
 
             const recipientEmails = [supplier.supplier_email, 'ajo@shunyaekai.tech'];
             await sendMailFunc(recipientEmails.join(','), subject, body);

@@ -134,7 +134,7 @@ module.exports = {
                             <li>Registration Date: ${formattedDate}</li>
                           </ul>
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-                          <p>Best regards,<br/>Deliver.com Team</p>
+                          <p>Best regards,<br/>MedHub Global Team</p>
                         `;
               // sendMailFunc(adminEmail, subject, body);
               const recipientEmails = [adminEmail, 'ajo@shunyaekai.tech'];  // Add more emails if needed
@@ -1229,7 +1229,7 @@ module.exports = {
 
                                 You can view and respond to this inquiry by logging into your account on our platform. Please take the time to review the buyer's request and provide your response at your earliest convenience.<br /><br />
 
-                                 <p>Best regards,<br/>Deliver.com Team</p>
+                                 <p>Best regards,<br/>MedHub Global Team</p>
                         `;
   
                   // await sendMailFunc(supplier_email, subject, body);
