@@ -19,6 +19,8 @@ const Invoices = require("../schema/invoiceSchema");
 const { validation } = require("../utils/utilities");
 const path = require("path");
 const sendMailFunc = require("../utils/sendEmail");
+const sendEmail = require('../utils/emailService')
+const {getTodayFormattedDate}  = require('../utils/utilities')
 const {
   Medicine,
   SecondaryMarketMedicine,
@@ -413,7 +415,8 @@ module.exports = {
         const subject = "New Registration Alert: Buyer Account Created";
         const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
         const emailContent = await buyerRegistrationContent(buyer);
-        await sendMailFunc(recipientEmails.join(","), subject, emailContent);
+        // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
+        await sendEmail(recipientEmails, subject, emailContent)
 
         return res.status(200).send({
           code: 200,
@@ -464,7 +467,8 @@ module.exports = {
         const subject = "New Registration Alert: Supplier Account Created";
         const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
         const emailContent = await supplierRegistrationContent(supplier);
-        await sendMailFunc(recipientEmails.join(","), subject, emailContent);
+        // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
+        await sendEmail(recipientEmails, subject, emailContent)
 
         return res.status(200).send({
           code: 200,
