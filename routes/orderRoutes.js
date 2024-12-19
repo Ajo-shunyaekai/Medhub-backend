@@ -8,8 +8,8 @@ const {checkAuthorization, checkCommonUserAuthentication}  = require('../middlew
 const createMulterMiddleware = require('../utils/imageUpload')
 
 const imageUploadMiddleware = createMulterMiddleware([
-    { fieldName: 'complaint_image', uploadPath: './uploads/buyer/order/complaint_images' },
-    { fieldName: 'feedback_image', uploadPath: './uploads/buyer/order/feedback_images' },
+    { fieldName: 'complaint_image', uploadPath: './uploads/buyer/order/complaint_images', maxCount: 10 },
+    { fieldName: 'feedback_image', uploadPath: './uploads/buyer/order/feedback_images', maxCount: 10 },
 ]);
 
 module.exports = () => {

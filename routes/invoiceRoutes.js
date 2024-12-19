@@ -10,7 +10,7 @@ const createMulterMiddleware = require('../utils/imageUpload')
 
 
 const imageUploadMiddleware = createMulterMiddleware([
-    { fieldName: 'transaction_image', uploadPath: './uploads/buyer/order/invoice_images' },
+    { fieldName: 'transaction_image', uploadPath: './uploads/buyer/order/invoice_images', maxCount: 10 },
 ]);
 
 
