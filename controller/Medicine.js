@@ -143,7 +143,6 @@ module.exports = {
           invoice_image
         });
       }
-
       const savedMedicine = await newMedicine.save();
   
       // Create a notification

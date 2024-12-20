@@ -4,8 +4,9 @@ const path                                       = require('path');
 const Controller                                 = require('../controller/Medicine')
 const { handleResponse }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
-const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
-const createMulterMiddleware = require('../utils/imageUpload')
+const {checkAuthorization, 
+    checkCommonUserAuthentication}               = require('../middleware/Authorization');
+const createMulterMiddleware                     = require('../utils/imageUpload')
 
 const medicineUploadMiddleware = createMulterMiddleware([
     { fieldName: 'product_image', uploadPath: './uploads/medicine/product_files', maxCount: 10 },
