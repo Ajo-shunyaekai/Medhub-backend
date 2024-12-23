@@ -61,14 +61,14 @@ const upload = multer({ storage: storage });
 const cpUpload = (req, res, next) => {
   // console.log("Before Multer", req); // Log before Multer processes the request
   upload.fields([
-    { name: "buyer_image" },
-    { name: "license_image" },
-    { name: "tax_image" },
-    { name: "certificate_image" },
+    { name: "buyer_image", maxCount: 1 },
+    { name: "license_image", maxCount: 10 },
+    { name: "tax_image", maxCount: 10 },
+    { name: "certificate_image", maxCount: 10 },
     { name: 'supplier_image', maxCount: 1 },
-    { name: 'license_image' },
-    { name: 'tax_image'},
-    { name: 'certificate_image' },
+    { name: 'license_image', maxCount: 10 },
+    { name: 'tax_image', maxCount: 10},
+    { name: 'certificate_image', maxCount: 10 },
   ])(req, res, (err) => {
     if (err) {
       console.error("Multer Error:", err);

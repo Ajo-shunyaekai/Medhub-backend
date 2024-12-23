@@ -157,6 +157,8 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-invoice-list-all-users', checkAuthorization, checkCommonUserAuthentication, Order.getInvoiceListForAllUsers);
+
      //------------------------------------------------------ supplier order ------------------------------------------------------//
      
      routes.post('/proforma-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
