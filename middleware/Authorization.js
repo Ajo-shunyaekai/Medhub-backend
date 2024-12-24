@@ -185,6 +185,7 @@ module.exports = {
         }
         next();
       } else if (supplier_id) {
+        lo
         const supplier = await Supplier.findOne({ token: access_token });
 
         if (!supplier) {
@@ -205,9 +206,11 @@ module.exports = {
   },
 
   checkCommonUserAuthentication: async (req, res, next) => {
+    console.log('checkCommonUserAuthentication', req.headers.user_type,req.headers.supplier_id );
+    
     const { access_token, user_type } = req.headers;
-    const { supplier_id, seller_id, admin_id, buyer_id } = req?.body;
-
+    const { supplier_id, seller_id, admin_id, buyer_id,supplierId } = Object.keys(req.body).length > 0 ? req.body : req.headers;
+    console.log('req?.body', req.body);
     try {
       const user =
         user_type == "Buyer"
@@ -219,12 +222,14 @@ module.exports = {
           : user_type == "Seller"
           ? await Seller.find({ token: access_token, seller_id })
           : null;
-
+          
       if (!user) {
+        console.log('!user', user);
         return res.status(400).send({ message: "Invalid Access Token" });
       }
 
       if (user.status === 0) {
+        console.log('user.status === 0', user);
         return res.status(400).send({ message: "Access Denied" });
       }
 
