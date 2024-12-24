@@ -694,7 +694,6 @@ module.exports = {
 
     buyerInvoicesList: async (reqObj, callback) => {
       try {
-        console.log('here', reqObj);
         const {page_no, limit, filterKey, buyer_id} = reqObj
         const pageNo   = page_no || 2
         const pageSize = limit || 2
@@ -1836,5 +1835,260 @@ module.exports = {
         
       }
     },
+
+    getInvoiceListForAllUsers: async (req, res) => {
+      try {
+        const { user_type } = req?.headers;
+        const { page_no, limit, filterKey, buyer_id, supplier_id, page_size } = req?.body;
+        const pageNo = page_no || 2;
+        const pageSize = limit || page_size || 2;
+        // const page_size = pageSize || 2
+        const offset = (pageNo - 1) * pageSize;
+    
+        // Match conditions based on user_type
+        const buyerMatch = { buyer_id, status: filterKey };
+        const adminMatch = { status: filterKey };
+        const supplierMatch = { supplier_id, status: filterKey };
+    
+        // Projection objects based on user_type
+        const buyerProjObj = { supplier: { $arrayElemAt: ["$supplier", 0] } };
+        const supplierProjObj = { buyer: { $arrayElemAt: ["$buyer", 0] } };
+    
+        const buyerProjObj2 = {
+          "buyer.buyer_image": 1,
+          "buyer.buyer_name": 1,
+          "buyer.buyer_address": 1,
+          "buyer.buyer_type": 1,
+          "buyer.country_of_origin": 1,
+        };
+    
+        const supplierProjObj2 = {
+          "supplier.supplier_image": 1,
+          "supplier.supplier_name": 1,
+          "supplier.supplier_address": 1,
+          "supplier.supplier_type": 1,
+        };
+        // Determine the match condition and projection based on user_type
+        const matchCondition = user_type === 'Buyer' ? buyerMatch : user_type === 'Supplier' ? supplierMatch : adminMatch;
+        const lookupCollection = user_type === 'Buyer' ? 'buyers' : 'suppliers';
+        const localField = user_type === 'Buyer' ? 'buyer_id' : 'supplier_id';
+        const foreignField = user_type === 'Buyer' ? 'buyer_id' : 'supplier_id';
+        const projObj = user_type === 'Buyer' ? buyerProjObj : supplierProjObj;
+        const projObj2 = user_type === 'Buyer' ? buyerProjObj2 : supplierProjObj2;
+
+        const commonProjObj = {  
+          invoice_id           : 1,
+          order_id             : 1,
+          enquiry_id           : 1,
+          purchaseOrder_id     : 1,
+          buyer_id             : 1,
+          supplier_id          : 1,
+          invoice_no           : 1,
+          invoice_date         : 1,
+          buyer_name           : 1,
+          buyer_address        : 1,
+          buyer_country        : 1,
+          buyer_vat_reg_no     : 1,
+          supplier_name        : 1,
+          supplier_address     : 1,
+          supplier_country     : 1,
+          supplier_vat_reg_no  : 1,
+          items                : 1,
+          payment_terms        : 1,
+          total_payable_amount : 1,
+          total_amount_paid    : 1,
+          pending_amount       : 1,
+          account_number       : 1,
+          sort_code            : 1,
+          transaction_image    : 1,
+          transaction_id       : 1,
+          mode_of_payment      : 1,
+          invoice_status       : 1,
+          status               : 1,
+          payment_status       : 1,
+          created_at           : 1,
+        }
+
+        const commonGroupObj = {          
+          _id: "$_id",
+          invoice_id: { $first: "$invoice_id" },
+          order_id: { $first: "$order_id" },
+          enquiry_id: { $first: "$enquiry_id" },
+          purchaseOrder_id: { $first: "$purchaseOrder_id" },
+          buyer_id: { $first: "$buyer_id" },
+          supplier_id: { $first: "$supplier_id" },
+          invoice_no: { $first: "$invoice_no" },
+          invoice_date: { $first: "$invoice_date" },
+          buyer_name: { $first: "$buyer_name" },
+          buyer_address: { $first: "$buyer_address" },
+          buyer_country: { $first: "$buyer_country" },
+          buyer_vat_reg_no: { $first: "$buyer_vat_reg_no" },
+          supplier_name: { $first: "$supplier_name" },
+          supplier_address: { $first: "$supplier_address" },
+          supplier_country: { $first: "$supplier_country" },
+          supplier_vat_reg_no: { $first: "$supplier_vat_reg_no" },
+          items: { $push: "$items" },
+          payment_terms: { $first: "$payment_terms" },
+          total_payable_amount: { $first: "$total_payable_amount" },
+          total_amount_paid: { $first: "$total_amount_paid" },
+          pending_amount: { $first: "$pending_amount" },
+          account_number: { $first: "$account_number" },
+          sort_code: { $first: "$sort_code" },
+          transaction_image: { $first: "$transaction_image" },
+          status: { $first: "$status" },
+          payment_status: { $first: "$payment_status" },
+          mode_of_payment: { $first: "$mode_of_payment" },
+          created_at: { $first: "$created_at" },
+          invoice_status: { $first: "$invoice_status" },
+        }
+  
+        let data;
+    
+        if (user_type === 'Admin') {
+          // Admin specific logic
+          data = await Invoices.aggregate([
+            {
+              $match: matchCondition
+            },
+            {
+              $lookup: {
+                from         : "buyers",
+                localField   : "buyer_id",
+                foreignField : "buyer_id",
+                as           : "buyer"
+              }
+            },
+            {
+              $lookup: {
+                from         : "suppliers",
+                localField   : "supplier_id",
+                foreignField : "supplier_id",
+                as           : "supplier"
+              }
+            },
+            {
+              $project: {
+                ...commonProjObj,
+                buyer                : { $arrayElemAt : ["$buyer", 0] },
+                supplier             : { $arrayElemAt : ["$supplier", 0] }
+              }
+            },
+            {
+              $unwind : "$items" 
+            },
+            {
+              $lookup: {
+                from         : "medicines",
+                localField   : "items.medicine_id",
+                foreignField : "medicine_id",
+                as           : "medicine"
+              }
+            },
+            {
+              $addFields: {
+                "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+              }
+            },
+            {
+              $group: {
+                ...commonGroupObj,
+                buyer                : { $first: "$buyer" },
+                supplier             : { $first: "$supplier" },
+                totalPrice           : { $sum: "$items.item_price" }
+              }
+            },
+            {
+              $project: {
+                ...commonProjObj,
+                totalPrice           : 1,
+                ...buyerProjObj2,
+                ...supplierProjObj2,
+              }
+            },
+            { $sort  : { created_at: -1 } },
+            { $skip  : offset },
+            { $limit : pageSize },
+        ])
+        } else if (user_type === 'Buyer' || user_type === 'Supplier') {
+          data = await Invoices.aggregate([
+            {
+              $match: matchCondition,
+            },
+            {
+              $lookup: {
+                from: lookupCollection,
+                localField: localField,
+                foreignField: foreignField,
+                as: user_type === 'Buyer' ? 'buyer' : 'supplier',
+              },
+            },
+            {
+              $project: {
+                ...commonProjObj,
+                ...(projObj), // Add projection based on user type
+              },
+            },
+            {
+              $unwind: "$items",
+            },
+            {
+              $lookup: {
+                from: "medicines",
+                localField: "items.medicine_id",
+                foreignField: "medicine_id",
+                as: "medicine",
+              },
+            },
+            {
+              $addFields: {
+                "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } },
+              },
+            },
+            {
+              $group: {
+                ...commonGroupObj,
+                totalPrice: { $sum: "$items.item_price" },
+                ...(user_type === 'Buyer' && { buyer: { $first: "$buyer" } }),
+                ...(user_type === 'Supplier' && { supplier: { $first: "$supplier" } }),
+              },
+            },
+            {
+              $project: {
+                ...commonProjObj,
+                totalPrice: 1,
+                ...(projObj2), // Additional fields based on user type
+              },
+            },
+            { $sort: { created_at: -1 } },
+            { $skip: offset },
+            { $limit: pageSize },
+          ]);
+        }
+    
+        if (!data || data.length === 0) {
+          return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
+        }
+  
+        const totalItems = await Invoices.countDocuments(matchCondition); // Count based on correct match condition
+        if (!totalItems) {
+          return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
+        }
+  
+        const totalPages = Math.ceil(totalItems / pageSize);
+        const responseData = {
+          data,
+          totalPages,
+          totalItems,
+        };
+  
+        res.status(200).send({ code: 200, message: "List Fetched successfully", result: responseData });
+      } catch (error) {
+        console.log(error);
+        res.status(400).send({ code: 400, message: "Error in fetching order list", result: error });
+      }
+    },
+    
 
 }

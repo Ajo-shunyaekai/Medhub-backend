@@ -214,11 +214,11 @@ module.exports = {
     try {
       const user =
         user_type == "Buyer"
-          ? await Buyer.findOne({ token: access_token, buyer_id })
+          ? await Buyer.findOne({ token: access_token })
           : user_type == "Admin"
           ? await Admin.findOne({ token: access_token, admin_id })
           : user_type == "Supplier"
-          ? await Supplier.findOne({ token: access_token, supplier_id : supplier_id || supplierId })
+          ? await Supplier.findOne({ token: access_token })
           : user_type == "Seller"
           ? await Seller.find({ token: access_token, seller_id })
           : null;
