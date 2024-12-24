@@ -206,7 +206,7 @@ module.exports = {
   },
 
   checkCommonUserAuthentication: async (req, res, next) => {
-    console.log('checkCommonUserAuthentication', req.headers.user_type,req.headers.supplier_id );
+    // console.log('checkCommonUserAuthentication', req.headers.user_type,req.headers.supplier_id );
     
     const { access_token, user_type } = req.headers;
     const { supplier_id, seller_id, admin_id, buyer_id,supplierId } = Object.keys(req.body).length > 0 ? req.body : req.headers;

@@ -49,6 +49,7 @@ module.exports = () => {
                 res.send(response);
             });
     });
+    routes.post('/get-order-list-all-users', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
 
     routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 

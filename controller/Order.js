@@ -2089,6 +2089,405 @@ module.exports = {
         res.status(400).send({ code: 400, message: "Error in fetching order list", result: error });
       }
     },
+
+    getOrderListAllUsers: async (req, res) => {
+      try {
+
+        console.log(`\n FUNCTION CALLED`)
+        const { user_type } = req?.headers;
+        const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id } = req?.body;
+    
+        const pageNo = page_no || 1;
+        const pageSize = req?.body?.pageSize || limit || 2;
+        const offset = (pageNo - 1) * pageSize;
+
+        const adjustedFilterKey = filterKey === 'order-request' ? 'pending' : filterKey;  
+    
+        let dateFilter = {};
+    
+        // Apply date filter based on the filterValue (today, week, month, year, all)
+        const currentDate = new Date(); // Current date and time
+    
+        if (filterValue === 'today') {
+          // Filter for today
+          dateFilter = {
+            created_at: {
+              $gte: moment().startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'week') {
+          // Filter for the last 7 days
+          dateFilter = {
+            created_at: {
+              $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'month') {
+          // Filter for the last 30 days
+          dateFilter = {
+            created_at: {
+              $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'year') {
+          // Filter for the last 365 days
+          dateFilter = {
+            created_at: {
+              $gte: moment().subtract(365, 'days').startOf('day').toDate(),
+              $lte: moment().endOf('day').toDate(),
+            },
+          };
+        } else if (filterValue === 'all') {
+          // No date filter for 'all'
+          dateFilter = {};
+        }
+    
+        const adminMatch = {
+          order_status: filterKey,
+          ...dateFilter,
+        };
+    
+        const otherMatch = {
+          buyer_id: buyer_id,
+          order_status: filterKey,
+        };
+    
+        const matchObj = user_type === 'Admin' ? adminMatch : user_type == 'Buyer' ? otherMatch : {order_status : adjustedFilterKey, supplier_id: supplier_id};
+    
+        console.log("DATE FILTER", dateFilter);
+        let data;
+    
+        if (user_type === 'Admin') {
+          data = await Order.aggregate([
+            {
+              $match: {
+                order_status: filterKey,
+                ...dateFilter,
+              },
+            },
+            {
+              $lookup: {
+                from: "suppliers",
+                localField: "supplier_id",
+                foreignField: "supplier_id",
+                as: "supplier",
+              },
+            },
+            {
+              $lookup: {
+                from: "buyers",
+                localField: "buyer_id",
+                foreignField: "buyer_id",
+                as: "buyer",
+              },
+            },
+            {
+              $project: {
+                order_id: 1,
+                buyer_id: 1,
+                buyer_name: 1,
+                supplier_id: 1,
+                supplier_name: 1,
+                items: 1,
+                payment_terms: 1,
+                est_delivery_time: 1,
+                shipping_details: 1,
+                remarks: 1,
+                order_status: 1,
+                status: 1,
+                invoice_no: 1,
+                created_at: 1,
+                supplier: { $arrayElemAt: ["$supplier", 0] },
+                buyer: { $arrayElemAt: ["$buyer", 0] },
+              },
+            },
+            {
+              $unwind: "$items",
+            },
+            {
+              $lookup: {
+                from: "medicines",
+                localField: "items.product_id",
+                foreignField: "medicine_id",
+                as: "medicine",
+              },
+            },
+            {
+              $addFields: {
+                "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                order_id: { $first: "$order_id" },
+                buyer_id: { $first: "$buyer_id" },
+                buyer_name: { $first: "$buyer_name" },
+                supplier_id: { $first: "$supplier_id" },
+                supplier_name: { $first: "$supplier_name" },
+                items: { $push: "$items" },
+                payment_terms: { $first: "$payment_terms" },
+                est_delivery_time: { $first: "$est_delivery_time" },
+                shipping_details: { $first: "$shipping_details" },
+                remarks: { $first: "$remarks" },
+                order_status: { $first: "$order_status" },
+                status: { $first: "$status" },
+                invoice_no: { $first: "$invoice_no" },
+                created_at: { $first: "$created_at" },
+                supplier: { $first: "$supplier" },
+                buyer: { $first: "$buyer" },
+                totalPrice: { $sum: "$items.item_price" },
+              },
+            },
+            {
+              $project: {
+                order_id: 1,
+                buyer_id: 1,
+                buyer_name: 1,
+                supplier_id: 1,
+                supplier_name: 1,
+                items: 1,
+                payment_terms: 1,
+                est_delivery_time: 1,
+                shipping_details: 1,
+                remarks: 1,
+                order_status: 1,
+                status: 1,
+                invoice_no: 1,
+                created_at: 1,
+                totalPrice: 1,
+                "supplier.supplier_image": 1,
+                "supplier.supplier_name": 1,
+                "supplier.supplier_type": 1,
+                "buyer.buyer_image": 1,
+                "buyer.buyer_name": 1,
+                "buyer.buyer_type": 1,
+              },
+            },
+            { $sort: { created_at: -1 } },
+            { $skip: offset },
+            { $limit: pageSize },
+          ]);
+        } else if (user_type == 'Buyer') {
+          data = await Order.aggregate([
+            {
+              $match: { 
+                buyer_id     : buyer_id,
+                order_status : filterKey
+              },
+            },
+            {
+              $lookup: {
+                from: "suppliers",
+                localField: "supplier_id",
+                foreignField: "supplier_id",
+                as: "supplier",
+              },
+            },
+            {
+              $project: {
+                order_id: 1,
+                buyer_id: 1,
+                buyer_company: 1,
+                supplier_id: 1,
+                items: 1,
+                payment_terms: 1,
+                est_delivery_time: 1,
+                shipping_details: 1,
+                invoice_no: 1,
+                remarks: 1,
+                order_status: 1,
+                status: 1,
+                created_at: 1,
+                supplier: { $arrayElemAt: ["$supplier", 0] },
+              },
+            },
+            {
+              $unwind: "$items",
+            },
+            {
+              $lookup: {
+                from: "medicines",
+                localField: "items.product_id",
+                foreignField: "medicine_id",
+                as: "medicine",
+              },
+            },
+            {
+              $addFields: {
+                "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                order_id: { $first: "$order_id" },
+                buyer_id: { $first: "$buyer_id" },
+                buyer_company: { $first: "$buyer_company" },
+                supplier_id: { $first: "$supplier_id" },
+                items: { $push: "$items" },
+                payment_terms: { $first: "$payment_terms" },
+                est_delivery_time: { $first: "$est_delivery_time" },
+                shipping_details: { $first: "$shipping_details" },
+                invoice_no: { $first: "$invoice_no" },
+                remarks: { $first: "$remarks" },
+                order_status: { $first: "$order_status" },
+                status: { $first: "$status" },
+                created_at: { $first: "$created_at" },
+                supplier: { $first: "$supplier" },
+                totalPrice: { $sum: "$items.item_price" },
+              },
+            },
+            {
+              $project: {
+                order_id: 1,
+                buyer_id: 1,
+                buyer_company: 1,
+                supplier_id: 1,
+                items: 1,
+                payment_terms: 1,
+                est_delivery_time: 1,
+                shipping_details: 1,
+                remarks: 1,
+                invoice_no: 1,
+                order_status: 1,
+                status: 1,
+                created_at: 1,
+                totalPrice: 1,
+                "supplier.supplier_image": 1,
+                "supplier.supplier_name": 1,
+                "supplier.supplier_type": 1,
+              },
+            },
+            { $sort: { created_at: -1 } },
+            { $skip: offset },
+            { $limit: pageSize },
+          ]);
+        } else if (user_type == 'Supplier'){
+          data = await Order.aggregate([
+            {
+                $match: { 
+                    supplier_id  : supplier_id,
+                    order_status : adjustedFilterKey
+                }
+            },
+            {
+              $lookup: {
+                from         : "buyers",
+                localField   : "buyer_id",
+                foreignField : "buyer_id",
+                as           : "buyer"
+              }
+            },
+            {
+              $project: {
+                order_id          : 1,
+                supplier_id       : 1,
+                buyer_name        : 1,
+                buyer_id          : 1,
+                items             : 1,
+                payment_terms     : 1,
+                est_delivery_time : 1,
+                shipping_details  : 1,
+                remarks           : 1,
+                order_status      : 1,
+                status            : 1,
+                invoice_no        : 1,
+                created_at        : 1,
+                buyer             : { $arrayElemAt : ["$buyer", 0] }
+              }
+            },
+            {
+              $unwind : "$items" 
+            },
+            {
+              $lookup: {
+                from         : "medicines",
+                localField   : "items.product_id",
+                foreignField : "medicine_id",
+                as           : "medicine"
+              }
+            },
+            {
+              $addFields: {
+                "items.medicine_image" : { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price"     : { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } } 
+              }
+            },
+            {
+              $group: {
+                _id               : "$_id",
+                order_id          : { $first: "$order_id" },
+                supplier_id       : { $first: "$supplier_id" },
+                buyer_name        : { $first: "$buyer_name" },
+                buyer_id          : { $first: "$buyer_id" },
+                items             : { $push: "$items" },
+                payment_terms     : { $first: "$payment_terms" },
+                est_delivery_time : { $first: "$est_delivery_time" },
+                shipping_details  : { $first: "$shipping_details" },
+                remarks           : { $first: "$remarks" },
+                order_status      : { $first: "$order_status" },
+                status            : { $first: "$status" },
+                invoice_no        : { $first: "$invoice_no" },
+                created_at        : { $first: "$created_at" },
+                buyer             : { $first: "$buyer" },
+                totalPrice        : { $sum: "$items.item_price" }
+              }
+            },
+            {
+                $project: {
+                    order_id          : 1,
+                    supplier_id       : 1,
+                    buyer_name        : 1,
+                    buyer_id          : 1,
+                    items             : 1,
+                    payment_terms     : 1,
+                    est_delivery_time : 1,
+                    shipping_details  : 1,
+                    remarks           : 1,
+                    order_status      : 1,
+                    status            : 1,
+                    invoice_no        : 1,
+                    created_at        : 1,
+                    totalPrice        : 1,
+                    "buyer.buyer_image" : 1,
+                    "buyer.buyer_name"  : 1,
+                }
+            },
+            { $sort  : { created_at: -1 } },
+            { $skip  : offset },
+            { $limit : pageSize },
+        ])
+        }
+    
+        if (!data) {
+          return res.status(400).send({ code: 400, message: 'Error occurred fetching order list', result: {} });
+        }
+
+        console.log(`\n DATA OF ORDER FOR ADMIN : \n ${data}`)
+    
+        const totalItems = await Order.countDocuments(matchObj);
+    
+        const totalPages = Math.ceil(totalItems / pageSize);
+    
+        const responseData = {
+          data,
+          totalPages,
+          totalItems,
+        };
+        res.status(200).send({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
+    
+      } catch (error) {
+        console.log('Internal Server Error', error);
+        res.status(500).send({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+    
     
 
 }
