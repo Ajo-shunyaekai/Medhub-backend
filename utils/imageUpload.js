@@ -39,7 +39,7 @@
 const multer = require("multer");
 
 const createMulterMiddleware = (uploadConfig) => {
-    console.log('uploadConfig',uploadConfig)
+    // console.log('uploadConfig',uploadConfig)
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       const { user_type } = req.headers;

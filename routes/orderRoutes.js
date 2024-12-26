@@ -49,14 +49,17 @@ module.exports = () => {
                 res.send(response);
             });
     });
+    routes.post('/get-order-list-all-users', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
 
     routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-            Order.buyerOrderDetails(req.body, result => {
-                const response = handleResponse(result);
-                res.send(response);
-            });
+        Order.buyerOrderDetails(req.body, result => {
+            const response = handleResponse(result);
+            res.send(response);
+        });
     });
+
+    routes.post('/get-specific-order-details', checkAuthorization, checkCommonUserAuthentication, Order?.getSpecificOrderDetails);
 
     routes.post('/cancel-order', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 

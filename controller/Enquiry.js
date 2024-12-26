@@ -1,4 +1,5 @@
 const mongoose     = require('mongoose');
+const moment       = require('moment');
 const ObjectId     = mongoose.Types.ObjectId;
 const Enquiry      = require('../schema/enquiryListSchema')
 const Support      = require('../schema/supportSchema')
@@ -505,7 +506,189 @@ module.exports = {
             console.log(error);
             callback({ code: 500, message: 'Internal Server Error', result: error });
         }
-    }
+    },
+
+    getEnquiryListAllUsers: async (req, res)=>{
+        try {
+            const {user_type} = req?.headers;
+            const { supplier_id, buyer_id, status, pageNo, pageSize,filterValue } = req?.body;
+            const page_no   = pageNo || 1
+            const page_size = pageSize || 2
+            const offset    = (page_no - 1) * page_size
+            const matchCondition = {enquiry_status: {$ne: 'order created'}};
+            if (buyer_id && !supplier_id) {
+                matchCondition.buyer_id = buyer_id;
+            } else if (supplier_id && !buyer_id) {
+                matchCondition.supplier_id = supplier_id;
+            }
+            let dateFilter = {}; 
+    
+            const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+            const endDate   = moment().endOf('day').toDate();
+            console.log("Year filter: ", startDate, endDate); 
+            
+            // Apply date filter based on filterValue (today, week, month, year, all)
+            if (filterValue === 'today') {
+                dateFilter = {
+                    created_at: {
+                        $gte: moment().startOf('day').toDate(),
+                        $lte: moment().endOf('day').toDate(),
+                    },
+                };
+            } else if (filterValue === 'week') {
+                dateFilter = {
+                    created_at: {
+                        $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                        $lte: moment().endOf('day').toDate(),
+                    },
+                };
+            } else if (filterValue === 'month') {
+                dateFilter = {
+                    created_at: {
+                        $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                        $lte: moment().endOf('day').toDate(),
+                    },
+                };
+            } else if (filterValue === 'year') {
+                dateFilter = {
+                    created_at: {
+                        $gte: startDate,
+                        $lte: endDate,
+                    },
+                };
+            } else if (filterValue === 'all' || !filterValue) {
+                dateFilter = {}; // No date filter
+            }
+        
+            // Merge dateFilter with filterCondition to apply both filters
+            const combinedFilter = { ...matchCondition, ...dateFilter };
+            const AdminProject1 = {
+                enquiry_id      : 1,
+                created_at      : 1,
+                items           : 1,
+                quotation_items : 1,
+                payment_terms   : 1,
+                created_at      : 1,
+                updated_at      : 1,
+                enquiry_status  : 1,
+                buyer : {
+                    $arrayElemAt : ["$buyer_details", 0]
+                },
+                supplier : {
+                    $arrayElemAt : ["$supplier_details", 0]
+                },
+            }
+
+            const AdminProject2 = {
+                enquiry_id      : 1,
+                created_at      : 1,
+                items           : 1,
+                quotation_items : 1,
+                payment_terms   : 1,
+                created_at      : 1,
+                updated_at      : 1,
+                enquiry_status  : 1,
+                "buyer.buyer_id"             : 1,
+                "buyer.buyer_name"           : 1,
+                "buyer.buyer_type"           : 1,
+                "buyer.buyer_mobile"         : 1,
+                "buyer.country_of_origin"    : 1,
+                "supplier.supplier_id"       : 1,
+                "supplier.supplier_name"     : 1,
+                "supplier.supplier_type"     : 1,
+                "supplier.supplier_mobile"   : 1,
+                "supplier.country_of_origin" : 1,
+            }
+
+            const projObj1 = {
+                enquiry_id     : 1,
+                created_at     : 1,
+                items          : 1,
+                enquiry_status : 1,
+                buyer : {
+                    $arrayElemAt : ["$buyer_details", 0]
+                },
+                supplier : {
+                    $arrayElemAt : ["$supplier_details", 0]
+                },
+            }
+
+            const projObj2 = {
+                enquiry_id     : 1,
+                created_at     : 1,
+                items          : 1,
+                enquiry_status : 1,
+                "buyer.buyer_id"             : 1,
+                "buyer.buyer_name"           : 1,
+                "buyer.buyer_type"           : 1,
+                "buyer.buyer_mobile"         : 1,
+                "buyer.country_of_origin"    : 1,
+                "supplier.supplier_id"       : 1,
+                "supplier.supplier_name"     : 1,
+                "supplier.supplier_type"     : 1,
+                "supplier.supplier_mobile"   : 1,
+                "supplier.country_of_origin" : 1,
+            }
+
+            const proj1 = user_type == 'Admin' ? AdminProject1 : projObj1
+            const proj2 = user_type == 'Admin' ? AdminProject2 : projObj2
+
+            let data = await Enquiry.aggregate([
+                {
+                    // $match: matchCondition
+                        $match : user_type == 'Admin' ? combinedFilter : matchCondition
+                },
+                {
+                    $lookup : {
+                        from         : "buyers",
+                        localField   : "buyer_id",
+                        foreignField : "buyer_id",
+                        as           : "buyer_details",
+                    }
+                },
+                {
+                    $lookup : {
+                        from         : "suppliers",
+                        localField   : "supplier_id",
+                        foreignField : "supplier_id",
+                        as           : "supplier_details",
+                    }
+                },
+                {
+                    $project: proj1
+                },
+                {
+                    $project: proj2
+                },
+                {
+                    $sort: { created_at: -1 }
+                },
+                {
+                    $skip: offset
+                },
+                {
+                    $limit: page_size
+                },
+                
+            ])
+            if(!data){
+                return res?.status(400)?.send({ code: 400, message: 'Error occured fetching enquiry list', result: {} });
+            }
+
+            const totalItems = await Enquiry.countDocuments(user_type == 'Admin' ? combinedFilter : matchCondition);
+            const totalPages = Math.ceil(totalItems / page_size);
+
+            const returnObj = {
+                data,
+                totalPages,
+                totalItems
+            };
+            return res?.status(200)?.send({code: 200, message: 'Enquiry list', result: returnObj})
+        } catch (error) {
+            console.log(error);
+            return res?.status(500)?.send({ code: 500, message: 'Internal Server Error', result: error });
+        }
+    },
     
     
 }    

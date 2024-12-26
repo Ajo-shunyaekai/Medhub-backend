@@ -26,6 +26,13 @@ module.exports = () => {
                 res.send(response);
             });
     });
+    routes.post('/get-specific-enquiry-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
+
+            Enquiry.getEnquiryDetails(req.body, result => {
+                const response = handleResponse(result);
+                res.send(response);
+            });
+    });
 
     routes.post('/submit-quotation', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
@@ -42,6 +49,8 @@ module.exports = () => {
             res.send(response);
         });
     });
+    
+    routes.post('/get-enquiry-list-all-users', checkAuthorization, checkCommonUserAuthentication, Enquiry.getEnquiryListAllUsers);
 
     routes.post('/cancel-enquiry', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
 
