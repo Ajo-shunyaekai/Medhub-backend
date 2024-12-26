@@ -59,6 +59,13 @@ module.exports = () => {
                 res.send(response);
             });
     });
+    
+    routes.post('/get-specific-invoice-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
+            Invoice.invoiceDetails(req.body, result => {
+                const response = handleResponse(result);
+                res.send(response);
+            });
+    });
  
 
 
