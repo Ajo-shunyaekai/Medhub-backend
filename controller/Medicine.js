@@ -1123,6 +1123,459 @@ module.exports = {
     } catch (error) {
         callback({ code: 500, message: "Internal Server Error", result: error });
     }
-  }
+  },
+
+  getSpecificMedicinesList: async (req, res) => {
+    try {
+      const {user_type} = req?.headers;
+      const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, supplier_id, category_name, medicine_status, price_range, delivery_time, in_stock, admin_id } = req?.body;
+
+      console.log(req?.body)
+  
+      const page_no   = pageNo || 1;
+      const page_size = pageSize || 10;
+      const offset    = (page_no - 1) * page_size;
+  
+      let matchCondition = {
+        medicine_type: user_type == 'Admin' ? medicineType : medicine_type,
+      };
+  
+      if (supplier_id) {
+        matchCondition.supplier_id = supplier_id;
+      }
+  
+      if (medicine_status === 'accepted' || status === 'accepted') {
+        matchCondition.status = 1;
+      } else if (medicine_status === 'rejected' || status === 'rejected') {
+        matchCondition.status = 2;
+      } else if (medicine_status === 'pending' || status === 'pending') {
+        matchCondition.status = 0;
+      } else {
+        matchCondition.status = 1;
+      }
+  
+  
+      if (searchKey && category_name) {
+          matchCondition.$and = [
+              {
+                  $or: [
+                      { medicine_name : { $regex: searchKey, $options: 'i' } },
+                      { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+                  ]
+              },
+              { medicine_category: category_name }  // Ensure the field name is correct
+          ];
+      } else if (searchKey) {
+          matchCondition.$or = [
+              { medicine_name : { $regex: searchKey, $options: 'i' } },
+              { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+          ];
+      } else if (category_name) {
+          matchCondition.medicine_category = category_name;  // Use correct field
+      }
+    
+  
+      if (in_stock && in_stock.length > 0) {
+          const stockedCountries    = in_stock[0].split(',').map(country => country.trim());
+          matchCondition.stocked_in = { $in: stockedCountries };
+      }
+  
+      let pipeline = [
+          {
+              $match: matchCondition,
+          }
+      ];
+  
+      if (price_range && price_range.length > 0) {
+          const ranges = price_range[0].split(',').map(range => range.trim());
+          const priceConditions = ranges.map(range => {
+              if (range.includes('greater than')) {
+                  const value = parseFloat(range.split('greater than')[1].trim());
+                  return { "inventory_info.unit_price": { $gt: value.toString() } };
+              } else {
+                  const [min, max] = range.split('AED')[0].trim().split('-').map(num => parseFloat(num.trim()));
+                  return { 
+                      "inventory_info.unit_price": { $gte: min.toString(), $lte: max.toString() } 
+                  };
+              }
+          });
+          pipeline.push({ $match: { $or: priceConditions } });
+      }
+  
+      if (delivery_time && delivery_time.length > 0) {
+          const ranges = delivery_time[0].split(',').map(range => range.trim());
+          const deliveryConditions = ranges.map(range => {
+              if (range.includes('greater than')) {
+                  const value = parseInt(range.split('greater than')[1].trim());
+                  return { "inventory_info.est_delivery_days": { $gt: value.toString() } };
+              } else {
+                  const [min, max] = range.split('-').map(num => parseInt(num.trim()));
+                  // return { 
+                  //     "inventory_info.est_delivery_days": { $gte: min, $lte: max } 
+                  // };
+                  return { 
+                    "inventory_info.est_delivery_days": { $gte: min.toString(), $lte: max.toString() } 
+                  };
+              }
+          });
+          pipeline.push({ $match: { $or: deliveryConditions } });
+      }
+  
+      pipeline.push(
+        {
+          $sort: { created_at: -1 }
+      },
+          {
+            
+              $project: {
+                  medicine_id       : 1,
+                  supplier_id       : 1,
+                  medicine_name     : 1,
+                  medicine_image    : 1,
+                  drugs_name        : 1,
+                  composition       : 1,
+                  country_of_origin : 1,
+                  dossier_type      : 1,
+                  tags              : 1,
+                  dossier_status    : 1,
+                  gmp_approvals     : 1,
+                  medicine_category : 1,
+                  registered_in     : 1,
+                  comments          : 1,
+                  dosage_form       : 1,
+                  category_name     : 1,
+                  strength          : 1,
+                  quantity          : 1,
+                  medicine_type     : 1,
+                  stocked_in        : 1,
+                  "inventory_info.unit_price"        : 1,
+                  "inventory_info.est_delivery_days" : 1,
+                  "inventory_info.total_price"       : 1,
+              }
+          },
+          { $skip  : offset },
+          { $limit : page_size }
+      );
+  
+      // console.log('pipeline', JSON.stringify(pipeline, null, 2));
+      let data;
+      
+      if( user_type == 'Admin' ){
+        data = await Medicine.aggregate([
+          {
+            $match: {
+              medicine_type: medicineType,
+              status       : status
+            }
+          },
+          {
+            $lookup: {
+              from         : "medicineinventories",
+              localField   : "medicine_id",
+              foreignField : "medicine_id",
+              as           : "inventory",
+            },
+          },
+          {
+            $sort: { created_at: -1 } 
+          },
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
+              medicine_type     : 1,
+              status            : 1,
+              inventory : {
+                $arrayElemAt: ["$inventory", 0],
+              },
+            },
+          },
+          
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
+              medicine_type     : 1,
+              status            : 1,
+              "inventory.delivery_info"  : 1,
+              "inventory.price"          : 1,
+            },
+          },
+          
+          { $skip: offset },
+          { $limit: page_size },
+        ])
+
+      } else if(user_type == 'Supplier'){
+        data = await Medicine.aggregate(pipeline);
+      } else if (user_type == 'Buyer') {
+        data = await Medicine.aggregate(pipeline);
+      }  
+  
+      // Count total items matching the condition
+      const totalItems = await Medicine.countDocuments(user_type == 'Admin'? {medicine_type: medicineType, status: status}: {medicine_type: medicine_type,});
+      const totalPages = Math.ceil(totalItems / page_size);
+  
+      const returnObj = {
+        data,
+        totalPages,
+        totalItems
+      };
+
+      console.log(data)
+  
+      res?.status(200)?.send({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
+    } catch (error) {
+      console.log(error)
+      res?.status(500)?.send({ code: 500, message: "Internal Server Error", result: error });
+    }
+  },
+
+  getSpecificMedicineDetails: async (req, res) => {
+    try {
+      const { user_type } = req?.headers;
+      const data = await Medicine.aggregate([
+        {
+          $match: { medicine_id: req?.body?.medicine_id },
+        },
+        {
+          $lookup: {
+            from         : "medicineinventories",
+            localField   : "medicine_id",
+            foreignField : "medicine_id",
+            as           : "inventory",
+          },
+        },
+        {
+          $project: {
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
+            inventory : {
+              $arrayElemAt: ["$inventory", 0],
+            },
+          },
+        },
+        {
+          $project: {
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
+            "inventory.inventory_info"     : 1,
+            "inventory.strength"           : 1,
+          },
+        },
+        {
+          $lookup: {
+            from         : "suppliers",
+            localField   : "supplier_id",
+            foreignField : "supplier_id",
+            as           : "supplier",
+          },
+        },
+        {
+          $project: {
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
+            "inventory.inventory_info"     : 1,
+            "inventory.strength"           : 1,
+            supplier : {
+              $arrayElemAt: ["$supplier", 0],
+            },
+          },
+        },
+        {
+          $project: {
+            medicine_id                    : 1,
+            supplier_id                    : 1,
+            medicine_name                  : 1,
+            medicine_type                  : 1,
+            composition                    : 1,
+            dossier_type                   : 1,
+            dossier_status                 : 1,
+            gmp_approvals                  : 1,
+            shipping_time                  : 1,
+            tags                           : 1,
+            available_for                  : 1,
+            description                    : 1,
+            registered_in                  : 1,
+            inventory_info                 : 1,
+            medicine_image                 : 1,
+            invoice_image                  : 1,
+            strength                       : 1,
+            medicine_category              : 1,
+            total_quantity                 : 1,
+            stocked_in                     : 1,
+            shelf_life                     : 1,
+            type_of_form                   : 1,
+            country_of_origin              : 1,
+            purchased_on                   : 1,
+            unit_price                     : 1,
+            country_available_in           : 1,
+            min_purchase_unit              : 1,
+            condition                      : 1,
+            unit_tax                       : 1,
+            manufacturer_country_of_origin : 1,
+            manufacturer_description       : 1,
+            manufacturer_name              : 1,
+            stockedIn_details              : 1,
+            edit_status                    : 1,
+            "inventory.inventory_info"             : 1,
+            "inventory.strength"                   : 1,
+            "supplier.supplier_id"                 : 1, 
+            "supplier.supplier_name"               : 1,
+            "supplier.supplier_email"              : 1,
+            "supplier.description"                 : 1,
+            "supplier.estimated_delivery_time"     : 1,
+            "supplier.tags"                        : 1,
+            "supplier.license_no"                  : 1,
+            "supplier.supplier_address"            : 1,
+            "supplier.payment_terms"               : 1,
+            "supplier.country_of_origin"           : 1,
+            "supplier.supplier_type"               : 1,
+            "supplier.contact_person_name"         : 1,
+            "supplier.supplier_country_code"       : 1,
+            "supplier.supplier_mobile"             : 1,
+            "supplier.contact_person_email"        : 1,
+            "supplier.contact_person_mobile_no"    : 1,
+            "supplier.contact_person_country_code" : 1,
+            "supplier.tax_no"                      : 1,
+            "supplier.supplier_type"               : 1,
+            "supplier.country_of_operation"        : 1,
+          },
+        },
+      ])
+
+      if (!data) {
+        res?.status(500)?.send({ code: 500, message: "Internal Server Error", result: error });
+      }
+
+      res?.status(200)?.send({ code: 200, message: "Medicine details fetched successfully", result: data });
+
+    } catch (error) {
+      console.log(error)
+      res?.status(500)?.send({ code: 500, message: "Internal Server Error", result: error });
+    }
+  },
 
 };

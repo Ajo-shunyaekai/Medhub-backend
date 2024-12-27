@@ -1,8 +1,9 @@
 require('dotenv').config();
 const bcrypt       = require('bcrypt');
+const moment       = require('moment');
 const jwt          = require('jsonwebtoken');
 const Supplier     = require('../schema/supplierSchema')
-const Buyer     = require('../schema/buyerSchema')
+const Buyer        = require('../schema/buyerSchema')
 const Order        = require('../schema/orderSchema')
 const SupplierEdit = require('../schema/supplierEditSchema')
 const Support      = require('../schema/supportSchema')
@@ -1150,6 +1151,112 @@ module.exports = {
         console.log('server error', error);
         callback({ code: 500, message: "Internal server error", result: error });
       }
-     }
+     },
 
+     getAllSuppliersList: async (req, res) => {
+      try {
+        const { user_type } = req?.headers;
+        const { filterKey, filterValue, searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = req?.body;
+
+        const page_no = pageNo || 1;
+        const page_size = pageSize || 2;
+        const offSet = (page_no - 1) * page_size;
+        const offset = (pageNo - 1) * pageSize;
+    
+        const fields = {
+          token    : 0,
+          password : 0
+        };
+
+        let filterCondition = {};
+        if (filterKey === 'pending') {
+          filterCondition = { account_status: 0 };
+        } else if (filterKey === 'accepted') {
+          filterCondition = { account_status: 1 };
+        } else if (filterKey === 'rejected') {
+          filterCondition = { account_status: 2 };
+        }
+
+        let dateFilter = {}; 
+
+        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+        const endDate   = moment().endOf('day').toDate();
+
+        // Apply date filter based on filterValue (today, week, month, year, all)
+        if (filterValue === 'today') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'week') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'month') {
+            dateFilter = {
+                createdAt: {
+                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                    $lte: moment().endOf('day').toDate(),
+                },
+            };
+        } else if (filterValue === 'year') {
+            dateFilter = {
+                createdAt: {
+                    $gte: startDate,
+                    $lte: endDate,
+                },
+            };
+        } else if (filterValue === 'all' || !filterValue) {
+            dateFilter = {}; // No date filter
+        }
+    
+        // Merge dateFilter with filterCondition to apply both filters
+        const combinedFilter = { ...filterCondition, ...dateFilter };
+      
+        let query = { account_status: 1 };
+        
+        if (searchKey) {
+          query.supplier_name = { $regex: new RegExp(searchKey, 'i') };
+        }
+        
+        if (filterCountry) {
+          query.country_of_origin = filterCountry;
+        }
+    
+        let data;
+
+        if(user_type == 'Admin'){
+          data = await Supplier.find(combinedFilter).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
+        } else if(user_type == 'Buyer'){
+          data = await Supplier.find(query)
+            .select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time, license_expiry_date tax_no')
+            .sort({createdAt: -1})
+            .skip(offset)
+            .limit(pageSize);
+        }
+
+        if(!data){
+          res?.status(500)?.send({ code: 500, message: "Error fetching suppliers list", result: {} })
+        }
+        
+        const totalItems = await Supplier.countDocuments( user_type == 'Admin' ? combinedFilter: user_type == 'Buyer' && query );
+      
+        const totalPages = Math.ceil(totalItems / page_size);
+        const returnObj = {
+          data,
+          totalPages,
+          totalItems
+        };
+    
+        res?.status(200)?.send({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
+      } catch (error) {
+        console.log('server error', error);
+        res?.status(500)?.send({ code: 500, message: "Internal server error", result: error });
+      }
+     }
    }

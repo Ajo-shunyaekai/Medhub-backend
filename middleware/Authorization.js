@@ -209,30 +209,35 @@ module.exports = {
     // console.log('checkCommonUserAuthentication', req.headers.user_type,req.headers.supplier_id );
     
     const { access_token, user_type } = req.headers;
-    const { supplier_id, seller_id, admin_id, buyer_id,supplierId } = Object.keys(req.body).length > 0 ? req.body : req.headers;
-    console.log('req?.body', req.body);
+    const { supplier_id, seller_id, admin_id, buyer_id, supplierId } = req.body;
+    
+    // Log to check if the access token and user type are correct
+    console.log('Access Token:', access_token);
+    console.log('User Type:', user_type);
+    
     try {
-      const user =
-        user_type == "Buyer"
-          ? await Buyer.findOne({ token: access_token })
-          : user_type == "Admin"
-          ? await Admin.findOne({ token: access_token, admin_id })
-          : user_type == "Supplier"
-          ? await Supplier.findOne({ token: access_token })
-          : user_type == "Seller"
-          ? await Seller.find({ token: access_token, seller_id })
-          : null;
-          
+      let user = null;
+  
+      if (user_type === "Buyer") {
+        user = await Buyer.findOne({ token: access_token });
+      } else if (user_type === "Admin") {
+        user = await Admin.findOne({ token: access_token, admin_id });
+      } else if (user_type === "Supplier") {
+        user = await Supplier.findOne({ token: access_token });
+      } else if (user_type === "Seller") {
+        user = await Seller.findOne({ token: access_token, seller_id });
+      }
+      
       if (!user) {
-        console.log('!user', user);
+        console.log('User not found with the provided access token');
         return res.status(400).send({ message: "Invalid Access Token" });
       }
-
+  
       if (user.status === 0) {
-        console.log('user.status === 0', user);
+        console.log('User is disabled (status = 0)');
         return res.status(400).send({ message: "Access Denied" });
       }
-
+  
       next();
     } catch (error) {
       console.error("Error checking access token:", error);
