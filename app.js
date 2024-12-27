@@ -8,6 +8,9 @@ const bodyParser     = require('body-parser');
 const connect        = require('./utils/dbConnection')
 const initializeSocket = require('./utils/socketHandler');
 const { Server }     = require('socket.io'); 
+const sendEmail          = require('./utils/emailService')
+const {contactUsContent} = require("./utils/emailContents");
+const EmailListing = require('./schema/emailListingSchema')
 
 //-----------------   routes   -----------------------//
 const userRouter      = require('./routes/userRoutes')()
@@ -35,11 +38,11 @@ app.use('/uploads', express.static('uploads'));
 
 // Serve HTML files
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/home.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+app.get('/index.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/about.html', (req, res) => {
@@ -56,6 +59,7 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.get(['/*'], (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
+
 
 const corsOptions = {
   origin: [
@@ -86,6 +90,39 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+
+// contact us Email sending route
+app.post('/send-email', async (req, res) => {
+  console.log('/send-email', req.body); 
+  const { username, email, subject, phone, companyname,  message,checkbox, subscribed } = req.body;
+// return false
+  try {
+    if (checkbox === 'on') {
+      const existingSubscriber = await EmailListing.findOne({ email });
+      if (!existingSubscriber) {
+        const newSubscriber = new EmailListing({ username, email, phone });
+        await newSubscriber.save();
+        console.log(`User subscribed to mailing list: ${email}`);
+      } else {
+        console.log(`User already subscribed: ${email}`);
+      }
+    }
+    
+    const subject = "Inquiry from MedHub Global";
+    // const recipientEmails = [process.env.SMTP_USER_ID, "ajo@shunyaekai.tech"];
+    const recipientEmails = ["ajo@shunyaekai.tech"];
+    const emailContent = await contactUsContent(req.body)
+    // const result = await sendEmail({ username, email, subject, phone, message, checkbox });
+     await sendEmail(recipientEmails, subject, emailContent);
+     res.status(200).json({
+      success: true,
+      message: "Thank you! We have received your details and will get back to you shortly.",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+})
 
 //------------------------------ api routes ------------------//
 app.use(`/api/auth`,authRoutes)

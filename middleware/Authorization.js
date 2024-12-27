@@ -214,7 +214,7 @@ module.exports = {
     // Log to check if the access token and user type are correct
     console.log('Access Token:', access_token);
     console.log('User Type:', user_type);
-    
+
     try {
       let user = null;
   
