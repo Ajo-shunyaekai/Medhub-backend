@@ -231,5 +231,7 @@ module.exports = () => {
         });
     });
     
-   return routes
+    routes.post(`/get-all-suppliers-list`, checkAuthorization, checkCommonUserAuthentication, Controller.getAllSuppliersList)
+   
+    return routes
 }

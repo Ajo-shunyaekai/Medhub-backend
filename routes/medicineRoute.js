@@ -153,6 +153,10 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/get-all-medicines-list', checkAuthorization, Controller.getSpecificMedicinesList);
+    
+    routes.post('/get-specific-medicine-details', checkAuthorization, Controller.getSpecificMedicineDetails);
  
     return routes;
 }
