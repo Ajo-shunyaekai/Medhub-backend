@@ -95,7 +95,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // contact us Email sending route
 app.post('/send-email', async (req, res) => {
   console.log('/send-email', req.body); 
-  const { username, email, subject, phone, message,checkbox, subscribed } = req.body;
+  const { username, email, subject, phone, companyname,  message,checkbox, subscribed } = req.body;
 // return false
   try {
     if (checkbox === 'on') {

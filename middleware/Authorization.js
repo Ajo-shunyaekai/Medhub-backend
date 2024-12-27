@@ -210,7 +210,8 @@ module.exports = {
     
     const { access_token, user_type } = req.headers;
     const { supplier_id, seller_id, admin_id, buyer_id,supplierId } = Object.keys(req.body).length > 0 ? req.body : req.headers;
-    console.log('req?.body', req.body);
+    // console.log('req?.body', req.body);
+    console.log('access_token', access_token);
     try {
       const user =
         user_type == "Buyer"

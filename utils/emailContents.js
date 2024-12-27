@@ -17,11 +17,12 @@ const contactUsContent = (obj) => {
                 <body>
                     <p>Hi Admin,</p>
                     <p>We have received an inquiry. Below are the details:</p>
+                     <p><strong>Company Name:</strong> ${obj.companyname}</p>
                     <p><strong>Email:</strong> ${obj.email}</p>
-                    ${obj.isInterest ? '' : `<p><strong>Name:</strong> ${obj.username}</p>
-                                        <p><strong>Phone:</strong> ${obj.phone}</p>
-                                        <p><strong>Subject:</strong> ${obj.subject}</p>
-                                        <p><strong>Message:</strong> ${obj.message || 'N/A'}</p>`}
+                    <p><strong>Name:</strong> ${obj.username}</p>
+                    <p><strong>Phone:</strong> ${obj.phone}</p>
+                    <p><strong>Subject:</strong> ${obj.subject}</p>
+                    <p><strong>Message:</strong> ${obj.message || 'N/A'}</p>
                     <br />
                     <p>Regards,</p>
                     <p><strong>MedHub Global Team</strong></p>

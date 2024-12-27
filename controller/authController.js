@@ -489,8 +489,15 @@ module.exports = {
 
   loginUser: async (req, res) => {
     try {
-      const { access_token, user_type } = req.headers;
-      const { email, password } = req.body;
+      const { access_token,  } = req.headers;
+      const { email, password, user_type } = req.body;
+      console.log(user_type)
+      console.log(req.body)
+      if (!user_type) {
+        return res
+          ?.status(404)
+          ?.send({ code: 404, message: "Invalid Access" });
+      }
 
       const user =
         user_type == "Buyer"
@@ -610,3 +617,4 @@ module.exports = {
     }
   },
 };
+
