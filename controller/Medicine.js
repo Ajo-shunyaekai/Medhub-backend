@@ -1570,7 +1570,7 @@ module.exports = {
         res?.status(500)?.send({ code: 500, message: "Internal Server Error", result: error });
       }
 
-      res?.status(200)?.send({ code: 200, message: "Medicine details fetched successfully", result: data });
+      res?.status(200)?.send({ code: 200, message: "Medicine details fetched successfully", result: data[0] || data });
 
     } catch (error) {
       console.log(error)
