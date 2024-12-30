@@ -37,7 +37,7 @@ const buyerRegistrationContent = (buyer)=>{
         `
             <p>Dear Admin,</p>
             <p>We hope this message finds you well.</p>
-            <p>We are pleased to inform you that a new buyer has registered on Deliver. Below are the details of the new account:</p>
+            <p>We are pleased to inform you that a new buyer has registered on Medhub Global. Below are the details of the new account:</p>
             <ul>
             <li>Type of Account: ${buyer?.buyer_type}</li>
             <li>Company Name: ${buyer?.buyer_name}</li>
@@ -47,7 +47,7 @@ const buyerRegistrationContent = (buyer)=>{
             <li>Registration Date: ${getTodayFormattedDate()}</li>
             </ul>
             <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-            <p>Best regards,<br/>Deliver.com Team</p>
+            <p>Best regards,<br/>MedHub Global Team</p>
         `
     )
 }
@@ -57,7 +57,7 @@ const supplierRegistrationContent = (seller)=>{
         `
             <p>Dear Admin,</p>
             <p>We hope this message finds you well.</p>
-            <p>We are pleased to inform you that a new supplier has registered on Deliver. Below are the details of the new account:</p>
+            <p>We are pleased to inform you that a new supplier has registered on Medhub Global. Below are the details of the new account:</p>
             <ul>
             <li>Type of Account: ${seller.supplier_type}</li>
             <li>Company Name: ${seller.supplier_name}</li>
@@ -67,7 +67,7 @@ const supplierRegistrationContent = (seller)=>{
             <li>Registration Date: ${getTodayFormattedDate()}</li>
             </ul>
             <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-            <p>Best regards,<br/>Deliver.com Team</p>
+            <p>Best regards,<br/>MedHub Global Team</p>
         `
     )
 }

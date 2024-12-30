@@ -440,11 +440,11 @@ module.exports = {
     //         Your Login Password is: ${password} <br />
     //         <br /><br />
     //         Thanks & Regards <br />
-    //         Team Deliver`;
+    //         MedHub Global Team`;
     //         const recipientEmails = [updateProfile.supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
     //         await sendMailFunc(recipientEmails.join(','), subject, body);
 
-                const subject = 'Registration Approved at Deliver.com';
+                const subject = 'Registration Approved at Medhub Global';
                 const body = `Dear ${updateProfile.supplier_name}, <br /><br />
 
                 We are pleased to inform you that your registration on our website has been successfully approved!<br /><br />
@@ -460,7 +460,7 @@ module.exports = {
                 Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
 
                 Best regards, <br />
-                <strong>Team Deliver</strong>
+                <strong>MedHub Global Team</strong>
                 `;
 
                 // Sending the email to multiple recipients
@@ -481,7 +481,7 @@ module.exports = {
           //   If you believe this is an error, please contact our support team. <br />
           //   <br /><br />
           //   Thanks & Regards <br />
-          //   Team Deliver`;
+          //   MedHub Global Team`;
     
           // sendMailFunc(updateProfile.supplier_email, 'Registration Request Rejected', body);
     
@@ -760,7 +760,7 @@ module.exports = {
     
           // sendMailFunc(updateStatus.buyer_email, 'Login Credentials for Deliver', body);
 
-                const subject = 'Registration Approved at Deliver.com';
+                const subject = 'Registration Approved at Medhub Global';
                 const body = `Dear ${updateStatus.buyer_name}, <br /><br />
 
                 We are pleased to inform you that your registration on our website has been successfully approved!<br /><br />
@@ -776,7 +776,7 @@ module.exports = {
                 Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
 
                 Best regards, <br />
-                <strong>Team Deliver</strong>
+                <strong>Team MedHub Global Team</strong>
                 `;
 
                 // Sending the email to multiple recipients
@@ -794,7 +794,7 @@ module.exports = {
           //   If you believe this is an error, please contact our support team. <br />
           //   <br /><br />
           //   Thanks & Regards <br />
-          //   Team Deliver`;
+          //   MedHub Global Team`;
     
           // sendMailFunc(updateStatus.buyer_email, 'Registration Request Rejected', body);
     
@@ -2162,7 +2162,7 @@ module.exports = {
                   Supplier ID: ${updateStatus.supplier_id} <br />
                   <br /><br />
                   Thanks & Regards <br />
-                  Team Deliver`;
+                  MedHub Global Team`;
 
               // Determine event type based on medicine_type
               event = medicine_type === 'new' ? 'addnewmedicine' : 'addsecondarymedicine';
@@ -2594,7 +2594,7 @@ module.exports = {
                           Supplier ID: ${updatedMedicine.supplier_id} <br />
                           <br /><br />
                           Thanks & Regards, <br />
-                          Team Deliver`;
+                          MedHub Global Team`;
 
             // Send the email to the supplier
             await sendMailFunc(supplier.supplier_email, subject, body);

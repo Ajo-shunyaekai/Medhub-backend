@@ -16,7 +16,8 @@ function initializeSocket(server) {
         'http://localhost:3333',
         'https://supplierdeliver.shunyaekai.com',
         'https://buyerdeliver.shunyaekai.com',
-        'https://deliver.shunyaekai.com'
+        'https://deliver.shunyaekai.com',
+        'https://medhub.shunyaekai.com'
       ],
       methods: ['GET', 'POST'],
       credentials: true

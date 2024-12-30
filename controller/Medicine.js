@@ -18,7 +18,7 @@ const {getTodayFormattedDate}  = require('../utils/utilities')
   const body = `
     <p>Dear Admin,</p>
     <p>We hope this message finds you well.</p>
-    <p>A supplier has submitted a new product for approval on Deliver. Please review the details below:</p>
+    <p>A supplier has submitted a new product for approval on Medhub Global. Please review the details below:</p>
     <ul>
       <li>Supplier Name: ${supplierName}</li>
       <li>Product Name: ${medicineName}</li>
