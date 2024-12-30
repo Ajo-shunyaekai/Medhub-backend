@@ -8,6 +8,7 @@ const User = require("../schema/userSchema");
 const Order = require("../schema/orderSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
+const List  = require('../schema/addToListSchema');
 const BuyerEdit = require("../schema/buyerEditSchema");
 const SupplierEdit = require("../schema/supplierEditSchema");
 const MedicineInventory = require("../schema/medicineInventorySchema");
@@ -487,74 +488,85 @@ module.exports = {
     }
   },
 
+
   loginUser: async (req, res) => {
     try {
-      const { access_token,  } = req.headers;
-      const { email, password, user_type } = req.body;
-      console.log(user_type)
-      console.log(req.body)
-      if (!user_type) {
-        return res
-          ?.status(404)
-          ?.send({ code: 404, message: "Invalid Access" });
-      }
+        const { access_token } = req.headers;
+        const { email, password, user_type } = req.body;
 
-      const user =
-        user_type == "Buyer"
-          ? await Buyer.findOne({ buyer_email: email })
-          : user_type == "Admin"
-          ? await Admin.findOne({ email: email })
-          : user_type == "Supplier"
-          ? await Supplier.findOne({ supplier_email: email })
-          : user_type == "Seller"
-          ? await Seller.findOne({ email: email })
-          : null;
+        console.log(user_type);
+        console.log(req.body);
 
-      if (!user) {
-        return res
-          ?.status(404)
-          ?.send({ code: 404, message: "Email not found", result: user || {} });
-      }
+        if (!user_type) {
+            return res?.status(404)?.send({ code: 404, message: "Invalid Access" });
+        }
 
-      const isMatch = await bcrypt.compare(password, user?.password);
+        // Find the user based on user type
+        const user =
+            user_type === "Buyer"
+                ? await Buyer.findOne({ buyer_email: email })
+                : user_type === "Admin"
+                ? await Admin.findOne({ email })
+                : user_type === "Supplier"
+                ? await Supplier.findOne({ supplier_email: email })
+                : user_type === "Seller"
+                ? await Seller.findOne({ email })
+                : null;
 
-      if (!isMatch) {
-        return res
-          ?.status(400)
-          ?.send({ code: 400, message: "Incorrect Password" });
-      }
+        if (!user) {
+            return res?.status(404)?.send({
+                code: 404,
+                message: "Email not found",
+                result: user || {},
+            });
+        }
 
-      const user2 =
-        user_type == "Buyer"
-          ? await Buyer.findById(user?._id)?.select(
-              "-password -createdAt -updatedAt -__v"
-            )
-          : user_type == "Admin"
-          ? await Admin.findById(user?._id)?.select(
-              "-password -createdAt -updatedAt -__v"
-            )
-          : user_type == "Supplier"
-          ? await Supplier.findById(user?._id)?.select(
-              "-password -createdAt -updatedAt -__v"
-            )
-          : user_type == "Seller"
-          ? await Seller.findById(user?._id)?.select(
-              "-password -createdAt -updatedAt -__v"
-            )
-          : null;
+        // Check if the password matches
+        const isMatch = await bcrypt.compare(password, user?.password);
 
-      return res?.status(200)?.send({
-        code: 200,
-        message: `${user_type} Login Successfull`,
-        result: user2,
-      });
+        if (!isMatch) {
+            return res?.status(400)?.send({ code: 400, message: "Incorrect Password" });
+        }
+
+        // Fetch user details excluding sensitive information
+        let user2 =
+            user_type === "Buyer"
+                ? await Buyer.findById(user?._id).select("-password -createdAt -updatedAt -__v").lean()
+                : user_type === "Admin"
+                ? await Admin.findById(user?._id).select("-password -createdAt -updatedAt -__v").lean()
+                : user_type === "Supplier"
+                ? await Supplier.findById(user?._id).select("-password -createdAt -updatedAt -__v").lean()
+                : user_type === "Seller"
+                ? await Seller.findById(user?._id).select("-password -createdAt -updatedAt -__v").lean()
+                : null;
+
+        if (user_type === "Buyer") {
+            console.log("user_type === 'Buyer'");
+            console.log("user2", user2);
+
+            // Count documents in the List collection for the buyer
+            const listCount = await List.countDocuments({ buyer_id: user2.buyer_id });
+            user2.list_count = listCount;
+
+            console.log("listCount", listCount);
+        }
+
+        return res?.status(200)?.send({
+            code: 200,
+            message: `${user_type} Login Successful`,
+            result: user2,
+        });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      return res
-        ?.status(500)
-        ?.send({ code: 500, message: "Internal Server Error", result: error });
+        console.error("Internal Server Error:", error);
+        return res?.status(500)?.send({
+            code: 500,
+            message: "Internal Server Error",
+            result: error,
+        });
     }
-  },
+},
+
+  
 
   // editLoggedinUserProfile : async (reqObj, callback) => {
   //   try {

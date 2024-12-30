@@ -1238,7 +1238,8 @@ module.exports = {
           {
             $match: {
               to_id : buyer_id,
-              to    : 'buyer'
+              to    : 'buyer',
+              status: 0
               
             }
           },
@@ -1277,7 +1278,7 @@ module.exports = {
         ])
         
         .then( async(data) => {
-          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer'});
+          const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer', status: 0});
           const totalPages = Math.ceil(totalItems / page_size);
 
           const returnObj = {
