@@ -1239,7 +1239,7 @@ module.exports = {
             $match: {
               to_id : buyer_id,
               to    : 'buyer',
-              status: 0
+              // status: 0
               
             }
           },
@@ -1377,22 +1377,30 @@ module.exports = {
 
     updateStatus : async(reqObj, callback) => {
       try {
-        const { notification_id, status } = reqObj
+        const { notification_id, status = 1, buyer_id, user_type } = reqObj
+      //   const updateNotification = await Notification.findOneAndUpdate(
+      //     { to_id: buyer_id, to: user_type },
+      //     {
+      //         $set: {
+      //           status: status,
+      //         }
+      //     },
+      //     { new: true } 
+      // );
 
-        const updateNotification = await Notification.findOneAndUpdate(
-          { notification_id : notification_id },
-          {
-              $set: {
-                status: status,
-                // status            : 'Awaiting Details from Seller'
-              }
-          },
-          { new: true } 
-      );
-      if (!updateNotification) {
+      const updateNotifications = await Notification.updateMany(
+        { to_id: buyer_id, to: user_type }, 
+        {
+            $set: {
+                status: status, 
+            },
+        },
+        { multi: true } 
+    )
+      if (!updateNotifications) {
           return callback({ code: 404, message: 'Notification not found', result: null });
       }
-      callback({ code: 200, message: "Status Updated", result: updateNotification });
+      callback({ code: 200, message: "Status Updated", result: updateNotifications });
 
       } catch (error) {
         console.log(error);

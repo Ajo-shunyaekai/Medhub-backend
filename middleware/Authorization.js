@@ -206,14 +206,12 @@ module.exports = {
   },
 
   checkCommonUserAuthentication: async (req, res, next) => {
-    // console.log('checkCommonUserAuthentication', req.headers.user_type,req.headers.supplier_id );
-    
     const { access_token, user_type } = req.headers;
     const { supplier_id, seller_id, admin_id, buyer_id, supplierId } = req.body;
     
     // Log to check if the access token and user type are correct
-    console.log('Access Token:', access_token);
-    console.log('User Type:', user_type);
+    // console.log('Access Token:', access_token);
+    // console.log('User Type:', user_type);
 
     try {
       let user = null;
@@ -229,12 +227,12 @@ module.exports = {
       }
       
       if (!user) {
-        console.log('User not found with the provided access token');
+        // console.log('User not found with the provided access token');
         return res.status(400).send({ message: "Invalid Access Token" });
       }
   
       if (user.status === 0) {
-        console.log('User is disabled (status = 0)');
+        // console.log('User is disabled (status = 0)');
         return res.status(400).send({ message: "Access Denied" });
       }
   

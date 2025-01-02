@@ -758,7 +758,8 @@ module.exports = {
           {
             $match: {
               to_id : supplier_id,
-              to    : 'supplier'
+              to    : 'supplier',
+              // status: 0
               
             }
           },
@@ -805,7 +806,7 @@ module.exports = {
         ])
         
         .then( async(data) => {
-          const totalItems = await Notification.countDocuments({to_id: supplier_id, to: 'supplier'});
+          const totalItems = await Notification.countDocuments({to_id: supplier_id, to: 'supplier', status: 0});
           const totalPages = Math.ceil(totalItems / page_size);
 
           const returnObj = {
@@ -904,22 +905,21 @@ module.exports = {
 
      updateStatus : async(reqObj, callback) => {
       try {
-        const { notification_id, status } = reqObj
+        const { notification_id, status = 1, supplier_id, user_type } = reqObj
 
-        const updateNotification = await Notification.findOneAndUpdate(
-          { notification_id : notification_id },
+        const updateNotifications = await Notification.updateMany(
+          { to_id: supplier_id, to: user_type }, 
           {
               $set: {
-                status : status,
-                // status            : 'Awaiting Details from Seller'
-              }
+                  status: status, 
+              },
           },
-          { new: true } 
-      );
-      if (!updateNotification) {
+          { multi: true } 
+      )
+      if (!updateNotifications) {
           return callback({ code: 404, message: 'Notification not found', result: null });
       }
-      callback({ code: 200, message: "Status Updated", result: updateNotification });
+      callback({ code: 200, message: "Status Updated", result: updateNotifications });
 
       } catch (error) {
         console.log(error);
