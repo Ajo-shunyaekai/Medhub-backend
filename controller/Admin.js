@@ -18,6 +18,10 @@ const PurchaseOrder      = require('../schema/purchaseOrderSchema')
 const Invoices           = require('../schema/invoiceSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
+const { parse } = require('json2csv');
+const fs = require('fs');
+const path = require('path');
+const { flattenData } = require('../utils/csvConverter')
 
 const generatePassword = () => {
   const password = generator.generate({
@@ -296,6 +300,78 @@ module.exports = {
         callback({ code: 500, message: 'Internal server error', result: error });
       }
     },
+    
+    getSupplierCSVList: async (req, res) => {
+      try {
+        const { pageNo, pageSize, filterKey, filterValue } = req?.body;
+
+        let filterCondition = {};
+        if (filterKey === 'pending') {
+          filterCondition = { account_status: 0 };
+        } else if (filterKey === 'accepted') {
+          filterCondition = { account_status: 1 };
+        } else if (filterKey === 'rejected') {
+          filterCondition = { account_status: 2 };
+        }
+
+        let dateFilter = {};
+        const combinedFilter = { ...filterCondition, ...dateFilter };
+    
+        const data = await Supplier.find(combinedFilter).sort({createdAt: -1})
+        
+        // Convert Mongoose document to plain object and flatten
+        const flattenedData = data.map(item => flattenData(item.toObject(), ["_id", "__v", "supplier_image", "license_image", "tax_image", "certificate_image", "profile_status", "createdAt", "updatedAt", "token", "password"], [], 'supplier_list')); // `toObject()` removes internal Mongoose metadata
+
+        // Convert the flattened data to CSV
+        const csv = parse(flattenedData);
+        
+        // Set headers for file download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+
+        res.status(200).send(csv);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        res?.status(500)?.send({ code: 500, message: 'Internal server error', result: error });
+      }
+    },
+
+    getBuyerCSVList: async (req, res) => {
+      try {
+        const { pageNo, pageSize, filterKey, filterValue } = req?.body;
+
+        let filterCondition = {};
+        if (filterKey === 'pending') {
+          filterCondition = { account_status: 0 };
+        } else if (filterKey === 'accepted') {
+          filterCondition = { account_status: 1 };
+        } else if (filterKey === 'rejected') {
+          filterCondition = { account_status: 2 };
+        }
+
+        let dateFilter = {};
+        const combinedFilter = { ...filterCondition, ...dateFilter };
+    
+        const data = await Buyer.find(combinedFilter).sort({createdAt: -1})
+        
+        // Convert Mongoose document to plain object and flatten
+        const flattenedData = data.map(item => flattenData(item.toObject(), ["_id", "__v", "supplier_image", "buyer_image", "license_image", "tax_image", "certificate_image", "profile_status", "createdAt", "updatedAt", "token", "password"], [], 'buyer_list')); // `toObject()` removes internal Mongoose metadata
+
+        // Convert the flattened data to CSV
+        const csv = parse(flattenedData);
+        
+        // Set headers for file download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+
+        res.status(200).send(csv);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        res?.status(500)?.send({ code: 500, message: 'Internal server error', result: error });
+      }
+    },
 
     supplierDetails : async(reqObj, callback) => {
       try {
@@ -387,6 +463,28 @@ module.exports = {
       }catch (err) {
         console.error('Er:', err);
         callback({code: 500, message : 'Internal server error'})
+      }
+    },
+    
+    getSuppReqCSVList: async(req, res) => {
+      try {
+
+        const data = await Supplier.find({account_status : 0}).sort({createdAt: -1})
+
+        // Convert Mongoose document to plain object and flatten
+        const flattenedData = data.map(item => flattenData(item.toObject(), ["_id", "__v", "supplier_image", "license_image", "tax_image", "certificate_image", "profile_status", "createdAt", "updatedAt", "token", "password"])); // `toObject()` removes internal Mongoose metadata
+
+        // Convert the flattened data to CSV
+        const csv = parse(flattenedData);
+        
+        // Set headers for file download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+
+        res.status(200).send(csv);
+      }catch (err) {
+        console.error('Er:', err);
+        res?.status(500)?.({code: 500, message : 'Internal server error'})
       }
     },
 
