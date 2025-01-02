@@ -2067,14 +2067,15 @@ module.exports = {
           ]);
         }
     
-        if (!data || data.length === 0) {
-          return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
-        }
+        // if (!data || data.length === 0) {
+        //   return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
+        // }
   
         const totalItems = await Invoices.countDocuments(matchCondition); // Count based on correct match condition
-        if (!totalItems) {
-          return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
-        }
+        // if (!totalItems) {
+        //   console.log('totalItems',totalItems);
+        //   return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
+        // }
   
         const totalPages = Math.ceil(totalItems / pageSize);
         const responseData = {

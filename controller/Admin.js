@@ -3804,7 +3804,8 @@ module.exports = {
           {
             $match: {
               // to_id: buyer_id,
-              to : 'admin'
+              to : 'admin',
+              // status: 0
             }
           },
           {
@@ -3853,7 +3854,7 @@ module.exports = {
           { $limit : page_size },
         ])
         .then(async (data) => {
-          const totalItems = await Notification.countDocuments({ to: 'admin'});
+          const totalItems = await Notification.countDocuments({ to: 'admin', status:0});
           const totalPages = Math.ceil(totalItems / page_size);
     
           const returnObj = {
@@ -3957,22 +3958,33 @@ module.exports = {
     updateStatus : async(reqObj, callback) => {
       console.log(reqObj);
       try {
-        const { notification_id, status } = reqObj
+        const { notification_id, status = 1, user_type } = reqObj
 
-        const updateNotification = await Notification.findOneAndUpdate(
-          { notification_id : notification_id },
-          {
-              $set: {
-                status: status,
-                // status            : 'Awaiting Details from Seller'
-              }
-          },
-          { new: true } 
-      );
-      if (!updateNotification) {
+      //   const updateNotification = await Notification.findOneAndUpdate(
+      //     { notification_id : notification_id },
+      //     {
+      //         $set: {
+      //           status: status,
+      //           // status            : 'Awaiting Details from Seller'
+      //         }
+      //     },
+      //     { new: true } 
+      // );
+
+      const updateNotifications = await Notification.updateMany(
+        { to: user_type }, 
+        {
+            $set: {
+                status: status, 
+            },
+        },
+        // { multi: true } 
+    )
+
+      if (!updateNotifications) {
           return callback({ code: 404, message: 'Notification not found', result: null });
       }
-      callback({ code: 200, message: "Status Updated", result: updateNotification });
+      callback({ code: 200, message: "Status Updated", result: updateNotifications });
 
       } catch (error) {
         console.log(error);
