@@ -49,7 +49,10 @@ module.exports = () => {
                 res.send(response);
             });
     });
+    
     routes.post('/get-order-list-all-users', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
+    
+    routes.post('/get-order-list-csv', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListCSV);
 
     routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 

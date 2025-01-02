@@ -58,6 +58,10 @@ module.exports = () => {
         });
     });
 
+    routes.post('/get-supplier-list-csv', checkAuthorization, checkCommonUserAuthentication, Controller.getSupplierCSVList);
+    
+    routes.post('/get-buyer-list-csv', checkAuthorization, checkCommonUserAuthentication, Controller.getBuyerCSVList);
+
     routes.post('/get-supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supplierDetails(req.body, result => {
             const response = handleResponse(result);
@@ -71,6 +75,8 @@ module.exports = () => {
             res.send(response);
         });
     });
+
+    routes.post('/get-supplier-req-csv-list', checkAuthorization, checkCommonUserAuthentication, Controller.getSuppReqCSVList);
 
     routes.post('/accept-reject-supplier-registration', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.acceptRejectSupplierRegReq(req.body, result => {

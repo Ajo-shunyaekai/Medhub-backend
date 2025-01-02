@@ -232,6 +232,8 @@ module.exports = () => {
     });
     
     routes.post(`/get-all-suppliers-list`, checkAuthorization, checkCommonUserAuthentication, Controller.getAllSuppliersList)
+    
+    routes.post(`/get-csv-suppliers-list`, checkAuthorization, checkCommonUserAuthentication, Controller.getCSVSuppliersList)
    
     return routes
 }

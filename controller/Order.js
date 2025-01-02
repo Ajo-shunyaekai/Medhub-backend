@@ -8,6 +8,10 @@ const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const nodemailer         = require('nodemailer');
+const { flattenData } = require('../utils/csvConverter')
+const { parse } = require('json2csv');
+const fs = require('fs');
+const path = require('path');
 
 
   const transporter = nodemailer.createTransport({
@@ -2096,9 +2100,9 @@ module.exports = {
 
         console.log(`\n FUNCTION CALLED`)
         const { user_type } = req?.headers;
-        const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id } = req?.body;
+        const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id, admin_id } = req?.body;
     
-        const pageNo = page_no || 1;
+        const pageNo = req?.body?.pageNo || page_no || 1;
         const pageSize = req?.body?.pageSize || limit || 2;
         const offset = (pageNo - 1) * pageSize;
 
@@ -2482,6 +2486,161 @@ module.exports = {
           totalItems,
         };
         res.status(200).send({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
+    
+      } catch (error) {
+        console.log('Internal Server Error', error);
+        res.status(500).send({ code: 500, message: "Internal Server Error", result: error });
+      }
+    },
+    
+    getOrderListCSV: async (req, res) => {
+      try {
+        const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id } = req?.body;   
+    
+        let dateFilter = {};
+        
+        console.log("DATE FILTER", dateFilter);
+        let data = await Order.aggregate([
+            {
+              $match: {
+                order_status: filterKey,
+                ...dateFilter,
+              },
+            },
+            {
+              $lookup: {
+                from: "suppliers",
+                localField: "supplier_id",
+                foreignField: "supplier_id",
+                as: "supplier",
+              },
+            },
+            {
+              $lookup: {
+                from: "buyers",
+                localField: "buyer_id",
+                foreignField: "buyer_id",
+                as: "buyer",
+              },
+            },
+            {
+              $project: {
+                order_id: 1,
+                buyer_id: 1,
+                buyer_name: 1,
+                supplier_id: 1,
+                supplier_name: 1,
+                items: 1,
+                payment_terms: 1,
+                est_delivery_time: 1,
+                shipping_details: 1,
+                remarks: 1,
+                order_status: 1,
+                status: 1,
+                invoice_no: 1,
+                created_at: 1,
+                supplier: { $arrayElemAt: ["$supplier", 0] },
+                buyer: { $arrayElemAt: ["$buyer", 0] },
+              },
+            },
+            {
+              $unwind: "$items",
+            },
+            {
+              $lookup: {
+                from: "medicines",
+                localField: "items.product_id",
+                foreignField: "medicine_id",
+                as: "medicine",
+              },
+            },
+            {
+              $addFields: {
+                "items.medicine_image": { $arrayElemAt: ["$medicine.medicine_image", 0] },
+                "items.item_price": { $toDouble: { $arrayElemAt: [{ $split: ["$items.price", " "] }, 0] } },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                order_id: { $first: "$order_id" },
+                buyer_id: { $first: "$buyer_id" },
+                buyer_name: { $first: "$buyer_name" },
+                supplier_id: { $first: "$supplier_id" },
+                supplier_name: { $first: "$supplier_name" },
+                items: { $push: "$items" },
+                payment_terms: { $first: "$payment_terms" },
+                est_delivery_time: { $first: "$est_delivery_time" },
+                shipping_details: { $first: "$shipping_details" },
+                remarks: { $first: "$remarks" },
+                order_status: { $first: "$order_status" },
+                status: { $first: "$status" },
+                invoice_no: { $first: "$invoice_no" },
+                created_at: { $first: "$created_at" },
+                supplier: { $first: "$supplier" },
+                buyer: { $first: "$buyer" },
+                totalPrice: { $sum: "$items.item_price" },
+              },
+            },
+            {
+              $project: {
+                order_id: 1,
+                buyer_id: 1,
+                buyer_name: 1,
+                supplier_id: 1,
+                supplier_name: 1,
+                items: 1,
+                payment_terms: 1,
+                est_delivery_time: 1,
+                shipping_details: 1,
+                remarks: 1,
+                order_status: 1,
+                status: 1,
+                invoice_no: 1,
+                created_at: 1,
+                totalPrice: 1,
+                "supplier.supplier_image": 1,
+                "supplier.supplier_name": 1,
+                "supplier.supplier_type": 1,
+                "buyer.buyer_image": 1,
+                "buyer.buyer_name": 1,
+                "buyer.buyer_type": 1,
+              },
+            },
+          ]);
+    
+        if (!data) {
+          return res.status(400).send({ code: 400, message: 'Error occurred fetching order list', result: {} });
+        }
+
+        const productsArr = []
+        data?.forEach(item=>{
+          item?.items?.forEach(medicine=> {
+
+            productsArr?.push({
+              ...medicine,
+              order_id : item?.order_id,
+              buyer_name : item?.buyer_name,
+              supplier_name : item?.supplier_name,
+              order_id : item?.order_id,
+              order_id : item?.order_id,
+            })
+            
+          })
+          
+        })
+        
+        // Convert Mongoose document to plain object and flatten"
+        const flattenedData = productsArr.map(item => flattenData(item, [], ["order_id", "buyer_name", "supplier_name", "medicine_name", "medicine_id", "quantity_required", "unit_price", "total_amount", "target_price", "counter_price"], 'order_list')); // `toObject()` removes internal Mongoose metadata
+
+        // Convert the flattened data to CSV
+        const csv = parse(flattenedData);
+        
+        // Set headers for file download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+
+        res.status(200).send(csv);
     
       } catch (error) {
         console.log('Internal Server Error', error);
