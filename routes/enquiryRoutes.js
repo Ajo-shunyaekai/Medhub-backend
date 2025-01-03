@@ -50,7 +50,7 @@ module.exports = () => {
         });
     });
     
-    routes.post('/get-enquiry-list-all-users', checkAuthorization, checkCommonUserAuthentication, Enquiry.getEnquiryListAllUsers);
+    routes.post('/get-all-enquiry-list', checkAuthorization, checkCommonUserAuthentication, Enquiry.getEnquiryListAllUsers);
 
     routes.post('/cancel-enquiry', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
 

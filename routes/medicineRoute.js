@@ -156,7 +156,7 @@ module.exports = () => {
 
     routes.post('/get-all-medicines-list', checkAuthorization, Controller.getSpecificMedicinesList);
     
-    routes.post('/get-specific-medicine-details', checkAuthorization, Controller.getSpecificMedicineDetails);
+    routes.post('/get-specific-medicine-details/:id', checkAuthorization, Controller.getSpecificMedicineDetails);
  
     return routes;
 }
