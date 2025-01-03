@@ -189,3 +189,4 @@ initializeSocket(server)
 
 module.exports = app;
 
+console.log('test after clone')
