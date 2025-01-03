@@ -56,9 +56,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Serve React build for other routes
 app.use(express.static(path.join(__dirname, 'build')));
 
-app.get(['/*'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
 
 const corsOptions = {
@@ -70,11 +67,13 @@ const corsOptions = {
     'http://192.168.1.53:3000',
     'http://localhost:2221',
     'http://localhost:3030',
+    'http://localhost:8000',
     'http://192.168.1.34:3333',
     'http://192.168.1.218:3030',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3333',
+    'http://192.168.1.2:8000',
     'https://medhub.shunyaekai.com'
   ],
   methods: 'GET, POST',
@@ -174,6 +173,11 @@ app.use('/api/supplier/invoice', invoiceRouter);
 //-----------------purchaseorder--------------------------//
 
 //--------------- api routes ------------------//
+
+app.get(['/*'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
 const ADMIN_ID = process.env.ADMIN_ID
 const PORT = process.env.PORT || 2222;
 
