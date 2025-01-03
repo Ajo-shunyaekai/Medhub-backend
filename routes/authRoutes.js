@@ -82,6 +82,6 @@ const cpUpload = (req, res, next) => {
 
 router.post(`/register`, checkAuthorization, cpUpload, registerUser);
 router.post(`/login`, loginUser);
-router.post(`/:id`, getLoggedinUserProfileDetails);
+router.get(`/:id`, getLoggedinUserProfileDetails);
 
 module.exports = router;

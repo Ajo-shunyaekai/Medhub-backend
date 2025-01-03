@@ -56,9 +56,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Serve React build for other routes
 app.use(express.static(path.join(__dirname, 'build')));
 
-app.get(['/*'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+// app.get(['/*'], (req, res) => {
+//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
 
 
 const corsOptions = {
@@ -77,7 +77,7 @@ const corsOptions = {
     'http://localhost:3333',
     'https://medhub.shunyaekai.com'
   ],
-  methods: 'GET, POST',
+  methods: 'GET, POST, PUT, PATCH, DELETE',
   credentials: true
 };
 
@@ -91,6 +91,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+  console.log(`Received request: ${req.method} ${req.url}`);
+  next();
+});
 
 
 // contact us Email sending route
@@ -172,6 +176,10 @@ app.use('/api/invoice', invoiceRouter);
 app.use('/api/buyer/invoice', invoiceRouter);
 app.use('/api/supplier/invoice', invoiceRouter);
 //-----------------purchaseorder--------------------------//
+ 
+app.get(['/*'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 //--------------- api routes ------------------//
 const ADMIN_ID = process.env.ADMIN_ID
