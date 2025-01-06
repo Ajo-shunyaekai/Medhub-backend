@@ -60,8 +60,8 @@ module.exports = () => {
             });
     });
     
-    routes.post('/get-specific-invoice-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-            Invoice.invoiceDetails(req.body, result => {
+    routes.get('/get-specific-invoice-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
+            Invoice.invoiceDetails(req, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });

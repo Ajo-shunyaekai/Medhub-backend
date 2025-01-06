@@ -239,9 +239,10 @@ module.exports = {
       }
     },
   
-    invoiceDetails: async (reqObj, callback) => {
+    invoiceDetails: async (req, callback) => {
       try {
-        const { order_id, invoice_id, supplier_id } = reqObj;
+        // const { order_id, invoice_id, supplier_id } = reqObj;
+        const invoice_id = req?.params?.id;
     
         Invoice.aggregate([
           {

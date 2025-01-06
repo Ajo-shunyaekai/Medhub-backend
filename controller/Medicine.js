@@ -1127,17 +1127,18 @@ module.exports = {
 
   getSpecificMedicinesList: async (req, res) => {
     try {
-      const {user_type} = req?.headers;
-      const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, supplier_id, category_name, medicine_status, price_range, delivery_time, in_stock, admin_id } = req?.body;
+      const { user_type, supplier_id, buyer_id, admin_id } = req?.headers;
+      // const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, category_name, medicine_status, price_range, delivery_time, in_stock, } = req?.body;
+      const { status = undefined, searchKey = undefined, pageNo = undefined, pageSize = undefined, medicineType = undefined, medicine_type = undefined, category_name = undefined, medicine_status = undefined, price_range = undefined, delivery_time = undefined, in_stock = undefined, } = req?.query;
 
-      console.log(req?.body)
+      console.log('req?.query', req?.query)
   
-      const page_no   = pageNo || 1;
-      const page_size = pageSize || 10;
+      const page_no   = parseInt(pageNo) || 1;
+      const page_size = parseInt(pageSize) || 10;
       const offset    = (page_no - 1) * page_size;
   
       let matchCondition = {
-        medicine_type: user_type == 'Admin' ? medicineType : medicine_type,
+        medicine_type: medicine_type?.replaceAll("%20"," ")|| medicineType?.replaceAll("%20"," "),
       };
   
       if (supplier_id) {
@@ -1155,7 +1156,7 @@ module.exports = {
       }
   
   
-      if (searchKey && category_name) {
+      if (searchKey && searchKey!=='null' && category_name) {
           matchCondition.$and = [
               {
                   $or: [
@@ -1165,7 +1166,7 @@ module.exports = {
               },
               { medicine_category: category_name }  // Ensure the field name is correct
           ];
-      } else if (searchKey) {
+      } else if (searchKey && searchKey!=='null' ) {
           matchCondition.$or = [
               { medicine_name : { $regex: searchKey, $options: 'i' } },
               { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
@@ -1264,8 +1265,8 @@ module.exports = {
         data = await Medicine.aggregate([
           {
             $match: {
-              medicine_type: medicineType,
-              status       : status
+              medicine_type: medicine_type?.replaceAll("%20"," ") || medicineType?.replaceAll("%20"," "),
+              status       : parseInt(status)
             }
           },
           {
@@ -1339,13 +1340,13 @@ module.exports = {
       }  
   
       // Count total items matching the condition
-      const totalItems = await Medicine.countDocuments(user_type == 'Admin'? {medicine_type: medicineType, status: status}: {medicine_type: medicine_type,});
-      const totalPages = Math.ceil(totalItems / page_size);
+      const totalItems = await Medicine.countDocuments(user_type == 'Admin'? {medicine_type: medicine_type?.replaceAll("%20"," ")|| medicineType?.replaceAll("%20"," "), status: parseInt(status)}: {medicine_type: medicine_type?.replaceAll("%20"," "),});
+      const totalPages = Math.ceil(totalItems / parseInt(page_size));
   
       const returnObj = {
         data,
         totalPages,
-        totalItems
+        totalItems: data?.length || totalItems
       };
 
       console.log(data)
@@ -1362,7 +1363,7 @@ module.exports = {
       const { user_type } = req?.headers;
       const data = await Medicine.aggregate([
         {
-          $match: { medicine_id: req?.body?.medicine_id },
+          $match: { medicine_id: req?.params?.id },
         },
         {
           $lookup: {

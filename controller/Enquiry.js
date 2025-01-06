@@ -133,9 +133,9 @@ module.exports = {
         }
     },
 
-    getEnquiryDetails: async (reqObj, callback) => {
+    getEnquiryDetails: async (req, callback) => {
         try {
-            const { enquiry_id } = reqObj;
+            const enquiry_id = req?.params?.id;
     
             Enquiry.aggregate([
                 {
@@ -510,10 +510,11 @@ module.exports = {
 
     getEnquiryListAllUsers: async (req, res)=>{
         try {
-            const {user_type} = req?.headers;
-            const { supplier_id, buyer_id, status, pageNo, pageSize,filterValue } = req?.body;
-            const page_no   = pageNo || 1
-            const page_size = pageSize || 2
+            const { user_type, supplier_id, buyer_id, admin_id } = req?.headers;
+            // const { supplier_id, buyer_id, status, pageNo, pageSize,filterValue } = req?.body;
+            const { status, pageNo, pageSize, filterValue } = req?.query;
+            const page_no   = parseInt(pageNo) || 1
+            const page_size = parseInt(pageSize) || 2
             const offset    = (page_no - 1) * page_size
             const matchCondition = {enquiry_status: {$ne: 'order created'}};
             if (buyer_id && !supplier_id) {
@@ -681,7 +682,7 @@ module.exports = {
             const returnObj = {
                 data,
                 totalPages,
-                totalItems
+                totalItems: data?.length || totalItems,
             };
             return res?.status(200)?.send({code: 200, message: 'Enquiry list', result: returnObj})
         } catch (error) {

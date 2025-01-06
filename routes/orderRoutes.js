@@ -50,7 +50,7 @@ module.exports = () => {
             });
     });
     
-    routes.post('/get-all-order-list', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
+    routes.get('/get-all-order-list', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
     
     routes.post('/get-order-list-csv', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListCSV);
 
@@ -62,7 +62,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/get-specific-order-details/:id', checkAuthorization, checkCommonUserAuthentication, Order?.getSpecificOrderDetails);
+    routes.get('/get-specific-order-details/:id', checkAuthorization, checkCommonUserAuthentication, Order?.getSpecificOrderDetails);
 
     routes.post('/cancel-order', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
@@ -163,7 +163,7 @@ module.exports = () => {
         });
     });
 
-    routes.post('/get-all-invoice-list', checkAuthorization, checkCommonUserAuthentication, Order.getInvoiceListForAllUsers);
+    routes.get('/get-all-invoice-list', checkAuthorization, checkCommonUserAuthentication, Order.getInvoiceListForAllUsers);
 
      //------------------------------------------------------ supplier order ------------------------------------------------------//
      
