@@ -1570,8 +1570,16 @@ module.exports = {
       if (!data) {
         res?.status(500)?.send({ code: 500, message: "Internal Server Error", result: error });
       }
-
-      res?.status(200)?.send({ code: 200, message: "Medicine details fetched successfully", result: data[0] || data });
+      const distinctCountries = await Medicine.distinct("stocked_in");
+      // const responseData = {
+      //   data: data[0],
+      //   countryAvailable: distinctCountries
+      // }
+      res?.status(200)?.send({ code: 200, message: "Medicine details fetched successfully", 
+        result: {
+        ...data[0], 
+        countryAvailable: distinctCountries, 
+      }, });
 
     } catch (error) {
       console.log(error)
