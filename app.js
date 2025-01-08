@@ -57,7 +57,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'build')));
 
 
-
 const corsOptions = {
   origin: [
     'http://192.168.1.31:2221',
@@ -76,7 +75,7 @@ const corsOptions = {
     'http://192.168.1.2:8000',
     'https://medhub.shunyaekai.com'
   ],
-  methods: 'GET, POST',
+  methods: 'GET, POST, PUT, PATCH, DELETE',
   credentials: true
 };
 
@@ -90,6 +89,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+  console.log(`Received request: ${req.method} ${req.url}`);
+  next();
+});
 
 
 // contact us Email sending route
@@ -171,6 +174,10 @@ app.use('/api/invoice', invoiceRouter);
 app.use('/api/buyer/invoice', invoiceRouter);
 app.use('/api/supplier/invoice', invoiceRouter);
 //-----------------purchaseorder--------------------------//
+ 
+app.get(['/*'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 //--------------- api routes ------------------//
 
@@ -193,3 +200,4 @@ initializeSocket(server)
 
 module.exports = app;
 
+console.log('test after clone')

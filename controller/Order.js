@@ -1842,12 +1842,13 @@ module.exports = {
 
     getInvoiceListForAllUsers: async (req, res) => {
       try {
-        const { user_type } = req?.headers;
-        const { page_no, limit, filterKey, buyer_id, supplier_id, page_size } = req?.body;
-        const pageNo = page_no || 2;
-        const pageSize = limit || page_size || 2;
+        const { user_type, buyer_id, supplier_id, admin_id } = req?.headers;
+        // const { page_no, limit, filterKey, buyer_id, supplier_id, page_size } = req?.body;
+        const { pageNo = undefined, filterKey = undefined, pageSize = undefined } = req?.query;
+        // const pageNo = page_no || 2;
+        // const pageSize = limit || page_size || 2;
         // const page_size = pageSize || 2
-        const offset = (pageNo - 1) * pageSize;
+        const offset = (parseInt(pageNo) - 1) * parseInt(pageSize);
     
         // Match conditions based on user_type
         const buyerMatch = { buyer_id, status: filterKey };
@@ -2012,7 +2013,7 @@ module.exports = {
             },
             { $sort  : { created_at: -1 } },
             { $skip  : offset },
-            { $limit : pageSize },
+            { $limit : parseInt(pageSize) },
         ])
         } else if (user_type === 'Buyer' || user_type === 'Supplier') {
           data = await Invoices.aggregate([
@@ -2067,7 +2068,7 @@ module.exports = {
             },
             { $sort: { created_at: -1 } },
             { $skip: offset },
-            { $limit: pageSize },
+            { $limit: parseInt(pageSize) },
           ]);
         }
     
@@ -2081,11 +2082,11 @@ module.exports = {
         //   return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
         // }
   
-        const totalPages = Math.ceil(totalItems / pageSize);
+        const totalPages = Math.ceil(totalItems / parseInt(pageSize));
         const responseData = {
           data,
           totalPages,
-          totalItems,
+          totalItems: data?.length || totalItems,
         };
   
         res.status(200).send({ code: 200, message: "List Fetched successfully", result: responseData });
@@ -2099,12 +2100,13 @@ module.exports = {
       try {
 
         console.log(`\n FUNCTION CALLED`)
-        const { user_type } = req?.headers;
-        const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id, admin_id } = req?.body;
+        const { user_type, buyer_id, supplier_id, admin_id } = req?.headers;
+        // const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id, admin_id } = req?.body;
+        const { pageNo, pageSize, filterKey, filterValue, } = req?.query;
     
-        const pageNo = req?.body?.pageNo || page_no || 1;
-        const pageSize = req?.body?.pageSize || limit || 2;
-        const offset = (pageNo - 1) * pageSize;
+        // const pageNo = req?.body?.pageNo || page_no || 1;
+        // const pageSize = req?.body?.pageSize || limit || 2;
+        const offset = (parseInt(pageNo) - 1) * parseInt(pageSize);
 
         const adjustedFilterKey = filterKey === 'order-request' ? 'pending' : filterKey;  
     
@@ -2275,7 +2277,7 @@ module.exports = {
             },
             { $sort: { created_at: -1 } },
             { $skip: offset },
-            { $limit: pageSize },
+            { $limit: parseInt(pageSize) },
           ]);
         } else if (user_type == 'Buyer') {
           data = await Order.aggregate([
@@ -2371,7 +2373,7 @@ module.exports = {
             },
             { $sort: { created_at: -1 } },
             { $skip: offset },
-            { $limit: pageSize },
+            { $limit: parseInt(pageSize) },
           ]);
         } else if (user_type == 'Supplier'){
           data = await Order.aggregate([
@@ -2466,7 +2468,7 @@ module.exports = {
             },
             { $sort  : { created_at: -1 } },
             { $skip  : offset },
-            { $limit : pageSize },
+            { $limit : parseInt(pageSize) },
         ])
         }
     
@@ -2478,12 +2480,12 @@ module.exports = {
     
         const totalItems = await Order.countDocuments(matchObj);
     
-        const totalPages = Math.ceil(totalItems / pageSize);
+        const totalPages = Math.ceil(totalItems / parseInt(pageSize));
     
         const responseData = {
           data,
           totalPages,
-          totalItems,
+          totalItems: data?.length || totalItems,
         };
         res.status(200).send({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
     
@@ -2651,7 +2653,8 @@ module.exports = {
     getSpecificOrderDetails: async (req, res) => {
       try {
         const {user_type} = req?.headers;
-        const {buyer_id, order_id, filterKey, admin_id, supplier_id} = req?.body;
+        // const {buyer_id, order_id, filterKey, admin_id, supplier_id} = req?.body;
+        const order_id =req?.params?.id;
         let data;
         if(user_type == 'Admin'){
           data = await Order.aggregate([

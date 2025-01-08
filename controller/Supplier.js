@@ -267,13 +267,13 @@ module.exports = {
      }
     },
 
-    supplierProfileDetails : async(reqObj, callback) => {
+    supplierProfileDetails : async(req, callback) => {
       try {
         const fields = {
           token : 0,
           password : 0
         }
-        Supplier.findOne({supplier_id: reqObj.supplier_id}).select(fields) 
+        Supplier.findOne({supplier_id: req?.params?.id}).select(fields) 
         .then((data) => {
           callback({code: 200, message : 'Supplier details fetched successfully', result:data})
       }).catch((error) => {
@@ -1160,12 +1160,12 @@ module.exports = {
      getAllSuppliersList: async (req, res) => {
       try {
         const { user_type } = req?.headers;
-        const { filterKey, filterValue, searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = req?.body;
+        const { filterKey, filterValue, searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = req?.query;
 
-        const page_no = pageNo || 1;
-        const page_size = pageSize || 2;
-        const offSet = (page_no - 1) * page_size;
-        const offset = (pageNo - 1) * pageSize;
+        const page_no = parseInt(pageNo) || 1;
+        const page_size = parseInt(pageSize) || 2;
+        const offSet = parseInt(page_no - 1) * page_size;
+        const offset = parseInt(pageNo - 1) * pageSize;
     
         const fields = {
           token    : 0,
@@ -1254,7 +1254,7 @@ module.exports = {
         const returnObj = {
           data,
           totalPages,
-          totalItems
+          totalItems: data?.length || totalItems,
         };
     
         res?.status(200)?.send({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });

@@ -245,14 +245,14 @@ module.exports = {
         }
     },
 
-    buyerProfileDetails : async(reqObj, callback) => {
+    buyerProfileDetails : async(req, callback) => {
       try {
         // Buyer.findOne({buyer_id: reqObj.buyer_id}).select('buyer_id buyer_name email mobile country_code company_name')
         const fields = {
           token    : 0,
           password : 0
         }
-        Buyer.findOne({buyer_id: reqObj.buyer_id}).select(fields)  
+        Buyer.findOne({buyer_id: req?.params?.id}).select(fields)  
         .then((data) => {
           callback({code: 200, message : 'Buyer details fetched successfully', result:data})
       }).catch((error) => {
