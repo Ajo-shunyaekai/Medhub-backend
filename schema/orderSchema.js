@@ -202,6 +202,8 @@ const shipmentSchema = new Schema({
     },
 });
 
+
+
 const orderSchema = new Schema({
     order_id: {
         type: String,
@@ -302,6 +304,7 @@ const orderSchema = new Schema({
     },
     logistics_details: [logisticsSchema],
     shipment_details: shipmentSchema,
+
     
     order_status: {
         type: String,

@@ -50,6 +50,7 @@ module.exports = () => {
             });
     });
     
+    // routes.post('/get-order-list-all-users', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
     routes.get('/get-all-order-list', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
     
     routes.post('/get-order-list-csv', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListCSV);

@@ -682,7 +682,7 @@ module.exports = {
             const returnObj = {
                 data,
                 totalPages,
-                totalItems: data?.length || totalItems,
+                totalItems: totalItems,
             };
             return res?.status(200)?.send({code: 200, message: 'Enquiry list', result: returnObj})
         } catch (error) {
