@@ -8,7 +8,11 @@ const {Medicine, SecondaryMarketMedicine, NewMedicine }    = require("../schema/
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 const Notification             = require('../schema/notificationSchema')
 const sendEmail                = require('../utils/emailService')
-const {getTodayFormattedDate}  = require('../utils/utilities')
+const {getTodayFormattedDate}  = require('../utils/utilities');
+const { flattenData } = require("../utils/csvConverter");
+const { parse } = require('json2csv');
+const fs = require('fs');
+const path = require('path');
 
 
  // Send email to the admin
@@ -1346,12 +1350,239 @@ module.exports = {
       const returnObj = {
         data,
         totalPages,
-        totalItems: data?.length || totalItems
+        totalItems: totalItems
       };
 
       console.log(data)
   
       res?.status(200)?.send({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
+    } catch (error) {
+      console.log(error)
+      res?.status(500)?.send({ code: 500, message: "Internal Server Error", result: error });
+    }
+  },
+
+  getMedicinesListCSV: async (req, res) => {
+    try {
+      const { user_type, supplier_id, buyer_id, admin_id } = req?.headers;
+      const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, category_name, medicine_status, price_range, delivery_time, in_stock, } = req?.body;
+      // const { status = undefined, searchKey = undefined, pageNo = undefined, pageSize = undefined, medicineType = undefined, medicine_type = undefined, category_name = undefined, medicine_status = undefined, price_range = undefined, delivery_time = undefined, in_stock = undefined, } = req?.query;
+
+      console.log('req?.query', req?.query)
+  
+      const page_no   = parseInt(pageNo) || 1;
+      const page_size = parseInt(pageSize) || 10;
+      const offset    = (page_no - 1) * page_size;
+  
+      let matchCondition = {
+        medicine_type: medicine_type?.replaceAll("%20"," ")|| medicineType?.replaceAll("%20"," "),
+      };
+  
+      if (supplier_id) {
+        matchCondition.supplier_id = supplier_id;
+      }
+  
+      if (medicine_status === 'accepted' || status === 'accepted') {
+        matchCondition.status = 1;
+      } else if (medicine_status === 'rejected' || status === 'rejected') {
+        matchCondition.status = 2;
+      } else if (medicine_status === 'pending' || status === 'pending') {
+        matchCondition.status = 0;
+      } else {
+        matchCondition.status = 1;
+      }
+  
+  
+      if (searchKey && searchKey!=='null' && category_name) {
+          matchCondition.$and = [
+              {
+                  $or: [
+                      { medicine_name : { $regex: searchKey, $options: 'i' } },
+                      { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+                  ]
+              },
+              { medicine_category: category_name }  // Ensure the field name is correct
+          ];
+      } else if (searchKey && searchKey!=='null' ) {
+          matchCondition.$or = [
+              { medicine_name : { $regex: searchKey, $options: 'i' } },
+              { tags          : { $elemMatch: { $regex: searchKey, $options: 'i' } } }
+          ];
+      } else if (category_name) {
+          matchCondition.medicine_category = category_name;  // Use correct field
+      }
+    
+  
+      if (in_stock && in_stock.length > 0) {
+          const stockedCountries    = in_stock[0].split(',').map(country => country.trim());
+          matchCondition.stocked_in = { $in: stockedCountries };
+      }
+  
+      let pipeline = [
+          {
+              $match: matchCondition,
+          }
+      ];
+  
+      if (price_range && price_range.length > 0) {
+          const ranges = price_range[0].split(',').map(range => range.trim());
+          const priceConditions = ranges.map(range => {
+              if (range.includes('greater than')) {
+                  const value = parseFloat(range.split('greater than')[1].trim());
+                  return { "inventory_info.unit_price": { $gt: value.toString() } };
+              } else {
+                  const [min, max] = range.split('AED')[0].trim().split('-').map(num => parseFloat(num.trim()));
+                  return { 
+                      "inventory_info.unit_price": { $gte: min.toString(), $lte: max.toString() } 
+                  };
+              }
+          });
+          pipeline.push({ $match: { $or: priceConditions } });
+      }
+  
+      if (delivery_time && delivery_time.length > 0) {
+          const ranges = delivery_time[0].split(',').map(range => range.trim());
+          const deliveryConditions = ranges.map(range => {
+              if (range.includes('greater than')) {
+                  const value = parseInt(range.split('greater than')[1].trim());
+                  return { "inventory_info.est_delivery_days": { $gt: value.toString() } };
+              } else {
+                  const [min, max] = range.split('-').map(num => parseInt(num.trim()));
+                  // return { 
+                  //     "inventory_info.est_delivery_days": { $gte: min, $lte: max } 
+                  // };
+                  return { 
+                    "inventory_info.est_delivery_days": { $gte: min.toString(), $lte: max.toString() } 
+                  };
+              }
+          });
+          pipeline.push({ $match: { $or: deliveryConditions } });
+      }
+  
+      pipeline.push(
+        {
+          $sort: { created_at: -1 }
+      },
+          {
+            
+              $project: {
+                  medicine_id       : 1,
+                  supplier_id       : 1,
+                  medicine_name     : 1,
+                  medicine_image    : 1,
+                  drugs_name        : 1,
+                  composition       : 1,
+                  country_of_origin : 1,
+                  dossier_type      : 1,
+                  tags              : 1,
+                  dossier_status    : 1,
+                  gmp_approvals     : 1,
+                  medicine_category : 1,
+                  registered_in     : 1,
+                  comments          : 1,
+                  dosage_form       : 1,
+                  category_name     : 1,
+                  strength          : 1,
+                  quantity          : 1,
+                  medicine_type     : 1,
+                  stocked_in        : 1,
+                  "inventory_info.unit_price"        : 1,
+                  "inventory_info.est_delivery_days" : 1,
+                  "inventory_info.total_price"       : 1,
+              }
+          },
+      );
+  
+      // console.log('pipeline', JSON.stringify(pipeline, null, 2));
+      let data;
+      
+      if( user_type == 'Admin' ){
+        data = await Medicine.aggregate([
+          {
+            $match: {
+              medicine_type: medicine_type?.replaceAll("%20"," ") || medicineType?.replaceAll("%20"," "),
+              status       : parseInt(status)
+            }
+          },
+          {
+            $lookup: {
+              from         : "medicineinventories",
+              localField   : "medicine_id",
+              foreignField : "medicine_id",
+              as           : "inventory",
+            },
+          },
+          {
+            $sort: { created_at: -1 } 
+          },
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
+              medicine_type     : 1,
+              status            : 1,
+              inventory : {
+                $arrayElemAt: ["$inventory", 0],
+              },
+            },
+          },
+          
+          {
+            $project: {
+              medicine_id       : 1,
+              supplier_id       : 1,
+              medicine_name     : 1,
+              medicine_image    : 1,
+              drugs_name        : 1,
+              country_of_origin : 1,
+              dossier_type      : 1,
+              dossier_status    : 1,
+              gmp_approvals     : 1,
+              registered_in     : 1,
+              comments          : 1,
+              dosage_form       : 1,
+              category_name     : 1,
+              strength          : 1,
+              quantity          : 1,
+              medicine_type     : 1,
+              status            : 1,
+              "inventory.delivery_info"  : 1,
+              "inventory.price"          : 1,
+            },
+          },
+        ])
+
+      } else if(user_type == 'Supplier'){
+        data = await Medicine.aggregate(pipeline);
+      } else if (user_type == 'Buyer') {
+        data = await Medicine.aggregate(pipeline);
+      }  
+      
+      // Convert Mongoose document to plain object and flatten
+      const flattenedData = data.map(item => flattenData(item, ["_id", "__v", "medicine_image", "Medicine Image","StockedIn Details","stockedIn_details", "Status", "status", "Supplier Id", "supplier_id"], [], 'product_list')); // `toObject()` removes internal Mongoose metadata
+
+      // Convert the flattened data to CSV
+      const csv = parse(flattenedData);
+      
+      // Set headers for file download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=product.csv');
+
+      res.status(200).send(csv);
+  
     } catch (error) {
       console.log(error)
       res?.status(500)?.send({ code: 500, message: "Internal Server Error", result: error });
