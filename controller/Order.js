@@ -2086,7 +2086,7 @@ module.exports = {
         const responseData = {
           data,
           totalPages,
-          totalItems: data?.length || totalItems,
+          totalItems: totalItems,
         };
   
         res.status(200).send({ code: 200, message: "List Fetched successfully", result: responseData });
@@ -2485,7 +2485,7 @@ module.exports = {
         const responseData = {
           data,
           totalPages,
-          totalItems: data?.length || totalItems,
+          totalItems: totalItems,
         };
         res.status(200).send({ code: 200, message: "Buyer Order List Fetched successfully", result: responseData });
     

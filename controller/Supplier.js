@@ -1254,7 +1254,7 @@ module.exports = {
         const returnObj = {
           data,
           totalPages,
-          totalItems: data?.length || totalItems,
+          totalItems: totalItems,
         };
     
         res?.status(200)?.send({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
