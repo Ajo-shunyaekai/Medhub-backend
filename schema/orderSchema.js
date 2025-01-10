@@ -254,7 +254,9 @@ const supplierLogisticsSchema = new Schema({
     pincode             : { type: String, required: true },
     type_of_address     : { type: String, enum: ['Warehouse', 'Shop', 'Other'], required: true },
     bill_of_material    : billOfMaterialSchema, 
-    package_information : packageInformationSchema 
+    package_information : packageInformationSchema ,
+    pickup_date         : { type: String, required: true},
+    pickup_time         : { type: String, required: true},
 });
 
 
@@ -360,6 +362,7 @@ const orderSchema = new Schema({
     // shipment_details: shipmentSchema,
     buyer_logistics_data: buyerLogisticsSchema,
     supplier_logistics_data: supplierLogisticsSchema,
+    
     order_status: {
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],

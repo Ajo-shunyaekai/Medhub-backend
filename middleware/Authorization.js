@@ -5,6 +5,7 @@ const User = require("../schema/userSchema");
 const Seller = require("../schema/sellerSchema");
 const Supplier = require("../schema/supplierSchema");
 const Admin = require("../schema/adminSchema");
+const LogisticsPartner = require('../schema/logisticsCompanySchema')
 
 module.exports = {
   checkAuthorization: async (req, res, next) => {
@@ -206,7 +207,7 @@ module.exports = {
   },
 
   checkCommonUserAuthentication: async (req, res, next) => {
-    const { access_token, user_type,  supplier_id, seller_id, buyer_id, } = req.headers;
+    const { access_token, user_type,  supplier_id, seller_id, buyer_id, client_id } = req.headers;
     // const { supplier_id, seller_id, admin_id, buyer_id, supplierId } = req.body;
     
     const admin_id = req.headers?.admin_id ||req?.body?.admin_id
@@ -224,8 +225,8 @@ module.exports = {
         user = await Admin.findOne({ token: access_token, admin_id });
       } else if (user_type === "Supplier") {
         user = await Supplier.findOne({ token: access_token });
-      } else if (user_type === "Seller") {
-        user = await Seller.findOne({ token: access_token, seller_id });
+      } else if (user_type === "Logistics") {
+        user = await LogisticsPartner.findOne({ token: access_token });
       }
       
       if (!user) {

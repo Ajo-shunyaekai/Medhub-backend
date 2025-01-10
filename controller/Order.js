@@ -8,6 +8,7 @@ const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Address = require("../schema/addressSchema");
+const Logistics = require('../schema/logisticsSchema')
 const nodemailer         = require('nodemailer');
 const { flattenData } = require('../utils/csvConverter')
 const { parse } = require('json2csv');
@@ -275,6 +276,7 @@ module.exports = {
         const {full_name, email, mobile_number, house_name, locality, city, state, country, pincode, type  } = reqObj.supplier_logistics_data
         const supplier = await Supplier.findOne({ supplier_id: supplier_id });
         const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+        const order = await Order.findOne({order_id: order_id})
 
         if (!supplier) {
           return callback({ code: 404, message: 'Supplier not found', result: null });
@@ -315,6 +317,17 @@ module.exports = {
         if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
         }
+        const logisticsId = 'LGR-' + Math.random().toString(16).slice(2, 10);
+        const newLogisticsRequest = new Logistics({
+          logistics_id     : logisticsId,
+          enquiry_id       : order.enquiry_id,
+          purchaseOrder_id : order.purchaseOrder_id,
+          orderId          : order._id,
+          supplierId       : supplier._id,
+          buyerId          : buyer._id,
+          status           : 'P'
+        });
+        await newLogisticsRequest.save();
 
         const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
         const newNotification = new Notification({
