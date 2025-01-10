@@ -25,6 +25,14 @@ const logisticsPartnerSchema = new mongoose.Schema({
     required: true,
     match: /^\+?\d{10,15}$/, 
   },
+  password: {
+    type: String,
+    required: true,
+  },
+  token: {
+    type: String,
+    required: true,
+  },
   address: {
     street: {
       type: String,

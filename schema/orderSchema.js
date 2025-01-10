@@ -202,6 +202,60 @@ const shipmentSchema = new Schema({
     },
 });
 
+const buyerLogisticsSchema = new Schema({
+    full_name: { type: String, required: true },
+    email: { type: String, required: true },
+    mobile_number: { type: String, required: true },
+    house_name: { type: String, required: true },
+    locality: { type: String, required: true },
+    state: { type: String, required: true },
+    city: { type: String, required: true },
+    country: { type: String, required: true },
+    pincode: { type: String, required: true },
+    type_of_address: { type: String, enum: ['Warehouse', 'Shop', 'Other'], required: true },
+    mode_of_transport: { type: String, enum: ['Air Cargo', 'Sea Freight', 'Road Freight', 'Ask Partner'], required: true },
+    extra_services: [{
+        type: String,
+        enum: ['Door to Door', 'Include Custom Clearance']
+    }]
+})
+
+const billOfMaterialSchema = new Schema({
+    products: [{
+        product_name   : { type: String, required: true }, 
+        quantity       : { type: Number, required: true },     
+        no_of_packages : { type: Number, required: true } 
+    }]
+});
+
+const packageInformationSchema = new Schema({
+    total_no_of_packages: { type: Number, required: true }, 
+    package_details: [{               
+        package_name: { type: String },
+        dimensions: {                                       
+            length: { type: Number, required: true },
+            width:  { type: Number, required: true },
+            height: { type: Number, required: true },
+            volume: { type: Number, required: true }
+        },
+        weight: { type: Number, required: true }            
+    }]
+});
+
+const supplierLogisticsSchema = new Schema({
+    full_name           : { type: String, required: true },
+    email               : { type: String, required: true },
+    mobile_number       : { type: String, required: true },
+    house_name          : { type: String, required: true },
+    locality            : { type: String, required: true },
+    country             : { type: String, required: true },
+    state               : { type: String, required: true },
+    city                : { type: String, required: true },
+    pincode             : { type: String, required: true },
+    type_of_address     : { type: String, enum: ['Warehouse', 'Shop', 'Other'], required: true },
+    bill_of_material    : billOfMaterialSchema, 
+    package_information : packageInformationSchema 
+});
 
 
 const orderSchema = new Schema({
@@ -302,10 +356,10 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
-    logistics_details: [logisticsSchema],
-    shipment_details: shipmentSchema,
-
-    
+    // logistics_details: [logisticsSchema],
+    // shipment_details: shipmentSchema,
+    buyer_logistics_data: buyerLogisticsSchema,
+    supplier_logistics_data: supplierLogisticsSchema,
     order_status: {
         type: String,
         enum: ['pending', 'active', 'in-transit', 'delivered','completed', 'cancelled'],
@@ -329,38 +383,6 @@ const orderSchema = new Schema({
         type: Date,
         default: Date.now
     }
-
-    // payment_terms: {
-    //     type: String,
-    //     // required: true
-    // },
-    // est_delivery_time: {
-    //     type: String,
-    //     // required: true
-    // },
-  
-    // remarks: {
-    //     type: String,
-    //     // required: true
-    // },
-
-      // shipping_details: {
-    //     type: {
-    //         consignor_name: {
-    //             type: String,
-    //             required: true
-    //         },
-    //         mobile_no: {
-    //             type: String,
-    //             required: true
-    //         },
-    //         address: {
-    //             type: String,
-    //             required: true
-    //         }
-    //     },
-    //     required: true
-    // },
 });
 
 module.exports = mongoose.model('Order', orderSchema);

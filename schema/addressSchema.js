@@ -6,19 +6,23 @@ const addressSchema = new mongoose.Schema(
       type: String,
       required: [true, "User id is required for address"],
     },
-    fullName: {
+    full_name: {
       type: String,
       required: [true, "Full name is required for address"],
     },
-    phone: {
+    email: {
+      type: String,
+      required: [true, "Email is required for address"],
+    },
+    mobile_number: {
       type: String,
       required: [true, "Phone number is required for address"],
     },
-    houseName: {
+    house_name: {
       type: String,
       required: [true, "House Name is required for address"],
     },
-    street: {
+    locality: {
       type: String,
       required: [true, "Street is required for address"],
     },
@@ -34,7 +38,7 @@ const addressSchema = new mongoose.Schema(
       type: String,
       required: [true, "Country is required for address"],
     },
-    postalCode: { type: String },
+    pincode: { type: String },
     type: {
       type: String,
       enum: ["company", "shop", "warehouse", "factory", "other"],

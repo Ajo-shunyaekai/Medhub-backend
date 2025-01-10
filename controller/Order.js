@@ -7,6 +7,7 @@ const Buyer        = require('../schema/buyerSchema')
 const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
+const Address = require("../schema/addressSchema");
 const nodemailer         = require('nodemailer');
 const { flattenData } = require('../utils/csvConverter')
 const { parse } = require('json2csv');
@@ -175,43 +176,72 @@ module.exports = {
        }
     },
 
-    bookLogistics : async(reqObj, callback) => {
+    bookLogistics: async (reqObj, callback) => {
       try {
-        
-        const { buyer_id, supplier_id, order_id, logistics_details } = reqObj
-        const logisticsArray = Array.isArray(logistics_details) ? logistics_details : [logistics_details];
+        const { buyer_id, supplier_id, order_id, buyer_logistics_data, is_registered } = reqObj;
+        const {full_name, email, mobile_number, house_name, locality, city, state, country, pincode, type } = reqObj.buyer_logistics_data
+    
+        if (!buyer_id || !supplier_id || !order_id || !buyer_logistics_data) {
+          return callback({ code: 400, message: 'Missing required fields', result: null });
+        }
 
-        const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-        const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+        const buyer = await Buyer.findOne({ buyer_id });
+        if (!buyer) {
+          return callback({ code: 404, message: 'Buyer not found', result: null });
+        }
+        const supplier = await Supplier.find({ supplier_id });
+        if (!supplier) {
+          return callback({ code: 404, message: 'Supplier not found', result: null });
+        }
+        // const address = await Address.findOne({ user_id: buyer_id });
+        if(!is_registered) {
+          const newAddress = new Address({
+            user_id: buyer?._id,
+            full_name,
+            email,
+            mobile_number,
+            house_name,
+            locality,
+            city,
+            state,
+            country,
+            pincode,
+            type,
+            // isDefault,
+        });
+        await newAddress.save();
+        }
+       
 
         const updatedOrder = await Order.findOneAndUpdate(
-          { order_id : order_id },
+          { order_id },
           {
-              $set: {
-                logistics_details : logisticsArray,
-                status            : 'Awaiting Details from Supplier'
-              }
+            $set: {
+              buyer_logistics_data,
+              status: 'Awaiting Details from Supplier',
+            },
           },
-          { new: true } 
-      );
-      if (!updatedOrder) {
+          { new: true }
+        );
+    
+        if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
-      }
+        }
 
-      const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-      const newNotification = new Notification({
-        notification_id : notificationId,
-        event_type      : 'Logistics booking request',
-        event           : 'order',
-        from            : 'buyer',
-        to              : 'supplier',
-        from_id         : buyer_id,
-        to_id           : supplier_id,
-        event_id        : order_id,
-        message         : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
-        status          : 0
-    })
-    await newNotification.save()
+      //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+      //   const newNotification = new Notification({
+      //     notification_id : notificationId,
+      //     event_type      : 'Logistics booking request',
+      //     event           : 'order',
+      //     from            : 'buyer',
+      //     to              : 'supplier',
+      //     from_id         : buyer_id,
+      //     to_id           : supplier_id,
+      //     event_id        : order_id,
+      //     message         : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
+      //     status          : 0
+      //   })
+      //  await newNotification.save()
 
     // const body = `Hello ${supplier.supplier_name}, <br />
     //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
@@ -220,67 +250,101 @@ module.exports = {
     //               MedHub Global Team`;
 
     // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
-     
-    callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
-
+    
+        // Success response
+        // return callback(null, {
+        //   code: 200,
+        //   message: 'Logistics request submitted successfully',
+        //   result: updatedOrder,
+        // });
+        callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
       } catch (error) {
-        console.log(error)
-       callback({code: 500, message: 'Internal Server Error'})
+        // Error handling
+        console.error('Error in bookLogistics:', error);
+        return callback({
+          code: 500,
+          message: 'Internal Server Error',
+          result: null,
+        });
       }
     },
-
-    submitPickupDetails : async(reqObj, callback) => {
+    
+    submitPickupDetails: async (reqObj, callback) => {
       try {
-        
-        const { buyer_id, supplier_id, order_id, shipment_details } = reqObj
+        const { buyer_id, supplier_id, order_id, shipment_details, supplier_logistics_data, is_registered } = reqObj;
+        const {full_name, email, mobile_number, house_name, locality, city, state, country, pincode, type  } = reqObj.supplier_logistics_data
+        const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+        const buyer = await Buyer.findOne({ buyer_id: buyer_id });
 
-         const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-            const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+        if (!supplier) {
+          return callback({ code: 404, message: 'Supplier not found', result: null });
+        }
 
+        if (!buyer) {
+          return callback({ code: 404, message: 'Buyer not found', result: null });
+        }
+        if(!is_registered) {
+        const newAddress = new Address({
+          user_id: supplier?._id,
+          full_name,
+          email,
+          mobile_number,
+          house_name,
+          locality,
+          city,
+          state,
+          country,
+          pincode,
+          type,
+      });
+      await newAddress.save();
+    }
 
         const updatedOrder = await Order.findOneAndUpdate(
-          { order_id : order_id },
+          { order_id: order_id },
           {
-              $set: {
-                shipment_details : shipment_details,
-                status           : 'Shipment Details Submitted'
-              }
+            $set: {
+              shipment_details: shipment_details,
+              supplier_logistics_data: supplier_logistics_data,
+              status: 'Shipment Details Submitted',
+            },
           },
           { new: true } 
-      );
-      if (!updatedOrder) {
+        );
+
+        if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
-      }
-          const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-          const newNotification = new Notification({
-            notification_id : notificationId,
-            event_type      : 'Shipment details submitted',
-            event           : 'order',
-            from            : 'supplier',
-            to              : 'buyer',
-            from_id         : supplier_id,
-            to_id           : buyer_id,
-            event_id        : order_id,
-            message         : `Submission Confirmation: The shipment details have been successfully submitted for ${order_id}`,
-            status          : 0
-        })
-        await newNotification.save()
+        }
 
-//         const body = `Hello ${buyer.buyer_name}, <br />
-//         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
-//         <br /><br />
-//         Thanks & Regards <br />
-//         MedHub Global Team`;
+        const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+        const newNotification = new Notification({
+          notification_id: notificationId,
+          event_type: 'Shipment details submitted',
+          event: 'order',
+          from: 'supplier',
+          to: 'buyer',
+          from_id: supplier_id,
+          to_id: buyer_id,
+          event_id: order_id,
+          message: `Submission Confirmation: The shipment details have been successfully submitted for ${order_id}`,
+          status: 0,
+        });
+        await newNotification.save();
 
-// await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
-     
-          callback({code: 200, message: 'Updated', result: updatedOrder})
+        // const body = `Hello ${buyer.buyer_name}, <br />
+        // Your logistics details for <strong>${order_id}</strong> have been submitted to our logistics partner.<br />
+        // <br /><br />
+        // Thanks & Regards <br />
+        // MedHub Global Team`;
+        // await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
 
+        callback({ code: 200, message: 'Updated', result: updatedOrder });
       } catch (error) {
-        console.log(error)
-       callback({code: 500, message: 'Internal Server Error'})
+        console.error(error);
+        callback({ code: 500, message: 'Internal Server Error' });
       }
     },
+
 
     buyerOrdersList: async (reqObj, callback) => {
         try {
