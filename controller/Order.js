@@ -12,6 +12,7 @@ const { flattenData } = require('../utils/csvConverter')
 const { parse } = require('json2csv');
 const fs = require('fs');
 const path = require('path');
+const { addStageToOrderHistory } = require('./orderHistory')
 
 
   const transporter = nodemailer.createTransport({
@@ -104,6 +105,9 @@ module.exports = {
         if (!updatedEnquiry) {
             return callback({ code: 404, message: 'Enquiry not found', result: null });
         }
+        
+            //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
+            const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
          const updatedPO = await PurchaseOrder.findOneAndUpdate(
             { purchaseOrder_id : reqObj.purchaseOrder_id },
             {

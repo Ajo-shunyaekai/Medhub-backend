@@ -73,7 +73,16 @@ const enquirySchema = new Schema({
         ref: 'Buyer',
         required: true
     },
-    
+    buyerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Buyer",
+      required: [true, "Buyer Id is required"],
+    },
+    supplierId: {
+        type: Schema.Types.ObjectId,
+        ref: "Supplier",
+        required: [true, "Supplier Id is required"],
+    },    
     supplier_id: {
         type: String,
         ref: 'Supplier',

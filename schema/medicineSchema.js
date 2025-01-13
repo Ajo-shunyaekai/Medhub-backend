@@ -194,6 +194,11 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  supplierId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Supplier",
+    required: [true, "Supplier Id is required"],
+  },
   medicine_name: {
     type: String,
     required: true
