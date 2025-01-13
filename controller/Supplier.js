@@ -362,7 +362,7 @@ module.exports = {
           {
             $match: {
               supplier_id: supplier_id,
-              created_at: { $gte: today }  // Match only today's data
+              // created_at: { $gte: today }  // Match only today's data
             }
           },
           {
@@ -453,7 +453,7 @@ module.exports = {
           {
             $match: {
               supplier_id: supplier_id,
-              created_at: { $gte: today },  // Match only today's data
+              // created_at: { $gte: today },  // Match only today's data
               po_status: 'active'  // Filter for active purchase orders
             }
           },
@@ -478,7 +478,7 @@ module.exports = {
           {
             $match: {
               supplier_id: supplier_id,
-              created_at: { $gte: today }  // Match only today's data
+              // created_at: { $gte: today }  // Match only today's data
             }
           },
           {

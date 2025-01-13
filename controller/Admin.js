@@ -3408,6 +3408,7 @@ module.exports = {
       try {
         
         const { filterValue } = reqObj
+        
         // const startOfToday = new Date(new Date().setHours(0, 0, 0, 0)); 
         // const endOfToday   = new Date(new Date().setHours(23, 59, 59, 999));
 

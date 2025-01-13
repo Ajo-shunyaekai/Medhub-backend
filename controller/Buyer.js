@@ -628,7 +628,7 @@ module.exports = {
           {
             $match: {
               buyer_id   : buyer_id,
-              created_at : { $gte: today }  // Match only today's data
+              // created_at : { $gte: today }  
             }
           },
           {
@@ -718,7 +718,7 @@ module.exports = {
           {
             $match: {
               buyer_id   : buyer_id,
-              created_at : { $gte: today }, 
+              // created_at : { $gte: today }, 
               po_status  : 'active' 
             }
           },
@@ -743,7 +743,7 @@ module.exports = {
           {
             $match: {
               buyer_id   : buyer_id,
-              created_at : { $gte: today }  
+              // created_at : { $gte: today }  
             }
           },
           {
