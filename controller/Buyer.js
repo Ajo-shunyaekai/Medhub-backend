@@ -13,6 +13,7 @@ const List               = require('../schema/addToListSchema');
 const Enquiry            = require('../schema/enquiryListSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Notification       = require('../schema/notificationSchema')
+const OrderHistory = require("../schema/orderHistorySchema");
 const Invoice  = require('../schema/invoiceSchema')
 const nodemailer         = require('nodemailer');
 const sendEmail = require('../utils/emailService')
@@ -943,6 +944,9 @@ module.exports = {
           buyer_id    : reqObj.buyer_id,
           supplier_id : reqObj.supplier_id,
         });
+
+        const buyerDetails = await Buyer?.findOne({buyer_id:reqObj.buyer_id})
+        const supplierDetails = await Supplier?.findOne({supplier_id:reqObj.supplier_id})
     
         if (existingList) {
           existingList.item_details.push({
@@ -973,6 +977,8 @@ module.exports = {
           const newList = new List({
             list_id     : listId,
             buyer_id    : reqObj.buyer_id,
+            buyerId     : buyerDetails?._id,
+            supplierId  : supplierDetails?._id,
             supplier_id : reqObj.supplier_id,
             item_details: [{
               medicine_id       : reqObj.medicine_id,
@@ -1006,6 +1012,14 @@ module.exports = {
     showList : async(reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj
+
+        // Fetching buyer details based on buyer_id
+        const buyerDetails = await Buyer?.findOne({ buyer_id });
+    
+        if (!buyerDetails) {
+          callback({ code: 400, message: 'Error while fetching buyer details', result: {} });
+          return;
+        }
 
         const page_no   = pageNo || 1
         const page_size = pageSize || 1
@@ -1044,6 +1058,8 @@ module.exports = {
               _id              : "$_id",
               list_id          : { $first : "$list_id" },
               buyer_id         : { $first : "$buyer_id" },
+              buyerId          : { $first : buyerDetails?._id }, 
+              supplierId       : { $first : "$_id" }, 
               supplier_id      : { $first : "$supplier_id" },
               supplier_details : { $first: { $arrayElemAt: ["$supplier_details", 0] } }, 
               item_details : {
@@ -1067,7 +1083,9 @@ module.exports = {
               _id          : 0,
               list_id      : 1,
               buyer_id     : 1,
+              buyerId      : 1,
               supplier_id  : 1,
+              supplierId   : 1,
               // item_details : 1,
               item_details : { $reverseArray: "$item_details" },  
               "supplier_details.supplier_id"          : 1,
@@ -1150,15 +1168,22 @@ module.exports = {
           let enquiryId = 'INQ-' + Math.random().toString(16).slice(2, 10);
 
           // Grouping items by supplier_id and including supplier details
-          const groupedItems = items.reduce((acc, item) => {
+          const groupedItems = await items.reduce(async (accPromise, item) => {
+              const acc = await accPromise;
               const { supplier_id, supplier_name, supplier_email, supplier_contact_email, list_id, item_details } = item;
               if (!supplier_id || !item_details || !Array.isArray(item_details) || item_details.length === 0) {
                   throw new Error('Missing required item details');
+              }
+              const supplierDetails = await Supplier.findOne({ supplier_id });
+              
+              if (!supplierDetails) {
+                  throw new Error('Failed fetching supplier details');
               }
   
               if (!acc[supplier_id]) {
                   acc[supplier_id] = {
                       supplier_name,
+                      supplierId  : supplierDetails?._id,
                       supplier_email,
                       supplier_contact_email,
                       items: []
@@ -1185,15 +1210,36 @@ module.exports = {
               return acc;
           }, {});
   
-          const enquiries = Object.keys(groupedItems).map(supplier_id => ({
+          const enquiries = await Promise.all(Object.keys(groupedItems).map(async (supplier_id) => {
+            const supplierDetails = await Supplier.findOne({ supplier_id });
+            return ({
               enquiry_id  : enquiryId,
               buyer_id,
+              buyerId     : buyer?._id,
+              supplierId  : supplierDetails?._id,
               supplier_id,
               items       : groupedItems[supplier_id].items
-          }));
-  
+          })}));
+          
           const enquiryDocs = await Enquiry.insertMany(enquiries);
-  
+          
+          const dataForOrderHistory = await Promise.all(enquiryDocs.map(async (enquiry) => {
+            return ({
+              enquiryId   : enquiry?._id,
+              buyerId     : enquiry?.buyerId,
+              supplierId  : enquiry?.supplierId,              
+              stages      : [
+                {
+                  name: 'Inquiry Raised',
+                  date: new Date(),
+                  referenceId: enquiry?._id,
+                  referenceType: 'Enquiry',
+                }
+              ]
+          })}));
+          
+          const orderHistoryDocs = await OrderHistory.insertMany(dataForOrderHistory);
+
           // Update lists and remove items from the List collection
           await Promise.all(items.map(async item => {
               const { list_id, item_details } = item;

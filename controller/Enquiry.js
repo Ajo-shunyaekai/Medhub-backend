@@ -8,6 +8,7 @@ const Buyer        = require('../schema/buyerSchema')
 const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
 const nodemailer         = require('nodemailer');
+const { addStageToOrderHistory } = require('./orderHistory');
 
 
     const transporter = nodemailer.createTransport({
@@ -413,8 +414,10 @@ module.exports = {
                                 MedHub Global Team`;
   
                   await sendMailFunc(buyer.buyer_email, 'Quotation Received!', body);
+            //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
+            const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Quotation Submitted', new Date(), updatedEnquiry?._id, 'Enquiry')
 
-          callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry });
+          callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry, updatedOrderHistory });
       } catch (error) {
           console.log('error', error);
           callback({ code: 500, message: 'Internal server error', result: error });
@@ -445,8 +448,12 @@ module.exports = {
             if (!updatedEnquiry) {
                 return callback({ code: 404, message: 'Enquiry not found', result: null });
             }
-    
-            callback({ code: 200, message: `Quotation ${msg} Successfully`, result: updatedEnquiry });
+
+            
+            //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
+            // const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Quotation Accepted', new Date(), updatedEnquiry?._id, 'Enquiry')
+
+            callback({ code: 200, message: `Quotation ${msg} Successfully`, result: updatedEnquiry, });
         } catch (error) {
             console.log('error', error);
             callback({ code: 500, message: 'Internal server error', result: error });

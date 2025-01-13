@@ -85,6 +85,8 @@ module.exports = {
         manufacturer_name, manufacturer_country_of_origin, manufacturer_description, quantity, unit_price,
         total_price, est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
       } = reqObj;
+
+      const supplierDetails = await Supplier?.findOne({supplier_id})
   
       if (![quantity, unit_price, total_price, est_delivery_days].every(Array.isArray)) {
         return callback({ code: 400, message: "Inventory fields should be arrays" });
@@ -105,6 +107,7 @@ module.exports = {
       const medicineData = {
         medicine_id,
         supplier_id,
+        supplierId : supplierDetails?._id,
         medicine_name,
         composition,
         strength,
@@ -1235,6 +1238,7 @@ module.exports = {
               $project: {
                   medicine_id       : 1,
                   supplier_id       : 1,
+                  supplierId        : 1,
                   medicine_name     : 1,
                   medicine_image    : 1,
                   drugs_name        : 1,
@@ -1288,6 +1292,7 @@ module.exports = {
             $project: {
               medicine_id       : 1,
               supplier_id       : 1,
+              supplierId        : 1,
               medicine_name     : 1,
               medicine_image    : 1,
               drugs_name        : 1,
@@ -1313,6 +1318,7 @@ module.exports = {
             $project: {
               medicine_id       : 1,
               supplier_id       : 1,
+              supplierId        : 1,
               medicine_name     : 1,
               medicine_image    : 1,
               drugs_name        : 1,
@@ -1468,6 +1474,7 @@ module.exports = {
               $project: {
                   medicine_id       : 1,
                   supplier_id       : 1,
+                  supplierId        : 1,
                   medicine_name     : 1,
                   medicine_image    : 1,
                   drugs_name        : 1,
@@ -1519,6 +1526,7 @@ module.exports = {
             $project: {
               medicine_id       : 1,
               supplier_id       : 1,
+              supplierId        : 1,
               medicine_name     : 1,
               medicine_image    : 1,
               drugs_name        : 1,
@@ -1544,6 +1552,7 @@ module.exports = {
             $project: {
               medicine_id       : 1,
               supplier_id       : 1,
+              supplierId        : 1,
               medicine_name     : 1,
               medicine_image    : 1,
               drugs_name        : 1,
