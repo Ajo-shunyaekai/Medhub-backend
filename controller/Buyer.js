@@ -636,7 +636,7 @@ module.exports = {
               numeric_total_price : {
                 $toDouble : {
                   $arrayElemAt : [
-                    { $split : ["$total_price", " "] },
+                    { $split : ["$grand_total", " "] },
                     0
                   ]
                 }
@@ -762,11 +762,55 @@ module.exports = {
             }
           }
         ];
+
+        // Aggregation for Invoices
+    const invoicesAggregation = [
+      {
+        $match: {
+          buyer_id: buyer_id,
+        }
+      },
+      {
+        $facet: {
+          paid: [
+            { $match: { invoice_status: 'paid' } },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                count: 1
+              }
+            }
+          ],
+          pending: [
+            { $match: { invoice_status: 'pending' } },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                count: 1
+              }
+            }
+          ]
+        }
+      }
+    ];
     
-        const [ordersData, purchaseOrdersData, enquiriesData] = await Promise.all([
+        const [ordersData, purchaseOrdersData, enquiriesData, invoicesData] = await Promise.all([
           Order.aggregate(ordersAggregation),
           PurchaseOrder.aggregate(purchaseOrdersAggregation),
-          Enquiry.aggregate(enquiriesAggregation)
+          Enquiry.aggregate(enquiriesAggregation),
+          Invoice.aggregate(invoicesAggregation)
         ]);
     
         // Prepare the final result
@@ -774,7 +818,11 @@ module.exports = {
           orderDetails             : ordersData[0],
           purchaseOrderCount       : purchaseOrdersData[0]?.count || 0,
           purchaseOrderTotalAmount : purchaseOrdersData[0]?.total_amount || 0,
-          enquiryCount             : enquiriesData[0]?.count || 0
+          enquiryCount             : enquiriesData[0]?.count || 0,
+          invoiceDetails: {
+            paidCount: invoicesData[0]?.paid[0]?.count || 0,
+            pendingCount: invoicesData[0]?.pending[0]?.count || 0
+          }
         };
     
         callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result });
@@ -810,7 +858,7 @@ module.exports = {
               numeric_total_price: {
                 $toDouble: {
                   $arrayElemAt: [
-                    { $split: ["$total_price", " "] },
+                    { $split: ["$grand_total", " "] },
                     0
                   ]
                 }
