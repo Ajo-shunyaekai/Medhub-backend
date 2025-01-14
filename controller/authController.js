@@ -36,12 +36,12 @@ const {
   supplierRegistrationContent,
   buyerRegistrationContent,
 } = require("../utils/emailContents");
-
+ 
 module.exports = {
   registerUser: async (req, res) => {
     // Console log request body directly
     console.log("Request Body: ", req.body);
-
+ 
     try {
       // const { access_token, user_type } = req.headers;
       const { user_type } = req.body;
@@ -68,17 +68,17 @@ module.exports = {
         description,
         vat_reg_no,
       } = req.body;
-
-
+ 
+ 
       let regObj = {};
-
+ 
       if (!user_type) {
         return res.status(400).send({
           code: 400,
           message: "Need User Type",
         });
       }
-
+ 
       if (user_type === "Buyer") {
         // Validate the required files for "Buyer" type
         if (
@@ -118,7 +118,7 @@ module.exports = {
             errObj: {},
           });
         }
-
+ 
         // Extract and format the mobile and country code
         const buyerCountryCode = buyer_mobile.split(" ")[0];
         const buyer_mobile_number = buyer_mobile.split(" ").slice(1).join(" ");
@@ -127,7 +127,7 @@ module.exports = {
           .slice(1)
           .join(" ");
         const personCountryCode = contact_person_mobile.split(" ")[0];
-
+ 
         regObj = {
           buyer_email,
           buyer_type,
@@ -163,7 +163,7 @@ module.exports = {
             path.basename(file.path)
           ),
         };
-
+ 
         // Validate registration fields using a custom validation function
         const errObj = validation(regObj, "buyerRegister");
         if (Object.values(errObj).length) {
@@ -210,7 +210,7 @@ module.exports = {
             });
           return;
         }
-
+ 
         if (
           !req.files["certificate_image"] ||
           req.files["certificate_image"].length === 0
@@ -224,7 +224,7 @@ module.exports = {
             });
           return;
         }
-
+ 
         const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
         const supplier_mobile_number = req.body.supplier_mobile_no
           .split(" ")
@@ -235,7 +235,7 @@ module.exports = {
           .slice(1)
           .join(" ");
         const personCountryCode = req.body.contact_person_mobile.split(" ")[0];
-
+ 
         regObj = {
           ...req.body,
           supplier_mobile: supplier_mobile_number,
@@ -255,15 +255,15 @@ module.exports = {
             path.basename(file.path)
           ),
         };
-
+ 
         const errObj = validation(regObj, "supplierRegister");
-
+ 
         if (Object.values(errObj).length) {
           res.send({ code: 419, message: "All fields are required", errObj });
           return;
         }
       }
-
+ 
       // Check for email existence based on user type
       const emailExists =
         user_type === "Buyer"
@@ -275,7 +275,7 @@ module.exports = {
           : user_type === "Seller"
           ? await Seller.findOne({ email: req.body?.email })
           : null;
-
+ 
       if (emailExists) {
         console.log("EMAIL ALREADY EXISTS");
         return res
@@ -283,7 +283,7 @@ module.exports = {
           .send({ code: 409, message: "Email already exists" });
       }
       console.log("NO MATCHING EMAIL EXISTS, CAN PROCEED");
-
+ 
       // Generate unique notification ID and user ID
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
       const userId = `${
@@ -297,13 +297,13 @@ module.exports = {
           ? "SLR-"
           : ""
       }${Math.random().toString(16).slice(2, 10)}`;
-
+ 
       // Create JWT token for the user
       let jwtSecretKey = process.env.APP_SECRET;
       let data = { time: Date(), email: req.body?.email };
       const token = jwt.sign(data, jwtSecretKey);
       const saltRounds = 10;
-
+ 
       // Create instances of Admin, Supplier, and Buyer models based on user type
       const newAdmin = new Admin({
         admin_id: userId,
@@ -312,7 +312,7 @@ module.exports = {
         password: req.body?.password,
         token: token,
       });
-
+ 
       const newSupplier = new Supplier({
         supplier_id                 : userId,
         supplier_type               : regObj.supplier_type,
@@ -346,7 +346,7 @@ module.exports = {
         account_status              : 0,
         profile_status              : 0
       });
-
+ 
       const newBuyer = new Buyer({
         buyer_id: userId,
         buyer_type: regObj?.buyer_type,
@@ -378,7 +378,7 @@ module.exports = {
         account_status: 0,
         profile_status: 0,
       });
-
+ 
       // Hash password
       const hashedPassword = await bcrypt.genSalt(saltRounds);
       if (!hashedPassword) {
@@ -387,19 +387,19 @@ module.exports = {
           message: "Error in generating salt or hashing password",
         });
       }
-
+ 
       // If user type is "Buyer", save buyer details and send response
       if (user_type === "Buyer") {
         console.log("In BUYER");
         const buyer = await newBuyer.save();
-
+ 
         if (!buyer) {
           return res.status(400).send({
             code: 400,
             message: "Error While Submitting Buyer Registration Request",
           });
         }
-
+ 
         const newNotification = new Notification({
           notification_id: notificationId,
           event_type: "New Registration Request",
@@ -411,7 +411,7 @@ module.exports = {
           message: "New Buyer Registration Request",
           status: 0,
         });
-
+ 
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Buyer Account Created";
@@ -419,13 +419,13 @@ module.exports = {
         const emailContent = await buyerRegistrationContent(buyer);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent)
-
+ 
         return res.status(200).send({
           code: 200,
           message: "Buyer Registration Request Submitted Successfully",
         });
       }
-
+ 
       // If user type is "Admin", save admin and return response
       else if (user_type === "Admin") {
         newAdmin.password = hashedPassword;
@@ -441,7 +441,7 @@ module.exports = {
           message: "Admin Registration Request Successfully",
         });
       }
-
+ 
       // If user type is "Supplier", save supplier and send response
       else if (user_type === "Supplier") {
         console.log(`IN SUPPLIER`)
@@ -463,7 +463,7 @@ module.exports = {
           message: "New Supplier Registration Request",
           status: 0,
         });
-
+ 
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Supplier Account Created";
@@ -471,13 +471,13 @@ module.exports = {
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent)
-
+ 
         return res.status(200).send({
           code: 200,
           message: "Supplier Registration Request Submitted Successfully",
         });
       }
-
+ 
       // Additional handling for other user types (Seller) would go here
     } catch (error) {
       console.log("ERROR IN REGISTER FUNCTION:", error);
@@ -488,20 +488,20 @@ module.exports = {
       });
     }
   },
-
-
+ 
+ 
   loginUser: async (req, res) => {
     try {
         const { access_token } = req.headers;
         const { email, password, user_type } = req.body;
-
+ 
         console.log(user_type);
         console.log(req.body);
-
+ 
         if (!user_type) {
             return res?.status(404)?.send({ code: 404, message: "Invalid Access" });
         }
-
+ 
         // Find the user based on user type
         const user =
             user_type === "Buyer"
@@ -513,7 +513,7 @@ module.exports = {
                 : user_type === "Seller"
                 ? await Seller.findOne({ email })
                 : null;
-
+ 
         if (!user) {
             return res?.status(404)?.send({
                 code: 404,
@@ -521,14 +521,14 @@ module.exports = {
                 result: user || {},
             });
         }
-
+ 
         // Check if the password matches
         const isMatch = await bcrypt.compare(password, user?.password);
-
+ 
         if (!isMatch) {
             return res?.status(400)?.send({ code: 400, message: "Incorrect Password" });
         }
-
+ 
         // Fetch user details excluding sensitive information
         let user2 =
             user_type === "Buyer"
@@ -540,18 +540,18 @@ module.exports = {
                 : user_type === "Seller"
                 ? await Seller.findById(user?._id).select("-password -createdAt -updatedAt -__v").lean()
                 : null;
-
+ 
         if (user_type === "Buyer") {
             console.log("user_type === 'Buyer'");
             console.log("user2", user2);
-
+ 
             // Count documents in the List collection for the buyer
             const listCount = await List.countDocuments({ buyer_id: user2.buyer_id });
             user2.list_count = listCount;
-
+ 
             console.log("listCount", listCount);
         }
-
+ 
         return res?.status(200)?.send({
             code: 200,
             message: `${user_type} Login Successful`,
@@ -566,21 +566,21 @@ module.exports = {
         });
     }
 },
-
+ 
   
-
+ 
   // editLoggedinUserProfile : async (reqObj, callback) => {
   //   try {
   //     const { admin_id, user_name, email } = reqObj
-
+ 
   //     const admin = await Admin.findOne({admin_id : admin_id})
-
+ 
   //     if(!admin) {
   //       callback({code: 404, message : 'User not found'})
   //     }
-
+ 
   //     const updateProfile = await Admin.findOneAndUpdate({admin_id : admin_id},  { user_name: user_name, email: email }, {new: true})
-
+ 
   //     if(updateProfile) {
   //       callback({code: 200, message: 'Profile Updated Successfully', result: updateProfile})
   //     } else {
@@ -591,12 +591,12 @@ module.exports = {
   //     callback({code: 500, message: 'Internal Server Error', result: error})
   //   }
   // },
-
+ 
   getLoggedinUserProfileDetails: async (req, res) => {
     try {
       const { access_token, user_type } = req.headers;
       const { id } = req?.params;
-
+ 
       const user =
         user_type == "Buyer"
           ? await Buyer.findById(id)?.select(
@@ -615,11 +615,11 @@ module.exports = {
               "-password -token -createdAt -updatedAt -__v"
             )
           : null;
-
+ 
       if (!user) {
         return res.status(400).send({ message: "No user Found" });
       }
-
+ 
       return res?.status(200)?.send({ message: "User Found", user });
     } catch (error) {
       console.log({
@@ -630,4 +630,4 @@ module.exports = {
     }
   },
 };
-
+ 

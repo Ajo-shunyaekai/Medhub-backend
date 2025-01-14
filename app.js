@@ -26,9 +26,10 @@ const enquiryRouter   = require('./routes/enquiryRoutes')()
 const purchaseRouter  = require('./routes/purchaseOrderRoutes')()
 const invoiceRouter   = require('./routes/invoiceRoutes')()
 const authRoutes      = require(`./routes/authRoutes`)
-const addressRoutes   = require(`./routes/addressRoutes`)
-const orderHistoryRoutes   = require(`./routes/orderHistoryRoutes`)
-const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
+
+// const addressRoutes   = require(`./routes/addressRoutes`)
+// const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
+
 
 //-----------------   routes   -----------------------//
 
@@ -132,9 +133,11 @@ app.post('/send-email', async (req, res) => {
 
 //------------------------------ api routes ------------------//
 app.use(`/api/auth`,authRoutes)
-app.use(`/api/order-history`,orderHistoryRoutes)
-app.use('/api/address', addressRoutes)
-app.use('/api/logistics', logisticsRoutes);
+
+// app.use(`/api/order-history`,orderHistoryRoutes)
+// app.use('/api/address', addressRoutes)
+// app.use('/api/logistics', logisticsRoutes);
+
 app.use('/api/user', userRouter);
 app.use('/api/admin', adminRouter);
 

@@ -16,11 +16,12 @@ const {
   loginUser,
   getLoggedinUserProfileDetails,
 } = require(`../controller/authController`);
-
+ 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // const { access_token, user_type } = req.headers;
     const { user_type } = req.body;
+
 
     console.log('user_type', user_type)
 
@@ -58,9 +59,9 @@ const storage = multer.diskStorage({
     cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
   },
 });
-
+ 
 const upload = multer({ storage: storage });
-
+ 
 const cpUpload = (req, res, next) => {
   // console.log("Before Multer", req); // Log before Multer processes the request
   upload.fields([
@@ -82,9 +83,15 @@ const cpUpload = (req, res, next) => {
     next();
   });
 };
-
+ 
 router.post(`/register`, checkAuthorization, cpUpload, registerUser);
 router.post(`/login`, loginUser);
+
 router.post(`/:id`, getLoggedinUserProfileDetails);
 
 module.exports = router;
+
+// router.get(`/:id`, getLoggedinUserProfileDetails);
+ 
+// module.exports = router;
+
