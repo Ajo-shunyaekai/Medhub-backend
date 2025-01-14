@@ -26,7 +26,7 @@ module.exports = () => {
                 res.send(response);
             });
     });
-    routes.get('/get-specific-enquiry-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
+    routes.post('/get-specific-enquiry-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
             Enquiry.getEnquiryDetails(req, result => {
                 const response = handleResponse(result);
@@ -50,7 +50,7 @@ module.exports = () => {
         });
     });
     
-    routes.get('/get-all-enquiry-list', checkAuthorization, checkCommonUserAuthentication, Enquiry.getEnquiryListAllUsers);
+    routes.post('/get-all-enquiry-list', checkAuthorization, checkCommonUserAuthentication, Enquiry.getEnquiryListAllUsers);
 
     routes.post('/cancel-enquiry', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
 

@@ -27,6 +27,7 @@ const purchaseRouter  = require('./routes/purchaseOrderRoutes')()
 const invoiceRouter   = require('./routes/invoiceRoutes')()
 const authRoutes      = require(`./routes/authRoutes`)
 const addressRoutes   = require(`./routes/addressRoutes`)
+const orderHistoryRoutes   = require(`./routes/orderHistoryRoutes`)
 const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
 
 //-----------------   routes   -----------------------//
@@ -131,6 +132,7 @@ app.post('/send-email', async (req, res) => {
 
 //------------------------------ api routes ------------------//
 app.use(`/api/auth`,authRoutes)
+app.use(`/api/order-history`,orderHistoryRoutes)
 app.use('/api/address', addressRoutes)
 app.use('/api/logistics', logisticsRoutes);
 app.use('/api/user', userRouter);
@@ -179,9 +181,9 @@ app.use('/api/buyer/invoice', invoiceRouter);
 app.use('/api/supplier/invoice', invoiceRouter);
 //-----------------purchaseorder--------------------------//
  
-app.get(['/*'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+// app.get(['/*'], (req, res) => {
+//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
 
 //--------------- api routes ------------------//
 

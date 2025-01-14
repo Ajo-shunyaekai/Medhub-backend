@@ -3,12 +3,106 @@ const Address = require("../schema/addressSchema");
 const Enquiry = require("../schema/enquiryListSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
-const Order = require("../schema/orderHistorySchema");
+const Order = require("../schema/orderSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const OrderHistory = require("../schema/orderHistorySchema");
 
+// const getOrderHistory = async (req, res) => {
+//   try {
+
+//     console.log('orderHistory detail functioncalled')
+//     const { user_type, buyer_id, admin_id, supplier_id } = req?.headers;
+//     const { id } = req?.params;
+
+//     const orderHistory = await OrderHistory?.findOne({ orderId: id });
+//     if (!orderHistory) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding order history details", result: {} });
+//     }
+
+//     const buyerDetails = await Buyer?.findById(orderHistory?.buyerId);
+//     if (!buyerDetails) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding buyer details", result: {} });
+//     }
+
+//     const supplierDetails = await Supplier?.findById(orderHistory?.supplierId);
+//     if (!supplierDetails) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding supplier details", result: {} });
+//     }
+    
+//     // const orderDetails = await Order?.findById(id);
+//     // if (!orderDetails) {
+//     //   return res
+//     //     ?.status(400)
+//     //     ?.send({ message: "Failed finding order details", result: {} });
+//     // }
+
+//     const updatedOrderHistory = await Promise.all(
+//       orderHistory?.stages?.map(async (stage) => {
+//         let schemaNameToSearchFrom;
+//         switch (stage?.referenceType) {
+//           case "Enquiry":
+//             schemaNameToSearchFrom = Enquiry;
+//             break;
+
+//           case "Purchase Order":
+//             schemaNameToSearchFrom = PurchaseOrder;
+//             break;
+
+//           case "Order":
+//             schemaNameToSearchFrom = Order;
+//             break;
+
+//           default:
+//             break;
+//         }
+
+//         const fetchDetails = async (referenceId) => {
+//           const fetchData = await schemaNameToSearchFrom?.findOne({
+//             _id: referenceId,
+//           });
+//           if (!fetchData) {
+//             return res
+//               ?.status(400)
+//               ?.send({ message: "Failed finding stage details", result: {} });
+//           }
+//           return fetchData;
+//         };
+
+//         const details = await fetchDetails(stage?.referenceId);
+//         return {
+//           ...stage,
+//           details,
+//         };
+//       })
+//     );
+
+//     if (!updatedOrderHistory) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding order history details", result: {} });
+//     }
+
+//     return res?.status(200)?.send({
+//       message: "Success get Order History!",
+//       orderHistory: updatedOrderHistory,
+//     });
+//   } catch (error) {
+//     console.log("error", error);
+//     return res
+//       ?.status(500)
+//       ?.send({ message: error.message || "Internal Server Error", result: {} });
+//   }
+// };
+
 const getOrderHistory = async (req, res) => {
   try {
+    console.log('orderHistory detail function called');
     const { user_type, buyer_id, admin_id, supplier_id } = req?.headers;
     const { id } = req?.params;
 
@@ -19,18 +113,14 @@ const getOrderHistory = async (req, res) => {
         ?.send({ message: "Failed finding order history details", result: {} });
     }
 
-    const buyerDetails = await Buyer?.findOne({
-      buyer_id: orderHistory?.buyerId,
-    });
+    const buyerDetails = await Buyer?.findById(orderHistory?.buyerId);
     if (!buyerDetails) {
       return res
         ?.status(400)
         ?.send({ message: "Failed finding buyer details", result: {} });
     }
 
-    const supplierDetails = await Supplier?.findOne({
-      supplier_id: orderHistory?.supplierId,
-    });
+    const supplierDetails = await Supplier?.findById(orderHistory?.supplierId);
     if (!supplierDetails) {
       return res
         ?.status(400)
@@ -38,55 +128,47 @@ const getOrderHistory = async (req, res) => {
     }
 
     const updatedOrderHistory = await Promise.all(
-      orderHistory?.stages?.map(async (stage) => {
+      orderHistory?.stages?.map(async (stage,index) => {
+
+        // console.log("stage and index", stage, index)
         let schemaNameToSearchFrom;
+
         switch (stage?.referenceType) {
           case "Enquiry":
-            schemaNameToSearchFrom = Enquiry;
+            schemaNameToSearchFrom = await Enquiry;
             break;
-
           case "Purchase Order":
-            schemaNameToSearchFrom = PurchaseOrder;
+            schemaNameToSearchFrom = await PurchaseOrder;
             break;
-
           case "Order":
-            schemaNameToSearchFrom = Order;
+            schemaNameToSearchFrom = await Order;
             break;
-
           default:
-            break;
+            schemaNameToSearchFrom = await null; // If referenceType is invalid, skip fetching
         }
 
-        const fetchDetails = async (referenceId) => {
-          const fetchData = await schemaNameToSearchFrom?.findOne({
-            _id: referenceId,
-          });
-          if (!fetchData) {
-            return res
-              ?.status(400)
-              ?.send({ message: "Failed finding stage details", result: {} });
-          }
-          return fetchData;
-        };
+        if (!schemaNameToSearchFrom) {
+          return { ...stage, details: null }; // If schema is not found, return empty details
+        }
 
-        const details = await fetchDetails(stage?.referenceId);
-        return {
-          ...stage,
-          details,
-        };
+        const details = await schemaNameToSearchFrom?.findOne({
+          _id: stage?.referenceId,
+        });
+
+        if (!details) {
+          return { ...stage, details: null }; // If details are not found, add empty details to the stage
+        }
+        console.log("\n\n\n\n\n\n\n new stage", index, details)
+        // console.log("stage and index", stage, index, "\n map return result",{ ...stage, details })
+        return { ...stage, details };
       })
     );
-
-    if (!updatedOrderHistory) {
-      return res
-        ?.status(400)
-        ?.send({ message: "Failed finding order history details", result: {} });
-    }
 
     return res?.status(200)?.send({
       message: "Success get Order History!",
       orderHistory: updatedOrderHistory,
     });
+
   } catch (error) {
     console.log("error", error);
     return res
@@ -94,6 +176,87 @@ const getOrderHistory = async (req, res) => {
       ?.send({ message: error.message || "Internal Server Error", result: {} });
   }
 };
+
+// const getOrderHistory = async (req, res) => {
+//   try {
+//     console.log('orderHistory detail function called');
+//     const { user_type, buyer_id, admin_id, supplier_id } = req?.headers;
+//     const { id } = req?.params;
+
+//     const orderHistory = await OrderHistory?.findOne({ orderId: id });
+//     if (!orderHistory) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding order history details", result: {} });
+//     }
+
+//     const buyerDetails = await Buyer?.findById(orderHistory?.buyerId);
+//     if (!buyerDetails) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding buyer details", result: {} });
+//     }
+
+//     const supplierDetails = await Supplier?.findById(orderHistory?.supplierId);
+//     if (!supplierDetails) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding supplier details", result: {} });
+//     }
+
+//     // Process each stage and fetch details by referenceId
+//     const updatedOrderHistory = await Promise.all(
+//       orderHistory?.stages?.map(async (stage) => {
+//         let schemaNameToSearchFrom;
+//         switch (stage?.referenceType) {
+//           case "Enquiry":
+//             schemaNameToSearchFrom = Enquiry;
+//             break;
+
+//           case "Purchase Order":
+//             schemaNameToSearchFrom = PurchaseOrder;
+//             break;
+
+//           case "Order":
+//             schemaNameToSearchFrom = Order;
+//             break;
+
+//           default:
+//             return { ...stage, details: null }; // If referenceType doesn't match any schema, skip fetching details
+//         }
+
+//         const details = await schemaNameToSearchFrom?.findById(stage?.referenceId);
+//         return {
+//           ...stage,
+//           details: details || null, // Add details to the stage if found
+//         };
+//       })
+//     );
+
+//     if (!updatedOrderHistory) {
+//       return res
+//         ?.status(400)
+//         ?.send({ message: "Failed finding updated order history details", result: {} });
+//     }
+
+//     // Return the final order history response
+//     return res?.status(200)?.send({
+//       message: "Success get Order History!",
+//       orderHistory: {
+//         ...orderHistory._doc, // Include the original order history data
+//         stages: updatedOrderHistory, // Include the updated stages with fetched details
+//         buyerDetails,
+//         supplierDetails,
+//       },
+//     });
+//   } catch (error) {
+//     console.log("error", error);
+//     return res
+//       ?.status(500)
+//       ?.send({ message: error.message || "Internal Server Error", result: {} });
+//   }
+// };
+
 
 const addStageToOrderHistory = async ( id, stageName, stageDate, stageReference, stageReferenceType ) => {
   try {
@@ -125,8 +288,15 @@ const addStageToOrderHistory = async ( id, stageName, stageDate, stageReference,
       referenceType: stageReferenceType,
     };
 
+    const additionalStageDetails = {
+      name: "Logistics Request Sent",
+      date: new Date(stageDate.getTime() + 2 * 60 * 1000),
+      referenceId: stageReference,
+      referenceType: stageReferenceType,
+    };
+
     let updateFields = {
-      $push: { stages: stageDetails },
+      $push: stageName == 'Pick up Details Submitted'? { stages: stageDetails, additionalStageDetails } : { stages: stageDetails },
     };
 
     // If stageReferenceType is "Order" and stageName is "Order Created", set the orderId field as well

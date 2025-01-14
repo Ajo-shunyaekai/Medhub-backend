@@ -138,7 +138,7 @@ module.exports = () => {
         });
     });
 
-    routes.get('/get-specific-supplier-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    routes.post('/get-specific-supplier-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.supplierProfileDetails(req, result => {
             const response = handleResponse(result);
             res.send(response);
@@ -231,7 +231,7 @@ module.exports = () => {
         });
     });
     
-    routes.get(`/get-all-suppliers-list`, checkAuthorization, checkCommonUserAuthentication, Controller.getAllSuppliersList)
+    routes.post(`/get-all-suppliers-list`, checkAuthorization, checkCommonUserAuthentication, Controller.getAllSuppliersList)
     
     routes.post(`/get-csv-suppliers-list`, checkAuthorization, checkCommonUserAuthentication, Controller.getCSVSuppliersList)
    

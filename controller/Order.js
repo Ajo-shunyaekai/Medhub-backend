@@ -109,7 +109,7 @@ module.exports = {
         }
         
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-            const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
+            // const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
          const updatedPO = await PurchaseOrder.findOneAndUpdate(
             { purchaseOrder_id : reqObj.purchaseOrder_id },
             {
@@ -232,6 +232,8 @@ module.exports = {
         if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
         }
+        //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
+        // const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
 
       //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
       //   const newNotification = new Notification({
@@ -332,6 +334,9 @@ module.exports = {
           status           : 'P'
         });
         await newLogisticsRequest.save();
+
+        //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
+        // const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Pick up Details Submitted', new Date(), newLogisticsRequest?._id, 'Logistics',)
 
         const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
         const newNotification = new Notification({

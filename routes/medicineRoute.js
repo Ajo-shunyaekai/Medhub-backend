@@ -154,10 +154,10 @@ module.exports = () => {
         });
     });
 
-    routes.get('/get-all-medicines-list', checkAuthorization, Controller.getSpecificMedicinesList);
+    routes.post('/get-all-medicines-list', checkAuthorization, Controller.getSpecificMedicinesList);
     routes.post('/get-all-medicines-list-csv', checkAuthorization, Controller.getMedicinesListCSV);
     
-    routes.get('/get-specific-medicine-details/:id', checkAuthorization, Controller.getSpecificMedicineDetails);
+    routes.post('/get-specific-medicine-details/:id', checkAuthorization, Controller.getSpecificMedicineDetails);
  
     return routes;
 }
