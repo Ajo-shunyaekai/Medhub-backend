@@ -12,10 +12,10 @@ const orderHistorySchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Order",
     },
-    logisticPartnerId: {
-      type: Schema.Types.ObjectId,
-      ref: "LogisticsPartner",
-    },
+    // logisticPartnerId: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: "LogisticsPartner",
+    // },
     logisticId: {
       type: Schema.Types.ObjectId,
       ref: "Logistics",
@@ -35,6 +35,7 @@ const orderHistorySchema = new Schema(
       {
         name: {
           type: String,
+          enum: ['Inquiry Raised', 'Quotation Submitted', 'Purchase Order Created', 'Order Created', 'Delivery Details Submitted', 'Pick up Details Submitted', 'Logistics Request Sent', 'Order Initiated by Logistic Partner'],
           required: true,
         },
         date: {

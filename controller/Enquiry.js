@@ -415,9 +415,9 @@ module.exports = {
   
                   await sendMailFunc(buyer.buyer_email, 'Quotation Received!', body);
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-            const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Quotation Submitted', new Date(), updatedEnquiry?._id, 'Enquiry')
+            // const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Quotation Submitted', new Date(), updatedEnquiry?._id, 'Enquiry')
 
-          callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry, updatedOrderHistory });
+          callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry });
       } catch (error) {
           console.log('error', error);
           callback({ code: 500, message: 'Internal server error', result: error });

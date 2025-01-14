@@ -21,16 +21,17 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // const { access_token, user_type } = req.headers;
     const { user_type } = req.body;
- 
+
+
     console.log('user_type', user_type)
- 
+
     // if (!user_type) {
     //   return res.status(400).send({  
     //     code: 400,
     //     message: "Need User Type",
     //   });
     // }
- 
+
     let uploadPath =
       user_type == "Buyer"
         ? "./uploads/buyer/buyer_images"
@@ -85,6 +86,12 @@ const cpUpload = (req, res, next) => {
  
 router.post(`/register`, checkAuthorization, cpUpload, registerUser);
 router.post(`/login`, loginUser);
-router.get(`/:id`, getLoggedinUserProfileDetails);
- 
+
+router.post(`/:id`, getLoggedinUserProfileDetails);
+
 module.exports = router;
+
+// router.get(`/:id`, getLoggedinUserProfileDetails);
+ 
+// module.exports = router;
+

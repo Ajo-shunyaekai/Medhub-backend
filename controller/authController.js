@@ -45,7 +45,7 @@ module.exports = {
     try {
       // const { access_token, user_type } = req.headers;
       const { user_type } = req.body;
- 
+
       // Use req.body directly instead of stringifying it
       const {
         buyer_mobile,
