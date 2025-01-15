@@ -153,6 +153,13 @@ const buyerSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    otp: {
+      type: Number,
+    },
+    otpExpiry: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );

@@ -1,7 +1,7 @@
-const {getTodayFormattedDate}  = require('./utilities')
+const { getTodayFormattedDate } = require("./utilities");
 // function formatDate(date) {
 //     const day = date.getDate().toString().padStart(2, '0');
-//     const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+//     const month = (date.getMonth() + 1).toString().padStart(2, '0');
 //     const year = date.getFullYear();
 //     return `${day}-${month}-${year}`;
 // }
@@ -72,4 +72,31 @@ const supplierRegistrationContent = (seller)=>{
     )
 }
 
-module.exports = {contactUsContent, buyerRegistrationContent, supplierRegistrationContent}
+const otpForResetPasswordContent = (user, otp) => {
+  return `
+    <html>
+      <body>
+        <p>Dear ${ user?.supplier_name || user?.buyer_name || user?.user_name || user?.company_name || "User" },</p>
+        <p>You recently requested to reset your password for your MedHub Global account. Please use the following One-Time Password (OTP) to proceed with resetting your password.</p>
+        
+        <h2>Your OTP: <strong>${otp}</strong></h2>
+        
+        <p>This OTP is valid for the next 10 minutes. If you did not request a password reset, please ignore this email or contact our support team immediately.</p>
+        
+        <p>To reset your password, please follow these steps:</p>
+        <ol>
+          <li>Enter the OTP on the password reset page.</li>
+          <li>Set your new password.</li>
+        </ol>
+        
+        <br/>
+        <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+        
+        <p>Best regards,</p>
+        <p><strong>MedHub Global Team</strong></p>
+      </body>
+    </html>
+    `;
+};
+
+module.exports = { contactUsContent, buyerRegistrationContent, supplierRegistrationContent, otpForResetPasswordContent, };

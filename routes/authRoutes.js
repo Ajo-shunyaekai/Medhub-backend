@@ -15,6 +15,10 @@ const {
   registerUser,
   loginUser,
   getLoggedinUserProfileDetails,
+  verifyEmail,
+  verifyOTP,
+  resetPassword,
+  updatePassword
 } = require(`../controller/authController`);
  
 const storage = multer.diskStorage({
@@ -86,6 +90,10 @@ const cpUpload = (req, res, next) => {
  
 router.post(`/register`, checkAuthorization, cpUpload, registerUser);
 router.post(`/login`, loginUser);
+router.post(`/verify-email`, verifyEmail);
+router.post(`/verify-otp`, verifyOTP);
+router.post(`/reset-password`, resetPassword);
+router.post(`/update-password/:id`, updatePassword);
 
 router.post(`/:id`, getLoggedinUserProfileDetails);
 
