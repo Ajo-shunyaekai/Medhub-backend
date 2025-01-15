@@ -16,6 +16,8 @@ const Notification       = require('../schema/notificationSchema')
 const Enquiry            = require('../schema/enquiryListSchema')
 const PurchaseOrder      = require('../schema/purchaseOrderSchema')
 const Invoices           = require('../schema/invoiceSchema')
+const BuyerProfileEdit   = require('../schema/buyerEditSchema')
+const SupplierProfileEdit   = require('../schema/supplierEditSchema')
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 const { parse } = require('json2csv');
@@ -5636,4 +5638,28 @@ getRegReqList: async (reqObj, callback) => {
     },
 
     //------------------------------ transaction -------------------------------//
+
+    getProfileEditRequestList: async (req, res) => {
+      try {
+        const {type, editStatus} = req?.query;
+        let usersList;
+        if(type == 'supplier'){
+          usersList = await SupplierProfileEdit?.find({ editReqStatus: editStatus })
+        } else if(type == 'buyer'){
+          usersList = await BuyerProfileEdit?.find({ editReqStatus: editStatus })
+        }
+        if(!usersList || usersList.length === 0){
+          return res?.status(400)?.send({ message: "No List Found" });
+        }
+
+        return res?.status(200)?.send({message: `Success Fetching Profile Edit Requests`, list: usersList})
+      } catch (error) {
+        console.log({
+          code: 500,
+          message: "Internal Server Error",
+          result: error,
+        });
+        
+      }
+    },
 }

@@ -37,11 +37,10 @@ const {
   buyerRegistrationContent,
   otpForResetPasswordContent,
 } = require("../utils/emailContents");
+const { sendErrorResponse, sendSuccessResponse } = require("../utils/commonResonse");
 
 module.exports = {
   registerUser: async (req, res) => {
-    // Console log request body directly
-    console.log("Request Body: ", req.body);
 
     try {
       // const { access_token, user_type } = req.headers;
@@ -73,10 +72,7 @@ module.exports = {
       let regObj = {};
 
       if (!user_type) {
-        return res.status(400).send({
-          code: 400,
-          message: "Need User Type",
-        });
+        return sendErrorResponse(res, 400, "Need User Type.");
       }
 
       if (user_type === "Buyer") {
@@ -85,38 +81,22 @@ module.exports = {
           !req.files["buyer_image"] ||
           req.files["buyer_image"].length === 0
         ) {
-          return res.send({
-            code: 415,
-            message: "Company Logo is required!",
-            errObj: {},
-          });
+          return sendErrorResponse(res, 415, "Company Logo is required.");
         }
         if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
-          return res.send({
-            code: 415,
-            message: "Company tax image is required!",
-            errObj: {},
-          });
+          return sendErrorResponse(res, 415, "Company tax image is required.");
         }
         if (
           !req.files["license_image"] ||
           req.files["license_image"].length === 0
         ) {
-          return res.send({
-            code: 415,
-            message: "Company license image is required!",
-            errObj: {},
-          });
+          return sendErrorResponse(res, 415, "Company license image is required.");
         }
         if (
           !req.files["certificate_image"] ||
           req.files["certificate_image"].length === 0
         ) {
-          return res.send({
-            code: 415,
-            message: "Company certificate image is required!",
-            errObj: {},
-          });
+          return sendErrorResponse(res, 415, "Company certificate image is required.");
         }
 
         // Extract and format the mobile and country code
@@ -167,54 +147,30 @@ module.exports = {
         // Validate registration fields using a custom validation function
         const errObj = validation(regObj, "buyerRegister");
         if (Object.values(errObj).length) {
-          return res.send({
-            code: 419,
-            message: "All fields are required",
-            errObj,
-          });
+          return sendErrorResponse(res, 419, "All fields are required.", errObj);
         }
       } else if (user_type === "Supplier") {
         if (
           !req.files["supplier_image"] ||
           req.files["supplier_image"].length === 0
         ) {
-          res?.status(415)?.send({
-            code: 415,
-            message: "Supplier Logo is required!",
-            errObj: {},
-          });
-          return;
+          return sendErrorResponse(res, 415, "Supplier Logo is required.");
         }
         if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
-          res?.status(415)?.send({
-            code: 415,
-            message: "Supplier tax image is required!",
-            errObj: {},
-          });
-          return;
+          return sendErrorResponse(res, 415, "Supplier tax image is required.");
         }
         if (
           !req.files["license_image"] ||
           req.files["license_image"].length === 0
         ) {
-          res?.status(415)?.send({
-            code: 415,
-            message: "Supplier license image is required!",
-            errObj: {},
-          });
-          return;
+          return sendErrorResponse(res, 415, "Supplier license image is required.");
         }
 
         if (
           !req.files["certificate_image"] ||
           req.files["certificate_image"].length === 0
         ) {
-          res?.status(415)?.send({
-            code: 415,
-            message: "Supplier Certificate image is required!",
-            errObj: {},
-          });
-          return;
+          return sendErrorResponse(res, 415, "Supplier Certificate image is required.");
         }
 
         const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
@@ -251,8 +207,7 @@ module.exports = {
         const errObj = validation(regObj, "supplierRegister");
 
         if (Object.values(errObj).length) {
-          res.send({ code: 419, message: "All fields are required", errObj });
-          return;
+          return sendErrorResponse(res, 419, "All fields are required", errObj);
         }
       }
 
@@ -269,12 +224,8 @@ module.exports = {
           : null;
 
       if (emailExists) {
-        console.log("EMAIL ALREADY EXISTS");
-        return res
-          .status(409)
-          .send({ code: 409, message: "Email already exists" });
+        return sendErrorResponse(res, 409, "Email already exists");
       }
-      console.log("NO MATCHING EMAIL EXISTS, CAN PROCEED");
 
       // Generate unique notification ID and user ID
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
@@ -374,22 +325,15 @@ module.exports = {
       // Hash password
       const hashedPassword = await bcrypt.genSalt(saltRounds);
       if (!hashedPassword) {
-        return res.status(400).send({
-          code: 400,
-          message: "Error in generating salt or hashing password",
-        });
+        return sendErrorResponse(res, 400, "Error in generating salt or hashing password");
       }
 
       // If user type is "Buyer", save buyer details and send response
       if (user_type === "Buyer") {
-        console.log("In BUYER");
         const buyer = await newBuyer.save();
 
         if (!buyer) {
-          return res.status(400).send({
-            code: 400,
-            message: "Error While Submitting Buyer Registration Request",
-          });
+          return sendErrorResponse(res, 400, "Error While Submitting Buyer Registration Request");
         }
 
         const newNotification = new Notification({
@@ -413,10 +357,7 @@ module.exports = {
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent);
 
-        return res.status(200).send({
-          code: 200,
-          message: "Buyer Registration Request Submitted Successfully",
-        });
+        return sendSuccessResponse(res, 200, `Buyer Registration Request Submitted Successfully.`);
       }
 
       // If user type is "Admin", save admin and return response
@@ -424,26 +365,16 @@ module.exports = {
         newAdmin.password = hashedPassword;
         const admin = await newAdmin.save();
         if (!admin) {
-          return res.status(400).send({
-            code: 400,
-            message: "Error While Submitting Admin Registration Request",
-          });
+          return sendErrorResponse(res, 400, "Error While Submitting Admin Registration Request");
         }
-        return res.status(200).send({
-          code: 200,
-          message: "Admin Registration Request Successfully",
-        });
+        return sendSuccessResponse(res, 200, `Admin Registration Request Successfully.`);
       }
 
       // If user type is "Supplier", save supplier and send response
       else if (user_type === "Supplier") {
-        console.log(`IN SUPPLIER`);
         const supplier = await newSupplier.save();
         if (!supplier) {
-          return res.status(400).send({
-            code: 400,
-            message: "Error While Submitting Supplier Registration Request",
-          });
+          return sendErrorResponse(res, 400, "Error While Submitting Supplier Registration Request");
         }
         const newNotification = new Notification({
           notification_id: notificationId,
@@ -466,20 +397,13 @@ module.exports = {
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent);
 
-        return res.status(200).send({
-          code: 200,
-          message: "Supplier Registration Request Submitted Successfully",
-        });
+        return sendSuccessResponse(res, 200, `Supplier Registration Request Submitted Successfully.`);
       }
 
       // Additional handling for other user types (Seller) would go here
     } catch (error) {
-      console.log("ERROR IN REGISTER FUNCTION:", error);
-      return res.status(500).send({
-        code: 500,
-        message: "Internal server error",
-        result: error,
-      });
+      console.log("Internal Server Error:", error);
+      return sendErrorResponse(res, 500, "Internal Server Error", error);
     }
   },
 
@@ -488,11 +412,16 @@ module.exports = {
       const { access_token } = req.headers;
       const { email, password, user_type } = req.body;
 
-      console.log(user_type);
-      console.log(req.body);
-
       if (!user_type) {
-        return res?.status(404)?.send({ code: 404, message: "Invalid Access" });
+        return sendErrorResponse(res, 400, "Cannot Identify User.");
+      }
+
+      if (!email) {
+        return sendErrorResponse(res, 400, "Email isrequired.");
+      }
+
+      if (!password) {
+        return sendErrorResponse(res, 400, "Password isrequired.");
       }
 
       // Find the user based on user type
@@ -508,20 +437,14 @@ module.exports = {
           : null;
 
       if (!user) {
-        return res?.status(404)?.send({
-          code: 404,
-          message: "Email not found",
-          result: user || {},
-        });
+        return sendErrorResponse(res, 400, "User not found.");
       }
 
       // Check if the password matches
       const isMatch = await bcrypt.compare(password, user?.password);
 
       if (!isMatch) {
-        return res
-          ?.status(400)
-          ?.send({ code: 400, message: "Incorrect Password" });
+        return sendErrorResponse(res, 400, "Incorrect Password.");
       }
 
       // Fetch user details excluding sensitive information
@@ -545,30 +468,18 @@ module.exports = {
           : null;
 
       if (user_type === "Buyer") {
-        console.log("user_type === 'Buyer'");
-        console.log("user2", user2);
 
         // Count documents in the List collection for the buyer
         const listCount = await List.countDocuments({
           buyer_id: user2.buyer_id,
         });
         user2.list_count = listCount;
-
-        console.log("listCount", listCount);
       }
 
-      return res?.status(200)?.send({
-        code: 200,
-        message: `${user_type} Login Successful`,
-        result: user2,
-      });
+      return sendSuccessResponse(res, 200, `${user_type} Login Successful.`, user2);
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      return res?.status(500)?.send({
-        code: 500,
-        message: "Internal Server Error",
-        result: error,
-      });
+      console.log("Internal Server Error:", error);
+      return sendErrorResponse(res, 500, "Internal Server Error", error);
     }
   },
 
@@ -620,16 +531,13 @@ module.exports = {
           : null;
 
       if (!user) {
-        return res.status(400).send({ message: "No user Found" });
+        return sendErrorResponse(res, 400, "No user Found");
       }
 
-      return res?.status(200)?.send({ message: "User Found", user });
+      return sendSuccessResponse(res, 200, "User Found.", user);
     } catch (error) {
-      console.log({
-        code: 500,
-        message: "Internal Server Error",
-        result: error,
-      });
+      console.log("Internal Server Error:", error);
+      return sendErrorResponse(res, 500, "Internal Server Error", error);
     }
   },
 
@@ -638,9 +546,7 @@ module.exports = {
       const { email, user_type } = req?.body;
 
       if (!email) {
-        return res
-          .status(400)
-          .send({ code: 400, message: "Email is required." });
+        return sendErrorResponse(res, 400, "Email is required.");
       }
 
       let user;
@@ -656,10 +562,7 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return res.status(400).send({
-          code: 400,
-          message: "Email not registered. Please provide a registered address.",
-        });
+        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
       }
 
       // Generate a new OTP and its expiry time (10 minutes ahead)
@@ -707,10 +610,7 @@ module.exports = {
 
       // If the update fails, return an error
       if (!updatedUser) {
-        return res.status(400).send({
-          code: 400,
-          message: "Error verifying email and generating OTP.",
-        });
+        return sendErrorResponse(res, 400, "Error verifying email and generating OTP.");
       }
 
       // Email settings and content
@@ -725,16 +625,10 @@ module.exports = {
       await sendEmail(recipientEmails, subject, emailContent);
 
       // Success response
-      return res
-        .status(200)
-        .send({ code: 200, message: "Mail sent to the registered email." });
+      return sendSuccessResponse(res, 200, "Mail sent to the registered email.");
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      return res.status(500).send({
-        code: 500,
-        message: "Internal Server Error",
-        result: error,
-      });
+      console.log("Internal Server Error:", error);
+      return sendErrorResponse(res, 500, "Internal Server Error", error);
     }
   },
 
@@ -743,13 +637,11 @@ module.exports = {
       const { email, otp, user_type } = req?.body;
 
       if (!email) {
-        return res
-          .status(400)
-          .send({ code: 400, message: "Email is required." });
+        return sendErrorResponse(res, 400, "Email is required.");
       }
 
       if (!otp) {
-        return res.status(400).send({ code: 400, message: "OTP is required." });
+        return sendErrorResponse(res, 400, "OTP is required.");
       }
 
       let user;
@@ -765,26 +657,17 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return res.status(400).send({
-          code: 400,
-          message: "Email not registered. Please provide a registered address.",
-        });
+        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
       }
 
       // Check if OTP matches and if it's still valid (hasn't expired)
       const currentDate = new Date();
 
       if (user.otp !== otp) {
-        return res.status(400).send({
-          code: 400,
-          message: "Invalid OTP",
-        });
+        return sendErrorResponse(res, 400, "Invalid OTP");
       }
       if (user.otpExpiry < currentDate) {
-        return res.status(400).send({
-          code: 400,
-          message: "Expired OTP",
-        });
+        return sendErrorResponse(res, 400, "Expired OTP");
       }
 
       // OTP is valid, now proceed to remove otp and otpExpiry
@@ -819,24 +702,14 @@ module.exports = {
 
       // If the update fails, return an error
       if (!updatedUser) {
-        return res.status(400).send({
-          code: 400,
-          message: "Error unsetting OTP and OTP expiry.",
-        });
+        return sendErrorResponse(res, 400, "Error unsetting OTP and OTP expiry.");
       }
 
       // Success response
-      return res.status(200).send({
-        code: 200,
-        message: "OTP verified successfully.",
-      });
+      return sendSuccessResponse(res, 200, "OTP verified successfully.");
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      return res?.status(500)?.send({
-        code: 500,
-        message: "Internal Server Error",
-        result: error,
-      });
+      console.log("Internal Server Error:", error);
+      return sendErrorResponse(res, 500, "Internal Server Error", error);
     }
   },
 
@@ -845,15 +718,11 @@ module.exports = {
       const { email, password, user_type } = req?.body;
 
       if (!email) {
-        return res
-          .status(400)
-          .send({ code: 400, message: "Email is required." });
+        return sendErrorResponse(res, 400, "Email is required.");
       }
 
       if (!password) {
-        return res
-          .status(400)
-          .send({ code: 400, message: "Password is required." });
+        return sendErrorResponse(res, 400, "Password is required.");
       }
 
       let user;
@@ -869,21 +738,13 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return res.status(400).send({
-          code: 400,
-          message: "Email not registered. Please provide a registered address.",
-        });
+        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
       }
 
       // Check if the new password matches the old password
       const isMatch = await bcrypt.compare(password, user?.password);
       if (isMatch) {
-        return res
-          ?.status(400)
-          ?.send({
-            code: 400,
-            message: "New password cannot be the same as old password.",
-          });
+        return sendErrorResponse(res, 400, "New password cannot be the same as old password.");
       }
 
       // Hash the new password
@@ -915,47 +776,29 @@ module.exports = {
 
       // If the update fails, return an error response
       if (!updateProfile) {
-        return res
-          ?.status(400)
-          ?.send({ code: 400, message: "Failed to update password." });
+        return sendErrorResponse(res, 400, "Failed to update password.");
       }
 
       // Success response
-      return res.status(200).send({
-        code: 200,
-        message: "Password has been successfully updated.",
-      });
+      return sendSuccessResponse(res, 200, "Password has been successfully updated.");
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      return res?.status(500)?.send({
-        code: 500,
-        message: "Internal Server Error",
-        result: error,
-      });
+      console.log("Internal Server Error:", error);
+      return sendErrorResponse(res, 500, "Internal Server Error", error);
     }
   },
 
   updatePassword: async (req, res) => {
     try {
-      const { newPassword, oldPassword, email, user_type } = req?.body;
       const { id } = req?.params;
-
-      // if (!email) {
-      //   return res
-      //     .status(400)
-      //     .send({ code: 400, message: "Email is required." });
-      // }
+      const { user_type } = req?.headers;
+      const { newPassword, oldPassword } = req?.body;
 
       if (!oldPassword) {
-        return res
-          .status(400)
-          .send({ code: 400, message: "Old Password is required." });
+        return sendErrorResponse(res, 400, "Old Password is required.");
       }
 
       if (!newPassword) {
-        return res
-          .status(400)
-          .send({ code: 400, message: "New Password is required." });
+        return sendErrorResponse(res, 400, "New Password is required.");
       }
 
       let user;
@@ -971,18 +814,13 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return res.status(400).send({
-          code: 400,
-          message: "Email not registered. Please provide a registered address.",
-        });
+        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
       }
 
       // Check if the provided old password matches the current password
       const isOldPwdMatch = await bcrypt.compare(oldPassword, user?.password);
       if (!isOldPwdMatch) {
-        return res
-          ?.status(400)
-          ?.send({ code: 400, message: "Old password is not correct." });
+        return sendErrorResponse(res, 400, "Old password is not correct.");
       }
 
       // Check if the new password matches the old password (to prevent reuse)
@@ -991,12 +829,7 @@ module.exports = {
         user?.password
       );
       if (isNewPwdSameAsOld) {
-        return res
-          ?.status(400)
-          ?.send({
-            code: 400,
-            message: "New password cannot be the same as old password.",
-          });
+        return sendErrorResponse(res, 400, "New password cannot be the same as old password.");
       }
 
       // Hash the new password
@@ -1028,23 +861,14 @@ module.exports = {
 
       // If the update fails, return an error response
       if (!updateProfile) {
-        return res
-          ?.status(400)
-          ?.send({ code: 400, message: "Failed to update password." });
+        return sendErrorResponse(res, 400, "Failed to update password.");
       }
 
       // Success response
-      return res.status(200).send({
-        code: 200,
-        message: "Password has been successfully updated.",
-      });
+      return sendSuccessResponse(res, 200, "Password has been successfully updated.");
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      return res?.status(500)?.send({
-        code: 500,
-        message: "Internal Server Error",
-        result: error,
-      });
+      console.log("Internal Server Error:", error);
+      return sendErrorResponse(res, 500, "Internal Server Error", error);
     }
   },
 };

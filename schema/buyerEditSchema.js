@@ -1,110 +1,141 @@
-const mongoose = require('mongoose');
-const Schema   = mongoose.Schema;
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const buyerEditSchema = new Schema({
-  buyer_id: {
-    type: String,
-    required: true,
-    // unique: true
-  },
-  buyer_name : {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  buyer_address: {
-    type: String,
-    required: true
-  },
-  buyer_mobile: {
-    type: String,
-    required : true,
-  },
-  buyer_country_code: {
-    type: String,
-    required : true,
-  },
-  buyer_email: {
-    type: String,
-    required: true,
-    // unique: true
-  },
-  contact_person_name: {
-    type: String,
-    required: true,
-  },
-  designation: {
+const buyerProfileEditSchema = new Schema(
+  {
+    buyerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Buyer",
+      required: [true, "Validation Error : buyerId is required"],
+    },
+    buyer_id: {
       type: String,
-      required: true,
-  },
-  contact_person_mobile: {
-    type: String,
-    required: true,
-  },
-  contact_person_country_code: {
+      trim: true,
+      required: [true, "Validation Error : buyer_id is required"],
+      unique: true,
+    },
+    buyer_type: {
       type: String,
-      required: true,
-  },
-  contact_person_email : {
+      trim: true,
+    },
+    buyer_name: {
       type: String,
-      required: true,
-  },
-  country_of_origin: {
-    type: String,
-    required: true,
-  },
-  country_of_operation: [{
+      trim: true,
+    },
+    buyer_address: {
       type: String,
-      required: true,
-  }],
-  tax_no: {
-    type: String,
-    required: true
-  },
-  license_no: {
-    type: String,
-    required: true
-  },
-  buyer_image: [{
-    type: String,
-    required: true,
-  }],
-  license_image: [{
-    type: String,
-    required: true,
-  }],
-  tax_image: [{
+      trim: true,
+    },
+    buyer_email: {
       type: String,
+      trim: true,
+      unique: true,
+    },
+    buyer_mobile: {
+      type: String,
+      trim: true,
+    },
+    buyer_country_code: {
+      type: String,
+      trim: true,
+    },
+    registration_no: {
+      type: String,
+      trim: true,
+    },
+    vat_reg_no: {
+      type: String,
+      trim: true,
+    },
+    contact_person_name: {
+      type: String,
+      trim: true,
+    },
+    designation: {
+      type: String,
+      trim: true,
+    },
+    contact_person_email: {
+      type: String,
+      trim: true,
+    },
+    contact_person_mobile: {
+      type: String,
+      trim: true,
+    },
+    contact_person_country_code: {
+      type: String,
+      trim: true,
+    },
+    country_of_origin: {
+      type: String,
+      trim: true,
+    },
+    country_of_operation: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    approx_yearly_purchase_value: {
+      type: String,
+      trim: true,
+    },
+    interested_in: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    license_no: {
+      type: String,
+      trim: true,
+    },
+    license_expiry_date: {
+      type: String,
+      trim: true,
+    },
+    tax_no: {
+      type: String,
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    license_image: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    tax_image: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    certificate_image: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    buyer_image: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    editReqStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
       required: true,
-  }],
-  password: {
-    type: String,
-    // required: true
+      trim: true,
+      default: "pending",
+    },
   },
-//   account_status: {
-//     type: Number,
-//     required: true
-//   },
-  edit_status: {
-    type: Number,  // 0- pending, 1 - accepted, 2- rejected
-    required: true
-  },
-//   token: {
-//     type: String,
-//     required: true,
-//     unique : true
-//   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('BuyerProfileEdit', buyerEditSchema);
+module.exports = mongoose.model("BuyerProfileEdit", buyerProfileEditSchema);
