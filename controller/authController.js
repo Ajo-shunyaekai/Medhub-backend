@@ -464,6 +464,7 @@ module.exports = {
         const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
+  
         await sendEmail(recipientEmails, subject, emailContent);
 
         return res.status(200).send({
