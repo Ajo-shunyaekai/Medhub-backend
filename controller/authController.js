@@ -259,11 +259,11 @@ module.exports = {
       // Check for email existence based on user type
       const emailExists =
         user_type === "Buyer"
-          ? await Buyer.findOne({ buyer_email: regObj?.buyer_email })
+          ? await Buyer.findOne({ contact_person_email: regObj?.contact_person_email })
           : user_type === "Admin"
           ? await Admin.findOne({ email: req.body?.email })
           : user_type === "Supplier"
-          ? await Supplier.findOne({ supplier_email: req.body?.supplier_email })
+          ? await Supplier.findOne({ contact_person_email: req.body?.contact_person_email })
           : user_type === "Seller"
           ? await Seller.findOne({ email: req.body?.email })
           : null;
@@ -407,6 +407,7 @@ module.exports = {
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Buyer Account Created";
+
         const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
         const emailContent = await buyerRegistrationContent(buyer);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
@@ -459,6 +460,7 @@ module.exports = {
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Supplier Account Created";
+        // const subject = New Registration Alert: ${user_type} Account Created;
         const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);

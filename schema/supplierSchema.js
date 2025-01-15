@@ -25,9 +25,9 @@ const supplierSchema = new Schema(
       required: true,
     },
     supplier_email: {
-      type: String,
-      required: true,
-      unique: true,
+        type: String,
+        // required: true,
+        unique : true
     },
     supplier_mobile: {
       type: String,

@@ -391,80 +391,163 @@ module.exports = {
       }
     },
 
-    getRegReqList: async(reqObj, callback) => {
-      try {
-        const { pageNo, limit, filterValue} = reqObj
+//     getRegReqList: async(reqObj, callback) => {
+//       try {
+//         const { pageNo, limit, filterValue} = reqObj
 
-        const page_no   = pageNo || 1
-        const page_size = limit || 2
-        const offSet    = (page_no -1) * page_size
+//         const page_no   = pageNo || 1
+//         const page_size = limit || 2
+//         const offSet    = (page_no -1) * page_size
 
-        const fields = {
-          token    : 0,
-          password : 0
-        };
+//         const fields = {
+//           token    : 0,
+//           password : 0
+//         };
+// console.log('reqObj',reqObj)
+//         let dateFilter = {}; 
 
-        let dateFilter = {}; 
+//         const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+//         const endDate   = moment().endOf('day').toDate();
 
-        const startDate = moment().subtract(365, 'days').startOf('day').toDate();
-        const endDate   = moment().endOf('day').toDate();
-        console.log("Year filter: ", startDate, endDate); 
+//         if (filterValue === 'today') {
+//             dateFilter = {
+//                 createdAt: {
+//                     $gte: moment().startOf('day').toDate(),
+//                     $lte: moment().endOf('day').toDate(),
+//                 },
+//             };
+//         } else if (filterValue === 'week') {
+//             dateFilter = {
+//                 createdAt: {
+//                     $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+//                     $lte: moment().endOf('day').toDate(),
+//                 },
+//             };
+//         } else if (filterValue === 'month') {
+//             dateFilter = {
+//                 createdAt: {
+//                     $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+//                     $lte: moment().endOf('day').toDate(),
+//                 },
+//             };
+//         } else if (filterValue === 'year') {
+//             dateFilter = {
+//                 createdAt: {
+//                     $gte: startDate,
+//                     $lte: endDate,
+//                 },
+//             };
+//         } else if (filterValue === 'all' || !filterValue || filterValue === '') {
+//             dateFilter = {};
+//         }
 
-        if (filterValue === 'today') {
-            dateFilter = {
-                createdAt: {
-                    $gte: moment().startOf('day').toDate(),
-                    $lte: moment().endOf('day').toDate(),
-                },
-            };
-        } else if (filterValue === 'week') {
-            dateFilter = {
-                createdAt: {
-                    $gte: moment().subtract(7, 'days').startOf('day').toDate(),
-                    $lte: moment().endOf('day').toDate(),
-                },
-            };
-        } else if (filterValue === 'month') {
-            dateFilter = {
-                createdAt: {
-                    $gte: moment().subtract(30, 'days').startOf('day').toDate(),
-                    $lte: moment().endOf('day').toDate(),
-                },
-            };
-        } else if (filterValue === 'year') {
-            dateFilter = {
-                createdAt: {
-                    $gte: startDate,
-                    $lte: endDate,
-                },
-            };
-        } else if (filterValue === 'all' || !filterValue) {
-            dateFilter = {};
-        }
+//         Supplier.find({account_status : 0, ...dateFilter}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
+//           Supplier.countDocuments({account_status : 0, ...dateFilter}).then((totalItems) => {
 
-        Supplier.find({account_status : 0, ...dateFilter}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
-          Supplier.countDocuments({account_status : 0, ...dateFilter}).then((totalItems) => {
+//             const totalPages = Math.ceil( totalItems / page_size )
+//             const returnObj = {
+//               data,
+//               totalPages,
+//               totalItems
+//             }
+//             callback({code: 200, message : 'supplier registration request list fetched successfully', result: returnObj})
+//           })
+//           .catch((err) => {
+//             callback({code: 400, message : 'Error while fetching supplier registration request list count', result: err})
+//           }) 
+//       }).catch((error) => {
+//           console.error('Error:', error);
+//           callback({code: 400, message : 'Error in fetching suppliers registration request list', result: error})
+//       });
+//       }catch (err) {
+//         console.error('Er:', err);
+//         callback({code: 500, message : 'Internal server error'})
+//       }
+//     },
 
-            const totalPages = Math.ceil( totalItems / page_size )
-            const returnObj = {
-              data,
-              totalPages,
-              totalItems
-            }
-            callback({code: 200, message : 'supplier registration request list fetched successfully', result: returnObj})
-          })
-          .catch((err) => {
-            callback({code: 400, message : 'Error while fetching supplier registration request list count', result: err})
-          }) 
-      }).catch((error) => {
-          console.error('Error:', error);
-          callback({code: 400, message : 'Error in fetching suppliers registration request list', result: error})
-      });
-      }catch (err) {
-        console.error('Er:', err);
-        callback({code: 500, message : 'Internal server error'})
+
+getRegReqList: async (reqObj, callback) => {
+  try {
+      const { pageNo, limit, filterValue } = reqObj;
+
+      const page_no = pageNo || 1;  // Default to page 1 if no page number is provided
+      const page_size = limit || 5; // Default limit to 5 if not provided
+      const offSet = (page_no - 1) * page_size;
+
+      const fields = {
+          token: 0,
+          password: 0
+      };
+      console.log('reqObj', reqObj);
+
+      let dateFilter = {};  // Initialize date filter
+
+      const startDate = moment().subtract(365, 'days').startOf('day').toDate();
+      const endDate = moment().endOf('day').toDate();
+
+      if (filterValue === 'today') {
+          dateFilter = {
+              createdAt: {
+                  $gte: moment().startOf('day').toDate(),
+                  $lte: moment().endOf('day').toDate(),
+              },
+          };
+      } else if (filterValue === 'week') {
+          dateFilter = {
+              createdAt: {
+                  $gte: moment().subtract(7, 'days').startOf('day').toDate(),
+                  $lte: moment().endOf('day').toDate(),
+              },
+          };
+      } else if (filterValue === 'month') {
+          dateFilter = {
+              createdAt: {
+                  $gte: moment().subtract(30, 'days').startOf('day').toDate(),
+                  $lte: moment().endOf('day').toDate(),
+              },
+          };
+      } else if (filterValue === 'year') {
+          dateFilter = {
+              createdAt: {
+                  $gte: startDate,
+                  $lte: endDate,
+              },
+          };
+      } else if (!filterValue || filterValue === 'all') {
+          dateFilter = {};  // No filtering, fetch all data
       }
-    },
+
+      Supplier.find({ account_status: 0, ...dateFilter })
+          .select(fields)
+          .sort({ createdAt: -1 })  // Sorting by creation date, descending order
+          .skip(offSet)
+          .limit(page_size)
+          .then((data) => {
+              Supplier.countDocuments({ account_status: 0, ...dateFilter })
+                  .then((totalItems) => {
+                      const totalPages = Math.ceil(totalItems / page_size);
+                      const returnObj = {
+                          data,
+                          totalPages,
+                          totalItems
+                      };
+                      callback({ code: 200, message: 'Supplier registration request list fetched successfully', result: returnObj });
+                  })
+                  .catch((err) => {
+                      console.error('Error while counting documents:', err);
+                      callback({ code: 400, message: 'Error while fetching supplier registration request list count', result: err });
+                  });
+          })
+          .catch((error) => {
+              console.error('Error in fetching suppliers registration request list:', error);
+              callback({ code: 400, message: 'Error in fetching supplier registration request list', result: error });
+          });
+  } catch (err) {
+      console.error('Internal server error:', err);
+      callback({ code: 500, message: 'Internal server error' });
+  }
+},
+
     
     getSuppReqCSVList: async(req, res) => {
       try {
