@@ -6,6 +6,7 @@ const Controller = require("../controller/Buyer");
 const { handleResponse } = require("../utils/utilities");
 const { validation } = require("../utils/utilities");
 const { imageUpload } = require("../utils/imageUpload");
+const mime = require('mime-types');
 const {
   checkAuthorization,
   checkCommonUserAuthentication,
@@ -21,45 +22,83 @@ const {
   updatePassword
 } = require(`../controller/authController`);
  
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     // const { access_token, user_type } = req.headers;
+//     const { user_type } = req.body;
+
+
+//     console.log('user_type', user_type)
+
+//     // if (!user_type) {
+//     //   return res.status(400).send({  
+//     //     code: 400,
+//     //     message: "Need User Type",
+//     //   });
+//     // }
+
+//     let uploadPath =
+//       user_type == "Buyer"
+//         ? "./uploads/buyer/buyer_images"
+//         : user_type == "Supplier" && "./uploads/supplier/supplierImage_files";
+//     if (file.fieldname === "tax_image") {
+//       uploadPath =
+//         user_type == "Buyer"
+//           ? "./uploads/buyer/tax_images"
+//           : user_type == "Supplier" && "./uploads/supplier/tax_image";
+//     } else if (file.fieldname === "license_image") {
+//       uploadPath =
+//         user_type == "Buyer"
+//           ? "./uploads/buyer/license_images"
+//           : user_type == "Supplier" && "./uploads/supplier/license_image";
+//     } else if (file.fieldname === "certificate_image") {
+//       uploadPath =
+//         user_type == "Buyer"
+//           ? "./uploads/buyer/certificate_images"
+//           : user_type == "Supplier" && "./uploads/supplier/certificate_image";
+//     }
+//     cb(null, uploadPath);
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = file.mimetype.split("/")[1];
+//     cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
+//   },
+// });
+
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // const { access_token, user_type } = req.headers;
     const { user_type } = req.body;
 
-
-    console.log('user_type', user_type)
-
-    // if (!user_type) {
-    //   return res.status(400).send({  
-    //     code: 400,
-    //     message: "Need User Type",
-    //   });
-    // }
-
+    // Define the default upload path based on user type and fieldname
     let uploadPath =
-      user_type == "Buyer"
+      user_type === "Buyer"
         ? "./uploads/buyer/buyer_images"
-        : user_type == "Supplier" && "./uploads/supplier/supplierImage_files";
+        : user_type === "Supplier" && "./uploads/supplier/supplierImage_files";
+
+    // Adjust upload path based on the specific file type
     if (file.fieldname === "tax_image") {
       uploadPath =
-        user_type == "Buyer"
+        user_type === "Buyer"
           ? "./uploads/buyer/tax_images"
-          : user_type == "Supplier" && "./uploads/supplier/tax_image";
+          : user_type === "Supplier" && "./uploads/supplier/tax_image";
     } else if (file.fieldname === "license_image") {
       uploadPath =
-        user_type == "Buyer"
+        user_type === "Buyer"
           ? "./uploads/buyer/license_images"
-          : user_type == "Supplier" && "./uploads/supplier/license_image";
+          : user_type === "Supplier" && "./uploads/supplier/license_image";
     } else if (file.fieldname === "certificate_image") {
       uploadPath =
-        user_type == "Buyer"
+        user_type === "Buyer"
           ? "./uploads/buyer/certificate_images"
-          : user_type == "Supplier" && "./uploads/supplier/certificate_image";
+          : user_type === "Supplier" && "./uploads/supplier/certificate_image";
     }
+
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    const ext = file.mimetype.split("/")[1];
+    // Resolve the file extension using mime-types
+    const ext = mime.extension(file.mimetype) || 'bin'; // Default to 'bin' for unknown MIME types
     cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
   },
 });
