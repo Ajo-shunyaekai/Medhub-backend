@@ -671,7 +671,7 @@ module.exports = {
                 const body = `
                           <p>Dear Admin,</p>
                           <p>We hope this message finds you well.</p>
-                          <p>A supplier has submitted a new edit product request for approval on Deliver. Please review the details below:</p>
+                          <p>A supplier has submitted a new edit product request for approval on MedHub Global. Please review the details below:</p>
                           <ul>
                             <li>Supplier Name: ${supplier.supplier_name}</li>
                             <li>Product Name: ${medicine_name}</li>
@@ -762,7 +762,7 @@ module.exports = {
             const body = `
                       <p>Dear Admin,</p>
                       <p>We hope this message finds you well.</p>
-                      <p>A supplier has submitted a new edit product request for approval on Deliver. Please review the details below:</p>
+                      <p>A supplier has submitted a new edit product request for approval on Medhub Global. Please review the details below:</p>
                       <ul>
                         <li>Supplier Name: ${supplier.supplier_name}</li>
                         <li>Product Name: ${medicine_name}</li>
