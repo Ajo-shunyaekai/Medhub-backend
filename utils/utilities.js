@@ -48,7 +48,7 @@ module.exports = {
                 { field: 'registered_in', message: 'Registered Countries are required' },
                 { field: 'quantity', message: 'Quantity is required' },
                 { field: 'unit_price', message: 'Unit Price is required' },
-                { field: 'total_price', message: 'Total Price is required' },
+                // { field: 'total_price', message: 'Total Price is required' },
                 { field: 'est_delivery_days', message: 'Estimated Delivery Days are required' }
             ],
             addSecondaryProduct: [
@@ -129,7 +129,7 @@ module.exports = {
                 { field: 'supplier_type', message: 'Company type field is required' },
                 { field: 'supplier_name', message: 'Company name field is required' },
                 { field: 'supplier_address', message: 'Suppplier address field is required' },
-                { field: 'supplier_email', message: 'Supplier email Field is required' },
+                // { field: 'supplier_email', message: 'Supplier email Field is required' },
                 { field: 'supplier_mobile_no', message: 'Supplier mobile Field is required' },
                 { field: 'description', message: 'Description Field is required' },
                 { field: 'license_no', message: 'License no Field is required' },
@@ -146,7 +146,7 @@ module.exports = {
                 { field: 'supplier_country_code', message: 'Supplier country code  Field is required' },
                 { field: 'contact_person_country_code', message: 'Contact person country code  Field is required' },
                 { field: 'tags', message: 'Tags are required' },
-                { field: 'estimated_delivery_time', message: 'Estimated Delivery Time is required' }
+                // { field: 'estimated_delivery_time', message: 'Estimated Delivery Time is required' }
             ],
             cancelOrder: [
                 { field: 'buyer_id', message: 'Buyer id is required' },
