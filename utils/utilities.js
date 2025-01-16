@@ -48,7 +48,7 @@ module.exports = {
                 { field: 'registered_in', message: 'Registered Countries are required' },
                 { field: 'quantity', message: 'Quantity is required' },
                 { field: 'unit_price', message: 'Unit Price is required' },
-                { field: 'total_price', message: 'Total Price is required' },
+                // { field: 'total_price', message: 'Total Price is required' },
                 { field: 'est_delivery_days', message: 'Estimated Delivery Days are required' }
             ],
             addSecondaryProduct: [
