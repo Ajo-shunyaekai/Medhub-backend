@@ -6,6 +6,8 @@ const Invoice  = require('../schema/invoiceSchema')
 const Enquiry  = require('../schema/enquiryListSchema')
 const Notification = require('../schema/notificationSchema')
 const nodemailer         = require('nodemailer');
+const logErrorToFile = require('../logs/errorLogs')
+const { sendErrorResponse } = require('../utils/commonResonse')
 
 
   const transporter = nodemailer.createTransport({
@@ -43,7 +45,7 @@ const initializeInvoiceNumber = async () => {
 
 module.exports = {
 
-    createInvoice : async(reqObj, callback) => {
+    createInvoice : async (req, reqObj, callback) => {
        try {
         const invoiceId = 'INV-' + Math.random().toString(16).slice(2, 10);
 
@@ -130,12 +132,13 @@ module.exports = {
             return callback({code: 400, message: 'Error while creating the invoice'})
         })
        } catch (error) {
-        console.log('Internal Server Error',error);
-        callback({code: 500, message: 'Internal Server Error'})
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
        }
     },
 
-    updatePaymentStatus: async (reqObj, callback) => {
+    updatePaymentStatus: async (req, reqObj, callback) => {
       try {
           const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj;
 
@@ -234,12 +237,13 @@ module.exports = {
 
           callback({ code: 200, message: 'Payment Status Updated', result: response });
       } catch (error) {
-          console.error(error);
-          callback({ code: 500, message: 'Internal Server Error' });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
   
-    invoiceDetails: async (req, callback) => {
+    invoiceDetails: async (req, reqObj, callback) => {
       try {
         // const { order_id, invoice_id, supplier_id } = reqObj;
         const invoice_id = req?.params?.id;
@@ -413,8 +417,9 @@ module.exports = {
             callback({ code: 400, message: "Error while fetching details", result: err });
           });
       } catch (error) {
-        console.log('server error', error);
-        callback({ code: 500, message: "Internal server error", result: error });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
 

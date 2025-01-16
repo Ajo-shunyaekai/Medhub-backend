@@ -17,6 +17,8 @@ const Notification = require("../schema/notificationSchema");
 const Enquiry = require("../schema/enquiryListSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const Invoices = require("../schema/invoiceSchema");
+const BuyerProfileEdit = require('../schema/buyerEditSchema')
+const SupplierProfileEdit = require('../schema/supplierEditSchema')
 const { validation } = require("../utils/utilities");
 const path = require("path");
 const sendMailFunc = require("../utils/sendEmail");
@@ -36,12 +38,16 @@ const {
   supplierRegistrationContent,
   buyerRegistrationContent,
   otpForResetPasswordContent,
+  profileEditRequestContent,
 } = require("../utils/emailContents");
-const { sendErrorResponse, sendSuccessResponse } = require("../utils/commonResonse");
+const {
+  sendErrorResponse,
+  sendSuccessResponse,
+} = require("../utils/commonResonse");
+const logErrorToFile = require("../logs/errorLogs");
 
 module.exports = {
   registerUser: async (req, res) => {
-
     try {
       // const { access_token, user_type } = req.headers;
       const { user_type } = req.body;
@@ -90,13 +96,21 @@ module.exports = {
           !req.files["license_image"] ||
           req.files["license_image"].length === 0
         ) {
-          return sendErrorResponse(res, 415, "Company license image is required.");
+          return sendErrorResponse(
+            res,
+            415,
+            "Company license image is required."
+          );
         }
         if (
           !req.files["certificate_image"] ||
           req.files["certificate_image"].length === 0
         ) {
-          return sendErrorResponse(res, 415, "Company certificate image is required.");
+          return sendErrorResponse(
+            res,
+            415,
+            "Company certificate image is required."
+          );
         }
 
         // Extract and format the mobile and country code
@@ -147,7 +161,12 @@ module.exports = {
         // Validate registration fields using a custom validation function
         const errObj = validation(regObj, "buyerRegister");
         if (Object.values(errObj).length) {
-          return sendErrorResponse(res, 419, "All fields are required.", errObj);
+          return sendErrorResponse(
+            res,
+            419,
+            "All fields are required.",
+            errObj
+          );
         }
       } else if (user_type === "Supplier") {
         if (
@@ -163,14 +182,22 @@ module.exports = {
           !req.files["license_image"] ||
           req.files["license_image"].length === 0
         ) {
-          return sendErrorResponse(res, 415, "Supplier license image is required.");
+          return sendErrorResponse(
+            res,
+            415,
+            "Supplier license image is required."
+          );
         }
 
         if (
           !req.files["certificate_image"] ||
           req.files["certificate_image"].length === 0
         ) {
-          return sendErrorResponse(res, 415, "Supplier Certificate image is required.");
+          return sendErrorResponse(
+            res,
+            415,
+            "Supplier Certificate image is required."
+          );
         }
 
         const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
@@ -214,11 +241,15 @@ module.exports = {
       // Check for email existence based on user type
       const emailExists =
         user_type === "Buyer"
-          ? await Buyer.findOne({ contact_person_email: regObj?.contact_person_email })
+          ? await Buyer.findOne({
+              contact_person_email: regObj?.contact_person_email,
+            })
           : user_type === "Admin"
           ? await Admin.findOne({ email: req.body?.email })
           : user_type === "Supplier"
-          ? await Supplier.findOne({ contact_person_email: req.body?.contact_person_email })
+          ? await Supplier.findOne({
+              contact_person_email: req.body?.contact_person_email,
+            })
           : user_type === "Seller"
           ? await Seller.findOne({ email: req.body?.email })
           : null;
@@ -325,7 +356,11 @@ module.exports = {
       // Hash password
       const hashedPassword = await bcrypt.genSalt(saltRounds);
       if (!hashedPassword) {
-        return sendErrorResponse(res, 400, "Error in generating salt or hashing password");
+        return sendErrorResponse(
+          res,
+          400,
+          "Error in generating salt or hashing password"
+        );
       }
 
       // If user type is "Buyer", save buyer details and send response
@@ -333,7 +368,11 @@ module.exports = {
         const buyer = await newBuyer.save();
 
         if (!buyer) {
-          return sendErrorResponse(res, 400, "Error While Submitting Buyer Registration Request");
+          return sendErrorResponse(
+            res,
+            400,
+            "Error While Submitting Buyer Registration Request"
+          );
         }
 
         const newNotification = new Notification({
@@ -357,7 +396,11 @@ module.exports = {
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent);
 
-        return sendSuccessResponse(res, 200, `Buyer Registration Request Submitted Successfully.`);
+        return sendSuccessResponse(
+          res,
+          200,
+          `Buyer Registration Request Submitted Successfully.`
+        );
       }
 
       // If user type is "Admin", save admin and return response
@@ -365,16 +408,28 @@ module.exports = {
         newAdmin.password = hashedPassword;
         const admin = await newAdmin.save();
         if (!admin) {
-          return sendErrorResponse(res, 400, "Error While Submitting Admin Registration Request");
+          return sendErrorResponse(
+            res,
+            400,
+            "Error While Submitting Admin Registration Request"
+          );
         }
-        return sendSuccessResponse(res, 200, `Admin Registration Request Successfully.`);
+        return sendSuccessResponse(
+          res,
+          200,
+          `Admin Registration Request Successfully.`
+        );
       }
 
       // If user type is "Supplier", save supplier and send response
       else if (user_type === "Supplier") {
         const supplier = await newSupplier.save();
         if (!supplier) {
-          return sendErrorResponse(res, 400, "Error While Submitting Supplier Registration Request");
+          return sendErrorResponse(
+            res,
+            400,
+            "Error While Submitting Supplier Registration Request"
+          );
         }
         const newNotification = new Notification({
           notification_id: notificationId,
@@ -395,16 +450,21 @@ module.exports = {
         const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
-  
+
         await sendEmail(recipientEmails, subject, emailContent);
 
-        return sendSuccessResponse(res, 200, `Supplier Registration Request Submitted Successfully.`);
+        return sendSuccessResponse(
+          res,
+          200,
+          `Supplier Registration Request Submitted Successfully.`
+        );
       }
 
       // Additional handling for other user types (Seller) would go here
     } catch (error) {
       console.log("Internal Server Error:", error);
-      return sendErrorResponse(res, 500, "Internal Server Error", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -438,7 +498,7 @@ module.exports = {
           : null;
 
       if (!user) {
-        return sendErrorResponse(res, 400, "User not found.");
+        return sendErrorResponse(res, 400, "User not found. Please enter registered email.");
       }
 
       // Check if the password matches
@@ -469,7 +529,6 @@ module.exports = {
           : null;
 
       if (user_type === "Buyer") {
-
         // Count documents in the List collection for the buyer
         const listCount = await List.countDocuments({
           buyer_id: user2.buyer_id,
@@ -477,35 +536,18 @@ module.exports = {
         user2.list_count = listCount;
       }
 
-      return sendSuccessResponse(res, 200, `${user_type} Login Successful.`, user2);
+      return sendSuccessResponse(
+        res,
+        200,
+        `${user_type} Login Successful.`,
+        user2
+      );
     } catch (error) {
       console.log("Internal Server Error:", error);
-      return sendErrorResponse(res, 500, "Internal Server Error", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
-
-  // editLoggedinUserProfile : async (reqObj, callback) => {
-  //   try {
-  //     const { admin_id, user_name, email } = reqObj
-
-  //     const admin = await Admin.findOne({admin_id : admin_id})
-
-  //     if(!admin) {
-  //       callback({code: 404, message : 'User not found'})
-  //     }
-
-  //     const updateProfile = await Admin.findOneAndUpdate({admin_id : admin_id},  { user_name: user_name, email: email }, {new: true})
-
-  //     if(updateProfile) {
-  //       callback({code: 200, message: 'Profile Updated Successfully', result: updateProfile})
-  //     } else {
-  //       callback({code: 400, message: 'Error while updating profile details', result: updateProfile})
-  //     }
-  //   } catch (error) {
-  //     console.log("error", error)
-  //     callback({code: 500, message: 'Internal Server Error', result: error})
-  //   }
-  // },
 
   getLoggedinUserProfileDetails: async (req, res) => {
     try {
@@ -538,7 +580,8 @@ module.exports = {
       return sendSuccessResponse(res, 200, "User Found.", user);
     } catch (error) {
       console.log("Internal Server Error:", error);
-      return sendErrorResponse(res, 500, "Internal Server Error", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -563,7 +606,11 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
+        return sendErrorResponse(
+          res,
+          400,
+          "Email not registered. Please provide a registered address."
+        );
       }
 
       // Generate a new OTP and its expiry time (10 minutes ahead)
@@ -611,7 +658,11 @@ module.exports = {
 
       // If the update fails, return an error
       if (!updatedUser) {
-        return sendErrorResponse(res, 400, "Error verifying email and generating OTP.");
+        return sendErrorResponse(
+          res,
+          400,
+          "Error verifying email and generating OTP."
+        );
       }
 
       // Email settings and content
@@ -626,10 +677,15 @@ module.exports = {
       await sendEmail(recipientEmails, subject, emailContent);
 
       // Success response
-      return sendSuccessResponse(res, 200, "Mail sent to the registered email.");
+      return sendSuccessResponse(
+        res,
+        200,
+        "Mail sent to the registered email."
+      );
     } catch (error) {
       console.log("Internal Server Error:", error);
-      return sendErrorResponse(res, 500, "Internal Server Error", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -658,7 +714,11 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
+        return sendErrorResponse(
+          res,
+          400,
+          "Email not registered. Please provide a registered address."
+        );
       }
 
       // Check if OTP matches and if it's still valid (hasn't expired)
@@ -703,14 +763,19 @@ module.exports = {
 
       // If the update fails, return an error
       if (!updatedUser) {
-        return sendErrorResponse(res, 400, "Error unsetting OTP and OTP expiry.");
+        return sendErrorResponse(
+          res,
+          400,
+          "Error unsetting OTP and OTP expiry."
+        );
       }
 
       // Success response
       return sendSuccessResponse(res, 200, "OTP verified successfully.");
     } catch (error) {
       console.log("Internal Server Error:", error);
-      return sendErrorResponse(res, 500, "Internal Server Error", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -739,13 +804,21 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
+        return sendErrorResponse(
+          res,
+          400,
+          "Email not registered. Please provide a registered address."
+        );
       }
 
       // Check if the new password matches the old password
       const isMatch = await bcrypt.compare(password, user?.password);
       if (isMatch) {
-        return sendErrorResponse(res, 400, "New password cannot be the same as old password.");
+        return sendErrorResponse(
+          res,
+          400,
+          "New password cannot be the same as old password."
+        );
       }
 
       // Hash the new password
@@ -781,10 +854,15 @@ module.exports = {
       }
 
       // Success response
-      return sendSuccessResponse(res, 200, "Password has been successfully updated.");
+      return sendSuccessResponse(
+        res,
+        200,
+        "Password has been successfully updated."
+      );
     } catch (error) {
       console.log("Internal Server Error:", error);
-      return sendErrorResponse(res, 500, "Internal Server Error", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -815,7 +893,11 @@ module.exports = {
 
       // If the user is not found, return an error response
       if (!user) {
-        return sendErrorResponse(res, 400, "Email not registered. Please provide a registered address.");
+        return sendErrorResponse(
+          res,
+          400,
+          "Email not registered. Please provide a registered address."
+        );
       }
 
       // Check if the provided old password matches the current password
@@ -830,7 +912,11 @@ module.exports = {
         user?.password
       );
       if (isNewPwdSameAsOld) {
-        return sendErrorResponse(res, 400, "New password cannot be the same as old password.");
+        return sendErrorResponse(
+          res,
+          400,
+          "New password cannot be the same as old password."
+        );
       }
 
       // Hash the new password
@@ -866,10 +952,368 @@ module.exports = {
       }
 
       // Success response
-      return sendSuccessResponse(res, 200, "Password has been successfully updated.");
+      return sendSuccessResponse(
+        res,
+        200,
+        "Password has been successfully updated."
+      );
     } catch (error) {
       console.log("Internal Server Error:", error);
-      return sendErrorResponse(res, 500, "Internal Server Error", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+    }
+  },
+
+  addProfileEditRequest: async (req, res) => {
+    try {
+      const { id } = req?.params;
+      const { user_type } = req?.headers;
+
+      if (user_type === "Buyer") {
+        // Validate the required files for "Buyer" type
+        if ((!req?.body?.buyer_image || !req?.body?.buyer_image?.length === 0) && (!req.files["new_buyer_image"] || req.files["new_buyer_image"].length === 0)) {
+          return sendErrorResponse(res, 415, "Company Logo is required.");
+        }
+        if ((!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) && (!req.files["new_tax_image"] || req.files["new_tax_image"].length === 0)) {
+          return sendErrorResponse(res, 415, "Company tax image is required.");
+        }
+        if ((!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) && (!req.files["new_license_image"] || req.files["new_license_image"].length === 0)) {
+          return sendErrorResponse(res, 415, "Company license image is required.");
+        }
+        if ((!req?.body?.certificate_image || !req?.body?.certificate_image?.length === 0) && (!req.files["new_certificate_image"] ||
+          req.files["new_certificate_image"].length === 0)) {
+          return sendErrorResponse( res, 415, "Company certificate image is required.");
+        }
+
+        // Extract and format the mobile and country code
+        const buyerCountryCode = buyer_mobile.split(" ")[0];
+        const buyer_mobile_number = buyer_mobile.split(" ").slice(1).join(" ");
+        const person_mob_no = contact_person_mobile
+          .split(" ")
+          .slice(1)
+          .join(" ");
+        const personCountryCode = contact_person_mobile.split(" ")[0];
+
+        const newBuyerImage = req.files["new_buyer_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedBuyerImage = [...newBuyerImage, ...req?.body?.buyer_image]
+
+        const newLicenseImage = req.files["new_license_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedLicenseImage = [...newLicenseImage, ...req?.body?.license_image]
+
+        const newTaxImage = req.files["new_tax_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedTaxImages = [...newTaxImage, ...req?.body?.tax_image]
+
+        const newCertificateImage = req.files["new_certificate_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedCertificateImage  = [...newCertificateImage, ...req?.body?.certificate_image]
+
+        regObj = {
+          buyer_email,
+          buyer_type,
+          buyer_name,
+          buyer_address,
+          contact_person_name,
+          designation,
+          contact_person_email,
+          contact_person_mobile: person_mob_no,
+          contact_person_country_code: personCountryCode,
+          country_of_origin,
+          country_of_operation,
+          approx_yearly_purchase_value,
+          interested_in,
+          license_no,
+          license_expiry_date,
+          tax_no,
+          registration_no,
+          description,
+          vat_reg_no,
+          buyer_mobile: buyer_mobile_number,
+          buyer_country_code: buyerCountryCode,
+          buyer_image: updatedBuyerImage,
+          license_image: updatedLicenseImage,
+          tax_image: updatedTaxImages,
+          certificate_image: updatedCertificateImage,
+        };
+
+        // Validate registration fields using a custom validation function
+        const errObj = validation(regObj, "buyerRegister");
+        if (Object.values(errObj).length) {
+          return sendErrorResponse(
+            res,
+            419,
+            "All fields are required.",
+            errObj
+          );
+        }
+      } else if (user_type === "Supplier") {
+        if ((!req?.body?.supplier_image || !req?.body?.supplier_image?.length === 0) && (!req.files["new_supplier_image"] ||
+          req.files["new_supplier_image"].length === 0)
+        ) {
+          return sendErrorResponse(res, 415, "Supplier Logo is required.");
+        }
+        if ((!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) && (!req.files["new_tax_image"] || req.files["new_tax_image"].length === 0)) {
+          return sendErrorResponse(res, 415, "Supplier tax image is required.");
+        }
+        if ((!req?.body?.license_image || !req?.body?.license_image?.length === 0) && (!req.files["new_license_image"] ||
+          req.files["new_license_image"].length === 0)
+        ) {
+          return sendErrorResponse(
+            res,
+            415,
+            "Supplier license image is required."
+          );
+        }
+
+        if ((!req?.body?.certificate_image || !req?.body?.certificate_image?.length === 0) && (!req.files["new_certificate_image"] ||
+          req.files["new_certificate_image"].length === 0)
+        ) {
+          return sendErrorResponse(
+            res,
+            415,
+            "Supplier Certificate image is required."
+          );
+        }
+
+        const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
+        const supplier_mobile_number = req.body.supplier_mobile_no
+          .split(" ")
+          .slice(1)
+          .join(" ");
+        const person_mob_no = req.body.contact_person_mobile
+          .split(" ")
+          .slice(1)
+          .join(" ");
+        const personCountryCode = req.body.contact_person_mobile.split(" ")[0];
+        
+        const newSupplierImage = req.files["new_supplier_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedSupplierImage = [...newSupplierImage, ...req?.body?.supplier_image]
+
+        const newLicenseImage = req.files["new_license_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedLicenseImage = [...newLicenseImage, ...req?.body?.license_image]
+
+        const newTaxImage = req.files["new_tax_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedTaxImages = [...newTaxImage, ...req?.body?.tax_image]
+
+        const newCertificateImage = req.files["new_certificate_image"].map((file) =>
+          path.basename(file.path)
+        )
+        const updatedCertificateImage  = [...newCertificateImage, ...req?.body?.certificate_image]
+
+        regObj = {
+          ...req.body,
+          supplier_mobile: supplier_mobile_number,
+          supplier_country_code: supplierCountryCode,
+          contact_person_mobile_no: person_mob_no,
+          contact_person_country_code: personCountryCode,
+          supplier_image: updatedSupplierImage,
+          license_image: updatedLicenseImage,
+          tax_image: updatedTaxImages,
+          certificate_image: updatedCertificateImage,
+        };
+
+        const errObj = validation(regObj, "supplierRegister");
+
+        if (Object.values(errObj).length) {
+          return sendErrorResponse(res, 419, "All fields are required", errObj);
+        }
+      }
+      
+      // Use req.body directly instead of stringifying it
+      const {
+        buyer_mobile,
+        buyer_email,
+        buyer_type,
+        buyer_name,
+        buyer_address,
+        contact_person_name,
+        designation,
+        contact_person_email,
+        contact_person_mobile,
+        country_of_origin,
+        country_of_operation,
+        approx_yearly_purchase_value,
+        interested_in,
+        license_no,
+        license_expiry_date,
+        tax_no,
+        registration_no,
+        description,
+        vat_reg_no,
+      } = req.body;
+
+      let user;
+      if (user_type === "Buyer") {
+        user = await Buyer?.findById(id)?.select('-__v -_id -createdAt -updatedAt -password -toekn -otp -profile_status -account_status');
+      } else if (user_type === "Supplier") {
+        user = await Supplier?.findById(id)?.select('-__v -_id -createdAt -updatedAt -password -toekn -otp -profile_status -account_status');
+      }
+      // If the user is not found, return an error response
+      if (!user) {
+        return sendErrorResponse(res, 400, "Failed fetching profile details.");
+      }
+
+      // Generate unique notification ID and user ID
+      const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
+      const userId = user_type === "Buyer"
+          ? user?.buyer_id
+          : user_type === "Supplier"
+          && user?.supplier_id
+
+      const newSupplierReq = new Supplier({
+        supplier_id: userId,
+        supplierId: user?._id,
+        supplier_type: regObj.supplier_type,
+        supplier_name: regObj.supplier_name,
+        supplier_address: regObj.supplier_address,
+        description: regObj.description,
+        supplier_email: regObj.supplier_email,
+        supplier_mobile: regObj.supplier_mobile,
+        supplier_country_code: regObj.supplier_country_code,
+        license_no: regObj.license_no,
+        license_expiry_date: regObj.license_expiry_date,
+        tax_no: regObj.tax_no,
+        country_of_origin: regObj.country_of_origin,
+        country_of_operation: regObj.country_of_operation,
+        contact_person_name: regObj.contact_person_name,
+        designation: regObj.designation,
+        contact_person_mobile_no: regObj.contact_person_mobile_no,
+        contact_person_country_code: regObj.contact_person_country_code,
+        contact_person_email: regObj.contact_person_email,
+        supplier_image: regObj.supplier_image,
+        license_image: regObj.license_image,
+        certificate_image: regObj.certificate_image,
+        tax_image: regObj.tax_image,
+        payment_terms: regObj.payment_terms,
+        estimated_delivery_time: regObj.estimated_delivery_time,
+        tags: regObj.tags,
+        registration_no: regObj.registration_no,
+        vat_reg_no: regObj.vat_reg_no,
+      });
+
+      const newBuyerReq = new BuyerProfileEdit({
+        buyer_id: userId,
+        buyerId: user?._id,
+        buyer_type: regObj?.buyer_type,
+        buyer_name: regObj?.buyer_name,
+        buyer_address: regObj?.buyer_address,
+        buyer_email: regObj?.buyer_email,
+        buyer_mobile: regObj?.buyer_mobile,
+        buyer_country_code: regObj?.buyer_country_code,
+        contact_person_name: regObj?.contact_person_name,
+        contact_person_email: regObj?.contact_person_email,
+        contact_person_mobile: regObj?.contact_person_mobile,
+        contact_person_country_code: regObj?.contact_person_country_code,
+        country_of_origin: regObj?.country_of_origin,
+        country_of_operation: regObj?.country_of_operation,
+        approx_yearly_purchase_value: regObj?.approx_yearly_purchase_value,
+        interested_in: regObj?.interested_in,
+        license_no: regObj?.license_no,
+        license_expiry_date: regObj?.license_expiry_date,
+        tax_no: regObj?.tax_no,
+        registration_no: regObj?.registration_no,
+        description: regObj?.description,
+        buyer_image: regObj?.buyer_image,
+        designation: regObj?.designation,
+        tax_image: regObj?.tax_image,
+        license_image: regObj?.license_image,
+        certificate_image: regObj?.certificate_image,
+        vat_reg_no: regObj?.vat_reg_no,
+      });
+
+      let newProfileEditRequest;
+      if (user_type === "Buyer") {
+        newProfileEditRequest = await newBuyerReq.save();
+      } else if (user_type === "Supplier") {
+        newProfileEditRequest = await newSupplierReq.save();
+      }
+
+      // If the newProfileEditRequest is not found, return an error response
+      if (!newProfileEditRequest) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Failed creating your profile update request."
+        );
+      }
+
+      let updatedUser;
+      if (user_type === "Buyer") {
+        updatedUser = await Buyer?.findByIdAndUpdate(
+          user?._id,
+          { profile_status: 0 },
+          { new: true }
+        );
+      } else if (user_type === "Supplier") {
+        updatedUser = await Supplier?.findByIdAndUpdate(
+          user?._id,
+          { profile_status: 0 },
+          { new: true }
+        );
+      }
+      // If the updatedUser is not found, return an error response
+      if (!updatedUser) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Failed updating request status in your profile"
+        );
+      }
+
+      // save a new notification
+      const newNotification = new Notification({
+        notification_id: notificationId,
+        event_type: `${user_type} profile request`,
+        event: user_type?.toLoweeCase()+"prolieupdaterequest",
+        from: "buyer",
+        to: "admin",
+        from_id: userId,
+        event_id: userId,
+        message: `${user_type} Profile Update Request`,
+        status: 0,
+      });
+      
+      const savedNotification = await newNotification.save();
+      
+      // If the savedNotification is not saved, return an error response
+      if(!savedNotification) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Failed creating notification for admin to edit profile"
+        );
+      }
+
+      // send email to the admin
+      const adminEmail = "ajo@shunyaekai.tech";
+      const subject = "New Registration Alert: Buyer Account Created";
+      const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
+      const emailContent = await profileEditRequestContent(newProfileEditRequest);
+      await sendEmail(recipientEmails, subject, emailContent);
+
+
+      // Success response
+      return sendSuccessResponse(
+        res,
+        200,
+        "Profile update request has been sent to the admin."
+      );
+    } catch (error) {
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 };

@@ -22,21 +22,21 @@ module.exports = () => {
         //     res.send({ code: 422, message: 'All fields are required', errObj });
         //     return;
         // }
-            Order.createOrder(req.body, result => {
+            Order.createOrder(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
     routes.post('/book-logistics', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-            Order.bookLogistics(req.body, result => {
+            Order.bookLogistics(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
     routes.post('/submit-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-        Order.submitPickupDetails(req.body, result => {
+        Order.submitPickupDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -44,7 +44,7 @@ module.exports = () => {
 
     routes.post('/buyer-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-            Order.buyerOrdersList(req.body, result => {
+            Order.buyerOrdersList(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
@@ -57,7 +57,7 @@ module.exports = () => {
 
     routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-        Order.buyerOrderDetails(req.body, result => {
+        Order.buyerOrderDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -74,7 +74,7 @@ module.exports = () => {
         //     return;
         // }
 
-        Order.cancelOrder(req.body, result => {
+        Order.cancelOrder(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -91,7 +91,7 @@ module.exports = () => {
             ...req.body,
             feedback_image: req.files['feedback_image'].map(file => path.basename(file.path))
         }
-        Order.orderFeedback(obj, result => {
+        Order.orderFeedback(req, obj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -108,7 +108,7 @@ module.exports = () => {
             ...req.body,
             complaint_image: req.files['complaint_image'].map(file => path.basename(file.path))
         }
-        Order.orderComplaint(obj, result => {
+        Order.orderComplaint(req, obj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -116,7 +116,7 @@ module.exports = () => {
 
     routes.post('/buyer-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-        Order.buyerInvoicesList(req.body, result => {
+        Order.buyerInvoicesList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -124,7 +124,7 @@ module.exports = () => {
 
     routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-        Order.buyerInvoiceDetails(req.body, result => {
+        Order.buyerInvoiceDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -134,7 +134,7 @@ module.exports = () => {
     //------------------------------------------------------ supplier order ------------------------------------------------------//
     routes.post('/supplier-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-        Order.supplierOrdersList(req.body, result => {
+        Order.supplierOrdersList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -142,7 +142,7 @@ module.exports = () => {
 
     routes.post('/supplier-order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-        Order.supplierOrderDetails(req.body, result => {
+        Order.supplierOrderDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });  
@@ -150,7 +150,7 @@ module.exports = () => {
 
     // routes.post('/proforma-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-    //     Order.supplierInvoicesList(req.body, result => {
+    //     Order.supplierInvoicesList(req, req.body, result => {
     //         const response = handleResponse(result);
     //         res.send(response);
     //     });
@@ -158,7 +158,7 @@ module.exports = () => {
 
     routes.post('/supplier-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-        Order.supplierInvoicesList(req.body, result => {
+        Order.supplierInvoicesList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -170,7 +170,7 @@ module.exports = () => {
      
      routes.post('/proforma-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
 
-        Order.proformaInvoiceList(req.body, result => {
+        Order.proformaInvoiceList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -178,7 +178,7 @@ module.exports = () => {
 
 
     routes.post('/sales-filter', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Order.orderSalesFilterList(req.body, result => {
+        Order.orderSalesFilterList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

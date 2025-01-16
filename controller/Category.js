@@ -1,9 +1,11 @@
-const Category           = require('../schema/categorySchema')
+const logErrorToFile = require('../logs/errorLogs');
+const Category           = require('../schema/categorySchema');
+const { sendErrorResponse } = require('../utils/commonResonse');
 
 
 module.exports = {
 
-    addCategory : async(reqObj, callback) => {
+    addCategory : async (req, reqObj, callback) => {
         try {
             let category_id  = "CAT-" + Math.random().toString(16).slice(2);
 
@@ -19,11 +21,13 @@ module.exports = {
                 return callback({code: 400, message: "Error while adding category" });
                })
         } catch (error) {
-            callback({code: 500, message : 'Internal server error'})
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
 
-    categoriesList : async(reqObj, callback) => {     
+    categoriesList : async (req, reqObj, callback) => {     
         try { 
             Category.find({}).select('category_id category_name description').then((data) => {
               callback({code: 200, message : 'Category list fetched successfully', result:data})
@@ -31,16 +35,19 @@ module.exports = {
               callback({code: 400, message : 'Error in fetching categories list',error: err})
           });
         } catch (error) {
-            console.log(error);
-            callback({code: 500, message : 'Internal server error', error: error})
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }     
     },
 
-    editCategory : async(reqObj, callback) => {
+    editCategory : async (req, reqObj, callback) => {
         try {
 
         } catch (error) {
-            callback({code: 500, message : 'Internal server error'})
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
 

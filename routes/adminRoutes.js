@@ -8,41 +8,41 @@ const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  
 module.exports = () => {
 
     routes.post('/register', checkAuthorization,   (req, res) => {
-        Controller.register(req.body, result => {
+        Controller.register(req, req.body, result => {
             res.send({ code : 200, message : 'Admin registration successfull', result });
         });
     });
 
     routes.post('/login', checkAuthorization, (req, res) => {  
-        Controller.login(req.body, result => {
+        Controller.login(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/edit-profile', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-        Controller.editAdminProfile(req.body, result => {
+        Controller.editAdminProfile(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         }) 
     })
 
     routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-        Controller.adminProfileDetails(req.body, result => {
+        Controller.adminProfileDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         })
     })
 
     routes.post('/get-user-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getUserList(req.body, result => {
+        Controller.getUserList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/block-unblock-user', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.blockUnblockUser(req.body, result => {
+        Controller.blockUnblockUser(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -52,7 +52,7 @@ module.exports = () => {
     //------------------------------------------ supplier ------------------------------------------//
 
     routes.post('/get-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getSupplierList(req.body, result => {
+        Controller.getSupplierList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -63,14 +63,14 @@ module.exports = () => {
     routes.post('/get-buyer-list-csv', checkAuthorization, checkCommonUserAuthentication, Controller.getBuyerCSVList);
 
     routes.post('/get-supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supplierDetails(req.body, result => {
+        Controller.supplierDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-supplier-reg-req-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getRegReqList(req.body, result => {
+        Controller.getRegReqList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -79,7 +79,7 @@ module.exports = () => {
     routes.post('/get-supplier-req-csv-list', checkAuthorization, checkCommonUserAuthentication, Controller.getSuppReqCSVList);
 
     routes.post('/accept-reject-supplier-registration', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.acceptRejectSupplierRegReq(req.body, result => {
+        Controller.acceptRejectSupplierRegReq(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -91,28 +91,28 @@ module.exports = () => {
     //------------------------------------------ buyer ------------------------------------------//
 
     routes.post('/get-buyer-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getBuyerList(req.body, result => {
+        Controller.getBuyerList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-buyer-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.buyerDetails(req.body, result => {
+        Controller.buyerDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-buyer-reg-req-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getBuyerRegReqList(req.body, result => {
+        Controller.getBuyerRegReqList(req, req.body, result => {
             const response = handleResponse(result)
             res.send(response)
         })
     })
 
     routes.post('/accept-reject-buyer-registration', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.acceptRejectBuyerRegReq(req.body, result => {
+        Controller.acceptRejectBuyerRegReq(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -124,28 +124,28 @@ module.exports = () => {
     //------------------------------------------ buyer/supplier ------------------------------------------//
 
     routes.post('/get-buyer-supplier-reg-req-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getTotalRegReqList(req.body, result => {
+        Controller.getTotalRegReqList(req, req.body, result => {
             const response = handleResponse(result)
             res.send(response)
         })
     })
 
     routes.post('/get-buyer-supplier-aprroved-reg-req-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getTotalApprovedRegReqList(req.body, result => {
+        Controller.getTotalApprovedRegReqList(req, req.body, result => {
             const response = handleResponse(result)
             res.send(response)
         })
     })
 
     routes.post('/get-profile-edit-request-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getProfileUpdateReqList(req.body, result => {
+        Controller.getProfileUpdateReqList(req, req.body, result => {
             const response = handleResponse(result)
             res.send(response)
         })
     })
 
     routes.post('/accept-reject-profile-edit-req', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.acceptRejectProfileEditRequest(req.body, result => {
+        Controller.acceptRejectProfileEditRequest(req, req.body, result => {
             const response = handleResponse(result)
             res.send(response)
         })
@@ -156,49 +156,49 @@ module.exports = () => {
     //------------------------------------------ medicine ------------------------------------------//
 
     routes.post('/accept-reject-add-medicine', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.acceptRejectAddMedicineReq(req.body, result => {
+        Controller.acceptRejectAddMedicineReq(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/accept-reject-edit-medicine', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.acceptRejectEditMedicineReq(req.body, result => {
+        Controller.acceptRejectEditMedicineReq(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-medicine-edit-request-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.medicineEditList(req.body, result => {
+        Controller.medicineEditList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-edit-medicine_details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.editMedicineDetails(req.body, result => {
+        Controller.editMedicineDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-medicine-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.allMedicineList(req.body, result => {
+        Controller.allMedicineList(req, req.body, result => {
             const response = handleResponse(result)
             res.send(response)
         })
     })
 
     routes.post('/medicine-details', checkAuthorization, (req, res) => {
-        Controller.getMedicineDetails(req.body, result => {
+        Controller.getMedicineDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/all-medicine-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        MedicineController.allMedicineList(req.body, result => {
+        MedicineController.allMedicineList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -210,14 +210,14 @@ module.exports = () => {
      //------------------------------------------ support ------------------------------------------//
 
     routes.post('/get-support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supportList(req.body, result => {
+        Controller.supportList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supportDetails(req.body, result => {
+        Controller.supportDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -226,49 +226,49 @@ module.exports = () => {
      //------------------------------------------ support ------------------------------------------//
 
     routes.post('/dashboard-data-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.adminDashboardDataList(req.body, result => {
+        Controller.adminDashboardDataList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/buyer-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.buyerOrdersList(req.body, result => {
+        Controller.buyerOrdersList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.orderDetails(req.body, result => {
+        Controller.orderDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     // routes.post('/buyer-supplier-invoices-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-    //     Controller.invoicesList(req.body, result => {
+    //     Controller.invoicesList(req, req.body, result => {
     //         const response = handleResponse(result);
     //         res.send(response);
     //     });
     // });
 
     routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getNotificationList(req.body, result => {
+        Controller.getNotificationList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-notification-details-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getNotificationDetailsList(req.body, result => {
+        Controller.getNotificationDetailsList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.updateStatus(req.body, result => {
+        Controller.updateStatus(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -278,14 +278,14 @@ module.exports = () => {
 
     //------------------------------------------ inquiry ------------------------------------------//
     routes.post('/get-inquiry-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.inquiriesList(req.body, result => {
+        Controller.inquiriesList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-inquiry-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.inquiryDetails(req.body, result => {
+        Controller.inquiryDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -296,14 +296,14 @@ module.exports = () => {
 
      //------------------------------------------ invoice ------------------------------------------//
      routes.post('/get-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.invoicesList(req.body, result => {
+        Controller.invoicesList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.invoiceDetails(req.body, result => {
+        Controller.invoiceDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -313,14 +313,14 @@ module.exports = () => {
 
      //------------------------------------------ transaction ------------------------------------------//
      routes.post('/get-po-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getPOList(req.body, result => {
+        Controller.getPOList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-po-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getPODetails(req.body, result => {
+        Controller.getPODetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -330,18 +330,22 @@ module.exports = () => {
 
     //------------------------------------------ transaction ------------------------------------------//
     routes.post('/get-transaction-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.transactionList(req.body, result => {
+        Controller.transactionList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-transaction-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.transactionDetails(req.body, result => {
+        Controller.transactionDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
+
+    routes.post('/get-profile-edit-requests/:type/:status',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestList)
+    routes.post('/edit-profile-request/:id',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestList)
+    routes.post('/get-profile-edit-requests',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestList)
 
     //------------------------------------------ transaction ------------------------------------------//
     

@@ -26,7 +26,7 @@ module.exports = () => {
             countryCode
         }
        
-        Controller.register(obj, result => {
+        Controller.register(req, obj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -39,7 +39,7 @@ module.exports = () => {
             return;
         }
 
-        Controller.login(req.body, result => {
+        Controller.login(req, req.body, result => {
             let randomNumber   = Math.random().toString();
             randomNumber       = randomNumber.substring(2, randomNumber.length);
             res.cookie('userCookie', randomNumber, { maxAge: 900000, httpOnly: true });

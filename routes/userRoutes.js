@@ -26,7 +26,7 @@ module.exports = () => {
             countryCode
         }
 
-        Controller.register(obj, result => {
+        Controller.register(req, obj, result => {
 
             let randomNumber   = Math.random().toString();
             randomNumber       = randomNumber.substring(2, randomNumber.length);
@@ -44,7 +44,7 @@ module.exports = () => {
             return;
         }
 
-        Controller.login(req.body, result => {
+        Controller.login(req, req.body, result => {
             // let randomNumber   = Math.random().toString();
             // randomNumber       = randomNumber.substring(2, randomNumber.length);
             // res.cookie('userCookie', randomNumber, { maxAge: 900000, httpOnly: true });
@@ -55,7 +55,7 @@ module.exports = () => {
                 otp   : newOtp
               }
 
-              Controller.saveOtp(obj, result => {
+              Controller.saveOtp(req, obj, result => {
                    const response = handleResponse(result);
                     res.send(response);
               })
@@ -65,7 +65,7 @@ module.exports = () => {
     });
 
     routes.post('/verify-otp', checkAuthorization, (req, res) => {
-        Controller.verifyOtp(req.body, result => {
+        Controller.verifyOtp(req, req.body, result => {
             // res.send({ code : 200, message : 'User list', result });
             const response = handleResponse(result);
             res.send(response);
@@ -80,7 +80,7 @@ module.exports = () => {
             return;
         }
 
-        Controller.updatePassword(req.body, result => {
+        Controller.updatePassword(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -93,20 +93,20 @@ module.exports = () => {
             res.send( { code : 419, message : 'All fields are required', errObj });
             return;
         }
-        Controller.editProfile(req.body, result => {
+        Controller.editProfile(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-user-list', checkAuthorization, (req, res) => {
-        Controller.getUserList(req.body, result => {
+        Controller.getUserList(req, req.body, result => {
             res.send({ code : 200, message : 'User list', result });
         });
     });
 
     routes.post('/get-profile', checkAuthorization,checkUserAuthentication, (req, res) => {
-        Controller.getProfile(req.body, result => {
+        Controller.getProfile(req, req.body, result => {
             res.send({ code : 200, message : 'User list', result });
         });
     });

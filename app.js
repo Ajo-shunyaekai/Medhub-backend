@@ -25,7 +25,9 @@ const orderRouter     = require('./routes/orderRoutes')()
 const enquiryRouter   = require('./routes/enquiryRoutes')()
 const purchaseRouter  = require('./routes/purchaseOrderRoutes')()
 const invoiceRouter   = require('./routes/invoiceRoutes')()
-const authRoutes      = require(`./routes/authRoutes`)
+const authRoutes      = require(`./routes/authRoutes`);
+const logErrorToFile  = require('./logs/errorLogs');
+const { sendErrorResponse } = require('./utils/commonResonse');
 
 // const addressRoutes   = require(`./routes/addressRoutes`)
 // const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
@@ -161,7 +163,6 @@ app.use('/api/guest', guestRouter);
 
 //-----------------order--------------------------//
 app.use('/api/order', orderRouter);
-// app.use('/api/order1', orderRouter);
 app.use('/api/buyer/order', orderRouter);
 app.use('/api/supplier/order', orderRouter);
 //-----------------order--------------------------//
@@ -196,6 +197,12 @@ app.get(['/*'], (req, res) => {
 
 const ADMIN_ID = process.env.ADMIN_ID
 const PORT = process.env.PORT || 2222;
+
+// Error-handling middleware
+app.use((err, req, res, next) => {
+  logErrorToFile(err, req); // Log the error
+  return sendErrorResponse(res, 500, 'An unexpected error occurred. Please try again later.', err)
+});
 
 const server = app.listen(PORT, (req, res) => {
   console.log(`server is runnig http://localhost:${PORT}/`);

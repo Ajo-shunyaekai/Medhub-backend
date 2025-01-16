@@ -23,7 +23,7 @@ module.exports = () => {
         //     res.send({ code: 422, message: 'All fields are required', errObj });
         //     return;
         // }
-            Invoice.createInvoice(req.body, result => {
+            Invoice.createInvoice(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
@@ -47,21 +47,21 @@ module.exports = () => {
     });
 
     // routes.post('/submit-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-    //     Order.submitPickupDetails(req.body, result => {
+    //     Order.submitPickupDetails(req, req.body, result => {
     //         const response = handleResponse(result);
     //         res.send(response);
     //     });
     // });
 
     routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-            Invoice.invoiceDetails(req.body, result => {
+            Invoice.invoiceDetails(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
     
     routes.post('/get-specific-invoice-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-            Invoice.invoiceDetails(req, result => {
+            Invoice.invoiceDetails(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });

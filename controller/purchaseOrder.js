@@ -7,6 +7,8 @@ const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
 const nodemailer         = require('nodemailer');
 const { addStageToOrderHistory } = require('./orderHistory');
+const logErrorToFile = require('../logs/errorLogs');
+const { sendErrorResponse } = require('../utils/commonResonse');
 
 var transporter = nodemailer.createTransport({
   host   : "smtp.gmail.com",
@@ -33,7 +35,7 @@ const sendMailFunc = (email, subject, body) =>{
 
 module.exports = {
  
-    createPO: async (reqObj, callback) => {
+    createPO: async (req, reqObj, callback) => {
         try {
             const purchaseOrderId = 'PO-' + Math.random().toString(16).slice(2,10)
             const { buyer_id, enquiry_id, supplier_id, itemIds, grandTotalAmount,rejectedIds,
@@ -136,7 +138,7 @@ module.exports = {
             await newPO.save();
 
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-            const updatedOrderHistory = await addStageToOrderHistory(enquiry?._id, 'Purchase Order Created', new Date(), newPO?._id, 'Enquiry')
+            const updatedOrderHistory = await addStageToOrderHistory(req, enquiry?._id, 'Purchase Order Created', new Date(), newPO?._id, 'Enquiry')
             
             const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
@@ -166,12 +168,13 @@ module.exports = {
 
             callback({ code: 200, message: 'Purchase Order Created Successfully', data: newPO });
         } catch (error) {
-            console.log('Internal Server Error', error);
-            callback({ code: 500, message: 'Internal Server Error' });
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
 
-    getPOList : async(reqObj, callback) => {
+    getPOList : async (req, reqObj, callback) => {
         try {
         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
         const page_no   = pageNo || 1
@@ -309,12 +312,13 @@ module.exports = {
             callback({code: 400, message: 'Error while fetching PO list', result: err})
             })
         } catch (error) {
-            console.log(error);
-        callback({code: 500, message: 'Internal Server Error'})
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
 
-    getPODetails: async (reqObj, callback) => {
+    getPODetails: async (req, reqObj, callback) => {
         try {
             const {purchaseOrder_id, buyer_id, supplier_id, enquiry_id} = reqObj
             PurchaseOrder.aggregate([
@@ -408,12 +412,13 @@ module.exports = {
                 callback({ code: 400, message: 'Error while fetching purchase order details' , result: err});   
             })
         } catch (error) {
-            console.log(error);
-            callback({ code: 500, message: 'Internal Server Error', result: error });
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
 
-    editPO: async (reqObj, callback) => {
+    editPO: async (req, reqObj, callback) => {
         try {
             const { 
                 buyer_id,
@@ -514,8 +519,9 @@ module.exports = {
 
             callback({ code: 200, message: 'Purchase Order updated successfully', data: purchaseOrder });
         } catch (error) {
-            console.log('Internal Server Error', error);
-            callback({ code: 500, message: 'Internal Server Error' });
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
     

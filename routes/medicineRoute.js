@@ -15,7 +15,7 @@ const medicineUploadMiddleware = createMulterMiddleware([
 
 module.exports = () => {
     routes.post('/get-medicine-by-name', checkAuthorization, (req, res) => {
-        Controller.getMedicineByName(req.body, result => {
+        Controller.getMedicineByName(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -59,21 +59,21 @@ module.exports = () => {
             }
         }
         
-        Controller.addMedicine(obj, result => {
+        Controller.addMedicine(req, obj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/medicine-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.allMedicineList(req.body, result => {
+        Controller.allMedicineList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/medicine-details', checkAuthorization, (req, res) => {
-        Controller.getMedicineDetails(req.body, result => {
+        Controller.getMedicineDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -116,7 +116,7 @@ module.exports = () => {
             return;
         }
     
-        Controller.editMedicine(req.body, result => {
+        Controller.editMedicine(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -125,14 +125,14 @@ module.exports = () => {
     
     routes.post('/medicine-edit-req-list', checkAuthorization, (req, res) => {
        
-        Controller.medicineEditList(req.body, result => {
+        Controller.medicineEditList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/filter', checkAuthorization, (req, res) => {
-        Controller.filterMedicine(req.body, result => {
+        Controller.filterMedicine(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -140,7 +140,7 @@ module.exports = () => {
 
     routes.post('/similar-medicine-list', checkAuthorization, (req, res) => {
        
-        Controller.similarMedicineList(req.body, result => {
+        Controller.similarMedicineList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -148,7 +148,7 @@ module.exports = () => {
 
     routes.post('/other-medicine-list', checkAuthorization, (req, res) => {
        
-        Controller.otherMedicineList(req.body, result => {
+        Controller.otherMedicineList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

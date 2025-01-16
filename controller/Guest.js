@@ -2,10 +2,12 @@ const bcrypt         = require('bcrypt');
 const jwt            = require('jsonwebtoken');
 const Guest          = require('../schema/guestSchema')
 const {generateOtp}  = require('../utils/utilities');
+const logErrorToFile = require('../logs/errorLogs');
+const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    guestLogin : async(reqObj, callback) => {
+    guestLogin : async (req, reqObj, callback) => {
       try {
         const mobile = reqObj.mobile
         const newOtp = generateOtp()
@@ -31,12 +33,13 @@ module.exports = {
         })
         }
       }catch (error) {
-        console.error('Internal Server Error:', error);
-        callback({code: 500, message: "Internal Server Error", result: error })
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
     },
 
-    verifyOtp : async(reqObj, callback) => {
+    verifyOtp : async (req, reqObj, callback) => {
         try {
           const otp    = reqObj.otp
           const mobile = reqObj.mobile
@@ -56,8 +59,9 @@ module.exports = {
           }
   
         }catch (error) {
-          console.log('Internal Server Error', error)
-          callback({code: 500, message: "Internal Server Error", result: error })
+          console.log("Internal Server Error:", error);
+          logErrorToFile(error, req);
+          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
        }
     },
 

@@ -19,11 +19,13 @@ const {getTodayFormattedDate}  = require('../utils/utilities')
 const { parse } = require('json2csv');
 const fs = require('fs');
 const path = require('path');
-const { flattenData } = require('../utils/csvConverter')
+const { flattenData } = require('../utils/csvConverter');
+const logErrorToFile = require('../logs/errorLogs');
+const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
     
-    register : async(reqObj, callback) => {
+    register : async (req, reqObj, callback) => {
         try {
           const emailExists = await Supplier.findOne({supplier_email : reqObj.supplier_email})
           if(emailExists) {
@@ -113,12 +115,13 @@ module.exports = {
             })
             
         } catch (error) {
-          console.log('err',error);
-          callback({code: 500, message: 'Internal Server Error'});
+          console.log("Internal Server Error:", error);
+          logErrorToFile(error, req);
+          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
 
-    login : async(reqObj, callback) => {
+    login : async (req, reqObj, callback) => {
       try {
         const password  = reqObj.password
         const email     = reqObj.email
@@ -161,12 +164,13 @@ module.exports = {
             callback({code: 401, message: 'Incorrect Password'});
         }
       }catch (error) {
-        console.error('Error validating user:', error);
-        callback({code: 500});
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
 
-    filterValues : async(reqObj, callback) => {
+    filterValues : async (req, reqObj, callback) => {
       try {
         // const countryData = await Supplier.find({}, { country_of_origin: 1, _id: 0 }).exec();
         const countryData = await Supplier.distinct("country_of_origin", {account_status: 1})
@@ -178,12 +182,13 @@ module.exports = {
 
       callback({ code: 200, message: "Filter values", result: [result] });
       }catch (error) {
-        console.error('Error:', error);
-        callback({code: 500});
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
     },
 
-    editSupplier : async(reqObj, callback) => {
+    editSupplier : async (req, reqObj, callback) => {
       try {
        const {
           supplier_id, supplier_name, description, supplier_address, 
@@ -262,12 +267,13 @@ module.exports = {
 
       // callback({ code: 200, message: "Filter values", result: [result] });
       }catch (error) {
-        console.error('Error:', error);
-        callback({ code: 500, message: 'Internal Server Error', error: error});
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
     },
 
-    supplierProfileDetails : async(req, callback) => {
+    supplierProfileDetails : async(req, reqObj, callback) => {
       try {
         const fields = {
           token : 0,
@@ -281,11 +287,13 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching supplier details'})
       });
       }catch (error) {
-        callback({code: 500, message : 'Internal server error'})
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
 
-    buyerDetails : async(reqObj, callback) => {
+    buyerDetails : async (req, reqObj, callback) => {
       try {
         // const fields = [
         //   'supplier_id', 'supplier_name', 'supplier_image', 'supplier_email',
@@ -305,12 +313,13 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching Buyer details'})
       });
       }catch (error) {
-        console.log('Internal Server Error', error)
-        callback({code: 500, message : 'Internal server error'})
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
 
-    changePassword : async(reqObj, callback) => {
+    changePassword : async (req, reqObj, callback) => {
       try {
         const { supplier_id, password } = reqObj
         const supplier = await Supplier.findOne({supplier_id : supplier_id})
@@ -343,13 +352,14 @@ module.exports = {
 
         // Supplier.findOneAndUpdate({supplier_id : supplier_id},{$set: {password :}})
       } catch (error) {
-        console.log('error',error);
-            callback({code: 500 , message: "Internal Server Error", error: error})
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
     
 
-    supplierDashboardOrderDetails: async (reqObj, callback) => {
+    supplierDashboardOrderDetails: async (req, reqObj, callback) => {
       try {
         const { supplier_id } = reqObj;
     
@@ -561,14 +571,14 @@ module.exports = {
     
         callback({ code: 200, message: 'Supplier dashboard order details fetched successfully', result });
       } catch (error) {
-        console.log('Internal Server Error', error);
-        callback({ code: 500, message: 'Internal server error', result: error });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
     
 
-    supplierOrderSupplierCountry : async(reqObj, callback) => {
-      console.log(`\n GET FUNCTIN CALLED`)
+    supplierOrderSupplierCountry : async (req, reqObj, callback) => {
       try {
         const { supplier_id } = reqObj
 
@@ -620,12 +630,13 @@ module.exports = {
           callback({code: 400, message : 'error while fetching supplier buyer country', result: err})
         })
       } catch (error) {
-        console.log('Internal Server Error', error)
-        callback({code: 500, message : 'Internal server error', result: error})
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
 
-    editMedicine : async(reqObj, callback) => {
+    editMedicine : async (req, reqObj, callback) => {
       try {
         const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
           dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
@@ -739,14 +750,15 @@ module.exports = {
       });
   }
       }catch (error) {
-        console.error('Error:', error);
-        callback({ code: 500, message: 'Internal Server Error', error: error});
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
     },
 
     //----------------------------- support -------------------------------------//
     
-    supportList : async(reqObj, callback) => {
+    supportList : async (req, reqObj, callback) => {
       try {
          const { supplier_id, pageNo, pageSize } = reqObj
  
@@ -774,11 +786,13 @@ module.exports = {
          })
  
       } catch (error) {
-       callback({code: 500, message : 'Internal Server Error', result: error})
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
      },
  
-    supportDetails : async (reqObj, callback) => {
+    supportDetails : async (req, reqObj, callback) => {
       try {
           const { supplier_id , support_id } = reqObj
 
@@ -786,14 +800,16 @@ module.exports = {
           callback({code: 200, message : 'supplier support details fetched successfully', result: data})
           })
       } catch (error) {
-        
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
  
      //----------------------------- support --------------------------------------//
 
 
-     getNotificationList : async(reqObj, callback) => {
+     getNotificationList : async (req, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize } = reqObj
 
@@ -868,11 +884,13 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
      },
 
-     getNotificationDetailsList : async(reqObj, callback) => {
+     getNotificationDetailsList : async (req, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize } = reqObj
 
@@ -946,11 +964,13 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
      },
 
-     updateStatus : async(reqObj, callback) => {
+     updateStatus : async (req, reqObj, callback) => {
       try {
         const { notification_id, status = 1, supplier_id, user_type } = reqObj
 
@@ -969,12 +989,13 @@ module.exports = {
       callback({ code: 200, message: "Status Updated", result: updateNotifications });
 
       } catch (error) {
-        console.log(error);
-        callback({ code: 500, message: "Internal Server Error", result: error });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
      },
 
-     medicinRequestList: async (reqObj, callback) => {
+     medicinRequestList: async (req, reqObj, callback) => {
         try {
           const {searchKey, pageNo, pageSize, medicine_type, status, editStatus, supplier_id} = reqObj
     
@@ -1172,11 +1193,13 @@ module.exports = {
           }
         
         } catch (error) {
-          callback({ code: 500, message: "Internal Server Error", result: error });
+          console.log("Internal Server Error:", error);
+          logErrorToFile(error, req);
+          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
      },
 
-     getInvoiceCount: async (reqObj, callback) => {
+     getInvoiceCount: async (req, reqObj, callback) => {
       try {
         const { supplier_id } = reqObj; 
     
@@ -1199,8 +1222,9 @@ module.exports = {
           callback({ code: 400, message: "Error while fetching count", result: err });
         });
       } catch (error) {
-        console.log('server error', error);
-        callback({ code: 500, message: "Internal server error", result: error });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
      },
 
@@ -1306,8 +1330,9 @@ module.exports = {
     
         res?.status(200)?.send({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
       } catch (error) {
-        console.log('server error', error);
-        res?.status(500)?.send({ code: 500, message: "Internal server error", result: error });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
      },
 
@@ -1414,9 +1439,9 @@ module.exports = {
 
         res.status(200).send(csv);
       } catch (error) {
-        console.log('server error', error);
-        res.status(500).json({ error: 'Error generating CSV' });
-        // res?.status(500)?.send({ code: 500, message: "Internal server error", result: error });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
      }
    }
