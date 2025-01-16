@@ -7,95 +7,117 @@ const supplierSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     supplier_type: {
       type: String,
       required: true,
+      trim: true,
     },
     supplier_name: {
       type: String,
       required: true,
+      trim: true,
     },
     description: {
       type: String,
       required: true,
+      trim: true,
     },
     supplier_address: {
       type: String,
       required: true,
+      trim: true,
     },
     supplier_email: {
-        type: String,
-        // required: true,
-        // unique : true
+      type: String,
+      // required: true,
+//       unique: true,
+      trim: true,
     },
     supplier_mobile: {
       type: String,
       required: true,
+      trim: true,
     },
     supplier_country_code: {
       type: String,
       required: true,
+      trim: true,
     },
     license_no: {
       type: String,
       required: true,
+      trim: true,
     },
     license_expiry_date: {
       type: String,
       required: true,
+      trim: true,
     },
     tax_no: {
       type: String,
       required: true,
+      trim: true,
     },
     registration_no: {
       type: String,
       required: true,
+      trim: true,
     },
     vat_reg_no: {
       type: String,
       required: true,
+      trim: true,
     },
     country_of_origin: {
       type: String,
       required: true,
+      trim: true,
     },
     country_of_operation: [
       {
         type: String,
         required: true,
+        trim: true,
       },
     ],
     contact_person_name: {
       type: String,
       required: true,
+      trim: true,
     },
     designation: {
       type: String,
       required: true,
+      trim: true,
     },
     contact_person_mobile_no: {
       type: String,
       required: true,
+      trim: true,
     },
     contact_person_country_code: {
       type: String,
       required: true,
+      trim: true,
     },
     contact_person_email: {
       type: String,
       required: true,
+      trim: true,
     },
     supplier_image: [
       {
         type: String,
         required: true,
+        trim: true,
       },
     ],
     license_image: [
       {
         type: String,
+        trim: true,
         required: true,
       },
     ],
@@ -103,28 +125,34 @@ const supplierSchema = new Schema(
       {
         type: String,
         required: true,
+        trim: true,
       },
     ],
     certificate_image: [
       {
         type: String,
         required: true,
+        trim: true,
       },
     ],
     payment_terms: {
       type: String,
       required: true,
+      trim: true,
     },
     tags: {
       type: String,
       required: true,
+      trim: true,
     },
     estimated_delivery_time: {
       type: String,
-      // required: true,
+//       required: true,
+      trim: true,
     },
     password: {
       type: String,
+      trim: true,
     },
     account_status: {
       type: Number, // 0 - pending, 1 - accepted || unblocked ,  2 - rejected,  3 - blocked
@@ -137,15 +165,16 @@ const supplierSchema = new Schema(
     token: {
       type: String,
       required: true,
+      trim: true,
       unique: true,
     },
     createdAt: {
-        type: Date,
-        default: Date.now
+      type: Date,
+      default: Date.now,
     },
-      updatedAt: {
-        type: Date,
-        default: Date.now
+    updatedAt: {
+      type: Date,
+      default: Date.now,
     },
     otp: {
       type: Number,

@@ -25,21 +25,21 @@ module.exports = () => {
         req.body.data.buyerMobile = buyerPhoneNumber;
 
     console.log('new',req.body);
-            Controller.createPO(req.body, result => {
+            Controller.createPO(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
     routes.post('/get-po-list', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
-        Controller.getPOList(req.body, result => {
+        Controller.getPOList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-po-details', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
-        Controller.getPODetails(req.body, result => {
+        Controller.getPODetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -58,7 +58,7 @@ module.exports = () => {
         req.body.data.supplierMobile = supplierPhoneNumber;
         req.body.data.buyer_country_code = buyerCountryCode;
         req.body.data.buyerMobile = buyerPhoneNumber;
-        Controller.editPO(req.body, result => {
+        Controller.editPO(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

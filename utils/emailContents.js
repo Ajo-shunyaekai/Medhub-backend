@@ -99,4 +99,28 @@ const otpForResetPasswordContent = (user, otp) => {
     `;
 };
 
-module.exports = { contactUsContent, buyerRegistrationContent, supplierRegistrationContent, otpForResetPasswordContent, };
+const profileEditRequestContent = (user)=>{
+    return (
+        `
+        <html>
+            <body>
+                <p>Dear Admin,</p>
+                <p>We hope this message finds you well.</p>
+                <p>We are pleased to inform you that a buyer has requested to update their profile details on Medhub Global. Below are the details of the new account:</p>
+                <ul>
+                <li>Type of Account: ${user?.buyer_type || user?.supplier_type}</li>
+                <li>Company Name: ${user?.buyer_name || user?.supplier_name}</li>
+                <li>Contact Person: ${user?.contact_person_name || user?.contact_person_name}</li>
+                <li>Email Address: ${user?.contact_person_email || user?.contact_person_email}</li>
+                <li>Phone Number: ${user?.contact_person_country_code  || user?.contact_person_country_code} ${user?.contact_person_mobile || user?.contact_person_mobile_no}</li>
+                <li>Request Date: ${getTodayFormattedDate()}</li>
+                </ul>
+                <p>Please review the updated details and take any necessary actions to verify and approve the new account.</p>
+                <p>Best regards,<br/>MedHub Global Team</p>
+            </body>
+        </html>
+    `
+    )
+}
+
+module.exports = { contactUsContent, buyerRegistrationContent, supplierRegistrationContent, otpForResetPasswordContent, profileEditRequestContent  };

@@ -1,11 +1,13 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt    = require('jsonwebtoken');
-const User   = require('../schema/userSchema')
+const User   = require('../schema/userSchema');
+const logErrorToFile = require('../logs/errorLogs');
+const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    register : async(reqObj, callback) => {
+    register : async (req, reqObj, callback) => {
         try {
           const emailExists = await User.findOne({email : reqObj.email})
           if(emailExists) {
@@ -44,11 +46,13 @@ module.exports = {
               callback({code: 401});
             }) 
         } catch (error) {
-          callback({code: 500});
+          console.log("Internal Server Error:", error);
+          logErrorToFile(error, req);
+          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
     
-    login : async(reqObj, callback) => {
+    login : async (req, reqObj, callback) => {
       const password = reqObj.password
       const email    = reqObj.email
 
@@ -67,12 +71,14 @@ module.exports = {
             callback({code: 401, message: 'Invalid Password'});
         }
       }catch (error) {
-        callback({code: 500, message: 'Internal server Error' });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
     },
 
     //save the generated opt in user collection
-    saveOtp : async(reqObj, callback) => {
+    saveOtp : async (req, reqObj, callback) => {
       const otp   = reqObj.otp
       const email = reqObj.email
 
@@ -84,12 +90,14 @@ module.exports = {
           callback({code: 400, message: 'Error in saving OTP' });
         })
       }catch (error) {
-        callback({code: 500, message: 'Internal server Error' });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
     },
 
     //verify the otp for the user
-    verifyOtp : async(reqObj, callback) => {
+    verifyOtp : async (req, reqObj, callback) => {
       try {
         const otp   = reqObj.otp
         const email = reqObj.email
@@ -107,11 +115,13 @@ module.exports = {
         }
 
       }catch (error) {
-        callback({code: 500, message: 'Internal server Error' });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
     },
 
-    updatePassword : async(reqObj, callback) => {
+    updatePassword : async (req, reqObj, callback) => {
       const current_password = reqObj.current_password
       const new_password     = reqObj.new_password
       const user_id          = reqObj.user_id
@@ -137,11 +147,13 @@ module.exports = {
           callback({ code: 500, message: 'Error in updating the password'});
       }
     } catch (error) {
-      callback({ code: 500, message: 'Internal Server Error' });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
     },
 
-    editProfile : async(reqObj, callback) => {
+    editProfile : async (req, reqObj, callback) => {
       try {
         const user_id = reqObj.user_id
 
@@ -159,11 +171,13 @@ module.exports = {
             callback({ code: 400, message: 'Error in updating the profile'});
           }
       } catch (error) {
-        callback({ code: 500, message: 'Internal Server Error' });
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
 
-    getUserList : async(reqObj, callback) => {
+    getUserList : async (req, reqObj, callback) => {
       try {
         User.find({}).select('user_id first_name last_name mobile email').then((data) => {
           callback(data)
@@ -171,11 +185,13 @@ module.exports = {
           console.error('Error:', error);
       });
       }catch (error) {
-        callback(500);
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
     },
 
-    getProfile : async(reqObj, callback) => {
+    getProfile : async (req, reqObj, callback) => {
       try {
         User.find({user_id : reqObj.user_id}).select('user_id first_name last_name mobile email').then((data) => {
           callback(data)
@@ -183,7 +199,9 @@ module.exports = {
           console.error('Error:', error);
       });
       }catch (error) {
-        callback(500);
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
     },
 

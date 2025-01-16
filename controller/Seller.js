@@ -1,11 +1,13 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt    = require('jsonwebtoken');
-const Seller = require('../schema/sellerSchema')
+const Seller = require('../schema/sellerSchema');
+const logErrorToFile = require('../logs/errorLogs');
+const { sendErrorResponse } = require('../utils/commonResonse');
 
 
 module.exports = {
-    register : async(reqObj, callback) => {
+    register : async (req, reqObj, callback) => {
         try {
           const emailExists = await Seller.findOne({email : reqObj.email})
           if(emailExists) {
@@ -47,11 +49,13 @@ module.exports = {
               callback({code: 401});
             }) 
         } catch (error) {
-          callback({code: 500});
+          console.log("Internal Server Error:", error);
+          logErrorToFile(error, req);
+          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
     },
 
-    login : async(reqObj, callback) => {
+    login : async (req, reqObj, callback) => {
         const password  = reqObj.password
         const email     = reqObj.email
   
@@ -72,8 +76,9 @@ module.exports = {
               callback({code: 401, message: 'Incorrect Password'});
           }
         }catch (error) {
-          console.error('Error validating user:', error);
-          callback({code: 500});
+          console.log("Internal Server Error:", error);
+          logErrorToFile(error, req);
+          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
        }
     },
 }

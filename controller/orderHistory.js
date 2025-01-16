@@ -6,6 +6,8 @@ const Buyer = require("../schema/buyerSchema");
 const Order = require("../schema/orderSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const OrderHistory = require("../schema/orderHistorySchema");
+const logErrorToFile = require("../logs/errorLogs");
+const { sendErrorResponse } = require("../utils/commonResonse");
 
 // const getOrderHistory = async (req, res) => {
 //   try {
@@ -93,10 +95,9 @@ const OrderHistory = require("../schema/orderHistorySchema");
 //       orderHistory: updatedOrderHistory,
 //     });
 //   } catch (error) {
-//     console.log("error", error);
-//     return res
-//       ?.status(500)
-//       ?.send({ message: error.message || "Internal Server Error", result: {} });
+          // console.log("Internal Server Error:", error);
+          // logErrorToFile(error, req);
+          // return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
 //   }
 // };
 
@@ -170,10 +171,9 @@ const getOrderHistory = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("error", error);
-    return res
-      ?.status(500)
-      ?.send({ message: error.message || "Internal Server Error", result: {} });
+    console.log("Internal Server Error:", error);
+    logErrorToFile(error, req);
+    return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
   }
 };
 
@@ -250,15 +250,14 @@ const getOrderHistory = async (req, res) => {
 //       },
 //     });
 //   } catch (error) {
-//     console.log("error", error);
-//     return res
-//       ?.status(500)
-//       ?.send({ message: error.message || "Internal Server Error", result: {} });
+            // console.log("Internal Server Error:", error);
+            // logErrorToFile(error, req);
+            // return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
 //   }
 // };
 
 
-const addStageToOrderHistory = async ( id, stageName, stageDate, stageReference, stageReferenceType ) => {
+const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageReference, stageReferenceType ) => {
   try {
 
     let filterKey;
@@ -323,8 +322,9 @@ const addStageToOrderHistory = async ( id, stageName, stageDate, stageReference,
       orderHistory: updatedOrderHistory,
     };
   } catch (error) {
-    console.log("error", error);
-    return { message: error.message || "Internal Server Error", result: {} };
+    console.log("Internal Server Error:", error);
+    logErrorToFile(error, req);
+    return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
   }
 };
 

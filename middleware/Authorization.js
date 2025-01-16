@@ -5,7 +5,9 @@ const User = require("../schema/userSchema");
 const Seller = require("../schema/sellerSchema");
 const Supplier = require("../schema/supplierSchema");
 const Admin = require("../schema/adminSchema");
-const LogisticsPartner = require('../schema/logisticsCompanySchema')
+const LogisticsPartner = require('../schema/logisticsCompanySchema');
+const logErrorToFile = require("../logs/errorLogs");
+const { sendErrorResponse } = require("../utils/commonResonse");
 
 module.exports = {
   checkAuthorization: async (req, res, next) => {
@@ -22,9 +24,9 @@ module.exports = {
         }
       }
     } catch (error) {
-      res
-        .status(500)
-        .send({ message: "Internal server error for checkAuthorization" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -45,9 +47,9 @@ module.exports = {
         }
       }
     } catch (error) {
-      res
-        .status(500)
-        .send({ message: "Internal server error for checkAuthentication" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -71,8 +73,9 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Error checking access token:", error);
-      return res.status(500).send({ message: "Internal Server Error" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -96,8 +99,9 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Error checking access token:", error);
-      return res.status(500).send({ message: "Internal Server Error" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
   //this is working fine
@@ -117,8 +121,9 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Error checking access token:", error);
-      return res.status(500).send({ message: "Internal Server Error" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -139,8 +144,9 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Error checking access token:", error);
-      return res.status(500).send({ message: "Internal Server Error" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -164,8 +170,9 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Error checking access token:", error);
-      return res.status(500).send({ message: "Internal Server Error" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -201,8 +208,9 @@ module.exports = {
         return res.status(404).send({ message: "Invalid Access" });
       }
     } catch (error) {
-      console.error("Error checking access token:", error);
-      return res.status(500).send({ message: "Internal Server Error" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 
@@ -241,8 +249,9 @@ module.exports = {
   
       next();
     } catch (error) {
-      console.error("Error checking access token:", error);
-      return res.status(500).send({ message: "Internal Server Error" });
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
 };

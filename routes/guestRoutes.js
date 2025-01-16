@@ -8,14 +8,14 @@ const { handleResponse }                         = require('../utils/utilities')
 module.exports = () => {
 
     routes.post('/login', checkAuthorization, (req, res) => {  
-            Controller.guestLogin(req.body, result => {
+            Controller.guestLogin(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
 
     routes.post('/verify-otp', checkAuthorization, (req, res) => {  
-        Controller.verifyOtp(req.body, result => {
+        Controller.verifyOtp(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

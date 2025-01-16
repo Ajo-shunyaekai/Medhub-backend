@@ -63,7 +63,7 @@ module.exports = () => {
             return;
         }
         
-        Controller.register(regObj, result => {
+        Controller.register(req, regObj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -77,7 +77,7 @@ module.exports = () => {
             return;
         }
 
-        Controller.login(req.body, result => {
+        Controller.login(req, req.body, result => {
             let randomNumber   = Math.random().toString();
             randomNumber       = randomNumber.substring(2, randomNumber.length);
             res.cookie('userCookie', randomNumber, { maxAge: 900000, httpOnly: true });
@@ -88,7 +88,7 @@ module.exports = () => {
     });
 
     routes.post('/get-filter-values', checkAuthorization, (req, res) => {
-        Controller.filterValues(req.body, result => {
+        Controller.filterValues(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -132,35 +132,35 @@ module.exports = () => {
             return;
         }
         
-        Controller.editSupplier(editObj, result => {
+        Controller.editSupplier(req, editObj, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-specific-supplier-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supplierProfileDetails(req, result => {
+        Controller.supplierProfileDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     })
 
     routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supplierProfileDetails(req.body, result => {
+        Controller.supplierProfileDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/buyer-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.buyerDetails(req.body, result => {
+        Controller.buyerDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/change-password', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.changePassword(req.body, result => {
+        Controller.changePassword(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -168,7 +168,7 @@ module.exports = () => {
 
     routes.post('/orders-summary-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         
-        Controller.supplierDashboardOrderDetails(req.body, result => {
+        Controller.supplierDashboardOrderDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -176,41 +176,41 @@ module.exports = () => {
 
     routes.post('/orders-buyer-country', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         
-        Controller.supplierOrderSupplierCountry(req.body, result => {
+        Controller.supplierOrderSupplierCountry(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supportList(req.body, result => {
+        Controller.supportList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supportDetails(req.body, result => {
+        Controller.supportDetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getNotificationList(req.body, result => {
+        Controller.getNotificationList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
     routes.post('/get-notification-details-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getNotificationDetailsList(req.body, result => {
+        Controller.getNotificationDetailsList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.updateStatus(req.body, result => {
+        Controller.updateStatus(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -218,14 +218,14 @@ module.exports = () => {
 
 
     routes.post('/medicine-request-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.medicinRequestList(req.body, result => {
+        Controller.medicinRequestList(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
     });
 
     routes.post('/get-invoice-count', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getInvoiceCount(req.body, result => {
+        Controller.getInvoiceCount(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

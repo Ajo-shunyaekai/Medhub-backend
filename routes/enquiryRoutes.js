@@ -13,7 +13,7 @@ module.exports = () => {
     
     routes.post('/enquiry-list', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
 
-            Enquiry.getEnquiryList(req.body, result => {
+            Enquiry.getEnquiryList(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
@@ -21,14 +21,14 @@ module.exports = () => {
 
     routes.post('/enquiry-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
-            Enquiry.getEnquiryDetails(req.body, result => {
+            Enquiry.getEnquiryDetails(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
     });
     routes.post('/get-specific-enquiry-details/:id', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
-            Enquiry.getEnquiryDetails(req, result => {
+            Enquiry.getEnquiryDetails(req, req.body, result => {
                 const response = handleResponse(result);
                 res.send(response);
             });
@@ -36,7 +36,7 @@ module.exports = () => {
 
     routes.post('/submit-quotation', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
-        Enquiry.submitQuotation(req.body, result => {
+        Enquiry.submitQuotation(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -44,7 +44,7 @@ module.exports = () => {
 
     routes.post('/accept-reject-quotation', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
 
-        Enquiry.acceptRejectQuotation(req.body, result => {
+        Enquiry.acceptRejectQuotation(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });
@@ -54,7 +54,7 @@ module.exports = () => {
 
     routes.post('/cancel-enquiry', checkAuthorization, checkCommonUserAuthentication,(req, res) => {
 
-        Enquiry.cancelEnquiry(req.body, result => {
+        Enquiry.cancelEnquiry(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
         });

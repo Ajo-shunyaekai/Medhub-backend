@@ -19,8 +19,10 @@ const {
   verifyEmail,
   verifyOTP,
   resetPassword,
-  updatePassword
+  updatePassword,
+  addProfileEditRequest
 } = require(`../controller/authController`);
+const { sendErrorResponse } = require('../utils/commonResonse');
  
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
@@ -77,17 +79,17 @@ const storage = multer.diskStorage({
         : user_type === "Supplier" && "./uploads/supplier/supplierImage_files";
 
     // Adjust upload path based on the specific file type
-    if (file.fieldname === "tax_image") {
+    if (file.fieldname === "tax_image" || file.fieldname === "new_tax_image") {
       uploadPath =
         user_type === "Buyer"
           ? "./uploads/buyer/tax_images"
           : user_type === "Supplier" && "./uploads/supplier/tax_image";
-    } else if (file.fieldname === "license_image") {
+    } else if (file.fieldname === "license_image" || file.fieldname === "new_license_image") {
       uploadPath =
         user_type === "Buyer"
           ? "./uploads/buyer/license_images"
           : user_type === "Supplier" && "./uploads/supplier/license_image";
-    } else if (file.fieldname === "certificate_image") {
+    } else if (file.fieldname === "certificate_image" || file.fieldname === "new_certificate_image") {
       uploadPath =
         user_type === "Buyer"
           ? "./uploads/buyer/certificate_images"
@@ -116,9 +118,18 @@ const cpUpload = (req, res, next) => {
     { name: 'license_image', maxCount: 10 },
     { name: 'tax_image', maxCount: 10},
     { name: 'certificate_image', maxCount: 10 },
+    { name: "new_buyer_image", maxCount: 1 },
+    { name: "new_license_image", maxCount: 10 },
+    { name: "new_tax_image", maxCount: 10 },
+    { name: "new_certificate_image", maxCount: 10 },
+    { name: 'new_supplier_image', maxCount: 1 },
+    { name: 'new_license_image', maxCount: 10 },
+    { name: 'new_tax_image', maxCount: 10},
+    { name: 'new_certificate_image', maxCount: 10 },
   ])(req, res, (err) => {
     if (err) {
       console.error("Multer Error:", err);
+      return sendErrorResponse(res, 500, "File upload error", err);
       res.status(500).json({ error: "File upload error" });
       return;
     }
@@ -133,6 +144,7 @@ router.post(`/verify-email`, verifyEmail);
 router.post(`/verify-otp`, verifyOTP);
 router.post(`/reset-password`, resetPassword);
 router.post(`/update-password/:id`, updatePassword);
+router.post(`/request-profile-edit/:id`, checkAuthorization, cpUpload, addProfileEditRequest);
 
 router.post(`/:id`, getLoggedinUserProfileDetails);
 
