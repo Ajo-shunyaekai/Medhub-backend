@@ -592,7 +592,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     acceptRejectSupplierRegReq: async (req, reqObj, callback) => {
       try {
-        const { supplier_id, action } = reqObj;
+        const { supplier_id, sales_person_name, action } = reqObj;
     
         const supplier = await Supplier.findOne({ supplier_id: supplier_id });
     
@@ -605,7 +605,7 @@ getRegReqList: async (req, reqObj, callback) => {
     
         const updateProfile = await Supplier.findOneAndUpdate(
           { supplier_id: supplier_id },
-          { account_status: newAccountStatus, profile_status: newProfileStatus },
+          { account_status: newAccountStatus, profile_status: newProfileStatus, sales_person_name },
           { new: true }
         );
     

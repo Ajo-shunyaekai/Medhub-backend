@@ -82,6 +82,11 @@ const supplierSchema = new Schema(
         trim: true,
       },
     ],
+    sales_person_name: {
+      type: String,
+      // required: true,
+      trim: true,
+    },
     contact_person_name: {
       type: String,
       required: true,

@@ -82,7 +82,7 @@ module.exports = {
       }
       
       const {
-        product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life,
+        product_type, supplier_id, medicine_name, composition  = '', strength, type_of_form, shelf_life,
         dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags,
         unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
         manufacturer_name, manufacturer_country_of_origin, manufacturer_description, quantity, unit_price,
@@ -112,7 +112,7 @@ module.exports = {
         supplier_id,
         supplierId : supplierDetails?._id,
         medicine_name,
-        composition,
+        // composition,
         strength,
         type_of_form,
         shelf_life,
@@ -611,7 +611,7 @@ module.exports = {
               supplier_id,
               medicine_name,
               medicine_type : 'new_medicine',
-              composition,
+              // composition,
               strength,
               type_of_form,
               shelf_life,
@@ -708,7 +708,7 @@ module.exports = {
               purchased_on,
               country_available_in,
               min_purchase_unit,
-              composition,
+              // composition,
               strength,
               type_of_form,
               shelf_life,

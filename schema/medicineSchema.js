@@ -209,7 +209,7 @@ const medicineSchema = new mongoose.Schema({
   },
   composition: {
     type: String,
-    required: true
+    // required: true
   },
   strength: {
     type: String,
