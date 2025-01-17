@@ -51,6 +51,7 @@ module.exports = {
               // registration_no             : reqobj.registration_no,
               country_of_origin           : reqObj.country_of_origin,
               country_of_operation        : reqObj.country_of_operation,
+              sales_person_name           : reqObj.sales_person_name,
               contact_person_name         : reqObj.contact_person_name,
               designation                 : reqObj.designation,
               contact_person_mobile_no    : reqObj.contact_person_mobile_no,

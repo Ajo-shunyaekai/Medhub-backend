@@ -592,7 +592,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     acceptRejectSupplierRegReq: async (req, reqObj, callback) => {
       try {
-        const { supplier_id, action } = reqObj;
+        const { supplier_id, sales_person_name, action } = reqObj;
     
         const supplier = await Supplier.findOne({ supplier_id: supplier_id });
     
@@ -605,7 +605,7 @@ getRegReqList: async (req, reqObj, callback) => {
     
         const updateProfile = await Supplier.findOneAndUpdate(
           { supplier_id: supplier_id },
-          { account_status: newAccountStatus, profile_status: newProfileStatus },
+          { account_status: newAccountStatus, profile_status: newProfileStatus, sales_person_name },
           { new: true }
         );
     
@@ -645,9 +645,9 @@ getRegReqList: async (req, reqObj, callback) => {
     //         await sendMailFunc(recipientEmails.join(','), subject, body);
 
                 const subject = 'Registration Approved at Medhub Global';
-                const body = `Dear ${updateProfile.supplier_name}, <br /><br />
+                const body = `Dear ${updateProfile.contact_person_name}, <br /><br />
 
-                We are pleased to inform you that your registration on our website has been successfully approved!<br /><br />
+                We are pleased to inform you that the registration of your company <strong>${updateProfile.supplier_name}</strong>, on our website has been successfully approved!<br /><br />
 
                 You can now access your account using the following login details:<br /><br />
 
@@ -968,9 +968,9 @@ getRegReqList: async (req, reqObj, callback) => {
           // sendMailFunc(updateStatus.buyer_email, 'Login Credentials for Deliver', body);
 
                 const subject = 'Registration Approved at Medhub Global';
-                const body = `Dear ${updateStatus.buyer_name}, <br /><br />
+                const body = `Dear ${updateStatus.contact_person_name}, <br /><br />
 
-                We are pleased to inform you that your registration on our website has been successfully approved!<br /><br />
+                We are pleased to inform you that the registration of your company <strong>${updateStatus.buyer_name}</strong>, on our website has been successfully approved!<br /><br />
 
                 You can now access your account using the following login details:<br /><br />
 

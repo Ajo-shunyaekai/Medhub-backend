@@ -32,7 +32,7 @@ const supplierSchema = new Schema(
     supplier_email: {
       type: String,
       // required: true,
-      unique: true,
+//       unique: true,
       trim: true,
     },
     supplier_mobile: {
@@ -82,6 +82,11 @@ const supplierSchema = new Schema(
         trim: true,
       },
     ],
+    sales_person_name: {
+      type: String,
+      // required: true,
+      trim: true,
+    },
     contact_person_name: {
       type: String,
       required: true,
@@ -147,7 +152,7 @@ const supplierSchema = new Schema(
     },
     estimated_delivery_time: {
       type: String,
-      required: true,
+//       required: true,
       trim: true,
     },
     password: {

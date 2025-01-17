@@ -358,10 +358,10 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
-    // logistics_details: [logisticsSchema],
-    // shipment_details: shipmentSchema,
-    buyer_logistics_data: buyerLogisticsSchema,
-    supplier_logistics_data: supplierLogisticsSchema,
+    logistics_details: [logisticsSchema],
+    shipment_details: shipmentSchema,
+    // buyer_logistics_data: buyerLogisticsSchema,
+    // supplier_logistics_data: supplierLogisticsSchema,
     
     order_status: {
         type: String,

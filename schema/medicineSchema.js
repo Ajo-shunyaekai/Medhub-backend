@@ -209,7 +209,7 @@ const medicineSchema = new mongoose.Schema({
   },
   composition: {
     type: String,
-    required: true
+    // required: true
   },
   strength: {
     type: String,
@@ -300,7 +300,7 @@ const medicineSchema = new mongoose.Schema({
   inventory_info: [{
     quantity          : String,
     unit_price        : String,
-    total_price       : String,
+    // total_price       : String,
     est_delivery_days : String,
   }],
   status: {  // 0 - pending, 1 - accepted  ,  2 - rejected, 3 - deleted

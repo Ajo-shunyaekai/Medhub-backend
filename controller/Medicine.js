@@ -82,27 +82,27 @@ module.exports = {
       }
       
       const {
-        product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life,
+        product_type, supplier_id, medicine_name, composition  = '', strength, type_of_form, shelf_life,
         dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags,
         unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
         manufacturer_name, manufacturer_country_of_origin, manufacturer_description, quantity, unit_price,
-        total_price, est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
+        est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
       } = reqObj;
 
       const supplierDetails = await Supplier?.findOne({supplier_id})
   
-      if (![quantity, unit_price, total_price, est_delivery_days].every(Array.isArray)) {
+      if (![quantity, unit_price, est_delivery_days].every(Array.isArray)) {
         return callback({ code: 400, message: "Inventory fields should be arrays" });
       }
   
-      if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+      if (quantity.length !== unit_price.length || unit_price.length !== est_delivery_days.length) {
         return callback({ code: 400, message: "All inventory arrays must have the same length" });
       }
   
       const inventory_info = quantity.map((_, index) => ({
         quantity          : quantity[index],
         unit_price        : unit_price[index],
-        total_price       : total_price[index],
+        // total_price       : total_price[index],
         est_delivery_days : est_delivery_days[index],
       }));
   
@@ -112,7 +112,7 @@ module.exports = {
         supplier_id,
         supplierId : supplierDetails?._id,
         medicine_name,
-        composition,
+        // composition,
         strength,
         type_of_form,
         shelf_life,
@@ -582,24 +582,24 @@ module.exports = {
               dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
               unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
               manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details,
-              quantity, unit_price, total_price, est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
+              quantity, unit_price, est_delivery_days, purchased_on, country_available_in, min_purchase_unit, condition, invoice_image
              } = reqObj;
 
              const supplier = await Supplier.findOne({ supplier_id: supplier_id });
 
              if (!Array.isArray(quantity) || !Array.isArray(unit_price) ||
-             !Array.isArray(total_price) || !Array.isArray(est_delivery_days)) {
+              !Array.isArray(est_delivery_days)) {
              return callback({ code: 400, message: "Inventory fields should be arrays" });
            }
        
-           if (quantity.length !== unit_price.length || unit_price.length !== total_price.length || total_price.length !== est_delivery_days.length) {
+           if (quantity.length !== unit_price.length || unit_price.length !== est_delivery_days.length) {
              return callback({ code: 400, message: "All inventory fields are required" });
            }
        
            const inventory_info = quantity.map((_, index) => ({
              quantity          : quantity[index],
              unit_price        : unit_price[index],
-             total_price       : total_price[index],
+            //  total_price       : total_price[index],
              est_delivery_days : est_delivery_days[index],
            }));
        
@@ -611,7 +611,7 @@ module.exports = {
               supplier_id,
               medicine_name,
               medicine_type : 'new_medicine',
-              composition,
+              // composition,
               strength,
               type_of_form,
               shelf_life,
@@ -708,7 +708,7 @@ module.exports = {
               purchased_on,
               country_available_in,
               min_purchase_unit,
-              composition,
+              // composition,
               strength,
               type_of_form,
               shelf_life,
