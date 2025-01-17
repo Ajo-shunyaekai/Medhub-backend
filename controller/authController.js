@@ -928,7 +928,6 @@ module.exports = {
       // Update the password based on the user type
       if (user_type === "Buyer") {
         updateProfile = await Buyer?.findOneAndUpdate(
-          { buyer_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
@@ -1316,4 +1315,131 @@ module.exports = {
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
   },
+
+  // Helper functions
+  updateProfileDetails : async (user, userType, name, email, phone, address, hashedPassword) => {
+    const userCountryCode = phone.split(" ")[0];
+    const userMobileNumber = phone.split(" ").slice(1).join(" ");
+    
+    const updateData = {
+      nameField: userType === "Buyer" ? "buyer_name" : "supplier_name",
+      emailField: userType === "Buyer" ? "buyer_email" : "supplier_email",
+      mobileField: userType === "Buyer" ? "buyer_mobile" : "supplier_mobile",
+      countryCodeField: userType === "Buyer" ? "buyer_country_code" : "supplier_country_code",
+      addressField: userType === "Buyer" ? "buyer_address" : "supplier_address",
+    };
+
+    const updateProfile = await (userType === "Buyer" ? Buyer : Supplier)?.findByIdAndUpdate(
+      user?._id,
+      { $set: {
+          [updateData.nameField]: name,
+          [updateData.emailField]: email,
+          [updateData.mobileField]: userMobileNumber,
+          [updateData.countryCodeField]: userCountryCode,
+          ...(hashedPassword && { password: hashedPassword }) // Update password if hashedPassword is provided
+        }
+      },
+      { new: true }
+    );
+
+    return updateProfile;
+  },
+
+  sendProfileEditRequest : async (user, userType, address) => {
+    const ProfileEdit = userType === "Buyer" ? BuyerProfileEdit : SupplierProfileEdit;
+    const profileReq = new ProfileEdit({
+      [`${userType.toLowerCase()}_id`]: user?.[`${userType.toLowerCase()}_id`],
+      [`${userType.toLowerCase()}_address`]: address,
+      userId: user?._id,
+      editReqStatus: 'pendinig',
+    });
+
+    return await profileReq.save();
+  },
+
+  checkPasswords : async (oldPassword, newPassword, user) => {
+    const isOldPwdMatch = await bcrypt.compare(oldPassword?.trim(), user?.password);
+    if (!isOldPwdMatch) {
+      return { valid: false, message: "Old password is not correct." };
+    }
+
+    const isNewPwdSameAsOld = await bcrypt.compare(newPassword?.trim(), user?.password);
+    if (isNewPwdSameAsOld) {
+      return { valid: false, message: "New password cannot be the same as old password." };
+    }
+
+    return { valid: true };
+  },
+
+  // Main function
+  updateProfileAndSendEditRequest: async (req, res) => {
+    try {
+      const { id } = req?.params;
+      const { user_type } = req?.headers;
+      const { newPassword, oldPassword, name, email, phone, address } = req?.body;
+      const isPasswordUpdate = newPassword?.trim();
+      
+      let user;
+      if (user_type === "Buyer") {
+        user = await Buyer?.findById(id);
+      } else if (user_type === "Supplier") {
+        user = await Supplier?.findById(id);
+      } else if (user_type === "Admin") {
+        user = await Admin?.findById(id);
+      }
+
+      if (!user) {
+        return sendErrorResponse(res, 400, "Profile not found.");
+      }
+
+      const { valid, message } = isPasswordUpdate ? await checkPasswords(oldPassword, newPassword, user) : { valid: true };
+      if (!valid) return sendErrorResponse(res, 400, message);
+
+      const saltRounds = 10;
+      const hashedPassword = isPasswordUpdate ? await bcrypt.hash(newPassword?.trim(), saltRounds) : null;
+
+      const userCountryCode = phone.split(" ")[0];
+      const userMobileNumber = phone.split(" ").slice(1).join(" ");
+
+      const changePersonalDetails = user_type === 'Buyer' 
+        ? (user?.buyer_name !== name || user?.buyer_email !== email || user?.buyer_country_code !== userCountryCode || user?.buyer_mobile !== userMobileNumber) 
+        : (user?.supplier_name !== name || user?.supplier_email !== email || user?.supplier_country_code !== userCountryCode || user?.supplier_mobile !== userMobileNumber);
+
+      const sendRequestToAdmin = user_type === 'Buyer' ? (user?.buyer_address !== address) : (user?.supplier_address !== address);
+
+      if (changePersonalDetails && sendRequestToAdmin) {
+        const updateProfile = await updateProfileDetails(user, user_type, name, email, phone, address, hashedPassword);
+        if (!updateProfile) {
+          return sendErrorResponse(res, 400, "Failed to update profile details.");
+        }
+
+        const newProfileEditReq = await sendProfileEditRequest(user, user_type, address);
+        if (!newProfileEditReq) {
+          return sendSuccessResponse(res, 206, 'Profile details updated, but failed to send address update request to Admin.', updateProfile);
+        }
+
+        return sendSuccessResponse(res, 200, 'Profile details updated, also send address update request to Admin.', updateProfile);
+      }
+
+      if (changePersonalDetails && !sendRequestToAdmin) {
+        const updateProfile = await updateProfileDetails(user, user_type, name, email, phone, address, hashedPassword);
+        if (!updateProfile) {
+          return sendErrorResponse(res, 400, "Failed to update profile details.");
+        }
+
+        return sendSuccessResponse(res, 200, 'Profile details updated.');
+      }
+
+      if (!changePersonalDetails && sendRequestToAdmin) {
+        const newProfileEditReq = await sendProfileEditRequest(user, user_type, address);
+        return sendSuccessResponse(res, 200, 'Sent address update request to Admin.');
+      }
+
+    } catch (error) {
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+    }
+  },
+
 };
