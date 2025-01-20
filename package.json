@@ -21,6 +21,7 @@
     "joi": "^17.12.2",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",
+    "mime-types": "^2.1.35",
     "moment-timezone": "^0.5.45",
     "mongodb": "^6.5.0",
     "mongoose": "^8.2.2",
