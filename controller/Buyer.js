@@ -1319,6 +1319,7 @@ module.exports = {
 
                                 You can view and respond to this inquiry by logging into your account on our platform. Please take the time to review the buyer's request and provide your response at your earliest convenience.<br /><br />
 
+                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                                  <p>Best regards,<br/>MedHub Global Team</p>
                         `;
   

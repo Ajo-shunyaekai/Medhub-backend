@@ -414,6 +414,7 @@ module.exports = {
             const body = `Hello ${buyer.buyer_name}, <br />
                                 You’ve received a quote from the supplier for <strong>${enquiry_id}</strong>.<br />
                                 <br /><br />
+                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                                 Thanks & Regards <br />
                                 MedHub Global Team`;
   
@@ -510,6 +511,7 @@ module.exports = {
             const body = `Hello ${supplier.supplier_name}, <br />
                                 Inquiry request has been cancelled by ${buyer.buyer_name} for <strong>${enquiry_id}</strong>.<br />
                                 <br /><br />
+                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                                 Thanks & Regards <br />
                                 MedHub Global Team`;
   

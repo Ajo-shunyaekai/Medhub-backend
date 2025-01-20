@@ -166,6 +166,7 @@ module.exports = {
                         <p>Thank you for your order. We are pleased to confirm order and the details as follows:</p>
                         ${itemsTable}
                         <p>We have begun processing your order and will keep you informed about its status. </p>
+                        <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                         <p>Thanks & Regards,<br/>MedHub Global Team</p>
                         `;
 

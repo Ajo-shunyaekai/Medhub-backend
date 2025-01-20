@@ -658,6 +658,7 @@ getRegReqList: async (req, reqObj, callback) => {
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
 
                 Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
+                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
 
                 Best regards, <br />
                 <strong>MedHub Global Team</strong>
@@ -981,6 +982,8 @@ getRegReqList: async (req, reqObj, callback) => {
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
 
                 Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
+
+                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
 
                 Best regards, <br />
                 <strong>Team MedHub Global Team</strong>
@@ -2385,6 +2388,7 @@ getRegReqList: async (req, reqObj, callback) => {
                   Medicine ID: ${updateStatus.medicine_id} <br />
                   Supplier ID: ${updateStatus.supplier_id} <br />
                   <br /><br />
+                  <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                   Thanks & Regards <br />
                   MedHub Global Team`;
 
@@ -2822,6 +2826,7 @@ getRegReqList: async (req, reqObj, callback) => {
                           Medicine ID: ${updatedMedicine.medicine_id} <br />
                           Supplier ID: ${updatedMedicine.supplier_id} <br />
                           <br /><br />
+                          <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                           Thanks & Regards, <br />
                           MedHub Global Team`;
 

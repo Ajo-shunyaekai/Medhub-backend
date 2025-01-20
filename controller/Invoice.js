@@ -120,6 +120,7 @@ module.exports = {
             Invoice for order ${reqObj.orderId} has been generated.<br />
             Total Payable Amount: <strong>${reqObj.totalPayableAmount} AED</strong><br />
             <br /><br />
+            <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
             Thanks & Regards <br />
             MedHub Global Team`;
 
@@ -224,6 +225,7 @@ module.exports = {
             Payment for invoice ${invoice_id} on ${order_id} has been completed.<br />
             Total Amount Paid: <strong>${amount_paid} AED</strong><br />
             <br /><br />
+            <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
             Thanks & Regards <br />
             MedHub Global Team`;
 

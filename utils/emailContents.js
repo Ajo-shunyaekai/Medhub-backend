@@ -47,6 +47,7 @@ const buyerRegistrationContent = (buyer)=>{
             <li>Registration Date: ${getTodayFormattedDate()}</li>
             </ul>
             <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
+
             <p>Best regards,<br/>MedHub Global Team</p>
         `
     )
