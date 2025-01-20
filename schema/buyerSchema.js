@@ -184,6 +184,14 @@ const buyerSchema = new Schema(
     otp: {
       type: Number,
     },
+    otpCount: {
+      type: Number,
+      default: 0,
+    },
+    otpLimitReachedAt: {
+      type: Date,  // This field will store the timestamp of when the OTP limit was reached
+      default: null,  // Default is null when the user hasn't reached the limit yet
+    },
     otpExpiry: {
       type: Date,
       default: Date.now,
