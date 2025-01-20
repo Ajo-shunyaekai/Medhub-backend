@@ -795,6 +795,262 @@ module.exports = {
    }
   },
 
+//   editMedicine: async (req, reqObj, callback) => {
+//     try {
+//         // Parse stockedInDetails and inventoryInfo if they are strings
+//         let stockedInDetails = reqObj.stocked_in_details;
+//         let inventoryInfo = [];
+
+//         console.log('reqObj', reqObj);
+
+//         // Parse JSON strings if needed
+//         if (typeof stockedInDetails === 'string') {
+//             try {
+//                 stockedInDetails = JSON.parse(stockedInDetails);
+//             } catch (err) {
+//                 return callback({ code: 400, message: "Invalid format for stocked_in_details" });
+//             }
+//         }
+
+//         if (typeof inventoryInfo === 'string') {
+//             try {
+//                 inventoryInfo = JSON.parse(inventoryInfo);
+//             } catch (err) {
+//                 return callback({ code: 400, message: "Invalid format for inventory_info" });
+//             }
+//         }
+
+//         // Transform arrays into proper format for registered_in, stocked_in, and medicine_image
+//         // const registeredInArray = Array.isArray(reqObj.registered_in) ? reqObj.registered_in : [reqObj.registered_in];
+//         // const stockedInArray = Array.isArray(reqObj.stocked_in) ? reqObj.stocked_in : [reqObj.stocked_in];
+//         // const medicineImageArray = Array.isArray(reqObj.medicine_image) ? reqObj.medicine_image : [reqObj.medicine_image];
+
+//         // // Validate required fields
+//         // const requiredFields = [
+//         //     'medicine_id', 'supplier_id', 'medicine_name',
+//         //     'medicine_category', 'strength', 'type_of_form', 'shelf_life',
+//         //     'dossier_type', 'dossier_status', 'total_quantity', 'gmp_approvals',
+//         //     'shipping_time', 'unit_tax', 'country_of_origin', 'available_for',
+//         //     'description', 'manufacturer_name', 'manufacturer_country_of_origin',
+//         //     'manufacturer_description'
+//         // ];
+
+//         // const missingFields = requiredFields.filter(field => !reqObj[field]);
+//         // if (missingFields.length > 0) {
+//         //     return callback({ 
+//         //         code: 400, 
+//         //         message: `Missing required fields: ${missingFields.join(', ')}` 
+//         //     });
+//         // }
+
+//         // Transform the request object to match the schema requirements
+//         // const transformedReqObj = {
+//         //     medicine_id:  reqObj.medicine_id,
+//         //     supplier_id:  reqObj.supplier_id ,
+//         //     medicine_name: { value: reqObj.medicine_name },
+//         //     composition: { value: reqObj.composition },
+//         //     strength: { value: reqObj.strength },
+//         //     type_of_form: { value: reqObj.type_of_form },
+//         //     shelf_life: { value: reqObj.shelf_life },
+//         //     dossier_type: { value: reqObj.dossier_type },
+//         //     dossier_status: { value: reqObj.dossier_status },
+//         //     medicine_category: { value: reqObj.medicine_category },
+//         //     total_quantity: { value: reqObj.total_quantity },
+//         //     gmp_approvals: { value: reqObj.gmp_approvals },
+//         //     shipping_time: { value: reqObj.shipping_time },
+//         //     unit_tax: { value: reqObj.unit_tax },
+//         //     country_of_origin: { value: reqObj.country_of_origin },
+//         //     available_for: { value: reqObj.available_for },
+//         //     description: { value: reqObj.description },
+//         //     manufacturer_name: { value: reqObj.manufacturer_name },
+//         //     manufacturer_country_of_origin: { value: reqObj.manufacturer_country_of_origin },
+//         //     manufacturer_description: { value: reqObj.manufacturer_description },
+//         //     edit_status: 0 ,
+//         //     status: 0 ,
+//         //     // Handle array fields properly
+//         //     tags: reqObj.tags ? reqObj.tags.split(',').map(tag => ({
+//         //         value: tag.trim(),
+//         //         isChanged: true
+//         //     })) : [],
+            
+//         //     registered_in: registeredInArray.map(country => ({
+//         //         value: country,
+//         //         isChanged: true
+//         //     })),
+            
+//         //     stocked_in: stockedInArray.map(country => ({
+//         //         value: country,
+//         //         isChanged: true
+//         //     })),
+            
+//         //     medicine_image: medicineImageArray.map(image => ({
+//         //         value: image,
+//         //         isChanged: true
+//         //     })),
+            
+//         //     // Handle nested arrays
+//         //     stockedIn_details: stockedInDetails.map(detail => ({
+//         //         stocked_in_country: { value: detail.stocked_in_country, isChanged: true },
+//         //         stocked_quantity: { value: detail.stocked_quantity, isChanged: true },
+//         //         stocked_in_type: { value: detail.stocked_in_type, isChanged: true }
+//         //     })),
+            
+//         //     // inventory_info: inventoryInfo.map(info => ({
+//         //     //     quantity: { value: info.quantity, isChanged: true },
+//         //     //     unit_price: { value: info.unit_price, isChanged: true },
+//         //     //     est_delivery_days: { value: info.est_delivery_days, isChanged: true }
+//         //     // }))
+
+//         //     inventory_info: reqObj.quantity.map((qty, index) => ({
+//         //       quantity: { value: qty, isChanged: true },
+//         //       unit_price: { value: reqObj.unit_price[index], isChanged: true },
+//         //       est_delivery_days: { value: reqObj.est_delivery_days[index], isChanged: true }
+//         //   }))
+          
+//         // };
+
+//         // Fetch the original medicine data
+//         // const originalMedicine = await Medicine.findOne({ 
+//         //     medicine_id: reqObj.medicine_id, 
+//         //     supplier_id: reqObj.supplier_id 
+//         // });
+        
+//         // if (!originalMedicine) {
+//         //     return callback({ code: 404, message: "Original medicine not found" });
+//         // }
+//         // Fetch the original medicine data
+//         const originalMedicine = await Medicine.findOne({ 
+//           medicine_id: reqObj.medicine_id, 
+//           supplier_id: reqObj.supplier_id 
+//       });
+      
+//       if (!originalMedicine) {
+//           return callback({ code: 404, message: "Original medicine not found" });
+//       }
+
+//       // Compare and set isChanged based on original data
+//       const setIsChanged = (newValue, originalValue) => newValue !== originalValue;
+
+//       const transformedReqObj = {
+//           medicine_id: reqObj.medicine_id,
+//           supplier_id: reqObj.supplier_id,
+//           medicine_name: { value: reqObj.medicine_name, isChanged: setIsChanged(reqObj.medicine_name, originalMedicine.medicine_name) },
+//           composition: { value: reqObj.composition, isChanged: setIsChanged(reqObj.composition, originalMedicine.composition) },
+//           strength: { value: reqObj.strength, isChanged: setIsChanged(reqObj.strength, originalMedicine.strength) },
+//           type_of_form: { value: reqObj.type_of_form, isChanged: setIsChanged(reqObj.type_of_form, originalMedicine.type_of_form) },
+//           shelf_life: { value: reqObj.shelf_life, isChanged: setIsChanged(reqObj.shelf_life, originalMedicine.shelf_life) },
+//           dossier_type: { value: reqObj.dossier_type, isChanged: setIsChanged(reqObj.dossier_type, originalMedicine.dossier_type) },
+//           dossier_status: { value: reqObj.dossier_status, isChanged: setIsChanged(reqObj.dossier_status, originalMedicine.dossier_status) },
+//           medicine_category: { value: reqObj.medicine_category, isChanged: setIsChanged(reqObj.medicine_category, originalMedicine.medicine_category) },
+//           total_quantity: { value: reqObj.total_quantity, isChanged: setIsChanged(reqObj.total_quantity, originalMedicine.total_quantity) },
+//           gmp_approvals: { value: reqObj.gmp_approvals, isChanged: setIsChanged(reqObj.gmp_approvals, originalMedicine.gmp_approvals) },
+//           shipping_time: { value: reqObj.shipping_time, isChanged: setIsChanged(reqObj.shipping_time, originalMedicine.shipping_time) },
+//           unit_tax: { value: reqObj.unit_tax, isChanged: setIsChanged(reqObj.unit_tax, originalMedicine.unit_tax) },
+//           country_of_origin: { value: reqObj.country_of_origin, isChanged: setIsChanged(reqObj.country_of_origin, originalMedicine.country_of_origin) },
+//           available_for: { value: reqObj.available_for, isChanged: setIsChanged(reqObj.available_for, originalMedicine.available_for) },
+//           description: { value: reqObj.description, isChanged: setIsChanged(reqObj.description, originalMedicine.description) },
+//           manufacturer_name: { value: reqObj.manufacturer_name, isChanged: setIsChanged(reqObj.manufacturer_name, originalMedicine.manufacturer_name) },
+//           manufacturer_country_of_origin: { value: reqObj.manufacturer_country_of_origin, isChanged: setIsChanged(reqObj.manufacturer_country_of_origin, originalMedicine.manufacturer_country_of_origin) },
+//           manufacturer_description: { value: reqObj.manufacturer_description, isChanged: setIsChanged(reqObj.manufacturer_description, originalMedicine.manufacturer_description) },
+//           edit_status: 0,
+//           status: 0,
+//           tags: reqObj.tags ? reqObj.tags.split(',').map(tag => ({
+//               value: tag.trim(),
+//               isChanged: !originalMedicine.tags.some(originalTag => originalTag === tag.trim())
+//           })) : [],
+//           registered_in: (Array.isArray(reqObj.registered_in) ? reqObj.registered_in : [reqObj.registered_in]).map(country => ({
+//               value: country,
+//               isChanged: !originalMedicine.registered_in.some(originalCountry => originalCountry === country)
+//           })),
+//           stocked_in: (Array.isArray(reqObj.stocked_in) ? reqObj.stocked_in : [reqObj.stocked_in]).map(country => ({
+//               value: country,
+//               isChanged: !originalMedicine.stocked_in.some(originalCountry => originalCountry === country)
+//           })),
+//           medicine_image: (Array.isArray(reqObj.medicine_image) ? reqObj.medicine_image : [reqObj.medicine_image]).map(image => ({
+//               value: image,
+//               isChanged: !originalMedicine.medicine_image.some(originalImage => originalImage === image)
+//           })),
+//           stockedIn_details: stockedInDetails.map(detail => ({
+//               stocked_in_country: { value: detail.stocked_in_country, isChanged: setIsChanged(detail.stocked_in_country, originalMedicine.stockedIn_details.find(d => d.stocked_in_country === detail.stocked_in_country)?.stocked_in_country) },
+//               stocked_quantity: { value: detail.stocked_quantity, isChanged: setIsChanged(detail.stocked_quantity, originalMedicine.stockedIn_details.find(d => d.stocked_in_country === detail.stocked_in_country)?.stocked_quantity)},
+//               stocked_in_type: { value: detail.stocked_in_type, isChanged: setIsChanged(detail.stocked_in_type, originalMedicine.stockedIn_details.find(d => d.stocked_in_country === detail.stocked_in_country)?.stocked_in_type) }
+//           })),
+//           inventory_info: reqObj.quantity.map((qty, index) => ({
+//               quantity: { value: qty, isChanged: setIsChanged(qty, originalMedicine.inventory_info[index]?.quantity) },
+//               unit_price: { value: reqObj.unit_price[index], isChanged: setIsChanged(reqObj.unit_price[index], originalMedicine.inventory_info[index]?.unit_price) },
+//               est_delivery_days: { value: reqObj.est_delivery_days[index], isChanged: setIsChanged(reqObj.est_delivery_days[index], originalMedicine.inventory_info[index]?.est_delivery_days) }
+//           }))
+//       };
+
+  
+//         // Save the edit request based on product type
+//         let savedEditRequest;
+//         if (reqObj.product_type === 'new') {
+//             const newMedEdit = new NewMedicineEdit(transformedReqObj);
+//             savedEditRequest = await newMedEdit.save();
+//         } else if (reqObj.product_type === 'secondary market') {
+//             const secondaryMedEdit = new SecondaryMarketMedicineEdit(transformedReqObj);
+//             savedEditRequest = await secondaryMedEdit.save();
+//         } else {
+//             return callback({ code: 400, message: "Invalid product type" });
+//         }
+
+//         // Update the original medicine's edit status
+//         const updatedMedicine = await Medicine.findOneAndUpdate(
+//             { 
+//                 medicine_id: reqObj.medicine_id, 
+//                 supplier_id: reqObj.supplier_id 
+//             },
+//             { edit_status: 0 },
+//             { new: true }
+//         );
+
+//         if (!updatedMedicine) {
+//             return callback({ code: 404, message: "Failed to update medicine edit status" });
+//         }
+
+//         // Create notification and send email
+//         const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+//         const notificationEvent = reqObj.product_type === 'new' ? 'editnewmedicinerequest' : 'editsecondarymedicinerequest';
+//         const newNotification = new Notification({
+//             notification_id: notificationId,
+//             event_type: reqObj.product_type === 'new' ? 'New Medicine Edit Request' : 'Secondary Medicine Edit Request',
+//             event: notificationEvent,
+//             from: 'supplier',
+//             to: 'admin',
+//             from_id: reqObj.supplier_id,
+//             event_id: reqObj.medicine_id,
+//             message: `New ${reqObj.product_type} Edit Medicine Request from ${reqObj.supplier_id}`,
+//             status: 0,
+//         });
+//         await newNotification.save();
+
+//         // Send email
+//         const adminEmail = 'ajo@shunyaekai.tech';
+//         const subject = `New Product Edit Request: Approval Required`;
+//         const body = `
+//             <p>Dear Admin,</p>
+//             <p>A supplier has submitted a new edit product request for approval on MedHub Global. Details:</p>
+//             <ul>
+//                 <li>Supplier Name: ${reqObj.supplier_name}</li>
+//                 <li>Product Name: ${reqObj.medicine_name}</li>
+//                 <li>Submission Date: ${getTodayFormattedDate()}</li>
+//             </ul>
+//             <p>Best regards,<br/>MedHub Global Team</p>
+//         `;
+//         await sendEmail(adminEmail, subject, body);
+
+//         callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedEditRequest });
+//     } catch (error) {
+//         console.error("Internal Server Error:", error);
+//         logErrorToFile(error, req);
+//         return callback({ code: 500, message: "An unexpected error occurred. Please try again later." });
+//     }
+// },
+
+  
+  
+
   medicineEditList : async (req, reqObj, callback) => {
     try {
       const { status, pageNo, pageSize, medicine_id, supplier_id } = reqObj
