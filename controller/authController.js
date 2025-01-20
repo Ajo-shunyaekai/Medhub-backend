@@ -17,8 +17,8 @@ const Notification = require("../schema/notificationSchema");
 const Enquiry = require("../schema/enquiryListSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const Invoices = require("../schema/invoiceSchema");
-const BuyerProfileEdit = require('../schema/buyerEditSchema')
-const SupplierProfileEdit = require('../schema/supplierEditSchema')
+const BuyerProfileEdit = require("../schema/buyerEditSchema");
+const SupplierProfileEdit = require("../schema/supplierEditSchema");
 const { validation } = require("../utils/utilities");
 const path = require("path");
 const sendMailFunc = require("../utils/sendEmail");
@@ -468,7 +468,12 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 
@@ -502,7 +507,11 @@ module.exports = {
           : null;
 
       if (!user) {
-        return sendErrorResponse(res, 400, "User not found. Please enter registered email.");
+        return sendErrorResponse(
+          res,
+          400,
+          "User not found. Please enter registered email."
+        );
       }
 
       // Check if the password matches
@@ -549,7 +558,12 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 
@@ -585,7 +599,12 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 
@@ -631,6 +650,7 @@ module.exports = {
           {
             $set: {
               otp: otp,
+              otpCount: 1,
               otpExpiry: tenMinutesAhead,
             },
           },
@@ -642,6 +662,7 @@ module.exports = {
           {
             $set: {
               otp: otp,
+              otpCount: 1,
               otpExpiry: tenMinutesAhead,
             },
           },
@@ -653,6 +674,7 @@ module.exports = {
           {
             $set: {
               otp: otp,
+              otpCount: 1,
               otpExpiry: tenMinutesAhead,
             },
           },
@@ -689,7 +711,304 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
+    }
+  },
+
+  // verifyEmailAndResendOTP: async (req, res) => {
+  //   try {
+  //     const { email, user_type } = req?.body;
+
+  //     if (!email) {
+  //       return sendErrorResponse(res, 400, "Email is required.");
+  //     }
+
+  //     let user;
+
+  //     // Find the user based on their type and email
+  //     if (user_type === "Buyer") {
+  //       user = await Buyer?.findOne({ buyer_email: email });
+  //     } else if (user_type === "Supplier") {
+  //       user = await Supplier?.findOne({ supplier_email: email });
+  //     } else if (user_type === "Admin") {
+  //       user = await Admin?.findOne({ email: email });
+  //     }
+
+  //     // If the user is not found, return an error response
+  //     if (!user) {
+  //       return sendErrorResponse(
+  //         res,
+  //         400,
+  //         "Email not registered. Please provide a registered address."
+  //       );
+  //     }
+
+  //     // Check if the user has reached their OTP limit
+  //     if (user?.otpCount >= 5) {
+  //       const currentDate = new Date();
+
+  //       // If the user has an otpLimitReachedAt timestamp, check if 2 hours have passed
+  //       if (user?.otpLimitReachedAt) {
+  //         const twoHoursLater = new Date(user.otpLimitReachedAt.getTime() + 2 * 60 * 60 * 1000);
+
+  //         // If 2 hours haven't passed, deny the request
+  //         if (currentDate < twoHoursLater) {
+  //           return sendErrorResponse(
+  //             res,
+  //             400,
+  //             `You have reached your OTP limit. You can request again after ${twoHoursLater.toLocaleString()}.`
+  //           );
+  //         } else {
+  //           // If 2 hours have passed, reset the otpCount and allow the user to request an OTP
+  //           user.otpCount = 0;
+  //           user.otpLimitReachedAt = null;
+  //         }
+  //       } else {
+  //         // If no timestamp is present, record the time they reached the OTP limit
+  //         user.otpLimitReachedAt = currentDate;
+  //         await user.save();
+  //         return sendErrorResponse(
+  //           res,
+  //           400,
+  //           "You have reached your OTP limit. You can request again after 2 hours."
+  //         );
+  //       }
+  //     }
+
+  //     // Check if OTP matches and if it's still valid (hasn't expired)
+  //     const currentDate = new Date();
+
+  //     // Generate a new OTP and its expiry time (10 minutes ahead)
+  //     const otp = Math.random()?.toString()?.slice(2, 8);
+  //     const tenMinutesAhead = new Date(currentDate.getTime() + 10 * 60 * 1000);
+
+  //     let updatedUser;
+
+  //     // Update the user with OTP and expiry based on their type
+  //     if (user_type === "Buyer") {
+  //       updatedUser = await Buyer?.findOneAndUpdate(
+  //         { buyer_email: email },
+  //         {
+  //           $set: {
+  //             otp: otp,
+  //             otpExpiry: tenMinutesAhead,
+  //             otpCount: user?.otpCount + 1, // Increment OTP count
+  //           },
+  //         },
+  //         { new: true }
+  //       );
+  //     } else if (user_type === "Supplier") {
+  //       updatedUser = await Supplier?.findOneAndUpdate(
+  //         { supplier_email: email },
+  //         {
+  //           $set: {
+  //             otp: otp,
+  //             otpExpiry: tenMinutesAhead,
+  //             otpCount: user?.otpCount + 1, // Increment OTP count
+  //           },
+  //         },
+  //         { new: true }
+  //       );
+  //     } else if (user_type === "Admin") {
+  //       updatedUser = await Admin?.findOneAndUpdate(
+  //         { email: email },
+  //         {
+  //           $set: {
+  //             otp: otp,
+  //             otpExpiry: tenMinutesAhead,
+  //             otpCount: user?.otpCount + 1, // Increment OTP count
+  //           },
+  //         },
+  //         { new: true }
+  //       );
+  //     }
+
+  //     // If the update fails, return an error
+  //     if (!updatedUser) {
+  //       return sendErrorResponse(
+  //         res,
+  //         400,
+  //         "Error verifying email and generating OTP."
+  //       );
+  //     }
+
+  //     // Email settings and content
+  //     const adminEmail = "shivani@shunyaekai.tech";
+  //     const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
+  //     const recipientEmails = [adminEmail, "ajo@shunyaekai.tech", email].filter(
+  //       (email) => email
+  //     );
+
+  //     // Prepare the email content
+  //     const emailContent = await otpForResetPasswordContent(updatedUser, otp);
+  //     await sendEmail(recipientEmails, subject, emailContent);
+
+  //     // Success response
+  //     return sendSuccessResponse(
+  //       res,
+  //       200,
+  //       "Mail sent to the registered email."
+  //     );
+  //   } catch (error) {
+  //     console.log("Internal Server Error:", error);
+  //     logErrorToFile(error, req);
+  //     return sendErrorResponse(
+  //       res,
+  //       500,
+  //       "An unexpected error occurred. Please try again later.",
+  //       error
+  //     );
+  //   }
+  // },
+
+  verifyEmailAndResendOTP: async (req, res) => {
+    try {
+      const { email, user_type } = req?.body;
+
+      if (!email) {
+        return sendErrorResponse(res, 400, "Email is required.");
+      }
+
+      let user;
+
+      // Find the user based on their type and email
+      if (user_type === "Buyer") {
+        user = await Buyer?.findOne({ buyer_email: email });
+      } else if (user_type === "Supplier") {
+        user = await Supplier?.findOne({ supplier_email: email });
+      } else if (user_type === "Admin") {
+        user = await Admin?.findOne({ email: email });
+      }
+
+      // If the user is not found, return an error response
+      if (!user) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Email not registered. Please provide a registered address."
+        );
+      }
+
+      // Check if the user has reached their OTP limit
+      const currentDate = new Date();
+
+      if (user?.otpCount >= 5) {
+        // If the user has an otpLimitReachedAt timestamp, check if 2 hours have passed
+        if (user?.otpLimitReachedAt) {
+          const twoHoursLater = new Date(
+            user.otpLimitReachedAt.getTime() + 2 * 60 * 60 * 1000
+          );
+
+          // If 2 hours haven't passed, deny the request
+          if (currentDate < twoHoursLater) {
+            return sendErrorResponse(
+              res,
+              400,
+              `You have reached your OTP limit. You can request again after ${twoHoursLater.toLocaleString()}.`
+            );
+          } else {
+            // If 2 hours have passed, reset the otpCount to 1 and remove otpLimitReachedAt
+            user.otpCount = 1; // Reset to 1, not 0
+            user.otpLimitReachedAt = null; // Remove the otpLimitReachedAt
+            await user.save(); // Save the changes
+          }
+        } else {
+          // If no timestamp is present, record the time they reached the OTP limit
+          user.otpLimitReachedAt = currentDate;
+          await user.save();
+          return sendErrorResponse(
+            res,
+            400,
+            "You have reached your OTP limit. You can request again after 2 hours."
+          );
+        }
+      }
+
+      // Generate a new OTP and its expiry time (10 minutes ahead)
+      const otp = Math.random()?.toString()?.slice(2, 8);
+      const tenMinutesAhead = new Date(currentDate.getTime() + 10 * 60 * 1000);
+
+      let updatedUser;
+
+      // Update the user with OTP and expiry based on their type
+      if (user_type === "Buyer") {
+        updatedUser = await Buyer?.findOneAndUpdate(
+          { buyer_email: email },
+          {
+            $set: {
+              otp: otp,
+              otpExpiry: tenMinutesAhead,
+              otpCount: user?.otpCount + 1, // Increment OTP count
+            },
+          },
+          { new: true }
+        );
+      } else if (user_type === "Supplier") {
+        updatedUser = await Supplier?.findOneAndUpdate(
+          { supplier_email: email },
+          {
+            $set: {
+              otp: otp,
+              otpExpiry: tenMinutesAhead,
+              otpCount: user?.otpCount + 1, // Increment OTP count
+            },
+          },
+          { new: true }
+        );
+      } else if (user_type === "Admin") {
+        updatedUser = await Admin?.findOneAndUpdate(
+          { email: email },
+          {
+            $set: {
+              otp: otp,
+              otpExpiry: tenMinutesAhead,
+              otpCount: user?.otpCount + 1, // Increment OTP count
+            },
+          },
+          { new: true }
+        );
+      }
+
+      // If the update fails, return an error
+      if (!updatedUser) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Error verifying email and generating OTP."
+        );
+      }
+
+      // Email settings and content
+      const adminEmail = "shivani@shunyaekai.tech";
+      const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
+      const recipientEmails = [adminEmail, "ajo@shunyaekai.tech", email].filter(
+        (email) => email
+      );
+
+      // Prepare the email content
+      const emailContent = await otpForResetPasswordContent(updatedUser, otp);
+      await sendEmail(recipientEmails, subject, emailContent);
+
+      // Success response
+      return sendSuccessResponse(
+        res,
+        200,
+        "Mail sent to the registered email."
+      );
+    } catch (error) {
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 
@@ -728,10 +1047,13 @@ module.exports = {
       // Check if OTP matches and if it's still valid (hasn't expired)
       const currentDate = new Date();
 
-      if (user.otp !== otp) {
+      if (user.otp !== Number.parseInt(otp)) {
         return sendErrorResponse(res, 400, "Invalid OTP");
       }
-      if (user.otpExpiry < currentDate) {
+
+      // Ensure the OTP expiry is correctly handled by checking the time
+      const otpExpiryDate = new Date(user.otpExpiry); // Convert to Date object
+      if (otpExpiryDate < currentDate) {
         return sendErrorResponse(res, 400, "Expired OTP");
       }
 
@@ -779,7 +1101,12 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 
@@ -866,7 +1193,12 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 
@@ -932,7 +1264,6 @@ module.exports = {
       // Update the password based on the user type
       if (user_type === "Buyer") {
         updateProfile = await Buyer?.findOneAndUpdate(
-          { buyer_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
@@ -964,7 +1295,12 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 
@@ -975,18 +1311,42 @@ module.exports = {
 
       if (user_type === "Buyer") {
         // Validate the required files for "Buyer" type
-        if ((!req?.body?.buyer_image || !req?.body?.buyer_image?.length === 0) && (!req.files["new_buyer_image"] || req.files["new_buyer_image"].length === 0)) {
+        if (
+          (!req?.body?.buyer_image || !req?.body?.buyer_image?.length === 0) &&
+          (!req.files["new_buyer_image"] ||
+            req.files["new_buyer_image"].length === 0)
+        ) {
           return sendErrorResponse(res, 415, "Company Logo is required.");
         }
-        if ((!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) && (!req.files["new_tax_image"] || req.files["new_tax_image"].length === 0)) {
+        if (
+          (!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) &&
+          (!req.files["new_tax_image"] ||
+            req.files["new_tax_image"].length === 0)
+        ) {
           return sendErrorResponse(res, 415, "Company tax image is required.");
         }
-        if ((!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) && (!req.files["new_license_image"] || req.files["new_license_image"].length === 0)) {
-          return sendErrorResponse(res, 415, "Company license image is required.");
+        if (
+          (!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) &&
+          (!req.files["new_license_image"] ||
+            req.files["new_license_image"].length === 0)
+        ) {
+          return sendErrorResponse(
+            res,
+            415,
+            "Company license image is required."
+          );
         }
-        if ((!req?.body?.certificate_image || !req?.body?.certificate_image?.length === 0) && (!req.files["new_certificate_image"] ||
-          req.files["new_certificate_image"].length === 0)) {
-          return sendErrorResponse( res, 415, "Company certificate image is required.");
+        if (
+          (!req?.body?.certificate_image ||
+            !req?.body?.certificate_image?.length === 0) &&
+          (!req.files["new_certificate_image"] ||
+            req.files["new_certificate_image"].length === 0)
+        ) {
+          return sendErrorResponse(
+            res,
+            415,
+            "Company certificate image is required."
+          );
         }
 
         // Extract and format the mobile and country code
@@ -1000,23 +1360,29 @@ module.exports = {
 
         const newBuyerImage = req.files["new_buyer_image"].map((file) =>
           path.basename(file.path)
-        )
-        const updatedBuyerImage = [...newBuyerImage, ...req?.body?.buyer_image]
+        );
+        const updatedBuyerImage = [...newBuyerImage, ...req?.body?.buyer_image];
 
         const newLicenseImage = req.files["new_license_image"].map((file) =>
           path.basename(file.path)
-        )
-        const updatedLicenseImage = [...newLicenseImage, ...req?.body?.license_image]
+        );
+        const updatedLicenseImage = [
+          ...newLicenseImage,
+          ...req?.body?.license_image,
+        ];
 
         const newTaxImage = req.files["new_tax_image"].map((file) =>
           path.basename(file.path)
-        )
-        const updatedTaxImages = [...newTaxImage, ...req?.body?.tax_image]
+        );
+        const updatedTaxImages = [...newTaxImage, ...req?.body?.tax_image];
 
-        const newCertificateImage = req.files["new_certificate_image"].map((file) =>
-          path.basename(file.path)
-        )
-        const updatedCertificateImage  = [...newCertificateImage, ...req?.body?.certificate_image]
+        const newCertificateImage = req.files["new_certificate_image"].map(
+          (file) => path.basename(file.path)
+        );
+        const updatedCertificateImage = [
+          ...newCertificateImage,
+          ...req?.body?.certificate_image,
+        ];
 
         regObj = {
           buyer_email,
@@ -1057,16 +1423,26 @@ module.exports = {
           );
         }
       } else if (user_type === "Supplier") {
-        if ((!req?.body?.supplier_image || !req?.body?.supplier_image?.length === 0) && (!req.files["new_supplier_image"] ||
-          req.files["new_supplier_image"].length === 0)
+        if (
+          (!req?.body?.supplier_image ||
+            !req?.body?.supplier_image?.length === 0) &&
+          (!req.files["new_supplier_image"] ||
+            req.files["new_supplier_image"].length === 0)
         ) {
           return sendErrorResponse(res, 415, "Supplier Logo is required.");
         }
-        if ((!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) && (!req.files["new_tax_image"] || req.files["new_tax_image"].length === 0)) {
+        if (
+          (!req?.body?.tax_image || !req?.body?.tax_image?.length === 0) &&
+          (!req.files["new_tax_image"] ||
+            req.files["new_tax_image"].length === 0)
+        ) {
           return sendErrorResponse(res, 415, "Supplier tax image is required.");
         }
-        if ((!req?.body?.license_image || !req?.body?.license_image?.length === 0) && (!req.files["new_license_image"] ||
-          req.files["new_license_image"].length === 0)
+        if (
+          (!req?.body?.license_image ||
+            !req?.body?.license_image?.length === 0) &&
+          (!req.files["new_license_image"] ||
+            req.files["new_license_image"].length === 0)
         ) {
           return sendErrorResponse(
             res,
@@ -1075,8 +1451,11 @@ module.exports = {
           );
         }
 
-        if ((!req?.body?.certificate_image || !req?.body?.certificate_image?.length === 0) && (!req.files["new_certificate_image"] ||
-          req.files["new_certificate_image"].length === 0)
+        if (
+          (!req?.body?.certificate_image ||
+            !req?.body?.certificate_image?.length === 0) &&
+          (!req.files["new_certificate_image"] ||
+            req.files["new_certificate_image"].length === 0)
         ) {
           return sendErrorResponse(
             res,
@@ -1095,26 +1474,35 @@ module.exports = {
           .slice(1)
           .join(" ");
         const personCountryCode = req.body.contact_person_mobile.split(" ")[0];
-        
+
         const newSupplierImage = req.files["new_supplier_image"].map((file) =>
           path.basename(file.path)
-        )
-        const updatedSupplierImage = [...newSupplierImage, ...req?.body?.supplier_image]
+        );
+        const updatedSupplierImage = [
+          ...newSupplierImage,
+          ...req?.body?.supplier_image,
+        ];
 
         const newLicenseImage = req.files["new_license_image"].map((file) =>
           path.basename(file.path)
-        )
-        const updatedLicenseImage = [...newLicenseImage, ...req?.body?.license_image]
+        );
+        const updatedLicenseImage = [
+          ...newLicenseImage,
+          ...req?.body?.license_image,
+        ];
 
         const newTaxImage = req.files["new_tax_image"].map((file) =>
           path.basename(file.path)
-        )
-        const updatedTaxImages = [...newTaxImage, ...req?.body?.tax_image]
+        );
+        const updatedTaxImages = [...newTaxImage, ...req?.body?.tax_image];
 
-        const newCertificateImage = req.files["new_certificate_image"].map((file) =>
-          path.basename(file.path)
-        )
-        const updatedCertificateImage  = [...newCertificateImage, ...req?.body?.certificate_image]
+        const newCertificateImage = req.files["new_certificate_image"].map(
+          (file) => path.basename(file.path)
+        );
+        const updatedCertificateImage = [
+          ...newCertificateImage,
+          ...req?.body?.certificate_image,
+        ];
 
         regObj = {
           ...req.body,
@@ -1134,7 +1522,7 @@ module.exports = {
           return sendErrorResponse(res, 419, "All fields are required", errObj);
         }
       }
-      
+
       // Use req.body directly instead of stringifying it
       const {
         buyer_mobile,
@@ -1160,9 +1548,13 @@ module.exports = {
 
       let user;
       if (user_type === "Buyer") {
-        user = await Buyer?.findById(id)?.select('-__v -_id -createdAt -updatedAt -password -toekn -otp -profile_status -account_status');
+        user = await Buyer?.findById(id)?.select(
+          "-__v -_id -createdAt -updatedAt -password -toekn -otp -profile_status -account_status"
+        );
       } else if (user_type === "Supplier") {
-        user = await Supplier?.findById(id)?.select('-__v -_id -createdAt -updatedAt -password -toekn -otp -profile_status -account_status');
+        user = await Supplier?.findById(id)?.select(
+          "-__v -_id -createdAt -updatedAt -password -toekn -otp -profile_status -account_status"
+        );
       }
       // If the user is not found, return an error response
       if (!user) {
@@ -1171,10 +1563,10 @@ module.exports = {
 
       // Generate unique notification ID and user ID
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
-      const userId = user_type === "Buyer"
+      const userId =
+        user_type === "Buyer"
           ? user?.buyer_id
-          : user_type === "Supplier"
-          && user?.supplier_id
+          : user_type === "Supplier" && user?.supplier_id;
 
       const newSupplierReq = new Supplier({
         supplier_id: userId,
@@ -1280,7 +1672,7 @@ module.exports = {
       const newNotification = new Notification({
         notification_id: notificationId,
         event_type: `${user_type} profile request`,
-        event: user_type?.toLoweeCase()+"prolieupdaterequest",
+        event: user_type?.toLoweeCase() + "prolieupdaterequest",
         from: "buyer",
         to: "admin",
         from_id: userId,
@@ -1288,11 +1680,11 @@ module.exports = {
         message: `${user_type} Profile Update Request`,
         status: 0,
       });
-      
+
       const savedNotification = await newNotification.save();
-      
+
       // If the savedNotification is not saved, return an error response
-      if(!savedNotification) {
+      if (!savedNotification) {
         return sendErrorResponse(
           res,
           400,
@@ -1304,9 +1696,10 @@ module.exports = {
       const adminEmail = "ajo@shunyaekai.tech";
       const subject = "New Registration Alert: Buyer Account Created";
       const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
-      const emailContent = await profileEditRequestContent(newProfileEditRequest);
+      const emailContent = await profileEditRequestContent(
+        newProfileEditRequest
+      );
       await sendEmail(recipientEmails, subject, emailContent);
-
 
       // Success response
       return sendSuccessResponse(
@@ -1317,7 +1710,226 @@ module.exports = {
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
+    }
+  },
+
+  // Helper functions
+  updateProfileDetails: async (
+    user,
+    userType,
+    name,
+    email,
+    phone,
+    address,
+    hashedPassword
+  ) => {
+    const userCountryCode = phone.split(" ")[0];
+    const userMobileNumber = phone.split(" ").slice(1).join(" ");
+
+    const updateData = {
+      nameField: userType === "Buyer" ? "buyer_name" : "supplier_name",
+      emailField: userType === "Buyer" ? "buyer_email" : "supplier_email",
+      mobileField: userType === "Buyer" ? "buyer_mobile" : "supplier_mobile",
+      countryCodeField:
+        userType === "Buyer" ? "buyer_country_code" : "supplier_country_code",
+      addressField: userType === "Buyer" ? "buyer_address" : "supplier_address",
+    };
+
+    const updateProfile = await (userType === "Buyer"
+      ? Buyer
+      : Supplier
+    )?.findByIdAndUpdate(
+      user?._id,
+      {
+        $set: {
+          [updateData.nameField]: name,
+          [updateData.emailField]: email,
+          [updateData.mobileField]: userMobileNumber,
+          [updateData.countryCodeField]: userCountryCode,
+          ...(hashedPassword && { password: hashedPassword }), // Update password if hashedPassword is provided
+        },
+      },
+      { new: true }
+    );
+
+    return updateProfile;
+  },
+
+  sendProfileEditRequest: async (user, userType, address) => {
+    const ProfileEdit =
+      userType === "Buyer" ? BuyerProfileEdit : SupplierProfileEdit;
+    const profileReq = new ProfileEdit({
+      [`${userType.toLowerCase()}_id`]: user?.[`${userType.toLowerCase()}_id`],
+      [`${userType.toLowerCase()}_address`]: address,
+      userId: user?._id,
+      editReqStatus: "pendinig",
+    });
+
+    return await profileReq.save();
+  },
+
+  checkPasswords: async (oldPassword, newPassword, user) => {
+    const isOldPwdMatch = await bcrypt.compare(
+      oldPassword?.trim(),
+      user?.password
+    );
+    if (!isOldPwdMatch) {
+      return { valid: false, message: "Old password is not correct." };
+    }
+
+    const isNewPwdSameAsOld = await bcrypt.compare(
+      newPassword?.trim(),
+      user?.password
+    );
+    if (isNewPwdSameAsOld) {
+      return {
+        valid: false,
+        message: "New password cannot be the same as old password.",
+      };
+    }
+
+    return { valid: true };
+  },
+
+  // Main function
+  updateProfileAndSendEditRequest: async (req, res) => {
+    try {
+      const { id } = req?.params;
+      const { user_type } = req?.headers;
+      const { newPassword, oldPassword, name, email, phone, address } =
+        req?.body;
+      const isPasswordUpdate = newPassword?.trim();
+
+      let user;
+      if (user_type === "Buyer") {
+        user = await Buyer?.findById(id);
+      } else if (user_type === "Supplier") {
+        user = await Supplier?.findById(id);
+      } else if (user_type === "Admin") {
+        user = await Admin?.findById(id);
+      }
+
+      if (!user) {
+        return sendErrorResponse(res, 400, "Profile not found.");
+      }
+
+      const { valid, message } = isPasswordUpdate
+        ? await checkPasswords(oldPassword, newPassword, user)
+        : { valid: true };
+      if (!valid) return sendErrorResponse(res, 400, message);
+
+      const saltRounds = 10;
+      const hashedPassword = isPasswordUpdate
+        ? await bcrypt.hash(newPassword?.trim(), saltRounds)
+        : null;
+
+      const userCountryCode = phone.split(" ")[0];
+      const userMobileNumber = phone.split(" ").slice(1).join(" ");
+
+      const changePersonalDetails =
+        user_type === "Buyer"
+          ? user?.buyer_name !== name ||
+            user?.buyer_email !== email ||
+            user?.buyer_country_code !== userCountryCode ||
+            user?.buyer_mobile !== userMobileNumber
+          : user?.supplier_name !== name ||
+            user?.supplier_email !== email ||
+            user?.supplier_country_code !== userCountryCode ||
+            user?.supplier_mobile !== userMobileNumber;
+
+      const sendRequestToAdmin =
+        user_type === "Buyer"
+          ? user?.buyer_address !== address
+          : user?.supplier_address !== address;
+
+      if (changePersonalDetails && sendRequestToAdmin) {
+        const updateProfile = await updateProfileDetails(
+          user,
+          user_type,
+          name,
+          email,
+          phone,
+          address,
+          hashedPassword
+        );
+        if (!updateProfile) {
+          return sendErrorResponse(
+            res,
+            400,
+            "Failed to update profile details."
+          );
+        }
+
+        const newProfileEditReq = await sendProfileEditRequest(
+          user,
+          user_type,
+          address
+        );
+        if (!newProfileEditReq) {
+          return sendSuccessResponse(
+            res,
+            206,
+            "Profile details updated, but failed to send address update request to Admin.",
+            updateProfile
+          );
+        }
+
+        return sendSuccessResponse(
+          res,
+          200,
+          "Profile details updated, also send address update request to Admin.",
+          updateProfile
+        );
+      }
+
+      if (changePersonalDetails && !sendRequestToAdmin) {
+        const updateProfile = await updateProfileDetails(
+          user,
+          user_type,
+          name,
+          email,
+          phone,
+          address,
+          hashedPassword
+        );
+        if (!updateProfile) {
+          return sendErrorResponse(
+            res,
+            400,
+            "Failed to update profile details."
+          );
+        }
+
+        return sendSuccessResponse(res, 200, "Profile details updated.");
+      }
+
+      if (!changePersonalDetails && sendRequestToAdmin) {
+        const newProfileEditReq = await sendProfileEditRequest(
+          user,
+          user_type,
+          address
+        );
+        return sendSuccessResponse(
+          res,
+          200,
+          "Sent address update request to Admin."
+        );
+      }
+    } catch (error) {
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
     }
   },
 };

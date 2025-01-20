@@ -20,7 +20,8 @@ const {
   verifyOTP,
   resetPassword,
   updatePassword,
-  addProfileEditRequest
+  addProfileEditRequest,
+  verifyEmailAndResendOTP
 } = require(`../controller/authController`);
 const { sendErrorResponse } = require('../utils/commonResonse');
  
@@ -140,7 +141,8 @@ const cpUpload = (req, res, next) => {
  
 router.post(`/register`, checkAuthorization, cpUpload, registerUser);
 router.post(`/login`, loginUser);
-router.post(`/verify-email`, verifyEmail);
+router.post(`/verify-email`, verifyEmailAndResendOTP);
+router.post(`/resend-otp`, verifyEmailAndResendOTP);
 router.post(`/verify-otp`, verifyOTP);
 router.post(`/reset-password`, resetPassword);
 router.post(`/update-password/:id`, updatePassword);
