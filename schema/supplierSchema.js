@@ -150,6 +150,11 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
+    trade_code: {
+      type: String,
+      // required: true,
+      trim: true,
+    },
     estimated_delivery_time: {
       type: String,
 //       required: true,

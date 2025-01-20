@@ -864,8 +864,8 @@ module.exports = {
             }
           },
           { $sort  : {createdAt: -1} },
-          { $skip  : offset },
-          { $limit : page_size },
+          // { $skip  : offset },
+          // { $limit : page_size },
           
         ])
         

@@ -1389,15 +1389,15 @@ module.exports = {
             }
           },
           { $sort  : {createdAt: -1} },
-          { $skip  : offset },
-          { $limit : page_size },
+          // { $skip  : offset },
+          // { $limit : page_size },
           
         ])
         
         .then( async(data) => {
           const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer', status: 0});
           const totalPages = Math.ceil(totalItems / page_size);
-
+console.log('NOTFICATION', data.length)
           const returnObj = {
               data,
               totalPages,

@@ -50,6 +50,11 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : vat_reg_no is required"],
     },
+    trade_code: {
+      type: String,
+      trim: true,
+      // required: [true, "Validation Error : vat_reg_no is required"],
+    },
     contact_person_name: {
       type: String,
       trim: true,

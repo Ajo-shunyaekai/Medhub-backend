@@ -73,6 +73,7 @@ module.exports = {
         registration_no,
         description,
         vat_reg_no,
+        trade_code
       } = req.body;
 
       let regObj = {};
@@ -142,6 +143,7 @@ module.exports = {
           registration_no,
           description,
           vat_reg_no,
+          trade_code,
           buyer_mobile: buyer_mobile_number,
           buyer_country_code: buyerCountryCode,
           buyer_image: req.files["buyer_image"].map((file) =>
@@ -316,6 +318,7 @@ module.exports = {
         tags: regObj.tags,
         registration_no: regObj.registration_no,
         vat_reg_no: regObj.vat_reg_no,
+        trade_code : regObj.trade_code,
         token: token,
         account_status: 0,
         profile_status: 0,
@@ -348,6 +351,7 @@ module.exports = {
         license_image: regObj?.license_image,
         certificate_image: regObj?.certificate_image,
         vat_reg_no: regObj?.vat_reg_no,
+        trade_code : regObj.trade_code,
         token: token,
         account_status: 0,
         profile_status: 0,

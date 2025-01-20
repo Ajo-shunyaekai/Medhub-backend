@@ -4091,8 +4091,8 @@ getRegReqList: async (req, reqObj, callback) => {
             }
           },
           { $sort  : { createdAt: -1 } },
-          { $skip  : offset },
-          { $limit : page_size },
+          // { $skip  : offset },
+          // { $limit : page_size },
         ])
         .then(async (data) => {
           const totalItems = await Notification.countDocuments({ to: 'admin', status:0});
