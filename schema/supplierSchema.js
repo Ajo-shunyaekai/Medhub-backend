@@ -11,6 +11,7 @@ const supplierSchema = new Schema(
     },
     supplier_type: {
       type: String,
+      enum: ["Manufacturer", "Distributor", "Medical Practitioner"],
       required: true,
       trim: true,
     },
@@ -32,7 +33,7 @@ const supplierSchema = new Schema(
     supplier_email: {
       type: String,
       // required: true,
-//       unique: true,
+      //       unique: true,
       trim: true,
     },
     supplier_mobile: {
@@ -157,7 +158,7 @@ const supplierSchema = new Schema(
     },
     estimated_delivery_time: {
       type: String,
-//       required: true,
+      //       required: true,
       trim: true,
     },
     password: {
@@ -178,14 +179,6 @@ const supplierSchema = new Schema(
       trim: true,
       unique: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
     otp: {
       type: Number,
     },
@@ -194,12 +187,54 @@ const supplierSchema = new Schema(
       default: 0,
     },
     otpLimitReachedAt: {
-      type: Date,  // This field will store the timestamp of when the OTP limit was reached
-      default: null,  // Default is null when the user hasn't reached the limit yet
+      type: Date, // This field will store the timestamp of when the OTP limit was reached
+      default: null, // Default is null when the user hasn't reached the limit yet
     },
     otpExpiry: {
       type: Date,
       default: Date.now,
+    },
+    registeredAddress: {
+      full_name: {
+        type: String, // Conatct Person Name
+        required: [true, "Full name is required for address"],
+      },
+      mobile_number: {
+        type: String, // Conatct Person Mobile
+        required: [true, "Phone number is required for address"],
+      },
+      country_code: {
+        type: String, // Conatct Person Country code
+        required: [true, "Country code is required for address"],
+      },
+      company_reg_address: {
+        type: String, // Company Name
+        required: [true, "Building Name is required for address"],
+      },
+      locality: {
+        type: String, // Address Line 1
+        required: [true, "Street is required for address"],
+      },
+      land_mark: {
+        type: String, // Address Line 2
+      },
+      city: {
+        type: String,
+        // required: [true, "City is required for address"],
+      },
+      state: {
+        type: String,
+        // required: [true, "State is required for address"],
+      },
+      country: {
+        type: String,
+        required: [true, "Country is required for address"],
+      },
+      pincode: { type: String },
+      type: {
+        type: String,
+        default: "Registered",
+      },
     },
   },
   { timestamps: true }

@@ -10,10 +10,6 @@ const addressSchema = new mongoose.Schema(
       type: String,
       required: [true, "Full name is required for address"],
     },
-    // email: {
-    //   type: String,
-    //   required: [true, "Email is required for address"],
-    // },
     mobile_number: {
       type: String,
       required: [true, "Phone number is required for address"],
@@ -25,6 +21,9 @@ const addressSchema = new mongoose.Schema(
     locality: {
       type: String,
       required: [true, "Street is required for address"],
+    },
+    land_mark: {
+      type: String,       
     },
     city: {
       type: String,

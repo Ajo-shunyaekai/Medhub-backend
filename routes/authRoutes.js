@@ -95,6 +95,11 @@ const storage = multer.diskStorage({
         user_type === "Buyer"
           ? "./uploads/buyer/certificate_images"
           : user_type === "Supplier" && "./uploads/supplier/certificate_image";
+    } else if (file.fieldname === "medical_practitioner_image" || file.fieldname === "new_medical_practitioner_image") {
+      uploadPath =
+        user_type === "Buyer"
+          ? "./uploads/buyer/medical_practitioner_images"
+          : user_type === "Supplier" && "./uploads/supplier/medical_practitioner_image";
     }
 
     cb(null, uploadPath);
@@ -119,6 +124,7 @@ const cpUpload = (req, res, next) => {
     { name: 'license_image', maxCount: 10 },
     { name: 'tax_image', maxCount: 10},
     { name: 'certificate_image', maxCount: 10 },
+    { name: 'medical_practitioner_image', maxCount: 10 },
     { name: "new_buyer_image", maxCount: 1 },
     { name: "new_license_image", maxCount: 10 },
     { name: "new_tax_image", maxCount: 10 },
@@ -127,12 +133,11 @@ const cpUpload = (req, res, next) => {
     { name: 'new_license_image', maxCount: 10 },
     { name: 'new_tax_image', maxCount: 10},
     { name: 'new_certificate_image', maxCount: 10 },
+    { name: 'new_medical_practitioner_image', maxCount: 10 },
   ])(req, res, (err) => {
     if (err) {
       console.error("Multer Error:", err);
       return sendErrorResponse(res, 500, "File upload error", err);
-      res.status(500).json({ error: "File upload error" });
-      return;
     }
     // console.log("After Multer", req); // Log after Multer processes the request
     next();
