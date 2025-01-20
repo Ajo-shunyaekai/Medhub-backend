@@ -73,7 +73,7 @@ module.exports = {
         registration_no,
         description,
         vat_reg_no,
-        trade_code
+        trade_code,
       } = req.body;
 
       let regObj = {};
@@ -318,7 +318,7 @@ module.exports = {
         tags: regObj.tags,
         registration_no: regObj.registration_no,
         vat_reg_no: regObj.vat_reg_no,
-        trade_code : regObj.trade_code,
+        trade_code: regObj.trade_code,
         token: token,
         account_status: 0,
         profile_status: 0,
@@ -351,7 +351,7 @@ module.exports = {
         license_image: regObj?.license_image,
         certificate_image: regObj?.certificate_image,
         vat_reg_no: regObj?.vat_reg_no,
-        trade_code : regObj.trade_code,
+        trade_code: regObj.trade_code,
         token: token,
         account_status: 0,
         profile_status: 0,
@@ -636,6 +636,15 @@ module.exports = {
         );
       }
 
+      // If the user registration is yet not confirmed by the admin, return an error response
+      if (user?.account_status != 1) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Registration Confirmation is stilpending with the admin"
+        );
+      }
+
       // Generate a new OTP and its expiry time (10 minutes ahead)
       const otp = Math.random()?.toString()?.slice(2, 8);
       const currentDate = new Date();
@@ -891,6 +900,15 @@ module.exports = {
           res,
           400,
           "Email not registered. Please provide a registered address."
+        );
+      }
+
+      // If the user registration is yet not confirmed by the admin, return an error response
+      if (user?.account_status != 1) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Registration Confirmation is stilpending with the admin"
         );
       }
 
@@ -1774,7 +1792,13 @@ module.exports = {
     return await profileReq.save();
   },
 
-  checkPasswords: async (oldPassword, newPassword, user) => {
+  checkPasswords: async (oldPassword, newPassword, confirmPassword, user) => {
+    if (newPassword?.trim() != confirmPassword?.trim()) {
+      return {
+        valid: false,
+        message: "confirm password is not same as new password.",
+      };
+    }
     const isOldPwdMatch = await bcrypt.compare(
       oldPassword?.trim(),
       user?.password
@@ -1802,8 +1826,15 @@ module.exports = {
     try {
       const { id } = req?.params;
       const { user_type } = req?.headers;
-      const { newPassword, oldPassword, name, email, phone, address } =
-        req?.body;
+      const {
+        newPassword,
+        oldPassword,
+        confirmPassword,
+        name,
+        email,
+        phone,
+        address,
+      } = req?.body;
       const isPasswordUpdate = newPassword?.trim();
 
       let user;
@@ -1820,7 +1851,7 @@ module.exports = {
       }
 
       const { valid, message } = isPasswordUpdate
-        ? await checkPasswords(oldPassword, newPassword, user)
+        ? await checkPasswords(oldPassword, newPassword, confirmPassword, user)
         : { valid: true };
       if (!valid) return sendErrorResponse(res, 400, message);
 
