@@ -274,7 +274,7 @@ console.log('req.body',req.body)
             full_name: contact_person_email || "",
             mobile_number: person_mob_no || "",
             country_code: personCountryCode || "",
-            company_reg_address: supplier_address || "",
+            company_reg_address: req.body.supplier_address || "",
             locality: locality || "",
             land_mark: land_mark || "",
             city: city || "",
