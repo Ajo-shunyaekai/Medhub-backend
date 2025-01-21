@@ -153,6 +153,13 @@ const buyerSchema = new Schema(
         required: [true, "Validation Error : certificate_image is required"],
       },
     ],
+    medical_certificate: [
+      {
+        type: String,
+        trim: true,
+        required: [true, "Validation Error : medical_certificate_image is required"],
+      },
+    ],
     buyer_image: [
       {
         type: String,

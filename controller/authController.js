@@ -175,6 +175,9 @@ console.log('req.body',req.body)
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
+          medical_certificate: req.files["medical_practitioner_image"]?.map((file) =>
+            path.basename(file.path)
+          ),
           registeredAddress: {
             full_name: contact_person_name || "",
             mobile_number: person_mob_no || "",
@@ -270,6 +273,9 @@ console.log('req.body',req.body)
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
+          medical_certificate: req.files["medical_practitioner_image"].map((file) =>
+            path.basename(file.path)
+          ),
           registeredAddress: {
             full_name: contact_person_email || "",
             mobile_number: person_mob_no || "",
@@ -363,6 +369,7 @@ console.log('req.body',req.body)
         supplier_image: regObj.supplier_image,
         license_image: regObj.license_image,
         certificate_image: regObj.certificate_image,
+        medical_certificate : regObj.medical_certificate,
         tax_image: regObj.tax_image,
         payment_terms: regObj.payment_terms,
         estimated_delivery_time: regObj.estimated_delivery_time,
@@ -402,6 +409,7 @@ console.log('req.body',req.body)
         tax_image: regObj?.tax_image,
         license_image: regObj?.license_image,
         certificate_image: regObj?.certificate_image,
+        medical_certificate : regObj.medical_certificate,
         vat_reg_no: regObj?.vat_reg_no,
         trade_code: regObj.trade_code,
         registeredAddress: regObj.registeredAddress,
