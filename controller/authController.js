@@ -74,6 +74,11 @@ module.exports = {
         description,
         vat_reg_no,
         trade_code,
+        locality,
+        city,
+        state,
+        country,
+        pincode,
       } = req.body;
 
       let regObj = {};
@@ -111,6 +116,16 @@ module.exports = {
             res,
             415,
             "Company certificate image is required."
+          );
+        }
+        if (
+          req?.body?.buyer_type == 'Medical Practitioner' && (!req.files["medical_practitioner_image"] ||
+          req.files["medical_practitioner_image"].length === 0)
+        ) {
+          return sendErrorResponse(
+            res,
+            415,
+            "Medical Practitioner Certificate image is required."
           );
         }
 
@@ -158,6 +173,18 @@ module.exports = {
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
+          registeredAddress: {
+            full_name: contact_person_email || "",
+            mobile_number: person_mob_no || "",
+            country_code: buyerCountryCode || "",
+            company_reg_address: buyer_address || "",
+            locality: locality || "",
+            land_mark: land_mark || "",
+            city: city || "",
+            state: state || "",
+            country: country || "",
+            pincode: pincode || "",
+          }
         };
 
         // Validate registration fields using a custom validation function
@@ -201,6 +228,16 @@ module.exports = {
             "Supplier Certificate image is required."
           );
         }
+        if (
+          req?.body?.supplier_type == 'Medical Practitioner' && (!req.files["medical_practitioner_image"] ||
+          req.files["medical_practitioner_image"].length === 0)
+        ) {
+          return sendErrorResponse(
+            res,
+            415,
+            "Medical Practitioner Certificate image is required."
+          );
+        }
 
         const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
         const supplier_mobile_number = req.body.supplier_mobile_no
@@ -231,6 +268,18 @@ module.exports = {
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
+          registeredAddress: {
+            full_name: contact_person_email || "",
+            mobile_number: person_mob_no || "",
+            country_code: personCountryCode || "",
+            company_reg_address: supplier_address || "",
+            locality: locality || "",
+            land_mark: land_mark || "",
+            city: city || "",
+            state: state || "",
+            country: country || "",
+            pincode: pincode || "",
+          }
         };
 
         const errObj = validation(regObj, "supplierRegister");

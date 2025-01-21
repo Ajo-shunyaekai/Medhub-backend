@@ -28,6 +28,7 @@ const invoiceRouter   = require('./routes/invoiceRoutes')()
 const authRoutes      = require(`./routes/authRoutes`);
 const logErrorToFile  = require('./logs/errorLogs');
 const { sendErrorResponse } = require('./utils/commonResonse');
+const { rateLimiter } = require('./middleware/expressRateLimiter');
 
 // const addressRoutes   = require(`./routes/addressRoutes`)
 // const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
@@ -87,6 +88,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
+app.use(rateLimiter)
 
 app.use(bodyParser.json({ limit: '500000mb' }));
 
