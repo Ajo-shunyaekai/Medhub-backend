@@ -113,6 +113,11 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
+    activity_code: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     supplier_image: [
       {
         type: String,
@@ -139,6 +144,13 @@ const supplierSchema = new Schema(
         type: String,
         required: true,
         trim: true,
+      },
+    ],
+    medical_practitioner_image: [
+      {
+        type: String,
+        trim: true,
+        // required: [true, "Validation Error : medical_practitioner_image is required"],
       },
     ],
     payment_terms: {

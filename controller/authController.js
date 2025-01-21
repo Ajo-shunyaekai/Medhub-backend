@@ -75,10 +75,12 @@ module.exports = {
         vat_reg_no,
         trade_code,
         locality,
+        land_mark,
         city,
         state,
         country,
         pincode,
+        activity_code,
       } = req.body;
 
       let regObj = {};
@@ -161,6 +163,7 @@ module.exports = {
           trade_code,
           buyer_mobile: buyer_mobile_number,
           buyer_country_code: buyerCountryCode,
+          activity_code,
           buyer_image: req.files["buyer_image"].map((file) =>
             path.basename(file.path)
           ),
@@ -171,6 +174,9 @@ module.exports = {
             path.basename(file.path)
           ),
           certificate_image: req.files["certificate_image"].map((file) =>
+            path.basename(file.path)
+          ),
+          medical_practitioner_image: req.files["medical_practitioner_image"].map((file) =>
             path.basename(file.path)
           ),
           registeredAddress: {
@@ -252,6 +258,7 @@ module.exports = {
 
         regObj = {
           ...req.body,
+          activity_code,
           supplier_mobile: supplier_mobile_number,
           supplier_country_code: supplierCountryCode,
           contact_person_mobile_no: person_mob_no,
@@ -268,11 +275,14 @@ module.exports = {
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
+          medical_practitioner_image: req.files["medical_practitioner_image"].map((file) =>
+            path.basename(file.path)
+          ),
           registeredAddress: {
             full_name: contact_person_email || "",
             mobile_number: person_mob_no || "",
             country_code: personCountryCode || "",
-            company_reg_address: supplier_address || "",
+            company_reg_address:  req.body.supplier_address || "",
             locality: locality || "",
             land_mark: land_mark || "",
             city: city || "",
@@ -349,6 +359,9 @@ module.exports = {
         supplier_country_code: regObj.supplier_country_code,
         license_no: regObj.license_no,
         license_expiry_date: regObj.license_expiry_date,
+        medical_practitioner_image: regObj?.medical_practitioner_image,
+        activity_code: regObj?.activity_code,
+        registeredAddress: regObj.registeredAddress,
         tax_no: regObj.tax_no,
         // registration_no             : regobj.registration_no,
         country_of_origin: regObj.country_of_origin,
@@ -399,6 +412,9 @@ module.exports = {
         tax_image: regObj?.tax_image,
         license_image: regObj?.license_image,
         certificate_image: regObj?.certificate_image,
+        medical_practitioner_image: regObj?.medical_practitioner_image,
+        activity_code: regObj?.activity_code,
+        registeredAddress: regObj.registeredAddress,
         vat_reg_no: regObj?.vat_reg_no,
         trade_code: regObj.trade_code,
         token: token,

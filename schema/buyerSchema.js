@@ -71,6 +71,11 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : contact_person_email is required"],
     },
+    activity_code: {
+      type: String,
+      required: [true, "Validation Error : activity_code is required"],
+      trim: true,
+    },
     contact_person_mobile: {
       type: String,
       trim: true,
@@ -151,6 +156,13 @@ const buyerSchema = new Schema(
         type: String,
         trim: true,
         required: [true, "Validation Error : certificate_image is required"],
+      },
+    ],
+    medical_practitioner_image: [
+      {
+        type: String,
+        trim: true,
+        // required: [true, "Validation Error : medical_practitioner_image is required"],
       },
     ],
     buyer_image: [
