@@ -23,7 +23,7 @@ const buyerSchema = new Schema(
     buyer_address: {
       type: String,
       trim: true,
-      required: [true, "Validation Error : buyer_address is required"],
+      // required: [true, "Validation Error : buyer_address is required"],
     },
     buyer_email: {
       type: String,

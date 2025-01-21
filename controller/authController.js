@@ -74,13 +74,14 @@ module.exports = {
         description,
         vat_reg_no,
         trade_code,
+        land_mark,
         locality,
         city,
         state,
         country,
         pincode,
       } = req.body;
-
+console.log('req.body',req.body)
       let regObj = {};
 
       if (!user_type) {
@@ -159,6 +160,7 @@ module.exports = {
           description,
           vat_reg_no,
           trade_code,
+          land_mark,
           buyer_mobile: buyer_mobile_number,
           buyer_country_code: buyerCountryCode,
           buyer_image: req.files["buyer_image"].map((file) =>
@@ -174,9 +176,9 @@ module.exports = {
             path.basename(file.path)
           ),
           registeredAddress: {
-            full_name: contact_person_email || "",
+            full_name: contact_person_name || "",
             mobile_number: person_mob_no || "",
-            country_code: buyerCountryCode || "",
+            country_code: personCountryCode || "",
             company_reg_address: buyer_address || "",
             locality: locality || "",
             land_mark: land_mark || "",
@@ -368,6 +370,7 @@ module.exports = {
         registration_no: regObj.registration_no,
         vat_reg_no: regObj.vat_reg_no,
         trade_code: regObj.trade_code,
+        registeredAddress: regObj.registeredAddress,
         token: token,
         account_status: 0,
         profile_status: 0,
@@ -401,6 +404,7 @@ module.exports = {
         certificate_image: regObj?.certificate_image,
         vat_reg_no: regObj?.vat_reg_no,
         trade_code: regObj.trade_code,
+        registeredAddress: regObj.registeredAddress,
         token: token,
         account_status: 0,
         profile_status: 0,

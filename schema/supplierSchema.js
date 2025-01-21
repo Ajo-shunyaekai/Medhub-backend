@@ -27,7 +27,7 @@ const supplierSchema = new Schema(
     },
     supplier_address: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     supplier_email: {

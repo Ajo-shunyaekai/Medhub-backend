@@ -2383,14 +2383,15 @@ getRegReqList: async (req, reqObj, callback) => {
           // Handle the success message based on status and action
           if (action === 'accept') {
               subject = 'Medicine Added Successfully';
-              body = `Hello ${supplier_name}, <br />
-                  Your medicine request has been approved and added successfully. <br />
-                  Medicine ID: ${updateStatus.medicine_id} <br />
-                  Supplier ID: ${updateStatus.supplier_id} <br />
-                  <br /><br />
-                  <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                  Thanks & Regards <br />
-                  MedHub Global Team`;
+              body = `Hello ${supplier_name}, <br /><br />
+                      We are pleased to inform you that your medicine request has been approved and successfully added to our records. Below are the details for your reference: <br /><br />
+                      <strong>Medicine ID:</strong> ${updateStatus.medicine_id} <br />
+                      <strong>Medicine Name:</strong> ${updateStatus.medicine_name} <br />
+                      <strong>Supplier ID:</strong> ${updateStatus.supplier_id} <br /><br />
+                      If you require further assistance or have any queries, feel free to contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>. <br /><br />
+                      Thank you for being a valued partner. <br /><br />
+                      Best regards, <br />
+                      <strong>MedHub Global Team</strong>`;
 
               // Determine event type based on medicine_type
               event = medicine_type === 'new' ? 'addnewmedicine' : 'addsecondarymedicine';
