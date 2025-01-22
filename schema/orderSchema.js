@@ -301,7 +301,11 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
-    deposit_due: {
+    // deposit_due: {
+    //     type: String,
+    //     required: true
+    // },
+    deposit_due_date: {
         type: String,
         required: true
     },
