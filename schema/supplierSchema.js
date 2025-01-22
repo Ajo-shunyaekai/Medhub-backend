@@ -113,6 +113,11 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
+    activity_code: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     supplier_image: [
       {
         type: String,
@@ -145,7 +150,7 @@ const supplierSchema = new Schema(
       {
         type: String,
         trim: true,
-        required: true,
+        // required: [true, "Validation Error : medical_practitioner_image is required"],
       },
     ],
     payment_terms: {
@@ -202,18 +207,18 @@ const supplierSchema = new Schema(
       default: Date.now,
     },
     registeredAddress: {
-      full_name: {
-        type: String, // Conatct Person Name
-        required: [true, "Full name is required for address"],
-      },
-      mobile_number: {
-        type: String, // Conatct Person Mobile
-        required: [true, "Phone number is required for address"],
-      },
-      country_code: {
-        type: String, // Conatct Person Country code
-        required: [true, "Country code is required for address"],
-      },
+      // full_name: {
+      //   type: String, // Conatct Person Name
+      //   required: [true, "Full name is required for address"],
+      // },
+      // mobile_number: {
+      //   type: String, // Conatct Person Mobile
+      //   required: [true, "Phone number is required for address"],
+      // },
+      // country_code: {
+      //   type: String, // Conatct Person Country code
+      //   required: [true, "Country code is required for address"],
+      // },
       company_reg_address: {
         type: String, // Company Name
         required: [true, "Building Name is required for address"],
@@ -240,6 +245,7 @@ const supplierSchema = new Schema(
       pincode: { type: String },
       type: {
         type: String,
+        enum: ["Registered"],
         default: "Registered",
       },
     },

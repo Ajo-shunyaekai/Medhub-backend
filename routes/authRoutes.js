@@ -20,10 +20,12 @@ const {
   verifyOTP,
   resetPassword,
   updatePassword,
-  addProfileEditRequest,
-  verifyEmailAndResendOTP
+  // addProfileEditRequest,
+  verifyEmailAndResendOTP,
+  updateProfileAndSendEditRequest
 } = require(`../controller/authController`);
 const { sendErrorResponse } = require('../utils/commonResonse');
+const { validateUserInput, handleValidationErrors } = require('../middleware/validations/editProfile');
  
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
@@ -151,7 +153,8 @@ router.post(`/resend-otp`, verifyEmailAndResendOTP);
 router.post(`/verify-otp`, verifyOTP);
 router.post(`/reset-password`, resetPassword);
 router.post(`/update-password/:id`, updatePassword);
-router.post(`/request-profile-edit/:id`, checkAuthorization, cpUpload, addProfileEditRequest);
+// router.post(`/request-profile-edit/:id`, checkAuthorization, cpUpload, addProfileEditRequest);
+router.put(`/:id`, checkAuthorization, cpUpload, validateUserInput, handleValidationErrors, updateProfileAndSendEditRequest);
 
 router.post(`/:id`, getLoggedinUserProfileDetails);
 

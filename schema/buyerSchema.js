@@ -71,6 +71,11 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : contact_person_email is required"],
     },
+    activity_code: {
+      type: String,
+      required: [true, "Validation Error : activity_code is required"],
+      trim: true,
+    },
     contact_person_mobile: {
       type: String,
       trim: true,
@@ -157,7 +162,7 @@ const buyerSchema = new Schema(
       {
         type: String,
         trim: true,
-        required: [true, "Validation Error : medical_certificate_image is required"],
+        // required: [true, "Validation Error : medical_certificate_image is required"],
       },
     ],
     buyer_image: [
@@ -202,21 +207,21 @@ const buyerSchema = new Schema(
       default: Date.now,
     },
     registeredAddress: {
-      full_name: {
-        type: String, // Conatct Person Name
-        required: [true, "Full name is required for address"],
-      },
-      mobile_number: {
-        type: String, // Conatct Person Mobile
-        required: [true, "Phone number is required for address"],
-      },
-      country_code: {
-        type: String, // Conatct Person Country code
-        required: [true, "Country code is required for address"],
-      },
+      // full_name: {
+      //   type: String, // Conatct Person Name
+      //   required: [true, "Full name is required for address"],
+      // },
+      // mobile_number: {
+      //   type: String, // Conatct Person Mobile
+      //   required: [true, "Phone number is required for address"],
+      // },
+      // country_code: {
+      //   type: String, // Conatct Person Country code
+      //   required: [true, "Country code is required for address"],
+      // },
       company_reg_address: {
-        type: String, // Company Name
-        required: [true, "Building Name is required for address"],
+        type: String, // Company Billing Address
+        required: [true, "Company Billing Address is required for address"],
       },
       locality: {
         type: String, // Address Line 1
@@ -240,6 +245,7 @@ const buyerSchema = new Schema(
       pincode: { type: String },
       type: {
         type: String,
+        enum: ["Registered"],
         default: "Registered",
       },
     },
