@@ -145,7 +145,7 @@ const supplierSchema = new Schema(
       {
         type: String,
         trim: true,
-        required: [true, "Validation Error : medical_certificate_image is required"],
+        required: true,
       },
     ],
     payment_terms: {
@@ -158,9 +158,9 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
-    trade_code: {
+    activity_code: {
       type: String,
-      // required: true,
+      required: true,
       trim: true,
     },
     estimated_delivery_time: {

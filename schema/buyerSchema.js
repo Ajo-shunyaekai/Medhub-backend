@@ -51,10 +51,10 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : vat_reg_no is required"],
     },
-    trade_code: {
+    activity_code: {
       type: String,
       trim: true,
-      // required: [true, "Validation Error : vat_reg_no is required"],
+      required: [true, "Validation Error : activity_code is required"],
     },
     contact_person_name: {
       type: String,
