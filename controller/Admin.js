@@ -652,7 +652,7 @@ getRegReqList: async (req, reqObj, callback) => {
                 You can now access your account using the following login details:<br /><br />
 
                 <strong>Login URL:</strong> ${process.env.SUPPLIER_LOGIN_URL} <br />
-                <strong>Username:</strong> ${updateProfile.supplier_email} <br />
+                <strong>Username:</strong> ${updateProfile.contact_person_email} <br />
                 <strong>Temporary Password:</strong> ${password} <br /><br />
 
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
