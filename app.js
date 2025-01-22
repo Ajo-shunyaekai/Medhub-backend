@@ -88,7 +88,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
-app.use(rateLimiter)
+// app.use(rateLimiter)
 
 app.use(bodyParser.json({ limit: '500000mb' }));
 
