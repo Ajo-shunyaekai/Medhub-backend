@@ -27,7 +27,7 @@ const supplierSchema = new Schema(
     },
     supplier_address: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     supplier_email: {
@@ -146,7 +146,7 @@ const supplierSchema = new Schema(
         trim: true,
       },
     ],
-    medical_practitioner_image: [
+    medical_certificate: [
       {
         type: String,
         trim: true,
@@ -163,9 +163,9 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
-    trade_code: {
+    activity_code: {
       type: String,
-      // required: true,
+      required: true,
       trim: true,
     },
     estimated_delivery_time: {

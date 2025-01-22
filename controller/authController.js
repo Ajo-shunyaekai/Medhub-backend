@@ -64,6 +64,7 @@ module.exports = {
         designation,
         contact_person_email,
         contact_person_mobile,
+        sales_person_name,
         country_of_origin,
         country_of_operation,
         approx_yearly_purchase_value,
@@ -74,16 +75,15 @@ module.exports = {
         registration_no,
         description,
         vat_reg_no,
-        trade_code,
-        locality,
         land_mark,
+        locality,
         city,
         state,
         country,
         pincode,
         activity_code,
       } = req.body;
-
+console.log('req.body',req.body)
       let regObj = {};
 
       if (!user_type) {
@@ -152,6 +152,7 @@ module.exports = {
           contact_person_email,
           contact_person_mobile: person_mob_no,
           contact_person_country_code: personCountryCode,
+          sales_person_name,
           country_of_origin,
           country_of_operation,
           approx_yearly_purchase_value,
@@ -162,7 +163,8 @@ module.exports = {
           registration_no,
           description,
           vat_reg_no,
-          trade_code,
+          activity_code,
+          land_mark,
           buyer_mobile: buyer_mobile_number,
           buyer_country_code: buyerCountryCode,
           activity_code,
@@ -178,13 +180,13 @@ module.exports = {
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
-          medical_practitioner_image: req.files[
-            "medical_practitioner_image"
-          ].map((file) => path.basename(file.path)),
+          medical_certificate: req.files["medical_practitioner_image"]?.map((file) =>
+            path.basename(file.path)
+          ),
           registeredAddress: {
-            full_name: contact_person_email || "",
+            full_name: contact_person_name || "",
             mobile_number: person_mob_no || "",
-            country_code: buyerCountryCode || "",
+            country_code: personCountryCode || "",
             company_reg_address: buyer_address || "",
             locality: locality || "",
             land_mark: land_mark || "",
@@ -278,9 +280,9 @@ module.exports = {
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
-          medical_practitioner_image: req.files[
-            "medical_practitioner_image"
-          ].map((file) => path.basename(file.path)),
+          medical_certificate: req.files["medical_practitioner_image"].map((file) =>
+            path.basename(file.path)
+          ),
           registeredAddress: {
             full_name: contact_person_email || "",
             mobile_number: person_mob_no || "",
@@ -374,16 +376,19 @@ module.exports = {
         contact_person_mobile_no: regObj.contact_person_mobile_no,
         contact_person_country_code: regObj.contact_person_country_code,
         contact_person_email: regObj.contact_person_email,
+        sales_person_name: regObj.sales_person_name,
         supplier_image: regObj.supplier_image,
         license_image: regObj.license_image,
         certificate_image: regObj.certificate_image,
+        medical_certificate : regObj.medical_certificate,
         tax_image: regObj.tax_image,
         payment_terms: regObj.payment_terms,
         estimated_delivery_time: regObj.estimated_delivery_time,
         tags: regObj.tags,
         registration_no: regObj.registration_no,
         vat_reg_no: regObj.vat_reg_no,
-        trade_code: regObj.trade_code,
+        activity_code: regObj.activity_code,
+        registeredAddress: regObj.registeredAddress,
         token: token,
         account_status: 0,
         profile_status: 0,
@@ -401,6 +406,7 @@ module.exports = {
         contact_person_email: regObj?.contact_person_email,
         contact_person_mobile: regObj?.contact_person_mobile,
         contact_person_country_code: regObj?.contact_person_country_code,
+        sales_person_name : regObj.sales_person_name,
         country_of_origin: regObj?.country_of_origin,
         country_of_operation: regObj?.country_of_operation,
         approx_yearly_purchase_value: regObj?.approx_yearly_purchase_value,
@@ -415,11 +421,10 @@ module.exports = {
         tax_image: regObj?.tax_image,
         license_image: regObj?.license_image,
         certificate_image: regObj?.certificate_image,
-        medical_practitioner_image: regObj?.medical_practitioner_image,
-        activity_code: regObj?.activity_code,
-        registeredAddress: regObj.registeredAddress,
+        medical_certificate : regObj.medical_certificate,
         vat_reg_no: regObj?.vat_reg_no,
-        trade_code: regObj.trade_code,
+        activity_code: regObj.activity_code,
+        registeredAddress: regObj.registeredAddress,
         token: token,
         account_status: 0,
         profile_status: 0,

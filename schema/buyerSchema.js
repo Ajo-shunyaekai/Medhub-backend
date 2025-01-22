@@ -23,7 +23,7 @@ const buyerSchema = new Schema(
     buyer_address: {
       type: String,
       trim: true,
-      required: [true, "Validation Error : buyer_address is required"],
+      // required: [true, "Validation Error : buyer_address is required"],
     },
     buyer_email: {
       type: String,
@@ -51,10 +51,10 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : vat_reg_no is required"],
     },
-    trade_code: {
+    activity_code: {
       type: String,
       trim: true,
-      // required: [true, "Validation Error : vat_reg_no is required"],
+      required: [true, "Validation Error : activity_code is required"],
     },
     contact_person_name: {
       type: String,
@@ -158,11 +158,11 @@ const buyerSchema = new Schema(
         required: [true, "Validation Error : certificate_image is required"],
       },
     ],
-    medical_practitioner_image: [
+    medical_certificate: [
       {
         type: String,
         trim: true,
-        // required: [true, "Validation Error : medical_practitioner_image is required"],
+        // required: [true, "Validation Error : medical_certificate_image is required"],
       },
     ],
     buyer_image: [
