@@ -144,7 +144,7 @@ module.exports = () => {
         })
     })
 
-    routes.post('/accept-reject-profile-edit-req', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    routes.post('/action-profile-edit-req/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
         Controller.acceptRejectProfileEditRequest(req, req.body, result => {
             const response = handleResponse(result)
             res.send(response)

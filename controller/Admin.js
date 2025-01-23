@@ -18,13 +18,14 @@ const PurchaseOrder      = require('../schema/purchaseOrderSchema')
 const Invoices           = require('../schema/invoiceSchema')
 const BuyerProfileEdit   = require('../schema/buyerEditSchema')
 const SupplierProfileEdit   = require('../schema/supplierEditSchema')
+const ProfileEditRequest = require("../schema/profileEditRequestSchema");
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 const { parse } = require('json2csv');
 const fs = require('fs');
 const path = require('path');
 const { flattenData } = require('../utils/csvConverter');
-const { sendErrorResponse } = require('../utils/commonResonse');
+const { sendErrorResponse, sendSuccessResponse } = require('../utils/commonResonse');
 const logErrorToFile = require('../logs/errorLogs');
 
 const generatePassword = () => {
@@ -1893,117 +1894,75 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectProfileEditRequest : async (req, reqObj, callback) => {
-      
+    acceptRejectProfileEditRequest: async (req, res) => {
+      const { id } = req?.params;
+      const { action } = req?.body;
+    
       try {
-        const { user_id, user_type, action } = reqObj
-        
-        const status = action == 'accept' ? 1 : 'reject' ? 2 : ''
-
-        if(status === 1) {
-          if(user_type === 'supplier') {
-            const isSupplier = await SupplierEdit.findOne({supplier_id : user_id, edit_status: 0})
-
-              if(!isSupplier) {
-                return callback({code: 402, message: 'supplier edit request not found'})
-              }
-            
-              await SupplierEdit.findOneAndUpdate({supplier_id: user_id}, {$set: {edit_status: status}})
-  
-                 const updateObj = {
-                  supplier_name               : isSupplier.supplier_name, 
-                  description                 : isSupplier.description, 
-                  supplier_address            : isSupplier.supplier_address, 
-                  supplier_email              : isSupplier.supplier_email, 
-                  supplier_mobile             : isSupplier.supplier_mobile, 
-                  supplier_country_code       : isSupplier.supplier_country_code, 
-                  contact_person_name         : isSupplier.contact_person_name,
-                  contact_person_mobile_no    : isSupplier.contact_person_mobile_no, 
-                  contact_person_country_code : isSupplier.contact_person_country_code, 
-                  contact_person_email        : isSupplier.contact_person_email, 
-                  designation                 : isSupplier.designation,
-                  country_of_origin           : isSupplier.country_of_origin, 
-                  country_of_operation        : isSupplier.country_of_operation, 
-                  license_no                  : isSupplier.license_no, 
-                  tax_no                      : isSupplier.tax_no, 
-                  payment_terms               : isSupplier.payment_terms, 
-                  tags                        : isSupplier.tags, 
-                  estimated_delivery_time     : isSupplier.estimated_delivery_time, 
-                  supplier_image              : isSupplier.supplier_image, 
-                  tax_image                   : isSupplier.tax_image, 
-                  license_image               : isSupplier.license_image,
-                  profile_status              : 1    
-                 };
-
-                  Supplier.findOneAndUpdate({supplier_id: isSupplier.supplier_id}, {$set: updateObj}, {new: true})
-                  .then((result) => {
-                    callback({code: 200, message : 'Profile details updated successfully', result: result})
-                  })
-                  .catch((err) => {
-                          callback({code: 400, message : 'Error while updating profile details ', result: err})
-                  })
-  
-          } else if(user_type === 'buyer') {
-            const isBuyer = await BuyerEdit.findOne({buyer_id : user_id, edit_status : 0})
-            console.log(isBuyer);
-            if(!isBuyer) {
-              callback({code: 402, message: 'Buyer edit request not found'})
-            }
-              const countryOfOperationString = isBuyer.country_of_operation.join(', '); 
-
-            BuyerEdit.findOneAndUpdate({buyer_id: user_id},
-              {
-                $set: {
-                edit_status : status}
-              }).then(async() => {
-  
-                const updateObj = {
-                  // buyer_id                 : isbuyer.buyer_id, 
-                  buyer_name                  : isBuyer.buyer_name, 
-                  description                 : isBuyer.description, 
-                  buyer_address               : isBuyer.buyer_address, 
-                  buyer_email                 : isBuyer.buyer_email, 
-                  buyer_mobile                : isBuyer.buyer_mobile, 
-                  buyer_country_code          : isBuyer.buyer_country_code, 
-                  contact_person_name         : isBuyer.contact_person_name,
-                  contact_person_mobile_no    : isBuyer.contact_person_mobile, 
-                  contact_person_country_code : isBuyer.contact_person_country_code, 
-                  contact_person_email        : isBuyer.contact_person_email, 
-                  designation                 : isBuyer.designation,
-                  country_of_origin           : isBuyer.country_of_origin, 
-                  country_of_operation        : countryOfOperationString,
-                  license_no                  : isBuyer.license_no, 
-                  tax_no                      : isBuyer.tax_no, 
-                  payment_terms               : isBuyer.payment_terms, 
-                  tags                        : isBuyer.tags, 
-                  estimated_delivery_time     : isBuyer.estimated_delivery_time, 
-                  buyer_image                 : isBuyer.buyer_image, 
-                  tax_image                   : isBuyer.tax_image, 
-                  license_image               : isBuyer.license_image,
-                  profile_status              : 1    
-                };
-                
-  
-                Buyer.findOneAndUpdate({buyer_id : isBuyer.buyer_id}, { $set: updateObj}, {new: true})
-                .then((result) => {
-                  callback({code: 200, message : 'Profile details updated successfully', result: result})
-                })
-                .catch((err) => {
-                  callback({code: 400, message : 'Error while updating profile details ', result: err})
-                })
-              })
-          }
-        } else if(status === 2) {
-          callback({code: 403, message : 'Request for edit profile details rejected'})
+        // Find the profile edit request
+        const profileReq = await ProfileEditRequest?.findById(id);
+        if (!profileReq) {
+          return sendErrorResponse(res, 400, "Failed to fetch profile request.");
         }
-        
-
+    
+        // Find the user to update profile request
+        const profile = await (profileReq?.userSchemaReference)?.findById(profileReq?.userId);
+        if (!profile) {
+          return sendErrorResponse(res, 400, "Failed to fetch profile data to update details.");
+        }
+    
+        // Update the profile edit request status
+        const updatedProfileReq = await ProfileEditRequest?.findByIdAndUpdate(
+          profileReq?._id,
+          {
+            $set: {
+              editReqStatus: action,
+            },
+          },
+          { new: true }
+        );
+    
+        if (!updatedProfileReq) {
+          return sendErrorResponse(res, 400, "Failed to update profile edit request status.");
+        }
+    
+        // Update the profile with new address values, if any changes
+        const updatedProfile = await (profileReq?.userSchemaReference)?.findByIdAndUpdate(
+          profile?._id,
+          {
+            $set: {
+              registeredAddress: {
+                ...profile?.registeredAddress,
+                ...updatedProfileReq?.registeredAddress,
+              },
+              profile_status: action == 'Approved' ? 1 : 2
+            },
+          },
+          { new: true }
+        );
+    
+        if (!updatedProfile) {
+          return sendErrorResponse(res, 400, "Failed to update profile address.");
+        }
+    
+        // Return a success response
+        return sendSuccessResponse(
+          res,
+          200,
+          "Profile edit request processed successfully.",
+          {updatedProfileReq, updatedProfile}
+        );
       } catch (error) {
         console.log("Internal Server Error:", error);
         logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        return sendErrorResponse(
+          res,
+          500,
+          "An unexpected error occurred. Please try again later.",
+          error
+        );
       }
-    },
+    },    
 
     orderDetails : async (req, reqObj, callback) => {
       try {
