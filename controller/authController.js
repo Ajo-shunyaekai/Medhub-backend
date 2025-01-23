@@ -40,6 +40,7 @@ const {
   buyerRegistrationContent,
   otpForResetPasswordContent,
   profileEditRequestContent,
+  userRegistrationConfirmationContent,
 } = require("../utils/emailContents");
 const {
   sendErrorResponse,
@@ -466,12 +467,17 @@ console.log('req.body',req.body)
 
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
-        const subject = "New Registration Alert: Buyer Account Created";
 
+        const subject = "New Registration Alert: Buyer Account Created";
         const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
         const emailContent = await buyerRegistrationContent(buyer);
-        // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent);
+
+        const confirmationEmailRecipients = [buyer.contact_person_email, "ajo@shunyaekai.tech"]
+        const confirmationSubject = "Thank You for Registering on Medhub Global!";
+        const confirmationContent = await userRegistrationConfirmationContent(buyer, user_type)
+        await sendEmail(confirmationEmailRecipients, confirmationSubject, confirmationContent)
+        // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
 
         return sendSuccessResponse(
           res,
@@ -527,8 +533,12 @@ console.log('req.body',req.body)
         const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
-
         await sendEmail(recipientEmails, subject, emailContent);
+
+        const confirmationEmailRecipients = [supplier.contact_person_email, "ajo@shunyaekai.tech"]
+        const confirmationSubject = "Thank You for Registering on Medhub Global!";
+        const confirmationContent = await userRegistrationConfirmationContent(supplier, user_type)
+        await sendEmail(confirmationEmailRecipients, confirmationSubject, confirmationContent)
 
         return sendSuccessResponse(
           res,
