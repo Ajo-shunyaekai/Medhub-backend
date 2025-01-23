@@ -138,7 +138,7 @@ module.exports = {
             await newPO.save();
 
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-            const updatedOrderHistory = await addStageToOrderHistory(req, enquiry?._id, 'Purchase Order Created', new Date(), newPO?._id, 'Enquiry')
+            // const updatedOrderHistory = await addStageToOrderHistory(req, enquiry?._id, 'Purchase Order Created', new Date(), newPO?._id, 'Enquiry')
             
             const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
             const newNotification = new Notification({
