@@ -124,7 +124,8 @@ module.exports = {
         );
         if (!updatedPO) {
           return callback({ code: 404, message: 'Purchase Order not found', result: null });
-      }
+        }
+        
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
             notification_id : notificationId,

@@ -130,7 +130,7 @@ const userRegistrationConfirmationContent = (user, userType) => {
         <p>Dear ${user.contact_person_name},</p>
         <p>Thank you for registering on Medhub Global as a ${userType}. We are thrilled to have you onboard!</p>
         <p>We are currently reviewing the details you provided during registration. Once the review process is complete, you will receive an email confirmation from our team.</p>
-        <p>If you have any questions in the meantime, please feel free to reach out to our support team at <a href="mailto:support@medhubglobal.com">support@medhubglobal.com</a>.</p>
+        <p>If you have any questions in the meantime, please feel free to reach out to our support team at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
         <p>Thank you for choosing Medhub Global. We look forward to serving you!</p>
         <p>Best regards,<br/>Medhub Global Team</p>
         `

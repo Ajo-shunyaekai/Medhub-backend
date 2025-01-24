@@ -40,7 +40,7 @@ module.exports = () => {
             transaction_image: req.files['transaction_image'].map(file => path.basename(file.path))
         }
         
-        Invoice.updatePaymentStatus(obj, result => {
+        Invoice.updatePaymentStatus(req, obj, result => {
             const response = handleResponse(result);
             res.send(response);
         });

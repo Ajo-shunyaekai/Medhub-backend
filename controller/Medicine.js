@@ -1528,6 +1528,7 @@ module.exports = {
                   quantity          : 1,
                   medicine_type     : 1,
                   stocked_in        : 1,
+                  "inventory_info.quantity"          : 1,
                   "inventory_info.unit_price"        : 1,
                   "inventory_info.est_delivery_days" : 1,
                   "inventory_info.total_price"       : 1,

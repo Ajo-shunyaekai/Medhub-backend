@@ -56,6 +56,10 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : activity_code is required"],
     },
+    sales_person_name: {
+      type: String,
+      trim: true,
+    },
     contact_person_name: {
       type: String,
       trim: true,

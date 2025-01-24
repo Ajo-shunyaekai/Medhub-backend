@@ -665,7 +665,7 @@ getRegReqList: async (req, reqObj, callback) => {
                 `;
 
                 // Sending the email to multiple recipients
-                const recipientEmails = [updateProfile.supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                const recipientEmails = [updateProfile.contact_person_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
                 await sendMailFunc(recipientEmails.join(','), subject, body);
 
           // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Deliver', body);
@@ -976,7 +976,7 @@ getRegReqList: async (req, reqObj, callback) => {
                 You can now access your account using the following login details:<br /><br />
 
                 <strong>Login URL:</strong> ${process.env.BUYER_LOGIN_URL} <br />
-                <strong>Username:</strong> ${updateStatus.buyer_email} <br />
+                <strong>Username:</strong> ${updateStatus.contact_person_email} <br />
                 <strong>Temporary Password:</strong> ${password} <br /><br />
 
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
@@ -990,7 +990,7 @@ getRegReqList: async (req, reqObj, callback) => {
                 `;
 
                 // Sending the email to multiple recipients
-                const recipientEmails = [updateStatus.buyer_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                const recipientEmails = [updateStatus.contact_person_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
                 await sendMailFunc(recipientEmails.join(','), subject, body);
     
           return callback({
