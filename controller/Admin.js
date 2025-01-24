@@ -5240,7 +5240,27 @@ getRegReqList: async (req, reqObj, callback) => {
                 },
                 {
                     $addFields: {
-                        "order_items.medicine_details": "$medicine_details"
+                        "order_items.medicine_details": "$medicine_details",
+                        // Add extracted buyer registered address fields
+                        "buyer_registered_address": {
+                            company_reg_address: { $arrayElemAt: ["$buyer_details.registeredAddress.company_reg_address", 0] },
+                            locality           : { $arrayElemAt: ["$buyer_details.registeredAddress.locality", 0] },
+                            land_mark          : { $arrayElemAt: ["$buyer_details.registeredAddress.land_mark", 0] },
+                            city               : { $arrayElemAt: ["$buyer_details.registeredAddress.city", 0] },
+                            state              : { $arrayElemAt: ["$buyer_details.registeredAddress.state", 0] },
+                            country            : { $arrayElemAt: ["$buyer_details.registeredAddress.country", 0] },
+                            pincode            : { $arrayElemAt: ["$buyer_details.registeredAddress.pincode", 0] }
+                        },
+                        // Add extracted supplier registered address fields
+                        "supplier_registered_address": {
+                            company_reg_address: { $arrayElemAt: ["$supplier_details.registeredAddress.company_reg_address", 0] },
+                            locality           : { $arrayElemAt: ["$supplier_details.registeredAddress.locality", 0] },
+                            land_mark          : { $arrayElemAt: ["$supplier_details.registeredAddress.land_mark", 0] },
+                            city               : { $arrayElemAt: ["$supplier_details.registeredAddress.city", 0] },
+                            state              : { $arrayElemAt: ["$supplier_details.registeredAddress.state", 0] },
+                            country            : { $arrayElemAt: ["$supplier_details.registeredAddress.country", 0] },
+                            pincode            : { $arrayElemAt: ["$supplier_details.registeredAddress.pincode", 0] }
+                        }
                     }
                 },
                 {
@@ -5257,12 +5277,14 @@ getRegReqList: async (req, reqObj, callback) => {
                         buyer_address           : { $first: "$buyer_address" },
                         buyer_mobile            : { $first: "$buyer_mobile" },
                         buyer_country_code         : { $first: "$buyer_country_code" },
+                        buyer_registered_address: { $first: "$buyer_registered_address" },  // Already added
                         buyer_email             : { $first: "$buyer_email" },
                         buyer_regNo             : { $first: "$buyer_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
                         supplier_address        : { $first: "$supplier_address" },
                         supplier_mobile         : { $first: "$supplier_mobile" },
                         supplier_country_code         : { $first: "$supplier_country_code" },
+                        supplier_registered_address: { $first: "$supplier_registered_address" },  // Already added
                         supplier_email          : { $first: "$supplier_email" },
                         supplier_regNo          : { $first: "$supplier_regNo" },
                         supplier_name           : { $first: "$supplier_name" },

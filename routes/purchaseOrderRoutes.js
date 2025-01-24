@@ -42,7 +42,7 @@ module.exports = () => {
         Controller.getPODetails(req, req.body, result => {
             const response = handleResponse(result);
             res.send(response);
-        });
+        }, res);
     });
 
     routes.post('/edit-po', checkAuthorization, checkCommonUserAuthentication,(req, res) => {

@@ -318,16 +318,137 @@ module.exports = {
         }
     },
 
-    getPODetails: async (req, reqObj, callback) => {
+    getPODetails: async (req, reqObj, callback, res) => {
         try {
             const {purchaseOrder_id, buyer_id, supplier_id, enquiry_id} = reqObj
+            // PurchaseOrder.aggregate([
+            //     {
+            //         $match: {
+            //             purchaseOrder_id : purchaseOrder_id,
+            //             // buyer_id         : buyer_id,
+            //             // supplier_id      : supplier_id
+            //             // enquiry_id: enquiry_id
+            //         }
+            //     },
+            //     {
+            //         $lookup: {
+            //             from         : "enquiries",
+            //             localField   : "enquiry_id",
+            //             foreignField : "enquiry_id",
+            //             as           : "enquiry_details"
+            //         }
+            //     },
+            //     {
+            //         $lookup: {
+            //             from         : "buyers",
+            //             localField   : "buyer_id",
+            //             foreignField : "buyer_id",
+            //             as           : "buyer_details"
+            //         }
+            //     },
+            //     {
+            //         $lookup: {
+            //             from         : "suppliers",
+            //             localField   : "supplier_id",
+            //             foreignField : "supplier_id",
+            //             as           : "supplier_details"
+            //         }
+            //     },
+            //     {
+            //         $unwind: "$order_items"
+            //     },
+            //     {
+            //         $lookup: {
+            //             from         : "medicines",
+            //             localField   : "order_items.medicine_id",
+            //             foreignField : "medicine_id",
+            //             as           : "medicine_details"
+            //         }
+            //     },
+            //     {
+            //         $unwind: "$medicine_details"
+            //     },
+            //     {
+            //         $addFields: {
+            //             "order_items.medicine_details": "$medicine_details"
+            //         }
+            //     },
+            //     {
+            //         $group: {
+            //             _id                     : "$_id",
+            //             enquiry_id              : { $first: "$enquiry_id" },
+            //             purchaseOrder_id        : { $first: "$purchaseOrder_id" },
+            //             po_date                 : { $first: "$po_date" },
+            //             po_number               : { $first: "$po_number" },
+            //             additional_instructions : { $first: "$additional_instructions" },
+            //             po_status               : { $first: "$po_status" },
+            //             total_amount            : { $first: "$total_amount" },
+            //             buyer_name              : { $first: "$buyer_name" },
+            //             buyer_address           : { $first: "$buyer_address" },
+            //             buyer_mobile            : { $first: "$buyer_mobile" },
+            //             buyer_country_code      : { $first: "$buyer_country_code" },
+            //             // buyer_registered_address: {
+            //             //     company_reg_address: { $arrayElemAt: ["$buyer_details.registeredAddress.company_reg_address", 0] },
+            //             //     locality           : { $arrayElemAt: ["$buyer_details.registeredAddress.locality", 0] },
+            //             //     land_mark          : { $arrayElemAt: ["$buyer_details.registeredAddress.land_mark", 0] },
+            //             //     city               : { $arrayElemAt: ["$buyer_details.registeredAddress.city", 0] },
+            //             //     state              : { $arrayElemAt: ["$buyer_details.registeredAddress.state", 0] },
+            //             //     country            : { $arrayElemAt: ["$buyer_details.registeredAddress.country", 0] },
+            //             //     pincode            : { $arrayElemAt: ["$buyer_details.registeredAddress.pincode", 0] }
+            //             // },
+            //             // buyer_registered_address: {
+            //             //     company_reg_address: { $ifNull: [{ $arrayElemAt: ["$buyer_details.registeredAddress.company_reg_address", 0] }, ""] },
+            //             //     locality           : { $ifNull: [{ $arrayElemAt: ["$buyer_details.registeredAddress.locality", 0] }, ""] },
+            //             //     land_mark          : { $ifNull: [{ $arrayElemAt: ["$buyer_details.registeredAddress.land_mark", 0] }, ""] },
+            //             //     city               : { $ifNull: [{ $arrayElemAt: ["$buyer_details.registeredAddress.city", 0] }, ""] },
+            //             //     state              : { $ifNull: [{ $arrayElemAt: ["$buyer_details.registeredAddress.state", 0] }, ""] },
+            //             //     country            : { $ifNull: [{ $arrayElemAt: ["$buyer_details.registeredAddress.country", 0] }, ""] },
+            //             //     pincode            : { $ifNull: [{ $arrayElemAt: ["$buyer_details.registeredAddress.pincode", 0] }, ""] }
+            //             // },                        
+            //             buyer_email             : { $first: "$buyer_email" },
+            //             buyer_regNo             : { $first: "$buyer_regNo" },
+            //             supplier_name           : { $first: "$supplier_name" },
+            //             supplier_address        : { $first: "$supplier_address" },
+            //             supplier_mobile         : { $first: "$supplier_mobile" },
+            //             supplier_country_code   : { $first: "$supplier_country_code" },
+            //             // supplier_registered_address: {
+            //             //     company_reg_address: { $arrayElemAt: ["$supplier_details.registeredAddress.company_reg_address", 0] },
+            //             //     locality           : { $arrayElemAt: ["$supplier_details.registeredAddress.locality", 0] },
+            //             //     land_mark          : { $arrayElemAt: ["$supplier_details.registeredAddress.land_mark", 0] },
+            //             //     city               : { $arrayElemAt: ["$supplier_details.registeredAddress.city", 0] },
+            //             //     state              : { $arrayElemAt: ["$supplier_details.registeredAddress.state", 0] },
+            //             //     country            : { $arrayElemAt: ["$supplier_details.registeredAddress.country", 0] },
+            //             //     pincode            : { $arrayElemAt: ["$supplier_details.registeredAddress.pincode", 0] }
+            //             // },
+            //             // supplier_registered_address: {
+            //             //     company_reg_address: { $ifNull: [{ $arrayElemAt: ["$supplier_details.registeredAddress.company_reg_address", 0] }, ""] },
+            //             //     locality           : { $ifNull: [{ $arrayElemAt: ["$supplier_details.registeredAddress.locality", 0] }, ""] },
+            //             //     land_mark          : { $ifNull: [{ $arrayElemAt: ["$supplier_details.registeredAddress.land_mark", 0] }, ""] },
+            //             //     city               : { $ifNull: [{ $arrayElemAt: ["$supplier_details.registeredAddress.city", 0] }, ""] },
+            //             //     state              : { $ifNull: [{ $arrayElemAt: ["$supplier_details.registeredAddress.state", 0] }, ""] },
+            //             //     country            : { $ifNull: [{ $arrayElemAt: ["$supplier_details.registeredAddress.country", 0] }, ""] },
+            //             //     pincode            : { $ifNull: [{ $arrayElemAt: ["$supplier_details.registeredAddress.pincode", 0] }, ""] }
+            //             // },                        
+            //             supplier_email          : { $first: "$supplier_email" },
+            //             supplier_regNo          : { $first: "$supplier_regNo" },
+            //             supplier_name           : { $first: "$supplier_name" },
+            //             buyer_id                : { $first: "$buyer_id" },
+            //             supplier_id             : { $first: "$supplier_id" },
+            //             order_items             : { $push: "$order_items" },
+            //             buyer_details           : { $first: "$buyer_details" },
+            //             supplier_details        : { $first: "$supplier_details" },
+            //             enquiry_details         : { $first: "$enquiry_details" },
+            //         }
+            //     }
+            // ])
             PurchaseOrder.aggregate([
                 {
                     $match: {
-                        purchaseOrder_id : purchaseOrder_id,
-                        // buyer_id         : buyer_id,
-                        // supplier_id      : supplier_id
-                        // enquiry_id: enquiry_id
+                        purchaseOrder_id: purchaseOrder_id,
+                        // Uncomment the following if necessary
+                        // buyer_id       : buyer_id,
+                        // supplier_id    : supplier_id,
+                        // enquiry_id     : enquiry_id
                     }
                 },
                 {
@@ -370,7 +491,27 @@ module.exports = {
                 },
                 {
                     $addFields: {
-                        "order_items.medicine_details": "$medicine_details"
+                        "order_items.medicine_details": "$medicine_details",
+                        // Add extracted buyer registered address fields
+                        "buyer_registered_address": {
+                            company_reg_address: { $arrayElemAt: ["$buyer_details.registeredAddress.company_reg_address", 0] },
+                            locality           : { $arrayElemAt: ["$buyer_details.registeredAddress.locality", 0] },
+                            land_mark          : { $arrayElemAt: ["$buyer_details.registeredAddress.land_mark", 0] },
+                            city               : { $arrayElemAt: ["$buyer_details.registeredAddress.city", 0] },
+                            state              : { $arrayElemAt: ["$buyer_details.registeredAddress.state", 0] },
+                            country            : { $arrayElemAt: ["$buyer_details.registeredAddress.country", 0] },
+                            pincode            : { $arrayElemAt: ["$buyer_details.registeredAddress.pincode", 0] }
+                        },
+                        // Add extracted supplier registered address fields
+                        "supplier_registered_address": {
+                            company_reg_address: { $arrayElemAt: ["$supplier_details.registeredAddress.company_reg_address", 0] },
+                            locality           : { $arrayElemAt: ["$supplier_details.registeredAddress.locality", 0] },
+                            land_mark          : { $arrayElemAt: ["$supplier_details.registeredAddress.land_mark", 0] },
+                            city               : { $arrayElemAt: ["$supplier_details.registeredAddress.city", 0] },
+                            state              : { $arrayElemAt: ["$supplier_details.registeredAddress.state", 0] },
+                            country            : { $arrayElemAt: ["$supplier_details.registeredAddress.country", 0] },
+                            pincode            : { $arrayElemAt: ["$supplier_details.registeredAddress.pincode", 0] }
+                        }
                     }
                 },
                 {
@@ -387,29 +528,32 @@ module.exports = {
                         buyer_address           : { $first: "$buyer_address" },
                         buyer_mobile            : { $first: "$buyer_mobile" },
                         buyer_country_code      : { $first: "$buyer_country_code" },
+                        buyer_registered_address: { $first: "$buyer_registered_address" },  // Already added
                         buyer_email             : { $first: "$buyer_email" },
                         buyer_regNo             : { $first: "$buyer_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
                         supplier_address        : { $first: "$supplier_address" },
                         supplier_mobile         : { $first: "$supplier_mobile" },
                         supplier_country_code   : { $first: "$supplier_country_code" },
+                        supplier_registered_address: { $first: "$supplier_registered_address" },  // Already added
                         supplier_email          : { $first: "$supplier_email" },
                         supplier_regNo          : { $first: "$supplier_regNo" },
-                        supplier_name           : { $first: "$supplier_name" },
-                        buyer_id                : { $first: "$buyer_id" },
-                        supplier_id             : { $first: "$supplier_id" },
                         order_items             : { $push: "$order_items" },
                         buyer_details           : { $first: "$buyer_details" },
                         supplier_details        : { $first: "$supplier_details" },
-                        enquiry_details         : { $first: "$enquiry_details" },
+                        enquiry_details         : { $first: "$enquiry_details" }
                     }
                 }
-            ])
+            ])            
             .then((data) => {
                 callback({ code: 200, message: 'Purchase Order details' , result: data[0]});
             })
             .catch((err) => {
-                callback({ code: 400, message: 'Error while fetching purchase order details' , result: err});   
+                console.error("Error during aggregation:", err);  // Log the error
+                logErrorToFile(err, req);
+                return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", err);
+                callback({ code: 400, message: 'Error while fetching purchase order details', result: err });
+                // callback({ code: 400, message: 'Error while fetching purchase order details' , result: err});   
             })
         } catch (error) {
             console.log("Internal Server Error:", error);
