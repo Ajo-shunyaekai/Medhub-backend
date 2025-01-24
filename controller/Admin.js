@@ -599,7 +599,6 @@ getRegReqList: async (req, reqObj, callback) => {
         if (!supplier) {
           return callback({ code: 400, message: "Supplier not found" });
         }
-    
         const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
         const newProfileStatus = 1;
     
@@ -919,7 +918,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     acceptRejectBuyerRegReq: async (req, reqObj, callback) => {
       try {
-        const { buyer_id, action } = reqObj;
+        const { buyer_id, sales_person_name = '', action } = reqObj;
     
         const buyer = await Buyer.findOne({ buyer_id: buyer_id });
     
@@ -932,7 +931,7 @@ getRegReqList: async (req, reqObj, callback) => {
     
         const updateStatus = await Buyer.findOneAndUpdate(
           { buyer_id: buyer_id },
-          { account_status: newAccountStatus, profile_status: newProfileStatus },
+          { account_status: newAccountStatus, profile_status: newProfileStatus, sales_person_name },
           { new: true }
         );
     

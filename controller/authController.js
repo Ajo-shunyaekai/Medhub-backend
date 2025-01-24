@@ -85,7 +85,7 @@ module.exports = {
         activity_code,
       } = req.body;
 console.log('req.body',req.body)
-// return false
+
       let regObj = {};
  
       if (!user_type) {
