@@ -7,7 +7,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 
 module.exports = {
-    register : async (req, reqObj, callback) => {
+    register : async (req, res, reqObj, callback) => {
         try {
           const emailExists = await Seller.findOne({email : reqObj.email})
           if(emailExists) {
@@ -55,7 +55,7 @@ module.exports = {
         }
     },
 
-    login : async (req, reqObj, callback) => {
+    login : async (req, res, reqObj, callback) => {
         const password  = reqObj.password
         const email     = reqObj.email
   

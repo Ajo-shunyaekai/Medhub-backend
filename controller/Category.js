@@ -5,7 +5,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    addCategory : async (req, reqObj, callback) => {
+    addCategory : async (req, res, reqObj, callback) => {
         try {
             let category_id  = "CAT-" + Math.random().toString(16).slice(2);
 
@@ -27,7 +27,7 @@ module.exports = {
         }
     },
 
-    categoriesList : async (req, reqObj, callback) => {     
+    categoriesList : async (req, res, reqObj, callback) => {     
         try { 
             Category.find({}).select('category_id category_name description').then((data) => {
               callback({code: 200, message : 'Category list fetched successfully', result:data})
@@ -41,7 +41,7 @@ module.exports = {
         }     
     },
 
-    editCategory : async (req, reqObj, callback) => {
+    editCategory : async (req, res, reqObj, callback) => {
         try {
 
         } catch (error) {

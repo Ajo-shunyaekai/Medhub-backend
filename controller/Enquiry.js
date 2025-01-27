@@ -40,7 +40,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    getEnquiryList : async (req, reqObj, callback) => {
+    getEnquiryList : async (req, res, reqObj, callback) => {
         try {
         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
         const page_no   = pageNo || 1
@@ -137,7 +137,7 @@ module.exports = {
         }
     },
 
-    getEnquiryDetails: async (req, reqObj, callback) => {
+    getEnquiryDetails: async (req, res, reqObj, callback) => {
         try {
             const enquiry_id = req?.params?.id;
     
@@ -317,22 +317,22 @@ module.exports = {
                         "buyer.buyer_id"                       : "$buyer_details.buyer_id",
                         "buyer.buyer_name"                     : "$buyer_details.buyer_name",
                         "buyer.buyer_address"                  : "$buyer_details.buyer_address",
-                        "buyer.buyer_email"                    : "$buyer_details.buyer_email",
+                        "buyer.buyer_email"                    : "$buyer_details.contact_person_email",
                         "buyer.contact_person_email"           : "$buyer_details.contact_person_email",
                         "buyer.contact_person_mobile"          : "$buyer_details.contact_person_mobile",
                         "buyer.contact_person_country_code"    : "$buyer_details.contact_person_country_code",
                         "buyer.buyer_type"                     : "$buyer_details.buyer_type",
-                        "buyer.buyer_mobile"                   : "$buyer_details.buyer_mobile",
-                        "buyer.buyer_country_code"             : "$buyer_details.buyer_country_code",
+                        "buyer.buyer_mobile"                   : "$buyer_details.contact_person_mobile",
+                        "buyer.buyer_country_code"             : "$buyer_details.contact_person_country_code",
                         "buyer.country_of_origin"              : "$buyer_details.country_of_origin",
                         "buyer.buyer_image"                    : "$buyer_details.buyer_image",
                         "buyer.registration_no"                : "$buyer_details.registration_no",
                         "supplier.supplier_id"                 : "$supplier_details.supplier_id",
                         "supplier.supplier_name"               : "$supplier_details.supplier_name",
                         "supplier.supplier_type"               : "$supplier_details.supplier_type",
-                        "supplier.supplier_mobile"             : "$supplier_details.supplier_mobile",
-                        "supplier.supplier_country_code"       : "$supplier_details.supplier_country_code",
-                        "supplier.supplier_email"              : "$supplier_details.supplier_email",
+                        "supplier.supplier_mobile"             : "$supplier_details.contact_person_mobile_no",
+                        "supplier.supplier_country_code"       : "$supplier_details.contact_person_country_code",
+                        "supplier.supplier_email"              : "$supplier_details.contact_person_email",
                         "supplier.contact_person_email"        : "$supplier_details.contact_person_email",
                         "supplier.country_of_origin"           : "$supplier_details.country_of_origin",
                         "supplier.estimated_delivery_time"     : "$supplier_details.estimated_delivery_time",
@@ -357,7 +357,7 @@ module.exports = {
         }
     },
     
-    submitQuotation: async (req, reqObj, callback) => {
+    submitQuotation: async (req, res, reqObj, callback) => {
       try {
           const { enquiry_id, quotation_details, payment_terms, buyer_id, supplier_id } = reqObj;
 
@@ -430,7 +430,7 @@ module.exports = {
       }
     },
 
-    acceptRejectQuotation: async (req, reqObj, callback) => {
+    acceptRejectQuotation: async (req, res, reqObj, callback) => {
         try {
             const { enquiry_id, item_id, buyer_id, new_status } = reqObj;
 
@@ -467,7 +467,7 @@ module.exports = {
         }
     },
 
-    cancelEnquiry: async (req, reqObj, callback) => {
+    cancelEnquiry: async (req, res, reqObj, callback) => {
         try {
             const { supplier_id, buyer_id, status, enquiry_id, reason, comment } = reqObj;
 

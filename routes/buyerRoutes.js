@@ -2,7 +2,7 @@ const express                                    = require('express');
 let routes                                       = express.Router();
 const path                                       = require('path');
 const Controller                                 = require('../controller/Buyer')
-const { handleResponse }                         = require('../utils/utilities');
+const { handleResponse, handleController }                         = require('../utils/utilities');
 const {validation}                               = require('../utils/utilities')
 const {checkAuthorization, checkCommonUserAuthentication }  = require('../middleware/Authorization');
 const createMulterMiddleware = require('../utils/imageUpload')
@@ -17,8 +17,7 @@ const buyerUploadMiddleware = createMulterMiddleware([
 
 module.exports = () => {
 
-    routes.post('/register', checkAuthorization, buyerUploadMiddleware, async(req, res) => {
-      
+    routes.post('/register', checkAuthorization, buyerUploadMiddleware, async (req, res) => {
         if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
             res.send({ code: 415, message: 'Company Logo is required!', errObj: {} });
             return;
@@ -41,7 +40,6 @@ module.exports = () => {
         const person_mob_no       = req.body.contact_person_mobile.split(" ").slice(1).join(" ")
         const personCountryCode   = req.body.contact_person_mobile.split(" ")[0]; 
 
-
         const regObj = {
             ...req.body,
             buyer_mobile                : buyer_mobile_number,
@@ -61,10 +59,7 @@ module.exports = () => {
             return;
         }
         
-        Controller.Regsiter(req, regObj, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
+        handleController(Controller.Regsiter, req, res, regObj)
     });
 
     routes.post('/login', checkAuthorization, (req, res) => {
@@ -74,18 +69,10 @@ module.exports = () => {
             return;
         }
 
-        Controller.Login(req, req.body, result => {
-            let randomNumber   = Math.random().toString();
-            randomNumber       = randomNumber.substring(2, randomNumber.length);
-            res.cookie('userCookie', randomNumber, { maxAge: 900000, httpOnly: true });
-
-            const response = handleResponse(result);
-            res.send(response);
-        });
+        handleController(Controller.Login, req, res)
     });
 
     routes.post('/edit-profile-request', checkAuthorization, checkCommonUserAuthentication, buyerUploadMiddleware, (req, res) => {
-
         if (!req.files['buyer_image'] || req.files['buyer_image'].length === 0) {
             res.send({ code: 415, message: 'Buyer Logo is required!', errObj: {} });
             return;
@@ -121,174 +108,159 @@ module.exports = () => {
             res.send( { code : 419, message : 'All fields are required', errObj });
             return;
         }
-        // const countryCode  = req.body.mobile_no.split(" ")[0]; 
-        // const number       = req.body.mobile_no.split(" ").slice(1).join(" ")
-        
-        // const obj = {
-        //     ...req.body,
-        //     mobile: number,
-        //     countryCode
-        // }
-        // console.log('obj',obj);
 
-        Controller.EditProfile(req, regObj, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
+        handleController(Controller.EditProfile, req, res, regObj)
     });
 
-    routes.post('/get-specific-buyer-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.buyerProfileDetails(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
+    routes.post('/get-specific-buyer-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerProfileDetails, req, res));
     
-    routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.buyerProfileDetails(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supplierList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/my-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.mySupplierList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supplierDetails(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/supplier-product-list', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-        Controller.supplierProductList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/buyer-supplier-orders', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        
-        Controller.buyerSupplierOrdersList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/orders-summary-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        
-        Controller.buyerDashboardOrderDetails(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/orders-seller-country', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        
-        Controller.buyerOrderSellerCountry(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supportList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.supportDetails(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    //---------------------------------- add-to-list ---------------------------------//
-    routes.post('/add-to-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.addToList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/show-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.showList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/delete-list-item', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.deleteListItem(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/send-enquiry', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.sendEnquiry(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getNotificationList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/get-notification-details-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getNotificationDetailsList(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.updateStatus(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    routes.post('/get-invoice-count', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
-        Controller.getInvoiceCount(req, req.body, result => {
-            const response = handleResponse(result);
-            res.send(response);
-        });
-    });
-
-    // routes.post('/enquiry-list', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-
-    //     Controller.getEnquiryList(req, req.body, result => {
+    // routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.buyerProfileDetails(req, req.body, result => {
     //         const response = handleResponse(result);
     //         res.send(response);
     //     });
-    //  });
-
-    // routes.post('/enquiry-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
-
-    //     Controller.getEnquiryDetails(req, req.body, result => {
-    //             const response = handleResponse(result);
-    //             res.send(response);
-    //         });
     // });
+    routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerProfileDetails, req, res));
+
+    // routes.post('/supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.supplierList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierList, req, res));
+
+    // routes.post('/my-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.mySupplierList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/my-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.mySupplierList, req, res));
+
+    // routes.post('/supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.supplierDetails(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierDetails, req, res));
+
+    // routes.post('/supplier-product-list', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
+    //     Controller.supplierProductList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/supplier-product-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierProductList, req, res));
+
+    // routes.post('/buyer-supplier-orders', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+        
+    //     Controller.buyerSupplierOrdersList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/buyer-supplier-orders', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerSupplierOrdersList, req, res));
+
+    // routes.post('/orders-summary-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+        
+    //     Controller.buyerDashboardOrderDetails(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/orders-summary-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerDashboardOrderDetails, req, res));
+
+    // routes.post('/orders-seller-country', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+        
+    //     Controller.buyerOrderSellerCountry(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/orders-seller-country', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerOrderSellerCountry, req, res));
+
+    // routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.supportList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportList, req, res));
+
+    // routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.supportDetails(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportDetails, req, res));
+
+    //---------------------------------- add-to-list ---------------------------------//
+    // routes.post('/add-to-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.addToList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/add-to-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.addToList, req, res));
+
+    // routes.post('/show-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.showList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/show-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.showList, req, res));
+
+    // routes.post('/delete-list-item', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.deleteListItem(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/delete-list-item', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.deleteListItem, req, res));
+
+    // routes.post('/send-enquiry', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.sendEnquiry(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/send-enquiry', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.sendEnquiry, req, res));
+
+    // routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.getNotificationList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getNotificationList, req, res));
+
+    // routes.post('/get-notification-details-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.getNotificationDetailsList(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/get-notification-details-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getNotificationDetailsList, req, res));
+
+    // routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.updateStatus(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.updateStatus, req, res));
+
+    // routes.post('/get-invoice-count', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    //     Controller.getInvoiceCount(req, req.body, result => {
+    //         const response = handleResponse(result);
+    //         res.send(response);
+    //     });
+    // });
+    routes.post('/get-invoice-count', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getInvoiceCount, req, res));
 
     return routes;
 
