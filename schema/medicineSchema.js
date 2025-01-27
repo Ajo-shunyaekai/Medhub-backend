@@ -236,7 +236,7 @@ const medicineSchema = new mongoose.Schema({
     required: true
   },
   total_quantity: {
-    type: String,
+    type: Number,
     required: true
   },
   gmp_approvals: {
@@ -324,7 +324,12 @@ const medicineSchema = new mongoose.Schema({
 const Medicine = mongoose.model('Medicine', medicineSchema);
 
 const newMedicineSchema = new mongoose.Schema({
-  // Additional fields specific to 'new' medicine type can be added here if needed.
+   inventory_info: [{
+    quantity          : String,
+    unit_price        : String,
+    total_price       : String,
+    est_delivery_days : String,
+  }],
 });
 
 const NewMedicine = Medicine.discriminator('new', newMedicineSchema);

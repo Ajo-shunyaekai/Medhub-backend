@@ -137,5 +137,32 @@ const userRegistrationConfirmationContent = (user, userType) => {
   )
 }
 
+const lowInventoryContent = (supplierName, medicineName, quantity) => {
+    return (
+        `
+            <p>Dear ${supplierName},</p>
+            <p>We would like to inform you that the stock of the following item is running low:</p>
+            <p><strong>Product:</strong> ${medicineName}</p>
+            <p><strong>Remaining Quantity:</strong> ${quantity}</p>
+            <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
+            <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+            <p>Thanks & Regards,<br/>MedHub Global Team</p>
+        `
+  )
+}
+
+const licenseExpiryEmail = (name, email, expiryDate, reminderType, isSupplier = true) => {
+    return (
+        `
+             <p>Dear ${name},</p>
+            <p>Your product's license is set to expire on <strong>${expiryDate}</strong>. This is a reminder that your license will expire in ${reminderType}. Please ensure all necessary steps are taken for the renewal process.</p>
+            <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+            <p>Thanks & Regards,<br/>MedHub Global Team</p>
+        `
+  )
+}
+
 module.exports = { contactUsContent, buyerRegistrationContent, supplierRegistrationContent, 
-                   otpForResetPasswordContent, profileEditRequestContent, userRegistrationConfirmationContent  };
+                   otpForResetPasswordContent, profileEditRequestContent, userRegistrationConfirmationContent, 
+                   lowInventoryContent, licenseExpiryEmail
+                  };
