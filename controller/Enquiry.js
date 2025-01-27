@@ -40,7 +40,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    getEnquiryList : async (req, reqObj, callback) => {
+    getEnquiryList : async (req, res, reqObj, callback) => {
         try {
         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
         const page_no   = pageNo || 1
@@ -137,7 +137,7 @@ module.exports = {
         }
     },
 
-    getEnquiryDetails: async (req, reqObj, callback) => {
+    getEnquiryDetails: async (req, res, reqObj, callback) => {
         try {
             const enquiry_id = req?.params?.id;
     
@@ -357,7 +357,7 @@ module.exports = {
         }
     },
     
-    submitQuotation: async (req, reqObj, callback) => {
+    submitQuotation: async (req, res, reqObj, callback) => {
       try {
           const { enquiry_id, quotation_details, payment_terms, buyer_id, supplier_id } = reqObj;
 
@@ -430,7 +430,7 @@ module.exports = {
       }
     },
 
-    acceptRejectQuotation: async (req, reqObj, callback) => {
+    acceptRejectQuotation: async (req, res, reqObj, callback) => {
         try {
             const { enquiry_id, item_id, buyer_id, new_status } = reqObj;
 
@@ -467,7 +467,7 @@ module.exports = {
         }
     },
 
-    cancelEnquiry: async (req, reqObj, callback) => {
+    cancelEnquiry: async (req, res, reqObj, callback) => {
         try {
             const { supplier_id, buyer_id, status, enquiry_id, reason, comment } = reqObj;
 

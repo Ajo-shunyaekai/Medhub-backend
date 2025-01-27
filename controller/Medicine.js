@@ -41,7 +41,7 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 
 module.exports = {
 
-  getMedicineByName: async (req, reqObj, callback) => {
+  getMedicineByName: async (req, res, reqObj, callback) => {
     try {
       Medicine.aggregate([
         {
@@ -68,7 +68,7 @@ module.exports = {
     }
   },
 
-  addMedicine: async (req, reqObj, callback) => {
+  addMedicine: async (req, res, reqObj, callback) => {
     try {
       const medicine_id = "MED-" + Math.random().toString(16).slice(2, 10);
   
@@ -185,7 +185,7 @@ module.exports = {
     }
   },
 
-  allMedicineList: async (req, reqObj, callback) => {
+  allMedicineList: async (req, res, reqObj, callback) => {
     try {
         const { searchKey, pageNo, pageSize, medicine_type, supplier_id, category_name, 
                 medicine_status, price_range, delivery_time, in_stock } = reqObj;
@@ -338,7 +338,7 @@ module.exports = {
     }
   },
 
-  getMedicineDetails: async (req, reqObj, callback) => {
+  getMedicineDetails: async (req, res, reqObj, callback) => {
     try {
       Medicine.aggregate([
         {
@@ -567,7 +567,7 @@ module.exports = {
     }
   },
 
-  editMedicine : async (req, reqObj, callback) => {
+  editMedicine : async (req, res, reqObj, callback) => {
     try {
       let stockedInDetails = reqObj.stocked_in_details;
 
@@ -795,7 +795,7 @@ module.exports = {
    }
   },
 
-//   editMedicine: async (req, reqObj, callback) => {
+//   editMedicine: async (req, res, reqObj, callback) => {
 //     try {
 //         // Parse stockedInDetails and inventoryInfo if they are strings
 //         let stockedInDetails = reqObj.stocked_in_details;
@@ -1051,7 +1051,7 @@ module.exports = {
   
   
 
-  medicineEditList : async (req, reqObj, callback) => {
+  medicineEditList : async (req, res, reqObj, callback) => {
     try {
       const { status, pageNo, pageSize, medicine_id, supplier_id } = reqObj
 
@@ -1073,7 +1073,7 @@ module.exports = {
     }
   },
 
-  filterMedicine: async (req, reqObj, callback) => {  
+  filterMedicine: async (req, res, reqObj, callback) => {  
     try {
       let matchConditions = {};
 
@@ -1100,7 +1100,7 @@ module.exports = {
     }
   },
 
-  similarMedicineList: async (req, reqObj, callback) => {
+  similarMedicineList: async (req, res, reqObj, callback) => {
     try {
       const {
         medicine_name, medicine_id, medicine_type, status, supplier_id,
@@ -1329,7 +1329,7 @@ module.exports = {
     }
   },
 
-  otherMedicineList: async (req, reqObj, callback) => {
+  otherMedicineList: async (req, res, reqObj, callback) => {
     try {
         const { medicine_name, medicine_id, medicine_type, status, supplier_id, pageNo, pageSize } = reqObj;
         const page_no = pageNo || 1;

@@ -25,7 +25,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
     
-    register : async (req, reqObj, callback) => {
+    register : async (req, res, reqObj, callback) => {
         try {
           const emailExists = await Supplier.findOne({supplier_email : reqObj.supplier_email})
           if(emailExists) {
@@ -122,7 +122,7 @@ module.exports = {
         }
     },
 
-    login : async (req, reqObj, callback) => {
+    login : async (req, res, reqObj, callback) => {
       try {
         const password  = reqObj.password
         const email     = reqObj.email
@@ -171,7 +171,7 @@ module.exports = {
       }
     },
 
-    filterValues : async (req, reqObj, callback) => {
+    filterValues : async (req, res, reqObj, callback) => {
       try {
         // const countryData = await Supplier.find({}, { country_of_origin: 1, _id: 0 }).exec();
         const countryData = await Supplier.distinct("country_of_origin", {account_status: 1})
@@ -189,7 +189,7 @@ module.exports = {
      }
     },
 
-    editSupplier : async (req, reqObj, callback) => {
+    editSupplier : async (req, res, reqObj, callback) => {
       try {
        const {
           supplier_id, supplier_name, description, supplier_address, 
@@ -274,7 +274,7 @@ module.exports = {
      }
     },
 
-    supplierProfileDetails : async(req, reqObj, callback) => {
+    supplierProfileDetails : async(req, res, reqObj, callback) => {
       try {
         const fields = {
           token : 0,
@@ -294,7 +294,7 @@ module.exports = {
       }
     },
 
-    buyerDetails : async (req, reqObj, callback) => {
+    buyerDetails : async (req, res, reqObj, callback) => {
       try {
         // const fields = [
         //   'supplier_id', 'supplier_name', 'supplier_image', 'supplier_email',
@@ -320,7 +320,7 @@ module.exports = {
       }
     },
 
-    changePassword : async (req, reqObj, callback) => {
+    changePassword : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, password } = reqObj
         const supplier = await Supplier.findOne({supplier_id : supplier_id})
@@ -360,7 +360,7 @@ module.exports = {
     },
     
 
-    supplierDashboardOrderDetails: async (req, reqObj, callback) => {
+    supplierDashboardOrderDetails: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id } = reqObj;
     
@@ -579,7 +579,7 @@ module.exports = {
     },
     
 
-    supplierOrderSupplierCountry : async (req, reqObj, callback) => {
+    supplierOrderSupplierCountry : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id } = reqObj
 
@@ -637,7 +637,7 @@ module.exports = {
       }
     },
 
-    editMedicine : async (req, reqObj, callback) => {
+    editMedicine : async (req, res, reqObj, callback) => {
       try {
         const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
           dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
@@ -759,7 +759,7 @@ module.exports = {
 
     //----------------------------- support -------------------------------------//
     
-    supportList : async (req, reqObj, callback) => {
+    supportList : async (req, res, reqObj, callback) => {
       try {
          const { supplier_id, pageNo, pageSize } = reqObj
  
@@ -793,7 +793,7 @@ module.exports = {
       }
      },
  
-    supportDetails : async (req, reqObj, callback) => {
+    supportDetails : async (req, res, reqObj, callback) => {
       try {
           const { supplier_id , support_id } = reqObj
 
@@ -810,7 +810,7 @@ module.exports = {
      //----------------------------- support --------------------------------------//
 
 
-     getNotificationList : async (req, reqObj, callback) => {
+     getNotificationList : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize } = reqObj
 
@@ -891,7 +891,7 @@ module.exports = {
       }
      },
 
-     getNotificationDetailsList : async (req, reqObj, callback) => {
+     getNotificationDetailsList : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize } = reqObj
 
@@ -971,7 +971,7 @@ module.exports = {
       }
      },
 
-     updateStatus : async (req, reqObj, callback) => {
+     updateStatus : async (req, res, reqObj, callback) => {
       try {
         const { notification_id, status = 1, supplier_id, user_type } = reqObj
 
@@ -996,7 +996,7 @@ module.exports = {
       }
      },
 
-     medicinRequestList: async (req, reqObj, callback) => {
+     medicinRequestList: async (req, res, reqObj, callback) => {
         try {
           const {searchKey, pageNo, pageSize, medicine_type, status, editStatus, supplier_id} = reqObj
     
@@ -1200,7 +1200,7 @@ module.exports = {
         }
      },
 
-     getInvoiceCount: async (req, reqObj, callback) => {
+     getInvoiceCount: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id } = reqObj; 
     

@@ -1,4 +1,6 @@
 const randomstring = require('randomstring');
+const logErrorToFile = require('../logs/errorLogs');
+const { sendErrorResponse } = require('./commonResonse');
 
 module.exports = {
 
@@ -213,6 +215,42 @@ module.exports = {
     getTodayFormattedDate: () => {
         const today = new Date();
         return module.exports.formatDate(today); 
+    },
+
+    // Common callback function to handle the response for both routes
+    handleController: (controllerFunction, req, res, reqObj = null) => {
+        try {
+            const handleResponse = (result) => {
+                let message = '';
+                switch (result.code) {
+                    case 200:
+                    case 401:
+                    case 402:
+                    case 404:
+                    case 409:
+                    case 500:
+                        message = result.message;
+                        break;
+                }
+                return { code: result.code, message: message, result: result.result };
+            }
+            controllerFunction(req, res, (reqObj || req.body), result => {
+                const response = handleResponse(result);  // Directly call handleResponse here
+                res.send(response);
+            });
+        } catch (error) {
+            console.log("Internal Server Error:", error);
+            logErrorToFile(error, req);
+            return sendErrorResponse(
+                res,
+                500,
+                "An unexpected error occurred. Please try again later.",
+                error
+            );
+        }
     }
+    
+    
+
 
 }

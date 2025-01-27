@@ -35,7 +35,7 @@ const sendMailFunc = (email, subject, body) =>{
 
 module.exports = {
  
-    createPO: async (req, reqObj, callback) => {
+    createPO: async (req, res, reqObj, callback) => {
         try {
             const purchaseOrderId = 'PO-' + Math.random().toString(16).slice(2,10)
             const { buyer_id, enquiry_id, supplier_id, itemIds, grandTotalAmount,rejectedIds,
@@ -174,7 +174,7 @@ module.exports = {
         }
     },
 
-    getPOList : async (req, reqObj, callback) => {
+    getPOList : async (req, res, reqObj, callback) => {
         try {
         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj
         const page_no   = pageNo || 1
@@ -318,7 +318,7 @@ module.exports = {
         }
     },
 
-    getPODetails: async (req, reqObj, callback, res) => {
+    getPODetails: async (req, res, reqObj, callback) => {
         try {
             const {purchaseOrder_id, buyer_id, supplier_id, enquiry_id} = reqObj
             // PurchaseOrder.aggregate([
@@ -562,7 +562,7 @@ module.exports = {
         }
     },
 
-    editPO: async (req, reqObj, callback) => {
+    editPO: async (req, res, reqObj, callback) => {
         try {
             const { 
                 buyer_id,

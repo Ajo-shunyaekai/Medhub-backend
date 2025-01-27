@@ -45,7 +45,7 @@ const initializeInvoiceNumber = async () => {
 
 module.exports = {
 
-    createInvoice : async (req, reqObj, callback) => {
+    createInvoice : async (req, res, reqObj, callback) => {
        try {
         const invoiceId = 'INV-' + Math.random().toString(16).slice(2, 10);
 
@@ -139,7 +139,7 @@ module.exports = {
        }
     },
 
-    updatePaymentStatus: async (req, reqObj, callback) => {
+    updatePaymentStatus: async (req, res, reqObj, callback) => {
       try {
           const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj;
 
@@ -245,7 +245,7 @@ module.exports = {
       }
     },
   
-    invoiceDetails: async (req, reqObj, callback) => {
+    invoiceDetails: async (req, res, reqObj, callback) => {
       try {
         // const { order_id, invoice_id, supplier_id } = reqObj;
         const invoice_id = req?.params?.id;

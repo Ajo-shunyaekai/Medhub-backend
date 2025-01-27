@@ -62,7 +62,7 @@ const sendMailFunc = (email, subject, body) =>{
 
 module.exports = {
 
-    register : async (req, reqObj, callback) => {
+    register : async (req, res, reqObj, callback) => {
         try {
           const adminId    = 'ADM-' + Math.random().toString(16).slice(2, 10);
           let jwtSecretKey = process.env.APP_SECRET; 
@@ -101,7 +101,7 @@ module.exports = {
         } 
     },
 
-    login : async (req, reqObj, callback) => {
+    login : async (req, res, reqObj, callback) => {
       try {
          const password = reqObj.password
          const email    = reqObj.email
@@ -134,7 +134,7 @@ module.exports = {
       }
     },
 
-    editAdminProfile : async (req, reqObj, callback) => {
+    editAdminProfile : async (req, res, reqObj, callback) => {
       try {
         const { admin_id, user_name, email } = reqObj
 
@@ -158,7 +158,7 @@ module.exports = {
       }
     },
 
-    adminProfileDetails : async (req, reqObj, callback) => {
+    adminProfileDetails : async (req, res, reqObj, callback) => {
       try {
         const fields = {
           password  : 0,
@@ -179,7 +179,7 @@ module.exports = {
     }
     },
 
-    getUserList : async (req, reqObj, callback) => {
+    getUserList : async (req, res, reqObj, callback) => {
       try {
         User.find({}).select('user_id first_name last_name email status').limit(5).then((data) => {
           callback({code: 200, message : 'User list fetched successfully', result:data})
@@ -194,7 +194,7 @@ module.exports = {
       }
     },
 
-    blockUnblockUser: async (req, reqObj, callback) => {
+    blockUnblockUser: async (req, res, reqObj, callback) => {
       try {
           const { user_id } = reqObj;
           const user = await User.findOne({ user_id: user_id });
@@ -233,7 +233,7 @@ module.exports = {
     },
     //------------------------ supplier ------------------------//
 
-    getSupplierList: async (req, reqObj, callback) => {
+    getSupplierList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, filterValue } = reqObj;
     
@@ -389,7 +389,7 @@ module.exports = {
       }
     },
 
-    supplierDetails : async (req, reqObj, callback) => {
+    supplierDetails : async (req, res, reqObj, callback) => {
       try {
         const fields = {
           token    : 0,
@@ -409,7 +409,7 @@ module.exports = {
       }
     },
 
-//     getRegReqList: async (req, reqObj, callback) => {
+//     getRegReqList: async (req, res, reqObj, callback) => {
 //       try {
 //         const { pageNo, limit, filterValue} = reqObj
 
@@ -484,7 +484,7 @@ module.exports = {
 //     },
 
 
-getRegReqList: async (req, reqObj, callback) => {
+getRegReqList: async (req, res, reqObj, callback) => {
   try {
       const { pageNo, limit, filterValue } = reqObj;
 
@@ -591,7 +591,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectSupplierRegReq: async (req, reqObj, callback) => {
+    acceptRejectSupplierRegReq: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, sales_person_name, action } = reqObj;
     
@@ -702,7 +702,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
     
-    supplierSupportList : async (req, reqObj, callback) => {
+    supplierSupportList : async (req, res, reqObj, callback) => {
       try {
          const {pageNo, pageSize } = reqObj
  
@@ -739,7 +739,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //------------------------ buyer ------------------------//
-    getBuyerList: async (req, reqObj, callback) => {
+    getBuyerList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, filterValue } = reqObj;
     
@@ -821,7 +821,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    buyerDetails : async (req, reqObj, callback) => {
+    buyerDetails : async (req, res, reqObj, callback) => {
       try {
         const fields = {
           token    : 0,
@@ -841,7 +841,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getBuyerRegReqList: async (req, reqObj, callback) => {
+    getBuyerRegReqList: async (req, res, reqObj, callback) => {
       try {
         const {pageNo, pageSize, filterValue} = reqObj
 
@@ -918,7 +918,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectBuyerRegReq: async (req, reqObj, callback) => {
+    acceptRejectBuyerRegReq: async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, action } = reqObj;
     
@@ -1024,7 +1024,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
     
-    // buyerOrdersList: async (req, reqObj, callback) => {
+    // buyerOrdersList: async (req, res, reqObj, callback) => {
     //   try {
     //     const {pageNo, pageSize, filterKey, buyer_id, filterValue} = reqObj
   
@@ -1211,7 +1211,7 @@ getRegReqList: async (req, reqObj, callback) => {
     // },
 
 
-    buyerOrdersList: async (req, reqObj, callback) => {
+    buyerOrdersList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, buyer_id, filterValue } = reqObj;
     
@@ -1403,7 +1403,7 @@ getRegReqList: async (req, reqObj, callback) => {
     
 
 
-    buyerSupportList : async (req, reqObj, callback) => {
+    buyerSupportList : async (req, res, reqObj, callback) => {
       try {
          const {pageNo, pageSize } = reqObj
  
@@ -1437,7 +1437,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    buyerInvoicesList: async (req, reqObj, callback) => {
+    buyerInvoicesList: async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, buyer_id} = reqObj
   
@@ -1565,7 +1565,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     //------------------------ supplier/buyer ------------------------//
 
-    // getTotalRegReqList: async (req, reqObj, callback) => {
+    // getTotalRegReqList: async (req, res, reqObj, callback) => {
     //   try {
     //     const { pageNo, pageSize } = reqObj;
     
@@ -1631,7 +1631,7 @@ getRegReqList: async (req, reqObj, callback) => {
     // },
 
 
-    getTotalRegReqList: async (req, reqObj, callback) => {
+    getTotalRegReqList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterValue } = reqObj;
     
@@ -1736,7 +1736,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getTotalApprovedRegReqList: async (req, reqObj, callback) => {
+    getTotalApprovedRegReqList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterValue } = reqObj;
     
@@ -1843,7 +1843,7 @@ getRegReqList: async (req, reqObj, callback) => {
     },
     
     
-    getProfileUpdateReqList: async (req, reqObj, callback) => {
+    getProfileUpdateReqList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, limit, user_type  } = reqObj
 
@@ -1964,7 +1964,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },    
 
-    orderDetails : async (req, reqObj, callback) => {
+    orderDetails : async (req, res, reqObj, callback) => {
       try {
           const {buyer_id, order_id, filterKey} = reqObj
 
@@ -2195,7 +2195,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
    //------------------------ medicine ------------------------//
 
-  //   acceptRejectAddMedicineReq : async (req, reqObj, callback) => {
+  //   acceptRejectAddMedicineReq : async (req, res, reqObj, callback) => {
   //     console.log('REQ', reqObj);
       
   //     try {
@@ -2310,7 +2310,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
 
-    acceptRejectAddMedicineReq: async (req, reqObj, callback) => {
+    acceptRejectAddMedicineReq: async (req, res, reqObj, callback) => {
       try {
           const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
 
@@ -2419,7 +2419,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
   
-    allMedicineList: async (req, reqObj, callback) => {
+    allMedicineList: async (req, res, reqObj, callback) => {
       try {
         console.log('REQOBJ',reqObj);
         
@@ -2526,7 +2526,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getMedicineDetails: async (req, reqObj, callback) => {
+    getMedicineDetails: async (req, res, reqObj, callback) => {
       try {
         Medicine.aggregate([
           {
@@ -2669,7 +2669,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectEditMedicineReq: async (req, reqObj, callback) => {
+    acceptRejectEditMedicineReq: async (req, res, reqObj, callback) => {
       try {
         const { medicine_id, supplier_id, action, admin_id } = reqObj;
 
@@ -2865,7 +2865,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    medicineEditList : async (req, reqObj, callback) => {
+    medicineEditList : async (req, res, reqObj, callback) => {
       try {
         const {searchKey, pageNo, pageSize, medicineType, status} = reqObj
   
@@ -2973,7 +2973,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    editMedicineDetails: async (req, reqObj, callback) => {
+    editMedicineDetails: async (req, res, reqObj, callback) => {
       console.log('here', reqObj);
       
       try {
@@ -3199,7 +3199,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    deleteMedicine : async (req, reqObj, callback) => {
+    deleteMedicine : async (req, res, reqObj, callback) => {
       try {
         const { medicine_id, supplier_id } = reqObj
           
@@ -3225,7 +3225,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     //----------------------------- support -------------------------------------//
 
-    supportList: async (req, reqObj, callback) => {
+    supportList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, supportType } = reqObj;
     
@@ -3385,7 +3385,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
  
-    supportDetails : async (req, reqObj, callback) => {
+    supportDetails : async (req, res, reqObj, callback) => {
       try {
           const { supplier_id , support_id } = reqObj
 
@@ -3510,7 +3510,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //----------------------------- dashboard details -------------------------------------//
-    adminDashboardDataList: async (req, reqObj, callback) => {
+    adminDashboardDataList: async (req, res, reqObj, callback) => {
       try {
         
         const { filterValue } = reqObj
@@ -3998,7 +3998,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //------------------------------ notifications -------------------------------//
-    getNotificationList : async (req, reqObj, callback) => {
+    getNotificationList : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj;
     
@@ -4081,7 +4081,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getNotificationDetailsList : async (req, reqObj, callback) => {
+    getNotificationDetailsList : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj
     
@@ -4163,7 +4163,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    updateStatus : async (req, reqObj, callback) => {
+    updateStatus : async (req, res, reqObj, callback) => {
       console.log(reqObj);
       try {
         const { notification_id, status = 1, user_type } = reqObj
@@ -4203,7 +4203,7 @@ getRegReqList: async (req, reqObj, callback) => {
      //------------------------------ notifications -------------------------------//
 
     //------------------------------ inquiries -------------------------------//
-    inquiriesList: async (req, reqObj, callback) => {
+    inquiriesList: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, buyer_id, status, pageNo, pageSize, filterValue } = reqObj
         const page_no   = pageNo || 1
@@ -4356,7 +4356,7 @@ getRegReqList: async (req, reqObj, callback) => {
         }
     },
 
-    inquiryDetails: async (req, reqObj, callback) => {
+    inquiryDetails: async (req, res, reqObj, callback) => {
       try {
         const { enquiry_id } = reqObj
 
@@ -4622,7 +4622,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
      //------------------------------ invoice -------------------------------//
 
-    invoicesList: async (req, reqObj, callback) => {
+    invoicesList: async (req, res, reqObj, callback) => {
       try {
         const {pageNo, pageSize, filterKey, buyer_id} = reqObj
         const page_no   = pageNo || 2
@@ -4814,7 +4814,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    invoiceDetails: async (req, reqObj, callback) => {
+    invoiceDetails: async (req, res, reqObj, callback) => {
       try {
         const { order_id, invoice_id, supplier_id } = reqObj;
     
@@ -5003,7 +5003,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //------------------------------ PO -------------------------------//
-    getPOList : async (req, reqObj, callback) => {
+    getPOList : async (req, res, reqObj, callback) => {
       try {
         console.log('here',reqObj);
         
@@ -5191,7 +5191,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getPODetails: async (req, reqObj, callback) => {
+    getPODetails: async (req, res, reqObj, callback) => {
         try {
             const {purchaseOrder_id, buyer_id, supplier_id, enquiry_id} = reqObj
             PurchaseOrder.aggregate([
@@ -5315,7 +5315,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     //------------------------------ transaction -------------------------------//
 
-    transactionList: async (req, reqObj, callback) => {
+    transactionList: async (req, res, reqObj, callback) => {
       try {
         const {pageNo, pageSize, filterKey, buyer_id} = reqObj
         const page_no   = pageNo || 2
@@ -5506,7 +5506,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    transactionDetails: async (req, reqObj, callback) => {
+    transactionDetails: async (req, res, reqObj, callback) => {
       try {
         const { order_id, invoice_id, supplier_id,transaction_id } = reqObj;
     

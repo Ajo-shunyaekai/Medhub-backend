@@ -7,7 +7,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    guestLogin : async (req, reqObj, callback) => {
+    guestLogin : async (req, res, reqObj, callback) => {
       try {
         const mobile = reqObj.mobile
         const newOtp = generateOtp()
@@ -39,7 +39,7 @@ module.exports = {
     }
     },
 
-    verifyOtp : async (req, reqObj, callback) => {
+    verifyOtp : async (req, res, reqObj, callback) => {
         try {
           const otp    = reqObj.otp
           const mobile = reqObj.mobile
