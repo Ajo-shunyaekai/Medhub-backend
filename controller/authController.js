@@ -40,6 +40,7 @@ const {
   buyerRegistrationContent,
   otpForResetPasswordContent,
   profileEditRequestContent,
+  userRegistrationConfirmationContent,
 } = require("../utils/emailContents");
 const {
   sendErrorResponse,
@@ -52,7 +53,7 @@ module.exports = {
     try {
       // const { access_token, user_type } = req.headers;
       const { user_type } = req.body;
-
+ 
       // Use req.body directly instead of stringifying it
       const {
         buyer_mobile,
@@ -84,12 +85,13 @@ module.exports = {
         activity_code,
       } = req.body;
 console.log('req.body',req.body)
-      let regObj = {};
 
+      let regObj = {};
+ 
       if (!user_type) {
         return sendErrorResponse(res, 400, "Need User Type.");
       }
-
+ 
       if (user_type === "Buyer") {
         // Validate the required files for "Buyer" type
         if (
@@ -132,7 +134,7 @@ console.log('req.body',req.body)
             "Medical Practitioner Certificate image is required."
           );
         }
-
+ 
         // Extract and format the mobile and country code
         const buyerCountryCode = buyer_mobile.split(" ")[0];
         const buyer_mobile_number = buyer_mobile.split(" ").slice(1).join(" ");
@@ -141,7 +143,7 @@ console.log('req.body',req.body)
           .slice(1)
           .join(" ");
         const personCountryCode = contact_person_mobile.split(" ")[0];
-
+ 
         regObj = {
           buyer_email,
           buyer_type,
@@ -196,7 +198,7 @@ console.log('req.body',req.body)
             pincode: pincode || "",
           },
         };
-
+ 
         // Validate registration fields using a custom validation function
         const errObj = validation(regObj, "buyerRegister");
         if (Object.values(errObj).length) {
@@ -227,7 +229,7 @@ console.log('req.body',req.body)
             "Supplier license image is required."
           );
         }
-
+ 
         if (
           !req.files["certificate_image"] ||
           req.files["certificate_image"].length === 0
@@ -249,7 +251,7 @@ console.log('req.body',req.body)
             "Medical Practitioner Certificate image is required."
           );
         }
-
+ 
         const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
         const supplier_mobile_number = req.body.supplier_mobile_no
           .split(" ")
@@ -260,7 +262,7 @@ console.log('req.body',req.body)
           .slice(1)
           .join(" ");
         const personCountryCode = req.body.contact_person_mobile.split(" ")[0];
-
+ 
         regObj = {
           ...req.body,
           activity_code,
@@ -296,14 +298,14 @@ console.log('req.body',req.body)
             pincode: pincode || "",
           },
         };
-
+ 
         const errObj = validation(regObj, "supplierRegister");
-
+ 
         if (Object.values(errObj).length) {
           return sendErrorResponse(res, 419, "All fields are required", errObj);
         }
       }
-
+ 
       // Check for email existence based on user type
       const emailExists =
         user_type === "Buyer"
@@ -319,11 +321,11 @@ console.log('req.body',req.body)
           : user_type === "Seller"
           ? await Seller.findOne({ email: req.body?.email })
           : null;
-
+ 
       if (emailExists) {
         return sendErrorResponse(res, 409, "Email already exists");
       }
-
+ 
       // Generate unique notification ID and user ID
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
       const userId = `${
@@ -337,13 +339,13 @@ console.log('req.body',req.body)
           ? "SLR-"
           : ""
       }${Math.random().toString(16).slice(2, 10)}`;
-
+ 
       // Create JWT token for the user
       let jwtSecretKey = process.env.APP_SECRET;
       let data = { time: Date(), email: req.body?.email };
       const token = jwt.sign(data, jwtSecretKey);
       const saltRounds = 10;
-
+ 
       // Create instances of Admin, Supplier, and Buyer models based on user type
       const newAdmin = new Admin({
         admin_id: userId,
@@ -352,7 +354,7 @@ console.log('req.body',req.body)
         password: req.body?.password,
         token: token,
       });
-
+ 
       const newSupplier = new Supplier({
         supplier_id: userId,
         supplier_type: regObj.supplier_type,
@@ -393,7 +395,7 @@ console.log('req.body',req.body)
         account_status: 0,
         profile_status: 0,
       });
-
+ 
       const newBuyer = new Buyer({
         buyer_id: userId,
         buyer_type: regObj?.buyer_type,
@@ -429,7 +431,7 @@ console.log('req.body',req.body)
         account_status: 0,
         profile_status: 0,
       });
-
+ 
       // Hash password
       const hashedPassword = await bcrypt.genSalt(saltRounds);
       if (!hashedPassword) {
@@ -439,11 +441,11 @@ console.log('req.body',req.body)
           "Error in generating salt or hashing password"
         );
       }
-
+ 
       // If user type is "Buyer", save buyer details and send response
       if (user_type === "Buyer") {
         const buyer = await newBuyer.save();
-
+ 
         if (!buyer) {
           return sendErrorResponse(
             res,
@@ -451,7 +453,7 @@ console.log('req.body',req.body)
             "Error While Submitting Buyer Registration Request"
           );
         }
-
+ 
         const newNotification = new Notification({
           notification_id: notificationId,
           event_type: "New Registration Request",
@@ -463,23 +465,28 @@ console.log('req.body',req.body)
           message: "New Buyer Registration Request",
           status: 0,
         });
-
+ 
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Buyer Account Created";
-
+ 
         const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
         const emailContent = await buyerRegistrationContent(buyer);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent);
 
+        const confirmationEmailRecipients = [buyer.contact_person_email, "ajo@shunyaekai.tech"]
+        const confirmationSubject = "Thank You for Registering on Medhub Global!";
+        const confirmationContent = await userRegistrationConfirmationContent(buyer, user_type)
+        await sendEmail(confirmationEmailRecipients, confirmationSubject, confirmationContent)
+ 
         return sendSuccessResponse(
           res,
           200,
           `Buyer Registration Request Submitted Successfully.`
         );
       }
-
+ 
       // If user type is "Admin", save admin and return response
       else if (user_type === "Admin") {
         newAdmin.password = hashedPassword;
@@ -497,7 +504,7 @@ console.log('req.body',req.body)
           `Admin Registration Request Successfully.`
         );
       }
-
+ 
       // If user type is "Supplier", save supplier and send response
       else if (user_type === "Supplier") {
         const supplier = await newSupplier.save();
@@ -519,7 +526,7 @@ console.log('req.body',req.body)
           message: "New Supplier Registration Request",
           status: 0,
         });
-
+ 
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Supplier Account Created";
@@ -527,16 +534,22 @@ console.log('req.body',req.body)
         const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
-
+ 
         await sendEmail(recipientEmails, subject, emailContent);
 
+        const confirmationEmailRecipients = [supplier.contact_person_email, "ajo@shunyaekai.tech"]
+        const confirmationSubject = "Thank You for Registering on Medhub Global!";
+        const confirmationContent = await userRegistrationConfirmationContent(supplier, user_type)
+        await sendEmail(confirmationEmailRecipients, confirmationSubject, confirmationContent)
+
+ 
         return sendSuccessResponse(
           res,
           200,
           `Supplier Registration Request Submitted Successfully.`
         );
       }
-
+ 
       // Additional handling for other user types (Seller) would go here
     } catch (error) {
       console.log("Internal Server Error:", error);

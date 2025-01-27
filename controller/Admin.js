@@ -600,7 +600,6 @@ getRegReqList: async (req, res, reqObj, callback) => {
         if (!supplier) {
           return callback({ code: 400, message: "Supplier not found" });
         }
-    
         const newAccountStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
         const newProfileStatus = 1;
     
@@ -653,7 +652,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
                 You can now access your account using the following login details:<br /><br />
 
                 <strong>Login URL:</strong> ${process.env.SUPPLIER_LOGIN_URL} <br />
-                <strong>Username:</strong> ${updateProfile.supplier_email} <br />
+                <strong>Username:</strong> ${updateProfile.contact_person_email} <br />
                 <strong>Temporary Password:</strong> ${password} <br /><br />
 
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
@@ -666,7 +665,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
                 `;
 
                 // Sending the email to multiple recipients
-                const recipientEmails = [updateProfile.supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                const recipientEmails = [updateProfile.contact_person_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
                 await sendMailFunc(recipientEmails.join(','), subject, body);
 
           // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Deliver', body);
@@ -920,7 +919,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
 
     acceptRejectBuyerRegReq: async (req, res, reqObj, callback) => {
       try {
-        const { buyer_id, action } = reqObj;
+        const { buyer_id, sales_person_name = '', action } = reqObj;
     
         const buyer = await Buyer.findOne({ buyer_id: buyer_id });
     
@@ -933,7 +932,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
     
         const updateStatus = await Buyer.findOneAndUpdate(
           { buyer_id: buyer_id },
-          { account_status: newAccountStatus, profile_status: newProfileStatus },
+          { account_status: newAccountStatus, profile_status: newProfileStatus, sales_person_name },
           { new: true }
         );
     
@@ -977,7 +976,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
                 You can now access your account using the following login details:<br /><br />
 
                 <strong>Login URL:</strong> ${process.env.BUYER_LOGIN_URL} <br />
-                <strong>Username:</strong> ${updateStatus.buyer_email} <br />
+                <strong>Username:</strong> ${updateStatus.contact_person_email} <br />
                 <strong>Temporary Password:</strong> ${password} <br /><br />
 
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
@@ -991,7 +990,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
                 `;
 
                 // Sending the email to multiple recipients
-                const recipientEmails = [updateStatus.buyer_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                const recipientEmails = [updateStatus.contact_person_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
                 await sendMailFunc(recipientEmails.join(','), subject, body);
     
           return callback({

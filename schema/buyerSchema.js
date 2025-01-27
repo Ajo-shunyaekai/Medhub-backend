@@ -29,7 +29,7 @@ const buyerSchema = new Schema(
       type: String,
       trim: true,
       required: [true, "Validation Error : buyer_email is required"],
-      unique: true,
+      // unique: true,
     },
     buyer_mobile: {
       type: String,
@@ -56,6 +56,10 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : activity_code is required"],
     },
+    sales_person_name: {
+      type: String,
+      trim: true,
+    },
     contact_person_name: {
       type: String,
       trim: true,
@@ -69,6 +73,7 @@ const buyerSchema = new Schema(
     contact_person_email: {
       type: String,
       trim: true,
+      unique: true,
       required: [true, "Validation Error : contact_person_email is required"],
     },
     activity_code: {

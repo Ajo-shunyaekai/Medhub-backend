@@ -56,8 +56,7 @@ module.exports = () => {
             ...req.body,
             transaction_image: req.files['transaction_image'].map(file => path.basename(file.path))
         }
-        
-        handleController(Invoice.updatePaymentStatus, req, res, obj)
+       handleController(Invoice.updatePaymentStatus, req, res, obj)
     });
 
     // routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, async(req, res) => {
