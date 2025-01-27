@@ -118,6 +118,11 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
+    bank_details: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     supplier_image: [
       {
         type: String,

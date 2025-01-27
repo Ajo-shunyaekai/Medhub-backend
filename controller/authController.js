@@ -83,6 +83,7 @@ module.exports = {
         country,
         pincode,
         activity_code,
+        bank_details
       } = req.body;
 console.log('req.body',req.body)
 
@@ -170,6 +171,7 @@ console.log('req.body',req.body)
           buyer_mobile: buyer_mobile_number,
           buyer_country_code: buyerCountryCode,
           activity_code,
+          bank_details,
           buyer_image: req.files["buyer_image"].map((file) =>
             path.basename(file.path)
           ),
@@ -390,6 +392,7 @@ console.log('req.body',req.body)
         registration_no: regObj.registration_no,
         vat_reg_no: regObj.vat_reg_no,
         activity_code: regObj.activity_code,
+        bank_details : regObj.bank_details,
         registeredAddress: regObj.registeredAddress,
         token: token,
         account_status: 0,
