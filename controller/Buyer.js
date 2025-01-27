@@ -24,7 +24,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    Regsiter : async (req, reqObj, callback) => {
+    Regsiter : async (req, res, reqObj, callback) => {
       console.log(reqObj);
       // return false
       
@@ -122,7 +122,7 @@ module.exports = {
           } 
     },
 
-    Login : async (req, reqObj, callback) => {
+    Login : async (req, res, reqObj, callback) => {
      
         const password = reqObj.password
         const email    = reqObj.email
@@ -176,7 +176,7 @@ module.exports = {
        }
     },
 
-    EditProfile : async (req, reqObj, callback) => { 
+    EditProfile : async (req, res, reqObj, callback) => { 
         try {
           const {
             buyer_id, buyer_name, description, buyer_address,buyer_email, buyer_mobile, 
@@ -252,7 +252,7 @@ module.exports = {
         }
     },
 
-    buyerProfileDetails : async(req, reqObj, callback) => {
+    buyerProfileDetails : async(req, res, reqObj, callback) => {
       try {
         // Buyer.findOne({buyer_id: reqObj.buyer_id}).select('buyer_id buyer_name email mobile country_code company_name')
         const fields = {
@@ -273,7 +273,7 @@ module.exports = {
       }
     },
 
-    supplierList: async (req, reqObj, callback) => {
+    supplierList: async (req, res, reqObj, callback) => {
       try {
         const { searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = reqObj;
         const offset = (pageNo - 1) * pageSize;
@@ -312,7 +312,7 @@ module.exports = {
     },
 
 
-    mySupplierList: async (req, reqObj, callback) => {
+    mySupplierList: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
         const page_no = pageNo || 1;
@@ -446,7 +446,7 @@ module.exports = {
       }
     },
   
-    supplierDetails : async (req, reqObj, callback) => {
+    supplierDetails : async (req, res, reqObj, callback) => {
       try {
 
         Supplier.findOne({supplier_id: reqObj.supplier_id})
@@ -465,7 +465,7 @@ module.exports = {
       }
     },
 
-    supplierProductList : async (req, reqObj, callback) => {
+    supplierProductList : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize, medicine_type } = reqObj
   
@@ -552,7 +552,7 @@ module.exports = {
       }
     },
 
-    buyerSupplierOrdersList : async (req, reqObj, callback) => {
+    buyerSupplierOrdersList : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, buyer_id, pageNo, pageSize, order_type } = reqObj
 
@@ -629,7 +629,7 @@ module.exports = {
     },
 
 
-    buyerDashboardOrderDetails: async (req, reqObj, callback) => {
+    buyerDashboardOrderDetails: async (req, res, reqObj, callback) => {
       try {
         const { buyer_id } = reqObj;
     
@@ -848,7 +848,7 @@ module.exports = {
     },
     
 
-    buyerOrderSellerCountry : async (req, reqObj, callback) => {
+    buyerOrderSellerCountry : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id } = reqObj
 
@@ -907,7 +907,7 @@ module.exports = {
     },
 
     //----------------------------- support -------------------------------------//
-    supportList : async (req, reqObj, callback) => {
+    supportList : async (req, res, reqObj, callback) => {
      try {
         const { buyer_id, pageNo, pageSize } = reqObj
 
@@ -941,7 +941,7 @@ module.exports = {
      }
     },
 
-    supportDetails : async (req, reqObj, callback) => {
+    supportDetails : async (req, res, reqObj, callback) => {
       try {
          const { buyer_id , support_id } = reqObj
 
@@ -956,7 +956,7 @@ module.exports = {
     },
     //----------------------------- support --------------------------------------//
 
-    addToList : async (req, reqObj, callback) => {
+    addToList : async (req, res, reqObj, callback) => {
       try {
         const existingList = await List.findOne({
           buyer_id    : reqObj.buyer_id,
@@ -1028,7 +1028,7 @@ module.exports = {
       }
     },
 
-    showList : async (req, reqObj, callback) => {
+    showList : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj
 
@@ -1140,7 +1140,7 @@ module.exports = {
       }
     },
 
-    deleteListItem: async (req, reqObj, callback) => {
+    deleteListItem: async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, medicine_id, supplier_id, item_id, list_id } = reqObj;
         const itemIds = item_id.map(id => id.trim()).filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id));
@@ -1179,7 +1179,7 @@ module.exports = {
       }
     },
 
-    sendEnquiry: async (req, reqObj, callback) => {
+    sendEnquiry: async (req, res, reqObj, callback) => {
       try {
           const { buyer_id, buyer_name, items } = reqObj;
           if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
@@ -1344,7 +1344,7 @@ module.exports = {
       }
     },
   
-    getNotificationList : async (req, reqObj, callback) => {
+    getNotificationList : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj
 
@@ -1417,7 +1417,7 @@ console.log('NOTFICATION', data.length)
       }
     },
 
-    getNotificationDetailsList : async (req, reqObj, callback) => {
+    getNotificationDetailsList : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj
 
@@ -1497,7 +1497,7 @@ console.log('NOTFICATION', data.length)
       }
      },
 
-    updateStatus : async (req, reqObj, callback) => {
+    updateStatus : async (req, res, reqObj, callback) => {
       try {
         const { notification_id, status = 1, buyer_id, user_type } = reqObj
       //   const updateNotification = await Notification.findOneAndUpdate(
@@ -1531,7 +1531,7 @@ console.log('NOTFICATION', data.length)
       }
     },
 
-    getInvoiceCount: async (req, reqObj, callback) => {
+    getInvoiceCount: async (req, res, reqObj, callback) => {
       try {
         const { buyer_id } = reqObj; 
     

@@ -18,13 +18,14 @@ const PurchaseOrder      = require('../schema/purchaseOrderSchema')
 const Invoices           = require('../schema/invoiceSchema')
 const BuyerProfileEdit   = require('../schema/buyerEditSchema')
 const SupplierProfileEdit   = require('../schema/supplierEditSchema')
+const ProfileEditRequest = require("../schema/profileEditRequestSchema");
 const {Medicine, SecondaryMarketMedicine, NewMedicine }            = require("../schema/medicineSchema");
 const {EditMedicine, NewMedicineEdit, SecondaryMarketMedicineEdit} = require('../schema/medicineEditRequestSchema')
 const { parse } = require('json2csv');
 const fs = require('fs');
 const path = require('path');
 const { flattenData } = require('../utils/csvConverter');
-const { sendErrorResponse } = require('../utils/commonResonse');
+const { sendErrorResponse, sendSuccessResponse } = require('../utils/commonResonse');
 const logErrorToFile = require('../logs/errorLogs');
 
 const generatePassword = () => {
@@ -61,7 +62,7 @@ const sendMailFunc = (email, subject, body) =>{
 
 module.exports = {
 
-    register : async (req, reqObj, callback) => {
+    register : async (req, res, reqObj, callback) => {
         try {
           const adminId    = 'ADM-' + Math.random().toString(16).slice(2, 10);
           let jwtSecretKey = process.env.APP_SECRET; 
@@ -100,7 +101,7 @@ module.exports = {
         } 
     },
 
-    login : async (req, reqObj, callback) => {
+    login : async (req, res, reqObj, callback) => {
       try {
          const password = reqObj.password
          const email    = reqObj.email
@@ -133,7 +134,7 @@ module.exports = {
       }
     },
 
-    editAdminProfile : async (req, reqObj, callback) => {
+    editAdminProfile : async (req, res, reqObj, callback) => {
       try {
         const { admin_id, user_name, email } = reqObj
 
@@ -157,7 +158,7 @@ module.exports = {
       }
     },
 
-    adminProfileDetails : async (req, reqObj, callback) => {
+    adminProfileDetails : async (req, res, reqObj, callback) => {
       try {
         const fields = {
           password  : 0,
@@ -178,7 +179,7 @@ module.exports = {
     }
     },
 
-    getUserList : async (req, reqObj, callback) => {
+    getUserList : async (req, res, reqObj, callback) => {
       try {
         User.find({}).select('user_id first_name last_name email status').limit(5).then((data) => {
           callback({code: 200, message : 'User list fetched successfully', result:data})
@@ -193,7 +194,7 @@ module.exports = {
       }
     },
 
-    blockUnblockUser: async (req, reqObj, callback) => {
+    blockUnblockUser: async (req, res, reqObj, callback) => {
       try {
           const { user_id } = reqObj;
           const user = await User.findOne({ user_id: user_id });
@@ -232,7 +233,7 @@ module.exports = {
     },
     //------------------------ supplier ------------------------//
 
-    getSupplierList: async (req, reqObj, callback) => {
+    getSupplierList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, filterValue } = reqObj;
     
@@ -388,7 +389,7 @@ module.exports = {
       }
     },
 
-    supplierDetails : async (req, reqObj, callback) => {
+    supplierDetails : async (req, res, reqObj, callback) => {
       try {
         const fields = {
           token    : 0,
@@ -408,7 +409,7 @@ module.exports = {
       }
     },
 
-//     getRegReqList: async (req, reqObj, callback) => {
+//     getRegReqList: async (req, res, reqObj, callback) => {
 //       try {
 //         const { pageNo, limit, filterValue} = reqObj
 
@@ -483,7 +484,7 @@ module.exports = {
 //     },
 
 
-getRegReqList: async (req, reqObj, callback) => {
+getRegReqList: async (req, res, reqObj, callback) => {
   try {
       const { pageNo, limit, filterValue } = reqObj;
 
@@ -590,7 +591,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectSupplierRegReq: async (req, reqObj, callback) => {
+    acceptRejectSupplierRegReq: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, sales_person_name, action } = reqObj;
     
@@ -700,7 +701,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
     
-    supplierSupportList : async (req, reqObj, callback) => {
+    supplierSupportList : async (req, res, reqObj, callback) => {
       try {
          const {pageNo, pageSize } = reqObj
  
@@ -737,7 +738,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //------------------------ buyer ------------------------//
-    getBuyerList: async (req, reqObj, callback) => {
+    getBuyerList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, filterValue } = reqObj;
     
@@ -819,7 +820,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    buyerDetails : async (req, reqObj, callback) => {
+    buyerDetails : async (req, res, reqObj, callback) => {
       try {
         const fields = {
           token    : 0,
@@ -839,7 +840,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getBuyerRegReqList: async (req, reqObj, callback) => {
+    getBuyerRegReqList: async (req, res, reqObj, callback) => {
       try {
         const {pageNo, pageSize, filterValue} = reqObj
 
@@ -916,7 +917,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectBuyerRegReq: async (req, reqObj, callback) => {
+    acceptRejectBuyerRegReq: async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, sales_person_name = '', action } = reqObj;
     
@@ -1022,7 +1023,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
     
-    // buyerOrdersList: async (req, reqObj, callback) => {
+    // buyerOrdersList: async (req, res, reqObj, callback) => {
     //   try {
     //     const {pageNo, pageSize, filterKey, buyer_id, filterValue} = reqObj
   
@@ -1209,7 +1210,7 @@ getRegReqList: async (req, reqObj, callback) => {
     // },
 
 
-    buyerOrdersList: async (req, reqObj, callback) => {
+    buyerOrdersList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, buyer_id, filterValue } = reqObj;
     
@@ -1401,7 +1402,7 @@ getRegReqList: async (req, reqObj, callback) => {
     
 
 
-    buyerSupportList : async (req, reqObj, callback) => {
+    buyerSupportList : async (req, res, reqObj, callback) => {
       try {
          const {pageNo, pageSize } = reqObj
  
@@ -1435,7 +1436,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    buyerInvoicesList: async (req, reqObj, callback) => {
+    buyerInvoicesList: async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, buyer_id} = reqObj
   
@@ -1563,7 +1564,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     //------------------------ supplier/buyer ------------------------//
 
-    // getTotalRegReqList: async (req, reqObj, callback) => {
+    // getTotalRegReqList: async (req, res, reqObj, callback) => {
     //   try {
     //     const { pageNo, pageSize } = reqObj;
     
@@ -1629,7 +1630,7 @@ getRegReqList: async (req, reqObj, callback) => {
     // },
 
 
-    getTotalRegReqList: async (req, reqObj, callback) => {
+    getTotalRegReqList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterValue } = reqObj;
     
@@ -1734,7 +1735,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getTotalApprovedRegReqList: async (req, reqObj, callback) => {
+    getTotalApprovedRegReqList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterValue } = reqObj;
     
@@ -1841,7 +1842,7 @@ getRegReqList: async (req, reqObj, callback) => {
     },
     
     
-    getProfileUpdateReqList: async (req, reqObj, callback) => {
+    getProfileUpdateReqList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, limit, user_type  } = reqObj
 
@@ -1892,119 +1893,77 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectProfileEditRequest : async (req, reqObj, callback) => {
-      
+    acceptRejectProfileEditRequest: async (req, res) => {
+      const { id } = req?.params;
+      const { action } = req?.body;
+    
       try {
-        const { user_id, user_type, action } = reqObj
-        
-        const status = action == 'accept' ? 1 : 'reject' ? 2 : ''
-
-        if(status === 1) {
-          if(user_type === 'supplier') {
-            const isSupplier = await SupplierEdit.findOne({supplier_id : user_id, edit_status: 0})
-
-              if(!isSupplier) {
-                return callback({code: 402, message: 'supplier edit request not found'})
-              }
-            
-              await SupplierEdit.findOneAndUpdate({supplier_id: user_id}, {$set: {edit_status: status}})
-  
-                 const updateObj = {
-                  supplier_name               : isSupplier.supplier_name, 
-                  description                 : isSupplier.description, 
-                  supplier_address            : isSupplier.supplier_address, 
-                  supplier_email              : isSupplier.supplier_email, 
-                  supplier_mobile             : isSupplier.supplier_mobile, 
-                  supplier_country_code       : isSupplier.supplier_country_code, 
-                  contact_person_name         : isSupplier.contact_person_name,
-                  contact_person_mobile_no    : isSupplier.contact_person_mobile_no, 
-                  contact_person_country_code : isSupplier.contact_person_country_code, 
-                  contact_person_email        : isSupplier.contact_person_email, 
-                  designation                 : isSupplier.designation,
-                  country_of_origin           : isSupplier.country_of_origin, 
-                  country_of_operation        : isSupplier.country_of_operation, 
-                  license_no                  : isSupplier.license_no, 
-                  tax_no                      : isSupplier.tax_no, 
-                  payment_terms               : isSupplier.payment_terms, 
-                  tags                        : isSupplier.tags, 
-                  estimated_delivery_time     : isSupplier.estimated_delivery_time, 
-                  supplier_image              : isSupplier.supplier_image, 
-                  tax_image                   : isSupplier.tax_image, 
-                  license_image               : isSupplier.license_image,
-                  profile_status              : 1    
-                 };
-
-                  Supplier.findOneAndUpdate({supplier_id: isSupplier.supplier_id}, {$set: updateObj}, {new: true})
-                  .then((result) => {
-                    callback({code: 200, message : 'Profile details updated successfully', result: result})
-                  })
-                  .catch((err) => {
-                          callback({code: 400, message : 'Error while updating profile details ', result: err})
-                  })
-  
-          } else if(user_type === 'buyer') {
-            const isBuyer = await BuyerEdit.findOne({buyer_id : user_id, edit_status : 0})
-            console.log(isBuyer);
-            if(!isBuyer) {
-              callback({code: 402, message: 'Buyer edit request not found'})
-            }
-              const countryOfOperationString = isBuyer.country_of_operation.join(', '); 
-
-            BuyerEdit.findOneAndUpdate({buyer_id: user_id},
-              {
-                $set: {
-                edit_status : status}
-              }).then(async() => {
-  
-                const updateObj = {
-                  // buyer_id                 : isbuyer.buyer_id, 
-                  buyer_name                  : isBuyer.buyer_name, 
-                  description                 : isBuyer.description, 
-                  buyer_address               : isBuyer.buyer_address, 
-                  buyer_email                 : isBuyer.buyer_email, 
-                  buyer_mobile                : isBuyer.buyer_mobile, 
-                  buyer_country_code          : isBuyer.buyer_country_code, 
-                  contact_person_name         : isBuyer.contact_person_name,
-                  contact_person_mobile_no    : isBuyer.contact_person_mobile, 
-                  contact_person_country_code : isBuyer.contact_person_country_code, 
-                  contact_person_email        : isBuyer.contact_person_email, 
-                  designation                 : isBuyer.designation,
-                  country_of_origin           : isBuyer.country_of_origin, 
-                  country_of_operation        : countryOfOperationString,
-                  license_no                  : isBuyer.license_no, 
-                  tax_no                      : isBuyer.tax_no, 
-                  payment_terms               : isBuyer.payment_terms, 
-                  tags                        : isBuyer.tags, 
-                  estimated_delivery_time     : isBuyer.estimated_delivery_time, 
-                  buyer_image                 : isBuyer.buyer_image, 
-                  tax_image                   : isBuyer.tax_image, 
-                  license_image               : isBuyer.license_image,
-                  profile_status              : 1    
-                };
-                
-  
-                Buyer.findOneAndUpdate({buyer_id : isBuyer.buyer_id}, { $set: updateObj}, {new: true})
-                .then((result) => {
-                  callback({code: 200, message : 'Profile details updated successfully', result: result})
-                })
-                .catch((err) => {
-                  callback({code: 400, message : 'Error while updating profile details ', result: err})
-                })
-              })
-          }
-        } else if(status === 2) {
-          callback({code: 403, message : 'Request for edit profile details rejected'})
+        // Find the profile edit request
+        const profileReq = await ProfileEditRequest?.findById(id);
+        if (!profileReq) {
+          return sendErrorResponse(res, 400, "Failed to fetch profile request.");
         }
-        
-
+    
+        // Find the user to update profile request
+        const profile = await (profileReq?.userSchemaReference)?.findById(profileReq?.userId);
+        if (!profile) {
+          return sendErrorResponse(res, 400, "Failed to fetch profile data to update details.");
+        }
+    
+        // Update the profile edit request status
+        const updatedProfileReq = await ProfileEditRequest?.findByIdAndUpdate(
+          profileReq?._id,
+          {
+            $set: {
+              editReqStatus: action,
+            },
+          },
+          { new: true }
+        );
+    
+        if (!updatedProfileReq) {
+          return sendErrorResponse(res, 400, "Failed to update profile edit request status.");
+        }
+    
+        // Update the profile with new address values, if any changes
+        const updatedProfile = await (profileReq?.userSchemaReference)?.findByIdAndUpdate(
+          profile?._id,
+          {
+            $set: {
+              registeredAddress: {
+                ...profile?.registeredAddress,
+                ...updatedProfileReq?.registeredAddress,
+              },
+              profile_status: action == 'Approved' ? 1 : 2
+            },
+          },
+          { new: true }
+        );
+    
+        if (!updatedProfile) {
+          return sendErrorResponse(res, 400, "Failed to update profile address.");
+        }
+    
+        // Return a success response
+        return sendSuccessResponse(
+          res,
+          200,
+          "Profile edit request processed successfully.",
+          {updatedProfileReq, updatedProfile}
+        );
       } catch (error) {
         console.log("Internal Server Error:", error);
         logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        return sendErrorResponse(
+          res,
+          500,
+          "An unexpected error occurred. Please try again later.",
+          error
+        );
       }
-    },
+    },    
 
-    orderDetails : async (req, reqObj, callback) => {
+    orderDetails : async (req, res, reqObj, callback) => {
       try {
           const {buyer_id, order_id, filterKey} = reqObj
 
@@ -2235,7 +2194,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
    //------------------------ medicine ------------------------//
 
-  //   acceptRejectAddMedicineReq : async (req, reqObj, callback) => {
+  //   acceptRejectAddMedicineReq : async (req, res, reqObj, callback) => {
   //     console.log('REQ', reqObj);
       
   //     try {
@@ -2350,7 +2309,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
 
-    acceptRejectAddMedicineReq: async (req, reqObj, callback) => {
+    acceptRejectAddMedicineReq: async (req, res, reqObj, callback) => {
       try {
           const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
 
@@ -2459,7 +2418,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
   
-    allMedicineList: async (req, reqObj, callback) => {
+    allMedicineList: async (req, res, reqObj, callback) => {
       try {
         console.log('REQOBJ',reqObj);
         
@@ -2566,7 +2525,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getMedicineDetails: async (req, reqObj, callback) => {
+    getMedicineDetails: async (req, res, reqObj, callback) => {
       try {
         Medicine.aggregate([
           {
@@ -2709,7 +2668,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    acceptRejectEditMedicineReq: async (req, reqObj, callback) => {
+    acceptRejectEditMedicineReq: async (req, res, reqObj, callback) => {
       try {
         const { medicine_id, supplier_id, action, admin_id } = reqObj;
 
@@ -2905,7 +2864,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    medicineEditList : async (req, reqObj, callback) => {
+    medicineEditList : async (req, res, reqObj, callback) => {
       try {
         const {searchKey, pageNo, pageSize, medicineType, status} = reqObj
   
@@ -3013,7 +2972,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    editMedicineDetails: async (req, reqObj, callback) => {
+    editMedicineDetails: async (req, res, reqObj, callback) => {
       console.log('here', reqObj);
       
       try {
@@ -3239,7 +3198,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    deleteMedicine : async (req, reqObj, callback) => {
+    deleteMedicine : async (req, res, reqObj, callback) => {
       try {
         const { medicine_id, supplier_id } = reqObj
           
@@ -3265,7 +3224,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     //----------------------------- support -------------------------------------//
 
-    supportList: async (req, reqObj, callback) => {
+    supportList: async (req, res, reqObj, callback) => {
       try {
         const { pageNo, pageSize, filterKey, supportType } = reqObj;
     
@@ -3425,7 +3384,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
  
-    supportDetails : async (req, reqObj, callback) => {
+    supportDetails : async (req, res, reqObj, callback) => {
       try {
           const { supplier_id , support_id } = reqObj
 
@@ -3550,7 +3509,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //----------------------------- dashboard details -------------------------------------//
-    adminDashboardDataList: async (req, reqObj, callback) => {
+    adminDashboardDataList: async (req, res, reqObj, callback) => {
       try {
         
         const { filterValue } = reqObj
@@ -4038,7 +3997,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //------------------------------ notifications -------------------------------//
-    getNotificationList : async (req, reqObj, callback) => {
+    getNotificationList : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj;
     
@@ -4121,7 +4080,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getNotificationDetailsList : async (req, reqObj, callback) => {
+    getNotificationDetailsList : async (req, res, reqObj, callback) => {
       try {
         const { buyer_id, pageNo, pageSize } = reqObj
     
@@ -4203,7 +4162,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    updateStatus : async (req, reqObj, callback) => {
+    updateStatus : async (req, res, reqObj, callback) => {
       console.log(reqObj);
       try {
         const { notification_id, status = 1, user_type } = reqObj
@@ -4243,7 +4202,7 @@ getRegReqList: async (req, reqObj, callback) => {
      //------------------------------ notifications -------------------------------//
 
     //------------------------------ inquiries -------------------------------//
-    inquiriesList: async (req, reqObj, callback) => {
+    inquiriesList: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, buyer_id, status, pageNo, pageSize, filterValue } = reqObj
         const page_no   = pageNo || 1
@@ -4396,7 +4355,7 @@ getRegReqList: async (req, reqObj, callback) => {
         }
     },
 
-    inquiryDetails: async (req, reqObj, callback) => {
+    inquiryDetails: async (req, res, reqObj, callback) => {
       try {
         const { enquiry_id } = reqObj
 
@@ -4662,7 +4621,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
      //------------------------------ invoice -------------------------------//
 
-    invoicesList: async (req, reqObj, callback) => {
+    invoicesList: async (req, res, reqObj, callback) => {
       try {
         const {pageNo, pageSize, filterKey, buyer_id} = reqObj
         const page_no   = pageNo || 2
@@ -4854,7 +4813,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    invoiceDetails: async (req, reqObj, callback) => {
+    invoiceDetails: async (req, res, reqObj, callback) => {
       try {
         const { order_id, invoice_id, supplier_id } = reqObj;
     
@@ -5043,7 +5002,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
 
     //------------------------------ PO -------------------------------//
-    getPOList : async (req, reqObj, callback) => {
+    getPOList : async (req, res, reqObj, callback) => {
       try {
         console.log('here',reqObj);
         
@@ -5231,7 +5190,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    getPODetails: async (req, reqObj, callback) => {
+    getPODetails: async (req, res, reqObj, callback) => {
         try {
             const {purchaseOrder_id, buyer_id, supplier_id, enquiry_id} = reqObj
             PurchaseOrder.aggregate([
@@ -5280,7 +5239,27 @@ getRegReqList: async (req, reqObj, callback) => {
                 },
                 {
                     $addFields: {
-                        "order_items.medicine_details": "$medicine_details"
+                        "order_items.medicine_details": "$medicine_details",
+                        // Add extracted buyer registered address fields
+                        "buyer_registered_address": {
+                            company_reg_address: { $arrayElemAt: ["$buyer_details.registeredAddress.company_reg_address", 0] },
+                            locality           : { $arrayElemAt: ["$buyer_details.registeredAddress.locality", 0] },
+                            land_mark          : { $arrayElemAt: ["$buyer_details.registeredAddress.land_mark", 0] },
+                            city               : { $arrayElemAt: ["$buyer_details.registeredAddress.city", 0] },
+                            state              : { $arrayElemAt: ["$buyer_details.registeredAddress.state", 0] },
+                            country            : { $arrayElemAt: ["$buyer_details.registeredAddress.country", 0] },
+                            pincode            : { $arrayElemAt: ["$buyer_details.registeredAddress.pincode", 0] }
+                        },
+                        // Add extracted supplier registered address fields
+                        "supplier_registered_address": {
+                            company_reg_address: { $arrayElemAt: ["$supplier_details.registeredAddress.company_reg_address", 0] },
+                            locality           : { $arrayElemAt: ["$supplier_details.registeredAddress.locality", 0] },
+                            land_mark          : { $arrayElemAt: ["$supplier_details.registeredAddress.land_mark", 0] },
+                            city               : { $arrayElemAt: ["$supplier_details.registeredAddress.city", 0] },
+                            state              : { $arrayElemAt: ["$supplier_details.registeredAddress.state", 0] },
+                            country            : { $arrayElemAt: ["$supplier_details.registeredAddress.country", 0] },
+                            pincode            : { $arrayElemAt: ["$supplier_details.registeredAddress.pincode", 0] }
+                        }
                     }
                 },
                 {
@@ -5297,12 +5276,14 @@ getRegReqList: async (req, reqObj, callback) => {
                         buyer_address           : { $first: "$buyer_address" },
                         buyer_mobile            : { $first: "$buyer_mobile" },
                         buyer_country_code         : { $first: "$buyer_country_code" },
+                        buyer_registered_address: { $first: "$buyer_registered_address" },  // Already added
                         buyer_email             : { $first: "$buyer_email" },
                         buyer_regNo             : { $first: "$buyer_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
                         supplier_address        : { $first: "$supplier_address" },
                         supplier_mobile         : { $first: "$supplier_mobile" },
                         supplier_country_code         : { $first: "$supplier_country_code" },
+                        supplier_registered_address: { $first: "$supplier_registered_address" },  // Already added
                         supplier_email          : { $first: "$supplier_email" },
                         supplier_regNo          : { $first: "$supplier_regNo" },
                         supplier_name           : { $first: "$supplier_name" },
@@ -5333,7 +5314,7 @@ getRegReqList: async (req, reqObj, callback) => {
 
     //------------------------------ transaction -------------------------------//
 
-    transactionList: async (req, reqObj, callback) => {
+    transactionList: async (req, res, reqObj, callback) => {
       try {
         const {pageNo, pageSize, filterKey, buyer_id} = reqObj
         const page_no   = pageNo || 2
@@ -5524,7 +5505,7 @@ getRegReqList: async (req, reqObj, callback) => {
       }
     },
 
-    transactionDetails: async (req, reqObj, callback) => {
+    transactionDetails: async (req, res, reqObj, callback) => {
       try {
         const { order_id, invoice_id, supplier_id,transaction_id } = reqObj;
     

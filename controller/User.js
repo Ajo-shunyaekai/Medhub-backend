@@ -7,7 +7,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 
 module.exports = {
 
-    register : async (req, reqObj, callback) => {
+    register : async (req, res, reqObj, callback) => {
         try {
           const emailExists = await User.findOne({email : reqObj.email})
           if(emailExists) {
@@ -52,7 +52,7 @@ module.exports = {
         }
     },
     
-    login : async (req, reqObj, callback) => {
+    login : async (req, res, reqObj, callback) => {
       const password = reqObj.password
       const email    = reqObj.email
 
@@ -78,7 +78,7 @@ module.exports = {
     },
 
     //save the generated opt in user collection
-    saveOtp : async (req, reqObj, callback) => {
+    saveOtp : async (req, res, reqObj, callback) => {
       const otp   = reqObj.otp
       const email = reqObj.email
 
@@ -97,7 +97,7 @@ module.exports = {
     },
 
     //verify the otp for the user
-    verifyOtp : async (req, reqObj, callback) => {
+    verifyOtp : async (req, res, reqObj, callback) => {
       try {
         const otp   = reqObj.otp
         const email = reqObj.email
@@ -121,7 +121,7 @@ module.exports = {
      }
     },
 
-    updatePassword : async (req, reqObj, callback) => {
+    updatePassword : async (req, res, reqObj, callback) => {
       const current_password = reqObj.current_password
       const new_password     = reqObj.new_password
       const user_id          = reqObj.user_id
@@ -153,7 +153,7 @@ module.exports = {
     }
     },
 
-    editProfile : async (req, reqObj, callback) => {
+    editProfile : async (req, res, reqObj, callback) => {
       try {
         const user_id = reqObj.user_id
 
@@ -177,7 +177,7 @@ module.exports = {
       }
     },
 
-    getUserList : async (req, reqObj, callback) => {
+    getUserList : async (req, res, reqObj, callback) => {
       try {
         User.find({}).select('user_id first_name last_name mobile email').then((data) => {
           callback(data)
@@ -191,7 +191,7 @@ module.exports = {
     }
     },
 
-    getProfile : async (req, reqObj, callback) => {
+    getProfile : async (req, res, reqObj, callback) => {
       try {
         User.find({user_id : reqObj.user_id}).select('user_id first_name last_name mobile email').then((data) => {
           callback(data)

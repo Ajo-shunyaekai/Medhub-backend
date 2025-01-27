@@ -45,7 +45,7 @@ const initializeInvoiceNumber = async () => {
 
 module.exports = {
 
-    createInvoice : async (req, reqObj, callback) => {
+    createInvoice : async (req, res, reqObj, callback) => {
        try {
         const invoiceId = 'INV-' + Math.random().toString(16).slice(2, 10);
 
@@ -139,7 +139,7 @@ module.exports = {
        }
     },
 
-    updatePaymentStatus: async (req, reqObj, callback) => {
+    updatePaymentStatus: async (req, res, reqObj, callback) => {
       try {
           const { invoice_id, buyer_id, supplier_id, order_id, mode_of_payment, amount_paid, transaction_id, payment_date, transaction_image } = reqObj;
 
@@ -245,7 +245,7 @@ module.exports = {
       }
     },
   
-    invoiceDetails: async (req, reqObj, callback) => {
+    invoiceDetails: async (req, res, reqObj, callback) => {
       try {
         // const { order_id, invoice_id, supplier_id } = reqObj;
         const invoice_id = req?.params?.id;
@@ -383,10 +383,28 @@ module.exports = {
               buyer_address        : 1,
               buyer_country        : 1,
               buyer_vat_reg_no     : 1,
+              buyer_registered_address: {
+                company_reg_address: "$buyer.registeredAddress.company_reg_address",
+                locality           : "$buyer.registeredAddress.locality",
+                land_mark          : "$buyer.registeredAddress.land_mark",
+                city               : "$buyer.registeredAddress.city",
+                state              : "$buyer.registeredAddress.state",
+                country            : "$buyer.registeredAddress.country",
+                pincode            : "$buyer.registeredAddress.pincode",
+              },
               supplier_name        : 1,
               supplier_address     : 1,
               supplier_country     : 1,
               supplier_vat_reg_no  : 1,
+              supplier_registered_address: {
+                company_reg_address: "$supplier.registeredAddress.company_reg_address",
+                locality           : "$supplier.registeredAddress.locality",
+                land_mark          : "$supplier.registeredAddress.land_mark",
+                city               : "$supplier.registeredAddress.city",
+                state              : "$supplier.registeredAddress.state",
+                country            : "$supplier.registeredAddress.country",
+                pincode            : "$supplier.registeredAddress.pincode",
+              },
               items                : 1,
               payment_terms        : 1,
               total_payable_amount : 1,

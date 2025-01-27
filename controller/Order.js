@@ -53,7 +53,7 @@ const { sendErrorResponse } = require('../utils/commonResonse')
 
 module.exports = {
 
-   createOrder : async (req, reqObj, callback) => {
+   createOrder : async (req, res, reqObj, callback) => {
        try {
 
         const orderId = 'ORD-' + Math.random().toString(16).slice(2, 10);
@@ -189,7 +189,7 @@ module.exports = {
     },
 
     //new code
-    // bookLogistics: async (req, reqObj, callback) => {
+    // bookLogistics: async (req, res, reqObj, callback) => {
     //   try {
     //     const { buyer_id, supplier_id, order_id, buyer_logistics_data, is_registered } = reqObj;
     //     const {full_name, email, mobile_number, house_name, locality, city, state, country, pincode, type } = reqObj.buyer_logistics_data
@@ -288,7 +288,7 @@ module.exports = {
     //old code
 
 
-    bookLogistics: async (req, reqObj, callback) => {
+    bookLogistics: async (req, res, reqObj, callback) => {
       try {
         
         const { buyer_id, supplier_id, order_id, logistics_details } = reqObj
@@ -344,7 +344,7 @@ module.exports = {
     },
     
     //new code
-    // submitPickupDetails: async (req, reqObj, callback) => {
+    // submitPickupDetails: async (req, res, reqObj, callback) => {
     //   try {
     //     const { buyer_id, supplier_id, order_id, shipment_details, supplier_logistics_data, is_registered } = reqObj;
     //     const {full_name, email, mobile_number, house_name, locality, city, state, country, pincode, type  } = reqObj.supplier_logistics_data
@@ -437,7 +437,7 @@ module.exports = {
 
 
     //old code
-    submitPickupDetails: async (req, reqObj, callback) => {
+    submitPickupDetails: async (req, res, reqObj, callback) => {
       try {
         
         const { buyer_id, supplier_id, order_id, shipment_details } = reqObj
@@ -493,7 +493,7 @@ module.exports = {
 
 
 
-    buyerOrdersList: async (req, reqObj, callback) => {
+    buyerOrdersList: async (req, res, reqObj, callback) => {
         try {
           const {page_no, limit, filterKey, buyer_id} = reqObj
     
@@ -620,7 +620,7 @@ module.exports = {
         }
     },
 
-    buyerOrderDetails : async (req, reqObj, callback) => {
+    buyerOrderDetails : async (req, res, reqObj, callback) => {
         try {
             const {buyer_id, order_id, filterKey} = reqObj
 
@@ -844,7 +844,7 @@ module.exports = {
         }
     },
 
-    cancelOrder : async (req, reqObj, callback) => {
+    cancelOrder : async (req, res, reqObj, callback) => {
        try {
         const {order_id, buyer_id, reason, order_type} = reqObj
         
@@ -862,7 +862,7 @@ module.exports = {
        }
     },
 
-    orderFeedback : async (req, reqObj, callback) => {
+    orderFeedback : async (req, res, reqObj, callback) => {
       try {
        const supportId    = 'SPT-' + Math.random().toString(16).slice(2, 10);
 
@@ -889,7 +889,7 @@ module.exports = {
       }
     },
 
-    orderComplaint : async (req, reqObj, callback) => {
+    orderComplaint : async (req, res, reqObj, callback) => {
       try {
         const supportId    = 'SPT-' + Math.random().toString(16).slice(2, 10);
 
@@ -917,7 +917,7 @@ module.exports = {
       }
     },
 
-    buyerInvoicesList: async (req, reqObj, callback) => {
+    buyerInvoicesList: async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, buyer_id} = reqObj
         const pageNo   = page_no || 2
@@ -1093,7 +1093,7 @@ module.exports = {
       }
     },
 
-    buyerInvoiceDetails : async (req, reqObj, callback) => {
+    buyerInvoiceDetails : async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, buyer_id} = reqObj
         const pageNo   = page_no || 2
@@ -1265,7 +1265,7 @@ module.exports = {
       }
     },
 
-    supplierOrdersList: async (req, reqObj, callback) => {
+    supplierOrdersList: async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, supplier_id} = reqObj
 
@@ -1393,7 +1393,7 @@ module.exports = {
       }
     },
 
-    supplierOrderDetails : async (req, reqObj, callback) => {
+    supplierOrderDetails : async (req, res, reqObj, callback) => {
       try {
           const {buyer_id, order_id, filterKey} = reqObj
   
@@ -1641,7 +1641,7 @@ module.exports = {
       }
     },
   
-    supplierInvoicesList: async (req, reqObj, callback) => {
+    supplierInvoicesList: async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, supplier_id} = reqObj
         const pageNo   = page_no || 2
@@ -1816,7 +1816,7 @@ module.exports = {
       }
     },
 
-    proformaInvoiceList: async (req, reqObj, callback) => {
+    proformaInvoiceList: async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, buyer_id} = reqObj
   
@@ -1980,7 +1980,7 @@ module.exports = {
       }
     },
 
-    orderSalesFilterList: async (req, reqObj, callback) => {
+    orderSalesFilterList: async (req, res, reqObj, callback) => {
       try {
         const {page_no, limit, filterKey, buyer_id, supplier_id} = reqObj
   
