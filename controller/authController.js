@@ -86,7 +86,6 @@ module.exports = {
         bank_details
       } = req.body;
 console.log('req.body',req.body)
-
       let regObj = {};
  
       if (!user_type) {
