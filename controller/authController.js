@@ -589,7 +589,7 @@ console.log('req.body',req.body)
           : user_type === "Admin"
           ? await Admin.findOne({ email })
           : user_type === "Supplier"
-          ? await Supplier.findOne({ supplier_email: email })
+          ? await Supplier.findOne({ contact_person_email: email })
           : user_type === "Seller"
           ? await Seller.findOne({ email })
           : null;
