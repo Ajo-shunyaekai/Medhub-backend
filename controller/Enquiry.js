@@ -27,7 +27,7 @@ const { sendErrorResponse } = require('../utils/commonResonse');
     const sendMailFunc = (email, subject, body) =>{
   
     const mailOptions = {
-        from    : process.env.SMTP_USER_ID,
+        from    : `Medhub Global <${process.env.SMTP_USER_ID}>`,
         to      : email,
         subject : subject,
         // text    : 'This is text mail, and sending for testing purpose'
