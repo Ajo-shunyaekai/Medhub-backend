@@ -26,49 +26,6 @@ const {
 } = require(`../controller/authController`);
 const { sendErrorResponse } = require('../utils/commonResonse');
 const { validateUserInput, handleValidationErrors } = require('../middleware/validations/editProfile');
- 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     // const { access_token, user_type } = req.headers;
-//     const { user_type } = req.body;
-
-
-//     console.log('user_type', user_type)
-
-//     // if (!user_type) {
-//     //   return res.status(400).send({  
-//     //     code: 400,
-//     //     message: "Need User Type",
-//     //   });
-//     // }
-
-//     let uploadPath =
-//       user_type == "Buyer"
-//         ? "./uploads/buyer/buyer_images"
-//         : user_type == "Supplier" && "./uploads/supplier/supplierImage_files";
-//     if (file.fieldname === "tax_image") {
-//       uploadPath =
-//         user_type == "Buyer"
-//           ? "./uploads/buyer/tax_images"
-//           : user_type == "Supplier" && "./uploads/supplier/tax_image";
-//     } else if (file.fieldname === "license_image") {
-//       uploadPath =
-//         user_type == "Buyer"
-//           ? "./uploads/buyer/license_images"
-//           : user_type == "Supplier" && "./uploads/supplier/license_image";
-//     } else if (file.fieldname === "certificate_image") {
-//       uploadPath =
-//         user_type == "Buyer"
-//           ? "./uploads/buyer/certificate_images"
-//           : user_type == "Supplier" && "./uploads/supplier/certificate_image";
-//     }
-//     cb(null, uploadPath);
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = file.mimetype.split("/")[1];
-//     cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-//   },
-// });
 
 
 const storage = multer.diskStorage({
@@ -147,20 +104,22 @@ const cpUpload = (req, res, next) => {
 };
  
 router.post(`/register`, checkAuthorization, cpUpload, registerUser);
+
 router.post(`/login`, loginUser);
+
 router.post(`/verify-email`, verifyEmailAndResendOTP);
 router.post(`/resend-otp`, verifyEmailAndResendOTP);
+
 router.post(`/verify-otp`, verifyOTP);
+
 router.post(`/reset-password`, resetPassword);
+
 router.post(`/update-password/:id`, updatePassword);
-// router.post(`/request-profile-edit/:id`, checkAuthorization, cpUpload, addProfileEditRequest);
+
+router.post(`/edit-profile/:id`, checkAuthorization, validateUserInput, handleValidationErrors, updateProfileAndSendEditRequest);
+
 router.put(`/:id`, checkAuthorization, cpUpload, validateUserInput, handleValidationErrors, updateProfileAndSendEditRequest);
 
 router.post(`/:id`, getLoggedinUserProfileDetails);
 
 module.exports = router;
-
-// router.get(`/:id`, getLoggedinUserProfileDetails);
- 
-// module.exports = router;
-

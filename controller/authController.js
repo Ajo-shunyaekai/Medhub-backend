@@ -53,7 +53,7 @@ module.exports = {
     try {
       // const { access_token, user_type } = req.headers;
       const { user_type } = req.body;
- 
+
       // Use req.body directly instead of stringifying it
       const {
         buyer_mobile,
@@ -83,16 +83,16 @@ module.exports = {
         country,
         pincode,
         activity_code,
-        bank_details
+        bank_details,
       } = req.body;
-console.log('req.body',req.body)
+      console.log("req.body", req.body);
 
       let regObj = {};
- 
+
       if (!user_type) {
         return sendErrorResponse(res, 400, "Need User Type.");
       }
- 
+
       if (user_type === "Buyer") {
         // Validate the required files for "Buyer" type
         if (
@@ -135,7 +135,7 @@ console.log('req.body',req.body)
             "Medical Practitioner Certificate image is required."
           );
         }
- 
+
         // Extract and format the mobile and country code
         const buyerCountryCode = buyer_mobile.split(" ")[0];
         const buyer_mobile_number = buyer_mobile.split(" ").slice(1).join(" ");
@@ -144,7 +144,7 @@ console.log('req.body',req.body)
           .slice(1)
           .join(" ");
         const personCountryCode = contact_person_mobile.split(" ")[0];
- 
+
         regObj = {
           buyer_email,
           buyer_type,
@@ -184,9 +184,10 @@ console.log('req.body',req.body)
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
-          medical_certificate: req?.files?.["medical_practitioner_image"]?.map((file) =>
-            path.basename(file.path)
-          )|| [],
+          medical_certificate:
+            req?.files?.["medical_practitioner_image"]?.map((file) =>
+              path.basename(file.path)
+            ) || [],
           registeredAddress: {
             full_name: contact_person_name || "",
             mobile_number: person_mob_no || "",
@@ -200,7 +201,7 @@ console.log('req.body',req.body)
             pincode: pincode || "",
           },
         };
- 
+
         // Validate registration fields using a custom validation function
         const errObj = validation(regObj, "buyerRegister");
         if (Object.values(errObj).length) {
@@ -231,7 +232,7 @@ console.log('req.body',req.body)
             "Supplier license image is required."
           );
         }
- 
+
         if (
           !req.files["certificate_image"] ||
           req.files["certificate_image"].length === 0
@@ -253,7 +254,7 @@ console.log('req.body',req.body)
             "Medical Practitioner Certificate image is required."
           );
         }
- 
+
         const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
         const supplier_mobile_number = req.body.supplier_mobile_no
           .split(" ")
@@ -264,7 +265,7 @@ console.log('req.body',req.body)
           .slice(1)
           .join(" ");
         const personCountryCode = req.body.contact_person_mobile.split(" ")[0];
- 
+
         regObj = {
           ...req.body,
           activity_code,
@@ -284,9 +285,10 @@ console.log('req.body',req.body)
           certificate_image: req.files["certificate_image"].map((file) =>
             path.basename(file.path)
           ),
-          medical_certificate: req?.files?.["medical_practitioner_image"]?.map((file) =>
-            path.basename(file.path)
-          ) || [],
+          medical_certificate:
+            req?.files?.["medical_practitioner_image"]?.map((file) =>
+              path.basename(file.path)
+            ) || [],
           registeredAddress: {
             full_name: contact_person_email || "",
             mobile_number: person_mob_no || "",
@@ -300,14 +302,14 @@ console.log('req.body',req.body)
             pincode: pincode || "",
           },
         };
- 
+
         const errObj = validation(regObj, "supplierRegister");
- 
+
         if (Object.values(errObj).length) {
           return sendErrorResponse(res, 419, "All fields are required", errObj);
         }
       }
- 
+
       // Check for email existence based on user type
       const emailExists =
         user_type === "Buyer"
@@ -323,11 +325,11 @@ console.log('req.body',req.body)
           : user_type === "Seller"
           ? await Seller.findOne({ email: req.body?.email })
           : null;
- 
+
       if (emailExists) {
         return sendErrorResponse(res, 409, "Email already exists");
       }
- 
+
       // Generate unique notification ID and user ID
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
       const userId = `${
@@ -341,13 +343,13 @@ console.log('req.body',req.body)
           ? "SLR-"
           : ""
       }${Math.random().toString(16).slice(2, 10)}`;
- 
+
       // Create JWT token for the user
       let jwtSecretKey = process.env.APP_SECRET;
       let data = { time: Date(), email: req.body?.email };
       const token = jwt.sign(data, jwtSecretKey);
       const saltRounds = 10;
- 
+
       // Create instances of Admin, Supplier, and Buyer models based on user type
       const newAdmin = new Admin({
         admin_id: userId,
@@ -356,7 +358,7 @@ console.log('req.body',req.body)
         password: req.body?.password,
         token: token,
       });
- 
+
       const newSupplier = new Supplier({
         supplier_id: userId,
         supplier_type: regObj.supplier_type,
@@ -384,7 +386,7 @@ console.log('req.body',req.body)
         supplier_image: regObj.supplier_image,
         license_image: regObj.license_image,
         certificate_image: regObj.certificate_image,
-        medical_certificate : regObj.medical_certificate,
+        medical_certificate: regObj.medical_certificate,
         tax_image: regObj.tax_image,
         payment_terms: regObj.payment_terms,
         estimated_delivery_time: regObj.estimated_delivery_time,
@@ -392,13 +394,13 @@ console.log('req.body',req.body)
         registration_no: regObj.registration_no,
         vat_reg_no: regObj.vat_reg_no,
         activity_code: regObj.activity_code,
-        bank_details : regObj.bank_details,
+        bank_details: regObj.bank_details,
         registeredAddress: regObj.registeredAddress,
         token: token,
         account_status: 0,
         profile_status: 0,
       });
- 
+
       const newBuyer = new Buyer({
         buyer_id: userId,
         buyer_type: regObj?.buyer_type,
@@ -411,7 +413,7 @@ console.log('req.body',req.body)
         contact_person_email: regObj?.contact_person_email,
         contact_person_mobile: regObj?.contact_person_mobile,
         contact_person_country_code: regObj?.contact_person_country_code,
-        sales_person_name : regObj.sales_person_name,
+        sales_person_name: regObj.sales_person_name,
         country_of_origin: regObj?.country_of_origin,
         country_of_operation: regObj?.country_of_operation,
         approx_yearly_purchase_value: regObj?.approx_yearly_purchase_value,
@@ -426,7 +428,7 @@ console.log('req.body',req.body)
         tax_image: regObj?.tax_image,
         license_image: regObj?.license_image,
         certificate_image: regObj?.certificate_image,
-        medical_certificate : regObj.medical_certificate,
+        medical_certificate: regObj.medical_certificate,
         vat_reg_no: regObj?.vat_reg_no,
         activity_code: regObj.activity_code,
         registeredAddress: regObj.registeredAddress,
@@ -434,7 +436,7 @@ console.log('req.body',req.body)
         account_status: 0,
         profile_status: 0,
       });
- 
+
       // Hash password
       const hashedPassword = await bcrypt.genSalt(saltRounds);
       if (!hashedPassword) {
@@ -444,11 +446,11 @@ console.log('req.body',req.body)
           "Error in generating salt or hashing password"
         );
       }
- 
+
       // If user type is "Buyer", save buyer details and send response
       if (user_type === "Buyer") {
         const buyer = await newBuyer.save();
- 
+
         if (!buyer) {
           return sendErrorResponse(
             res,
@@ -456,7 +458,7 @@ console.log('req.body',req.body)
             "Error While Submitting Buyer Registration Request"
           );
         }
- 
+
         const newNotification = new Notification({
           notification_id: notificationId,
           event_type: "New Registration Request",
@@ -468,28 +470,39 @@ console.log('req.body',req.body)
           message: "New Buyer Registration Request",
           status: 0,
         });
- 
+
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Buyer Account Created";
- 
+
         const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
         const emailContent = await buyerRegistrationContent(buyer);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent);
 
-        const confirmationEmailRecipients = [buyer.contact_person_email, "ajo@shunyaekai.tech"]
-        const confirmationSubject = "Thank You for Registering on Medhub Global!";
-        const confirmationContent = await userRegistrationConfirmationContent(buyer, user_type)
-        await sendEmail(confirmationEmailRecipients, confirmationSubject, confirmationContent)
- 
+        const confirmationEmailRecipients = [
+          buyer.contact_person_email,
+          "ajo@shunyaekai.tech",
+        ];
+        const confirmationSubject =
+          "Thank You for Registering on Medhub Global!";
+        const confirmationContent = await userRegistrationConfirmationContent(
+          buyer,
+          user_type
+        );
+        await sendEmail(
+          confirmationEmailRecipients,
+          confirmationSubject,
+          confirmationContent
+        );
+
         return sendSuccessResponse(
           res,
           200,
           `Buyer Registration Request Submitted Successfully.`
         );
       }
- 
+
       // If user type is "Admin", save admin and return response
       else if (user_type === "Admin") {
         newAdmin.password = hashedPassword;
@@ -507,7 +520,7 @@ console.log('req.body',req.body)
           `Admin Registration Request Successfully.`
         );
       }
- 
+
       // If user type is "Supplier", save supplier and send response
       else if (user_type === "Supplier") {
         const supplier = await newSupplier.save();
@@ -529,7 +542,7 @@ console.log('req.body',req.body)
           message: "New Supplier Registration Request",
           status: 0,
         });
- 
+
         const savedNotification = await newNotification.save();
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Supplier Account Created";
@@ -537,22 +550,32 @@ console.log('req.body',req.body)
         const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
- 
+
         await sendEmail(recipientEmails, subject, emailContent);
 
-        const confirmationEmailRecipients = [supplier.contact_person_email, "ajo@shunyaekai.tech"]
-        const confirmationSubject = "Thank You for Registering on Medhub Global!";
-        const confirmationContent = await userRegistrationConfirmationContent(supplier, user_type)
-        await sendEmail(confirmationEmailRecipients, confirmationSubject, confirmationContent)
+        const confirmationEmailRecipients = [
+          supplier.contact_person_email,
+          "ajo@shunyaekai.tech",
+        ];
+        const confirmationSubject =
+          "Thank You for Registering on Medhub Global!";
+        const confirmationContent = await userRegistrationConfirmationContent(
+          supplier,
+          user_type
+        );
+        await sendEmail(
+          confirmationEmailRecipients,
+          confirmationSubject,
+          confirmationContent
+        );
 
- 
         return sendSuccessResponse(
           res,
           200,
           `Supplier Registration Request Submitted Successfully.`
         );
       }
- 
+
       // Additional handling for other user types (Seller) would go here
     } catch (error) {
       console.log("Internal Server Error:", error);
@@ -567,9 +590,11 @@ console.log('req.body',req.body)
   },
 
   loginUser: async (req, res) => {
+    console.log("login function called")
     try {
       const { access_token } = req.headers;
       const { email, password, user_type } = req.body;
+      console.log("\n\n\nreq?.body", req?.body)
 
       if (!user_type) {
         return sendErrorResponse(res, 400, "Cannot Identify User.");
@@ -586,11 +611,11 @@ console.log('req.body',req.body)
       // Find the user based on user type
       const user =
         user_type === "Buyer"
-          ? await Buyer.findOne({ buyer_email: email })
+          ? await Buyer.findOne({ contact_person_email: email })
           : user_type === "Admin"
           ? await Admin.findOne({ email })
           : user_type === "Supplier"
-          ? await Supplier.findOne({ supplier_email: email })
+          ? await Supplier.findOne({ contact_person_email: email })
           : user_type === "Seller"
           ? await Seller.findOne({ email })
           : null;
@@ -817,7 +842,7 @@ console.log('req.body',req.body)
       );
     }
   },
-  
+
   verifyEmailAndResendOTP: async (req, res) => {
     try {
       const { email, user_type } = req?.body;
@@ -1266,10 +1291,18 @@ console.log('req.body',req.body)
   },
 
   // Helper functions
-  updateProfileDetails: async (user, userType, name, email, phone, address, hashedPassword) => {
-    const userCountryCode = phone.split(" ")[0];
-    const userMobileNumber = phone.split(" ").slice(1).join(" ");
-  
+  updateProfileDetails: async (
+    user,
+    userType,
+    name,
+    email,
+    phone,
+    address,
+    hashedPassword
+  ) => {
+    const userCountryCode = phone.split(" ")[0]?.replaceAll(" ","");
+    const userMobileNumber = phone.split(" ").slice(1).join(" ")?.replaceAll(" ","");
+
     // Field mappings based on user type
     const fieldMap = {
       Buyer: {
@@ -1285,14 +1318,17 @@ console.log('req.body',req.body)
         countryCodeField: "supplier_country_code",
       },
     };
-  
+
     const updateFields = fieldMap[userType];
-  
+
     if (!updateFields) {
       throw new Error("Invalid user type.");
     }
-  
-    const updateProfile = await (userType === "Buyer" ? Buyer : Supplier)?.findByIdAndUpdate(
+
+    const updateProfile = await (userType === "Buyer"
+      ? Buyer
+      : Supplier
+    )?.findByIdAndUpdate(
       user?._id,
       {
         $set: {
@@ -1305,13 +1341,13 @@ console.log('req.body',req.body)
       },
       { new: true }
     );
-  
+
     return updateProfile;
-  },  
+  },
 
   checkAddressForChanges: (dbObj, otherObj) => {
     let newObj = {};
-  
+
     // Create newObj with isChanged comparison
     for (let key in otherObj) {
       if (dbObj.hasOwnProperty(key) && otherObj.hasOwnProperty(key)) {
@@ -1321,10 +1357,10 @@ console.log('req.body',req.body)
         };
       }
     }
-  
+
     // Check if any property has isChanged set to true
     let hasChanges = Object.values(newObj).some((prop) => prop.isChanged);
-  
+
     return { newObj, hasChanges };
   },
 
@@ -1356,20 +1392,20 @@ console.log('req.body',req.body)
     // }
     const ProfileEdit =
       // userType === "Buyer" ? BuyerProfileEdit : SupplierProfileEdit;
-      ProfileEditRequest
+      ProfileEditRequest;
     const profileReq = new ProfileEdit({
       registeredAddress: address,
       userId: user?._id,
-      userSchemaReference:  userType,
+      userSchemaReference: userType,
       editReqStatus: "Pendinig",
     });
 
     const sentRequest = await profileReq.save();
-    if(!sentRequest){
+    if (!sentRequest) {
       return sendErrorResponse(
         res,
         400,
-        "Failed to send address update request to Admin.",
+        "Failed to send address update request to Admin."
       );
     }
 
@@ -1380,16 +1416,16 @@ console.log('req.body',req.body)
       user?._id,
       {
         $set: {
-          profile_status: 0
+          profile_status: 0,
         },
       },
       { new: true }
     );
-    if(!updateProfile){
+    if (!updateProfile) {
       return sendErrorResponse(
         res,
         400,
-        "Failed to update request status in profile",
+        "Failed to update request status in profile"
       );
     }
 
@@ -1397,22 +1433,28 @@ console.log('req.body',req.body)
   },
 
   checkPasswords: async (oldPassword, newPassword, confirmPassword, user) => {
-    const isOldPwdMatch = await bcrypt.compare(oldPassword?.trim(), user?.password);
+    const isOldPwdMatch = await bcrypt.compare(
+      oldPassword?.trim(),
+      user?.password
+    );
     if (!isOldPwdMatch) {
       return { valid: false, message: "Old password is not correct." };
     }
-  
+
     if (oldPassword === newPassword) {
       return {
         valid: false,
         message: "New password cannot be the same as old password.",
       };
     }
-  
+
     if (newPassword !== confirmPassword) {
-      return { valid: false, message: "New password and confirm password must match." };
+      return {
+        valid: false,
+        message: "New password and confirm password must match.",
+      };
     }
-  
+
     // Add additional password strength checks here if necessary
     return { valid: true };
   },
@@ -1423,16 +1465,16 @@ console.log('req.body',req.body)
       const { id } = req?.params;
       const { user_type } = req?.headers;
       const {
-        name, // contact person name
-        email, // contact person email
-        phone, // contact person phone
-        newPassword,
-        oldPassword,
-        confirmPassword,
-        address,
+        name = null, // contact person name
+        email = null, // contact person email
+        phone = null, // contact person phone
+        newPassword = null,
+        oldPassword = null,
+        confirmPassword = null,
+        address = {},
       } = req?.body;
-      const isPasswordUpdate = newPassword?.trim();    
-      
+      const isPasswordUpdate = newPassword?.trim();
+
       // check whether user exists or not
       let user;
       if (user_type === "Buyer") {
@@ -1445,26 +1487,60 @@ console.log('req.body',req.body)
 
       if (!user) {
         return sendErrorResponse(res, 400, "Profile not found.");
-      }  
+      }
 
       // check whether we need to update personal details or not
-      const userCountryCode = phone.split(" ")[0];
-      const userMobileNumber = phone.split(" ").slice(1).join(" ");
-      
+      const userCountryCode = phone.split(" ")[0]?.replaceAll(" ","");
+      const userMobileNumber = phone.split(" ").slice(1).join(" ")?.replaceAll(" ","");
+
       const changePersonalDetails =
         user_type === "Buyer"
           ? user?.contact_person_name !== name ||
             user?.contact_person_email !== email ||
             user?.contact_person_country_code !== userCountryCode ||
-            user?.contact_person_mobile !== userMobileNumber
+            user?.contact_person_mobile !== userMobileNumber||
+            isPasswordUpdate
           : user?.contact_person_name !== name ||
             user?.contact_person_email !== email ||
             user?.contact_person_country_code !== userCountryCode ||
-            user?.contact_person_mobile_no !== userMobileNumber;
+            user?.contact_person_mobile_no !== userMobileNumber||
+            isPasswordUpdate;
+
+      const checkPasswords = async (oldPassword, newPassword, confirmPassword, user) => {
+        const isOldPwdMatch = await bcrypt.compare(
+          oldPassword?.trim(),
+          user?.password
+        );
+        if (!isOldPwdMatch) {
+          return { valid: false, message: "Old password is not correct." };
+        }
+    
+        if (oldPassword === newPassword) {
+          return {
+            valid: false,
+            message: "New password cannot be the same as old password.",
+          };
+        }
+    
+        if (newPassword !== confirmPassword) {
+          return {
+            valid: false,
+            message: "New password and confirm password must match.",
+          };
+        }
+    
+        // Add additional password strength checks here if necessary
+        return { valid: true };
+      }
 
       // check whether we need to update password or not
       const { valid, message } = isPasswordUpdate
-        ? await this.checkPasswords(oldPassword, newPassword, confirmPassword, user)
+        ? await checkPasswords(
+            oldPassword,
+            newPassword,
+            confirmPassword,
+            user
+          )
         : { valid: true };
       if (!valid) return sendErrorResponse(res, 400, message);
 
@@ -1473,8 +1549,27 @@ console.log('req.body',req.body)
         ? await bcrypt.hash(newPassword?.trim(), saltRounds)
         : null;
 
+      const checkAddressForChanges = async (dbObj, otherObj) => {
+        let newObj = {};
+
+        // Create newObj with isChanged comparison
+        for (let key in otherObj) {
+          if (dbObj.hasOwnProperty(key) && otherObj.hasOwnProperty(key)) {
+            newObj[key] = {
+              value: otherObj[key],
+              isChanged: dbObj[key] !== otherObj[key],
+            };
+          }
+        }
+
+        // Check if any property has isChanged set to true
+        let hasChanges = Object.values(newObj).some((prop) => prop.isChanged);
+
+        return { newObj, hasChanges };
+      };
+
       // check whether we need to update billing address or not
-      const changedUpdatedddress = await this.checkAddressForChanges(
+      const changedUpdatedddress = await checkAddressForChanges(
         user?.registeredAddress,
         {
           ...address,
@@ -1483,8 +1578,114 @@ console.log('req.body',req.body)
       );
       const sendRequestToAdmin = changedUpdatedddress.hasChanges;
 
+      const updateProfileDetails = async (
+        user,
+        userType,
+        name,
+        email,
+        phone,
+        address,
+        hashedPassword
+      ) => {
+        const userCountryCode = phone.split(" ")[0]?.replaceAll(" ","");
+        const userMobileNumber = phone.split(" ").slice(1).join(" ")?.replaceAll(" ","");
+
+        // Field mappings based on user type
+        const fieldMap = {
+          Buyer: {
+            nameField: "contact_person_name",
+            emailField: "contact_person_email",
+            mobileField: "contact_person_mobile",
+            countryCodeField: "contact_person_country_code",
+          },
+          Supplier: {
+            nameField: "contact_person_name",
+            emailField: "contact_person_email",
+            mobileField: "contact_person_mobile_no",
+            countryCodeField: "contact_person_country_code",
+          },
+        };
+
+        const updateFields = fieldMap[userType];
+
+        if (!updateFields) {
+          throw new Error("Invalid user type.");
+        }
+
+        const updateProfile = await (userType === "Buyer"
+          ? Buyer
+          : Supplier
+        )?.findByIdAndUpdate(
+          user?._id,
+          {
+            $set: {
+              [updateFields.nameField]: name,
+              [updateFields.emailField]: email,
+              [updateFields.mobileField]: userMobileNumber,
+              [updateFields.countryCodeField]: userCountryCode,
+              ...(hashedPassword && { password: hashedPassword }), // Update password if provided
+            },
+          },
+          { new: true }
+        );
+
+        return updateProfile;
+      };
+
+      const sendProfileEditRequest = async (user, userType, address) => {
+        console.log("\n\n\n\n address", address)
+        const ProfileEdit =
+          // userType === "Buyer" ? BuyerProfileEdit : SupplierProfileEdit;
+          ProfileEditRequest;
+        const profileReq = new ProfileEdit({
+          registeredAddress: address,
+          userId: user?._id,
+          userSchemaReference: userType,
+          // editReqStatus: "Pendinig",
+        });
+
+        const sentRequest = await profileReq.save();
+        if (!sentRequest) {
+          return sendErrorResponse(
+            res,
+            400,
+            "Failed to send address update request to Admin."
+          );
+        }
+
+        const updateProfile = await (userType === "Buyer"
+          ? Buyer
+          : Supplier
+        )?.findByIdAndUpdate(
+          user?._id,
+          {
+            $set: {
+              profile_status: 0,
+            },
+          },
+          { new: true }
+        );
+        if (!updateProfile) {
+          return sendErrorResponse(
+            res,
+            400,
+            "Failed to update request status in profile"
+          );
+        }
+
+        return sentRequest;
+      };
+      
+      if (!changePersonalDetails && !sendRequestToAdmin) {
+        return sendSuccessResponse(
+          res,
+          200,
+          "Nothing to change."
+        );
+      }
+
       if (changePersonalDetails && sendRequestToAdmin) {
-        const updateProfile = await this.updateProfileDetails(
+        const updateProfile = await updateProfileDetails(
           user,
           user_type,
           name,
@@ -1501,10 +1702,10 @@ console.log('req.body',req.body)
           );
         }
 
-        const newProfileEditReq = await this.sendProfileEditRequest(
+        const newProfileEditReq = await sendProfileEditRequest(
           user,
           user_type,
-          changedUpdatedddress.newObj
+          {...changedUpdatedddress.newObj, type: "Registered"}
         );
         if (!newProfileEditReq) {
           return sendSuccessResponse(
@@ -1524,7 +1725,7 @@ console.log('req.body',req.body)
       }
 
       if (changePersonalDetails && !sendRequestToAdmin) {
-        const updateProfile = await this.updateProfileDetails(
+        const updateProfile = await updateProfileDetails(
           user,
           user_type,
           name,
@@ -1545,11 +1746,18 @@ console.log('req.body',req.body)
       }
 
       if (!changePersonalDetails && sendRequestToAdmin) {
-        const newProfileEditReq = await this.sendProfileEditRequest(
+        const newProfileEditReq = await sendProfileEditRequest(
           user,
           user_type,
-          changedUpdatedddress.newObj
+          {...changedUpdatedddress.newObj, type: "Registered"}
         );
+        if (!newProfileEditReq) {
+          return sendErrorResponse(
+            res,
+            400,
+            "Failed to send update profile details request."
+          );
+        }
         return sendSuccessResponse(
           res,
           200,
