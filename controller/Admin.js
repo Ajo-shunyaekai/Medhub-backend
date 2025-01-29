@@ -5695,7 +5695,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
 
     getProfileEditRequestList: async (req, res) => {
       try {
-        const { type, status } = req?.query;
+        const { type, status } = req?.params;
     
         // Validate inputs
         if (!type) {
@@ -5704,17 +5704,86 @@ getRegReqList: async (req, res, reqObj, callback) => {
         if (!status) {
           return sendErrorResponse(res, 400, "Status is required.");
         }
-    
-        let usersList;
-    
-        // Query based on type and status
-        if (type === 'supplier') {
-          usersList = await SupplierProfileEdit?.find({ editReqStatus: status });
-        } else if (type === 'buyer') {
-          usersList = await BuyerProfileEdit?.find({ editReqStatus: status });
-        } else {
-          return sendErrorResponse(res, 400, "Invalid type provided.");
-        }
+
+        let usersList = await ProfileEditRequest.aggregate([
+          // Match based on status and userSchemaReference
+          {
+            $match: {
+              editReqStatus: status.charAt(0).toUpperCase() + status.slice(1),
+              userSchemaReference: type === "supplier" ? "Supplier" : "Buyer",
+            },
+          },
+          // Lookup based on type (Supplier or Buyer)
+          {
+            $lookup: {
+              from: type === "supplier" ? "suppliers" : "buyers",
+              localField: "userId",
+              foreignField: "_id", // userId field references the _id of the supplier or buyer
+              as: type === "supplier" ? "supplierDetails" : "buyerDetails", // Output field name
+            },
+          },
+          // Unwind the lookup result so that we can access the name fields
+          {
+            $unwind: {
+              path: type === "supplier" ? "$supplierDetails" : "$buyerDetails",
+              preserveNullAndEmptyArrays: true, // In case there are no matching details
+            },
+          },
+          // Project necessary fields including name from supplier or buyer
+          {
+            $project: {
+              _id: 1,
+              userId: 1,
+              userSchemaReference: 1,
+              registeredAddress: 1,
+              editReqStatus: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              name: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.buyer_name", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.buyer_name", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_name: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_name", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_name", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_email: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_email", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_email", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_country_code: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_country_code", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_country_code", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_mobile: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_mobile_no", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_mobile", // Adjust according to actual buyer field name
+                },
+              },
+              user_type: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.supplier_type", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.buyer_type", // Adjust according to actual buyer field name
+                },
+              },
+            },
+          },
+        ]);
     
         // If no requests are found
         if (!usersList || usersList.length === 0) {
@@ -5723,6 +5792,108 @@ getRegReqList: async (req, res, reqObj, callback) => {
     
         // Success response
         return sendSuccessResponse(res, 200, "Successfully fetched profile edit requests.", usersList);
+      } catch (error) {
+        console.log("Internal Server Error:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      }
+    },    
+    
+    getProfileEditRequestDetailst: async (req, res) => {
+      try {
+        const { id } = req?.params;
+    
+        // Validate inputs
+        if (!id) {  // only be buyer or supplier
+          return sendErrorResponse(res, 400, "id is required.");
+        }
+
+        let userProfileEditRequest = await ProfileEditRequest.aggregate([
+          // Match based on status and userSchemaReference
+          {
+            $match: {
+              _id: id
+            },
+          },
+          // Lookup based on type (Supplier or Buyer)
+          {
+            $lookup: {
+              from: type === "supplier" ? "suppliers" : "buyers",
+              localField: "userId",
+              foreignField: "_id", // userId field references the _id of the supplier or buyer
+              as: type === "supplier" ? "supplierDetails" : "buyerDetails", // Output field name
+            },
+          },
+          // Unwind the lookup result so that we can access the name fields
+          {
+            $unwind: {
+              path: type === "supplier" ? "$supplierDetails" : "$buyerDetails",
+              preserveNullAndEmptyArrays: true, // In case there are no matching details
+            },
+          },
+          // Project necessary fields including name from supplier or buyer
+          {
+            $project: {
+              _id: 1,
+              userId: 1,
+              userSchemaReference: 1,
+              registeredAddress: 1,
+              editReqStatus: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              name: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.buyer_name", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.buyer_name", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_name: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_name", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_name", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_email: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_email", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_email", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_country_code: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_country_code", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_country_code", // Adjust according to actual buyer field name
+                },
+              },
+              contact_person_mobile: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.contact_person_mobile_no", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.contact_person_mobile", // Adjust according to actual buyer field name
+                },
+              },
+              user_type: {
+                $cond: {
+                  if: { $eq: ["$userSchemaReference", "Supplier"] },
+                  then: "$supplierDetails.supplier_type", // Adjust according to actual supplier field name if different
+                  else: "$buyerDetails.buyer_type", // Adjust according to actual buyer field name
+                },
+              },
+            },
+          },
+        ]);
+    
+        // If no requests are found
+        if (!userProfileEditRequest || userProfileEditRequest.length === 0) {
+          return sendErrorResponse(res, 404, "No Request List Found.");
+        }
+    
+        // Success response
+        return sendSuccessResponse(res, 200, "Successfully fetched profile edit requests.", userProfileEditRequest);
       } catch (error) {
         console.log("Internal Server Error:", error);
         logErrorToFile(error, req);

@@ -103,27 +103,27 @@ const profileEditRequestSchema = new Schema(
   { timestamps: true }
 );
 
-// Middleware to track changes
-profileEditRequestSchema.pre("save", function (next) {
-  if (!this.isNew) {
-    const doc = this;
+// // Middleware to track changes
+// profileEditRequestSchema.pre("save", function (next) {
+//   if (!this.isNew) {
+//     const doc = this;
 
-    // Track changes for all relevant fields
-    [
-      "company_reg_address",
-      "locality",
-      "land_mark",
-      "city",
-      "state",
-      "country",
-      "pincode",
-    ].forEach((field) => {
-      if (doc.isModified(`${field}.value`)) {
-        doc[field].isChanged = true;
-      }
-    });
-  }
-  next();
-});
+//     // Track changes for all relevant fields
+//     [
+//       "company_reg_address",
+//       "locality",
+//       "land_mark",
+//       "city",
+//       "state",
+//       "country",
+//       "pincode",
+//     ].forEach((field) => {
+//       if (doc.isModified(`${field}.value`)) {
+//         doc[field].isChanged = true;
+//       }
+//     });
+//   }
+//   next();
+// });
 
 module.exports = mongoose.model("ProfileEditRequest", profileEditRequestSchema);

@@ -21,9 +21,9 @@ const validateUserInput = [
   // Phone validation
   body("phone")
     .notEmpty()
-    .withMessage("Phone cannot be empty")
-    .isMobilePhone()
-    .withMessage("Please provide a valid phone number"),
+    .withMessage("Phone cannot be empty"),
+    // .isMobilePhone()
+    // .withMessage("Please provide a valid phone number"),
 
   // Password validation
   body("newPassword")
@@ -39,7 +39,9 @@ const validateUserInput = [
 
         // Check if oldPassword is the same as newPassword
         if (req.body.oldPassword === value) {
-          throw new Error("New password cannot be the same as the old password");
+          throw new Error(
+            "New password cannot be the same as the old password"
+          );
         }
 
         // Check if confirmPassword matches newPassword
@@ -71,28 +73,27 @@ const validateUserInput = [
     .isString()
     .withMessage("Locality must be a string"),
 
-  body("address.land_mark")
-    .optional()
-    .isString()
-    .withMessage("Landmark must be a string"),
+  // body("address.land_mark")
+  //   .optional()
+  //   .isString()
+  //   .withMessage("Landmark must be a string"),
 
-  body("address.city")
-    .optional()
-    .isString()
-    .withMessage("City must be a string"),
+  // body("address.city")
+  //   .optional()
+  //   .isString()
+  //   .withMessage("City must be a string"),
 
-  body("address.state")
-    .optional()
-    .isString()
-    .withMessage("State must be a string"),
+  // body("address.state")
+  //   .optional()
+  //   .isString()
+  //   .withMessage("State must be a string"),
 
-  body("address.country")
-    .notEmpty()
-    .withMessage("Country cannot be empty"),
+  body("address.country").notEmpty().withMessage("Country cannot be empty"),
 
-  body("address.pincode")
-    .notEmpty()
-    .withMessage("Pincode cannot be empty"),
+  // body("address.pincode")
+  //   .optional()
+  //   .isString()
+  //   .withMessage("State must be a string"),
 ];
 
 // Middleware to handle validation errors
