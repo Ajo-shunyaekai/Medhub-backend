@@ -1091,7 +1091,8 @@ module.exports = {
                   quantity_required : "$item_details.quantity_required",
                   target_price      : "$item_details.target_price",
                   medicine_image    : "$medicine_details.medicine_image",
-                  medicine_name     : "$medicine_details.medicine_name"
+                  medicine_name     : "$medicine_details.medicine_name",
+                  total_quantity    : "$medicine_details.total_quantity"
                 }
               }
             }
@@ -1182,6 +1183,8 @@ module.exports = {
     sendEnquiry: async (req, res, reqObj, callback) => {
       try {
           const { buyer_id, buyer_name, items } = reqObj;
+          console.log('sendEnquiry REQOBJ', reqObj)
+          return false
           if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
               throw new Error('Invalid request');
           }

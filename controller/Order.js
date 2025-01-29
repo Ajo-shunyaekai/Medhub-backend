@@ -9,7 +9,9 @@ const Notification = require('../schema/notificationSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Address = require("../schema/addressSchema");
 const Logistics = require('../schema/logisticsSchema')
+const {Medicine} = require('../schema/medicineSchema')
 const nodemailer         = require('nodemailer');
+const sendEmail = require("../utils/emailService");
 const { flattenData } = require('../utils/csvConverter')
 const { parse } = require('json2csv');
 const fs = require('fs');
@@ -33,7 +35,7 @@ const { sendErrorResponse } = require('../utils/commonResonse')
   const sendMailFunc = (email, subject, body) =>{
     
     const mailOptions = {
-        from    : process.env.SMTP_USER_ID,
+      from      : `Medhub Global <${process.env.SMTP_USER_ID}>`,
         to      : email,
         subject : subject,
         // text    : 'This is text mail, and sending for testing purpose'
@@ -107,9 +109,10 @@ module.exports = {
             },
             { new: true } 
         );
+
         if (!updatedEnquiry) {
-            return callback({ code: 404, message: 'Enquiry not found', result: null });
-        }
+          return callback({ code: 404, message: 'Enquiry not found', result: null });
+      }
         
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
             // const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
@@ -125,7 +128,43 @@ module.exports = {
         if (!updatedPO) {
           return callback({ code: 404, message: 'Purchase Order not found', result: null });
         }
-        
+
+        for (const item of reqObj.orderItems) {
+          console.log('MED ID', item)
+          const medicine = await Medicine.findOne({ medicine_id: item.medicine_id });
+          if (medicine) {
+            const quantityRequired = typeof item.quantity_required === "string" ? parseInt(item.quantity_required, 10) : item.quantity_required;
+
+          if (isNaN(quantityRequired)) {
+            throw new Error('Invalid quantity_required value');
+          }
+
+          const updatedMedicine = await Medicine.findOneAndUpdate(
+            { _id: medicine._id },
+            { $inc: { total_quantity: -quantityRequired } },
+            { new: true } 
+          );
+
+              if (updatedMedicine.total_quantity <= 500) {
+                console.log('medicine.total_quantity',medicine.total_quantity)
+                const subject = `Low Stock Alert for ${medicine.medicine_name}`;
+                const recipientEmails = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
+                const body = `
+                    <p>Dear ${supplier.contact_person_name},</p>
+                    <p>We would like to inform you that the stock of the following item is running low:</p>
+                    <p><strong>Product:</strong> ${updatedMedicine.medicine_name}</p>
+                    <p><strong>Remaining Quantity:</strong> ${updatedMedicine.total_quantity}</p>
+                    <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
+                    <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                    <p>Thanks & Regards,<br/>MedHub Global Team</p>
+                `;
+
+                // await sendMailFunc(recipientEmails, subject, body);
+                await sendEmail(recipientEmails, subject, body);
+            }
+          }
+      }
+        return false
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
             notification_id : notificationId,
@@ -164,7 +203,7 @@ module.exports = {
 
                         // Email Body
                         const body = `
-                        <p>Dear ${buyer.buyer_name},</p>
+                        <p>Dear ${buyer.contact_person_name},</p>
                         <p>Thank you for your order. We are pleased to confirm order and the details as follows:</p>
                         ${itemsTable}
                         <p>We have begun processing your order and will keep you informed about its status. </p>
@@ -173,8 +212,9 @@ module.exports = {
                         `;
 
                         // Sending the email to multiple recipients (supplier and buyer)
-                        const recipientEmails = [buyer.buyer_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
-                        await sendMailFunc(recipientEmails.join(','), subject, body);
+                        const recipientEmails = [buyer.contact_person_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                        // await sendMailFunc(recipientEmails.join(','), subject, body);
+                        await sendEmail(recipientEmails, subject, body);
             return callback({code: 200, message: "Order Created Successfully"});
         })
         .catch((err) => {

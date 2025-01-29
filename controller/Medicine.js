@@ -1529,6 +1529,7 @@ module.exports = {
                   medicine_type     : 1,
                   stocked_in        : 1,
                   country_available_in : 1,
+                  total_quantity : 1,
                   "inventory_info.quantity"          : 1,
                   "inventory_info.unit_price"        : 1,
                   "inventory_info.est_delivery_days" : 1,
@@ -1582,6 +1583,7 @@ module.exports = {
               medicine_type     : 1,
               status            : 1,
               country_available_in : 1,
+              total_quantity       : 1,
               inventory : {
                 $arrayElemAt: ["$inventory", 0],
               },
@@ -1609,6 +1611,7 @@ module.exports = {
               medicine_type     : 1,
               status            : 1,
               country_available_in : 1,
+              total_quantity       : 1,
               "inventory.delivery_info"  : 1,
               "inventory.price"          : 1,
             },

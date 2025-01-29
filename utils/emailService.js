@@ -21,7 +21,8 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async (recipients, subject, body) => {
   try {
     const mailOptions = {
-      from : process.env.SMTP_USER_ID,
+      // from : process.env.SMTP_USER_ID,
+      from: `Medhub <${process.env.SMTP_USER_ID}>`,
       to   : Array.isArray(recipients) ? recipients.join(",") : recipients,
       subject,
       html: body,

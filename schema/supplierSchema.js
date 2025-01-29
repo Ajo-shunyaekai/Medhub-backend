@@ -120,7 +120,7 @@ const supplierSchema = new Schema(
     },
     bank_details: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     supplier_image: [
@@ -160,7 +160,7 @@ const supplierSchema = new Schema(
     ],
     payment_terms: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     tags: {

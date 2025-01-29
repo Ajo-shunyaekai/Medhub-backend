@@ -11,6 +11,7 @@ const { Server }     = require('socket.io');
 const sendEmail          = require('./utils/emailService')
 const {contactUsContent} = require("./utils/emailContents");
 const EmailListing = require('./schema/emailListingSchema')
+require('./schedulers/tasks');
 
 //-----------------   routes   -----------------------//
 const userRouter      = require('./routes/userRoutes')()
