@@ -1184,7 +1184,6 @@ module.exports = {
       try {
           const { buyer_id, buyer_name, items } = reqObj;
           console.log('sendEnquiry REQOBJ', reqObj)
-          return false
           if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
               throw new Error('Invalid request');
           }
@@ -1327,7 +1326,7 @@ module.exports = {
                         `;
   
                   // await sendMailFunc(supplier_email, subject, body);
-                  const recipientEmails = [supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                  const recipientEmails = [supplier_contact_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
                   // await sendMailFunc(recipientEmails.join(','), subject, body);
                   await sendEmail(recipientEmails, subject, body)
               }

@@ -2311,7 +2311,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
 
     acceptRejectAddMedicineReq: async (req, res, reqObj, callback) => {
       try {
-          const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
+          const { admin_id, medicine_id, supplier_id, supplier_email, contact_person_name, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
 
           const medicine = await Medicine.findOne({ medicine_id, supplier_id });
 
@@ -2341,7 +2341,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
           // Handle the success message based on status and action
           if (action === 'accept') {
               subject = 'Medicine Added Successfully';
-              body = `Hello ${supplier_name}, <br /><br />
+              body = `Hello ${contact_person_name}, <br /><br />
                       We are pleased to inform you that your medicine request has been approved and successfully added to our records. Below are the details for your reference: <br /><br />
                       <strong>Medicine ID:</strong> ${updateStatus.medicine_id} <br />
                       <strong>Medicine Name:</strong> ${updateStatus.medicine_name} <br />
@@ -2355,7 +2355,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
               event = medicine_type === 'new' ? 'addnewmedicine' : 'addsecondarymedicine';
 
               // Send email for acceptance
-              sendMailFunc(supplier_email, subject, body);
+              sendMailFunc(supplier_contact_email, subject, body);
 
               const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
               const newNotification = new Notification({
@@ -2780,7 +2780,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
               await newNotification.save();
             
             const subject = 'Medicine Edit Request Accepted Successfully';
-            const body = `Hello ${medicine.supplier_name}, <br />
+            const body = `Hello ${supplier.contact_person_name}, <br />
                           Your medicine edit request has been approved and changes are live now. <br />
                           Medicine ID: ${updatedMedicine.medicine_id} <br />
                           Supplier ID: ${updatedMedicine.supplier_id} <br />
@@ -2790,7 +2790,7 @@ getRegReqList: async (req, res, reqObj, callback) => {
                           MedHub Global Team`;
 
             // Send the email to the supplier
-            await sendMailFunc(supplier.supplier_email, subject, body);
+            await sendMailFunc(supplier.contact_person_email, subject, body);
 
             return callback({ code: 200, message: `${medicine.medicine_type === 'new_medicine' ? 'New' : 'Secondary'} Medicine Details Updated Successfully`, result: updatedMedicine });
 

@@ -164,7 +164,7 @@ module.exports = {
             }
           }
       }
-        return false
+       
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
             notification_id : notificationId,

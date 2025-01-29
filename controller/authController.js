@@ -611,7 +611,7 @@ module.exports = {
       // Find the user based on user type
       const user =
         user_type === "Buyer"
-          ? await Buyer.findOne({ contact_person_email: email })
+          ? await Buyer.findOne({ buyer_email: email })
           : user_type === "Admin"
           ? await Admin.findOne({ email })
           : user_type === "Supplier"
