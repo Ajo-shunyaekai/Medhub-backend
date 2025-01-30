@@ -57,7 +57,6 @@ module.exports = {
 
    createOrder : async (req, res, reqObj, callback) => {
        try {
-
         const orderId = 'ORD-' + Math.random().toString(16).slice(2, 10);
         const paymentTermsArray = reqObj.data.paymentTerms.split('\n').map(term => term.trim());
 
@@ -81,10 +80,22 @@ module.exports = {
             buyer_email       : reqObj.data.buyerEmail,
             buyer_mobile      : reqObj.data.buyerMobile,
             buyer_address     : reqObj.data.buyerAddress,
+            buyer_locality    : reqObj.data.buyerLocality,
+            buyer_landmark    : reqObj.data.buyerLandmark,
+            buyer_country     : reqObj.data.buyerCountry,
+            buyer_state       : reqObj.data.buyerState,
+            buyer_city        : reqObj.data.buyerCity,
+            buyer_pincode     : reqObj.data.buyerPincode,
             supplier_name     : reqObj.data.supplierName,
             supplier_email    : reqObj.data.supplierEmail,
             supplier_mobile   : reqObj.data.supplierMobile,
-            supplier_address  : reqObj.data.supplierAddress,       
+            supplier_address  : reqObj.data.supplierAddress,  
+            supplier_locality : reqObj.data.supplierLocality,
+            supplier_landmark : reqObj.data.supplierLandmark,
+            supplier_country  : reqObj.data.supplierCountry,
+            supplier_state    : reqObj.data.supplierState,
+            supplier_city     : reqObj.data.supplierCity,
+            supplier_pincode  : reqObj.data.supplierPincode,     
             items             : reqObj.orderItems || reqObj.data.orderItems,
             total_due_amount  : reqObj.data.totalDueAmount,
             grand_total       : reqObj.data.totalAmount,

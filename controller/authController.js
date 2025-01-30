@@ -611,7 +611,7 @@ module.exports = {
       // Find the user based on user type
       const user =
         user_type === "Buyer"
-          ? await Buyer.findOne({ buyer_email: email })
+          ? await Buyer.findOne({ contact_person_email: email })
           : user_type === "Admin"
           ? await Admin.findOne({ email })
           : user_type === "Supplier"
@@ -734,9 +734,9 @@ module.exports = {
 
       // Find the user based on their type and email
       if (user_type === "Buyer") {
-        user = await Buyer?.findOne({ buyer_email: email });
+        user = await Buyer?.findOne({ contact_person_email: email });
       } else if (user_type === "Supplier") {
-        user = await Supplier?.findOne({ supplier_email: email });
+        user = await Supplier?.findOne({ contact_person_email: email });
       } else if (user_type === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
@@ -769,7 +769,7 @@ module.exports = {
       // Update the user with OTP and expiry based on their type
       if (user_type === "Buyer") {
         updatedUser = await Buyer?.findOneAndUpdate(
-          { buyer_email: email },
+          { contact_person_email: email },
           {
             $set: {
               otp: otp,
@@ -781,7 +781,7 @@ module.exports = {
         );
       } else if (user_type === "Supplier") {
         updatedUser = await Supplier?.findOneAndUpdate(
-          { supplier_email: email },
+          { contact_person_email: email },
           {
             $set: {
               otp: otp,
@@ -855,9 +855,9 @@ module.exports = {
 
       // Find the user based on their type and email
       if (user_type === "Buyer") {
-        user = await Buyer?.findOne({ buyer_email: email });
+        user = await Buyer?.findOne({ contact_person_email: email });
       } else if (user_type === "Supplier") {
-        user = await Supplier?.findOne({ supplier_email: email });
+        user = await Supplier?.findOne({ contact_person_email: email });
       } else if (user_type === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
@@ -924,7 +924,7 @@ module.exports = {
       // Update the user with OTP and expiry based on their type
       if (user_type === "Buyer") {
         updatedUser = await Buyer?.findOneAndUpdate(
-          { buyer_email: email },
+          { contact_person_email: email },
           {
             $set: {
               otp: otp,
@@ -936,7 +936,7 @@ module.exports = {
         );
       } else if (user_type === "Supplier") {
         updatedUser = await Supplier?.findOneAndUpdate(
-          { supplier_email: email },
+          { contact_person_email: email },
           {
             $set: {
               otp: otp,
@@ -1014,9 +1014,9 @@ module.exports = {
 
       // Find the user based on their type and email
       if (user_type === "Buyer") {
-        user = await Buyer?.findOne({ buyer_email: email });
+        user = await Buyer?.findOne({ contact_person_email: email });
       } else if (user_type === "Supplier") {
-        user = await Supplier?.findOne({ supplier_email: email });
+        user = await Supplier?.findOne({ contact_person_email: email });
       } else if (user_type === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
@@ -1049,7 +1049,7 @@ module.exports = {
       // Update the user and unset the otp and otpExpiry fields
       if (user_type === "Buyer") {
         updatedUser = await Buyer?.findOneAndUpdate(
-          { buyer_email: email },
+          { contact_person_email: email },
           {
             $unset: { otp: "", otpExpiry: "" },
           },
@@ -1057,7 +1057,7 @@ module.exports = {
         );
       } else if (user_type === "Supplier") {
         updatedUser = await Supplier?.findOneAndUpdate(
-          { supplier_email: email },
+          { contact_person_email: email },
           {
             $unset: { otp: "", otpExpiry: "" },
           },
@@ -1112,9 +1112,9 @@ module.exports = {
 
       // Find the user based on their type and email
       if (user_type === "Buyer") {
-        user = await Buyer?.findOne({ buyer_email: email });
+        user = await Buyer?.findOne({ contact_person_email: email });
       } else if (user_type === "Supplier") {
-        user = await Supplier?.findOne({ supplier_email: email });
+        user = await Supplier?.findOne({ contact_person_email: email });
       } else if (user_type === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
@@ -1147,13 +1147,13 @@ module.exports = {
       // Update the password based on the user type
       if (user_type === "Buyer") {
         updateProfile = await Buyer?.findOneAndUpdate(
-          { buyer_email: email },
+          { contact_person_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
       } else if (user_type === "Supplier") {
         updateProfile = await Supplier?.findOneAndUpdate(
-          { supplier_email: email },
+          { contact_person_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
@@ -1255,7 +1255,7 @@ module.exports = {
         );
       } else if (user_type === "Supplier") {
         updateProfile = await Supplier?.findOneAndUpdate(
-          { supplier_email: email },
+          { contact_person_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
