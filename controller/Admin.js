@@ -6856,7 +6856,7 @@ module.exports = {
       await newNotification.save();
  
       // Email setup
-      const adminEmail = "ajo@shunyaekai.tech";
+      const adminEmail = "platform@medhub.global";
       const subject = `Profile Edit Request Status: ${status}`;
       const recipientEmails = [
         adminEmail,

@@ -159,7 +159,7 @@ module.exports = {
               if (updatedMedicine.total_quantity <= 500) {
                 console.log('medicine.total_quantity',medicine.total_quantity)
                 const subject = `Low Stock Alert for ${medicine.medicine_name}`;
-                const recipientEmails = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
+                const recipientEmails = [supplier.contact_person_email];
                 const body = `
                     <p>Dear ${supplier.contact_person_name},</p>
                     <p>We would like to inform you that the stock of the following item is running low:</p>
@@ -223,7 +223,7 @@ module.exports = {
                         `;
 
                         // Sending the email to multiple recipients (supplier and buyer)
-                        const recipientEmails = [buyer.contact_person_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                        const recipientEmails = [buyer.contact_person_email];  // Add more emails if needed
                         // await sendMailFunc(recipientEmails.join(','), subject, body);
                         await sendEmail(recipientEmails, subject, body);
             return callback({code: 200, message: "Order Created Successfully"});

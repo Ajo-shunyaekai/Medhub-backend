@@ -11,7 +11,7 @@ const { Server }     = require('socket.io');
 const sendEmail          = require('./utils/emailService')
 const {contactUsContent} = require("./utils/emailContents");
 const EmailListing = require('./schema/emailListingSchema')
-require('./schedulers/tasks');
+// require('./schedulers/tasks');
 
 //-----------------   routes   -----------------------//
 const userRouter      = require('./routes/userRoutes')()
@@ -123,7 +123,7 @@ app.post('/send-email', async (req, res) => {
     
     const subject = "Inquiry from MedHub Global";
     // const recipientEmails = [process.env.SMTP_USER_ID, "ajo@shunyaekai.tech"];
-    const recipientEmails = ["ajo@shunyaekai.tech"];
+    const recipientEmails = ["platform@medhub.global"];
     const emailContent = await contactUsContent(req.body)
     // const result = await sendEmail({ username, email, subject, phone, message, checkbox });
      await sendEmail(recipientEmails, subject, emailContent);
