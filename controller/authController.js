@@ -475,7 +475,7 @@ module.exports = {
         const adminEmail = "ajo@shunyaekai.tech";
         const subject = "New Registration Alert: Buyer Account Created";
 
-        const recipientEmails = [adminEmail, "shivani.shunyaekai@gmail.com"];
+        const recipientEmails = [adminEmail];
         const emailContent = await buyerRegistrationContent(buyer);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
         await sendEmail(recipientEmails, subject, emailContent);
@@ -815,7 +815,7 @@ module.exports = {
       }
 
       // Email settings and content
-      const adminEmail = "shivani@shunyaekai.tech";
+      const adminEmail = "ajo@shunyaekai.tech";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
       const recipientEmails = [adminEmail, "ajo@shunyaekai.tech", email].filter(
         (email) => email
@@ -970,9 +970,9 @@ module.exports = {
       }
 
       // Email settings and content
-      const adminEmail = "shivani@shunyaekai.tech";
+      const adminEmail = "ajo@shunyaekai.tech";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [adminEmail, "ajo@shunyaekai.tech", email].filter(
+      const recipientEmails = [adminEmail, email].filter(
         (email) => email
       );
 

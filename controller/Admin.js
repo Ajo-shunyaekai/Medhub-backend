@@ -891,8 +891,8 @@ module.exports = {
         // Sending the email to multiple recipients
         const recipientEmails = [
           updateProfile.contact_person_email,
-          "ajo@shunyaekai.tech",
-        ]; // Add more emails if needed
+          // "ajo@shunyaekai.tech",
+        ]; 
         await sendMailFunc(recipientEmails.join(","), subject, body);
  
         // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Deliver', body);
@@ -1296,8 +1296,8 @@ module.exports = {
         // Sending the email to multiple recipients
         const recipientEmails = [
           updateStatus.contact_person_email,
-          "ajo@shunyaekai.tech",
-        ]; // Add more emails if needed
+          // "ajo@shunyaekai.tech",
+        ]; 
         await sendMailFunc(recipientEmails.join(","), subject, body);
  
         return callback({
@@ -2650,6 +2650,7 @@ module.exports = {
       } = reqObj;
  
       const medicine = await Medicine.findOne({ medicine_id, supplier_id });
+      const supplier = await Supplier.findOne({supplier_id: supplier_id})
  
       if (!medicine) {
         return callback({ code: 400, message: "Medicine not found" });
@@ -2681,7 +2682,7 @@ module.exports = {
       // Handle the success message based on status and action
       if (action === "accept") {
         subject = "Medicine Added Successfully";
-        body = `Hello ${supplier_name}, <br /><br />
+        body = `Dear ${supplier.contact_person_name}, <br /><br />
                       We are pleased to inform you that your medicine request has been approved and successfully added to our records. Below are the details for your reference: <br /><br />
                       <strong>Medicine ID:</strong> ${updateStatus.medicine_id} <br />
                       <strong>Medicine Name:</strong> ${updateStatus.medicine_name} <br />
@@ -2696,7 +2697,7 @@ module.exports = {
           medicine_type === "new" ? "addnewmedicine" : "addsecondarymedicine";
  
         // Send email for acceptance
-        sendMailFunc(supplier_email, subject, body);
+        sendMailFunc(supplier.contact_person_email, subject, body);
  
         const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
         const newNotification = new Notification({
@@ -6860,7 +6861,6 @@ module.exports = {
       const recipientEmails = [
         adminEmail,
         updatedProfile?.contact_person_email,
-        "shivani.shunyaekai@gmail.com",
       ];
       // const { name, userType, email } = userDetails;
       // const { requestDate, status } = requestDetails;
