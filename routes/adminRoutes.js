@@ -95,13 +95,11 @@ module.exports = () => {
 
     routes.post('/get-transaction-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.transactionDetails, req, res));
 
-    routes.post('/get-profile-edit-requests/:type/:status',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestList)
-    
-    routes.post('/profile-edit-request-details/:id',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestDetailst)
-
-    routes.post('/edit-profile-request/:id',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestList)
-
     routes.post('/get-profile-edit-requests',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestList)
+    
+    routes.post('/get-profile-edit-request-details/:type/:id',checkAuthorization, checkCommonUserAuthentication, Controller.getProfileEditRequestDetails)
+    
+    routes.post('/update-profile-edit-request-details/:id',checkAuthorization, checkCommonUserAuthentication, Controller.updateProfileRequest)
     
     return routes;
 }
