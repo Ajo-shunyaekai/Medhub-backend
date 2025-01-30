@@ -1183,7 +1183,7 @@ module.exports = {
     sendEnquiry: async (req, res, reqObj, callback) => {
       try {
           const { buyer_id, buyer_name, items } = reqObj;
-          
+        
           if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
               throw new Error('Invalid request');
           }
@@ -1326,7 +1326,7 @@ module.exports = {
                         `;
   
                   // await sendMailFunc(supplier_email, subject, body);
-                  const recipientEmails = [supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                  const recipientEmails = [supplier_contact_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
                   // await sendMailFunc(recipientEmails.join(','), subject, body);
                   await sendEmail(recipientEmails, subject, body)
               }

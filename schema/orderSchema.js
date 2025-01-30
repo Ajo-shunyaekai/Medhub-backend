@@ -329,6 +329,24 @@ const orderSchema = new Schema({
         type: String,
         required: true
     },
+    buyer_locality: {
+        type: String,
+    },
+    buyer_landmark: {
+        type: String,
+    },
+    buyer_country: {
+        type: String,
+    },
+    buyer_state: {
+        type: String,
+    },
+    buyer_city: {
+        type: String,
+    },
+    buyer_pincode: {
+        type: String,
+    },
     supplier_name: {
         type: String,
         required: true
@@ -344,6 +362,24 @@ const orderSchema = new Schema({
     supplier_address: {
         type: String,
         required: true
+    },
+    supplier_locality: {
+        type: String,
+    },
+    supplier_landmark: {
+        type: String,
+    },
+    supplier_country: {
+        type: String,
+    },
+    supplier_state: {
+        type: String,
+    },
+    supplier_city: {
+        type: String,
+    },
+    supplierr_pincode: {
+        type: String,
     },
     items: [orderItemSchema],
     grand_total : {

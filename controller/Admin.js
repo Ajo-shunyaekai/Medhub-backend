@@ -41,7 +41,7 @@ const {
 const logErrorToFile = require("../logs/errorLogs");
 const { generateProfileEditRequestEmail } = require("../utils/emailContents");
 const sendEmail = require("../utils/emailService");
-
+ 
 const generatePassword = () => {
   const password = generator.generate({
     length: 12,
@@ -49,7 +49,7 @@ const generatePassword = () => {
   });
   return password;
 };
-
+ 
 var transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -71,7 +71,7 @@ const sendMailFunc = (email, subject, body) => {
   };
   transporter.sendMail(mailOptions);
 };
-
+ 
 module.exports = {
   register: async (req, res, reqObj, callback) => {
     try {
@@ -80,7 +80,7 @@ module.exports = {
       let data = { time: Date(), email: reqObj.email };
       const token = jwt.sign(data, jwtSecretKey);
       const saltRounds = 10;
-
+ 
       const newAdmin = new Admin({
         admin_id: adminId,
         user_name: reqObj.name,
@@ -88,7 +88,7 @@ module.exports = {
         password: reqObj.password,
         token: token,
       });
-
+ 
       bcrypt
         .genSalt(saltRounds)
         .then((salt) => {
@@ -96,7 +96,7 @@ module.exports = {
         })
         .then((hashedPassword) => {
           newAdmin.password = hashedPassword;
-
+ 
           newAdmin
             .save()
             .then((response) => {
@@ -132,14 +132,14 @@ module.exports = {
       );
     }
   },
-
+ 
   login: async (req, res, reqObj, callback) => {
     try {
       const password = reqObj.password;
       const email = reqObj.email;
-
+ 
       const admin = await Admin.findOne({ email: email });
-
+ 
       if (!admin) {
         return callback({
           code: 404,
@@ -147,9 +147,9 @@ module.exports = {
           result: admin,
         });
       }
-
+ 
       const isMatch = await bcrypt.compare(password, admin.password);
-
+ 
       const adminDetails = {
         _id: admin._id,
         admin_id: admin.admin_id,
@@ -157,7 +157,7 @@ module.exports = {
         email: admin.email,
         token: admin.token,
       };
-
+ 
       if (isMatch) {
         callback({
           code: 200,
@@ -178,23 +178,23 @@ module.exports = {
       );
     }
   },
-
+ 
   editAdminProfile: async (req, res, reqObj, callback) => {
     try {
       const { admin_id, user_name, email } = reqObj;
-
+ 
       const admin = await Admin.findOne({ admin_id: admin_id });
-
+ 
       if (!admin) {
         callback({ code: 404, message: "User not found" });
       }
-
+ 
       const updateProfile = await Admin.findOneAndUpdate(
         { admin_id: admin_id },
         { user_name: user_name, email: email },
         { new: true }
       );
-
+ 
       if (updateProfile) {
         callback({
           code: 200,
@@ -219,7 +219,7 @@ module.exports = {
       );
     }
   },
-
+ 
   adminProfileDetails: async (req, res, reqObj, callback) => {
     try {
       const fields = {
@@ -256,7 +256,7 @@ module.exports = {
       );
     }
   },
-
+ 
   getUserList: async (req, res, reqObj, callback) => {
     try {
       User.find({})
@@ -284,24 +284,24 @@ module.exports = {
       );
     }
   },
-
+ 
   blockUnblockUser: async (req, res, reqObj, callback) => {
     try {
       const { user_id } = reqObj;
       const user = await User.findOne({ user_id: user_id });
-
+ 
       if (!user) {
         return callback({ code: 400, message: "User not found" });
       }
-
+ 
       const newStatus = user.status === 1 ? 0 : 1;
-
+ 
       const updateProfile = await User.findOneAndUpdate(
         { user_id: user_id },
         { status: newStatus },
         { new: true }
       );
-
+ 
       if (updateProfile) {
         const returnObj = {
           user_id: updateProfile.user_id,
@@ -310,7 +310,7 @@ module.exports = {
           email: updateProfile.email,
           status: updateProfile.status,
         };
-
+ 
         callback({
           code: 200,
           message: `${
@@ -335,20 +335,20 @@ module.exports = {
     }
   },
   //------------------------ supplier ------------------------//
-
+ 
   getSupplierList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterKey, filterValue } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offSet = (page_no - 1) * page_size;
-
+ 
       const fields = {
         token: 0,
         password: 0,
       };
-
+ 
       let filterCondition = {};
       if (filterKey === "pending") {
         filterCondition = { account_status: 0 };
@@ -357,13 +357,13 @@ module.exports = {
       } else if (filterKey === "rejected") {
         filterCondition = { account_status: 2 };
       }
-
+ 
       let dateFilter = {};
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
       console.log("Year filter: ", startDate, endDate);
-
+ 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
         dateFilter = {
@@ -396,24 +396,24 @@ module.exports = {
       } else if (filterValue === "all" || !filterValue) {
         dateFilter = {}; // No date filter
       }
-
+ 
       // Merge dateFilter with filterCondition to apply both filters
       const combinedFilter = { ...filterCondition, ...dateFilter };
-
+ 
       const data = await Supplier.find(combinedFilter)
         .select(fields)
         .sort({ createdAt: -1 })
         .skip(offSet)
         .limit(page_size);
       const totalItems = await Supplier.countDocuments(combinedFilter);
-
+ 
       const totalPages = Math.ceil(totalItems / page_size);
       const returnObj = {
         data,
         totalPages,
         totalItems,
       };
-
+ 
       callback({
         code: 200,
         message: "Supplier list fetched successfully",
@@ -430,11 +430,11 @@ module.exports = {
       );
     }
   },
-
+ 
   getSupplierCSVList: async (req, res) => {
     try {
       const { pageNo, pageSize, filterKey, filterValue } = req?.body;
-
+ 
       let filterCondition = {};
       if (filterKey === "pending") {
         filterCondition = { account_status: 0 };
@@ -443,12 +443,12 @@ module.exports = {
       } else if (filterKey === "rejected") {
         filterCondition = { account_status: 2 };
       }
-
+ 
       let dateFilter = {};
       const combinedFilter = { ...filterCondition, ...dateFilter };
-
+ 
       const data = await Supplier.find(combinedFilter).sort({ createdAt: -1 });
-
+ 
       // Convert Mongoose document to plain object and flatten
       const flattenedData = data.map((item) =>
         flattenData(
@@ -470,14 +470,14 @@ module.exports = {
           "supplier_list"
         )
       ); // `toObject()` removes internal Mongoose metadata
-
+ 
       // Convert the flattened data to CSV
       const csv = parse(flattenedData);
-
+ 
       // Set headers for file download
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", "attachment; filename=users.csv");
-
+ 
       res.status(200).send(csv);
     } catch (error) {
       console.log("Internal Server Error:", error);
@@ -490,11 +490,11 @@ module.exports = {
       );
     }
   },
-
+ 
   getBuyerCSVList: async (req, res) => {
     try {
       const { pageNo, pageSize, filterKey, filterValue } = req?.body;
-
+ 
       let filterCondition = {};
       if (filterKey === "pending") {
         filterCondition = { account_status: 0 };
@@ -503,12 +503,12 @@ module.exports = {
       } else if (filterKey === "rejected") {
         filterCondition = { account_status: 2 };
       }
-
+ 
       let dateFilter = {};
       const combinedFilter = { ...filterCondition, ...dateFilter };
-
+ 
       const data = await Buyer.find(combinedFilter).sort({ createdAt: -1 });
-
+ 
       // Convert Mongoose document to plain object and flatten
       const flattenedData = data.map((item) =>
         flattenData(
@@ -531,14 +531,14 @@ module.exports = {
           "buyer_list"
         )
       ); // `toObject()` removes internal Mongoose metadata
-
+ 
       // Convert the flattened data to CSV
       const csv = parse(flattenedData);
-
+ 
       // Set headers for file download
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", "attachment; filename=users.csv");
-
+ 
       res.status(200).send(csv);
     } catch (error) {
       console.log("Internal Server Error:", error);
@@ -551,7 +551,7 @@ module.exports = {
       );
     }
   },
-
+ 
   supplierDetails: async (req, res, reqObj, callback) => {
     try {
       const fields = {
@@ -585,25 +585,25 @@ module.exports = {
       );
     }
   },
-
+ 
   //     getRegReqList: async (req, res, reqObj, callback) => {
   //       try {
   //         const { pageNo, limit, filterValue} = reqObj
-
+ 
   //         const page_no   = pageNo || 1
   //         const page_size = limit || 2
   //         const offSet    = (page_no -1) * page_size
-
+ 
   //         const fields = {
   //           token    : 0,
   //           password : 0
   //         };
   // console.log('reqObj',reqObj)
   //         let dateFilter = {};
-
+ 
   //         const startDate = moment().subtract(365, 'days').startOf('day').toDate();
   //         const endDate   = moment().endOf('day').toDate();
-
+ 
   //         if (filterValue === 'today') {
   //             dateFilter = {
   //                 createdAt: {
@@ -635,10 +635,10 @@ module.exports = {
   //         } else if (filterValue === 'all' || !filterValue || filterValue === '') {
   //             dateFilter = {};
   //         }
-
+ 
   //         Supplier.find({account_status : 0, ...dateFilter}).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size).then((data) => {
   //           Supplier.countDocuments({account_status : 0, ...dateFilter}).then((totalItems) => {
-
+ 
   //             const totalPages = Math.ceil( totalItems / page_size )
   //             const returnObj = {
   //               data,
@@ -659,26 +659,26 @@ module.exports = {
   //         callback({code: 500, message : 'Internal server error'})
   //       }
   //     },
-
+ 
   getRegReqList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, limit, filterValue } = reqObj;
-
+ 
       const page_no = pageNo || 1; // Default to page 1 if no page number is provided
       const page_size = limit || 5; // Default limit to 5 if not provided
       const offSet = (page_no - 1) * page_size;
-
+ 
       const fields = {
         token: 0,
         password: 0,
       };
       console.log("reqObj", reqObj);
-
+ 
       let dateFilter = {}; // Initialize date filter
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-
+ 
       if (filterValue === "today") {
         dateFilter = {
           createdAt: {
@@ -710,7 +710,7 @@ module.exports = {
       } else if (!filterValue || filterValue === "all") {
         dateFilter = {}; // No filtering, fetch all data
       }
-
+ 
       Supplier.find({ account_status: 0, ...dateFilter })
         .select(fields)
         .sort({ createdAt: -1 }) // Sorting by creation date, descending order
@@ -764,13 +764,13 @@ module.exports = {
       );
     }
   },
-
+ 
   getSuppReqCSVList: async (req, res) => {
     try {
       const data = await Supplier.find({ account_status: 0 }).sort({
         createdAt: -1,
       });
-
+ 
       // Convert Mongoose document to plain object and flatten
       const flattenedData = data.map((item) =>
         flattenData(item.toObject(), [
@@ -787,14 +787,14 @@ module.exports = {
           "password",
         ])
       ); // `toObject()` removes internal Mongoose metadata
-
+ 
       // Convert the flattened data to CSV
       const csv = parse(flattenedData);
-
+ 
       // Set headers for file download
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", "attachment; filename=users.csv");
-
+ 
       res.status(200).send(csv);
     } catch (err) {
       console.log("Internal Server Error:", error);
@@ -807,20 +807,20 @@ module.exports = {
       );
     }
   },
-
+ 
   acceptRejectSupplierRegReq: async (req, res, reqObj, callback) => {
     try {
       const { supplier_id, sales_person_name, action } = reqObj;
-
+ 
       const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-
+ 
       if (!supplier) {
         return callback({ code: 400, message: "Supplier not found" });
       }
       const newAccountStatus =
         action === "accept" ? 1 : action === "reject" ? 2 : "";
       const newProfileStatus = 1;
-
+ 
       const updateProfile = await Supplier.findOneAndUpdate(
         { supplier_id: supplier_id },
         {
@@ -830,21 +830,21 @@ module.exports = {
         },
         { new: true }
       );
-
+ 
       if (!updateProfile) {
         return callback({
           code: 400,
           message: "Failed to update supplier status",
         });
       }
-
+ 
       if (action === "accept") {
         let password = generatePassword();
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         updateProfile.password = hashedPassword;
         await updateProfile.save();
-
+ 
         const returnObj = {
           supplier_id: updateProfile.supplier_id,
           supplier_name: updateProfile.supplier_name,
@@ -856,7 +856,7 @@ module.exports = {
           password: updateProfile.password,
           generatedPassword: password,
         };
-
+ 
         // const subject = 'Login Credentials for Deliver'
         //       const body = `Hello ${updateProfile.supplier_name}, <br />
         //         Your Registration Request has been Approved. <br />
@@ -867,36 +867,36 @@ module.exports = {
         //         MedHub Global Team`;
         //         const recipientEmails = [updateProfile.supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
         //         await sendMailFunc(recipientEmails.join(','), subject, body);
-
+ 
         const subject = "Registration Approved at Medhub Global";
         const body = `Dear ${updateProfile.contact_person_name}, <br /><br />
-
+ 
                 We are pleased to inform you that the registration of your company <strong>${updateProfile.supplier_name}</strong>, on our website has been successfully approved!<br /><br />
-
+ 
                 You can now access your account using the following login details:<br /><br />
-
+ 
                 <strong>Login URL:</strong> ${process.env.SUPPLIER_LOGIN_URL} <br />
                 <strong>Username:</strong> ${updateProfile.contact_person_email} <br />
                 <strong>Temporary Password:</strong> ${password} <br /><br />
-
+ 
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
-
+ 
                 Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-
+ 
                 Best regards, <br />
                 <strong>MedHub Global Team</strong>
                 `;
-
+ 
         // Sending the email to multiple recipients
         const recipientEmails = [
           updateProfile.contact_person_email,
           "ajo@shunyaekai.tech",
         ]; // Add more emails if needed
         await sendMailFunc(recipientEmails.join(","), subject, body);
-
+ 
         // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Deliver', body);
-
+ 
         return callback({
           code: 200,
           message: "Supplier Registration Accepted Successfully",
@@ -909,9 +909,9 @@ module.exports = {
         //   <br /><br />
         //   Thanks & Regards <br />
         //   MedHub Global Team`;
-
+ 
         // sendMailFunc(updateProfile.supplier_email, 'Registration Request Rejected', body);
-
+ 
         return callback({
           code: 200,
           message: "Supplier Registration Rejected",
@@ -931,15 +931,15 @@ module.exports = {
       );
     }
   },
-
+ 
   supplierSupportList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 1;
       const offset = (page_no - 1) * page_size;
-
+ 
       Support.find({ user_type: "supplier" })
         .sort({ createdAt: -1 })
         .skip(offset)
@@ -987,21 +987,21 @@ module.exports = {
     }
   },
   //------------------------ supplier ------------------------//
-
+ 
   //------------------------ buyer ------------------------//
   getBuyerList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterKey, filterValue } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offSet = (page_no - 1) * page_size;
-
+ 
       const fields = {
         token: 0,
         password: 0,
       };
-
+ 
       let filterCondition = {};
       if (filterKey === "pending") {
         filterCondition = { account_status: 0 };
@@ -1010,13 +1010,13 @@ module.exports = {
       } else if (filterKey === "rejected") {
         filterCondition = { account_status: 2 };
       }
-
+ 
       let dateFilter = {};
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
       console.log("Year filter: ", startDate, endDate);
-
+ 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
         dateFilter = {
@@ -1049,24 +1049,24 @@ module.exports = {
       } else if (filterValue === "all" || !filterValue) {
         dateFilter = {}; // No date filter
       }
-
+ 
       // Merge dateFilter with filterCondition to apply both filters
       const combinedFilter = { ...filterCondition, ...dateFilter };
-
+ 
       const data = await Buyer.find(combinedFilter)
         .select(fields)
         .sort({ createdAt: -1 })
         .skip(offSet)
         .limit(page_size);
       const totalItems = await Buyer.countDocuments(combinedFilter);
-
+ 
       const totalPages = Math.ceil(totalItems / page_size);
       const returnObj = {
         data,
         totalPages,
         totalItems,
       };
-
+ 
       callback({
         code: 200,
         message: "Buyer list fetched successfully",
@@ -1083,7 +1083,7 @@ module.exports = {
       );
     }
   },
-
+ 
   buyerDetails: async (req, res, reqObj, callback) => {
     try {
       const fields = {
@@ -1114,26 +1114,26 @@ module.exports = {
       );
     }
   },
-
+ 
   getBuyerRegReqList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterValue } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offSet = (page_no - 1) * page_size;
-
+ 
       const fields = {
         token: 0,
         password: 0,
       };
-
+ 
       let dateFilter = {};
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
       console.log("Year filter: ", startDate, endDate);
-
+ 
       if (filterValue === "today") {
         dateFilter = {
           createdAt: {
@@ -1165,7 +1165,7 @@ module.exports = {
       } else if (filterValue === "all" || !filterValue) {
         dateFilter = {};
       }
-
+ 
       Buyer.find({ account_status: 0, ...dateFilter })
         .select(fields)
         .sort({ createdAt: -1 })
@@ -1212,21 +1212,21 @@ module.exports = {
       );
     }
   },
-
+ 
   acceptRejectBuyerRegReq: async (req, res, reqObj, callback) => {
     try {
       const { buyer_id, sales_person_name = "", action } = reqObj;
-
+ 
       const buyer = await Buyer.findOne({ buyer_id: buyer_id });
-
+ 
       if (!buyer) {
         return callback({ code: 400, message: "Buyer not found" });
       }
-
+ 
       const newAccountStatus =
         action === "accept" ? 1 : action === "reject" ? 2 : "";
       const newProfileStatus = 1;
-
+ 
       const updateStatus = await Buyer.findOneAndUpdate(
         { buyer_id: buyer_id },
         {
@@ -1236,21 +1236,21 @@ module.exports = {
         },
         { new: true }
       );
-
+ 
       if (!updateStatus) {
         return callback({
           code: 400,
           message: "Failed to update buyer status",
         });
       }
-
+ 
       if (action === "accept") {
         let password = generatePassword();
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         updateStatus.password = hashedPassword;
         await updateStatus.save();
-
+ 
         const returnObj = {
           buyer_id: updateStatus.buyer_id,
           buyer_name: updateStatus.buyer_name,
@@ -1261,7 +1261,7 @@ module.exports = {
           password: updateStatus.password,
           generatedPassword: password,
         };
-
+ 
         // const body = `Hello ${updateStatus.buyer_name}, <br />
         //   Your Registration Request has been Approved. <br />
         //   Your Login Email is: ${updateStatus.buyer_email} <br />
@@ -1269,37 +1269,37 @@ module.exports = {
         //   <br /><br />
         //   Thanks & Regards <br />
         //   Team Deliver`;
-
+ 
         // sendMailFunc(updateStatus.buyer_email, 'Login Credentials for Deliver', body);
-
+ 
         const subject = "Registration Approved at Medhub Global";
         const body = `Dear ${updateStatus.contact_person_name}, <br /><br />
-
+ 
                 We are pleased to inform you that the registration of your company <strong>${updateStatus.buyer_name}</strong>, on our website has been successfully approved!<br /><br />
-
+ 
                 You can now access your account using the following login details:<br /><br />
-
+ 
                 <strong>Login URL:</strong> ${process.env.BUYER_LOGIN_URL} <br />
                 <strong>Username:</strong> ${updateStatus.contact_person_email} <br />
                 <strong>Temporary Password:</strong> ${password} <br /><br />
-
+ 
                 Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
-
+ 
                 Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
-
+ 
                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-
+ 
                 Best regards, <br />
                 <strong>Team MedHub Global Team</strong>
                 `;
-
+ 
         // Sending the email to multiple recipients
         const recipientEmails = [
           updateStatus.contact_person_email,
           "ajo@shunyaekai.tech",
         ]; // Add more emails if needed
         await sendMailFunc(recipientEmails.join(","), subject, body);
-
+ 
         return callback({
           code: 200,
           message: "Buyer Registration Accepted Successfully",
@@ -1312,9 +1312,9 @@ module.exports = {
         //   <br /><br />
         //   Thanks & Regards <br />
         //   MedHub Global Team`;
-
+ 
         // sendMailFunc(updateStatus.buyer_email, 'Registration Request Rejected', body);
-
+ 
         return callback({
           code: 200,
           message: "Buyer Registration Rejected",
@@ -1334,20 +1334,20 @@ module.exports = {
       );
     }
   },
-
+ 
   // buyerOrdersList: async (req, res, reqObj, callback) => {
   //   try {
   //     const {pageNo, pageSize, filterKey, buyer_id, filterValue} = reqObj
-
+ 
   //     const page_no = pageNo || 1
   //     const limit   = pageSize || 2
   //     const offset  = (page_no - 1) * limit
-
+ 
   //     let dateFilter = {};
-
+ 
   // // Apply date filter based on the filterKey (today, week, month, year, all)
   // const currentDate = new Date(); // Current date and time
-
+ 
   // if (filterValue === 'today') {
   //   dateFilter = {
   //     created_at: {
@@ -1383,7 +1383,7 @@ module.exports = {
   //   // return;
   // }
   // console.log("DATE FILTER", dateFilter);
-
+ 
   //   Order.aggregate([
   //     {
   //         $match: {
@@ -1500,7 +1500,7 @@ module.exports = {
   //       Order.countDocuments({order_status : filterKey, ...dateFilter})
   //       .then(totalItems => {
   //           const totalPages = Math.ceil(totalItems / limit);
-
+ 
   //           const responseData = {
   //               data,
   //               totalPages,
@@ -1519,20 +1519,20 @@ module.exports = {
   // return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
   //   }
   // },
-
+ 
   buyerOrdersList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterKey, buyer_id, filterValue } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const limit = pageSize || 2;
       const offset = (page_no - 1) * limit;
-
+ 
       let dateFilter = {};
-
+ 
       // Apply date filter based on the filterValue (today, week, month, year, all)
       const currentDate = new Date(); // Current date and time
-
+ 
       if (filterValue === "today") {
         // Filter for today
         dateFilter = {
@@ -1572,9 +1572,9 @@ module.exports = {
         // callback({ code: 400, message: "Invalid filterValue provided" });
         // return;
       }
-
+ 
       console.log("DATE FILTER", dateFilter);
-
+ 
       Order.aggregate([
         {
           $match: {
@@ -1696,7 +1696,7 @@ module.exports = {
           Order.countDocuments({ order_status: filterKey, ...dateFilter }).then(
             (totalItems) => {
               const totalPages = Math.ceil(totalItems / limit);
-
+ 
               const responseData = {
                 data,
                 totalPages,
@@ -1729,15 +1729,15 @@ module.exports = {
       );
     }
   },
-
+ 
   buyerSupportList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 1;
       const offset = (page_no - 1) * page_size;
-
+ 
       Support.find({ user_type: "buyer" })
         .sort({ createdAt: -1 })
         .skip(offset)
@@ -1784,15 +1784,15 @@ module.exports = {
       );
     }
   },
-
+ 
   buyerInvoicesList: async (req, res, reqObj, callback) => {
     try {
       const { page_no, limit, filterKey, buyer_id } = reqObj;
-
+ 
       const pageNo = page_no || 1;
       const pageSize = limit || 1;
       const offset = (pageNo - 1) * pageSize;
-
+ 
       Order.aggregate([
         {
           $match: {
@@ -1895,7 +1895,7 @@ module.exports = {
           Order.countDocuments({ order_status: filterKey }).then(
             (totalItems) => {
               const totalPages = Math.ceil(totalItems / pageSize);
-
+ 
               const responseData = {
                 data,
                 totalPages,
@@ -1929,62 +1929,62 @@ module.exports = {
     }
   },
   //------------------------ buyer ------------------------//
-
+ 
   //------------------------ supplier/buyer ------------------------//
-
+ 
   // getTotalRegReqList: async (req, res, reqObj, callback) => {
   //   try {
   //     const { pageNo, pageSize } = reqObj;
-
+ 
   //     const page_no = pageNo || 1;
   //     const page_size = pageSize || 2;
   //     const offSet = (page_no - 1) * page_size;
-
+ 
   //     const fields = {
   //       token: 0,
   //       password: 0,
   //     };
-
+ 
   //     // Fetch buyer and supplier registration requests simultaneously
   //     const buyerQuery = Buyer.find({ account_status: 0 })
   //       .select(fields)
   //       .sort({ createdAt: -1 })
   //       .skip(offSet)
   //       .limit(page_size);
-
+ 
   //     const supplierQuery = Supplier.find({ account_status: 0 })
   //       .select(fields)
   //       .sort({ createdAt: -1 })
   //       .skip(offSet)
   //       .limit(page_size);
-
+ 
   //     const buyerCountQuery = Buyer.countDocuments({ account_status: 0 });
   //     const supplierCountQuery = Supplier.countDocuments({ account_status: 0 });
-
+ 
   //     const [buyerData, supplierData, buyerTotalCount, supplierTotalCount] = await Promise.all([
   //       buyerQuery,
   //       supplierQuery,
   //       buyerCountQuery,
   //       supplierCountQuery,
   //     ]);
-
+ 
   //     // Add a 'registration_type' field to distinguish between buyer and supplier requests
   //     const unifiedData = [
   //       ...buyerData.map((buyer) => ({ ...buyer._doc, registration_type: 'Buyer' })),
   //       ...supplierData.map((supplier) => ({ ...supplier._doc, registration_type: 'Supplier' })),
   //     ];
-
+ 
   //     // Calculate total pages for pagination
   //     const totalRequests = buyerTotalCount + supplierTotalCount;
   //     const totalPages = Math.ceil(totalRequests / page_size);
-
+ 
   //     // Prepare the result object
   //     const resultObj = {
   //       data: unifiedData,
   //       totalPages,
   //       totalItems: totalRequests,
   //     };
-
+ 
   //     callback({
   //       code: 200,
   //       message: "Registration request list fetched successfully",
@@ -1996,26 +1996,26 @@ module.exports = {
   // return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
   //   }
   // },
-
+ 
   getTotalRegReqList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterValue } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offSet = (page_no - 1) * page_size;
-
+ 
       const fields = {
         token: 0,
         password: 0,
       };
-
+ 
       let dateFilter = {};
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
       console.log("Year filter: ", startDate, endDate);
-
+ 
       if (filterValue === "today") {
         dateFilter = {
           createdAt: {
@@ -2047,16 +2047,16 @@ module.exports = {
       } else if (filterValue === "all" || !filterValue) {
         dateFilter = {};
       }
-
+ 
       // Fetch all buyer and supplier data first (no pagination applied yet)
       const buyerQuery = Buyer.find({ account_status: 0, ...dateFilter })
         .select(fields)
         .sort({ createdAt: -1 });
-
+ 
       const supplierQuery = Supplier.find({ account_status: 0, ...dateFilter })
         .select(fields)
         .sort({ createdAt: -1 });
-
+ 
       const buyerCountQuery = Buyer.countDocuments({
         account_status: 0,
         ...dateFilter,
@@ -2065,7 +2065,7 @@ module.exports = {
         account_status: 0,
         ...dateFilter,
       });
-
+ 
       const [buyerData, supplierData, buyerTotalCount, supplierTotalCount] =
         await Promise.all([
           buyerQuery,
@@ -2073,7 +2073,7 @@ module.exports = {
           buyerCountQuery,
           supplierCountQuery,
         ]);
-
+ 
       // Add 'registration_type' to differentiate between buyer and supplier
       const unifiedData = [
         ...buyerData.map((buyer) => ({
@@ -2085,24 +2085,24 @@ module.exports = {
           registration_type: "Supplier",
         })),
       ];
-
+ 
       // Sort the combined data by creation date
       unifiedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
+ 
       // Apply pagination after combining the data
       const paginatedData = unifiedData.slice(offSet, offSet + page_size);
-
+ 
       // Calculate total number of requests and pages
       const totalRequests = buyerTotalCount + supplierTotalCount;
       const totalPages = Math.ceil(totalRequests / page_size);
-
+ 
       // Prepare the result object
       const resultObj = {
         data: paginatedData,
         totalPages,
         totalItems: totalRequests,
       };
-
+ 
       callback({
         code: 200,
         message: "Registration request list fetched successfully",
@@ -2119,26 +2119,26 @@ module.exports = {
       );
     }
   },
-
+ 
   getTotalApprovedRegReqList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterValue } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offSet = (page_no - 1) * page_size;
-
+ 
       const fields = {
         token: 0,
         password: 0,
       };
-
+ 
       let dateFilter = {};
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
       console.log("Year filter: ", startDate, endDate);
-
+ 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
         dateFilter = {
@@ -2171,16 +2171,16 @@ module.exports = {
       } else if (filterValue === "all" || !filterValue) {
         dateFilter = {}; // No date filter
       }
-
+ 
       // Fetch all buyer and supplier data first (no pagination applied yet)
       const buyerQuery = Buyer.find({ account_status: 1, ...dateFilter })
         .select(fields)
         .sort({ createdAt: -1 });
-
+ 
       const supplierQuery = Supplier.find({ account_status: 1, ...dateFilter })
         .select(fields)
         .sort({ createdAt: -1 });
-
+ 
       const buyerCountQuery = Buyer.countDocuments({
         account_status: 1,
         ...dateFilter,
@@ -2189,7 +2189,7 @@ module.exports = {
         account_status: 1,
         ...dateFilter,
       });
-
+ 
       const [buyerData, supplierData, buyerTotalCount, supplierTotalCount] =
         await Promise.all([
           buyerQuery,
@@ -2197,7 +2197,7 @@ module.exports = {
           buyerCountQuery,
           supplierCountQuery,
         ]);
-
+ 
       // Add 'registration_type' to differentiate between buyer and supplier
       const unifiedData = [
         ...buyerData.map((buyer) => ({
@@ -2209,24 +2209,24 @@ module.exports = {
           registration_type: "Supplier",
         })),
       ];
-
+ 
       // Sort the combined data by creation date
       unifiedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
+ 
       // Apply pagination after combining the data
       const paginatedData = unifiedData.slice(offSet, offSet + page_size);
-
+ 
       // Calculate total number of requests and pages
       const totalRequests = buyerTotalCount + supplierTotalCount;
       const totalPages = Math.ceil(totalRequests / page_size);
-
+ 
       // Prepare the result object
       const resultObj = {
         data: paginatedData,
         totalPages,
         totalItems: totalRequests,
       };
-
+ 
       callback({
         code: 200,
         message: "Registration request list fetched successfully",
@@ -2243,22 +2243,22 @@ module.exports = {
       );
     }
   },
-
+ 
   getProfileUpdateReqList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, limit, user_type } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = limit || 2;
       const offSet = (page_no - 1) * page_size;
-
+ 
       const fieldsToExclude = {
         token: 0,
         createdAt: 0,
         updatedAt: 0,
         password: 0,
       };
-
+ 
       const fetchUpdateProfileRequests = (Model, callback) => {
         Model.find({})
           .select(fieldsToExclude)
@@ -2294,7 +2294,7 @@ module.exports = {
             });
           });
       };
-
+ 
       if (user_type === "supplier") {
         fetchUpdateProfileRequests(supplierEdit, callback);
       } else if (user_type === "supplier") {
@@ -2311,18 +2311,18 @@ module.exports = {
       );
     }
   },
-
+ 
   acceptRejectProfileEditRequest: async (req, res) => {
     const { id } = req?.params;
     const { action } = req?.body;
-
+ 
     try {
       // Find the profile edit request
       const profileReq = await ProfileEditRequest?.findById(id);
       if (!profileReq) {
         return sendErrorResponse(res, 400, "Failed to fetch profile request.");
       }
-
+ 
       // Find the user to update profile request
       const profile = await profileReq?.userSchemaReference?.findById(
         profileReq?.userId
@@ -2334,7 +2334,7 @@ module.exports = {
           "Failed to fetch profile data to update details."
         );
       }
-
+ 
       // Update the profile edit request status
       const updatedProfileReq = await ProfileEditRequest?.findByIdAndUpdate(
         profileReq?._id,
@@ -2345,7 +2345,7 @@ module.exports = {
         },
         { new: true }
       );
-
+ 
       if (!updatedProfileReq) {
         return sendErrorResponse(
           res,
@@ -2353,7 +2353,7 @@ module.exports = {
           "Failed to update profile edit request status."
         );
       }
-
+ 
       // Update the profile with new address values, if any changes
       const updatedProfile =
         await profileReq?.userSchemaReference?.findByIdAndUpdate(
@@ -2369,11 +2369,11 @@ module.exports = {
           },
           { new: true }
         );
-
+ 
       if (!updatedProfile) {
         return sendErrorResponse(res, 400, "Failed to update profile address.");
       }
-
+ 
       // Return a success response
       return sendSuccessResponse(
         res,
@@ -2392,11 +2392,11 @@ module.exports = {
       );
     }
   },
-
+ 
   orderDetails: async (req, res, reqObj, callback) => {
     try {
       const { buyer_id, order_id, filterKey } = reqObj;
-
+ 
       Order.aggregate([
         {
           $match: {
@@ -2531,11 +2531,11 @@ module.exports = {
             supplier_id: { $first: "$supplier_id" },
             items: { $push: "$items" },
             payment_terms: { $first: "$payment_terms" },
-
+ 
             deposit_requested: { $first: "$deposit_requested" },
             deposit_due: { $first: "$deposit_due" },
             // payment_terms     : { $first: "$payment_terms" },
-
+ 
             est_delivery_time: { $first: "$est_delivery_time" },
             shipping_details: { $first: "$shipping_details" },
             remarks: { $first: "$remarks" },
@@ -2636,123 +2636,6 @@ module.exports = {
     }
   },
 
-  //------------------------ supplier/buyer ------------------------//
-
-  //------------------------ medicine ------------------------//
-
-  //   acceptRejectAddMedicineReq : async (req, res, reqObj, callback) => {
-  //     console.log('REQ', reqObj);
-
-  //     try {
-  //         const { admin_id, medicine_id, supplier_id, supplier_email, supplier_contact_email, supplier_name, action, rejectionReason } = reqObj;
-
-  //         const medicine = await Medicine.findOne({ medicine_id, supplier_id });
-
-  //         if (!medicine) {
-  //             return callback({ code: 400, message: "Medicine not found" });
-  //         }
-
-  //         const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
-
-  //         const newMedicineStatus = action === 'accept' ? 1 : action === 'reject' ? 2 : '';
-  //         console.log(newMedicineStatus);
-  //         const updateStatus = await Medicine.findOneAndUpdate(
-  //             { medicine_id : medicine_id },
-  //             { status      : newMedicineStatus },
-  //             {edit_status  : newMedicineStatus},
-  //             { new: true }
-  //         );
-  // console.log(updateStatus);
-
-  //         if (!updateStatus) {
-  //             return callback({ code: 400, message: "Failed to update medicine status" });
-  //         }
-
-  //         let body;
-  //         let subject;
-  //         let event;
-
-  //         // if (action === 'accept') {
-  //         //     subject = 'Medicine Added Successfully';
-  //         //     body = `Hello ${supplier_name}, <br />
-  //         //         Your medicine request has been approved and added successfully. <br />
-  //         //         Medicine ID: ${updateStatus.medicine_id} <br />
-  //         //         Supplier ID: ${updateStatus.supplier_id} <br />
-  //         //         <br /><br />
-  //         //         Thanks & Regards <br />
-  //         //         Team Deliver`;
-
-  //         //     // Determine event type based on medicine_type
-  //         //     if (medicine_type === 'new') {
-  //         //         event = 'addnewmedicine';
-  //         //     } else if (medicine_type === 'secondary market') {
-  //         //         event = 'addsecondarymedicine';
-  //         //     }
-
-  //         //     // Send email for acceptance
-  //         //     sendMailFunc(supplier_email, subject, body);
-
-  //         //     const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-  //         //     const newNotification = new Notification({
-  //         //         notification_id: notificationId,
-  //         //         event_type: 'Medicine Request Accepted',
-  //         //         event,
-  //         //         from: 'admin',
-  //         //         to: 'supplier',
-  //         //         from_id: admin_id,
-  //         //         to_id: supplier_id,
-  //         //         event_id: medicine_id,
-  //         //         message: ` ${medicine_id}: Your listing has been approved and is now live!`,
-  //         //         status: 0
-  //         //     });
-  //         //     await newNotification.save();
-
-  //         // } else if (action === 'reject') {
-  //         //     // subject = 'Medicine Request Rejected';
-  //         //     // body = `Hello ${supplier_name}, <br />
-  //         //     //     We regret to inform you that your medicine request has been rejected. <br />
-  //         //     //     Medicine ID: ${updateStatus.medicine_id} <br />
-  //         //     //     Supplier ID: ${updateStatus.supplier_id} <br />
-  //         //     //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
-  //         //     //     <br /><br />
-  //         //     //     Thanks & Regards <br />
-  //         //     //     Team Deliver`;
-
-  //         //     // // Send email for rejection
-  //         //     // sendMailFunc(supplier_email, subject, body);
-
-  //         //     const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-  //         //     const newNotification = new Notification({
-  //         //         notification_id: notificationId,
-  //         //         event_type: 'Medicine Request Rejected',
-  //         //         event: 'addmedicine',  // This can remain general as the event type
-  //         //         from: 'admin',
-  //         //         to: 'supplier',
-  //         //         from_id: admin_id,
-  //         //         to_id: supplier_id,
-  //         //         event_id: medicine_id,
-  //         //         message: ` ${medicine_id}: Your listing has been disapproved.`,
-  //         //         status: 0
-  //         //     });
-  //         //     await newNotification.save();
-
-  //         // } else {
-  //         //     return callback({ code: 400, message: "Invalid action" });
-  //         // }
-
-  //         callback({
-  //             code: 200,
-  //             message: `${updateStatus.status === 1 ? 'Medicine Added Successfully' : updateStatus.status === 2 ? 'Add Medicine Request Rejected' : ''}`,
-  //             result: updateStatus
-  //         });
-
-  //     } catch (error) {
-  // console.log("Internal Server Error:", error);
-  // logErrorToFile(error, req);
-  // return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
-  //     }
-  //   },
-
   acceptRejectAddMedicineReq: async (req, res, reqObj, callback) => {
     try {
       const {
@@ -2765,36 +2648,36 @@ module.exports = {
         action,
         rejectionReason,
       } = reqObj;
-
+ 
       const medicine = await Medicine.findOne({ medicine_id, supplier_id });
-
+ 
       if (!medicine) {
         return callback({ code: 400, message: "Medicine not found" });
       }
-
+ 
       const { medicine_type } = medicine; // Fetch the medicine type from the found medicine
-
+ 
       const newMedicineStatus =
         action === "accept" ? 1 : action === "reject" ? 2 : null;
-
+ 
       // Ensure both status and edit_status are updated correctly
       const updateStatus = await Medicine.findOneAndUpdate(
         { medicine_id, supplier_id }, // Query to find the document
         { status: newMedicineStatus, edit_status: newMedicineStatus }, // Fields to update
         { new: true } // Return the updated document
       );
-
+ 
       if (!updateStatus) {
         return callback({
           code: 400,
           message: "Failed to update medicine status",
         });
       }
-
+ 
       let body;
       let subject;
       let event;
-
+ 
       // Handle the success message based on status and action
       if (action === "accept") {
         subject = "Medicine Added Successfully";
@@ -2807,14 +2690,14 @@ module.exports = {
                       Thank you for being a valued partner. <br /><br />
                       Best regards, <br />
                       <strong>MedHub Global Team</strong>`;
-
+ 
         // Determine event type based on medicine_type
         event =
           medicine_type === "new" ? "addnewmedicine" : "addsecondarymedicine";
-
+ 
         // Send email for acceptance
         sendMailFunc(supplier_email, subject, body);
-
+ 
         const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
         const newNotification = new Notification({
           notification_id: notificationId,
@@ -2839,10 +2722,10 @@ module.exports = {
         //     <br /><br />
         //     Thanks & Regards <br />
         //     Team Deliver`;
-
+ 
         // // Send email for rejection
         // sendMailFunc(supplier_email, subject, body);
-
+ 
         const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
         const newNotification = new Notification({
           notification_id: notificationId,
@@ -2860,7 +2743,7 @@ module.exports = {
       } else {
         return callback({ code: 400, message: "Invalid action" });
       }
-
+ 
       // Correctly return the success message based on the updated status
       callback({
         code: 200,
@@ -2884,17 +2767,17 @@ module.exports = {
       );
     }
   },
-
+ 
   allMedicineList: async (req, res, reqObj, callback) => {
     try {
       console.log("REQOBJ", reqObj);
-
+ 
       const { searchKey, pageNo, pageSize, medicineType, status } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 10;
       const offset = (page_no - 1) * page_size;
-
+ 
       Medicine.aggregate([
         {
           $match: {
@@ -2937,7 +2820,7 @@ module.exports = {
             },
           },
         },
-
+ 
         {
           $project: {
             medicine_id: 1,
@@ -2961,7 +2844,7 @@ module.exports = {
             "inventory.price": 1,
           },
         },
-
+ 
         { $skip: offset },
         { $limit: page_size },
       ])
@@ -3010,7 +2893,7 @@ module.exports = {
       );
     }
   },
-
+ 
   getMedicineDetails: async (req, res, reqObj, callback) => {
     try {
       Medicine.aggregate([
@@ -3170,24 +3053,24 @@ module.exports = {
       );
     }
   },
-
+ 
   acceptRejectEditMedicineReq: async (req, res, reqObj, callback) => {
     try {
       const { medicine_id, supplier_id, action, admin_id } = reqObj;
-
+ 
       const medicine = await EditMedicine.findOne({ medicine_id, supplier_id });
       const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-
+ 
       if (!medicine) {
         return callback({
           code: 400,
           message: "Medicine edit request not found",
         });
       }
-
+ 
       const editMedicineStatus =
         action === "accept" ? 1 : action === "reject" ? 2 : "";
-
+ 
       if (editMedicineStatus === 1) {
         let updateObj = {
           medicine_id: medicine.medicine_id,
@@ -3218,11 +3101,11 @@ module.exports = {
           inventory_info: medicine.inventory_info,
           edit_status: editMedicineStatus, // Ensure edit_status is updated
         };
-
+ 
         if (medicine.medicine_image && medicine.medicine_image.length > 0) {
           updateObj.medicine_image = medicine.medicine_image;
         }
-
+ 
         if (medicine.medicine_type === "new_medicine") {
           updateObj.medicine_type = "new";
           // updateObj.inventory_info = medicine.inventory_info;
@@ -3234,21 +3117,21 @@ module.exports = {
           updateObj.unit_price = medicine.unit_price;
           updateObj.invoice_image = medicine.invoice_image;
         }
-
+ 
         if (medicine.invoice_image && medicine.invoice_image.length > 0) {
           updateObj.invoice_image = medicine.invoice_image;
         }
-
+ 
         try {
           // Update the edit status in the EditMedicine collection
           await EditMedicine.findOneAndUpdate(
             { supplier_id, medicine_id },
             { $set: { edit_status: editMedicineStatus } }
           );
-
+ 
           let updatedMedicine;
           let event;
-
+ 
           if (medicine.medicine_type === "new_medicine") {
             event = "editnewmedicine";
             updatedMedicine = await NewMedicine.findOneAndUpdate(
@@ -3264,17 +3147,17 @@ module.exports = {
               { new: true }
             );
           }
-
+ 
           if (!updatedMedicine) {
             return callback({
               code: 400,
               message: "Medicine not found for update",
             });
           }
-
+ 
           // Delete the edit request from the EditMedicine collection after successful update
           await EditMedicine.deleteOne({ medicine_id, supplier_id });
-
+ 
           const notificationId =
             "NOT-" + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
@@ -3290,7 +3173,7 @@ module.exports = {
             status: 0,
           });
           await newNotification.save();
-
+ 
           const subject = "Medicine Edit Request Accepted Successfully";
           const body = `Hello ${medicine.supplier_name}, <br />
                           Your medicine edit request has been approved and changes are live now. <br />
@@ -3300,10 +3183,10 @@ module.exports = {
                           <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                           Thanks & Regards, <br />
                           MedHub Global Team`;
-
+ 
           // Send the email to the supplier
           await sendMailFunc(supplier.supplier_email, subject, body);
-
+ 
           return callback({
             code: 200,
             message: `${
@@ -3328,7 +3211,7 @@ module.exports = {
             { supplier_id, medicine_id },
             { $set: { edit_status: editMedicineStatus } }
           );
-
+ 
           let event;
           // Update the edit status in the respective medicine collection
           if (medicine.medicine_type === "new_medicine") {
@@ -3344,7 +3227,7 @@ module.exports = {
               { $set: { edit_status: editMedicineStatus } }
             );
           }
-
+ 
           const notificationId =
             "NOT-" + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
@@ -3360,7 +3243,7 @@ module.exports = {
             status: 0,
           });
           await newNotification.save();
-
+ 
           // const subject = 'Medicine Edit Request Rejected';
           // const body = `Hello ${medicine.supplier_name}, <br />
           //               Your medicine edit request has been rejected. <br />
@@ -3369,7 +3252,7 @@ module.exports = {
           //               <br /><br />
           //               Thanks & Regards, <br />
           //               Team Deliver`;
-
+ 
           // // Send the email to the supplier
           // await sendMailFunc(supplier.supplier_email, subject, body);
           return callback({
@@ -3399,15 +3282,15 @@ module.exports = {
       );
     }
   },
-
+ 
   medicineEditList: async (req, res, reqObj, callback) => {
     try {
       const { searchKey, pageNo, pageSize, medicineType, status } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 10;
       const offset = (page_no - 1) * page_size;
-
+ 
       EditMedicine.aggregate([
         {
           $match: {
@@ -3452,7 +3335,7 @@ module.exports = {
             },
           },
         },
-
+ 
         {
           $project: {
             medicine_id: 1,
@@ -3477,7 +3360,7 @@ module.exports = {
             "inventory.price": 1,
           },
         },
-
+ 
         { $skip: offset },
         { $limit: page_size },
       ])
@@ -3526,10 +3409,10 @@ module.exports = {
       );
     }
   },
-
+ 
   editMedicineDetails: async (req, res, reqObj, callback) => {
     console.log("here", reqObj);
-
+ 
     try {
       EditMedicine.aggregate([
         {
@@ -3769,11 +3652,11 @@ module.exports = {
       );
     }
   },
-
+ 
   deleteMedicine: async (req, res, reqObj, callback) => {
     try {
       const { medicine_id, supplier_id } = reqObj;
-
+ 
       Medicine.findOneAndUpdate(
         { medicine_id: medicine_id, supplier_id: supplier_id },
         { $set: { status: 3 } },
@@ -3801,39 +3684,39 @@ module.exports = {
     }
   },
   //------------------------------ medicine -------------------------------//
-
+ 
   //----------------------------- support -------------------------------------//
-
+ 
   supportList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterKey, supportType } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offSet = (page_no - 1) * page_size;
-
+ 
       let filterCondition = {};
-
+ 
       if (filterKey === "buyer") {
         filterCondition = { user_type: "buyer" };
       } else if (filterKey === "supplier") {
         filterCondition = { user_type: "supplier" };
       }
-
+ 
       if (supportType) {
         filterCondition.support_type = supportType;
       }
-
+ 
       // const data       = await Support.find(filterCondition).select().sort({createdAt: -1}).skip(offSet).limit(page_size);
       // const totalItems = await Support.countDocuments(filterCondition);
-
+ 
       // const totalPages = Math.ceil(totalItems / page_size);
       // const returnObj = {
       //   data,
       //   totalPages,
       //   totalItems
       // };
-
+ 
       Support.aggregate([
         {
           $match: filterCondition,
@@ -3874,7 +3757,7 @@ module.exports = {
             status: 1,
             createdAt: 1,
             updatedAt: 1,
-
+ 
             buyer: {
               $arrayElemAt: ["$buyer_details", 0],
             },
@@ -3945,7 +3828,7 @@ module.exports = {
         .then(async (data) => {
           const totalItems = await Support.countDocuments(filterCondition);
           const totalPages = Math.ceil(totalItems / page_size);
-
+ 
           const returnObj = {
             data,
             totalPages,
@@ -3971,11 +3854,11 @@ module.exports = {
       );
     }
   },
-
+ 
   supportDetails: async (req, res, reqObj, callback) => {
     try {
       const { supplier_id, support_id } = reqObj;
-
+ 
       Support.aggregate([
         {
           $match: {
@@ -4098,20 +3981,20 @@ module.exports = {
       );
     }
   },
-
+ 
   //----------------------------- support -------------------------------------//
-
+ 
   //----------------------------- dashboard details -------------------------------------//
   adminDashboardDataList: async (req, res, reqObj, callback) => {
     try {
       const { filterValue } = reqObj;
-
+ 
       // const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
       // const endOfToday   = new Date(new Date().setHours(23, 59, 59, 999));
-
+ 
       let startDate = null;
       let endDate = moment().endOf("day");
-
+ 
       if (filterValue === "today") {
         startDate = moment().startOf("day");
         endDate = moment().endOf("day");
@@ -4125,7 +4008,7 @@ module.exports = {
         startDate = null;
         endDate = null;
       }
-
+ 
       const orderDataList = Order.aggregate([
         {
           $addFields: {
@@ -4141,7 +4024,7 @@ module.exports = {
         //     createdAt: { $gte: startOfToday, $lt: endOfToday }
         //   }
         // },
-
+ 
         {
           $match: {
             // createdAt: { $gte: startDate.toDate(), $lt: endDate.toDate() }
@@ -4225,7 +4108,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const buyerRegReqList = Buyer.aggregate([
         // {
         //   $match: {
@@ -4295,7 +4178,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const supplierrRegReqList = Supplier.aggregate([
         {
           $match: {
@@ -4361,7 +4244,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const supplierCountry = Supplier.aggregate([
         // {
         //   $match: {
@@ -4388,7 +4271,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const buyerCountry = Buyer.aggregate([
         // {
         //   $match: {
@@ -4415,7 +4298,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const inquiryCount = Enquiry.aggregate([
         {
           $match: {
@@ -4449,7 +4332,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const poCount = PurchaseOrder.aggregate([
         {
           $match: {
@@ -4483,7 +4366,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const orderCount = Order.aggregate([
         {
           $match: {
@@ -4517,7 +4400,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const totalOrderCount = Order.aggregate([
         {
           $match: {
@@ -4546,7 +4429,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const completedOrderCount = Order.aggregate([
         {
           $match: {
@@ -4580,7 +4463,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const invoiceCount = Invoices.aggregate([
         {
           $match: {
@@ -4614,7 +4497,7 @@ module.exports = {
           },
         },
       ]);
-
+ 
       const [
         orderData,
         buyerData,
@@ -4640,17 +4523,17 @@ module.exports = {
         completedOrderCount,
         invoiceCount,
       ]);
-
+ 
       const totalOrderNumber =
         totalOrders.length > 0 ? totalOrders[0].count : 0;
       const completedOrderNumber =
         completedOrders.length > 0 ? completedOrders[0].count : 0;
-
+ 
       const completedOrderPercentage =
         totalOrderNumber > 0
           ? (completedOrderNumber / totalOrderNumber) * 100
           : 0;
-
+ 
       const result = {
         ...orderData[0],
         supplierCountryData,
@@ -4688,7 +4571,7 @@ module.exports = {
         completedOrderPercentage: completedOrderNumber,
         invoiceCount: invoiceData.length > 0 ? invoiceData[0].count : 0,
       };
-
+ 
       callback({
         code: 200,
         message: "Dashboard data list fetched successfully",
@@ -4706,16 +4589,16 @@ module.exports = {
     }
   },
   //----------------------------- dashboard details -------------------------------------//
-
+ 
   //------------------------------ notifications -------------------------------//
   getNotificationList: async (req, res, reqObj, callback) => {
     try {
       const { buyer_id, pageNo, pageSize } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 100;
       const offset = (page_no - 1) * page_size;
-
+ 
       Notification.aggregate([
         {
           $match: {
@@ -4775,7 +4658,7 @@ module.exports = {
             status: 0,
           });
           const totalPages = Math.ceil(totalItems / page_size);
-
+ 
           const returnObj = {
             data,
             totalPages,
@@ -4806,15 +4689,15 @@ module.exports = {
       );
     }
   },
-
+ 
   getNotificationDetailsList: async (req, res, reqObj, callback) => {
     try {
       const { buyer_id, pageNo, pageSize } = reqObj;
-
+ 
       const page_no = pageNo || 1;
       const page_size = pageSize || 5;
       const offset = (page_no - 1) * page_size;
-
+ 
       Notification.aggregate([
         {
           $match: {
@@ -4869,7 +4752,7 @@ module.exports = {
         .then(async (data) => {
           const totalItems = await Notification.countDocuments({ to: "admin" });
           const totalPages = Math.ceil(totalItems / page_size);
-
+ 
           const returnObj = {
             data,
             totalPages,
@@ -4900,12 +4783,12 @@ module.exports = {
       );
     }
   },
-
+ 
   updateStatus: async (req, res, reqObj, callback) => {
     console.log(reqObj);
     try {
       const { notification_id, status = 1, user_type } = reqObj;
-
+ 
       //   const updateNotification = await Notification.findOneAndUpdate(
       //     { notification_id : notification_id },
       //     {
@@ -4916,7 +4799,7 @@ module.exports = {
       //     },
       //     { new: true }
       // );
-
+ 
       const updateNotifications = await Notification.updateMany(
         { to: user_type },
         {
@@ -4926,7 +4809,7 @@ module.exports = {
         }
         // { multi: true }
       );
-
+ 
       if (!updateNotifications) {
         return callback({
           code: 404,
@@ -4951,7 +4834,7 @@ module.exports = {
     }
   },
   //------------------------------ notifications -------------------------------//
-
+ 
   //------------------------------ inquiries -------------------------------//
   inquiriesList: async (req, res, reqObj, callback) => {
     try {
@@ -4960,20 +4843,20 @@ module.exports = {
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offset = (page_no - 1) * page_size;
-
+ 
       const matchCondition = { enquiry_status: { $ne: "order created" } };
       if (buyer_id && !supplier_id) {
         matchCondition.buyer_id = buyer_id;
       } else if (supplier_id && !buyer_id) {
         matchCondition.supplier_id = supplier_id;
       }
-
+ 
       let dateFilter = {};
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
       console.log("Year filter: ", startDate, endDate);
-
+ 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
         dateFilter = {
@@ -5006,10 +4889,10 @@ module.exports = {
       } else if (filterValue === "all" || !filterValue) {
         dateFilter = {}; // No date filter
       }
-
+ 
       // Merge dateFilter with filterCondition to apply both filters
       const combinedFilter = { ...matchCondition, ...dateFilter };
-
+ 
       // if (status) {
       //     matchCondition.enquiry_status = status;
       // }
@@ -5087,7 +4970,7 @@ module.exports = {
         .then(async (data) => {
           const totalItems = await Enquiry.countDocuments(combinedFilter);
           const totalPages = Math.ceil(totalItems / page_size);
-
+ 
           const returnObj = {
             data,
             totalPages,
@@ -5113,11 +4996,11 @@ module.exports = {
       );
     }
   },
-
+ 
   inquiryDetails: async (req, res, reqObj, callback) => {
     try {
       const { enquiry_id } = reqObj;
-
+ 
       Enquiry.aggregate([
         {
           $match: {
@@ -5401,9 +5284,9 @@ module.exports = {
     }
   },
   //------------------------------ inquiries -------------------------------//
-
+ 
   //------------------------------ invoice -------------------------------//
-
+ 
   invoicesList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterKey, buyer_id } = reqObj;
@@ -5411,7 +5294,7 @@ module.exports = {
       const page_size = pageSize || 2;
       const offset = (page_no - 1) * page_size;
       console.log("here", reqObj);
-
+ 
       Invoices.aggregate([
         {
           $match: {
@@ -5581,7 +5464,7 @@ module.exports = {
         .then((data) => {
           Invoices.countDocuments({ status: filterKey }).then((totalItems) => {
             const totalPages = Math.ceil(totalItems / page_size);
-
+ 
             const responseData = {
               data,
               totalPages,
@@ -5613,11 +5496,11 @@ module.exports = {
       );
     }
   },
-
+ 
   invoiceDetails: async (req, res, reqObj, callback) => {
     try {
       const { order_id, invoice_id, supplier_id } = reqObj;
-
+ 
       Invoices.aggregate([
         {
           $match: {
@@ -5813,21 +5696,21 @@ module.exports = {
       );
     }
   },
-
+ 
   //------------------------------ invoice -------------------------------//
-
+ 
   //------------------------------ PO -------------------------------//
   getPOList: async (req, res, reqObj, callback) => {
     try {
       console.log("here", reqObj);
-
+ 
       const { supplier_id, buyer_id, status, pageNo, pageSize, filterValue } =
         reqObj;
       const page_no = pageNo || 1;
       const page_size = pageSize || 10;
       const offset = (page_no - 1) * page_size;
       const query = {};
-
+ 
       // if(!supplier_id) {
       //     query.buyer_id = buyer_id,
       //     query.po_status = status
@@ -5835,7 +5718,7 @@ module.exports = {
       //     query.supplier_id = supplier_id,
       //     query.po_status = status
       // }
-
+ 
       // const matchCondition = {};
       // if (buyer_id && !supplier_id) {
       //     matchCondition.buyer_id = buyer_id;
@@ -5845,13 +5728,13 @@ module.exports = {
       // if (status) {
       //     matchCondition.po_status = status;
       // }
-
+ 
       let dateFilter = {};
-
+ 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
       console.log("Year filter: ", startDate, endDate);
-
+ 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
         dateFilter = {
@@ -5884,7 +5767,7 @@ module.exports = {
       } else if (filterValue === "all" || !filterValue) {
         dateFilter = {}; // No date filter
       }
-
+ 
       PurchaseOrder.aggregate([
         {
           $match: {
@@ -5930,7 +5813,7 @@ module.exports = {
             enquiry_id: 1,
             created_at: 1,
             updated_at: 1,
-
+ 
             buyer: {
               $arrayElemAt: ["$buyer_details", 0],
             },
@@ -5991,7 +5874,7 @@ module.exports = {
             ...dateFilter,
           });
           const totalPages = Math.ceil(totalItems / page_size);
-
+ 
           const returnObj = {
             data,
             totalPages,
@@ -6017,7 +5900,7 @@ module.exports = {
       );
     }
   },
-
+ 
   getPODetails: async (req, res, reqObj, callback) => {
     try {
       const { purchaseOrder_id, buyer_id, supplier_id, enquiry_id } = reqObj;
@@ -6197,18 +6080,18 @@ module.exports = {
       );
     }
   },
-
+ 
   //------------------------------ PO -------------------------------//
-
+ 
   //------------------------------ transaction -------------------------------//
-
+ 
   transactionList: async (req, res, reqObj, callback) => {
     try {
       const { pageNo, pageSize, filterKey, buyer_id } = reqObj;
       const page_no = pageNo || 2;
       const page_size = pageSize || 2;
       const offset = (page_no - 1) * page_size;
-
+ 
       Invoices.aggregate([
         {
           $match: {
@@ -6378,7 +6261,7 @@ module.exports = {
         .then((data) => {
           Invoices.countDocuments({ status: filterKey }).then((totalItems) => {
             const totalPages = Math.ceil(totalItems / page_size);
-
+ 
             const responseData = {
               data,
               totalPages,
@@ -6410,11 +6293,11 @@ module.exports = {
       );
     }
   },
-
+ 
   transactionDetails: async (req, res, reqObj, callback) => {
     try {
       const { order_id, invoice_id, supplier_id, transaction_id } = reqObj;
-
+ 
       Invoices.aggregate([
         {
           $match: {
@@ -6615,13 +6498,13 @@ module.exports = {
       );
     }
   },
-
+ 
   //------------------------------ transaction -------------------------------//
-
+ 
   getProfileEditRequestList: async (req, res) => {
     try {
       const { type, status } = req?.query;
-
+ 
       // Validate inputs
       if (!type) {
         return sendErrorResponse(res, 400, "Type is required.");
@@ -6629,7 +6512,7 @@ module.exports = {
       // if (!status) {
       //   return sendErrorResponse(res, 400, "Status is required.");
       // }
-
+ 
       let usersList = await ProfileEditRequest.aggregate([
         // Match based on status and userSchemaReference
         {
@@ -6716,12 +6599,12 @@ module.exports = {
           },
         },
       ]);
-
+ 
       // If no requests are found
       if (!usersList || usersList.length === 0) {
         return sendErrorResponse(res, 404, "No Request List Found.");
       }
-
+ 
       // Success response
       return sendSuccessResponse(
         res,
@@ -6740,21 +6623,21 @@ module.exports = {
       );
     }
   },
-
+ 
   getProfileEditRequestDetails: async (req, res) => {
     try {
       // const { type } = req?.query;
       const { type, id } = req?.params;
-
+ 
       // Validate inputs
       if (!id) {
         // only be buyer or supplier
         return sendErrorResponse(res, 400, "id is required.");
       }
-
+ 
       // Ensure the ID is a valid ObjectId and instantiate it correctly
       const objectId = new mongoose.Types.ObjectId(id); // Correct instantiation of ObjectId
-
+ 
       let userProfileEditRequest = await ProfileEditRequest.aggregate([
         // Match based on status and userSchemaReference
         {
@@ -6840,12 +6723,12 @@ module.exports = {
           },
         },
       ]);
-
+ 
       // If no requests are found
       if (!userProfileEditRequest || userProfileEditRequest.length === 0) {
         return sendErrorResponse(res, 404, "No Request List Found.");
       }
-
+ 
       // Success response
       return sendSuccessResponse(
         res,
@@ -6864,25 +6747,25 @@ module.exports = {
       );
     }
   },
-
+ 
   updateProfileRequest: async (req, res) => {
     try {
       const { id } = req?.params;
       const { type, status } = req?.body;
-
+ 
       console.log("\n req.body/params", id, type, status)
-
+ 
       const userReq = await ProfileEditRequest?.findById(id);
       if (!userReq) {
         return sendErrorResponse(res, 400, "No Request Found.");
       }
-
+ 
       const updatedUserReq = await ProfileEditRequest?.findByIdAndUpdate(
         id,
         { $set: { editReqStatus: status } },
         { new: true, select: "-password -createdAt -updatedAt -__v -__i" }
       );
-
+ 
       if (!updatedUserReq) {
         return sendErrorResponse(
           res,
@@ -6890,13 +6773,13 @@ module.exports = {
           "Error in updating profile request."
         );
       }
-
+ 
       let fieldsToUpdateinProfile = {};
-
+ 
       if (status === "Accepted") {
         const { registeredAddress } = updatedUserReq || {};
         const updatedRegisteredAddress = {};
-
+ 
         if (registeredAddress) {
           [
             "company_reg_address",
@@ -6914,7 +6797,7 @@ module.exports = {
           });
           updatedRegisteredAddress.type = "Registered";
         }
-
+ 
         fieldsToUpdateinProfile = {
           profile_status: 1, // Profile Accepted
           registeredAddress: updatedRegisteredAddress,
@@ -6933,14 +6816,14 @@ module.exports = {
           profile_status: 2, // Profile Rejected
         };
       }
-
+ 
       const profileModel = type === "buyer" ? Buyer : Supplier;
       const updatedProfile = await profileModel?.findByIdAndUpdate(
         userReq?.userId,
         { $set: fieldsToUpdateinProfile },
         { new: true }
       );
-
+ 
       if (!updatedProfile) {
         return sendErrorResponse(
           res,
@@ -6948,7 +6831,7 @@ module.exports = {
           "Error in updating profile details."
         );
       }
-
+ 
       // Generate unique notification ID
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
       const newNotification = new Notification({
@@ -6968,9 +6851,9 @@ module.exports = {
             : "Your profile edit request has been rejected.",
         status: 0,
       });
-
+ 
       await newNotification.save();
-
+ 
       // Email setup
       const adminEmail = "ajo@shunyaekai.tech";
       const subject = `Profile Edit Request Status: ${status}`;
@@ -6992,9 +6875,9 @@ module.exports = {
         },
         { requestDate: updatedUserReq?.createdAt, status }
       );
-
+ 
       await sendEmail(recipientEmails, subject, emailContent);
-
+ 
       return sendSuccessResponse(
         res,
         200,

@@ -44,12 +44,24 @@ module.exports = {
                     poNumber,
                     supplierName,
                     supplierAddress,
+                    supplierLocality,
+                    supplierLandmark,
+                    supplierCountry,
+                    supplierState,
+                    supplierCity,
+                    supplierPincode,
                     supplierEmail,
                     supplierMobile,
                     supplier_country_code,
                     supplierRegNo,
                     buyerName,
                     buyerAddress,
+                    buyerLocality,
+                    buyerLandmark,
+                    buyerCountry,
+                    buyerState,
+                    buyerCity,
+                    buyerPincode,
                     buyerEmail,
                     buyerMobile,
                     buyer_country_code,
@@ -59,7 +71,8 @@ module.exports = {
                     rejectedItems
                 }
             } = reqObj;
-
+// console.log('reqObj',reqObj)
+// return false
             const supplier = await Supplier.findOne({ supplier_id: supplier_id });
             const buyer = await Buyer.findOne({ buyer_id: buyer_id });
 
@@ -120,12 +133,24 @@ module.exports = {
                 po_date                 : poDate,
                 buyer_name              : buyerName,
                 buyer_address           : buyerAddress,
+                buyer_locality          : buyerLocality,
+                buyer_landmark          : buyerLandmark,
+                buyer_country           : buyerCountry,
+                buyer_state             : buyerState,
+                buyer_city              : buyerCity,
+                buyer_pincode           : buyerPincode,
                 buyer_mobile            : buyerMobile,
                 buyer_country_code      : buyer_country_code,
                 buyer_email             : buyerEmail,
                 buyer_regNo             : buyerRegNo,
                 supplier_name           : supplierName,
                 supplier_address        : supplierAddress,
+                supplier_locality       : supplierLocality,
+                supplier_landmark       : supplierLandmark,
+                bsupplier_country       : supplierCountry,
+                supplier_state          : supplierState,
+                supplier_city           : supplierCity,
+                supplier_pincode        : supplierPincode,
                 supplier_mobile         : supplierMobile,
                 supplier_country_code   : supplier_country_code,
                 supplier_email          : supplierEmail,
@@ -538,6 +563,7 @@ module.exports = {
                         supplier_registered_address: { $first: "$supplier_registered_address" },  // Already added
                         supplier_email          : { $first: "$supplier_email" },
                         supplier_regNo          : { $first: "$supplier_regNo" },
+                        bank_details             : { $first: "$bank_details" },
                         order_items             : { $push: "$order_items" },
                         buyer_details           : { $first: "$buyer_details" },
                         supplier_details        : { $first: "$supplier_details" },
