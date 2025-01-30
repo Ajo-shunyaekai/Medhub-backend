@@ -857,7 +857,7 @@ module.exports = {
       if (user_type === "Buyer") {
         user = await Buyer?.findOne({ buyer_email: email });
       } else if (user_type === "Supplier") {
-        user = await Supplier?.findOne({ supplier_email: email });
+        user = await Supplier?.findOne({ contact_person_email: email });
       } else if (user_type === "Admin") {
         user = await Admin?.findOne({ email: email });
       }

@@ -1183,8 +1183,7 @@ module.exports = {
     sendEnquiry: async (req, res, reqObj, callback) => {
       try {
           const { buyer_id, buyer_name, items } = reqObj;
-          console.log('sendEnquiry REQOBJ', reqObj)
-          return false
+          
           if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
               throw new Error('Invalid request');
           }

@@ -55,7 +55,8 @@ function initializeSocket(server) {
       { event: 'editNewMedicine',           emit: 'newMedicineEditRequest' },
       { event: 'editSecondaryMedicine',     emit: 'secondaryMedicineEditRequest' },
       { event: 'updateMedicineAddRequest',  emit: 'addMedicineRequestUpdated' },
-      { event: 'updateMedicineEditRequest', emit: 'editMedicineRequestUpdated' }
+      { event: 'updateMedicineEditRequest', emit: 'editMedicineRequestUpdated' },
+      { event: 'updateProfileEditRequest',  emit: 'editProfileRequestUpdated' },
     ];
 
     notificationEvents.forEach(({ event, emit }) => {
