@@ -590,11 +590,9 @@ module.exports = {
   },
 
   loginUser: async (req, res) => {
-    console.log("login function called")
     try {
       const { access_token } = req.headers;
       const { email, password, user_type } = req.body;
-      console.log("\n\n\nreq?.body", req?.body)
 
       if (!user_type) {
         return sendErrorResponse(res, 400, "Cannot Identify User.");
@@ -972,9 +970,7 @@ module.exports = {
       // Email settings and content
       const adminEmail = "ajo@shunyaekai.tech";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [adminEmail, email].filter(
-        (email) => email
-      );
+      const recipientEmails = [adminEmail, email].filter((email) => email);
 
       // Prepare the email content
       const emailContent = await otpForResetPasswordContent(updatedUser, otp);
@@ -1300,8 +1296,12 @@ module.exports = {
     address,
     hashedPassword
   ) => {
-    const userCountryCode = phone.split(" ")[0]?.replaceAll(" ","");
-    const userMobileNumber = phone.split(" ").slice(1).join(" ")?.replaceAll(" ","");
+    const userCountryCode = phone.split(" ")[0]?.replaceAll(" ", "");
+    const userMobileNumber = phone
+      .split(" ")
+      .slice(1)
+      .join(" ")
+      ?.replaceAll(" ", "");
 
     // Field mappings based on user type
     const fieldMap = {
@@ -1490,23 +1490,32 @@ module.exports = {
       }
 
       // check whether we need to update personal details or not
-      const userCountryCode = phone.split(" ")[0]?.replaceAll(" ","");
-      const userMobileNumber = phone.split(" ").slice(1).join(" ")?.replaceAll(" ","");
+      const userCountryCode = phone.split(" ")[0]?.replaceAll(" ", "");
+      const userMobileNumber = phone
+        .split(" ")
+        .slice(1)
+        .join(" ")
+        ?.replaceAll(" ", "");
 
       const changePersonalDetails =
         user_type === "Buyer"
           ? user?.contact_person_name !== name ||
             user?.contact_person_email !== email ||
             user?.contact_person_country_code !== userCountryCode ||
-            user?.contact_person_mobile !== userMobileNumber||
+            user?.contact_person_mobile !== userMobileNumber ||
             isPasswordUpdate
           : user?.contact_person_name !== name ||
             user?.contact_person_email !== email ||
             user?.contact_person_country_code !== userCountryCode ||
-            user?.contact_person_mobile_no !== userMobileNumber||
+            user?.contact_person_mobile_no !== userMobileNumber ||
             isPasswordUpdate;
 
-      const checkPasswords = async (oldPassword, newPassword, confirmPassword, user) => {
+      const checkPasswords = async (
+        oldPassword,
+        newPassword,
+        confirmPassword,
+        user
+      ) => {
         const isOldPwdMatch = await bcrypt.compare(
           oldPassword?.trim(),
           user?.password
@@ -1514,33 +1523,28 @@ module.exports = {
         if (!isOldPwdMatch) {
           return { valid: false, message: "Old password is not correct." };
         }
-    
+
         if (oldPassword === newPassword) {
           return {
             valid: false,
             message: "New password cannot be the same as old password.",
           };
         }
-    
+
         if (newPassword !== confirmPassword) {
           return {
             valid: false,
             message: "New password and confirm password must match.",
           };
         }
-    
+
         // Add additional password strength checks here if necessary
         return { valid: true };
-      }
+      };
 
       // check whether we need to update password or not
       const { valid, message } = isPasswordUpdate
-        ? await checkPasswords(
-            oldPassword,
-            newPassword,
-            confirmPassword,
-            user
-          )
+        ? await checkPasswords(oldPassword, newPassword, confirmPassword, user)
         : { valid: true };
       if (!valid) return sendErrorResponse(res, 400, message);
 
@@ -1587,8 +1591,12 @@ module.exports = {
         address,
         hashedPassword
       ) => {
-        const userCountryCode = phone.split(" ")[0]?.replaceAll(" ","");
-        const userMobileNumber = phone.split(" ").slice(1).join(" ")?.replaceAll(" ","");
+        const userCountryCode = phone.split(" ")[0]?.replaceAll(" ", "");
+        const userMobileNumber = phone
+          .split(" ")
+          .slice(1)
+          .join(" ")
+          ?.replaceAll(" ", "");
 
         // Field mappings based on user type
         const fieldMap = {
@@ -1633,11 +1641,13 @@ module.exports = {
       };
 
       const sendProfileEditRequest = async (user, userType, address) => {
-        console.log("\n\n\n\n address", address)
+
+        const perId = "PER-" + Math.random().toString(16).slice(2, 10);
         const ProfileEdit =
           // userType === "Buyer" ? BuyerProfileEdit : SupplierProfileEdit;
           ProfileEditRequest;
         const profileReq = new ProfileEdit({
+          perId,
           registeredAddress: address,
           userId: user?._id,
           userSchemaReference: userType,
@@ -1675,12 +1685,13 @@ module.exports = {
 
         return sentRequest;
       };
-      
+
       if (!changePersonalDetails && !sendRequestToAdmin) {
         return sendSuccessResponse(
           res,
           200,
-          "Nothing to change."
+          "Nothing to change in your profile.",
+          user
         );
       }
 
@@ -1705,7 +1716,7 @@ module.exports = {
         const newProfileEditReq = await sendProfileEditRequest(
           user,
           user_type,
-          {...changedUpdatedddress.newObj, type: "Registered"}
+          { ...changedUpdatedddress.newObj, type: "Registered" }
         );
         if (!newProfileEditReq) {
           return sendSuccessResponse(
@@ -1742,14 +1753,19 @@ module.exports = {
           );
         }
 
-        return sendSuccessResponse(res, 200, "Profile details updated.");
+        return sendSuccessResponse(
+          res,
+          200,
+          "Profile details updated.",
+          updateProfile
+        );
       }
 
       if (!changePersonalDetails && sendRequestToAdmin) {
         const newProfileEditReq = await sendProfileEditRequest(
           user,
           user_type,
-          {...changedUpdatedddress.newObj, type: "Registered"}
+          { ...changedUpdatedddress.newObj, type: "Registered" }
         );
         if (!newProfileEditReq) {
           return sendErrorResponse(
@@ -1761,7 +1777,8 @@ module.exports = {
         return sendSuccessResponse(
           res,
           200,
-          "Sent address update request to Admin."
+          "Sent address update request to Admin.",
+          user
         );
       }
     } catch (error) {

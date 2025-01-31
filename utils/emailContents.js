@@ -215,23 +215,26 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
                 <h1>Update on Your Profile Edit Request</h1>
                 <p>Dear <strong>${name}</strong>,</p>
                 <p>We hope this message finds you well.</p>
-                <p>This email is to inform you about the status of your profile edit request submitted on <strong>${requestDate}</strong>.</p>
+                <p>This email is to inform you about the status of your profile edit request submitted.</p>
 
                 <p class="status">Action Taken: <strong>${status}</strong></p>
 
                 <h2>Details:</h2>
                 <ul>
                     <li><strong>Company Type:</strong> ${userType}</li>
-                    <li><strong>Request Date:</strong> ${requestDate}</li>
                     <li><strong>Status:</strong> ${status}</li>
                 </ul>
 
-                <p>
-                    <strong>If Accepted:</strong> We are pleased to inform you that your profile edit request has been accepted. Your changes have been successfully updated. If you have any further modifications or inquiries, please feel free to reach out at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
-                </p>
-                <p>
-                    <strong>If Rejected:</strong> Unfortunately, your profile edit request has been rejected. If you would like to know more about the reasons for this decision or if you would like to submit a revised request, please contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
-                </p>
+                ${status== 'Approved'
+                  ?
+                `<p>
+                    We are pleased to inform you that your profile edit request has been approved. Your changes have been successfully updated. If you have any further modifications or inquiries, please feel free to reach out at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
+                </p>`
+                :
+                `<p>
+                    Unfortunately, your profile edit request has been rejected. If you would like to know more about the reasons for this decision or if you would like to submit a revised request, please contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
+                </p>`
+                }
 
                 <p>Thank you for your understanding and for being a valued member of our community!</p>
 

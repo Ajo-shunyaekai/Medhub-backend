@@ -7,6 +7,10 @@ const profileEditRequestSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: [true, "Validation Error: userId is required"],
     },
+    perId: {
+      type: String,
+      required: [true, "Validation Error: perId is required"],
+    },
     userSchemaReference: {
       type: String,
       enum: ["Supplier", "Buyer"],

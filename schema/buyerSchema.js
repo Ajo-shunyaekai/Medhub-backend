@@ -250,7 +250,6 @@ const buyerSchema = new Schema(
       pincode: { type: String },
       type: {
         type: String,
-        enum: ["Registered"],
         default: "Registered",
       },
     },
