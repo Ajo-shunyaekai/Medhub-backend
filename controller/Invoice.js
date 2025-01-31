@@ -124,7 +124,7 @@ module.exports = {
             Thanks & Regards <br />
             MedHub Global Team`;
 
-            const recipientEmails = [buyer.buyer_email, 'ajo@shunyaekai.tech'];
+            const recipientEmails = [buyer.buyer_email,];
             await sendMailFunc(recipientEmails.join(','), subject, body);
             return callback({code: 200, message: "Invoice Created Successfully"});
         })

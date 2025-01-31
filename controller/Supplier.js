@@ -89,7 +89,7 @@ module.exports = {
               })
                await newNotification.save()
 
-               const adminEmail = 'ajo@shunyaekai.tech';
+               const adminEmail = 'platform@medhub.global';
                 const subject = `New Registration Alert: Supplier Account Created`;
                 const body = `
                           <p>Dear Admin,</p>
@@ -106,7 +106,7 @@ module.exports = {
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
                           <p>Best regards,<br/>MedHub Global Team</p>
                         `;
-                        const recipientEmails = [adminEmail, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                        const recipientEmails = [adminEmail];  // Add more emails if needed
                         // await sendMailFunc(recipientEmails.join(','), subject, body);
               await sendEmail(recipientEmails, subject, body)
               callback({code: 200, message: "Supplier Registration Successfull"})

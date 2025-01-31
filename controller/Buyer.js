@@ -89,7 +89,7 @@ module.exports = {
               })
                await newNotification.save()
 
-               const adminEmail = 'ajo@shunyaekai.tech';
+               const adminEmail = 'platform@medhub.global';
                 const subject = `New Registration Alert: Buyer Account Created`;
                 const body = `
                           <p>Dear Admin,</p>
@@ -107,7 +107,7 @@ module.exports = {
                           <p>Best regards,<br/>MedHub Global Team</p>
                         `;
               // sendMailFunc(adminEmail, subject, body);
-              const recipientEmails = [adminEmail, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+              const recipientEmails = [adminEmail];  // Add more emails if needed
                         // await sendMailFunc(recipientEmails.join(','), subject, body);
                  await sendEmail(recipientEmails, subject, body)
                 callback({code: 200, message: "Buyer Registration Request Submitted Successfully"})
@@ -1326,7 +1326,7 @@ module.exports = {
                         `;
   
                   // await sendMailFunc(supplier_email, subject, body);
-                  const recipientEmails = [supplier_contact_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                  const recipientEmails = [supplier_contact_email];  // Add more emails if needed
                   // await sendMailFunc(recipientEmails.join(','), subject, body);
                   await sendEmail(recipientEmails, subject, body)
               }

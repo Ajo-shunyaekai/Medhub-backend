@@ -472,7 +472,7 @@ module.exports = {
         });
 
         const savedNotification = await newNotification.save();
-        const adminEmail = "ajo@shunyaekai.tech";
+        const adminEmail = "platform@medhub.global";
         const subject = "New Registration Alert: Buyer Account Created";
 
         const recipientEmails = [adminEmail];
@@ -482,7 +482,6 @@ module.exports = {
 
         const confirmationEmailRecipients = [
           buyer.contact_person_email,
-          "ajo@shunyaekai.tech",
         ];
         const confirmationSubject =
           "Thank You for Registering on Medhub Global!";
@@ -544,10 +543,10 @@ module.exports = {
         });
 
         const savedNotification = await newNotification.save();
-        const adminEmail = "ajo@shunyaekai.tech";
+        const adminEmail = "platform@medhub.global";
         const subject = "New Registration Alert: Supplier Account Created";
         // const subject = New Registration Alert: ${user_type} Account Created;
-        const recipientEmails = [adminEmail, "ajo@shunyaekai.tech"];
+        const recipientEmails = [adminEmail];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
 
@@ -555,7 +554,6 @@ module.exports = {
 
         const confirmationEmailRecipients = [
           supplier.contact_person_email,
-          "ajo@shunyaekai.tech",
         ];
         const confirmationSubject =
           "Thank You for Registering on Medhub Global!";
@@ -813,9 +811,9 @@ module.exports = {
       }
 
       // Email settings and content
-      const adminEmail = "ajo@shunyaekai.tech";
+      // const adminEmail = "platform@medhub.global";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [adminEmail, "ajo@shunyaekai.tech", email].filter(
+      const recipientEmails = [email].filter(
         (email) => email
       );
 
@@ -968,9 +966,11 @@ module.exports = {
       }
 
       // Email settings and content
-      const adminEmail = "ajo@shunyaekai.tech";
+      // const adminEmail = "platform@medhub.global";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [adminEmail, email].filter((email) => email);
+      const recipientEmails = [email].filter(
+        (email) => email
+      );
 
       // Prepare the email content
       const emailContent = await otpForResetPasswordContent(updatedUser, otp);

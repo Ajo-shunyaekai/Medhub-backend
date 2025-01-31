@@ -19,7 +19,7 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 
  // Send email to the admin
  const sendAdminEmail = (supplierName, medicineName, description, productCategory) => {
-  const adminEmail = 'ajo@shunyaekai.tech';
+  const adminEmail = 'platform@medhub.global';
   const subject = `New Product Submission: Approval Required`;
   const body = `
     <p>Dear Admin,</p>
@@ -672,7 +672,7 @@ module.exports = {
                 });
                 await newNotification.save();
 
-                const adminEmail = 'ajo@shunyaekai.tech';
+                const adminEmail = 'platform@medhub.global';
                 const subject    = `New Product Edit Request: Approval Required`;
                 const body = `
                           <p>Dear Admin,</p>
@@ -763,7 +763,7 @@ module.exports = {
             });
             await newNotification.save();
 
-            const adminEmail = 'ajo@shunyaekai.tech';
+            const adminEmail = 'platform@medhub.global';
             const subject = `New Product Edit Request: Approval Required`;
             const body = `
                       <p>Dear Admin,</p>
