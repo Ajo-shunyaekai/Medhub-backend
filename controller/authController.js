@@ -813,9 +813,9 @@ module.exports = {
       }
 
       // Email settings and content
-      const adminEmail = "platform@medhub.global";
+      // const adminEmail = "platform@medhub.global";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [adminEmail, email].filter(
+      const recipientEmails = [email].filter(
         (email) => email
       );
 
@@ -968,9 +968,9 @@ module.exports = {
       }
 
       // Email settings and content
-      const adminEmail = "platform@medhub.global";
+      // const adminEmail = "platform@medhub.global";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [adminEmail, email].filter(
+      const recipientEmails = [email].filter(
         (email) => email
       );
 
