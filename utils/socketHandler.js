@@ -24,7 +24,9 @@ function initializeSocket(server) {
         'https://deliver-backend.vercel.app'
       ],
       methods: ['GET', 'POST'],
-      credentials: true
+      credentials: true,
+      preflightContinue: false, // Ensures that the server handles OPTIONS preflight requests
+  optionsSuccessStatus: 204,
     }
   });
 
