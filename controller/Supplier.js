@@ -974,10 +974,10 @@ module.exports = {
 
      updateStatus : async (req, res, reqObj, callback) => {
       try {
-        const { notification_id, status = 1, supplier_id, user_type } = reqObj
+        const { notification_id, status = 1, supplier_id, usertype } = reqObj
 
         const updateNotifications = await Notification.updateMany(
-          { to_id: supplier_id, to: user_type }, 
+          { to_id: supplier_id, to: usertype }, 
           {
               $set: {
                   status: status, 
@@ -1232,7 +1232,7 @@ module.exports = {
 
      getAllSuppliersList: async (req, res) => {
       try {
-        const { user_type } = req?.headers;
+        const { usertype } = req?.headers;
         const { filterKey, filterValue, searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = req?.query;
 
         const page_no = parseInt(pageNo) || 1;
@@ -1307,9 +1307,9 @@ module.exports = {
     
         let data;
 
-        if(user_type == 'Admin'){
+        if(usertype == 'Admin'){
           data = await Supplier.find(combinedFilter).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
-        } else if(user_type == 'Buyer'){
+        } else if(usertype == 'Buyer'){
           data = await Supplier.find(query)
             .select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time, license_expiry_date tax_no')
             .sort({createdAt: -1})
@@ -1321,7 +1321,7 @@ module.exports = {
           res?.status(500)?.send({ code: 500, message: "Error fetching suppliers list", result: {} })
         }
         
-        const totalItems = await Supplier.countDocuments( user_type == 'Admin' ? combinedFilter: user_type == 'Buyer' && query );
+        const totalItems = await Supplier.countDocuments( usertype == 'Admin' ? combinedFilter: usertype == 'Buyer' && query );
       
         const totalPages = Math.ceil(totalItems / page_size);
         const returnObj = {
@@ -1340,7 +1340,7 @@ module.exports = {
 
      getCSVSuppliersList: async (req, res) => {
       try {
-        const { user_type } = req?.headers;
+        const { usertype } = req?.headers;
         const { filterKey, filterValue, searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = req?.body;
 
         const page_no = pageNo || 1;
@@ -1415,9 +1415,9 @@ module.exports = {
     
         let data;
 
-        if(user_type == 'Admin'){
+        if(usertype == 'Admin'){
           data = await Supplier.find(combinedFilter).select(fields).sort({createdAt: -1}).skip(offSet).limit(page_size);
-        } else if(user_type == 'Buyer'){
+        } else if(usertype == 'Buyer'){
           data = await Supplier.find(query)
             .select('supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time, license_expiry_date tax_no')
             .sort({createdAt: -1})

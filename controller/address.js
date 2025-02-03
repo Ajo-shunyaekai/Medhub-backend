@@ -9,15 +9,15 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 
 const getAddress = async (req, res) => {
   try {
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     console.log("req?.headers", req?.headers);
     let user = undefined;
 
-    if (user_type == "Admin") {
+    if (usertype == "Admin") {
       user = await Admin?.findOne({ admin_id });
-    } else if (user_type == "Supplier") {
+    } else if (usertype == "Supplier") {
       user = await Supplier?.findOne({ supplier_id });
-    } else if (user_type == "Buyer") {
+    } else if (usertype == "Buyer") {
       user = await Buyer?.findOne({ buyer_id });
     }
 
@@ -65,16 +65,16 @@ const addAddress = async (req, res) => {
         errors: errors.array(),
       });
     }
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     const { fullName, phone, houseName, street, city, state, country, postalCode, type, isDefault } = req.body;
 
     let user = undefined;
 
-    if (user_type === "Admin") {
+    if (usertype === "Admin") {
       user = await Admin?.findOne({ admin_id });
-    } else if (user_type === "Supplier") {
+    } else if (usertype === "Supplier") {
       user = await Supplier?.findOne({ supplier_id });
-    } else if (user_type === "Buyer") {
+    } else if (usertype === "Buyer") {
       user = await Buyer?.findOne({ buyer_id });
     }
 
@@ -131,7 +131,7 @@ const editAddress = async (req, res) => {
         errors: errors.array(),
       });
     }
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     const { id } = req?.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -166,11 +166,11 @@ const editAddress = async (req, res) => {
 
     let user = undefined;
 
-    if (user_type === "Admin") {
+    if (usertype === "Admin") {
       user = await Admin?.findOne({ admin_id });
-    } else if (user_type === "Supplier") {
+    } else if (usertype === "Supplier") {
       user = await Supplier?.findOne({ supplier_id });
-    } else if (user_type === "Buyer") {
+    } else if (usertype === "Buyer") {
       user = await Buyer?.findOne({ buyer_id });
     }
 
@@ -208,7 +208,7 @@ const editAddress = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
   try {
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     const { id } = req?.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -236,11 +236,11 @@ const deleteAddress = async (req, res) => {
 
     let user = undefined;
 
-    if (user_type === "Admin") {
+    if (usertype === "Admin") {
       user = await Admin?.findOne({ admin_id });
-    } else if (user_type === "Supplier") {
+    } else if (usertype === "Supplier") {
       user = await Supplier?.findOne({ supplier_id });
-    } else if (user_type === "Buyer") {
+    } else if (usertype === "Buyer") {
       user = await Buyer?.findOne({ buyer_id });
     }
 

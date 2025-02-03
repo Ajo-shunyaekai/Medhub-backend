@@ -13,7 +13,7 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 //   try {
 
 //     console.log('orderHistory detail functioncalled')
-//     const { user_type, buyer_id, admin_id, supplier_id } = req?.headers;
+//     const { usertype, buyer_id, admin_id, supplier_id } = req?.headers;
 //     const { id } = req?.params;
 
 //     const orderHistory = await OrderHistory?.findOne({ orderId: id });
@@ -104,7 +104,7 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 const getOrderHistory = async (req, res) => {
   try {
     console.log('orderHistory detail function called');
-    const { user_type, buyer_id, admin_id, supplier_id } = req?.headers;
+    const { usertype, buyer_id, admin_id, supplier_id } = req?.headers;
     const { id } = req?.params;
 
     const orderHistory = await OrderHistory?.findOne({ orderId: id });
@@ -180,7 +180,7 @@ const getOrderHistory = async (req, res) => {
 // const getOrderHistory = async (req, res) => {
 //   try {
 //     console.log('orderHistory detail function called');
-//     const { user_type, buyer_id, admin_id, supplier_id } = req?.headers;
+//     const { usertype, buyer_id, admin_id, supplier_id } = req?.headers;
 //     const { id } = req?.params;
 
 //     const orderHistory = await OrderHistory?.findOne({ orderId: id });

@@ -30,35 +30,35 @@ const { validateUserInput, handleValidationErrors } = require('../middleware/val
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const { user_type } = req.body;
+    const { usertype } = req.body;
 
     // Define the default upload path based on user type and fieldname
     let uploadPath =
-      user_type === "Buyer"
+      usertype === "Buyer"
         ? "./uploads/buyer/buyer_images"
-        : user_type === "Supplier" && "./uploads/supplier/supplierImage_files";
+        : usertype === "Supplier" && "./uploads/supplier/supplierImage_files";
 
     // Adjust upload path based on the specific file type
     if (file.fieldname === "tax_image" || file.fieldname === "new_tax_image") {
       uploadPath =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? "./uploads/buyer/tax_images"
-          : user_type === "Supplier" && "./uploads/supplier/tax_image";
+          : usertype === "Supplier" && "./uploads/supplier/tax_image";
     } else if (file.fieldname === "license_image" || file.fieldname === "new_license_image") {
       uploadPath =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? "./uploads/buyer/license_images"
-          : user_type === "Supplier" && "./uploads/supplier/license_image";
+          : usertype === "Supplier" && "./uploads/supplier/license_image";
     } else if (file.fieldname === "certificate_image" || file.fieldname === "new_certificate_image") {
       uploadPath =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? "./uploads/buyer/certificate_images"
-          : user_type === "Supplier" && "./uploads/supplier/certificate_image";
+          : usertype === "Supplier" && "./uploads/supplier/certificate_image";
     } else if (file.fieldname === "medical_practitioner_image" || file.fieldname === "new_medical_practitioner_image") {
       uploadPath =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? "./uploads/buyer/medical_practitioner_images"
-          : user_type === "Supplier" && "./uploads/supplier/medical_practitioner_image";
+          : usertype === "Supplier" && "./uploads/supplier/medical_practitioner_image";
     }
 
     cb(null, uploadPath);

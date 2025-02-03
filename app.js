@@ -76,21 +76,16 @@ const corsOptions = {
     'http://localhost:3030',
     'http://localhost:8000',
     'http://192.168.1.34:3333',
-    'http://192.168.1.68:3001',
     'http://192.168.1.218:3030',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3333',
     'http://192.168.1.2:8000',
     'https://medhub.shunyaekai.com',
-    'https://medhub.global',
-    'https://deliver-backend.vercel.app',
-    'https://deliver-project-ashy.vercel.app'
+    'https://medhub.global'
   ],
   methods: 'GET, POST, PUT, PATCH, DELETE',
-  credentials: true,
-  preflightContinue: false, // Ensures that the server handles OPTIONS preflight requests
-  optionsSuccessStatus: 204,
+  credentials: true
 };
 
 app.use(cors(corsOptions));

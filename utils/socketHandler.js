@@ -20,14 +20,10 @@ function initializeSocket(server) {
         'https://buyerdeliver.shunyaekai.com',
         'https://deliver.shunyaekai.com',
         'https://medhub.shunyaekai.com',
-        'https://medhub.global',
-        'https://deliver-backend.vercel.app',
-        'https://deliver-project-ashy.vercel.app'
+        'https://medhub.global'
       ],
       methods: ['GET', 'POST'],
-      credentials: true,
-      preflightContinue: false, // Ensures that the server handles OPTIONS preflight requests
-  optionsSuccessStatus: 204,
+      credentials: true
     }
   });
 

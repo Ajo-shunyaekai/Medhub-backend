@@ -940,7 +940,7 @@ module.exports = {
       const page_size = pageSize || 1;
       const offset = (page_no - 1) * page_size;
 
-      Support.find({ user_type: "supplier" })
+      Support.find({ usertype: "supplier" })
         .sort({ createdAt: -1 })
         .skip(offset)
         .limit(page_size)
@@ -1738,7 +1738,7 @@ module.exports = {
       const page_size = pageSize || 1;
       const offset = (page_no - 1) * page_size;
 
-      Support.find({ user_type: "buyer" })
+      Support.find({ usertype: "buyer" })
         .sort({ createdAt: -1 })
         .skip(offset)
         .limit(page_size)
@@ -2246,7 +2246,7 @@ module.exports = {
 
   getProfileUpdateReqList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, limit, user_type } = reqObj;
+      const { pageNo, limit, usertype } = reqObj;
 
       const page_no = pageNo || 1;
       const page_size = limit || 2;
@@ -2295,9 +2295,9 @@ module.exports = {
           });
       };
 
-      if (user_type === "supplier") {
+      if (usertype === "supplier") {
         fetchUpdateProfileRequests(supplierEdit, callback);
-      } else if (user_type === "supplier") {
+      } else if (usertype === "supplier") {
         fetchUpdateProfileRequests(supplierEdit, callback);
       }
     } catch (error) {
@@ -3699,9 +3699,9 @@ module.exports = {
       let filterCondition = {};
 
       if (filterKey === "buyer") {
-        filterCondition = { user_type: "buyer" };
+        filterCondition = { usertype: "buyer" };
       } else if (filterKey === "supplier") {
-        filterCondition = { user_type: "supplier" };
+        filterCondition = { usertype: "supplier" };
       }
 
       if (supportType) {
@@ -3751,7 +3751,7 @@ module.exports = {
             support_id: 1,
             support_type: 1,
             user_id: 1,
-            user_type: 1,
+            usertype: 1,
             order_id: 1,
             reason: 1,
             support_image: 1,
@@ -3775,7 +3775,7 @@ module.exports = {
             support_id: 1,
             support_typ: 1,
             user_id: 1,
-            user_type: 1,
+            usertype: 1,
             order_id: 1,
             reason: 1,
             support_image: 1,
@@ -3895,7 +3895,7 @@ module.exports = {
             support_id: 1,
             support_type: 1,
             user_id: 1,
-            user_type: 1,
+            usertype: 1,
             order_id: 1,
             reason: 1,
             support_image: 1,
@@ -3918,7 +3918,7 @@ module.exports = {
             support_id: 1,
             support_type: 1,
             user_id: 1,
-            user_type: 1,
+            usertype: 1,
             order_id: 1,
             reason: 1,
             support_image: 1,
@@ -4788,7 +4788,7 @@ module.exports = {
   updateStatus: async (req, res, reqObj, callback) => {
     console.log(reqObj);
     try {
-      const { notification_id, status = 1, user_type } = reqObj;
+      const { notification_id, status = 1, usertype } = reqObj;
 
       //   const updateNotification = await Notification.findOneAndUpdate(
       //     { notification_id : notification_id },
@@ -4802,7 +4802,7 @@ module.exports = {
       // );
 
       const updateNotifications = await Notification.updateMany(
-        { to: user_type },
+        { to: usertype },
         {
           $set: {
             status: status,
@@ -6590,7 +6590,7 @@ module.exports = {
                 else: "$buyerDetails.contact_person_mobile", // Adjust according to actual buyer field name
               },
             },
-            user_type: {
+            usertype: {
               $cond: {
                 if: { $eq: ["$userSchemaReference", "Supplier"] },
                 then: "$supplierDetails.supplier_type", // Adjust according to actual supplier field name if different
@@ -6714,7 +6714,7 @@ module.exports = {
                 else: "$buyerDetails.contact_person_mobile", // Adjust according to actual buyer field name
               },
             },
-            user_type: {
+            usertype: {
               $cond: {
                 if: { $eq: ["$userSchemaReference", "Supplier"] },
                 then: "$supplierDetails.supplier_type", // Adjust according to actual supplier field name if different
