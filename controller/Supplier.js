@@ -580,6 +580,7 @@ module.exports = {
     
 
     supplierOrderSupplierCountry : async (req, res, reqObj, callback) => {
+      console.log('supplierOrderSupplierCountry', reqObj)
       try {
         const { supplier_id } = reqObj
 

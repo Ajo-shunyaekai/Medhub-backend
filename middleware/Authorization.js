@@ -217,7 +217,7 @@ module.exports = {
   checkCommonUserAuthentication: async (req, res, next) => {
     const { access_token, user_type,  supplier_id, seller_id, buyer_id, client_id } = req.headers;
     // const { supplier_id, seller_id, admin_id, buyer_id, supplierId } = req.body;
-    
+    console.log('checkCommonUserAuthentication', req)
     const admin_id = req.headers?.admin_id ||req?.body?.admin_id
     
     // Log to check if the access token and user type are correct
