@@ -84,7 +84,8 @@ const corsOptions = {
     'http://192.168.1.2:8000',
     'https://medhub.shunyaekai.com',
     'https://medhub.global',
-    'https://deliver-backend.vercel.app'
+    'https://deliver-backend.vercel.app',
+    'https://deliver-project-ashy.vercel.app'
   ],
   methods: 'GET, POST, PUT, PATCH, DELETE',
   credentials: true,

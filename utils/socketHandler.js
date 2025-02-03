@@ -21,7 +21,8 @@ function initializeSocket(server) {
         'https://deliver.shunyaekai.com',
         'https://medhub.shunyaekai.com',
         'https://medhub.global',
-        'https://deliver-backend.vercel.app'
+        'https://deliver-backend.vercel.app',
+        'https://deliver-project-ashy.vercel.app'
       ],
       methods: ['GET', 'POST'],
       credentials: true,
