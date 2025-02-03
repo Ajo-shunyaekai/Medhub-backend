@@ -73,7 +73,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
  
 const cpUpload = (req, res, next) => {
-  // console.log("Before Multer", req); // Log before Multer processes the request
   upload.fields([
     { name: "buyer_image", maxCount: 1 },
     { name: "license_image", maxCount: 10 },
@@ -98,7 +97,6 @@ const cpUpload = (req, res, next) => {
       console.error("Multer Error:", err);
       return sendErrorResponse(res, 500, "File upload error", err);
     }
-    // console.log("After Multer", req); // Log after Multer processes the request
     next();
   });
 };

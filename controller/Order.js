@@ -141,7 +141,6 @@ module.exports = {
         }
 
         for (const item of reqObj.orderItems) {
-          console.log('MED ID', item)
           const medicine = await Medicine.findOne({ medicine_id: item.medicine_id });
           if (medicine) {
             const quantityRequired = typeof item.quantity_required === "string" ? parseInt(item.quantity_required, 10) : item.quantity_required;
@@ -157,7 +156,6 @@ module.exports = {
           );
 
               if (updatedMedicine.total_quantity <= 500) {
-                console.log('medicine.total_quantity',medicine.total_quantity)
                 const subject = `Low Stock Alert for ${medicine.medicine_name}`;
                 const recipientEmails = [supplier.contact_person_email];
                 const body = `
@@ -229,7 +227,7 @@ module.exports = {
             return callback({code: 200, message: "Order Created Successfully"});
         })
         .catch((err) => {
-            console.log('err in order request',err);
+            logErrorToFile(err, req);
             return callback({code: 400, message: 'Error while creating the order'})
         })
        } catch (error) {
@@ -661,7 +659,7 @@ module.exports = {
             })
         })
         .catch((err) => {
-            console.log('Error in fetching order list',err);
+  
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
         } catch (error) {
@@ -884,7 +882,7 @@ module.exports = {
                 callback({ code: 200, message: "Details Fetched successfully", result: data[0] });
             })
             .catch((err) => {
-                console.log(err);
+                logErrorToFile(err, req);
                 callback({ code: 400, message: "Error in fetching order details", result: err });
             })
             
@@ -1134,7 +1132,7 @@ module.exports = {
             })
         })
         .catch((err) => {
-            console.log(err);
+            logErrorToFile(err, req);
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
       } catch (error) {
@@ -1306,7 +1304,7 @@ module.exports = {
             })
         })
         .catch((err) => {
-            console.log(err);
+            logErrorToFile(err, req);
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
       } catch (error) {
@@ -1434,7 +1432,7 @@ module.exports = {
             })
         })
         .catch((err) => {
-            console.log('Error in fetching order list',err);
+            logErrorToFile(err, req);
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
       } catch (error) {
@@ -1682,7 +1680,7 @@ module.exports = {
               callback({ code: 200, message: "Details Fetched successfully", result: data[0] });
           })
           .catch((err) => {
-              console.log(err);
+              logErrorToFile(err, req);
               callback({ code: 400, message: "Error in fetching order details", result: err });
           })
       } catch (error) {
@@ -1857,7 +1855,7 @@ module.exports = {
             })
         })
         .catch((err) => {
-            console.log(err);
+            logErrorToFile(err, req);
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
       } catch (error) {
@@ -2021,7 +2019,7 @@ module.exports = {
             })
         })
         .catch((err) => {
-            console.log(err);
+            logErrorToFile(err, req);
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
       } catch (error) {
@@ -2117,7 +2115,7 @@ module.exports = {
             callback({ code: 200, message: "List Fetched successfully", result: data });
         })
         .catch((err) => {
-            console.log(err);
+            logErrorToFile(err, req);
             callback({ code: 400, message: "Error in fetching order list", result: err });
         })
       } catch (error) {
@@ -2365,7 +2363,6 @@ module.exports = {
   
         const totalItems = await Invoices.countDocuments(matchCondition); // Count based on correct match condition
         // if (!totalItems) {
-        //   console.log('totalItems',totalItems);
         //   return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
         // }
   
@@ -2387,7 +2384,6 @@ module.exports = {
     getOrderListAllUsers: async (req, res) => {
       try {
 
-        console.log(`\n FUNCTION CALLED`)
         const { user_type, buyer_id, supplier_id, admin_id } = req?.headers;
         // const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id, admin_id } = req?.body;
         const { pageNo, pageSize, filterKey, filterValue, } = req?.query;
@@ -2452,7 +2448,6 @@ module.exports = {
     
         const matchObj = user_type === 'Admin' ? adminMatch : user_type == 'Buyer' ? otherMatch : {order_status : adjustedFilterKey, supplier_id: supplier_id};
     
-        console.log("DATE FILTER", dateFilter);
         let data;
     
         if (user_type === 'Admin') {
@@ -2764,7 +2759,6 @@ module.exports = {
           return res.status(400).send({ code: 400, message: 'Error occurred fetching order list', result: {} });
         }
 
-        console.log(`\n DATA OF ORDER FOR ADMIN : \n ${data}`)
     
         const totalItems = await Order.countDocuments(matchObj);
     
@@ -2790,7 +2784,6 @@ module.exports = {
     
         let dateFilter = {};
         
-        console.log("DATE FILTER", dateFilter);
         let data = await Order.aggregate([
             {
               $match: {
@@ -3613,7 +3606,7 @@ module.exports = {
           ])
         }
         if(!data) {          
-          console.log(err);
+          logErrorToFile(err, req);
           res?.status(400)?.send({ code: 400, message: "Error in fetching order details", result: err });
         }        
         res?.status(200)?.send({ code: 200, message: "Details Fetched successfully", result: data[0] })

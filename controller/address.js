@@ -10,7 +10,7 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 const getAddress = async (req, res) => {
   try {
     const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
-    console.log("req?.headers", req?.headers);
+    
     let user = undefined;
 
     if (user_type == "Admin") {

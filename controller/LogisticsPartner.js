@@ -74,7 +74,7 @@ const generatePassword = () => {
   const addLogisticsPartner =  async (req, res) => {
     try {
       const {company_name, contact_person, email, phone, address} = req.body
-      console.log("req.obj", req.body)
+
       // return false
       const emailExists = await LogisticsPartner.findOne({ email: req.email });
       if (emailExists) {

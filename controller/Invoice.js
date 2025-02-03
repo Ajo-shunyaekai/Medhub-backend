@@ -129,7 +129,7 @@ module.exports = {
             return callback({code: 200, message: "Invoice Created Successfully"});
         })
         .catch((err) => {
-            console.log('err in invoice creation',err);
+            logErrorToFile(err, req);
             return callback({code: 400, message: 'Error while creating the invoice'})
         })
        } catch (error) {
@@ -157,8 +157,6 @@ module.exports = {
           // Calculate the new amounts
           const newTotalAmountPaid = parseFloat((parseFloat(order.total_amount_paid) + parseFloat(amount_paid)).toFixed(2));
           const newPendingAmount   = parseFloat((parseFloat(order.grand_total) - newTotalAmountPaid).toFixed(2));
-          // console.log("newTotalAmountPaid",newTotalAmountPaid );
-          // console.log("newTotalAmountPaid", newTotalAmountPaid);
           
           // const invoiceStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
           // const invStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
@@ -167,8 +165,6 @@ module.exports = {
 
           const orderStatus    = parseFloat(newTotalAmountPaid).toFixed(2) === parseFloat(order.total_due_amount).toFixed(2) ? 'completed' : order.order_status;
           const newOrderStatus = parseFloat(newTotalAmountPaid).toFixed(2) === parseFloat(order.total_due_amount).toFixed(2) ? 'Completed' : order.status;
-          // console.log("orderStatus", orderStatus);
-          // console.log("newOrderStatus", newOrderStatus);
           // return false
           // Update the invoice
           const updatedInvoice = await Invoice.findOneAndUpdate(

@@ -362,7 +362,6 @@ module.exports = {
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-      console.log("Year filter: ", startDate, endDate);
 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
@@ -598,7 +597,6 @@ module.exports = {
   //           token    : 0,
   //           password : 0
   //         };
-  // console.log('reqObj',reqObj)
   //         let dateFilter = {};
 
   //         const startDate = moment().subtract(365, 'days').startOf('day').toDate();
@@ -672,7 +670,6 @@ module.exports = {
         token: 0,
         password: 0,
       };
-      console.log("reqObj", reqObj);
 
       let dateFilter = {}; // Initialize date filter
 
@@ -959,7 +956,7 @@ module.exports = {
               });
             })
             .catch((err) => {
-              console.log(err);
+              logErrorToFile(err, req);
               callback({
                 code: 400,
                 message: "error while fetching support list count",
@@ -968,7 +965,7 @@ module.exports = {
             });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "error while fetching support list",
@@ -1015,7 +1012,6 @@ module.exports = {
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-      console.log("Year filter: ", startDate, endDate);
 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
@@ -1132,7 +1128,6 @@ module.exports = {
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-      console.log("Year filter: ", startDate, endDate);
 
       if (filterValue === "today") {
         dateFilter = {
@@ -1382,7 +1377,6 @@ module.exports = {
   //   // callback({ code: 400, message: "Invalid filterKey provided" });
   //   // return;
   // }
-  // console.log("DATE FILTER", dateFilter);
 
   //   Order.aggregate([
   //     {
@@ -1510,11 +1504,9 @@ module.exports = {
   //       })
   //   })
   //   .catch((err) => {
-  //       console.log('Error in fetching order list',err);
   //       callback({ code: 400, message: "Error in fetching order list", result: err });
   //   })
   //   } catch (error) {
-  // console.log("Internal Server Error:", error);
   // logErrorToFile(error, req);
   // return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
   //   }
@@ -1573,7 +1565,6 @@ module.exports = {
         // return;
       }
 
-      console.log("DATE FILTER", dateFilter);
 
       Order.aggregate([
         {
@@ -1711,7 +1702,7 @@ module.exports = {
           );
         })
         .catch((err) => {
-          console.log("Error in fetching order list", err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error in fetching order list",
@@ -1757,7 +1748,7 @@ module.exports = {
               });
             })
             .catch((err) => {
-              console.log(err);
+              logErrorToFile(err, req);
               callback({
                 code: 400,
                 message: "error while fetching support list count",
@@ -1766,7 +1757,7 @@ module.exports = {
             });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "error while fetching support list",
@@ -1910,7 +1901,7 @@ module.exports = {
           );
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error in fetching order list",
@@ -1991,7 +1982,6 @@ module.exports = {
   //       result: resultObj,
   //     });
   //   } catch (error) {
-  // console.log("Internal Server Error:", error);
   // logErrorToFile(error, req);
   // return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
   //   }
@@ -2014,7 +2004,6 @@ module.exports = {
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-      console.log("Year filter: ", startDate, endDate);
 
       if (filterValue === "today") {
         dateFilter = {
@@ -2137,7 +2126,6 @@ module.exports = {
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-      console.log("Year filter: ", startDate, endDate);
 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
@@ -2617,7 +2605,7 @@ module.exports = {
           });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error in fetching order details",
@@ -2771,7 +2759,6 @@ module.exports = {
 
   allMedicineList: async (req, res, reqObj, callback) => {
     try {
-      console.log("REQOBJ", reqObj);
 
       const { searchKey, pageNo, pageSize, medicineType, status } = reqObj;
 
@@ -2876,7 +2863,7 @@ module.exports = {
             });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error fetching medicine list",
@@ -3392,7 +3379,7 @@ module.exports = {
             });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error fetching medicine list",
@@ -3412,7 +3399,6 @@ module.exports = {
   },
 
   editMedicineDetails: async (req, res, reqObj, callback) => {
-    console.log("here", reqObj);
 
     try {
       EditMedicine.aggregate([
@@ -3961,10 +3947,10 @@ module.exports = {
         },
       ])
         .then(async (data) => {
-          console.log(data[0]);
           callback({ code: 200, message: "Support Details", result: data[0] });
         })
         .catch((err) => {
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error while fetching support details",
@@ -4672,7 +4658,7 @@ module.exports = {
           });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error while fetching buyer list",
@@ -4766,7 +4752,7 @@ module.exports = {
           });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "error while fetching buyer list",
@@ -4786,7 +4772,6 @@ module.exports = {
   },
 
   updateStatus: async (req, res, reqObj, callback) => {
-    console.log(reqObj);
     try {
       const { notification_id, status = 1, user_type } = reqObj;
 
@@ -4856,7 +4841,6 @@ module.exports = {
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-      console.log("Year filter: ", startDate, endDate);
 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
@@ -5294,7 +5278,6 @@ module.exports = {
       const page_no = pageNo || 2;
       const page_size = pageSize || 2;
       const offset = (page_no - 1) * page_size;
-      console.log("here", reqObj);
 
       Invoices.aggregate([
         {
@@ -5479,7 +5462,7 @@ module.exports = {
           });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error in fetching order list",
@@ -5703,7 +5686,6 @@ module.exports = {
   //------------------------------ PO -------------------------------//
   getPOList: async (req, res, reqObj, callback) => {
     try {
-      console.log("here", reqObj);
 
       const { supplier_id, buyer_id, status, pageNo, pageSize, filterValue } =
         reqObj;
@@ -5734,7 +5716,6 @@ module.exports = {
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
-      console.log("Year filter: ", startDate, endDate);
 
       // Apply date filter based on filterValue (today, week, month, year, all)
       if (filterValue === "today") {
@@ -6276,7 +6257,7 @@ module.exports = {
           });
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({
             code: 400,
             message: "Error in fetching transaction list",
@@ -6754,7 +6735,6 @@ module.exports = {
       const { id } = req?.params;
       const { type, status, admin_id } = req?.body;
 
-      console.log("\n req.body/params", id, type, status);
 
       const userReq = await ProfileEditRequest?.findById(id);
       if (!userReq) {

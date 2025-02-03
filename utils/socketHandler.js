@@ -27,12 +27,12 @@ function initializeSocket(server) {
   });
 
   io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+    // console.log('User connected:', socket.id);
 
     // Registration handlers
     ['register', 'registerBuyer', 'registerAdmin'].forEach(event => {
       socket.on(event, (userId) => {
-        console.log(`${event.replace('register', '')} registered: ${userId}`);
+        // console.log(`${event.replace('register', '')} registered: ${userId}`);
         socket.join(userId);
       });
     });
@@ -66,14 +66,14 @@ function initializeSocket(server) {
 
         if (targetId) {
           io.to(targetId).emit(emit, message);
-          console.log(`${event} notification sent to ${targetId}`);
+          // console.log(`${event} notification sent to ${targetId}`);
         }
       });
     });
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      console.log('User disconnected: ', socket.id);
+      // console.log('User disconnected: ', socket.id);
     });
   });
 

@@ -99,14 +99,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
-  console.log(`Received request: ${req.method} ${req.url}`);
   next();
 });
 
 
 // contact us Email sending route
 app.post('/send-email', async (req, res) => {
-  console.log('/send-email', req.body); 
   const { username, email, subject, phone, companyname,  message,checkbox, subscribed } = req.body;
 // return false
   try {
@@ -115,9 +113,9 @@ app.post('/send-email', async (req, res) => {
       if (!existingSubscriber) {
         const newSubscriber = new EmailListing({ username, email, phone });
         await newSubscriber.save();
-        console.log(`User subscribed to mailing list: ${email}`);
+        // console.log(`User subscribed to mailing list: ${email}`);
       } else {
-        console.log(`User already subscribed: ${email}`);
+        // console.log(`User already subscribed: ${email}`);
       }
     }
     
@@ -218,5 +216,3 @@ initializeSocket(server)
 
 
 module.exports = app;
-
-console.log('test after clone')
