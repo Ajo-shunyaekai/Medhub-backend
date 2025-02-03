@@ -81,7 +81,8 @@ const corsOptions = {
     'http://localhost:3001',
     'http://localhost:3333',
     'http://192.168.1.2:8000',
-    'https://medhub.shunyaekai.com'
+    'https://medhub.shunyaekai.com',
+    'https://medhub.global'
   ],
   methods: 'GET, POST, PUT, PATCH, DELETE',
   credentials: true

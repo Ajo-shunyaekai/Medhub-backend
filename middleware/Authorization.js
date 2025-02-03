@@ -230,7 +230,7 @@ module.exports = {
       if (user_type === "Buyer") {
         user = await Buyer.findOne({ token: access_token });
       } else if (user_type === "Admin") {
-        user = await Admin.findOne({ token: access_token, admin_id });
+        user = await Admin.findOne({ token: access_token });
       } else if (user_type === "Supplier") {
         user = await Supplier.findOne({ token: access_token });
       } else if (user_type === "Logistics") {

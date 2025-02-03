@@ -19,7 +19,8 @@ function initializeSocket(server) {
         'https://supplierdeliver.shunyaekai.com',
         'https://buyerdeliver.shunyaekai.com',
         'https://deliver.shunyaekai.com',
-        'https://medhub.shunyaekai.com'
+        'https://medhub.shunyaekai.com',
+        'https://medhub.global'
       ],
       methods: ['GET', 'POST'],
       credentials: true
