@@ -86,7 +86,9 @@ const corsOptions = {
     'https://deliver-backend.vercel.app'
   ],
   methods: 'GET, POST, PUT, PATCH, DELETE',
-  credentials: true
+  credentials: true,
+  preflightContinue: false, // Ensures that the server handles OPTIONS preflight requests
+  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
