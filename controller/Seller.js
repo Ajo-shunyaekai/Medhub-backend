@@ -41,7 +41,7 @@ module.exports = {
                 newSeller.save() .then(() => {
                 callback({code: 200, message: "Seller Registration Successfull"})
               }).catch((err) => {
-                console.log('err',err);
+                logErrorToFile(err, req);
                 callback({code: 400 , message: " Seller Registration Failed"})
               })
             })
@@ -63,14 +63,12 @@ module.exports = {
           const seller = await Seller.findOne({ email: email });
   
           if (!seller) {
-              console.log('Not found');
               return callback({code: 404, message: "Email doesn't exists"});
           }
   
           const isMatch = await bcrypt.compare(password, seller.password);
   
           if (isMatch) {
-              console.log('Validation successful');
               callback({code : 200, message: "Login Successfull"});
           } else {
               callback({code: 401, message: 'Incorrect Password'});

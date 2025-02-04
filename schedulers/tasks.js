@@ -6,7 +6,6 @@
 // const { lowInventoryContent, 
 //     licenseExpiryEmail } = require("../utils/emailContents");
 
-// console.log('runiing')
 // // Helper function to format date to DD-MM-YYYY
 // function formatDateToDDMMYYYY(date) {
 //     const day = String(date.getDate()).padStart(2, '0');
@@ -23,7 +22,6 @@
 
 //     try {
 //         await sendEmail(recipientEmails, subject, emailContent);
-//         console.log(`Low inventory email sent to ${supplierEmail}`);
 //     } catch (err) {
 //         console.error('Error sending email:', err);
 //     }
@@ -32,7 +30,6 @@
 // // Cron job 1: Send low inventory emails every Monday at 10:00 AM
 // function scheduleLowInventoryCronJob() {
 //     cron.schedule('0 10 * * 1', async () => { // Runs every Monday at 10:00 AM
-//         console.log('Running low inventory cron job...');
 //         try {
 //             const medicines = await Medicine.find({ total_quantity: { $lte: 500 }, status: 1 });
 

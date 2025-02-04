@@ -11,8 +11,6 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 
 // const getOrderHistory = async (req, res) => {
 //   try {
-
-//     console.log('orderHistory detail functioncalled')
 //     const { usertype, buyer_id, admin_id, supplier_id } = req?.headers;
 //     const { id } = req?.params;
 
@@ -103,7 +101,6 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 
 const getOrderHistory = async (req, res) => {
   try {
-    console.log('orderHistory detail function called');
     const { usertype, buyer_id, admin_id, supplier_id } = req?.headers;
     const { id } = req?.params;
 
@@ -131,7 +128,6 @@ const getOrderHistory = async (req, res) => {
     const updatedOrderHistory = await Promise.all(
       orderHistory?.stages?.map(async (stage,index) => {
 
-        // console.log("stage and index", stage, index)
         let schemaNameToSearchFrom;
 
         switch (stage?.referenceType) {
@@ -159,8 +155,6 @@ const getOrderHistory = async (req, res) => {
         if (!details) {
           return { ...stage, details: null }; // If details are not found, add empty details to the stage
         }
-        console.log("\n\n\n\n\n\n\n new stage", index, details)
-        // console.log("stage and index", stage, index, "\n map return result",{ ...stage, details })
         return { ...stage, details };
       })
     );
@@ -179,7 +173,6 @@ const getOrderHistory = async (req, res) => {
 
 // const getOrderHistory = async (req, res) => {
 //   try {
-//     console.log('orderHistory detail function called');
 //     const { usertype, buyer_id, admin_id, supplier_id } = req?.headers;
 //     const { id } = req?.params;
 
@@ -316,7 +309,6 @@ const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageRefer
       };
     }
 
-    console.log("\n updatedOrderHistory", updatedOrderHistory);
     return {
       message: "Success added stage to Order History!",
       orderHistory: updatedOrderHistory,

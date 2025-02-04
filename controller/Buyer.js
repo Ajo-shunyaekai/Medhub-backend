@@ -25,7 +25,6 @@ const { sendErrorResponse } = require('../utils/commonResonse');
 module.exports = {
 
     Regsiter : async (req, res, reqObj, callback) => {
-      console.log(reqObj);
       // return false
       
         try {
@@ -112,7 +111,7 @@ module.exports = {
                  await sendEmail(recipientEmails, subject, body)
                 callback({code: 200, message: "Buyer Registration Request Submitted Successfully"})
               }).catch((err) => {
-                console.log('err',err);
+                logErrorToFile(err, req);
                 callback({code: 400 , message: "Error While Submiiting Buyer Registration Request"})
               })
           } catch (error) {
@@ -131,7 +130,6 @@ module.exports = {
           const buyer = await Buyer.findOne({ buyer_email: email });
  
           if (!buyer) {
-              console.log('Not found');
               return callback({code: 404, message: "Buyer Not Found"});
           }
   
@@ -542,7 +540,7 @@ module.exports = {
               })
             })
             .catch((err) => {
-              console.log(err);
+              logErrorToFile(err, req);
               callback({ code: 400, message: "Error fetching medicine list", result: err});
             });
       } catch (error) {
@@ -618,7 +616,7 @@ module.exports = {
           callback({code: 200, message : 'buyer supplier order list fetched successfully', result: resultObj})
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({code: 400, message : 'error while fetching buyer supplier order list', result: err})
         })
       } catch (error) {
@@ -925,12 +923,12 @@ module.exports = {
             callback({code: 200, message : 'buyer support list fetched successfully', result: returnObj})
           })
           .catch((err) => {
-            console.log(err);
+            logErrorToFile(err, req);
             callback({code: 400, message : 'error while fetching buyer support list count', result: err})
           })
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({code: 400, message : 'error while fetching buyer support list', result: err})
         })
 
@@ -1131,7 +1129,7 @@ module.exports = {
           callback({code: 200, message: "List fetched successfully", result: returnObj})
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
@@ -1400,7 +1398,7 @@ module.exports = {
         .then( async(data) => {
           const totalItems = await Notification.countDocuments({to_id: buyer_id, to: 'buyer', status: 0});
           const totalPages = Math.ceil(totalItems / page_size);
-console.log('NOTFICATION', data.length)
+          
           const returnObj = {
               data,
               totalPages,
@@ -1409,7 +1407,7 @@ console.log('NOTFICATION', data.length)
           callback({code: 200, message: "List fetched successfully", result: returnObj})
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
@@ -1489,7 +1487,7 @@ console.log('NOTFICATION', data.length)
           callback({code: 200, message: "List fetched successfully", result: returnObj})
         })
         .catch((err) => {
-          console.log(err);
+          logErrorToFile(err, req);
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {

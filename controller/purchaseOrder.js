@@ -71,8 +71,7 @@ module.exports = {
                     rejectedItems
                 }
             } = reqObj;
-// console.log('reqObj',reqObj)
-// return false
+            
             const supplier = await Supplier.findOne({ supplier_id: supplier_id });
             const buyer = await Buyer.findOne({ buyer_id: buyer_id });
 
@@ -97,7 +96,6 @@ module.exports = {
             orderItems.forEach(orderItem => {
                 const enquiryItem = enquiry.items.find(item => item.medicine_id === orderItem.medicine_id);
                 if (enquiryItem) {
-                    console.log('enquiryItem',enquiryItem);
                     enquiryItem.status = 'PO created';
                 } 
             });
@@ -105,7 +103,6 @@ module.exports = {
             rejectedItems.forEach(rejectedItem => {
                 const enquiryItem = enquiry.items.find(item => item.medicine_id === rejectedItem.medicine_id);
                 if (enquiryItem) {
-                    console.log('enquiryItem',enquiryItem);
                     enquiryItem.status = 'rejected';
                 } 
             });

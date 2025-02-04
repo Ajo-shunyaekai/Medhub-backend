@@ -19,7 +19,7 @@ module.exports = {
                 callback({code: 200, message: "OTP send successfully", result: newOtp })
               })
               .catch((err) => {
-                console.log(err);
+                logErrorToFile(err, req);
                 callback({code: 400, message: "Error in Sending OTP"})
               })
         } else {

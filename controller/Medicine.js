@@ -316,7 +316,6 @@ module.exports = {
             { $limit : page_size }
         );
 
-        // console.log('pipeline', JSON.stringify(pipeline, null, 2));
 
         const data = await Medicine.aggregate(pipeline);
 
@@ -694,7 +693,7 @@ module.exports = {
                   callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
               })
               .catch((err) => {
-                  console.log(err);
+                  logErrorToFile(err, req);
                   callback({ code: 400, message: "Error while submitting request" });
               });
    
@@ -784,7 +783,7 @@ module.exports = {
               callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
           })
           .catch((err) => {
-              console.log(err);
+              logErrorToFile(err, req);
               callback({ code: 400, message: "Error while submitting request" });
           });
       }
@@ -801,7 +800,6 @@ module.exports = {
 //         let stockedInDetails = reqObj.stocked_in_details;
 //         let inventoryInfo = [];
 
-//         console.log('reqObj', reqObj);
 
 //         // Parse JSON strings if needed
 //         if (typeof stockedInDetails === 'string') {
@@ -1090,7 +1088,7 @@ module.exports = {
       Medicine.aggregate(aggregatePipeline).then((result) => {
           callback({code: 200, message: `Filtered Medicine lists`, result: result});
       }).catch((err) => {
-        console.log(err);
+          logErrorToFile(err, req);
           callback({ code: 400, message: "Error in filtering", result: err });
       });
     } catch (error) {
@@ -1277,7 +1275,6 @@ module.exports = {
         { $skip  : offset },
         { $limit : page_size }
       );
-      // console.log('pipeline', JSON.stringify(pipeline, null, 2));
   
       const countPipeline = [
         {
@@ -1393,7 +1390,7 @@ module.exports = {
                 callback({ code: 400, message: "Error while fetching similar medicine list count", result: err });
             });
         }).catch((err) => {
-            console.log(err);
+            logErrorToFile(err, req);
             callback({ code: 400, message: "Error fetching medicine list", result: err });
         });
     } catch (error) {
@@ -1409,7 +1406,6 @@ module.exports = {
       // const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, category_name, medicine_status, price_range, delivery_time, in_stock, } = req?.body;
       const { status = undefined, searchKey = undefined, pageNo = undefined, pageSize = undefined, medicineType = undefined, medicine_type = undefined, category_name = undefined, medicine_status = undefined, price_range = undefined, delivery_time = undefined, in_stock = undefined, } = req?.query;
 
-      console.log('req?.query', req?.query)
   
       const page_no   = parseInt(pageNo) || 1;
       const page_size = parseInt(pageSize) || 10;
@@ -1540,7 +1536,6 @@ module.exports = {
           { $limit : page_size }
       );
   
-      // console.log('pipeline', JSON.stringify(pipeline, null, 2));
       let data;
       
       if( usertype == 'Admin' ){
@@ -1637,7 +1632,6 @@ module.exports = {
         totalItems: totalItems
       };
 
-      console.log(data)
   
       res?.status(200)?.send({ code: 200, message: "Medicine list fetched successfully", result: returnObj });
     } catch (error) {
@@ -1653,7 +1647,6 @@ module.exports = {
       const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, category_name, medicine_status, price_range, delivery_time, in_stock, } = req?.body;
       // const { status = undefined, searchKey = undefined, pageNo = undefined, pageSize = undefined, medicineType = undefined, medicine_type = undefined, category_name = undefined, medicine_status = undefined, price_range = undefined, delivery_time = undefined, in_stock = undefined, } = req?.query;
 
-      console.log('req?.query', req?.query)
   
       const page_no   = parseInt(pageNo) || 1;
       const page_size = parseInt(pageSize) || 10;
@@ -1779,7 +1772,6 @@ module.exports = {
           },
       );
   
-      // console.log('pipeline', JSON.stringify(pipeline, null, 2));
       let data;
       
       if( usertype == 'Admin' ){

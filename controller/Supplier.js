@@ -111,7 +111,7 @@ module.exports = {
               await sendEmail(recipientEmails, subject, body)
               callback({code: 200, message: "Supplier Registration Successfull"})
             }).catch((err) => {
-              console.log('err',err);
+              logErrorToFile(err, req);
               callback({code: 400 , message: "Error While Registering the Supplier"})
             })
             
@@ -702,7 +702,7 @@ module.exports = {
             callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
         })
         .catch((err) => {
-            console.log(err);
+             logErrorToFile(err, req);
              callback({ code: 400, message: "Error while submitting request" });
         });
      
@@ -747,7 +747,7 @@ module.exports = {
           callback({ code: 200, message: "Edit Medicine Request Submitted Successfully", result: savedMedicine });
       })
       .catch((err) => {
-          console.log(err);
+           logErrorToFile(err, req);
            callback({ code: 400, message: "Error while submitting request" });
       });
   }
@@ -778,12 +778,12 @@ module.exports = {
              callback({code: 200, message : 'supplier support list fetched successfully', result: returnObj})
            })
            .catch((err) => {
-             console.log(err);
+              logErrorToFile(err, req);
              callback({code: 400, message : 'error while fetching buyer support list count', result: err})
            })
          })
          .catch((err) => {
-           console.log(err);
+            logErrorToFile(err, req);
            callback({code: 400, message : 'error while fetching buyer support list', result: err})
          })
  
@@ -882,7 +882,7 @@ module.exports = {
           callback({code: 200, message: "List fetched successfully", result: returnObj})
         })
         .catch((err) => {
-          console.log(err);
+           logErrorToFile(err, req);
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
@@ -962,7 +962,7 @@ module.exports = {
           callback({code: 200, message: "List fetched successfully", result: returnObj})
         })
         .catch((err) => {
-          console.log(err);
+           logErrorToFile(err, req);
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
@@ -1109,7 +1109,7 @@ module.exports = {
               
               })
               .catch((err) => {
-                console.log(err);
+                 logErrorToFile(err, req);
                 callback({ code: 400, message: "Error fetching medicine list", result: err});
               });
           } else {

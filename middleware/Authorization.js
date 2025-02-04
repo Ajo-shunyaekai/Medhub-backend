@@ -39,7 +39,6 @@ module.exports = {
       } else {
         const verified = jwt.verify(accesstoken, process.env.APP_SECRET);
         if (verified) {
-          console.log("verified");
           next();
         } else {
           // Access Denied
@@ -219,11 +218,6 @@ module.exports = {
     // const { supplier_id, seller_id, admin_id, buyer_id, supplierId } = req.body;
     console.log('checkCommonUserAuthentication', req)
     const admin_id = req.headers?.admin_id ||req?.body?.admin_id
-    
-    // Log to check if the access token and user type are correct
-    // console.log('Access Token:', accesstoken);
-    // console.log('User Type:', usertype);
-
     try {
       let user = null;
   
@@ -238,12 +232,10 @@ module.exports = {
       }
       
       if (!user) {
-        // console.log('User not found with the provided access token');
         return res.status(400).send({ message: "Invalid Access Token" });
       }
   
       if (user.status === 0) {
-        // console.log('User is disabled (status = 0)');
         return res.status(400).send({ message: "Access Denied" });
       }
   

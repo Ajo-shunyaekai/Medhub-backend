@@ -1,13 +1,11 @@
 const multer = require("multer");
 
 const createMulterMiddleware = (uploadConfig) => {
-    // console.log('uploadConfig',uploadConfig)
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       const { usertype } = req.headers;
 
       if (!usertype) {
-        console.log('error', usertype);
         
         return cb(new Error("Need User Type"));
       }
@@ -19,7 +17,6 @@ const createMulterMiddleware = (uploadConfig) => {
       let uploadPath = fieldConfig ? fieldConfig.uploadPath : './uploads/default';
 
     //   if (fieldConfig) {
-    //     console.log('fieldConfig',fieldConfig)
     //     uploadPath =
     //       usertype === "Buyer"
     //         ? fieldConfig.buyerPath

@@ -366,7 +366,6 @@ module.exports = {
           const buyer = await Buyer.findOne({ buyer_id: buyer_id });
  
           if (!buyer) {
-              console.log('Not found');
               return callback({code: 404, message: "Buyer Not Found"});
           }
   
@@ -544,7 +543,6 @@ module.exports = {
     
             const startDate = moment().subtract(365, 'days').startOf('day').toDate();
             const endDate   = moment().endOf('day').toDate();
-            console.log("Year filter: ", startDate, endDate); 
             
             // Apply date filter based on filterValue (today, week, month, year, all)
             if (filterValue === 'today') {
