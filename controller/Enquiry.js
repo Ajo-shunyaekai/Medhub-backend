@@ -527,7 +527,7 @@ module.exports = {
 
     getEnquiryListAllUsers: async (req, res)=>{
         try {
-            const { user_type, supplier_id, buyer_id, admin_id } = req?.headers;
+            const { usertype, supplier_id, buyer_id, admin_id } = req?.headers;
             // const { supplier_id, buyer_id, status, pageNo, pageSize,filterValue } = req?.body;
             const { status, pageNo, pageSize, filterValue } = req?.query;
             const page_no   = parseInt(pageNo) || 1
@@ -647,13 +647,13 @@ module.exports = {
                 "supplier.country_of_origin" : 1,
             }
 
-            const proj1 = user_type == 'Admin' ? AdminProject1 : projObj1
-            const proj2 = user_type == 'Admin' ? AdminProject2 : projObj2
+            const proj1 = usertype == 'Admin' ? AdminProject1 : projObj1
+            const proj2 = usertype == 'Admin' ? AdminProject2 : projObj2
 
             let data = await Enquiry.aggregate([
                 {
                     // $match: matchCondition
-                        $match : user_type == 'Admin' ? combinedFilter : matchCondition
+                        $match : usertype == 'Admin' ? combinedFilter : matchCondition
                 },
                 {
                     $lookup : {
@@ -692,7 +692,7 @@ module.exports = {
                 return res?.status(400)?.send({ code: 400, message: 'Error occured fetching enquiry list', result: {} });
             }
 
-            const totalItems = await Enquiry.countDocuments(user_type == 'Admin' ? combinedFilter : matchCondition);
+            const totalItems = await Enquiry.countDocuments(usertype == 'Admin' ? combinedFilter : matchCondition);
             const totalPages = Math.ceil(totalItems / page_size);
 
             const returnObj = {
