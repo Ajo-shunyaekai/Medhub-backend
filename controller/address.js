@@ -9,15 +9,15 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 
 const getAddress = async (req, res) => {
   try {
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
 
     let user = undefined;
 
-    if (user_type === "Admin") {
+    if (usertype === "Admin") {
       user = await Admin?.findOne({ admin_id });
-    } else if (user_type === "Supplier") {
+    } else if (usertype === "Supplier") {
       user = await Supplier?.findOne({ supplier_id });
-    } else if (user_type === "Buyer") {
+    } else if (usertype === "Buyer") {
       user = await Buyer?.findOne({ buyer_id });
     }
 
@@ -77,7 +77,7 @@ const getAddress = async (req, res) => {
 
 const addAddress = async (req, res) => {
   try {
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     const {
       full_name,
       mobile_number,
@@ -106,13 +106,13 @@ const addAddress = async (req, res) => {
         .send({ message: "All required address fields must be provided" });
     }
 
-    // Find the corresponding user based on user_type
+    // Find the corresponding user based on usertype
     let user = undefined;
-    if (user_type === "Admin") {
+    if (usertype === "Admin") {
       user = await Admin.findOne({ admin_id });
-    } else if (user_type === "Supplier") {
+    } else if (usertype === "Supplier") {
       user = await Supplier.findOne({ supplier_id });
-    } else if (user_type === "Buyer") {
+    } else if (usertype === "Buyer") {
       user = await Buyer.findOne({ buyer_id });
     }
 
