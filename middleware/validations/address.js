@@ -3,65 +3,33 @@ const { body } = require("express-validator");
 const addressValidationRules = [
   body("fullName")
     .notEmpty()
-    .withMessage("Full name is required")
-    .isString()
-    .withMessage("Full name should be a string"),
+    .withMessage("Full name is required"),
 
-  body("phone")
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .isString()
-    .withMessage("Phone number should be a string")
-    .isLength({ min: 10 })
-    .withMessage("Phone number should be at least 10 characters long"),
+  body("phone").notEmpty().withMessage("Phone number is required"),
 
-  body("houseName")
+  body("company_reg_address")
     .notEmpty()
-    .withMessage("House Name is required")
-    .isString()
-    .withMessage("House Name should be a string"),
+    .withMessage("Company Address is required"),
 
-  body("street")
+  body("locality")
     .notEmpty()
-    .withMessage("Street is required")
-    .isString()
-    .withMessage("Street should be a string"),
+    .withMessage("Locality is required"),
 
-  body("city")
-    .notEmpty()
-    .withMessage("City is required")
-    .isString()
-    .withMessage("City should be a string"),
-
-  body("state")
-    .notEmpty()
-    .withMessage("State is required")
-    .isString()
-    .withMessage("State should be a string"),
+  body("lamd_mark").optional(),
 
   body("country")
     .notEmpty()
-    .withMessage("Country is required")
-    .isString()
-    .withMessage("Country should be a string"),
+    .withMessage("Country is required"),
 
-  body("postalCode")
-    .optional()
-    .isString()
-    .withMessage("Postal code should be a string"),
+  body("postalCode").optional(),
 
   body("type")
     .notEmpty()
     .withMessage("Address type is required")
-    .isIn(["company", "shop", "warehouse", "factory", "other"])
+    .isIn(["Company", "Shop", "Warehouse", "Factory", "Other"])
     .withMessage(
-      "Address type must be one of: company, shop, warehouse, factory, other"
+      "Address type must be one of: Company, Shop, Warehouse, Factory, Other"
     ),
-
-//   body("isDefault")
-//     .optional()
-//     .isBoolean()
-//     .withMessage("isDefault must be a boolean"),
 ];
 
 // Middleware to handle validation errors

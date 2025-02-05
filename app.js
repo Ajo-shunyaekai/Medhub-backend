@@ -31,7 +31,7 @@ const logErrorToFile  = require('./logs/errorLogs');
 const { sendErrorResponse } = require('./utils/commonResonse');
 const { rateLimiter } = require('./middleware/expressRateLimiter');
 
-// const addressRoutes   = require(`./routes/addressRoutes`)
+const addressRoutes   = require(`./routes/addressRoutes`)
 // const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
 
 
@@ -81,7 +81,8 @@ const corsOptions = {
     'http://localhost:3001',
     'http://localhost:3333',
     'http://192.168.1.2:8000',
-    'https://medhub.shunyaekai.com'
+    'https://medhub.shunyaekai.com',
+    'https://medhub.global'
   ],
   methods: 'GET, POST, PUT, PATCH, DELETE',
   credentials: true
@@ -138,7 +139,7 @@ app.post('/send-email', async (req, res) => {
 app.use(`/api/auth`,authRoutes)
 
 // app.use(`/api/order-history`,orderHistoryRoutes)
-// app.use('/api/address', addressRoutes)
+app.use('/api/address', addressRoutes)
 // app.use('/api/logistics', logisticsRoutes);
 
 app.use('/api/user', userRouter);
