@@ -918,7 +918,7 @@ module.exports = {
        const newSupport = new Support({
         support_id    : supportId,
         user_id       : reqObj.buyer_id || reqObj.supplier_id ,
-        user_type     : reqObj.user_type,
+        usertype     : reqObj.usertype,
         order_id      : reqObj.order_id,
         support_type  : reqObj.support_type,
         reason        : reqObj.feedback,
@@ -945,7 +945,7 @@ module.exports = {
         const newSupport = new Support({
          support_id    : supportId,
          user_id       : reqObj.buyer_id || reqObj.supplier_id,
-         user_type     : reqObj.user_type,
+         usertype     : reqObj.usertype,
          order_id      : reqObj.order_id,
          support_type  : reqObj.support_type,
          reason        : reqObj.complaint,
@@ -2127,7 +2127,7 @@ module.exports = {
 
     getInvoiceListForAllUsers: async (req, res) => {
       try {
-        const { user_type, buyer_id, supplier_id, admin_id } = req?.headers;
+        const { usertype, buyer_id, supplier_id, admin_id } = req?.headers;
         // const { page_no, limit, filterKey, buyer_id, supplier_id, page_size } = req?.body;
         const { pageNo = undefined, filterKey = undefined, pageSize = undefined } = req?.query;
         // const pageNo = page_no || 2;
@@ -2135,12 +2135,12 @@ module.exports = {
         // const page_size = pageSize || 2
         const offset = (parseInt(pageNo) - 1) * parseInt(pageSize);
     
-        // Match conditions based on user_type
+        // Match conditions based on usertype
         const buyerMatch = { buyer_id, status: filterKey };
         const adminMatch = { status: filterKey };
         const supplierMatch = { supplier_id, status: filterKey };
     
-        // Projection objects based on user_type
+        // Projection objects based on usertype
         const buyerProjObj = { supplier: { $arrayElemAt: ["$supplier", 0] } };
         const supplierProjObj = { buyer: { $arrayElemAt: ["$buyer", 0] } };
     
@@ -2158,13 +2158,13 @@ module.exports = {
           "supplier.supplier_address": 1,
           "supplier.supplier_type": 1,
         };
-        // Determine the match condition and projection based on user_type
-        const matchCondition = user_type === 'Buyer' ? buyerMatch : user_type === 'Supplier' ? supplierMatch : adminMatch;
-        const lookupCollection = user_type === 'Buyer' ? 'buyers' : 'suppliers';
-        const localField = user_type === 'Buyer' ? 'buyer_id' : 'supplier_id';
-        const foreignField = user_type === 'Buyer' ? 'buyer_id' : 'supplier_id';
-        const projObj = user_type === 'Buyer' ? buyerProjObj : supplierProjObj;
-        const projObj2 = user_type === 'Buyer' ? buyerProjObj2 : supplierProjObj2;
+        // Determine the match condition and projection based on usertype
+        const matchCondition = usertype === 'Buyer' ? buyerMatch : usertype === 'Supplier' ? supplierMatch : adminMatch;
+        const lookupCollection = usertype === 'Buyer' ? 'buyers' : 'suppliers';
+        const localField = usertype === 'Buyer' ? 'buyer_id' : 'supplier_id';
+        const foreignField = usertype === 'Buyer' ? 'buyer_id' : 'supplier_id';
+        const projObj = usertype === 'Buyer' ? buyerProjObj : supplierProjObj;
+        const projObj2 = usertype === 'Buyer' ? buyerProjObj2 : supplierProjObj2;
 
         const commonProjObj = {  
           invoice_id           : 1,
@@ -2234,7 +2234,7 @@ module.exports = {
   
         let data;
     
-        if (user_type === 'Admin') {
+        if (usertype === 'Admin') {
           // Admin specific logic
           data = await Invoices.aggregate([
             {
@@ -2300,7 +2300,7 @@ module.exports = {
             { $skip  : offset },
             { $limit : parseInt(pageSize) },
         ])
-        } else if (user_type === 'Buyer' || user_type === 'Supplier') {
+        } else if (usertype === 'Buyer' || usertype === 'Supplier') {
           data = await Invoices.aggregate([
             {
               $match: matchCondition,
@@ -2310,7 +2310,7 @@ module.exports = {
                 from: lookupCollection,
                 localField: localField,
                 foreignField: foreignField,
-                as: user_type === 'Buyer' ? 'buyer' : 'supplier',
+                as: usertype === 'Buyer' ? 'buyer' : 'supplier',
               },
             },
             {
@@ -2340,8 +2340,8 @@ module.exports = {
               $group: {
                 ...commonGroupObj,
                 totalPrice: { $sum: "$items.item_price" },
-                ...(user_type === 'Buyer' && { buyer: { $first: "$buyer" } }),
-                ...(user_type === 'Supplier' && { supplier: { $first: "$supplier" } }),
+                ...(usertype === 'Buyer' && { buyer: { $first: "$buyer" } }),
+                ...(usertype === 'Supplier' && { supplier: { $first: "$supplier" } }),
               },
             },
             {
@@ -2383,8 +2383,7 @@ module.exports = {
 
     getOrderListAllUsers: async (req, res) => {
       try {
-
-        const { user_type, buyer_id, supplier_id, admin_id } = req?.headers;
+        const { usertype, buyer_id, supplier_id, admin_id } = req?.headers;
         // const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id, admin_id } = req?.body;
         const { pageNo, pageSize, filterKey, filterValue, } = req?.query;
     
@@ -2446,11 +2445,11 @@ module.exports = {
           order_status: filterKey,
         };
     
-        const matchObj = user_type === 'Admin' ? adminMatch : user_type == 'Buyer' ? otherMatch : {order_status : adjustedFilterKey, supplier_id: supplier_id};
+        const matchObj = usertype === 'Admin' ? adminMatch : usertype == 'Buyer' ? otherMatch : {order_status : adjustedFilterKey, supplier_id: supplier_id};
     
         let data;
     
-        if (user_type === 'Admin') {
+        if (usertype === 'Admin') {
           data = await Order.aggregate([
             {
               $match: {
@@ -2562,7 +2561,7 @@ module.exports = {
             { $skip: offset },
             { $limit: parseInt(pageSize) },
           ]);
-        } else if (user_type == 'Buyer') {
+        } else if (usertype == 'Buyer') {
           data = await Order.aggregate([
             {
               $match: { 
@@ -2658,7 +2657,7 @@ module.exports = {
             { $skip: offset },
             { $limit: parseInt(pageSize) },
           ]);
-        } else if (user_type == 'Supplier'){
+        } else if (usertype == 'Supplier'){
           data = await Order.aggregate([
             {
                 $match: { 
@@ -2935,11 +2934,11 @@ module.exports = {
 
     getSpecificOrderDetails: async (req, res) => {
       try {
-        const {user_type} = req?.headers;
+        const {usertype} = req?.headers;
         // const {buyer_id, order_id, filterKey, admin_id, supplier_id} = req?.body;
         const order_id =req?.params?.id;
         let data;
-        if(user_type == 'Admin'){
+        if(usertype == 'Admin'){
           data = await Order.aggregate([
             {
                 $match: { 
@@ -3154,7 +3153,7 @@ module.exports = {
             }
           ])
         } 
-        else if(user_type == 'Buyer'){
+        else if(usertype == 'Buyer'){
           data = await Order.aggregate([
             {
                 $match: { 
@@ -3367,7 +3366,7 @@ module.exports = {
             }
           ])
         }
-        else if(user_type == 'Supplier'){
+        else if(usertype == 'Supplier'){
           data = await Order.aggregate([
             {
                 $match: { 

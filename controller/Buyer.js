@@ -1499,9 +1499,9 @@ module.exports = {
 
     updateStatus : async (req, res, reqObj, callback) => {
       try {
-        const { notification_id, status = 1, buyer_id, user_type } = reqObj
+        const { notification_id, status = 1, buyer_id, usertype } = reqObj
       //   const updateNotification = await Notification.findOneAndUpdate(
-      //     { to_id: buyer_id, to: user_type },
+      //     { to_id: buyer_id, to: usertype },
       //     {
       //         $set: {
       //           status: status,
@@ -1511,7 +1511,7 @@ module.exports = {
       // );
 
       const updateNotifications = await Notification.updateMany(
-        { to_id: buyer_id, to: user_type }, 
+        { to_id: buyer_id, to: usertype }, 
         {
             $set: {
                 status: status, 

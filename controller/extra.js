@@ -1,17 +1,17 @@
 const updateProfileAndSendEditRequest = async (req, res) => {
     try {
       const { id } = req?.params;
-      const { user_type } = req?.headers;
+      const { usertype } = req?.headers;
       const { newPassword, oldPassword, name, email, phone, address } = req?.body;
       let changePersonalDetails = false;
       let sendRequestToAdmin = false;
       let user;
       // Find the user based on their type and email
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         user = await Buyer?.findById(id);
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         user = await Supplier?.findById(id);
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         user = await Admin?.findById(id);
       }
       // If the user is not found, return an error response
@@ -29,8 +29,8 @@ const updateProfileAndSendEditRequest = async (req, res) => {
       const userCountryCode = phone.split(" ")[0];
       const user_mobile_number = phone.split(" ").slice(1).join(" ");
       // check what to update (personal details only or the request to update the address or both )
-      changePersonalDetails = user_type =='Buyer' ? (user?.buyer_name !== name || user?.buyer_email !== email || !isNewPwdSameAsOld || user?.buyer_country_code !== userCountryCode || user?.buyer_mobile!== user_mobile_number ) : (user?.supplier_name !== name || user?.supplier_email !== email || !isNewPwdSameAsOld || user?.supplier_country_code !== userCountryCode || user?.supplier_mobile!== user_mobile_number )
-      sendRequestToAdmin = user_type =='Buyer' ? (user?.buyer_address !== address) : (user?.supplier_address !== address)
+      changePersonalDetails = usertype =='Buyer' ? (user?.buyer_name !== name || user?.buyer_email !== email || !isNewPwdSameAsOld || user?.buyer_country_code !== userCountryCode || user?.buyer_mobile!== user_mobile_number ) : (user?.supplier_name !== name || user?.supplier_email !== email || !isNewPwdSameAsOld || user?.supplier_country_code !== userCountryCode || user?.supplier_mobile!== user_mobile_number )
+      sendRequestToAdmin = usertype =='Buyer' ? (user?.buyer_address !== address) : (user?.supplier_address !== address)
       let updateProfile;
       let newProfileEditReq;
       // sending response according to the condition checked above
@@ -57,7 +57,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
             );
           }
           // Update the profile details based on the user type
-          if (user_type === "Buyer") {
+          if (usertype === "Buyer") {
             updateProfile = await Buyer?.findByIdAndUpdate(
               user?._id,
               { $set: 
@@ -85,7 +85,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
               return sendSuccessResponse(res, 206, 'Profile details updated, but failed to send address update request to Admin')
             }
             return sendSuccessResponse(res, 200, 'Profile details updated, also send address update request to Admin')          
-          } else if (user_type === "Supplier") {
+          } else if (usertype === "Supplier") {
             updateProfile = await Supplier?.findByIdAndUpdate(
               user?._id,
               { $set: 
@@ -116,7 +116,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           }
         } else {
           // Update the profile details based on the user type
-          if (user_type === "Buyer") {
+          if (usertype === "Buyer") {
             updateProfile = await Buyer?.findByIdAndUpdate(
               user?._id,
               { $set: 
@@ -143,7 +143,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
               return sendSuccessResponse(res, 206, 'Profile details updated, but failed to send address update request to Admin')
             }
             return sendSuccessResponse(res, 200, 'Profile details updated, also send address update request to Admin')          
-          } else if (user_type === "Supplier") {
+          } else if (usertype === "Supplier") {
             updateProfile = await Supplier?.findByIdAndUpdate(
               user?._id,
               { $set: 
@@ -191,7 +191,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           );
         }
         // Update the profile details based on the user type
-        if (user_type === "Buyer") {
+        if (usertype === "Buyer") {
           updateProfile = await Buyer?.findByIdAndUpdate(
             user?._id,
             { $set: 
@@ -209,7 +209,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
             return sendErrorResponse(res, 400, "Failed to update profile details.");
           }
           return sendSuccessResponse(res, 200, 'Profile details updated.')  
-        } else if (user_type === "Supplier") {
+        } else if (usertype === "Supplier") {
           updateProfile = await Supplier?.findByIdAndUpdate(
             user?._id,
             { $set: 
@@ -229,7 +229,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           return sendSuccessResponse(res, 200, 'Profile details updated.')
         }
       } else if(!changePersonalDetails && sendRequestToAdmin){
-        if(user_type === 'Buyer'){
+        if(usertype === 'Buyer'){
             const ProfileReq = new BuyerProfileEdit({
               buyer_id: user?.buyer_id,
               userId: user?._id,
@@ -237,7 +237,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
             });
             newProfileEditReq = await ProfileReq?.save()
           return sendSuccessResponse(res, 200, 'Sent address update request to Admin')            
-        } else if(user_type === 'Supplier'){
+        } else if(usertype === 'Supplier'){
             const ProfileReq = new SupplierProfileEdit({
               supplier_id: user?.supplier_id,
               userId: user?._id,

@@ -19,7 +19,7 @@ const supportSchema = new Schema({
     type: String,
     required: true,
   },
-  user_type: {
+  usertype: {
     type: String,
     required: true,
   },

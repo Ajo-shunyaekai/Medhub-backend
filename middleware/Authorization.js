@@ -32,12 +32,12 @@ module.exports = {
 
   checkAuthentication: async (req, res, next) => {
     /// For Admin
-    let access_token = req.headers.access_token;
+    let accesstoken = req.headers.accesstoken;
     try {
-      if (!access_token) {
+      if (!accesstoken) {
         res.status(401).send({ message: "Access Token is Missing" });
       } else {
-        const verified = jwt.verify(access_token, process.env.APP_SECRET);
+        const verified = jwt.verify(accesstoken, process.env.APP_SECRET);
         if (verified) {
           next();
         } else {
@@ -53,12 +53,12 @@ module.exports = {
   },
 
   checkAdminAuthentication: async (req, res, next) => {
-    let access_token = req.headers.access_token;
+    let accesstoken = req.headers.accesstoken;
     const admin_id = req.body.admin_id;
 
     try {
       const admin = await Admin.findOne({
-        token: access_token,
+        token: accesstoken,
         admin_id: admin_id,
       });
 
@@ -79,12 +79,12 @@ module.exports = {
   },
 
   checkUserAuthentication: async (req, res, next) => {
-    let access_token = req.headers.access_token;
+    let accesstoken = req.headers.accesstoken;
     const user_id = req.body.user_id;
 
     try {
       const user = await User.findOne({
-        token: access_token,
+        token: accesstoken,
         user_id: user_id,
       });
 
@@ -105,10 +105,10 @@ module.exports = {
   },
   //this is working fine
   checkBuyerAuthentication: async (req, res, next) => {
-    const access_token = req.headers.access_token;
+    const accesstoken = req.headers.accesstoken;
     const buyer_id = req.body.buyer_id;
     try {
-      const buyer = await Buyer.findOne({ token: access_token });
+      const buyer = await Buyer.findOne({ token: accesstoken });
 
       if (!buyer) {
         return res.status(400).send({ message: "Invalid Access Token" });
@@ -127,11 +127,11 @@ module.exports = {
   },
 
   checkSupplierAuthentication: async (req, res, next) => {
-    const access_token = req.headers.access_token;
+    const accesstoken = req.headers.accesstoken;
     const supplier_id = req.body.supplier_id;
 
     try {
-      const supplier = await Supplier.findOne({ token: access_token });
+      const supplier = await Supplier.findOne({ token: accesstoken });
 
       if (!supplier) {
         return res.status(400).send({ message: "Invalid Access Token" });
@@ -150,12 +150,12 @@ module.exports = {
   },
 
   checkSellerAuthentication: async (req, res, next) => {
-    const access_token = req.headers.access_token;
+    const accesstoken = req.headers.accesstoken;
     const seller_id = req.body.seller_id;
 
     try {
       const seller = await Seller.find({
-        token: access_token,
+        token: accesstoken,
         seller_id: seller_id,
       });
 
@@ -176,13 +176,13 @@ module.exports = {
   },
 
   commonAuthentication: async (req, res, next) => {
-    const access_token = req.headers.access_token;
+    const accesstoken = req.headers.accesstoken;
     const buyer_id = req.headers.buyer_id;
     const supplier_id = req.headers.supplier_id;
 
     try {
       if (buyer_id) {
-        const buyer = await Buyer.findOne({ token: access_token });
+        const buyer = await Buyer.findOne({ token: accesstoken });
         if (!buyer) {
           return res.status(400).send({ message: "Invalid Access Token" });
         }
@@ -193,7 +193,7 @@ module.exports = {
         next();
       } else if (supplier_id) {
         lo
-        const supplier = await Supplier.findOne({ token: access_token });
+        const supplier = await Supplier.findOne({ token: accesstoken });
 
         if (!supplier) {
           return res.status(400).send({ message: "Invalid Access Token" });
@@ -214,22 +214,21 @@ module.exports = {
   },
 
   checkCommonUserAuthentication: async (req, res, next) => {
-    const { access_token, user_type,  supplier_id, seller_id, buyer_id, client_id } = req.headers;
+    const { accesstoken, usertype,  supplier_id, seller_id, buyer_id, client_id } = req.headers;
     // const { supplier_id, seller_id, admin_id, buyer_id, supplierId } = req.body;
-    
+    console.log('checkCommonUserAuthentication', req)
     const admin_id = req.headers?.admin_id ||req?.body?.admin_id
-
     try {
       let user = null;
   
-      if (user_type === "Buyer") {
-        user = await Buyer.findOne({ token: access_token });
-      } else if (user_type === "Admin") {
-        user = await Admin.findOne({ token: access_token });
-      } else if (user_type === "Supplier") {
-        user = await Supplier.findOne({ token: access_token });
-      } else if (user_type === "Logistics") {
-        user = await LogisticsPartner.findOne({ token: access_token });
+      if (usertype === "Buyer") {
+        user = await Buyer.findOne({ token: accesstoken });
+      } else if (usertype === "Admin") {
+        user = await Admin.findOne({ token: accesstoken });
+      } else if (usertype === "Supplier") {
+        user = await Supplier.findOne({ token: accesstoken });
+      } else if (usertype === "Logistics") {
+        user = await LogisticsPartner.findOne({ token: accesstoken });
       }
       
       if (!user) {

@@ -1402,7 +1402,7 @@ module.exports = {
 
   getSpecificMedicinesList: async (req, res) => {
     try {
-      const { user_type, supplier_id, buyer_id, admin_id } = req?.headers;
+      const { usertype, supplier_id, buyer_id, admin_id } = req?.headers;
       // const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, category_name, medicine_status, price_range, delivery_time, in_stock, } = req?.body;
       const { status = undefined, searchKey = undefined, pageNo = undefined, pageSize = undefined, medicineType = undefined, medicine_type = undefined, category_name = undefined, medicine_status = undefined, price_range = undefined, delivery_time = undefined, in_stock = undefined, } = req?.query;
 
@@ -1538,7 +1538,7 @@ module.exports = {
   
       let data;
       
-      if( user_type == 'Admin' ){
+      if( usertype == 'Admin' ){
         data = await Medicine.aggregate([
           {
             $match: {
@@ -1616,14 +1616,14 @@ module.exports = {
           { $limit: page_size },
         ])
 
-      } else if(user_type == 'Supplier'){
+      } else if(usertype == 'Supplier'){
         data = await Medicine.aggregate(pipeline);
-      } else if (user_type == 'Buyer') {
+      } else if (usertype == 'Buyer') {
         data = await Medicine.aggregate(pipeline);
       }  
   
       // Count total items matching the condition
-      const totalItems = await Medicine.countDocuments(user_type == 'Admin'? {medicine_type: medicine_type?.replaceAll("%20"," ")|| medicineType?.replaceAll("%20"," "), status: parseInt(status)}: {medicine_type: medicine_type?.replaceAll("%20"," "),});
+      const totalItems = await Medicine.countDocuments(usertype == 'Admin'? {medicine_type: medicine_type?.replaceAll("%20"," ")|| medicineType?.replaceAll("%20"," "), status: parseInt(status)}: {medicine_type: medicine_type?.replaceAll("%20"," "),});
       const totalPages = Math.ceil(totalItems / parseInt(page_size));
   
       const returnObj = {
@@ -1643,7 +1643,7 @@ module.exports = {
 
   getMedicinesListCSV: async (req, res) => {
     try {
-      const { user_type, supplier_id, buyer_id, admin_id } = req?.headers;
+      const { usertype, supplier_id, buyer_id, admin_id } = req?.headers;
       const { status, searchKey, pageNo, pageSize, medicineType, medicine_type, category_name, medicine_status, price_range, delivery_time, in_stock, } = req?.body;
       // const { status = undefined, searchKey = undefined, pageNo = undefined, pageSize = undefined, medicineType = undefined, medicine_type = undefined, category_name = undefined, medicine_status = undefined, price_range = undefined, delivery_time = undefined, in_stock = undefined, } = req?.query;
 
@@ -1774,7 +1774,7 @@ module.exports = {
   
       let data;
       
-      if( user_type == 'Admin' ){
+      if( usertype == 'Admin' ){
         data = await Medicine.aggregate([
           {
             $match: {
@@ -1845,9 +1845,9 @@ module.exports = {
           },
         ])
 
-      } else if(user_type == 'Supplier'){
+      } else if(usertype == 'Supplier'){
         data = await Medicine.aggregate(pipeline);
-      } else if (user_type == 'Buyer') {
+      } else if (usertype == 'Buyer') {
         data = await Medicine.aggregate(pipeline);
       }  
       
@@ -1872,7 +1872,7 @@ module.exports = {
 
   getSpecificMedicineDetails: async (req, res) => {
     try {
-      const { user_type } = req?.headers;
+      const { usertype } = req?.headers;
       const data = await Medicine.aggregate([
         {
           $match: { medicine_id: req?.params?.id },

@@ -51,8 +51,8 @@ const logErrorToFile = require("../logs/errorLogs");
 module.exports = {
   registerUser: async (req, res) => {
     try {
-      // const { access_token, user_type } = req.headers;
-      const { user_type } = req.body;
+      // const { accesstoken, usertype } = req.headers;
+      const { usertype } = req.body;
 
       // Use req.body directly instead of stringifying it
       const {
@@ -88,11 +88,11 @@ module.exports = {
 
       let regObj = {};
 
-      if (!user_type) {
+      if (!usertype) {
         return sendErrorResponse(res, 400, "Need User Type.");
       }
 
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         // Validate the required files for "Buyer" type
         if (
           !req.files["buyer_image"] ||
@@ -211,7 +211,7 @@ module.exports = {
             errObj
           );
         }
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         if (
           !req.files["supplier_image"] ||
           req.files["supplier_image"].length === 0
@@ -311,17 +311,17 @@ module.exports = {
 
       // Check for email existence based on user type
       const emailExists =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? await Buyer.findOne({
               contact_person_email: regObj?.contact_person_email,
             })
-          : user_type === "Admin"
+          : usertype === "Admin"
           ? await Admin.findOne({ email: req.body?.email })
-          : user_type === "Supplier"
+          : usertype === "Supplier"
           ? await Supplier.findOne({
               contact_person_email: req.body?.contact_person_email,
             })
-          : user_type === "Seller"
+          : usertype === "Seller"
           ? await Seller.findOne({ email: req.body?.email })
           : null;
 
@@ -332,13 +332,13 @@ module.exports = {
       // Generate unique notification ID and user ID
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
       const userId = `${
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? "BYR-"
-          : user_type === "Admin"
+          : usertype === "Admin"
           ? "ADM-"
-          : user_type === "Supplier"
+          : usertype === "Supplier"
           ? "SUP-"
-          : user_type === "Seller"
+          : usertype === "Seller"
           ? "SLR-"
           : ""
       }${Math.random().toString(16).slice(2, 10)}`;
@@ -447,7 +447,7 @@ module.exports = {
       }
 
       // If user type is "Buyer", save buyer details and send response
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         const buyer = await newBuyer.save();
 
         if (!buyer) {
@@ -486,7 +486,7 @@ module.exports = {
           "Thank You for Registering on Medhub Global!";
         const confirmationContent = await userRegistrationConfirmationContent(
           buyer,
-          user_type
+          usertype
         );
         await sendEmail(
           confirmationEmailRecipients,
@@ -502,7 +502,7 @@ module.exports = {
       }
 
       // If user type is "Admin", save admin and return response
-      else if (user_type === "Admin") {
+      else if (usertype === "Admin") {
         newAdmin.password = hashedPassword;
         const admin = await newAdmin.save();
         if (!admin) {
@@ -520,7 +520,7 @@ module.exports = {
       }
 
       // If user type is "Supplier", save supplier and send response
-      else if (user_type === "Supplier") {
+      else if (usertype === "Supplier") {
         const supplier = await newSupplier.save();
         if (!supplier) {
           return sendErrorResponse(
@@ -544,7 +544,7 @@ module.exports = {
         const savedNotification = await newNotification.save();
         const adminEmail = "platform@medhub.global";
         const subject = "New Registration Alert: Supplier Account Created";
-        // const subject = New Registration Alert: ${user_type} Account Created;
+        // const subject = New Registration Alert: ${usertype} Account Created;
         const recipientEmails = [adminEmail];
         const emailContent = await supplierRegistrationContent(supplier);
         // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
@@ -558,7 +558,7 @@ module.exports = {
           "Thank You for Registering on Medhub Global!";
         const confirmationContent = await userRegistrationConfirmationContent(
           supplier,
-          user_type
+          usertype
         );
         await sendEmail(
           confirmationEmailRecipients,
@@ -588,10 +588,10 @@ module.exports = {
 
   loginUser: async (req, res) => {
     try {
-      const { access_token } = req.headers;
-      const { email, password, user_type } = req.body;
+      const { accesstoken } = req.headers;
+      const { email, password, usertype } = req.body;
 
-      if (!user_type) {
+      if (!usertype) {
         return sendErrorResponse(res, 400, "Cannot Identify User.");
       }
 
@@ -605,13 +605,13 @@ module.exports = {
 
       // Find the user based on user type
       const user =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? await Buyer.findOne({ contact_person_email: email })
-          : user_type === "Admin"
+          : usertype === "Admin"
           ? await Admin.findOne({ email })
-          : user_type === "Supplier"
+          : usertype === "Supplier"
           ? await Supplier.findOne({ contact_person_email: email })
-          : user_type === "Seller"
+          : usertype === "Seller"
           ? await Seller.findOne({ email })
           : null;
 
@@ -632,25 +632,25 @@ module.exports = {
 
       // Fetch user details excluding sensitive information
       let user2 =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? await Buyer.findById(user?._id)
               .select("-password -createdAt -updatedAt -__v")
               .lean()
-          : user_type === "Admin"
+          : usertype === "Admin"
           ? await Admin.findById(user?._id)
               .select("-password -createdAt -updatedAt -__v")
               .lean()
-          : user_type === "Supplier"
+          : usertype === "Supplier"
           ? await Supplier.findById(user?._id)
               .select("-password -createdAt -updatedAt -__v")
               .lean()
-          : user_type === "Seller"
+          : usertype === "Seller"
           ? await Seller.findById(user?._id)
               .select("-password -createdAt -updatedAt -__v")
               .lean()
           : null;
 
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         // Count documents in the List collection for the buyer
         const listCount = await List.countDocuments({
           buyer_id: user2.buyer_id,
@@ -661,7 +661,7 @@ module.exports = {
       return sendSuccessResponse(
         res,
         200,
-        `${user_type} Login Successful.`,
+        `${usertype} Login Successful.`,
         user2
       );
     } catch (error) {
@@ -678,23 +678,24 @@ module.exports = {
 
   getLoggedinUserProfileDetails: async (req, res) => {
     try {
-      const { access_token, user_type } = req.headers;
+      console.log('getLoggedinUserProfileDetails', req)
+      const { accesstoken, usertype } = req.headers;
       const { id } = req?.params;
 
       const user =
-        user_type == "Buyer"
+        usertype == "Buyer"
           ? await Buyer.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
-          : user_type == "Admin"
+          : usertype == "Admin"
           ? await Admin.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
-          : user_type == "Supplier"
+          : usertype == "Supplier"
           ? await Supplier.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
-          : user_type == "Seller"
+          : usertype == "Seller"
           ? await Seller.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
@@ -719,7 +720,7 @@ module.exports = {
 
   verifyEmail: async (req, res) => {
     try {
-      const { email, user_type } = req?.body;
+      const { email, usertype } = req?.body;
 
       if (!email) {
         return sendErrorResponse(res, 400, "Email is required.");
@@ -728,11 +729,11 @@ module.exports = {
       let user;
 
       // Find the user based on their type and email
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         user = await Buyer?.findOne({ contact_person_email: email });
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         user = await Supplier?.findOne({ contact_person_email: email });
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
 
@@ -762,7 +763,7 @@ module.exports = {
       let updatedUser;
 
       // Update the user with OTP and expiry based on their type
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         updatedUser = await Buyer?.findOneAndUpdate(
           { contact_person_email: email },
           {
@@ -774,7 +775,7 @@ module.exports = {
           },
           { new: true }
         );
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         updatedUser = await Supplier?.findOneAndUpdate(
           { contact_person_email: email },
           {
@@ -786,7 +787,7 @@ module.exports = {
           },
           { new: true }
         );
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         updatedUser = await Admin?.findOneAndUpdate(
           { email: email },
           {
@@ -840,7 +841,7 @@ module.exports = {
 
   verifyEmailAndResendOTP: async (req, res) => {
     try {
-      const { email, user_type } = req?.body;
+      const { email, usertype } = req?.body;
 
       if (!email) {
         return sendErrorResponse(res, 400, "Email is required.");
@@ -849,11 +850,11 @@ module.exports = {
       let user;
 
       // Find the user based on their type and email
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         user = await Buyer?.findOne({ contact_person_email: email });
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         user = await Supplier?.findOne({ contact_person_email: email });
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
 
@@ -917,7 +918,7 @@ module.exports = {
       let updatedUser;
 
       // Update the user with OTP and expiry based on their type
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         updatedUser = await Buyer?.findOneAndUpdate(
           { contact_person_email: email },
           {
@@ -929,7 +930,7 @@ module.exports = {
           },
           { new: true }
         );
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         updatedUser = await Supplier?.findOneAndUpdate(
           { contact_person_email: email },
           {
@@ -941,7 +942,7 @@ module.exports = {
           },
           { new: true }
         );
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         updatedUser = await Admin?.findOneAndUpdate(
           { email: email },
           {
@@ -995,7 +996,7 @@ module.exports = {
 
   verifyOTP: async (req, res) => {
     try {
-      const { email, otp, user_type } = req?.body;
+      const { email, otp, usertype } = req?.body;
 
       if (!email) {
         return sendErrorResponse(res, 400, "Email is required.");
@@ -1008,11 +1009,11 @@ module.exports = {
       let user;
 
       // Find the user based on their type and email
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         user = await Buyer?.findOne({ contact_person_email: email });
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         user = await Supplier?.findOne({ contact_person_email: email });
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
 
@@ -1042,7 +1043,7 @@ module.exports = {
       let updatedUser;
 
       // Update the user and unset the otp and otpExpiry fields
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         updatedUser = await Buyer?.findOneAndUpdate(
           { contact_person_email: email },
           {
@@ -1050,7 +1051,7 @@ module.exports = {
           },
           { new: true }
         );
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         updatedUser = await Supplier?.findOneAndUpdate(
           { contact_person_email: email },
           {
@@ -1058,7 +1059,7 @@ module.exports = {
           },
           { new: true }
         );
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         updatedUser = await Admin?.findOneAndUpdate(
           { email: email },
           {
@@ -1093,7 +1094,7 @@ module.exports = {
 
   resetPassword: async (req, res) => {
     try {
-      const { email, password, user_type } = req?.body;
+      const { email, password, usertype } = req?.body;
 
       if (!email) {
         return sendErrorResponse(res, 400, "Email is required.");
@@ -1106,11 +1107,11 @@ module.exports = {
       let user;
 
       // Find the user based on their type and email
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         user = await Buyer?.findOne({ contact_person_email: email });
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         user = await Supplier?.findOne({ contact_person_email: email });
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         user = await Admin?.findOne({ email: email });
       }
 
@@ -1140,19 +1141,19 @@ module.exports = {
       let updateProfile;
 
       // Update the password based on the user type
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         updateProfile = await Buyer?.findOneAndUpdate(
           { contact_person_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         updateProfile = await Supplier?.findOneAndUpdate(
           { contact_person_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         updateProfile = await Admin?.findOneAndUpdate(
           { email: email },
           { $set: { password: hashedPassword } },
@@ -1186,7 +1187,7 @@ module.exports = {
   updatePassword: async (req, res) => {
     try {
       const { id } = req?.params;
-      const { user_type } = req?.headers;
+      const { usertype } = req?.headers;
       const { newPassword, oldPassword } = req?.body;
 
       if (!oldPassword) {
@@ -1200,11 +1201,11 @@ module.exports = {
       let user;
 
       // Find the user based on their type and email
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         user = await Buyer?.findById(id);
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         user = await Supplier?.findById(id);
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         user = await Admin?.findById(id);
       }
 
@@ -1243,18 +1244,18 @@ module.exports = {
       let updateProfile;
 
       // Update the password based on the user type
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         updateProfile = await Buyer?.findOneAndUpdate(
           { $set: { password: hashedPassword } },
           { new: true }
         );
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         updateProfile = await Supplier?.findOneAndUpdate(
           { contact_person_email: email },
           { $set: { password: hashedPassword } },
           { new: true }
         );
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         updateProfile = await Admin?.findOneAndUpdate(
           { email: email },
           { $set: { password: hashedPassword } },
@@ -1462,7 +1463,7 @@ module.exports = {
   updateProfileAndSendEditRequest: async (req, res) => {
     try {
       const { id } = req?.params;
-      const { user_type } = req?.headers;
+      const { usertype } = req?.headers;
       const {
         name = null, // contact person name
         email = null, // contact person email
@@ -1476,11 +1477,11 @@ module.exports = {
 
       // check whether user exists or not
       let user;
-      if (user_type === "Buyer") {
+      if (usertype === "Buyer") {
         user = await Buyer?.findById(id);
-      } else if (user_type === "Supplier") {
+      } else if (usertype === "Supplier") {
         user = await Supplier?.findById(id);
-      } else if (user_type === "Admin") {
+      } else if (usertype === "Admin") {
         user = await Admin?.findById(id);
       }
 
@@ -1497,7 +1498,7 @@ module.exports = {
         ?.replaceAll(" ", "");
 
       const changePersonalDetails =
-        user_type === "Buyer"
+        usertype === "Buyer"
           ? user?.contact_person_name !== name ||
             user?.contact_person_email !== email ||
             user?.contact_person_country_code !== userCountryCode ||
@@ -1697,7 +1698,7 @@ module.exports = {
       if (changePersonalDetails && sendRequestToAdmin) {
         const updateProfile = await updateProfileDetails(
           user,
-          user_type,
+          usertype,
           name,
           email,
           phone,
@@ -1714,7 +1715,7 @@ module.exports = {
 
         const newProfileEditReq = await sendProfileEditRequest(
           user,
-          user_type,
+          usertype,
           { ...changedUpdatedddress.newObj, type: "Registered" }
         );
         if (!newProfileEditReq) {
@@ -1737,7 +1738,7 @@ module.exports = {
       if (changePersonalDetails && !sendRequestToAdmin) {
         const updateProfile = await updateProfileDetails(
           user,
-          user_type,
+          usertype,
           name,
           email,
           phone,
@@ -1763,7 +1764,7 @@ module.exports = {
       if (!changePersonalDetails && sendRequestToAdmin) {
         const newProfileEditReq = await sendProfileEditRequest(
           user,
-          user_type,
+          usertype,
           { ...changedUpdatedddress.newObj, type: "Registered" }
         );
         if (!newProfileEditReq) {
