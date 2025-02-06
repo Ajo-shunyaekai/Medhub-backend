@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Admin = require("../schema/adminSchema");
 const Address = require("../schema/addressSchema");
 const Enquiry = require("../schema/enquiryListSchema");
@@ -251,6 +252,7 @@ const getOrderHistory = async (req, res) => {
 
 
 const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageReference, stageReferenceType ) => {
+  console.log('herer,',req, id, stageName, stageDate, stageReference, stageReferenceType)
   try {
 
     let filterKey;
@@ -319,5 +321,86 @@ const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageRefer
     return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
   }
 };
+
+// const addStageToOrderHistory = async (req, id, stageName, stageDate, stageReference, stageReferenceType) => {
+//   try {
+//     let filterKey;
+//     switch (stageReferenceType) {
+//       case "Enquiry":
+//         filterKey = "enquiryId";
+//         break;
+//       case "Order":
+//         filterKey = stageName === 'Order Created' ? "enquiryId" : "orderId";
+//         break;
+//       default:
+//         filterKey = "orderId";
+//         break;
+//     }
+
+//     // Validate that id is a valid ObjectId
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       throw new Error(`Invalid ${filterKey}: ${id}`);
+//     }
+
+//     // Find the order history
+//     const orderHistory = await OrderHistory.findOne({ [filterKey]: id });
+//     if (!orderHistory) {
+//       throw new Error(`Order history not found for ${filterKey}: ${id}`);
+//     }
+
+//     const stageDetails = {
+//       name: stageName,
+//       date: stageDate,
+//       referenceId: stageReference,
+//       referenceType: stageReferenceType,
+//     };
+
+//     // Only add additional stage details for pick up details
+//     let updateFields = {
+//       $push: { stages: stageDetails }
+//     };
+
+//     if (stageName === 'Pick up Details Submitted') {
+//       const additionalStageDetails = {
+//         name: "Logistics Request Sent",
+//         date: new Date(stageDate.getTime() + 2 * 60 * 1000),
+//         referenceId: stageReference,
+//         referenceType: stageReferenceType,
+//       };
+//       updateFields.$push.stages = [stageDetails, additionalStageDetails];
+//     }
+
+//     // Set orderId if needed
+//     if (stageReferenceType === 'Order' && stageName === "Order Created") {
+//       updateFields.$set = { orderId: stageReference };
+//     }
+
+//     const updatedOrderHistory = await OrderHistory.findByIdAndUpdate(
+//       orderHistory._id,
+//       updateFields,
+//       { new: true }
+//     );
+
+//     if (!updatedOrderHistory) {
+//       throw new Error('Failed to update order history');
+//     }
+
+//     return {
+//       message: "Successfully added stage to Order History!",
+//       orderHistory: updatedOrderHistory,
+//     };
+
+//   } catch (error) {
+//     console.error("Error in addStageToOrderHistory:", error);
+    
+//     // Since we removed the dependency on res, return an error object
+//     return {
+//       success: false,
+//       message: error.message || "An unexpected error occurred while updating order history",
+//       error: error
+//     };
+//   }
+// };
+
 
 module.exports = { getOrderHistory, addStageToOrderHistory };

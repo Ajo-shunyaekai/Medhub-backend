@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order    = require('../schema/orderSchema')
 const Support  = require('../schema/supportSchema')
 const Invoice  = require('../schema/invoiceNumberSchema')
@@ -7,7 +8,7 @@ const Buyer        = require('../schema/buyerSchema')
 const Supplier     = require('../schema/supplierSchema')
 const Notification = require('../schema/notificationSchema')
 const PurchaseOrder = require('../schema/purchaseOrderSchema')
-const Address = require("../schema/addressSchema");
+const {Address, UserAddress} = require("../schema/addressSchema");
 const Logistics = require('../schema/logisticsSchema')
 const {Medicine} = require('../schema/medicineSchema')
 const nodemailer         = require('nodemailer');
@@ -126,7 +127,7 @@ module.exports = {
       }
         
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-            // const updatedOrderHistory = await addStageToOrderHistory(updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
+            // const updatedOrderHistory = await addStageToOrderHistory(null, updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
          const updatedPO = await PurchaseOrder.findOneAndUpdate(
             { purchaseOrder_id : reqObj.purchaseOrder_id },
             {
@@ -238,142 +239,115 @@ module.exports = {
     },
 
     //new code
-    // bookLogistics: async (req, res, reqObj, callback) => {
-    //   try {
-    //     const { buyer_id, supplier_id, order_id, buyer_logistics_data, is_registered } = reqObj;
-    //     const {full_name, email, mobile_number, house_name, locality, city, state, country, pincode, type } = reqObj.buyer_logistics_data
-    
-    //     if (!buyer_id || !supplier_id || !order_id || !buyer_logistics_data) {
-    //       return callback({ code: 400, message: 'Missing required fields', result: null });
-    //     }
-
-    //     const buyer = await Buyer.findOne({ buyer_id });
-    //     if (!buyer) {
-    //       return callback({ code: 404, message: 'Buyer not found', result: null });
-    //     }
-    //     const supplier = await Supplier.find({ supplier_id });
-    //     if (!supplier) {
-    //       return callback({ code: 404, message: 'Supplier not found', result: null });
-    //     }
-    //     // const address = await Address.findOne({ user_id: buyer_id });
-    //     if(!is_registered) {
-    //       const newAddress = new Address({
-    //         user_id: buyer?._id,
-    //         full_name,
-    //         email,
-    //         mobile_number,
-    //         house_name,
-    //         locality,
-    //         city,
-    //         state,
-    //         country,
-    //         pincode,
-    //         type,
-    //         // isDefault,
-    //     });
-    //     await newAddress.save();
-    //     }
-       
-
-    //     const updatedOrder = await Order.findOneAndUpdate(
-    //       { order_id },
-    //       {
-    //         $set: {
-    //           buyer_logistics_data,
-    //           status: 'Awaiting Details from Supplier',
-    //         },
-    //       },
-    //       { new: true }
-    //     );
-    
-    //     if (!updatedOrder) {
-    //       return callback({ code: 404, message: 'Order not found', result: null });
-    //     }
-    //     //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-    //     const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
-
-    //   //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-    //   //   const newNotification = new Notification({
-    //   //     notification_id : notificationId,
-    //   //     event_type      : 'Logistics booking request',
-    //   //     event           : 'order',
-    //   //     from            : 'buyer',
-    //   //     to              : 'supplier',
-    //   //     from_id         : buyer_id,
-    //   //     to_id           : supplier_id,
-    //   //     event_id        : order_id,
-    //   //     message         : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
-    //   //     status          : 0
-    //   //   })
-    //   //  await newNotification.save()
-
-    // // const body = `Hello ${supplier.supplier_name}, <br />
-    // //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
-    // //               <br /><br />
-    // //               Thanks & Regards <br />
-    // //               MedHub Global Team`;
-
-    // // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
-    
-    //     // Success response
-    //     // return callback(null, {
-    //     //   code: 200,
-    //     //   message: 'Logistics request submitted successfully',
-    //     //   result: updatedOrder,
-    //     // });
-    //     callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
-    //   } catch (error) {
-    //     // Error handling
-    //     console.error('Error in bookLogistics:', error);
-    //     return callback({
-    //       code: 500,
-    //       message: 'Internal Server Error',
-    //       result: null,
-    //     });
-    //   }
-    // },
-
-
-    //old code
-
-
     bookLogistics: async (req, res, reqObj, callback) => {
       try {
+        const { buyer_id, order_id, buyer_logistics_data, full_name, mobile_number, 
+               company_reg_address, locality, land_mark, city, state, country, pincode, 
+               mode_of_transport, address_type, extra_services } = reqObj;
+        // const {full_name, email, mobile_number, company_reg_address, locality, land_mark, city, state, country, pincode, adderssType } = reqObj.buyer_logistics_data
+    console.log('reqObj',reqObj)
+        if (!mongoose.Types.ObjectId.isValid(buyer_id)) {
+          return callback({ code: 400, message: 'Invalid buyer ID', result: null });
+        }
+    
+        if (!buyer_id || !order_id) {
+          return callback({ code: 400, message: 'Missing required fields', result: null });
+        }
+        const order = await Order.findOne({ order_id });
+        if (!order) {
+          return callback({ code: 404, message: 'Order not found', result: null });
+        }
+        const buyer = await Buyer.findById(buyer_id);
+        if (!buyer) {
+          return callback({ code: 404, message: 'Buyer not found', result: null });
+        }
         
-        const { buyer_id, supplier_id, order_id, logistics_details } = reqObj
-        const logisticsArray = Array.isArray(logistics_details) ? logistics_details : [logistics_details];
-
-        const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-        const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+        // const address = await Address.findOne({ user_id: buyer_id });
+        if(address_type !== 'Registered') {
+          console.log('address_type',address_type);
+          
+          const newAddress = new Address({
+            user_id: buyer?._id,
+            full_name,
+            // email,
+            mobile_number,
+            company_reg_address,
+            locality,
+            land_mark,
+            city,
+            state,
+            country,
+            pincode,
+            address_type: address_type,
+            // isDefault,
+        });
+        let userAddress = await UserAddress.findOne({ userId: buyer._id });
+      
+      if (userAddress) {
+        // Add new address to existing addresses array
+        userAddress.addresses.push(newAddress);
+        userAddress.default = newAddress._id;
+        await userAddress.save();
+      } else {
+        // Create new UserAddress document with initial address
+        userAddress = new UserAddress({
+          userId: buyer_id,
+          addresses: [newAddress],
+          default: newAddress._id,
+        });
+        await userAddress.save();
+      }
+        // await newAddress.save();
+        }
+        // return false
 
         const updatedOrder = await Order.findOneAndUpdate(
-          { order_id : order_id },
+          { order_id },
           {
-              $set: {
-                logistics_details : logisticsArray,
-                status            : 'Awaiting Details from Supplier'
-              }
+            $set: {
+              buyer_logistics_data: {
+                full_name,
+                mobile_number,
+                company_reg_address,
+                locality,
+                land_mark,
+                state ,
+                city ,
+                country ,
+                pincode,
+                address_type,
+                mode_of_transport,
+                extra_services
+              },
+              status: 'Awaiting Details from Supplier',
+            },
           },
-          { new: true } 
-      );
-      if (!updatedOrder) {
+          { new: true }
+        );
+    
+        if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
-      }
+        }
+        console.log('updatedOrder',updatedOrder)
+        // return false
+        //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
+        // const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
 
-      const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-      const newNotification = new Notification({
-        notification_id : notificationId,
-        event_type      : 'Logistics booking request',
-        event           : 'order',
-        from            : 'buyer',
-        to              : 'supplier',
-        from_id         : buyer_id,
-        to_id           : supplier_id,
-        event_id        : order_id,
-        message         : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
-        status          : 0
-    })
-    await newNotification.save()
+        
+      //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+      //   const newNotification = new Notification({
+      //     notification_id : notificationId,
+      //     event_type      : 'Logistics booking request',
+      //     event           : 'order',
+      //     from            : 'buyer',
+      //     to              : 'supplier',
+      //     from_id         : buyer_id,
+      //     to_id           : order?.supplier_id,
+      //     event_id        : order_id,
+      //     message         : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
+      //     status          : 0
+      //   })
+      //  await newNotification.save()
 
     // const body = `Hello ${supplier.supplier_name}, <br />
     //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
@@ -382,16 +356,88 @@ module.exports = {
     //               MedHub Global Team`;
 
     // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
-     
-    callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
-
+    
+        // Success response
+        // return callback(null, {
+        //   code: 200,
+        //   message: 'Logistics request submitted successfully',
+        //   result: updatedOrder,
+        // });
+        callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
       } catch (error) {
-        console.log("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        // Error handling
+        console.error('Error in bookLogistics:', error);
+        return callback({
+          code: 500,
+          message: 'Internal Server Error',
+          result: null,
+        });
       }
     },
+
+
+    //old code
+
+
+    // bookLogistics: async (req, res, reqObj, callback) => {
+    //   try {
+        
+    //     const { buyer_id, supplier_id, order_id, logistics_details } = reqObj
+    //     const logisticsArray = Array.isArray(logistics_details) ? logistics_details : [logistics_details];
+
+    //     const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+    //     const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+
+    //     const updatedOrder = await Order.findOneAndUpdate(
+    //       { order_id : order_id },
+    //       {
+    //           $set: {
+    //             logistics_details : logisticsArray,
+    //             status            : 'Awaiting Details from Supplier'
+    //           }
+    //       },
+    //       { new: true } 
+    //   );
+    //   if (!updatedOrder) {
+    //       return callback({ code: 404, message: 'Order not found', result: null });
+    //   }
+
+    //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+    //   const newNotification = new Notification({
+    //     notification_id : notificationId,
+    //     event_type      : 'Logistics booking request',
+    //     event           : 'order',
+    //     from            : 'buyer',
+    //     to              : 'supplier',
+    //     from_id         : buyer_id,
+    //     to_id           : supplier_id,
+    //     event_id        : order_id,
+    //     message         : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
+    //     status          : 0
+    // })
+    // await newNotification.save()
+
+    // // const body = `Hello ${supplier.supplier_name}, <br />
+    // //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
+    // //               <br /><br />
+    // //               Thanks & Regards <br />
+    // //               MedHub Global Team`;
+
+    // // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
+     
+    // callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
+
+    //   } catch (error) {
+    //     console.log("Internal Server Error:", error);
+    //     logErrorToFile(error, req);
+    //     return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+    //   }
+    // },
     
+
+
+
+
     //new code
     // submitPickupDetails: async (req, res, reqObj, callback) => {
     //   try {
@@ -3139,12 +3185,14 @@ module.exports = {
                 created_at        : 1,
                 totalPrice        : 1,
                 invoices           : 1,
+                "supplier._id" : 1,
                 "supplier.supplier_image" : 1,
                 "supplier.supplier_name"  : 1,
                 "supplier.supplier_type"  : 1,
                 "supplier.estimated_delivery_time"  : 1,
                 "enquiry.enquiry_id"  : 1,
                 "enquiry.payment_terms"  : 1,
+                "buyer._id" : 1,
                 "buyer.buyer_image" : 1,
                 "buyer.buyer_name" : 1,
                 "buyer.buyer_email" : 1,
@@ -3353,11 +3401,13 @@ module.exports = {
                 created_at        : 1,
                 totalPrice        : 1,
                 invoices          : 1,
+                "supplier._id" : 1,
                 "supplier.supplier_image" : 1,
                 "supplier.supplier_name"  : 1,
                 "supplier.supplier_type"  : 1,
                 "enquiry.enquiry_id"      : 1,
                 "enquiry.payment_terms"   : 1,
+                "buyer._id" : 1,
                 "buyer.buyer_image"       : 1,
                 "buyer.buyer_name"        : 1,
                 "buyer.buyer_email"       : 1,

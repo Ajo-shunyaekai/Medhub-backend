@@ -9,15 +9,15 @@ const { sendErrorResponse } = require("../utils/commonResonse");
 
 const getAddress = async (req, res) => {
   try {
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
-
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
+console.log('getAddress')
     let user = undefined;
 
-    if (user_type === "Admin") {
+    if (usertype === "Admin") {
       user = await Admin?.findOne({ admin_id });
-    } else if (user_type === "Supplier") {
+    } else if (usertype === "Supplier") {
       user = await Supplier?.findOne({ supplier_id });
-    } else if (user_type === "Buyer") {
+    } else if (usertype === "Buyer") {
       user = await Buyer?.findOne({ buyer_id });
     }
 
@@ -33,7 +33,6 @@ const getAddress = async (req, res) => {
     const updatedAddress = {
       ...address, // Convert address to plain object to safely spread
       userAddress: [
-        ...(address.addresses || []), // Ensure addresses is an array or empty array if not present
         {
           full_name: user?.contact_person_name,
           mobile_number:
@@ -56,6 +55,8 @@ const getAddress = async (req, res) => {
               (user?.contact_person_mobile || user?.contact_person_mobile_no),
             ...user?.supplier_address,
           },
+        ...(address.addresses || []), // Ensure addresses is an array or empty array if not present
+        
       ],
     };
 
@@ -77,7 +78,7 @@ const getAddress = async (req, res) => {
 
 const addAddress = async (req, res) => {
   try {
-    const { user_type, admin_id, supplier_id, buyer_id } = req?.headers;
+    const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     const {
       full_name,
       mobile_number,
@@ -106,13 +107,13 @@ const addAddress = async (req, res) => {
         .send({ message: "All required address fields must be provided" });
     }
 
-    // Find the corresponding user based on user_type
+    // Find the corresponding user based on usertype
     let user = undefined;
-    if (user_type === "Admin") {
+    if (usertype === "Admin") {
       user = await Admin.findOne({ admin_id });
-    } else if (user_type === "Supplier") {
+    } else if (usertype === "Supplier") {
       user = await Supplier.findOne({ supplier_id });
-    } else if (user_type === "Buyer") {
+    } else if (usertype === "Buyer") {
       user = await Buyer.findOne({ buyer_id });
     }
 
