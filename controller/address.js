@@ -33,7 +33,6 @@ const getAddress = async (req, res) => {
     const updatedAddress = {
       ...address, // Convert address to plain object to safely spread
       userAddress: [
-        ...(address.addresses || []), // Ensure addresses is an array or empty array if not present
         {
           full_name: user?.contact_person_name,
           mobile_number:
@@ -56,6 +55,8 @@ const getAddress = async (req, res) => {
               (user?.contact_person_mobile || user?.contact_person_mobile_no),
             ...user?.supplier_address,
           },
+        ...(address.addresses || []), // Ensure addresses is an array or empty array if not present
+        
       ],
     };
 

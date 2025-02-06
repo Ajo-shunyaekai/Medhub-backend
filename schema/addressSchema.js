@@ -33,7 +33,7 @@ const addressSchema = new mongoose.Schema(
       required: [true, "Country is required for address"],
     },
     pincode: { type: String },
-    type: {
+    address_type: {
       type: String,
       enum: ["Company", "Shop", "Warehouse", "Factory", "Other"],
       default: "Company",

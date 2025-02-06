@@ -216,7 +216,6 @@ module.exports = {
   checkCommonUserAuthentication: async (req, res, next) => {
     const { accesstoken, usertype,  supplier_id, seller_id, buyer_id, client_id } = req.headers;
     // const { supplier_id, seller_id, admin_id, buyer_id, supplierId } = req.body;
-    console.log('checkCommonUserAuthentication', req)
     const admin_id = req.headers?.admin_id ||req?.body?.admin_id
     try {
       let user = null;

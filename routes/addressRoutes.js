@@ -5,7 +5,7 @@ const { addressValidationRules, handleValidationErrors } = require('../middlewar
 
 const router = express.Router();
 
-router.post("/:id", checkAuthorization, checkCommonUserAuthentication, getAddress);
+router.post("/get-address", checkAuthorization, checkCommonUserAuthentication, getAddress);
 router.post("/add", checkAuthorization, checkCommonUserAuthentication, addressValidationRules,handleValidationErrors, addAddress);
 router.post("/:id/edit/:addressId", checkAuthorization, checkCommonUserAuthentication, addressValidationRules,handleValidationErrors, editAddress);
 router.post("/:id/delete/:addressId", checkAuthorization, checkCommonUserAuthentication, deleteAddress);
