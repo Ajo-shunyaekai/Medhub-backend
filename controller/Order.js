@@ -262,43 +262,53 @@ module.exports = {
           return callback({ code: 404, message: 'Buyer not found', result: null });
         }
         
-        // const address = await Address.findOne({ user_id: buyer_id });
-        if(address_type !== 'Registered') {
-          console.log('address_type',address_type);
-          
-          const newAddress = new Address({
-            user_id: buyer?._id,
-            full_name,
-            // email,
-            mobile_number,
-            company_reg_address,
-            locality,
-            land_mark,
-            city,
-            state,
-            country,
-            pincode,
-            address_type: address_type,
-            // isDefault,
-        });
-        let userAddress = await UserAddress.findOne({ userId: buyer._id });
-      
-      if (userAddress) {
-        // Add new address to existing addresses array
-        userAddress.addresses.push(newAddress);
-        userAddress.default = newAddress._id;
-        await userAddress.save();
-      } else {
-        // Create new UserAddress document with initial address
-        userAddress = new UserAddress({
-          userId: buyer_id,
-          addresses: [newAddress],
-          default: newAddress._id,
-        });
-        await userAddress.save();
-      }
-        // await newAddress.save();
+        // Handle address
+    let userAddress = await UserAddress.findOne({ userId: buyer._id });
+
+    if (address_type !== 'Registered') {
+      // Check if this address already exists
+      const addressExists = userAddress?.addresses.some(addr => 
+        addr.full_name === full_name &&
+        addr.mobile_number === mobile_number &&
+        addr.company_reg_address === company_reg_address &&
+        addr.locality === locality &&
+        addr.city === city &&
+        addr.country === country
+      );
+
+      // Only add new address if it doesn't exist
+      if (!addressExists) {
+        const newAddress = {
+          full_name,
+          mobile_number,
+          company_reg_address,
+          locality,
+          land_mark,
+          city,
+          state,
+          country,
+          pincode,
+          address_type,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        if (userAddress) {
+          // Add new address to existing addresses array
+          userAddress.addresses.push(newAddress);
+          userAddress.default = newAddress._id;
+          await userAddress.save();
+        } else {
+          // Create new UserAddress document
+          userAddress = new UserAddress({
+            userId: buyer_id,
+            addresses: [newAddress],
+            default: newAddress._id,
+          });
+          await userAddress.save();
         }
+      }
+    }
         // return false
 
         const updatedOrder = await Order.findOneAndUpdate(
@@ -3207,7 +3217,7 @@ module.exports = {
           data = await Order.aggregate([
             {
                 $match: { 
-                    order_id     : order_id,
+                    order_id  : order_id,
                     // buyer_id     : buyer_id,
                     // order_status : filterKey
                 }
@@ -3627,6 +3637,7 @@ module.exports = {
                 created_at        : 1,
                 totalPrice        : 1,
                 invoices          : 1,
+                "supplier._id" : 1,
                 "supplier.supplier_image"              : 1,
                 "supplier.supplier_name"               : 1,
                 "supplier.supplier_email"              : 1,

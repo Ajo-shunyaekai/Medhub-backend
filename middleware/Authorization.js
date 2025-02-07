@@ -237,7 +237,6 @@ module.exports = {
       if (user.status === 0) {
         return res.status(400).send({ message: "Access Denied" });
       }
-  
       next();
     } catch (error) {
       console.log("Internal Server Error:", error);
