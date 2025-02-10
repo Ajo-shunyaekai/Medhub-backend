@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const logisticsPartnerSchema = new mongoose.Schema(
   {
-    client_id: {
+    partner_id: {
       type: String,
       required: true,
       unique: true,

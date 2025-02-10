@@ -32,7 +32,7 @@ const { sendErrorResponse } = require('./utils/commonResonse');
 const { rateLimiter } = require('./middleware/expressRateLimiter');
 
 const addressRoutes   = require(`./routes/addressRoutes`)
-// const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
+const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
 
 
 //-----------------   routes   -----------------------//
@@ -140,7 +140,7 @@ app.use(`/api/auth`,authRoutes)
 
 // app.use(`/api/order-history`,orderHistoryRoutes)
 app.use('/api/address', addressRoutes)
-// app.use('/api/logistics', logisticsRoutes);
+app.use('/api/logistics', logisticsRoutes);
 
 app.use('/api/user', userRouter);
 app.use('/api/admin', adminRouter);

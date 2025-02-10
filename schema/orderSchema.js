@@ -223,6 +223,7 @@ const buyerLogisticsSchema = new Schema({
 
 const billOfMaterialSchema = new Schema({
     products: [{
+        product_id     : { type: String, required: true }, 
         product_name   : { type: String, required: true }, 
         quantity       : { type: Number, required: true },     
         no_of_packages : { type: Number, required: true } 
@@ -245,15 +246,15 @@ const packageInformationSchema = new Schema({
 
 const supplierLogisticsSchema = new Schema({
     full_name           : { type: String, required: true },
-    email               : { type: String, required: true },
     mobile_number       : { type: String, required: true },
-    house_name          : { type: String, required: true },
+    company_reg_address : { type: String, required: true },
     locality            : { type: String, required: true },
+    land_mark           : { type: String },
     country             : { type: String, required: true },
-    state               : { type: String, required: true },
-    city                : { type: String, required: true },
-    pincode             : { type: String, required: true },
-    address_type     : { type: String, enum: ['Warehouse', 'Shop', 'Other'], required: true },
+    state               : { type: String },
+    city                : { type: String },
+    pincode             : { type: String},
+    address_type        : { type: String, enum: ['Warehouse', 'Factory', 'Shop', 'Other'], required: true },
     bill_of_material    : billOfMaterialSchema, 
     package_information : packageInformationSchema ,
     pickup_date         : { type: String, required: true},
