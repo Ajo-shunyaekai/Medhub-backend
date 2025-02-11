@@ -133,33 +133,6 @@ const addLogisticsPartner = async (req, res) => {
   }
 };
 
-// const getLogisticsList =  async (req, res) => {
-//   try {
-//     console.log('getLogisticsList', req.headers)
-//     console.log('req.query', req.query)
-//     const {client_id, status, pageNo, pageSize} = req.query
-//     const page_no   = pageNo || 1
-//     const page_size = pageSize || 1
-//     const offset    = (page_no - 1) * page_size
-
-//     const data = await Logistics.find({ status }).skip(offset).limit(pageSize);
-//     const totalItems = await Logistics.countDocuments({ status });
-//     const totalPages = Math.ceil(totalItems / pageSize);
-//     res.status(200).json({
-//         message: 'Logistics list fetched successfully',
-//         result: {
-//             data,
-//             totalPages,
-//             totalItems,
-//         },
-//     })
-//   } catch (error) {
-//     console.log("Internal Server Error:", error);
-//     logErrorToFile(error, req);
-//     return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
-//   }
-// };
-
 const getLogisticsList = async (req, res) => {
   try {
     console.log("getLogisticsList", req.headers);
@@ -172,6 +145,7 @@ const getLogisticsList = async (req, res) => {
 
     const data = await Logistics.aggregate([
       { $match: { status } },
+      { $sort: { createdAt: -1 } }, // Sorting in descending order
       { $skip: offset },
       { $limit: page_size },
       {
@@ -236,7 +210,7 @@ const getLogisticsList = async (req, res) => {
 
 const getLogisticsDetails = async (req, res) => {
   const { partnerId, requestId } = req.params;
-  console.log('getLogisticsDetails', req.params)
+
   try {
     const logisticsDetails = await Logistics.aggregate([
       {
@@ -259,6 +233,63 @@ const getLogisticsDetails = async (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
+      {
+        $lookup: {
+          from: "buyers",
+          localField: "buyerId",
+          foreignField: "_id",
+          as: "buyerDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$buyerDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "suppliers",
+          localField: "supplierId",
+          foreignField: "_id",
+          as: "supplierDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$supplierDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          logistics_id: 1,
+          enquiry_id: 1,
+          purchaseOrder_id: 1,
+          orderId: 1,
+          status: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          orderDetails: 1,
+          buyerDetails: {
+            buyer_name: 1,
+            contact_person_name: 1,
+            contact_person_email: 1,
+            contact_person_country_code: 1,
+            contact_person_mobile: 1,
+            buyer_type: 1,
+          },
+          supplierDetails: {
+            supplier_name: 1,
+            contact_person_name: 1,
+            contact_person_email: 1,
+            contact_person_country_code: 1,
+            contact_person_mobile_no: 1,
+            supplier_type: 1,
+          },
+        },
+      },
     ]);
 
     if (!logisticsDetails.length) {
@@ -266,12 +297,12 @@ const getLogisticsDetails = async (req, res) => {
         .status(404)
         .json({ message: "No logistics details found for the provided IDs" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Logistics details fetched successfully",
-        result: logisticsDetails[0],
-      });
+
+    res.status(200).json({
+      code: 200,
+      message: "Logistics details fetched successfully",
+      result: logisticsDetails[0],
+    });
   } catch (error) {
     console.log("Internal Server Error:", error);
     logErrorToFile(error, req);
@@ -283,6 +314,7 @@ const getLogisticsDetails = async (req, res) => {
     );
   }
 };
+
 
 const updateLogisticsDetails = async (req, res) => {
   try {
