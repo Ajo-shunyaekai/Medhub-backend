@@ -133,6 +133,37 @@ const addLogisticsPartner = async (req, res) => {
   }
 };
 
+const getLogisticsDashboardData = async (req, res) => {
+  try {
+    console.log("getLogisticsStatusCount", req.headers);
+
+    const statusCounts = await Logistics.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Convert aggregation result into an object
+    const result = {};
+    statusCounts.forEach((item) => {
+      result[item._id] = item.count;
+    });
+
+    res.status(200).json({
+      code: 200,
+      message: "Logistics status count fetched successfully",
+      result,
+    });
+  } catch (error) {
+    console.log("Internal Server Error:", error);
+    return sendErrorResponse(res, 500, "An unexpected error occurred.", error);
+  }
+};
+
+
 const getLogisticsList = async (req, res) => {
   try {
     console.log("getLogisticsList", req.headers);
@@ -316,7 +347,7 @@ const getLogisticsDetails = async (req, res) => {
 };
 
 
-const updateLogisticsDetails = async (req, res) => {
+const updateLogisticsRequest = async (req, res) => {
   try {
     const { logisticsId, pickup_time, pickup_date, orderId } = req.body;
 
@@ -327,20 +358,21 @@ const updateLogisticsDetails = async (req, res) => {
       });
     }
 
-    const logistics = await Logistics.findOne({
-      logistics_id: logisticsId,
-      orderId: orderId,
-    });
+    // Find and update the logistics status to 'active'
+    const logistics = await Logistics.findOneAndUpdate(
+      { logistics_id: logisticsId, orderId: orderId },
+      { $set: { status: "active" } },
+      { new: true }
+    );
 
     if (!logistics) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "No logistics details found for the provided logisticsId and orderId",
-        });
+      return res.status(404).json({
+        message:
+          "No logistics details found for the provided logisticsId and orderId",
+      });
     }
 
+    // Update the order with pickup_time and pickup_date
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: orderId },
       {
@@ -358,9 +390,12 @@ const updateLogisticsDetails = async (req, res) => {
         .json({ message: "Order not found or update failed" });
     }
 
-    res
-      .status(200)
-      .json({ message: "Order updated successfully", result: updatedOrder });
+    res.status(200).json({
+      code: 200,
+      message: "Logistics status updated successfully",
+      order: updatedOrder,
+      logistics: logistics,
+    });
   } catch (error) {
     console.log("Internal Server Error:", error);
     logErrorToFile(error, req);
@@ -373,10 +408,12 @@ const updateLogisticsDetails = async (req, res) => {
   }
 };
 
+
 module.exports = {
   login,
   addLogisticsPartner,
+  getLogisticsDashboardData,
   getLogisticsList,
   getLogisticsDetails,
-  updateLogisticsDetails,
+  updateLogisticsRequest,
 };
