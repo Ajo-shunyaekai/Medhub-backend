@@ -697,8 +697,8 @@ module.exports = {
           ? await Supplier.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
-          : usertype == "Seller"
-          ? await Seller.findById(id)?.select(
+          : usertype == "Logistics"
+          ? await LogisticsPartner.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
           : null;
