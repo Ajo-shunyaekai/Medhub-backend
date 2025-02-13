@@ -103,7 +103,7 @@ module.exports = {
                             <li>Registration Date: ${getTodayFormattedDate()}</li>
                           </ul>
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-                          <p>Best regards,<br/>MedHub Global Team</p>
+                          <p>Best regards,<br/>Medhub Global Team</p>
                         `;
               // sendMailFunc(adminEmail, subject, body);
               const recipientEmails = [adminEmail];  // Add more emails if needed
@@ -1320,7 +1320,7 @@ module.exports = {
                                 You can view and respond to this inquiry by logging into your account on our platform. Please take the time to review the buyer's request and provide your response at your earliest convenience.<br /><br />
 
                                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                                 <p>Best regards,<br/>MedHub Global Team</p>
+                                 <p>Best regards,<br/>Medhub Global Team</p>
                         `;
   
                   // await sendMailFunc(supplier_email, subject, body);

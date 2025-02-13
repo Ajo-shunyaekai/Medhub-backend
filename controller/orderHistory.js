@@ -252,7 +252,6 @@ const getOrderHistory = async (req, res) => {
 
 
 const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageReference, stageReferenceType ) => {
-  console.log('herer,',req, id, stageName, stageDate, stageReference, stageReferenceType)
   try {
 
     let filterKey;

@@ -166,7 +166,7 @@ module.exports = {
                     <p><strong>Remaining Quantity:</strong> ${updatedMedicine.total_quantity}</p>
                     <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
                     <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                    <p>Thanks & Regards,<br/>MedHub Global Team</p>
+                    <p>Thanks & Regards,<br/>Medhub Global Team</p>
                 `;
 
                 // await sendMailFunc(recipientEmails, subject, body);
@@ -218,7 +218,7 @@ module.exports = {
                         ${itemsTable}
                         <p>We have begun processing your order and will keep you informed about its status. </p>
                         <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                        <p>Thanks & Regards,<br/>MedHub Global Team</p>
+                        <p>Thanks & Regards,<br/>Medhub Global Team</p>
                         `;
 
                         // Sending the email to multiple recipients (supplier and buyer)
@@ -431,7 +431,7 @@ module.exports = {
     // //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
     // //               <br /><br />
     // //               Thanks & Regards <br />
-    // //               MedHub Global Team`;
+    // //               Medhub Global Team`;
 
     // // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
      
@@ -608,6 +608,13 @@ module.exports = {
     },
     
     
+
+
+//         const body = `Hello ${buyer.buyer_name}, <br />
+//         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
+//         <br /><br />
+//         Thanks & Regards <br />
+//         Medhub Global Team`;
 
 
     //old code

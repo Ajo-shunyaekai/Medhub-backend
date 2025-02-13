@@ -122,7 +122,7 @@ module.exports = {
             <br /><br />
             <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
             Thanks & Regards <br />
-            MedHub Global Team`;
+            Medhub Global Team`;
 
             const recipientEmails = [buyer.buyer_email,];
             await sendMailFunc(recipientEmails.join(','), subject, body);
@@ -223,7 +223,7 @@ module.exports = {
             <br /><br />
             <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
             Thanks & Regards <br />
-            MedHub Global Team`;
+            Medhub Global Team`;
 
             const recipientEmails = [supplier.supplier_email, 'ajo@shunyaekai.tech'];
             await sendMailFunc(recipientEmails.join(','), subject, body);

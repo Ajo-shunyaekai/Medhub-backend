@@ -417,7 +417,7 @@ module.exports = {
                                 <br /><br />
                                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                                 Thanks & Regards <br />
-                                MedHub Global Team`;
+                                Medhub Global Team`;
   
                   await sendMailFunc(buyer.buyer_email, 'Quotation Received!', body);
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
@@ -514,7 +514,7 @@ module.exports = {
                                 <br /><br />
                                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                                 Thanks & Regards <br />
-                                MedHub Global Team`;
+                                Medhub Global Team`;
   
             await sendMailFunc(supplier.supplier_email, 'Inquiry Cancelled!', body);
             callback({ code: 200, message: 'Inquiry Cancelled Successfully', result: updatedEnquiry });

@@ -861,7 +861,7 @@ module.exports = {
         //         Your Login Password is: ${password} <br />
         //         <br /><br />
         //         Thanks & Regards <br />
-        //         MedHub Global Team`;
+        //         Medhub Global Team`;
         //         const recipientEmails = [updateProfile.supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
         //         await sendMailFunc(recipientEmails.join(','), subject, body);
 
@@ -882,7 +882,7 @@ module.exports = {
                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
  
                 Best regards, <br />
-                <strong>MedHub Global Team</strong>
+                <strong>Medhub Global Team</strong>
                 `;
 
         // Sending the email to multiple recipients
@@ -905,7 +905,7 @@ module.exports = {
         //   If you believe this is an error, please contact our support team. <br />
         //   <br /><br />
         //   Thanks & Regards <br />
-        //   MedHub Global Team`;
+        //   Medhub Global Team`;
 
         // sendMailFunc(updateProfile.supplier_email, 'Registration Request Rejected', body);
 
@@ -1285,7 +1285,7 @@ module.exports = {
                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
  
                 Best regards, <br />
-                <strong>Team MedHub Global Team</strong>
+                <strong>Team Medhub Global Team</strong>
                 `;
 
         // Sending the email to multiple recipients
@@ -1306,7 +1306,7 @@ module.exports = {
         //   If you believe this is an error, please contact our support team. <br />
         //   <br /><br />
         //   Thanks & Regards <br />
-        //   MedHub Global Team`;
+        //   Medhub Global Team`;
 
         // sendMailFunc(updateStatus.buyer_email, 'Registration Request Rejected', body);
 
@@ -2678,7 +2678,7 @@ module.exports = {
                       If you require further assistance or have any queries, feel free to contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>. <br /><br />
                       Thank you for being a valued partner. <br /><br />
                       Best regards, <br />
-                      <strong>MedHub Global Team</strong>`;
+                      <strong>Medhub Global Team</strong>`;
 
         // Determine event type based on medicine_type
         event =
@@ -3170,7 +3170,7 @@ module.exports = {
                           <br /><br />
                           <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                           Thanks & Regards, <br />
-                          MedHub Global Team`;
+                          Medhub Global Team`;
 
           // Send the email to the supplier
           await sendMailFunc(supplier.supplier_email, subject, body);
