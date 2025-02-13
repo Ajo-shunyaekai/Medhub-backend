@@ -1,11 +1,13 @@
-const { body } = require("express-validator");
+const { body, validationResult } = require("express-validator");
+const { sendErrorResponse } = require("../../utils/commonResonse");
+const logErrorToFile = require("../../logs/errorLogs");
 
 const addressValidationRules = [
-  body("fullName")
+  body("full_name")
     .notEmpty()
     .withMessage("Full name is required"),
 
-  body("phone").notEmpty().withMessage("Phone number is required"),
+  body("mobile_number").notEmpty().withMessage("Phone number is required"),
 
   body("company_reg_address")
     .notEmpty()
@@ -21,9 +23,13 @@ const addressValidationRules = [
     .notEmpty()
     .withMessage("Country is required"),
 
-  body("postalCode").optional(),
+  body("state").optional(),
 
-  body("type")
+  body("city").optional(),
+
+  body("pincode").optional(),
+
+  body("address_type")
     .notEmpty()
     .withMessage("Address type is required")
     .isIn(["Company", "Shop", "Warehouse", "Factory", "Other"])
@@ -35,11 +41,14 @@ const addressValidationRules = [
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
+  console.log('errors')
   if (!errors.isEmpty()) {
+    
     console.log("Internal Server Error:", errors.array());
     logErrorToFile(errors.array(), req);
     return sendErrorResponse(res, 400, "Validation Error", errors.array());
   }
+  
   next();
 };
 

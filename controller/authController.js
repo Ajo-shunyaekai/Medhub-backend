@@ -8,6 +8,8 @@ const User = require("../schema/userSchema");
 const Order = require("../schema/orderSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
+const LogisticsPartner   = require('../schema/logisticsCompanySchema')
+const Logistics = require('../schema/logisticsSchema');
 const List = require("../schema/addToListSchema");
 const BuyerEdit = require("../schema/buyerEditSchema");
 const SupplierEdit = require("../schema/supplierEditSchema");
@@ -611,8 +613,8 @@ module.exports = {
           ? await Admin.findOne({ email })
           : usertype === "Supplier"
           ? await Supplier.findOne({ contact_person_email: email })
-          : usertype === "Seller"
-          ? await Seller.findOne({ email })
+          : usertype === "Logistics"
+          ? await LogisticsPartner.findOne({ email })
           : null;
 
       if (!user) {
@@ -644,8 +646,8 @@ module.exports = {
           ? await Supplier.findById(user?._id)
               .select("-password -createdAt -updatedAt -__v")
               .lean()
-          : usertype === "Seller"
-          ? await Seller.findById(user?._id)
+          : usertype === "Logistics"
+          ? await LogisticsPartner.findById(user?._id)
               .select("-password -createdAt -updatedAt -__v")
               .lean()
           : null;
@@ -695,8 +697,8 @@ module.exports = {
           ? await Supplier.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
-          : usertype == "Seller"
-          ? await Seller.findById(id)?.select(
+          : usertype == "Logistics"
+          ? await LogisticsPartner.findById(id)?.select(
               "-password -token -createdAt -updatedAt -__v"
             )
           : null;

@@ -18,7 +18,7 @@ module.exports = () => {
 
     routes.post('/book-logistics', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.bookLogistics, req, res));
 
-    routes.post('/submit-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.submitPickupDetails, req, res));
+    routes.post('/submit-pickup-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.submitPickupDetails, req, res));
 
     routes.post('/buyer-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerOrdersList, req, res));
     

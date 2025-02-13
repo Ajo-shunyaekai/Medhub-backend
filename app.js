@@ -14,6 +14,7 @@ const EmailListing = require("./schema/emailListingSchema");
 // require('./schedulers/tasks');
 
 //-----------------   routes   -----------------------//
+
 const userRouter = require("./routes/userRoutes")();
 const adminRouter = require("./routes/adminRoutes")();
 const medicineRouter = require("./routes/medicineRoute")();
@@ -34,7 +35,8 @@ const { corsOptions } = require("./config/corsOptions");
 
 const addressRoutes = require(`./routes/addressRoutes`);
 const subscriptionRoutes = require("./routes/subscriptionRoutes"); // Make sure this file exports the correct routes
-// const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
+const logisticsRoutes = require(`./routes/logisticsPartnerRoutes`)
+
 
 //-----------------   routes   -----------------------//
 
@@ -123,9 +125,11 @@ app.post("/send-email", async (req, res) => {
 app.use(`/api/auth`, authRoutes);
 
 // app.use(`/api/order-history`,orderHistoryRoutes)
+
 app.use("/api/address", addressRoutes);
 app.use("/api/subscription", subscriptionRoutes);
-// app.use('/api/logistics', logisticsRoutes);
+app.use('/api/logistics', logisticsRoutes);
+
 
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);

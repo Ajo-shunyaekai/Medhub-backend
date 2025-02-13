@@ -245,7 +245,7 @@ module.exports = {
                company_reg_address, locality, land_mark, city, state, country, pincode, 
                mode_of_transport, address_type, extra_services } = reqObj;
         // const {full_name, email, mobile_number, company_reg_address, locality, land_mark, city, state, country, pincode, adderssType } = reqObj.buyer_logistics_data
-    ('reqObj',reqObj)
+    console.log('reqObj',reqObj)
         if (!mongoose.Types.ObjectId.isValid(buyer_id)) {
           return callback({ code: 400, message: 'Invalid buyer ID', result: null });
         }
@@ -262,42 +262,53 @@ module.exports = {
           return callback({ code: 404, message: 'Buyer not found', result: null });
         }
         
-        // const address = await Address.findOne({ user_id: buyer_id });
-        if(address_type !== 'Registered') {
-          
-          const newAddress = new Address({
-            user_id: buyer?._id,
-            full_name,
-            // email,
-            mobile_number,
-            company_reg_address,
-            locality,
-            land_mark,
-            city,
-            state,
-            country,
-            pincode,
-            address_type: address_type,
-            // isDefault,
-        });
-        let userAddress = await UserAddress.findOne({ userId: buyer._id });
-      
-      if (userAddress) {
-        // Add new address to existing addresses array
-        userAddress.addresses.push(newAddress);
-        userAddress.default = newAddress._id;
-        await userAddress.save();
-      } else {
-        // Create new UserAddress document with initial address
-        userAddress = new UserAddress({
-          userId: buyer_id,
-          addresses: [newAddress],
-          default: newAddress._id,
-        });
-        await userAddress.save();
-      }
-        // await newAddress.save();
+        // Handle address
+    let userAddress = await UserAddress.findOne({ userId: buyer._id });
+
+    if (address_type !== 'Registered') {
+      // Check if this address already exists
+      const addressExists = userAddress?.addresses.some(addr => 
+        addr.full_name === full_name &&
+        addr.mobile_number === mobile_number &&
+        addr.company_reg_address === company_reg_address &&
+        addr.locality === locality &&
+        addr.city === city &&
+        addr.country === country
+      );
+
+      // Only add new address if it doesn't exist
+      if (!addressExists) {
+        const newAddress = {
+          full_name,
+          mobile_number,
+          company_reg_address,
+          locality,
+          land_mark,
+          city,
+          state,
+          country,
+          pincode,
+          address_type,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        if (userAddress) {
+          // Add new address to existing addresses array
+          userAddress.addresses.push(newAddress);
+          userAddress.default = newAddress._id;
+          await userAddress.save();
+        } else {
+          // Create new UserAddress document
+          userAddress = new UserAddress({
+            userId: buyer_id,
+            addresses: [newAddress],
+            default: newAddress._id,
+          });
+          await userAddress.save();
         }
+      }
+    }
         // return false
 
         const updatedOrder = await Order.findOneAndUpdate(
@@ -327,6 +338,7 @@ module.exports = {
         if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
         }
+        console.log('updatedOrder',updatedOrder)
         // return false
         //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
         // const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
@@ -351,7 +363,7 @@ module.exports = {
     //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
     //               <br /><br />
     //               Thanks & Regards <br />
-    //               Medhub Global Team`;
+    //               MedHub Global Team`;
 
     // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
     
@@ -437,135 +449,166 @@ module.exports = {
 
 
     //new code
-    // submitPickupDetails: async (req, res, reqObj, callback) => {
-    //   try {
-    //     const { buyer_id, supplier_id, order_id, shipment_details, supplier_logistics_data, is_registered } = reqObj;
-    //     const {full_name, email, mobile_number, house_name, locality, city, state, country, pincode, type  } = reqObj.supplier_logistics_data
-    //     const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-    //     const buyer = await Buyer.findOne({ buyer_id: buyer_id });
-    //     const order = await Order.findOne({order_id: order_id})
-
-    //     if (!supplier) {
-    //       return callback({ code: 404, message: 'Supplier not found', result: null });
-    //     }
-
-    //     if (!buyer) {
-    //       return callback({ code: 404, message: 'Buyer not found', result: null });
-    //     }
-    //     if(!is_registered) {
-    //     const newAddress = new Address({
-    //       user_id: supplier?._id,
-    //       full_name,
-    //       email,
-    //       mobile_number,
-    //       house_name,
-    //       locality,
-    //       city,
-    //       state,
-    //       country,
-    //       pincode,
-    //       type,
-    //   });
-    //   await newAddress.save();
-    // }
-
-    //     const updatedOrder = await Order.findOneAndUpdate(
-    //       { order_id: order_id },
-    //       {
-    //         $set: {
-    //           shipment_details: shipment_details,
-    //           supplier_logistics_data: supplier_logistics_data,
-    //           status: 'Shipment Details Submitted',
-    //         },
-    //       },
-    //       { new: true } 
-    //     );
-
-    //     if (!updatedOrder) {
-    //       return callback({ code: 404, message: 'Order not found', result: null });
-    //     }
-    //     const logisticsId = 'LGR-' + Math.random().toString(16).slice(2, 10);
-    //     const newLogisticsRequest = new Logistics({
-    //       logistics_id     : logisticsId,
-    //       enquiry_id       : order.enquiry_id,
-    //       purchaseOrder_id : order.purchaseOrder_id,
-    //       orderId          : order._id,
-    //       supplierId       : supplier._id,
-    //       buyerId          : buyer._id,
-    //       status           : 'P'
-    //     });
-    //     await newLogisticsRequest.save();
-
-    //     //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-    //     const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Pick up Details Submitted', new Date(), newLogisticsRequest?._id, 'Logistics',)
-
-    //     const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-    //     const newNotification = new Notification({
-    //       notification_id: notificationId,
-    //       event_type: 'Shipment details submitted',
-    //       event: 'order',
-    //       from: 'supplier',
-    //       to: 'buyer',
-    //       from_id: supplier_id,
-    //       to_id: buyer_id,
-    //       event_id: order_id,
-    //       message: `Submission Confirmation: The shipment details have been successfully submitted for ${order_id}`,
-    //       status: 0,
-    //     });
-    //     await newNotification.save();
-
-    //     // const body = `Hello ${buyer.buyer_name}, <br />
-    //     // Your logistics details for <strong>${order_id}</strong> have been submitted to our logistics partner.<br />
-    //     // <br /><br />
-    //     // Thanks & Regards <br />
-    //     // Medhub Global Team`;
-    //     // await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
-
-    //     callback({ code: 200, message: 'Updated', result: updatedOrder });
-    //   } catch (error) {
-    //     console.error(error);
-    //     callback({ code: 500, message: 'Internal Server Error' });
-    //   }
-    // },
-
-
-    //old code
     submitPickupDetails: async (req, res, reqObj, callback) => {
+      console.log('REQOBJ',reqObj)
+      // return false
       try {
-        
-        const { buyer_id, supplier_id, order_id, shipment_details } = reqObj
-
-         const supplier = await Supplier.findOne({ supplier_id: supplier_id });
-            const buyer = await Buyer.findOne({ buyer_id: buyer_id });
-
-
-        const updatedOrder = await Order.findOneAndUpdate(
-          { order_id : order_id },
-          {
-              $set: {
-                shipment_details : shipment_details,
-                status           : 'Shipment Details Submitted'
-              }
-          },
-          { new: true } 
-      );
-      if (!updatedOrder) {
+        const {
+          supplier_id, order_id, full_name, mobile_number, company_reg_address, locality,
+          land_mark, city, state, country, pincode, mode_of_transport, address_type, extra_services, bills_of_material, packages, pickup_slot
+        } = reqObj;
+    
+        if (!mongoose.Types.ObjectId.isValid(supplier_id)) {
+          return callback({ code: 400, message: 'Invalid supplier ID', result: null });
+        }
+    
+        if (!supplier_id || !order_id) {
+          return callback({ code: 400, message: 'Missing required fields', result: null });
+        }
+    
+        const order = await Order.findOne({ order_id });
+        if (!order) {
           return callback({ code: 404, message: 'Order not found', result: null });
+        }
+    
+        const supplier = await Supplier.findById(supplier_id);
+        if (!supplier) {
+          return callback({ code: 404, message: 'Supplier not found', result: null });
+        }
+
+        const buyer = await Buyer.findOne({buyer_id: order.buyer_id});
+        if (!buyer) {
+          return callback({ code: 404, message: 'BUyer not found', result: null });
+        }
+    
+           // Handle address
+    let userAddress = await UserAddress.findOne({ userId: supplier._id });
+
+    if (address_type !== 'Registered') {
+      // Check if this address already exists
+      const addressExists = userAddress?.addresses.some(addr => 
+        addr.full_name === full_name &&
+        addr.mobile_number === mobile_number &&
+        addr.company_reg_address === company_reg_address &&
+        addr.locality === locality &&
+        addr.city === city &&
+        addr.country === country
+      );
+
+      // Only add new address if it doesn't exist
+      if (!addressExists) {
+        const newAddress = {
+          full_name,
+          mobile_number,
+          company_reg_address,
+          locality,
+          land_mark,
+          city,
+          state,
+          country,
+          pincode,
+          address_type,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        if (userAddress) {
+          // Add new address to existing addresses array
+          userAddress.addresses.push(newAddress);
+          userAddress.default = newAddress._id;
+          await userAddress.save();
+        } else {
+          // Create new UserAddress document
+          userAddress = new UserAddress({
+            userId: supplier_id,
+            addresses: [newAddress],
+            default: newAddress._id,
+          });
+          await userAddress.save();
+        }
       }
-          const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-          const newNotification = new Notification({
-            notification_id : notificationId,
-            event_type      : 'Shipment details submitted',
-            event           : 'order',
-            from            : 'supplier',
-            to              : 'buyer',
-            from_id         : supplier_id,
-            to_id           : buyer_id,
-            event_id        : order_id,
-            message         : `Submission Confirmation: The shipment details have been successfully submitted for ${order_id}`,
-            status          : 0
-        })
-        await newNotification.save()
+    }
+
+        // Construct Bill of Material
+    const billOfMaterial = {
+      products: bills_of_material.map(item => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: Number(item.quantity),
+        no_of_packages: Number(item.number_of_packages),
+      }))
+    };
+
+    // Construct Package Information
+    const packageInformation = {
+      total_no_of_packages: packages.length,
+      package_details: packages.map(pkg => ({
+        weight: Number(pkg.weight),
+        dimensions: {
+          length: Number(pkg.dimensions.length),
+          width: Number(pkg.dimensions.width),
+          height: Number(pkg.dimensions.height),
+          volume: Number(pkg.volume),
+        },
+      })),
+    };
+
+    
+        // Update order with supplier logistics data
+        const updatedOrder = await Order.findOneAndUpdate(
+          { order_id },
+          {
+            $set: {
+              supplier_logistics_data: {
+                full_name,
+                mobile_number,
+                company_reg_address,
+                locality,
+                land_mark,
+                state,
+                city,
+                country,
+                pincode,
+                address_type,
+                mode_of_transport,
+                extra_services,
+                bill_of_material: billOfMaterial,
+                package_information: packageInformation,
+                pickup_date: pickup_slot.date,
+                pickup_time: pickup_slot.time_slot,
+              },
+              status: 'Shipment Details Submitted',
+            },
+          },
+          { new: true }
+        );
+    
+        if (!updatedOrder) {
+          return callback({ code: 404, message: 'Order not found', result: null });
+        }
+
+         // Create Logistics Entry
+          const logisticsId = 'LGR-' + Math.random().toString(16).slice(2, 10);
+          const newLogisticsRequest = new Logistics({
+            logistics_id: logisticsId,
+            enquiry_id: order.enquiry_id,
+            purchaseOrder_id: order.purchaseOrder_id,
+            orderId: order._id,
+            supplierId: supplier._id,
+            buyerId: buyer._id,
+            status: 'pending',
+          });
+          await newLogisticsRequest.save();
+    
+        return callback({ code: 200, message: 'Pickup details updated successfully', result: updatedOrder });
+      } catch (error) {
+        console.error('Error in submitPickupDetails:', error);
+        return callback({ code: 500, message: 'Internal Server Error', result: null });
+      }
+    },
+    
+    
+
 
 //         const body = `Hello ${buyer.buyer_name}, <br />
 //         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
@@ -573,16 +616,61 @@ module.exports = {
 //         Thanks & Regards <br />
 //         Medhub Global Team`;
 
-// await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
-     
-          callback({code: 200, message: 'Updated', result: updatedOrder})
 
-      } catch (error) {
-        console.log("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
-      }
-    },
+    //old code
+//     submitPickupDetails: async (req, res, reqObj, callback) => {
+//       try {
+        
+//         const { buyer_id, supplier_id, order_id, shipment_details } = reqObj
+
+//          const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+//             const buyer = await Buyer.findOne({ buyer_id: buyer_id });
+
+
+//         const updatedOrder = await Order.findOneAndUpdate(
+//           { order_id : order_id },
+//           {
+//               $set: {
+//                 shipment_details : shipment_details,
+//                 status           : 'Shipment Details Submitted'
+//               }
+//           },
+//           { new: true } 
+//       );
+//       if (!updatedOrder) {
+//           return callback({ code: 404, message: 'Order not found', result: null });
+//       }
+//           const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+//           const newNotification = new Notification({
+//             notification_id : notificationId,
+//             event_type      : 'Shipment details submitted',
+//             event           : 'order',
+//             from            : 'supplier',
+//             to              : 'buyer',
+//             from_id         : supplier_id,
+//             to_id           : buyer_id,
+//             event_id        : order_id,
+//             message         : `Submission Confirmation: The shipment details have been successfully submitted for ${order_id}`,
+//             status          : 0
+//         })
+//         await newNotification.save()
+
+// //         const body = `Hello ${buyer.buyer_name}, <br />
+// //         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
+// //         <br /><br />
+// //         Thanks & Regards <br />
+// //         MedHub Global Team`;
+
+// // await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
+     
+//           callback({code: 200, message: 'Updated', result: updatedOrder})
+
+//       } catch (error) {
+//         console.log("Internal Server Error:", error);
+//         logErrorToFile(error, req);
+//         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+//       }
+//     },
 
 
 
@@ -3205,7 +3293,7 @@ module.exports = {
           data = await Order.aggregate([
             {
                 $match: { 
-                    order_id     : order_id,
+                    order_id  : order_id,
                     // buyer_id     : buyer_id,
                     // order_status : filterKey
                 }
@@ -3625,6 +3713,7 @@ module.exports = {
                 created_at        : 1,
                 totalPrice        : 1,
                 invoices          : 1,
+                "supplier._id" : 1,
                 "supplier.supplier_image"              : 1,
                 "supplier.supplier_name"               : 1,
                 "supplier.supplier_email"              : 1,

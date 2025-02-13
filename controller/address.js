@@ -78,6 +78,7 @@ const getAddress = async (req, res) => {
 
 const addAddress = async (req, res) => {
   try {
+    
     const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     const {
       full_name,
@@ -89,7 +90,7 @@ const addAddress = async (req, res) => {
       state,
       country,
       pincode,
-      type,
+      address_type,
       defaultAddress,
     } = req.body; // Extract address data from request body
 
@@ -100,7 +101,7 @@ const addAddress = async (req, res) => {
       !company_reg_address ||
       !locality ||
       !country ||
-      !type
+      !address_type
     ) {
       return res
         .status(400)
@@ -135,7 +136,7 @@ const addAddress = async (req, res) => {
       state,
       country,
       pincode,
-      type,
+      address_type,
     };
 
     // Find the user's existing addresses (create one if none exist)
@@ -162,6 +163,7 @@ const addAddress = async (req, res) => {
     await userAddress.save();
 
     return res.status(200).send({
+      code: 200,
       message: "Address added successfully!",
       address: userAddress,
     });
@@ -177,14 +179,72 @@ const addAddress = async (req, res) => {
   }
 };
 
+const getAddressById = async (req, res) => {
+  try {
+    const { usertype, admin_id, supplier_id, buyer_id } = req.headers;
+    const { userId, addressId } = req.params; 
+
+    
+    let user;
+    if (usertype === "Admin") {
+      user = await Admin.findOne({ admin_id });
+    } else if (usertype === "Supplier") {
+      user = await Supplier.findOne({ supplier_id });
+    } else if (usertype === "Buyer") {
+      user = await Buyer.findOne({ buyer_id });
+    }
+
+    if (!user) {
+      return res.status(400).send({
+        message: "Failed to find user details",
+        result: {},
+      });
+    }
+
+    const userAddress = await UserAddress.findOne({ userId: user._id });
+
+    if (!userAddress || userAddress.addresses.length === 0) {
+      return res.status(404).send({
+        message: "No addresses found for this user",
+      });
+    }
+
+    // Find specific address 
+    const address = userAddress.addresses.find(
+      (addr) => addr._id.toString() === addressId
+    );
+
+    if (!address) {
+      return res.status(404).send({
+        message: "Address not found",
+      });
+    }
+
+    return res.status(200).send({
+      code: 200,
+      message: "Address retrieved successfully!",
+      address,
+    });
+  } catch (error) {
+    console.error("Internal Server Error:", error);
+    logErrorToFile(error, req);
+    return sendErrorResponse(
+      res,
+      500,
+      "An unexpected error occurred. Please try again later.",
+      error
+    );
+  }
+};
+
 // Edit an address
 const editAddress = async (req, res) => {
   try {
-    const { id, addressId } = req.params; // id = userId, addressId = id of the address to edit
+    const { userId, addressId } = req.params; 
     const updatedData = req.body; // Data to update
 
     // Find the user address document
-    const userAddress = await UserAddress.findOne({ userId: id });
+    const userAddress = await UserAddress.findOne({ userId: userId });
 
     if (!userAddress) {
       return res.status(404).json({ message: "User not found" });
@@ -209,6 +269,7 @@ const editAddress = async (req, res) => {
     await userAddress.save();
 
     res.status(200).json({
+      code: 200,
       message: "Address updated successfully",
       updatedAddress: userAddress.addresses[addressIndex],
     });
@@ -218,7 +279,7 @@ const editAddress = async (req, res) => {
     return sendErrorResponse(
       res,
       500,
-      "An unexpected error occurred. Please try again later.",
+      "",
       error
     );
   }
@@ -227,10 +288,13 @@ const editAddress = async (req, res) => {
 // Delete an address
 const deleteAddress = async (req, res) => {
   try {
-    const { id, addressId } = req.params; // id = userId, addressId = id of the address to delete
+    console.log('deleteAddress', req.body)
+    console.log('deleteAddressPrams', req.params)
+    // return false
+    const { userId, addressId } = req.params; // addressId = id of the address to delete
 
     // Find the user address document
-    const userAddress = await UserAddress.findOne({ userId: id });
+    const userAddress = await UserAddress.findOne({ userId: userId });
 
     if (!userAddress) {
       return res.status(404).json({ message: "User not found" });
@@ -251,7 +315,7 @@ const deleteAddress = async (req, res) => {
     // Save the updated user address document
     await userAddress.save();
 
-    res.status(200).json({ message: "Address deleted successfully" });
+    res.status(200).json({ code: 200, message: "Address deleted successfully" });
   } catch (error) {
     console.log("Internal Server Error:", error);
     logErrorToFile(error, req);
@@ -264,4 +328,4 @@ const deleteAddress = async (req, res) => {
   }
 };
 
-module.exports = { getAddress, addAddress, editAddress, deleteAddress };
+module.exports = { getAddress, addAddress, getAddressById,  editAddress, deleteAddress };
