@@ -14,7 +14,7 @@ const contactUsContent = (obj) => {
                     <p><strong>Message:</strong> ${obj.message || "N/A"}</p>
                     <br />
                     <p>Regards,</p>
-                    <p><strong>MedHub Global Team</strong></p>
+                    <p><strong>Medhub Global Team</strong></p>
                 </body>
             </html>
        `;
@@ -37,7 +37,7 @@ const buyerRegistrationContent = (buyer) => {
             </ul>
             <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
 
-            <p>Best regards,<br/>MedHub Global Team</p>
+            <p>Best regards,<br/>Medhub Global Team</p>
         `;
 };
 
@@ -57,7 +57,7 @@ const supplierRegistrationContent = (seller) => {
             <li>Registration Date: ${getTodayFormattedDate()}</li>
             </ul>
             <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-            <p>Best regards,<br/>MedHub Global Team</p>
+            <p>Best regards,<br/>Medhub Global Team</p>
         `;
 };
 
@@ -72,7 +72,7 @@ const otpForResetPasswordContent = (user, otp) => {
           user?.company_name ||
           "User"
         },</p>
-        <p>You recently requested to reset your password for your MedHub Global account. Please use the following One-Time Password (OTP) to proceed with resetting your password.</p>
+        <p>You recently requested to reset your password for your Medhub Global account. Please use the following One-Time Password (OTP) to proceed with resetting your password.</p>
         
         <h2>Your OTP: <strong>${otp}</strong></h2>
         
@@ -88,7 +88,7 @@ const otpForResetPasswordContent = (user, otp) => {
         <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
         
         <p>Best regards,</p>
-        <p><strong>MedHub Global Team</strong></p>
+        <p><strong>Medhub Global Team</strong></p>
       </body>
     </html>
     `;
@@ -123,7 +123,7 @@ const profileEditRequestContent = (user) => {
                 <li>Request Date: ${getTodayFormattedDate()}</li>
                 </ul>
                 <p>Please review the updated details and take any necessary actions to verify and approve the new account.</p>
-                <p>Best regards,<br/>MedHub Global Team</p>
+                <p>Best regards,<br/>Medhub Global Team</p>
             </body>
         </html>
     `;
@@ -148,7 +148,7 @@ const lowInventoryContent = (supplierName, medicineName, quantity) => {
             <p><strong>Remaining Quantity:</strong> ${quantity}</p>
             <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
             <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-            <p>Thanks & Regards,<br/>MedHub Global Team</p>
+            <p>Thanks & Regards,<br/>Medhub Global Team</p>
         `;
 };
 
@@ -163,7 +163,7 @@ const licenseExpiryEmail = (
              <p>Dear ${name},</p>
             <p>Your product's license is set to expire on <strong>${expiryDate}</strong>. This is a reminder that your license will expire in ${reminderType}. Please ensure all necessary steps are taken for the renewal process.</p>
             <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-            <p>Thanks & Regards,<br/>MedHub Global Team</p>
+            <p>Thanks & Regards,<br/>Medhub Global Team</p>
         `;
 };
 
@@ -240,7 +240,7 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
 
                 <div class="footer">
                     <p>Best regards,</p>
-                    <p>MedHub Global Team</p>
+                    <p>Medhub Global Team</p>
                 </div>
             </div>
         </body>

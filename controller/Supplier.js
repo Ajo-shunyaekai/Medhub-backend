@@ -104,7 +104,7 @@ module.exports = {
                             <li>Registration Date: ${getTodayFormattedDate()}</li>
                           </ul>
                           <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-                          <p>Best regards,<br/>MedHub Global Team</p>
+                          <p>Best regards,<br/>Medhub Global Team</p>
                         `;
                         const recipientEmails = [adminEmail];  // Add more emails if needed
                         // await sendMailFunc(recipientEmails.join(','), subject, body);

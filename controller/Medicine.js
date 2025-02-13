@@ -33,7 +33,7 @@ const { sendErrorResponse } = require("../utils/commonResonse");
       <li>Submission Date: ${getTodayFormattedDate()}</li>
     </ul>
     <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-    <p>Best regards,<br/>MedHub Global Team</p>
+    <p>Best regards,<br/>Medhub Global Team</p>
   `;
   // return sendMailFunc(adminEmail, subject, body);
   return sendEmail(adminEmail, subject, body)
@@ -676,7 +676,7 @@ module.exports = {
                 const body = `
                           <p>Dear Admin,</p>
                           <p>We hope this message finds you well.</p>
-                          <p>A supplier has submitted a new edit product request for approval on MedHub Global. Please review the details below:</p>
+                          <p>A supplier has submitted a new edit product request for approval on Medhub Global. Please review the details below:</p>
                           <ul>
                             <li>Supplier Name: ${supplier.supplier_name}</li>
                             <li>Product Name: ${medicine_name}</li>
@@ -685,7 +685,7 @@ module.exports = {
                             <li>Submission Date: ${getTodayFormattedDate()}</li>
                           </ul>
                           <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-                          <p>Best regards,<br/>MedHub Global Team</p>
+                          <p>Best regards,<br/>Medhub Global Team</p>
                         `;
               // sendMailFunc(adminEmail, subject, body);
               await sendEmail(adminEmail, subject, body )
@@ -776,7 +776,7 @@ module.exports = {
                         <li>Submission Date: ${getTodayFormattedDate()}</li>
                       </ul>
                       <p>To proceed, please review the product details and approve or reject the submission based on your assessment.</p>
-                      <p>Best regards,<br/>MedHub Global Team</p>
+                      <p>Best regards,<br/>Medhub Global Team</p>
                     `;
           // sendMailFunc(adminEmail, subject, body);
           await sendEmail(adminEmail, subject, body )
@@ -1028,13 +1028,13 @@ module.exports = {
 //         const subject = `New Product Edit Request: Approval Required`;
 //         const body = `
 //             <p>Dear Admin,</p>
-//             <p>A supplier has submitted a new edit product request for approval on MedHub Global. Details:</p>
+//             <p>A supplier has submitted a new edit product request for approval on Medhub Global. Details:</p>
 //             <ul>
 //                 <li>Supplier Name: ${reqObj.supplier_name}</li>
 //                 <li>Product Name: ${reqObj.medicine_name}</li>
 //                 <li>Submission Date: ${getTodayFormattedDate()}</li>
 //             </ul>
-//             <p>Best regards,<br/>MedHub Global Team</p>
+//             <p>Best regards,<br/>Medhub Global Team</p>
 //         `;
 //         await sendEmail(adminEmail, subject, body);
 

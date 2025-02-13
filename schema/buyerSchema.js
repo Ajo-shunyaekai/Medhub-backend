@@ -212,18 +212,6 @@ const buyerSchema = new Schema(
       default: Date.now,
     },
     registeredAddress: {
-      // full_name: {
-      //   type: String, // Conatct Person Name
-      //   required: [true, "Full name is required for address"],
-      // },
-      // mobile_number: {
-      //   type: String, // Conatct Person Mobile
-      //   required: [true, "Phone number is required for address"],
-      // },
-      // country_code: {
-      //   type: String, // Conatct Person Country code
-      //   required: [true, "Country code is required for address"],
-      // },
       company_reg_address: {
         type: String, // Company Billing Address
         required: [true, "Company Billing Address is required for address"],
@@ -253,6 +241,23 @@ const buyerSchema = new Schema(
         default: "Registered",
       },
     },
+    subscriptionEmail: {
+      type: String,
+      default: "",
+    },
+    currentSubscription: {
+      type: Schema.Types.ObjectId,
+      ref: "Subscription", // Referencing the Subscription model
+    },
+    subscriptionsHistory: [
+      {
+        subscriptionId: {
+          type: Schema.Types.ObjectId,
+          ref: "Subscription", // Referencing the Subscription model
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

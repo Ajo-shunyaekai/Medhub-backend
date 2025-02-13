@@ -183,7 +183,7 @@ module.exports = {
             //                     Purchase Order created for <strong>${enquiry_id}</strong>.<br />
             //                     <br /><br />
             //                     Thanks & Regards <br />
-            //                     MedHub Global Team`;
+            //                     Medhub Global Team`;
   
             //       await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Created!', body);
 
@@ -680,7 +680,7 @@ module.exports = {
             //                     Purchase Order edited for <strong>${purchaseOrder_id}</strong>.<br />
             //                     <br /><br />
             //                     Thanks & Regards <br />
-            //                     MedHub Global Team`;
+            //                     Medhub Global Team`;
   
             //       await sendMailFunc('ajo@shunyaekai.tech', 'Purchase Order Edited!', body);
 

@@ -1,22 +1,26 @@
-const express  = require('express');
-const mongoose = require('mongoose');
-const logErrorToFile = require('../logs/errorLogs');
-const app      = express();
+const express = require("express");
+const mongoose = require("mongoose");
+const logErrorToFile = require("../logs/errorLogs");
+const { sendErrorResponse } = require("./commonResonse");
+const app = express();
 
-require('dotenv').config();
+require("dotenv").config();
 
-const uri = process.env.MONGO_ATLAS_URI
-// const uri  = 'mongodb://localhost:27017/deliver'; 
+const uri = process.env.MONGO_ATLAS_URI;
+// const uri  = 'mongodb://localhost:27017/deliver';
 
 const connection = () => {
-    // mongoose.connect(uri) 
-    mongoose.connect(uri)
+  // mongoose.connect(uri)
+  mongoose
+    .connect(uri)
     .then(() => {
-        console.log("connected to MongoDB");
-    }).catch((err) => {
-        logErrorToFile(err, req);
-        console.log("Error in connecting to MongoDB",err);
+      console.log("connected to MongoDB");
     })
-}
+    .catch((err) => {
+      console.log("Internal Server Error:", err);
+      logErrorToFile(err, req);
+      return sendErrorResponse(res, 500, "Error in connecting to MongoDB", err);
+    });
+};
 
 module.exports = connection;

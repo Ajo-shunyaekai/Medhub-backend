@@ -166,7 +166,7 @@ module.exports = {
                     <p><strong>Remaining Quantity:</strong> ${updatedMedicine.total_quantity}</p>
                     <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
                     <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                    <p>Thanks & Regards,<br/>MedHub Global Team</p>
+                    <p>Thanks & Regards,<br/>Medhub Global Team</p>
                 `;
 
                 // await sendMailFunc(recipientEmails, subject, body);
@@ -218,7 +218,7 @@ module.exports = {
                         ${itemsTable}
                         <p>We have begun processing your order and will keep you informed about its status. </p>
                         <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                        <p>Thanks & Regards,<br/>MedHub Global Team</p>
+                        <p>Thanks & Regards,<br/>Medhub Global Team</p>
                         `;
 
                         // Sending the email to multiple recipients (supplier and buyer)
@@ -245,7 +245,7 @@ module.exports = {
                company_reg_address, locality, land_mark, city, state, country, pincode, 
                mode_of_transport, address_type, extra_services } = reqObj;
         // const {full_name, email, mobile_number, company_reg_address, locality, land_mark, city, state, country, pincode, adderssType } = reqObj.buyer_logistics_data
-    console.log('reqObj',reqObj)
+    ('reqObj',reqObj)
         if (!mongoose.Types.ObjectId.isValid(buyer_id)) {
           return callback({ code: 400, message: 'Invalid buyer ID', result: null });
         }
@@ -264,7 +264,6 @@ module.exports = {
         
         // const address = await Address.findOne({ user_id: buyer_id });
         if(address_type !== 'Registered') {
-          console.log('address_type',address_type);
           
           const newAddress = new Address({
             user_id: buyer?._id,
@@ -328,7 +327,6 @@ module.exports = {
         if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
         }
-        console.log('updatedOrder',updatedOrder)
         // return false
         //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
         // const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
@@ -353,7 +351,7 @@ module.exports = {
     //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
     //               <br /><br />
     //               Thanks & Regards <br />
-    //               MedHub Global Team`;
+    //               Medhub Global Team`;
 
     // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
     
@@ -421,7 +419,7 @@ module.exports = {
     // //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
     // //               <br /><br />
     // //               Thanks & Regards <br />
-    // //               MedHub Global Team`;
+    // //               Medhub Global Team`;
 
     // // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
      
@@ -520,7 +518,7 @@ module.exports = {
     //     // Your logistics details for <strong>${order_id}</strong> have been submitted to our logistics partner.<br />
     //     // <br /><br />
     //     // Thanks & Regards <br />
-    //     // MedHub Global Team`;
+    //     // Medhub Global Team`;
     //     // await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
 
     //     callback({ code: 200, message: 'Updated', result: updatedOrder });
@@ -573,7 +571,7 @@ module.exports = {
 //         Your logisctics details for <strong>${order_id}</strong> has been submitted to our logistics partner .<br />
 //         <br /><br />
 //         Thanks & Regards <br />
-//         MedHub Global Team`;
+//         Medhub Global Team`;
 
 // await sendMailFunc(buyer.buyer_email, 'Logistics Details Submitted!', body);
      
