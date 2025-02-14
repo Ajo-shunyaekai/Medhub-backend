@@ -16,12 +16,14 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Your secret 
 // Array of available subscription plans
 const plans = [
   {
-    plan_id: "price_1QpN5xF9QJzsumL7cJCfv0UI",
+    plan_id: "price_1Qs1UJG7JtuXMMbft0yInx6G", //- test 
+    // plan_id: "price_1Qs1YQG7JtuXMMbfWUPZx4eu", //live
     plan_name: "Monthly Subscription",
     duration: "month",
   },
   {
-    plan_id: "price_1QpN6wF9QJzsumL71yv0Wf34",
+    plan_id: "price_1Qs1ShG7JtuXMMbfLKxV6J7B", //- test
+    // plan_id: "price_1Qs1YUG7JtuXMMbfa6sW0JO9", //live
     plan_name: "Yearly Subscription",
     duration: "year",
   },

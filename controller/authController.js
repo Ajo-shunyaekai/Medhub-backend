@@ -841,6 +841,7 @@ module.exports = {
     }
   },
 
+
   verifyEmailAndResendOTP: async (req, res) => {
     try {
       const { email, usertype } = req?.body;
