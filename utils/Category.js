@@ -1,7 +1,7 @@
-const categoryArrays = [
+const categoriesData = [
   //   -------------------------------------   Medical Equipment and Devices  -------------------------------------
   {
-    schema: "medicalEquipmentAndDevicesSchema",
+    schema: "MedicalEquipmentAndDevices",
     name: "Medical Equipment and Devices",
     subCategories: [
       {
@@ -303,7 +303,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Pharmaceuticals  -------------------------------------
   {
-    schema: "pharmaceuticalsSchema",
+    schema: "Pharmaceuticals",
     name: "Pharmaceuticals",
     subCategories: [
       {
@@ -398,7 +398,7 @@ const categoryArrays = [
       {
         name: "Vaccines",
         anotherCategories: [
-          "           COVID-19 Vaccines",
+          "COVID-19 Vaccines",
           "nfluenza Vaccines",
           "epatitis A Vaccine",
           "epatitis B Vaccine",
@@ -553,7 +553,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Skin, Hair and Cosmetic Supplies  -------------------------------------
   {
-    schema: "skinHairCosmeticSuppliesSchema",
+    schema: "SkinHairCosmeticSupplies",
     name: "Skin, Hair and Cosmetic Supplies",
     subCategories: [
       {
@@ -913,7 +913,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Vital Health and Wellness  -------------------------------------
   {
-    schema: "vitalHealthAndWellnessSchema",
+    schema: "VitalHealthAndWellness",
     name: "Vital Health and Wellness",
     subCategories: [
       {
@@ -985,7 +985,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Medical Consumables and Disposables  -------------------------------------
   {
-    schema: "medicalConsumablesAndDisposablesSchema",
+    schema: "MedicalConsumablesAndDisposables",
     name: "Medical Consumables and Disposables",
     subCategories: [
       {
@@ -1061,7 +1061,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Laboratory Supplies  -------------------------------------
   {
-    schema: "laboratorySuppliesSchema",
+    schema: "LaboratorySupplies",
     name: "Laboratory Supplies",
     subCategories: [
       {
@@ -1120,7 +1120,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Diagnostic and Monitoring Devices  -------------------------------------
   {
-    schema: "diagnosticAndMonitoringDevicesSchema",
+    schema: "DiagnosticAndMonitoringDevices",
     name: "Diagnostic and Monitoring Devices",
     subCategories: [
       {
@@ -1176,7 +1176,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Hospital and Clinic Supplies  -------------------------------------
   {
-    schema: "hospitalAndClinicSuppliesSchema",
+    schema: "HospitalAndClinicSupplies",
     name: "Hospital and Clinic Supplies",
     subCategories: [
       {
@@ -1229,47 +1229,11 @@ const categoryArrays = [
           "Others",
         ],
       },
-      {
-        name: "First Aid Kits",
-        anotherCategories: [
-          "Basic First Aid Kits",
-          "Trauma First Aid Kits",
-          "Travel First Aid Kits",
-          "Workplace First Aid Kits",
-          "Burn Care Kits",
-          "Emergency Medical",
-          "Others",
-        ],
-      },
-      {
-        name: "Emergency Medical Equipment",
-        anotherCategories: [
-          "Defibrillators",
-          "Ventilators",
-          "Suction Machines",
-          "Emergency Resuscitation Kits",
-          "Transport Ventilators",
-          "Oxygen Supply Kits",
-          "Others",
-        ],
-      },
-      {
-        name: "Trauma Care Products",
-        anotherCategories: [
-          "Trauma Bandages",
-          "Hemostatic Dressings",
-          "Cervical Collars",
-          "Splints & Braces",
-          "Trauma Stretchers",
-          "Emergency Wound Care Kits",
-          "Others",
-        ],
-      },
     ],
   },
   //   -------------------------------------   Orthopedic Supplies  -------------------------------------
   {
-    schema: "orthopedicSuppliesSchema",
+    schema: "OrthopedicSupplies",
     name: "Orthopedic Supplies",
     subCategories: [
       {
@@ -1329,7 +1293,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Dental Products  -------------------------------------
   {
-    schema: "dentalProductsSchema",
+    schema: "DentalProducts",
     name: "Dental Products",
     subCategories: [
       {
@@ -1390,7 +1354,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Eye Care Supplies  -------------------------------------
   {
-    schema: "eyeCareSuppliesSchema",
+    schema: "EyeCareSupplies",
     name: "Eye Care Supplies",
     subCategories: [
       {
@@ -1447,7 +1411,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Home Healthcare Products  -------------------------------------
   {
-    schema: "homeHealthcareProductsSchema",
+    schema: "HomeHealthcareProducts",
     name: "Home Healthcare Products",
     subCategories: [
       {
@@ -1506,7 +1470,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Alternative Medicines  -------------------------------------
   {
-    schema: "alternativeMedicinesSchema",
+    schema: "AlternativeMedicines",
     name: "Alternative Medicines",
     subCategories: [
       {
@@ -1524,7 +1488,7 @@ const categoryArrays = [
         ],
       },
       {
-        name: "Ayurvedic ",
+        name: "Ayurvedic",
         anotherCategories: [
           "Herbal Supplements",
           "Ayurvedic Oils and Balms",
@@ -1585,7 +1549,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Nutrition and Dietary Products  -------------------------------------
   {
-    schema: "nutritionAndDietaryProductsSchema",
+    schema: "NutritionAndDietaryProducts",
     name: "Nutrition and Dietary Products",
     subCategories: [
       {
@@ -1633,7 +1597,7 @@ const categoryArrays = [
   },
   //   -------------------------------------   Healthcare IT Solutions  -------------------------------------
   {
-    schema: "healthcareITSolutionsSchema",
+    schema: "HealthcareITSolutions",
     name: "Healthcare IT Solutions",
     subCategories: [
       {
@@ -1678,6 +1642,62 @@ const categoryArrays = [
       },
     ],
   },
+  //   -------------------------------------   Emergency and First Aid Supplies  -------------------------------------
+  {
+    schema: "EmergencyAndFirstAidSupplies",
+    name: "Emergency and First Aid Supplies",
+    subCategories: [
+      {
+        name: "First Aid Kits",
+        anotherCategories: [
+          "Basic First Aid Kits",
+          "Trauma First Aid Kits",
+          "Travel First Aid Kits",
+          "Workplace First Aid Kits",
+          "Burn Care Kits",
+          "Emergency Medical",
+          "Others",
+        ],
+      },
+      {
+        name: "Emergency Medical Equipment",
+        anotherCategories: [
+          "Defibrillators",
+          "Ventilators",
+          "Suction Machines",
+          "Emergency Resuscitation Kits",
+          "Transport Ventilators",
+          "Oxygen Supply Kits",
+          "Others",
+        ],
+      },
+      {
+        name: "Trauma Care Products",
+        anotherCategories: [
+          "Trauma Bandages",
+          "Hemostatic Dressings",
+          "Cervical Collars",
+          "Splints & Braces",
+          "Trauma Stretchers",
+          "Emergency Wound Care Kits",
+          "Others",
+        ],
+      },
+    ],
+  },
 ];
+
+const createCategory = (schema, name, subCategories) => ({
+  schema,
+  name,
+  subCategories: subCategories.map((subCategory) => ({
+    name: subCategory.name,
+    anotherCategories: subCategory.anotherCategories,
+  })),
+});
+
+const categoryArrays = categoriesData.map((category) =>
+  createCategory(category.schema, category.name, category.subCategories)
+);
 
 module.exports = categoryArrays;
