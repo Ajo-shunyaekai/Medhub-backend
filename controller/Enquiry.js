@@ -423,6 +423,19 @@ module.exports = {
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
             // const updatedOrderHistory = await addStageToOrderHistory(req, updatedEnquiry?._id, 'Quotation Submitted', new Date(), updatedEnquiry?._id, 'Enquiry')
 
+            // Add stage to order history
+    const updatedOrderHistory = await addStageToOrderHistory(
+        req, 
+        updatedEnquiry._id, 
+        'Quotation Submitted', 
+        new Date(), 
+        updatedEnquiry._id, 
+        'Enquiry'
+      );
+      if (!updatedOrderHistory || !updatedOrderHistory.orderHistory) {
+        console.log("Failed to update order history:", updatedOrderHistory?.message);
+      }  
+
           callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry });
       } catch (error) {
         console.log("Internal Server Error:", error);
@@ -458,7 +471,7 @@ module.exports = {
 
             
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-            // const updatedOrderHistory = await addStageToOrderHistory(req, updatedEnquiry?._id, 'Quotation Accepted', new Date(), updatedEnquiry?._id, 'Enquiry')
+            const updatedOrderHistory = await addStageToOrderHistory(req, updatedEnquiry?._id, 'Purchase Order Created', new Date(), updatedEnquiry?._id, 'Enquiry')
 
             callback({ code: 200, message: `Quotation ${msg} Successfully`, result: updatedEnquiry, });
         } catch (error) {

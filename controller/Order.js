@@ -127,7 +127,10 @@ module.exports = {
       }
         
             //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-            // const updatedOrderHistory = await addStageToOrderHistory(null, updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
+            const updatedOrderHistory = await addStageToOrderHistory(req, updatedEnquiry?._id, 'Order Created', new Date(), newOrder?._id, 'Order',)
+            // if (!updatedOrderHistory || !updatedOrderHistory.orderHistory) {
+            //   console.log("Failed to update order history:", updatedOrderHistory?.message);
+            // }
          const updatedPO = await PurchaseOrder.findOneAndUpdate(
             { purchaseOrder_id : reqObj.purchaseOrder_id },
             {
@@ -141,39 +144,103 @@ module.exports = {
           return callback({ code: 404, message: 'Purchase Order not found', result: null });
         }
 
+        // for (const item of reqObj.orderItems) {
+        //   const medicine = await Medicine.findOne({ medicine_id: item.medicine_id });
+        //   if (medicine) {
+        //     const quantityRequired = typeof item.quantity_required === "string" ? parseInt(item.quantity_required, 10) : item.quantity_required;
+
+        //   if (isNaN(quantityRequired)) {
+        //     throw new Error('Invalid quantity_required value');
+        //   }
+
+        //   const updatedMedicine = await Medicine.findOneAndUpdate(
+        //     { _id: medicine._id },
+        //     { $inc: { total_quantity: -quantityRequired } },
+        //     { new: true } 
+        //   );
+
+        //       if (updatedMedicine.total_quantity <= 500) {
+        //         const subject = `Low Stock Alert for ${medicine.medicine_name}`;
+        //         const recipientEmails = [supplier.contact_person_email];
+        //         const body = `
+        //             <p>Dear ${supplier.contact_person_name},</p>
+        //             <p>We would like to inform you that the stock of the following item is running low:</p>
+        //             <p><strong>Product:</strong> ${updatedMedicine.medicine_name}</p>
+        //             <p><strong>Remaining Quantity:</strong> ${updatedMedicine.total_quantity}</p>
+        //             <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
+        //             <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+        //             <p>Thanks & Regards,<br/>Medhub Global Team</p>
+        //         `;
+
+        //         await sendEmail(recipientEmails, subject, body);
+        //     }
+        //   }
+        // }
+
+
         for (const item of reqObj.orderItems) {
           const medicine = await Medicine.findOne({ medicine_id: item.medicine_id });
           if (medicine) {
-            const quantityRequired = typeof item.quantity_required === "string" ? parseInt(item.quantity_required, 10) : item.quantity_required;
-
-          if (isNaN(quantityRequired)) {
-            throw new Error('Invalid quantity_required value');
-          }
-
-          const updatedMedicine = await Medicine.findOneAndUpdate(
-            { _id: medicine._id },
-            { $inc: { total_quantity: -quantityRequired } },
-            { new: true } 
-          );
-
-              if (updatedMedicine.total_quantity <= 500) {
-                const subject = `Low Stock Alert for ${medicine.medicine_name}`;
-                const recipientEmails = [supplier.contact_person_email];
-                const body = `
-                    <p>Dear ${supplier.contact_person_name},</p>
-                    <p>We would like to inform you that the stock of the following item is running low:</p>
-                    <p><strong>Product:</strong> ${updatedMedicine.medicine_name}</p>
-                    <p><strong>Remaining Quantity:</strong> ${updatedMedicine.total_quantity}</p>
-                    <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
-                    <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                    <p>Thanks & Regards,<br/>Medhub Global Team</p>
-                `;
-
-                // await sendMailFunc(recipientEmails, subject, body);
-                await sendEmail(recipientEmails, subject, body);
+            // Convert quantity_required to a number if it's a string
+            let quantityRequired;
+            if (typeof item.quantity_required === "string") {
+              quantityRequired = parseInt(item.quantity_required, 10);
+            } else if (typeof item.quantity_required === "number") {
+              quantityRequired = item.quantity_required;
+            } else {
+              throw new Error(`Invalid quantity_required value for medicine ${medicine.medicine_id}: ${item.quantity_required}`);
             }
+            
+            // Validate the quantity is a valid number
+            if (isNaN(quantityRequired) || quantityRequired <= 0) {
+              throw new Error(`Invalid quantity value for medicine ${medicine.medicine_id}: ${quantityRequired}`);
+            }
+            
+            // Convert current total_quantity to a number if it's a string
+            let currentQuantity;
+            if (typeof medicine.total_quantity === "string") {
+              currentQuantity = parseInt(medicine.total_quantity, 10);
+              if (isNaN(currentQuantity)) {
+                throw new Error(`Invalid total_quantity value in database for medicine ${medicine.medicine_id}: ${medicine.total_quantity}`);
+              }
+            } else if (typeof medicine.total_quantity === "number") {
+              currentQuantity = medicine.total_quantity;
+            } else {
+              throw new Error(`Unexpected total_quantity type for medicine ${medicine.medicine_id}: ${typeof medicine.total_quantity}`);
+            }
+            
+            // Calculate new quantity
+            const newQuantity = currentQuantity - quantityRequired;
+            if (newQuantity < 0) {
+              throw new Error(`Insufficient stock for medicine ${medicine.medicine_id}. Required: ${quantityRequired}, Available: ${currentQuantity}`);
+            }
+            
+            // Update medicine quantity with $set instead of $inc
+            const updatedMedicine = await Medicine.findOneAndUpdate(
+              { _id: medicine._id },
+              { $set: { total_quantity: newQuantity } },
+              { new: true }
+            );
+            
+            // Check if stock is low and send alert email if needed
+            if (updatedMedicine.total_quantity <= 500) {
+              const subject = `Low Stock Alert for ${medicine.medicine_name}`;
+              const recipientEmails = [supplier.contact_person_email];
+              const body = `
+                <p>Dear ${supplier.contact_person_name},</p>
+                <p>We would like to inform you that the stock of the following item is running low:</p>
+                <p><strong>Product:</strong> ${updatedMedicine.medicine_name}</p>
+                <p><strong>Remaining Quantity:</strong> ${updatedMedicine.total_quantity}</p>
+                <p>Please restock the item at your earliest convenience to avoid any delays in fulfilling orders.</p>
+                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                <p>Thanks & Regards,<br/>Medhub Global Team</p>
+              `;
+              await sendEmail(recipientEmails, subject, body);
+            }
+          } else {
+            console.warn(`Medicine with ID ${item.medicine_id} not found`);
           }
-      }
+        }
        
           const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
           const newNotification = new Notification({
@@ -341,7 +408,7 @@ module.exports = {
         console.log('updatedOrder',updatedOrder)
         // return false
         //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-        // const updatedOrderHistory = await addStageToOrderHistory(updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
+        const updatedOrderHistory = await addStageToOrderHistory(req, updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
 
         
       //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
@@ -599,6 +666,8 @@ module.exports = {
             status: 'pending',
           });
           await newLogisticsRequest.save();
+
+          const updatedOrderHistory = await addStageToOrderHistory(req, updatedOrder?._id, 'Pick up Details Submitted', new Date(), newLogisticsRequest?._id, 'Order',)
     
         return callback({ code: 200, message: 'Pickup details updated successfully', result: updatedOrder });
       } catch (error) {
