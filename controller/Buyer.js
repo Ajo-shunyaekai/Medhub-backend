@@ -817,6 +817,55 @@ module.exports = {
         }
       }
     ];
+
+
+    const countPipeline = [
+      {
+        $match: { buyer_id: buyer_id }
+      },
+      {
+        $lookup: {
+          from: 'orders',
+          let: { buyerId: "$buyer_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$buyer_id", "$$buyerId"] },
+                    { $eq: ["$status", "Completed"] }
+                  ]
+                }
+              }
+            },
+            {
+              $group: {
+                _id: "$supplier_id" 
+              }
+            }
+          ],
+          as: 'my_suppliers'
+        }
+      },
+      {
+        $unwind: "$my_suppliers" 
+      },
+      {
+        $lookup: {
+          from         : 'suppliers', 
+          localField   : 'my_suppliers._id', 
+          foreignField : 'supplier_id', 
+          as           : 'supplier_details'
+        }
+      },
+      {
+        $unwind: "$supplier_details" 
+      },
+      {
+        $count: "total_items" 
+      }
+    ];
+    const supplierCount = await Order.aggregate(countPipeline);
     
         const [ordersData, purchaseOrdersData, enquiriesData, invoicesData] = await Promise.all([
           Order.aggregate(ordersAggregation),
@@ -834,7 +883,8 @@ module.exports = {
           invoiceDetails: {
             paidCount: invoicesData[0]?.paid[0]?.count || 0,
             pendingCount: invoicesData[0]?.pending[0]?.count || 0
-          }
+          },
+          supplierCount: supplierCount.length
         };
     
         callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result });
