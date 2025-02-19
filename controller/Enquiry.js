@@ -522,14 +522,14 @@ module.exports = {
             })
             await newNotification.save()
 
-            const body = `Hello ${supplier.supplier_name}, <br />
-                                Inquiry request has been cancelled by ${buyer.buyer_name} for <strong>${enquiry_id}</strong>.<br />
+            const body = `Hello ${supplier.contact_person_name}, <br />
+                                Inquiry request has been cancelled by ${buyer.contact_person_name} for <strong>${enquiry_id}</strong>.<br />
                                 <br /><br />
                                 <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
                                 Thanks & Regards <br />
                                 Medhub Global Team`;
   
-            await sendMailFunc(supplier.supplier_email, 'Inquiry Cancelled!', body);
+            await sendMailFunc(supplier.contact_person_email, 'Inquiry Cancelled!', body);
             callback({ code: 200, message: 'Inquiry Cancelled Successfully', result: updatedEnquiry });
         } catch (error) {
             console.log("Internal Server Error:", error);
