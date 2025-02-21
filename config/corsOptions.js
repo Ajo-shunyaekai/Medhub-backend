@@ -10,6 +10,7 @@ const corsOptions = {
     "http://localhost:8000",
     "http://192.168.1.34:3333",
     "http://192.168.1.218:3030",
+    'http://192.168.1.2:3000',
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:3333",
