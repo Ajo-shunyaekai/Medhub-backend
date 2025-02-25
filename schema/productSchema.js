@@ -185,6 +185,11 @@ const productSchema = new Schema(
       required: [true, "Validation Error: Category is required."],
       immutable: true, // This makes the category field read-only after the document is created
     },
+    medicine_id: {
+      type: String,
+      required: [true, "Validation Error: User Schema Reference is required."],
+      immutable: true, // This makes the userSchemaReference field read-only after the document is created
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: [true, "Validation Error: User Id is required."],

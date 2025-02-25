@@ -230,6 +230,7 @@ module.exports = {
       // Create new product with all necessary fields
       const newProductData = {
         ...req?.body,
+        medicine_id: "PRDT-" + Math.random().toString(16).slice(2, 10),
         general: {
           ...req?.body,
           ...(generalFiles || []),
