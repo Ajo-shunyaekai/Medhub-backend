@@ -33,10 +33,12 @@ const productSchema = new Schema(
         trim: true,
         required: [true, "Validation Error: Part/Model Number is required."],
       },
-      image: {
-        type: String,
-        trim: true,
-      },
+      image: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
       brand: {
         type: String,
         trim: true,
@@ -47,22 +49,22 @@ const productSchema = new Schema(
         required: [true, "Validation Error: Type/Form is required."],
       },
       quantity: {
-        type: String,
-        trim: true,
+        type: Number,
         required: [true, "Validation Error: Product Quantity is required."],
       },
       volumn: {
         type: String,
         trim: true,
-        required: [
-          true,
-          "Validation Error: Product Size / Volumn is required.",
-        ],
+        required: [true, "Validation Error: Product Size/Volumn is required."],
       },
       weight: {
+        type: Number,
+        required: [true, "Validation Error: Product Weight is required."],
+      },
+      unit: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Product Weight is required."],
+        required: [true, "Validation Error: Product Weight Unit is required."],
       },
       packageType: {
         type: String,
@@ -80,7 +82,11 @@ const productSchema = new Schema(
           "Validation Error: Product Packaging Material is required.",
         ],
       },
-      unitPrice: {
+      packageMaterialIfOther: {
+        type: String,
+        trim: true,
+      },
+      costPerProduct: {
         type: String,
         trim: true,
       },
@@ -96,8 +102,7 @@ const productSchema = new Schema(
         enum: ["In-stock", "Out of Stock", "On-demand"],
       },
       stockQuantity: {
-        type: String,
-        trim: true,
+        type: Number,
       },
       countries: [
         {
@@ -110,7 +115,7 @@ const productSchema = new Schema(
         trim: true,
       },
     },
-    compliance: [
+    complianceFile: [
       {
         type: String,
         trim: true,
@@ -125,10 +130,12 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
-      guuidelines: {
-        type: String,
-        trim: true,
-      },
+      guidelinesFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
       warranty: {
         type: String,
         trim: true,
@@ -141,18 +148,18 @@ const productSchema = new Schema(
           trim: true,
         },
       ],
-      healthHazardRating: {
-        type: String,
-        trim: true,
-      },
-      environmentalImpact: {
-        type: String,
-        trim: true,
-      },
-    },
-    categoryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: [true, "Validation Error: categoryId is required"],
+      healthHazardRating: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      environmentalImpact: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
     },
     category: {
       type: String,
@@ -175,16 +182,1542 @@ const productSchema = new Schema(
         "NutritionAndDietaryProducts",
         "HealthcareITSolutions",
       ],
-      required: [true, "Validation Error: categorySchemaRef is required"],
+      required: [true, "Validation Error: Category is required."],
+      immutable: true, // This makes the category field read-only after the document is created
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: [true, "Validation Error: userId is required"],
+      required: [true, "Validation Error: User Id is required."],
+      immutable: true, // This makes the userId field read-only after the document is created
     },
     userSchemaReference: {
       type: String,
       enum: ["Supplier", "Buyer"],
-      required: [true, "Validation Error: userSchemaReference is required"],
+      default: "Supplier",
+      required: [true, "Validation Error: User Schema Reference is required."],
+      immutable: true, // This makes the userSchemaReference field read-only after the document is created
+    },
+    market: {
+      type: String,
+      default: "new",
+      enum: ["new", "secondary"],
+      required: [true, "Validation Error: Product Market is required."],
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    MedicalEquipmentAndDevices: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Diagnostic Tools",
+          "Imaging Equipment",
+          "Surgical Instruments",
+          "Monitoring Devices",
+          "Mobility Aids",
+          "Respiratory Care",
+          "Elderly Care Products",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "MedicalEquipmentAndDevices" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Medical Equipment and Devices.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      specification: {
+        type: String,
+        trim: true,
+      },
+      specificationFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      diagnosticFunctions: {
+        type: String,
+        trim: true,
+      },
+      interoperability: {
+        type: String,
+        trim: true,
+      },
+      laserType: {
+        type: String,
+        trim: true,
+      },
+      coolingSystem: {
+        type: String,
+        trim: true,
+      },
+      spotSize: {
+        type: String,
+        trim: true,
+      },
+      performanceTestingReport: {
+        type: String,
+        trim: true,
+      },
+      performanceTestingReportFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+    },
+    Pharmaceuticals: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Prescription Medications",
+          "Over-the-Counter Medications",
+          "Vaccines",
+          "Generic Drugs",
+          "Specialized Treatments",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "Pharmaceuticals" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Pharmaceuticals.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      genericName: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "Pharmaceuticals" ? !!v : true;
+          },
+          message: "Validation Error: Generic Name is required.",
+        },
+      },
+      strength: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "Pharmaceuticals" ? !!v : true;
+          },
+          message: "Validation Error: Strength is required.",
+        },
+      },
+      composition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "Pharmaceuticals" ? !!v : true;
+          },
+          message: "Validation Error: Composition/Ingredients is required.",
+        },
+      },
+      formulation: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      drugAdministrationRoute: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "Pharmaceuticals" ? !!v : true;
+          },
+          message: "Validation Error: Drug Administration Routef is required.",
+        },
+      },
+      drugClass: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "Pharmaceuticals" ? !!v : true;
+          },
+          message: "Validation Error: Drug Class is required.",
+        },
+      },
+      controlledSubstance: {
+        type: Boolean,
+        trim: true,
+      },
+      otcClassification: {
+        type: String,
+        trim: true,
+        enum: ["Category I", "Category II", "Category III"],
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "Pharmaceuticals" ? !!v : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      sideEffectsAndWarnings: {
+        type: String,
+        trim: true,
+      },
+      allergens: {
+        type: String,
+        trim: true,
+      },
+    },
+    SkinHairCosmeticSupplies: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Skin Care",
+          "Hair Care",
+          "Personal Hygiene",
+          "Baby Care",
+          "Anti-aging Solutions",
+          "Skin Graft",
+          "Anti-Scar & Healing Ointments",
+          "Burn Care Solutions",
+          "Dermal Fillers & Injectables",
+          "Laser Treatment Devices",
+          "Chemical Peels",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Skin Hair Cosmetic Supplies.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      fragranceragrance: {
+        type: String,
+        trim: true,
+      },
+      spf: {
+        type: String,
+        trim: true,
+      },
+      vegan: {
+        type: Boolean,
+      },
+      crueltyFree: {
+        type: Boolean,
+      },
+      formulation: {
+        type: String,
+        trim: true,
+      },
+      strength: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Strength is required.",
+        },
+      },
+      composition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Composition/Ingredients is required.",
+        },
+      },
+      purpose: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Purpose is required.",
+        },
+      },
+      targetCondition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Target Condition is required.",
+        },
+      },
+      drugAdministrationRoute: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Drug Administration Route is required.",
+        },
+      },
+      drugClass: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Drug Class is required.",
+        },
+      },
+      controlledSubstance: {
+        type: String,
+        trim: true,
+      },
+      otcClassification: {
+        type: String,
+        trim: true,
+        enum: ["Category I", "Category II", "Category III"],
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      sideEffectsAndWarnings: {
+        type: String,
+        trim: true,
+      },
+      allergens: {
+        type: String,
+        trim: true,
+      },
+      dermatologistTested: {
+        type: String,
+        enum: ["Yes", "No"],
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Dermatologist Tested is required.",
+        },
+      },
+      dermatologistTestedFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      pediatricianRecommended: {
+        type: String,
+        enum: ["Yes", "No"],
+        validate: {
+          validator: function (v) {
+            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Pediatrician Recommended is required.",
+        },
+      },
+      pediatricianRecommendedFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      elasticity: {
+        type: String,
+        trim: true,
+      },
+      adhesiveness: {
+        type: String,
+        trim: true,
+      },
+      thickness: {
+        type: String,
+        trim: true,
+      },
+      concentration: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      moisturizers: {
+        type: String,
+        trim: true,
+      },
+      fillerType: {
+        type: String,
+        trim: true,
+      },
+    },
+    VitalHealthAndWellness: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Fitness Monitors",
+          "Herbal & Alternative Medicines",
+          "Immune Boosters",
+          "Vitamins & Supplements",
+          "Weight Management",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Vital Health And Wellness.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      healthBenefit: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message: "Vlidation Error: Health Benefit is required.",
+        },
+      },
+      genericName: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message: "Vlidation Error: Generic Name is required.",
+        },
+      },
+      strength: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message: "Vlidation Error: Strength is required.",
+        },
+      },
+      composition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message: "Vlidation Error: Composition/Ingredients is required.",
+        },
+      },
+      formulation: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      drugAdministrationRoute: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message: "Vlidation Error: Drug Administration Route is required.",
+        },
+      },
+      drugClass: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message: "Vlidation Error: Drug Class is required.",
+        },
+      },
+      controlledSubstance: {
+        type: Boolean,
+      },
+      otcClassification: {
+        type: String,
+        trim: true,
+        enum: ["Category I", "Category II", "Category III"],
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "VitalHealthAndWellness" ? !!v : true;
+          },
+          message: "Vlidation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      sideEffectsAndWarnings: {
+        type: String,
+        trim: true,
+      },
+      allergens: {
+        type: String,
+        trim: true,
+      },
+      vegan: {
+        type: Boolean,
+      },
+      crueltyFree: {
+        type: Boolean,
+      },
+      additivesSweeteners: {
+        type: String,
+        trim: true,
+      },
+    },
+    MedicalConsumablesAndDisposables: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Bandages, Gauze, & Wound Dressings",
+          "Gloves, Masks, & Protective gear",
+          "Sterilization Products",
+          "Surgical Sutures & Adhesives",
+          "Syringes, IV Sets & Catheters",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "MedicalConsumablesAndDisposables"
+              ? !!v
+              : true;
+          },
+          message:
+            "Subcategory is required for Medical Consumables AndDisposables.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      thickness: {
+        type: String,
+        trim: true,
+      },
+      powdered: {
+        type: Boolean,
+      },
+      productMaterial: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "MedicalConsumablesAndDisposables"
+              ? !!v
+              : true;
+          },
+          message: "Vlidation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      texture: {
+        type: Boolean,
+      },
+      sterilized: {
+        type: Boolean,
+      },
+      chemicalResistance: {
+        type: String,
+        trim: true,
+      },
+      allergens: {
+        type: String,
+        trim: true,
+      },
+      filtrationEfficiency: {
+        type: String,
+        trim: true,
+      },
+      breathability: {
+        type: String,
+        trim: true,
+      },
+      layerCount: {
+        type: String,
+        trim: true,
+      },
+      fluidResistance: {
+        type: Boolean,
+      },
+      filtrationType: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      shape: {
+        type: String,
+        trim: true,
+      },
+      coating: {
+        type: String,
+        trim: true,
+      },
+    },
+    LaboratorySupplies: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Test kits",
+          "Microscopes & Lab Equipment",
+          "Chemicals & Reagents",
+          "Lab Consumables",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "LaboratorySupplies" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Laboratory Supplies.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      magnificationRange: {
+        type: String,
+        trim: true,
+      },
+      objectiveLenses: {
+        type: String,
+        trim: true,
+      },
+      powerSource: {
+        type: String,
+        trim: true,
+      },
+      resolution: {
+        type: String,
+        trim: true,
+      },
+      connectivity: {
+        type: String,
+        trim: true,
+      },
+      shape: {
+        type: String,
+        trim: true,
+      },
+      coating: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      casNumber: {
+        type: String,
+        trim: true,
+      },
+      grade: {
+        type: String,
+        trim: true,
+      },
+      concentration: {
+        type: String,
+        trim: true,
+      },
+      physicalState: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      hazardClassification: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+    },
+    DiagnosticAndMonitoringDevices: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Blood Glucose Monitors",
+          "Blood Pressure Monitors",
+          "Oxygen Concentrators",
+          "Wearable Health Devices",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "DiagnosticAndMonitoringDevices"
+              ? !!v
+              : true;
+          },
+          message:
+            "Subcategory is required for Diagnostic And Monitoring Devices.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      specification: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "DiagnosticAndMonitoringDevices"
+              ? !!v
+              : true;
+          },
+          message: "Vlidation Error: Specification is required.",
+        },
+      },
+      specificationFile: [
+        {
+          type: String,
+          trim: true,
+          validate: {
+            validator: function (v) {
+              return this.category === "DiagnosticAndMonitoringDevices"
+                ? !!v
+                : true;
+            },
+            message: "Vlidation Error: Specification File is required.",
+          },
+        },
+      ],
+      diagnosticFunctions: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "DiagnosticAndMonitoringDevices"
+              ? !!v
+              : true;
+          },
+          message: "Vlidation Error: Diagnostic Functions is required.",
+        },
+      },
+      measurementRange: {
+        type: String,
+        trim: true,
+      },
+      flowRate: {
+        type: String,
+        trim: true,
+      },
+      concentration: {
+        type: String,
+        trim: true,
+      },
+      noiseLevel: {
+        type: String,
+        trim: true,
+      },
+      maintenanceNotes: {
+        type: String,
+        trim: true,
+      },
+      compatibleEquipment: {
+        type: String,
+        trim: true,
+      },
+      usageRate: {
+        type: String,
+        trim: true,
+      },
+      performanceTestingReport: {
+        type: String,
+        trim: true,
+      },
+      performanceTestingReportFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+    },
+    HospitalAndClinicSupplies: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Patient Beds & Stretchers",
+          "Trolleys & Storage Units",
+          "Examination Tables",
+          "Medical Furniture",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "HospitalAndClinicSupplies" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Hospital And Clinic Supplies.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      adhesiveness: {
+        type: String,
+        trim: true,
+      },
+      absorbency: {
+        type: String,
+        trim: true,
+      },
+      thickness: {
+        type: String,
+        trim: true,
+      },
+      powdered: {
+        type: Boolean,
+      },
+      productMaterial: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HospitalAndClinicSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      texture: {
+        type: Boolean,
+      },
+      sterilized: {
+        type: Boolean,
+      },
+      chemicalResistance: {
+        type: String,
+        trim: true,
+      },
+      fluidResistance: {
+        type: Boolean,
+      },
+      elasticity: {
+        type: String,
+        trim: true,
+      },
+    },
+    OrthopedicSupplies: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Orthopedic Braces & Supports",
+          "Splints & Casting Materials",
+          "Prosthetics",
+          "Rehabilitation Equipment",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "OrthopedicSupplies" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Orthopedic Supplies.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      breathability: {
+        type: String,
+        trim: true,
+      },
+      colorOptions: {
+        type: String,
+        trim: true,
+      },
+      elasticity: {
+        type: String,
+        trim: true,
+      },
+      sterilized: {
+        type: Boolean,
+      },
+      absorbency: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      targetCondition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "OrthopedicSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Target Condition is required.",
+        },
+      },
+      coating: {
+        type: String,
+        trim: true,
+      },
+      strength: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "OrthopedicSupplies" ? !!v : true;
+          },
+          message: "Validation Error: Strength is required.",
+        },
+      },
+      moistureResistance: {
+        type: String,
+        trim: true,
+        enum: ["Yes", "No"],
+      },
+    },
+    DentalProducts: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Dental Instruments & tools",
+          "Orthodontic Supplies",
+          "Dental Chairs and Accessories",
+          "Dental Consumables",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "DentalProducts" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Hospital And Dental Products.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      productMaterial: {
+        type: String,
+        trim: true,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      targetCondition: {
+        type: String,
+        trim: true,
+      },
+      maintenanceNotes: {
+        type: String,
+        trim: true,
+      },
+      compatibleEquipment: {
+        type: String,
+        trim: true,
+      },
+      usageRate: {
+        type: String,
+        trim: true,
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "DentalProducts" ? !!v : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+    },
+    EyeCareSupplies: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Contact Lenses and Solutions",
+          "Eyewear",
+          "Eyewear Lenses",
+          "Eye Drops and Ointments",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "EyeCareSupplies" ? !!v : true;
+          },
+          message:
+            "Subcategory is required for Hospital And Eye Care Supplies.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      lensPower: {
+        type: String,
+        trim: true,
+      },
+      baseCurve: {
+        type: String,
+        trim: true,
+      },
+      diameter: {
+        type: String,
+        trim: true,
+      },
+      frame: {
+        type: String,
+        trim: true,
+        enum: ["Metal", "Plastic", "Rimless"],
+      },
+      lens: {
+        type: String,
+        trim: true,
+        enum: ["Single Vision", "Bifocal", "Progressive", "Anti-Reflective"],
+      },
+      lensMaterial: {
+        type: String,
+        trim: true,
+        enum: ["Polycarbonate", "Glass", "Trivex"],
+      },
+      colorOptions: {
+        type: String,
+        trim: true,
+      },
+    },
+    HomeHealthcareProducts: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Mobility Aids",
+          "Respiratory Care",
+          "Patient Monitoring Devices",
+          "Elderly Care Products",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "HomeHealthcareProducts" ? !!v : true;
+          },
+          message:
+            "Subcategory is required for Hospital And Home Healthcare Products.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      colorOptions: {
+        type: String,
+        trim: true,
+      },
+      maxWeightCapacity: {
+        type: String,
+        trim: true,
+      },
+      gripType: {
+        type: String,
+        trim: true,
+      },
+      foldability: {
+        type: String,
+        trim: true,
+      },
+      lockingMechanism: {
+        type: String,
+        trim: true,
+      },
+      typeOfSupport: {
+        type: String,
+        trim: true,
+      },
+      flowRate: {
+        type: String,
+        trim: true,
+      },
+      concentration: {
+        type: String,
+        trim: true,
+      },
+      batteryType: {
+        type: String,
+        trim: true,
+      },
+      batterySize: {
+        type: String,
+        trim: true,
+      },
+      performanceTestingReport: {
+        type: String,
+        trim: true,
+      },
+      performanceTestingReportFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HomeHealthcareProducts" ? !!v : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+    },
+    AlternativeMedicines: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: ["Homeopathy", "Ayurvedic"],
+        validate: {
+          validator: function (v) {
+            return this.category === "AlternativeMedicines" ? !!v : true;
+          },
+          message:
+            "Subcategory is required for Hospital And Alternative Medicines.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      composition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "AlternativeMedicines" ? !!v : true;
+          },
+          message: "Validation Error: Composition/Ingredients is required.",
+        },
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      healthClaims: {
+        type: String,
+        trim: true,
+      },
+      healthClaimsFile: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "AlternativeMedicines" ? !!v : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+    },
+    EmergencyAndFirstAidSupplies: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "First Aid Kits",
+          "Emergency Medical Equipment",
+          "Trauma Care Products",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "EmergencyAndFirstAidSupplies"
+              ? !!v
+              : true;
+          },
+          message:
+            "Subcategory is required for Hospital And Emergency And First Aid Supplies.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "EmergencyAndFirstAidSupplies"
+              ? !!v
+              : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      composition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "EmergencyAndFirstAidSupplies"
+              ? !!v
+              : true;
+          },
+          message: "Validation Error: Composition/Ingredients is required.",
+        },
+      },
+      productLongevity: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "EmergencyAndFirstAidSupplies"
+              ? !!v
+              : true;
+          },
+          message: "Validation Error: Product Longevity  is required.",
+        },
+      },
+      foldability: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "EmergencyAndFirstAidSupplies"
+              ? !!v
+              : true;
+          },
+          message: "Validation Error: Foldability  is required.",
+        },
+      },
+    },
+    DisinfectionAndHygieneSupplies: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: ["Hand Sanitizers", "Air Purifiers", "Cleaning Agents"],
+        validate: {
+          validator: function (v) {
+            return this.category === "DisinfectionAndHygieneSupplies"
+              ? !!v
+              : true;
+          },
+          message:
+            "Subcategory is required for Hospital And Disinfection And Hygiene Supplies.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      composition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "DisinfectionAndHygieneSupplies"
+              ? !!v
+              : true;
+          },
+          message: "Validation Error: Composition/Ingredients is required.",
+        },
+      },
+      concentration: {
+        type: String,
+        trim: true,
+      },
+      formulation: {
+        type: String,
+        trim: true,
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "DisinfectionAndHygieneSupplies"
+              ? !!v
+              : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      fragrance: {
+        type: String,
+        trim: true,
+      },
+    },
+    NutritionAndDietaryProducts: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Protein Powders and Shakes",
+          "Specialized Nutrition",
+          "Meal Replacement Solutions",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message:
+            "Subcategory is required for Nutrition And Dietary Products.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      flavorOptions: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Flavor Options is required.",
+        },
+      },
+      aminoAcidProfile: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Amino Acid Profile is required.",
+        },
+      },
+      fatContent: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Fat Content is required.",
+        },
+      },
+      expiry: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Shelf Life/Expiry is required.",
+        },
+      },
+      vegan: {
+        type: Boolean,
+      },
+      purpose: {
+        type: String,
+        trim: true,
+      },
+      healthBenefit: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Health Benefit is required.",
+        },
+      },
+      composition: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Composition/Ingredients is required.",
+        },
+      },
+      additivesAndSweeteners: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Additives & Sweeteners is required.",
+        },
+      },
+      dairyFree: {
+        type: String,
+        trim: true,
+        enum: ["Yes", "No"],
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+          },
+          message: "Validation Error: Dairy Free is required.",
+        },
+      },
+    },
+    HealthcareITSolutions: {
+      subCategory: {
+        type: String,
+        trim: true,
+        enum: [
+          "Healthcare Management Software",
+          "Telemedicine Platforms",
+          "Medical Billing Software",
+          "IoT-Enabled Medical Devices",
+        ],
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message:
+            "Validation Error: Subcategory is required for Healthcare IT Solutions.",
+        },
+      },
+      anotherCategory: {
+        type: String,
+        trim: true,
+      },
+      license: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message: "Validation Error: License is required.",
+        },
+      },
+      scalabilityInfo: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message: "Validation Error: Scalability Info is required.",
+        },
+      },
+      addOns: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message: "Validation Error: Add-Ons is required.",
+        },
+      },
+      interoperability: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message: "Validation Error: Interoperability is required.",
+        },
+      },
+      interoperabilityFile: [
+        {
+          type: String,
+          trim: true,
+          validate: {
+            validator: function (v) {
+              return this.category === "HealthcareITSolutions" ? !!v : true;
+            },
+            message: "Validation Error: Interoperability is required.",
+          },
+        },
+      ],
+      userAccess: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message: "Validation Error: User Access is required.",
+        },
+      },
+      keyFeatures: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message: "Validation Error: Key Features is required.",
+        },
+      },
+      coreFunctionalities: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message: "Validation Error: Core Functionalities is required.",
+        },
+      },
     },
   },
   { timestamps: true }
