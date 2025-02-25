@@ -16,12 +16,14 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Your secret 
 // Array of available subscription plans
 const plans = [
   {
-    plan_id: "price_1Qs1YUG7JtuXMMbfa6sW0JO9", //live  price_1Qs1YUG7JtuXMMbfa6sW0JO9
+    // plan_id: "price_1Qs1YUG7JtuXMMbfa6sW0JO9", //live  
+    plan_id: "price_1Qs1ShG7JtuXMMbfLKxV6J7B", //test 
     plan_name: "Monthly Subscription",
     duration: "month",
   },
   {
-    plan_id: "price_1Qs1YQG7JtuXMMbfWUPZx4eu", //live price_1Qs1YQG7JtuXMMbfWUPZx4eu 
+    // plan_id: "price_1Qs1YQG7JtuXMMbfWUPZx4eu", //live 
+    plan_id: "price_1Qs1UJG7JtuXMMbft0yInx6G", //test 
     plan_name: "Yearly Subscription",
     duration: "year",
   },
@@ -30,6 +32,7 @@ const plans = [
 module.exports = {
   createSubscription: async (req, res) => {
     try {
+      console.log('REQBODY', req.body)
       const { plan_name, duration, email, userType, userId } = req?.body;
       const plan = plans?.find(
         (plan) => plan?.plan_name === plan_name && plan?.duration === duration
@@ -38,6 +41,7 @@ module.exports = {
       if (!plan) {
         return res?.status(400)?.json({ message: "Plan not found!!" });
       }
+      console.log('plan', plan)
 
       // Check if customer exists by email
       const customers = await stripe.customers.list({
@@ -70,7 +74,7 @@ module.exports = {
         cancel_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/failure`,
         customer: customer.id, // Use the existing or new customer
       });
-
+      console.log('session', session)
       return sendSuccessResponse(
         res,
         200,

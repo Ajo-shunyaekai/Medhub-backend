@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 let app = express();
+const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -80,6 +81,113 @@ app.use((req, res, next) => {
   next();
 });
 
+// Path for the uploads folder
+const uploadFolderPath = path.join(__dirname, "uploads");
+
+// Ensure the 'uploads' folder exists
+if (!fs.existsSync(uploadFolderPath)) {
+    fs.mkdirSync(uploadFolderPath);
+}
+
+// Serve video file from the uploads folder
+// app.get("/video", (req, res) => {
+//   const videoPath = path.join(uploadFolderPath, "video.mp4"); // path to the uploads folder
+//   const stat = fs.statSync(videoPath);
+//   const fileSize = stat.size;
+//   const range = req.headers.range;
+
+//   if (range) {
+//       const parts = range.replace(/bytes=/, "").split("-");
+//       const start = parseInt(parts[0], 10);
+//       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+//       if (start >= fileSize || end >= fileSize) {
+//           res.status(416).send("Requested range not satisfiable");
+//           return;
+//       }
+
+//       const chunkSize = end - start + 1;
+//       const fileStream = fs.createReadStream(videoPath, { start, end });
+
+//       res.writeHead(206, {
+//           "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+//           "Accept-Ranges": "bytes",
+//           "Content-Length": chunkSize,
+//           "Content-Type": "video/mp4",
+//       });
+
+//       fileStream.pipe(res);
+//   } else {
+//       res.writeHead(200, {
+//           "Content-Length": fileSize,
+//           "Content-Type": "video/mp4",
+//       });
+
+//       fs.createReadStream(videoPath).pipe(res);
+//   }
+// });
+
+app.get("/video", (req, res) => {
+  const videoPath = path.join(__dirname, "uploads", "video.mp4");
+  
+  if (!fs.existsSync(videoPath)) {
+      return res.status(404).send("Video file not found");
+  }
+
+  try {
+      const stat = fs.statSync(videoPath);
+      const fileSize = stat.size;
+      const range = req.headers.range;
+
+      // Add caching headers
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      res.setHeader('Accept-Ranges', 'bytes');
+
+      if (range) {
+          const parts = range.replace(/bytes=/, "").split("-");
+          const start = parseInt(parts[0], 10);
+          const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+          if (start >= fileSize) {
+              res.status(416).send('Requested range not satisfiable');
+              return;
+          }
+
+          // Optimize chunk size - 2MB chunks
+          const chunkSize = Math.min(2 * 1024 * 1024, end - start + 1);
+          const end2 = Math.min(start + chunkSize - 1, fileSize - 1);
+
+          const stream = fs.createReadStream(videoPath, { start, end: end2 });
+
+          res.writeHead(206, {
+              'Content-Range': `bytes ${start}-${end2}/${fileSize}`,
+              'Accept-Ranges': 'bytes',
+              'Content-Length': chunkSize,
+              'Content-Type': 'video/mp4'
+          });
+
+          // Handle stream errors
+          stream.on('error', error => {
+              console.error('Stream error:', error);
+              res.end();
+          });
+
+          stream.pipe(res);
+      } else {
+          // For initial request without range header
+          const head = {
+              'Content-Length': fileSize,
+              'Content-Type': 'video/mp4'
+          };
+          res.writeHead(200, head);
+          fs.createReadStream(videoPath).pipe(res);
+      }
+  } catch (error) {
+      console.error('Error streaming video:', error);
+      res.status(500).send('Error streaming video');
+  }
+});
+
 // contact us Email sending route
 app.post("/send-email", async (req, res) => {
   const {
@@ -108,6 +216,7 @@ app.post("/send-email", async (req, res) => {
     const subject = "Inquiry from Medhub Global";
     // const recipientEmails = [process.env.SMTP_USER_ID, "ajo@shunyaekai.tech"];
     const recipientEmails = ["platform@medhub.global"];
+    // const recipientEmails = ["ajo@shunyaekai.tech"]
     const emailContent = await contactUsContent(req.body);
     // const result = await sendEmail({ username, email, subject, phone, message, checkbox });
     await sendEmail(recipientEmails, subject, emailContent);
@@ -120,6 +229,8 @@ app.post("/send-email", async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+
 
 //------------------------------ api routes ------------------//
 app.use(`/api/auth`, authRoutes);
