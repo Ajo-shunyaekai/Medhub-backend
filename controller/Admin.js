@@ -854,7 +854,7 @@ module.exports = {
           generatedPassword: password,
         };
 
-        // const subject = 'Login Credentials for Deliver'
+        // const subject = 'Login Credentials for Medhub Global'
         //       const body = `Hello ${updateProfile.supplier_name}, <br />
         //         Your Registration Request has been Approved. <br />
         //         Your Login Email is: ${updateProfile.supplier_email} <br />
@@ -892,7 +892,7 @@ module.exports = {
         ];
         await sendMailFunc(recipientEmails.join(","), subject, body);
 
-        // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Deliver', body);
+        // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Medhub Global', body);
 
         return callback({
           code: 200,
@@ -1263,9 +1263,9 @@ module.exports = {
         //   Your Login Password is: ${password} <br />
         //   <br /><br />
         //   Thanks & Regards <br />
-        //   Team Deliver`;
+        //   Team Medhub Global`;
 
-        // sendMailFunc(updateStatus.buyer_email, 'Login Credentials for Deliver', body);
+        // sendMailFunc(updateStatus.buyer_email, 'Login Credentials for Medhub Global', body);
 
         const subject = "Registration Approved at Medhub Global";
         const body = `Dear ${updateStatus.contact_person_name}, <br /><br />
@@ -2710,7 +2710,7 @@ module.exports = {
         //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
         //     <br /><br />
         //     Thanks & Regards <br />
-        //     Team Deliver`;
+        //     Team Medhub Global`;
 
         // // Send email for rejection
         // sendMailFunc(supplier_email, subject, body);
@@ -3239,7 +3239,7 @@ module.exports = {
           //               Supplier ID: ${updatedMedicine.supplier_id} <br />
           //               <br /><br />
           //               Thanks & Regards, <br />
-          //               Team Deliver`;
+          //               Team `;
 
           // // Send the email to the supplier
           // await sendMailFunc(supplier.supplier_email, subject, body);

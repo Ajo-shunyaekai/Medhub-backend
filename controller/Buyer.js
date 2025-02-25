@@ -93,7 +93,7 @@ module.exports = {
                 const body = `
                           <p>Dear Admin,</p>
                           <p>We hope this message finds you well.</p>
-                          <p>We are pleased to inform you that a new buyer has registered on Deliver. Below are the details of the new account:</p>
+                          <p>We are pleased to inform you that a new buyer has registered on Medhub Global. Below are the details of the new account:</p>
                           <ul>
                             <li>Type of Account: ${reqObj.buyer_type}</li>
                             <li>Company Name: ${reqObj.buyer_name}</li>
@@ -1354,17 +1354,19 @@ module.exports = {
   
           // Send emails to suppliers
           await Promise.all(Object.keys(groupedItems).map(async supplier_id => {
+            const supplier = await Supplier.findOne({ supplier_id: supplier_id });
               const { supplier_name, supplier_email, supplier_contact_email, items } = groupedItems[supplier_id];
-              if (supplier_email) {
+              if (supplier?.contact_person_email) {
                   const itemsList = items.map(item => `Medicine ID: ${item.medicine_id}`).join('<br />');
                   const subject = `New Product Inquiry Received from ${buyer.buyer_name}`
-                  const body = `Dear ${supplier_name},<br /><br />
+                  const body = `Dear ${supplier?.contact_person_name},<br /><br />
 
-                                We are pleased to inform you that you have received a new product inquiry from <strong>${buyer.buyer_name}</strong> through our platform.<br /><br />
+                                We are pleased to inform you that you have received a new product inquiry from <strong>${buyer.contact_person_name}</strong> through our platform.<br /><br />
 
                                 <strong>Inquiry Details:</strong><br />
                                 Buyer’s Company Name: ${buyer.buyer_name}<br />
                                 Contact Person: ${buyer.contact_person_name}<br />
+                                Contact Email: ${buyer.contact_person_email}<br />
                                 Contact Information: ${buyer.contact_person_country_code} ${buyer.contact_person_mobile} <br /><br />
 
                                 You can view and respond to this inquiry by logging into your account on our platform. Please take the time to review the buyer's request and provide your response at your earliest convenience.<br /><br />
@@ -1374,7 +1376,7 @@ module.exports = {
                         `;
   
                   // await sendMailFunc(supplier_email, subject, body);
-                  const recipientEmails = [supplier_contact_email];  // Add more emails if needed
+                  const recipientEmails = [supplier?.contact_person_email];  // Add more emails if needed
                   // await sendMailFunc(recipientEmails.join(','), subject, body);
                   await sendEmail(recipientEmails, subject, body)
               }

@@ -258,40 +258,47 @@ module.exports = {
         })
         await newNotification.save()
 
-       const subject = `Order Confirmation from  ${supplier.supplier_name}`
-       let itemsTable = `<table border="1" cellpadding="5" cellspacing="0">
-                              <tr>
-                                  <th>Product Name</th>
-                                  <th>Quantity</th>
-                                  <th>Price</th>
-                                  <th>Tax</th>
-                                  <th>Total Amount</th>
-                              </tr>`;
-                        reqObj.orderItems.forEach(item => {
-                        itemsTable += `<tr>
-                                  <td>${item.medicine_name}</td>
-                                  <td>${item.quantity_required}</td>
-                                  <td>${item.counter_price || item.target_price} AED</td>
-                                  <td>${item.unit_tax}%</td>
-                                  <td>${item.total_amount} AED</td>
-                              </tr>`;
-                        });
-                        itemsTable += `</table>`;
+            const subject = `Order Confirmation from ${supplier.supplier_name}`;
 
-                        // Email Body
-                        const body = `
-                        <p>Dear ${buyer.contact_person_name},</p>
-                        <p>Thank you for your order. We are pleased to confirm order and the details as follows:</p>
-                        ${itemsTable}
-                        <p>We have begun processing your order and will keep you informed about its status. </p>
-                        <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                        <p>Thanks & Regards,<br/>Medhub Global Team</p>
-                        `;
+                let itemsTable = `<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+                                      <tr style="background-color: #f2f2f2;">
+                                          <th style="padding: 10px; text-align: left;">Product Name</th>
+                                          <th style="padding: 10px; text-align: left;">Quantity</th>
+                                          <th style="padding: 10px; text-align: left;">Price</th>
+                                          <th style="padding: 10px; text-align: left;">Tax</th>
+                                          <th style="padding: 10px; text-align: left;">Total Amount</th>
+                                      </tr>`;
 
-                        // Sending the email to multiple recipients (supplier and buyer)
-                        const recipientEmails = [buyer.contact_person_email];  // Add more emails if needed
-                        // await sendMailFunc(recipientEmails.join(','), subject, body);
-                        await sendEmail(recipientEmails, subject, body);
+                reqObj.orderItems.forEach(item => {
+                    itemsTable += `<tr>
+                                      <td style="padding: 10px;">${item.medicine_name}</td>
+                                      <td style="padding: 10px;">${item.quantity_required}</td>
+                                      <td style="padding: 10px;">${item.counter_price || item.target_price} USD</td>
+                                      <td style="padding: 10px;">${item.unit_tax}%</td>
+                                      <td style="padding: 10px;">${item.total_amount} USD</td>
+                                  </tr>`;
+                });
+
+                itemsTable += `</table>`;
+
+                const body = `
+                <p>Dear ${buyer.contact_person_name},</p>
+
+                <p>We are pleased to confirm your order with the following details:</p>
+
+                ${itemsTable}
+
+                <p>Your order is now being processed, and we will keep you informed about its progress. If you have any questions or require further assistance, please do not hesitate to contact us.</p>
+
+                <p>For any inquiries, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+
+                <p>Best regards,<br/><strong>Medhub Global Team</strong></p>
+                `;
+
+                // Sending the email to multiple recipients (supplier and buyer)
+                const recipientEmails = [buyer.contact_person_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
+                // await sendMailFunc(recipientEmails.join(','), subject, body);
+                await sendEmail(recipientEmails, subject, body);
             return callback({code: 200, message: "Order Created Successfully"});
         })
         .catch((err) => {

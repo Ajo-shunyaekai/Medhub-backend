@@ -116,15 +116,20 @@ module.exports = {
         await newNotification.save()
 
         const subject = `Invoice Created for Order  ${reqObj.orderId}`
-            const body = `Hello ${buyer.buyer_name}, <br />
-            Invoice for order ${reqObj.orderId} has been generated.<br />
-            Total Payable Amount: <strong>${reqObj.totalPayableAmount} AED</strong><br />
-            <br /><br />
-            <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-            Thanks & Regards <br />
-            Medhub Global Team`;
+        const body = `Dear ${buyer.contact_person_name},<br /><br />
 
-            const recipientEmails = [buyer.buyer_email,];
+                      We are pleased to inform you that the invoice for your order <strong>${reqObj.orderId}</strong> has been successfully generated.<br /><br />
+                      
+                      <strong>Total Payable Amount:</strong> ${reqObj.totalPayableAmount} USD<br /><br />
+                      
+                      You can review the invoice details by logging into your account on our platform. If you have any questions or require further assistance, please do not hesitate to contact us.<br /><br />
+                      
+                      <p>For support, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                      
+                      Best regards,<br />
+                      <strong>Medhub Global Team</strong>`;
+
+            const recipientEmails = [buyer.contact_person_email,];
             await sendMailFunc(recipientEmails.join(','), subject, body);
             return callback({code: 200, message: "Invoice Created Successfully"});
         })
@@ -216,16 +221,21 @@ module.exports = {
         })
         await newNotification.save()
 
-        const subject = `Payment Completed for Invoice ${invoice_id} on Order  ${order_id}`
-          const body = `Hello ${supplier.supplier_name}, <br />
-            Payment for invoice ${invoice_id} on ${order_id} has been completed.<br />
-            Total Amount Paid: <strong>${amount_paid} AED</strong><br />
-            <br /><br />
-            <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-            Thanks & Regards <br />
-            Medhub Global Team`;
+        const subject = `Payment Confirmation for Invoice ${invoice_id} – Order ${order_id}`;
+        const body = `Dear ${supplier.supplier_name},<br /><br />
 
-            const recipientEmails = [supplier.supplier_email, 'ajo@shunyaekai.tech'];
+                      We are pleased to inform you that the payment for <strong>Invoice ${invoice_id}</strong> associated with <strong>Order ${order_id}</strong> has been successfully completed.<br /><br />
+
+                      <strong>Total Amount Paid:</strong> ${amount_paid} USD<br /><br />
+
+                      If you require any further assistance, please do not hesitate to contact us.<br /><br />
+
+                      <p>For support, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+
+                      Best regards,<br />
+                      <strong>Medhub Global Team</strong>`;
+
+            const recipientEmails = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
             await sendMailFunc(recipientEmails.join(','), subject, body);
   
           const response = {

@@ -94,7 +94,7 @@ module.exports = {
                 const body = `
                           <p>Dear Admin,</p>
                           <p>We hope this message finds you well.</p>
-                          <p>We are pleased to inform you that a new supplier has registered on Deliver. Below are the details of the new account:</p>
+                          <p>We are pleased to inform you that a new supplier has registered on Medhub Global. Below are the details of the new account:</p>
                           <ul>
                             <li>Type of Account: ${reqObj.supplier_type}</li>
                             <li>Company Name: ${reqObj.supplier_name}</li>
