@@ -335,7 +335,11 @@ module.exports = {
         if (!buyer) {
           return callback({ code: 404, message: 'Buyer not found', result: null });
         }
-        
+
+        const supplier = await Supplier.findOne({supplier_id: order?.supplier_id})
+        if (!supplier) {
+          return callback({ code: 404, message: 'Supplier not found', result: null });
+        }
         // Handle address
     let userAddress = await UserAddress.findOne({ userId: buyer._id });
 
@@ -418,35 +422,31 @@ module.exports = {
         const updatedOrderHistory = await addStageToOrderHistory(req, updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
 
         
-      //   const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
-      //   const newNotification = new Notification({
-      //     notification_id : notificationId,
-      //     event_type      : 'Logistics booking request',
-      //     event           : 'order',
-      //     from            : 'buyer',
-      //     to              : 'supplier',
-      //     from_id         : buyer_id,
-      //     to_id           : order?.supplier_id,
-      //     event_id        : order_id,
-      //     message         : `Logisctics Booking Request! A logistics booking request has been initiated for ${order_id}`,
-      //     status          : 0
-      //   })
-      //  await newNotification.save()
+        const notificationId = 'NOT-' + Math.random().toString(16).slice(2, 10);
+        const newNotification = new Notification({
+          notification_id : notificationId,
+          event_type      : 'Logistics Drop Details Submitted',
+          event           : 'order',
+          from            : 'buyer',
+          to              : 'supplier',
+          from_id         : buyer_id,
+          to_id           : order?.supplier_id,
+          event_id        : order_id,
+          message         : `Logistics Drop Details Submitted! A logistics drop request has been initiated for Order ID ${order_id}`,
+          status          : 0
+        })
+       await newNotification.save()
 
-    // const body = `Hello ${supplier.supplier_name}, <br />
-    //               Logistics Booking details has been submitted by ${buyer.buyer_name} for <strong>${order_id}</strong>.<br />
-    //               <br /><br />
-    //               Thanks & Regards <br />
-    //               MedHub Global Team`;
+     const subject = `Logistics Drop Details Submitted for Order ID: ${order_id}`
+      const body = `Hello ${supplier.contact_person_name}, <br /><br />
+      Logistics Drop Details have been successfully submitted by <strong>${buyer.contact_person_name}</strong> for <strong>Order ID: ${order_id}</strong>.<br /><br />
+      
+      Please review the details and proceed accordingly.<br /><br />
 
-    // await sendMailFunc(supplier.supplier_email, 'Logistics Booking Details Submitted!', body);
-    
-        // Success response
-        // return callback(null, {
-        //   code: 200,
-        //   message: 'Logistics request submitted successfully',
-        //   result: updatedOrder,
-        // });
+      Thanks & Regards, <br />
+      <strong>MedHub Global Team</strong>`;
+      const recipientEmails = [supplier.contact_person_email];
+      await sendEmail(recipientEmails, subject, body);
         callback({code: 200, message: 'Logistics Details Submitted Successfully', result: updatedOrder})
       } catch (error) {
         // Error handling
