@@ -270,4 +270,7 @@ const editProductUpload = (req, res, next) => {
   });
 };
 
-module.exports = { addProductUpload, editProductUpload };
+// Multer setup to handle CSV file uploads
+const CSVupload = multer({ dest: "uploads/products" });
+
+module.exports = { addProductUpload, editProductUpload, CSVupload };

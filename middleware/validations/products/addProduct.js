@@ -16,6 +16,54 @@ const generalValidationRules = [
     .isIn(["new", "secondary"])
     .withMessage("Product Market is invalid."),
 
+  body("purchasedOn")
+    .optional()
+    .custom((value, { req }) => {
+      // Only validate if  market is 'Secondary' and purchasedOn is provided
+      if (req.body.market === "secondary" && !value) {
+        throw new Error(
+          "Purchased On is required when the market is 'Secondary'."
+        );
+      }
+      return true;
+    }),
+
+  body("condition")
+    .optional()
+    .custom((value, { req }) => {
+      // Only validate if  market is 'Secondary' and condition is provided
+      if (req.body.market === "secondary" && !value) {
+        throw new Error(
+          "Condition is required when the market is 'Secondary'."
+        );
+      }
+      return true;
+    }),
+
+  body("countryAvailable")
+    .optional()
+    .custom((value, { req }) => {
+      // Only validate if  market is 'Secondary' and countryAvailable is provided
+      if (req.body.market === "secondary" && !value) {
+        throw new Error(
+          "Country Available is required when the market is 'Secondary'."
+        );
+      }
+      return true;
+    }),
+
+  body("minimumPurchaseUnit")
+    .optional()
+    .custom((value, { req }) => {
+      // Only validate if  market is 'Secondary' and minimumPurchaseUnit is provided
+      if (req.body.market === "secondary" && !value) {
+        throw new Error(
+          "Minimum Purchase Unit is required when the market is 'Secondary'."
+        );
+      }
+      return true;
+    }),
+
   body("description")
     .notEmpty()
     .withMessage("Product Description is required."),
@@ -225,12 +273,7 @@ const generalValidationRules = [
     .withMessage("Product Category is invalid."),
 
   // User schema references
-  body("userId").notEmpty().withMessage("userId is required."),
-  body("userSchemaReference")
-    .isIn(["Supplier", "Buyer"])
-    .withMessage("userSchemaReference must be 'Supplier' or 'Buyer'")
-    .notEmpty()
-    .withMessage("userSchemaReference is required."),
+  body("supplier_id").notEmpty().withMessage("supplier_id is required."),
 ];
 
 // Conditionally apply validation rules based on category
@@ -378,7 +421,7 @@ const categorySpecificValidationRules = [
           ])
           .withMessage("Sub Category is invalid."),
         body("anotherCategory").optional().trim(),
-        body("fragranceragrance").optional().trim(),
+        body("fragrance").optional().trim(),
         body("spf")
           .optional()
           .trim()

@@ -175,7 +175,7 @@
 //       type: String,
 //       trim: true,
 //     },
-//     fragranceragrance: {
+//     fragrance: {
 //       type: String,
 //       trim: true,
 //     },
