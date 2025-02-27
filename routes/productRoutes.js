@@ -7,6 +7,7 @@ const router = express.Router();
 const {
   addProductUpload,
   editProductUpload,
+  CSVupload,
 } = require("../middleware/multer/productMulter");
 const {
   getAllProducts,
@@ -14,6 +15,7 @@ const {
   addProduct,
   editProduct,
   deleteProduct,
+  addBulkProducts,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -63,5 +65,13 @@ router.post(
 );
 
 router.post(`/:id`, checkAuthorization, getProductDetails);
+
+router.post(
+  `/add-bulk-products`,
+  checkAuthorization,
+  checkCommonUserAuthentication,
+  CSVupload.single("csvfile"),
+  addBulkProducts
+);
 
 module.exports = router;

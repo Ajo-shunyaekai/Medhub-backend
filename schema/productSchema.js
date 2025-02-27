@@ -183,32 +183,68 @@ const productSchema = new Schema(
         "HealthcareITSolutions",
       ],
       required: [true, "Validation Error: Category is required."],
-      immutable: true, // This makes the category field read-only after the document is created
+      immutable: true,
     },
     medicine_id: {
       type: String,
       required: [true, "Validation Error: User Schema Reference is required."],
-      immutable: true, // This makes the userSchemaReference field read-only after the document is created
+      immutable: true,
     },
-    userId: {
+    supplier_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: [true, "Validation Error: User Id is required."],
-      immutable: true, // This makes the userId field read-only after the document is created
-    },
-    userSchemaReference: {
-      type: String,
-      enum: ["Supplier", "Buyer"],
-      default: "Supplier",
-      required: [true, "Validation Error: User Schema Reference is required."],
-      immutable: true, // This makes the userSchemaReference field read-only after the document is created
+      immutable: true,
     },
     market: {
       type: String,
       default: "new",
       enum: ["new", "secondary"],
       required: [true, "Validation Error: Product Market is required."],
+      immutable: true,
+    },
+    secondayMarketDetails: {
+      purchasedOn: {
+        type: String,
+        validate: {
+          validator: function (v) {
+            return this.market === "secondary" ? !!v : true;
+          },
+          message: "Validation Error: Purchased On is required.",
+        },
+      },
+      countryAvailable: {
+        type: String,
+        validate: {
+          validator: function (v) {
+            return this.market === "secondary" ? !!v : true;
+          },
+          message: "Validation Error: Country Available is required.",
+        },
+      },
+      condition: {
+        type: String,
+        validate: {
+          validator: function (v) {
+            return this.market === "secondary" ? !!v : true;
+          },
+          message: "Validation Error: Condition is required.",
+        },
+      },
+      minimumPurchaseUnit: {
+        type: String,
+        validate: {
+          validator: function (v) {
+            return this.market === "secondary" ? !!v : true;
+          },
+          message: "Validation Error: Minimum Purchase Unit is required.",
+        },
+      },
     },
     isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    bulkUpload: {
       type: Boolean,
       default: false,
     },
@@ -361,7 +397,7 @@ const productSchema = new Schema(
       },
       controlledSubstance: {
         type: Boolean,
-        trim: true,
+        default: false,
       },
       otcClassification: {
         type: String,
@@ -416,7 +452,7 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
-      fragranceragrance: {
+      fragrance: {
         type: String,
         trim: true,
       },
@@ -426,9 +462,11 @@ const productSchema = new Schema(
       },
       vegan: {
         type: Boolean,
+        default: false,
       },
       crueltyFree: {
         type: Boolean,
+        default: false,
       },
       formulation: {
         type: String,
@@ -495,8 +533,8 @@ const productSchema = new Schema(
         },
       },
       controlledSubstance: {
-        type: String,
-        trim: true,
+        type: Boolean,
+        default: false,
       },
       otcClassification: {
         type: String,
@@ -675,6 +713,7 @@ const productSchema = new Schema(
       },
       controlledSubstance: {
         type: Boolean,
+        default: false,
       },
       otcClassification: {
         type: String,
@@ -701,9 +740,11 @@ const productSchema = new Schema(
       },
       vegan: {
         type: Boolean,
+        default: false,
       },
       crueltyFree: {
         type: Boolean,
+        default: false,
       },
       additivesSweeteners: {
         type: String,
@@ -741,6 +782,7 @@ const productSchema = new Schema(
       },
       powdered: {
         type: Boolean,
+        default: false,
       },
       productMaterial: {
         type: String,
@@ -764,9 +806,11 @@ const productSchema = new Schema(
       },
       texture: {
         type: Boolean,
+        default: false,
       },
       sterilized: {
         type: Boolean,
+        default: false,
       },
       chemicalResistance: {
         type: String,
@@ -790,6 +834,7 @@ const productSchema = new Schema(
       },
       fluidResistance: {
         type: Boolean,
+        default: false,
       },
       filtrationType: [
         {
@@ -1022,6 +1067,7 @@ const productSchema = new Schema(
       },
       powdered: {
         type: Boolean,
+        default: false,
       },
       productMaterial: {
         type: String,
@@ -1043,9 +1089,11 @@ const productSchema = new Schema(
       },
       texture: {
         type: Boolean,
+        default: false,
       },
       sterilized: {
         type: Boolean,
+        default: false,
       },
       chemicalResistance: {
         type: String,
@@ -1053,6 +1101,7 @@ const productSchema = new Schema(
       },
       fluidResistance: {
         type: Boolean,
+        default: false,
       },
       elasticity: {
         type: String,
@@ -1095,6 +1144,7 @@ const productSchema = new Schema(
       },
       sterilized: {
         type: Boolean,
+        default: false,
       },
       absorbency: {
         type: String,
@@ -1571,6 +1621,7 @@ const productSchema = new Schema(
       },
       vegan: {
         type: Boolean,
+        default: false,
       },
       purpose: {
         type: String,
