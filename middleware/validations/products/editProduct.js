@@ -591,7 +591,7 @@ const editCategorySpecificValidationRules = [
           .optional()
           .isBoolean()
           .withMessage("Cruelty Free must be a boolean"),
-        body("additivesSweeteners").optional().trim(),
+        body("additivesNSweeteners").optional().trim(),
       ];
     }
     if (value === "MedicalConsumablesAndDisposables") {
@@ -1133,7 +1133,7 @@ const editCategorySpecificValidationRules = [
         body("composition")
           .notEmpty()
           .withMessage("Composition/Ingredients are required"),
-        body("additivesAndSweeteners")
+        body("additivesNSweeteners")
           .notEmpty()
           .withMessage("Additives & Sweeteners are required"),
         body("dairyFree")

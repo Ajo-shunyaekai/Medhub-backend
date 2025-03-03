@@ -1,10 +1,12 @@
 require("dotenv").config();
+const { v4: uuidv4 } = require("uuid");
 const logErrorToFile = require("../logs/errorLogs");
 const {
   sendErrorResponse,
   sendSuccessResponse,
 } = require("../utils/commonResonse");
 const Supplier = require("../schema/supplierSchema");
+const Inventory = require("../schema/inventorySchema");
 const Buyer = require("../schema/buyerSchema");
 const Product = require("../schema/productSchema");
 const { default: mongoose } = require("mongoose");
@@ -57,6 +59,24 @@ module.exports = {
         $unwind: {
           path: "$userDetails",
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
+        },
+      });
+
+      // Add lookup for Inventory collection to fetch inventory details based on the productId
+      pipeline.push({
+        $lookup: {
+          from: "Inventory", // Inventory collection
+          localField: "uuid", // Product ID
+          foreignField: "inventory", // Inventory's reference to Product (inventory)
+          as: "inventoryDetails", // Alias for the joined data
+        },
+      });
+
+      // Optionally, unwind the inventoryDetails if you expect only one inventory per product
+      pipeline.push({
+        $unwind: {
+          path: "$inventoryDetails",
+          preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
 
@@ -121,6 +141,24 @@ module.exports = {
         $unwind: {
           path: "$userDetails",
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
+        },
+      });
+
+      // Add lookup for Inventory collection to fetch inventory details based on the productId
+      pipeline.push({
+        $lookup: {
+          from: "Inventory", // Inventory collection
+          localField: "uuid", // Product ID
+          foreignField: "inventory", // Inventory's reference to Product (inventory)
+          as: "inventoryDetails", // Alias for the joined data
+        },
+      });
+
+      // Optionally, unwind the inventoryDetails if you expect only one inventory per product
+      pipeline.push({
+        $unwind: {
+          path: "$inventoryDetails",
+          preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
 
@@ -215,6 +253,9 @@ module.exports = {
       const additionalFiles = await getFilePaths(req?.files, [
         "guidelinesFile",
       ]);
+      const secondaryMarketFiles = await getFilePaths(req?.files, [
+        "performaInvoiceFile",
+      ]);
       const healthNSafetyFiles = await getFilePaths(req?.files, [
         "safetyDatasheet",
         "healthHazardRating",
@@ -229,18 +270,22 @@ module.exports = {
 
       console.log("categoryFiles", categoryFiles);
 
+      const inventoryUUId = uuidv4();
+      const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+
       // Create new product with all necessary fields
       const newProductData = {
         ...req?.body,
-        medicine_id: "PRDT-" + Math.random().toString(16).slice(2, 10),
+        medicine_id,
         general: {
           ...req?.body,
           ...(generalFiles || []),
         },
-        inventory: {
-          ...req?.body,
-          ...(inventoryFiles || []),
-        },
+        inventory: inventoryUUId,
+        // inventory: {
+        //   ...req?.body,
+        //   ...(inventoryFiles || []),
+        // },
         complianceFile: complianceFiles.complianceFile,
         additional: {
           ...req?.body,
@@ -260,6 +305,7 @@ module.exports = {
       if (market == "secondary") {
         newProductData[secondaryMarketDetails] = {
           ...req?.body,
+          ...(secondaryMarketFiles || []),
         };
       }
 
@@ -268,6 +314,17 @@ module.exports = {
 
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
+      }
+
+      const newInventory = await Inventory.ceate({
+        uuid: inventoryUUId,
+        productId: newProduct?.medicine_id,
+        ...req?.body,
+        ...(inventoryFiles || []),
+      });
+
+      if (!newInventory) {
+        return sendErrorResponse(res, 400, "Failed to create new Inventory.");
       }
 
       return sendSuccessResponse(res, 200, "Success", newProduct);
@@ -297,8 +354,24 @@ module.exports = {
       }
 
       console.log("results", results);
+      const inventoryArray = [];
 
       const updatedResult = results?.map((result) => {
+        const productId = "PRDT-" + Math.random().toString(16).slice(2, 10);
+        const inventoryUUId = uuidv4();
+
+        inventoryArray.push({
+          uuid: inventoryUUId,
+          productId,
+          sku: result?.["SKU"]?.toString()?.trim() || "",
+          stock: result?.["Stock*"]?.toString()?.trim() || "",
+          stockQuantity: Number(result?.["Stock Quantity"]) || 0,
+          countries:
+            result?.["Countries where Stock Trades"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [],
+          date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
+        });
         let updatedObject = {
           general: {
             name: result?.["Product Name*"]?.toString()?.trim() || "",
@@ -331,16 +404,7 @@ module.exports = {
             costPerProduct:
               result?.["Cost Per Product"]?.toString()?.trim() || "",
           },
-          inventory: {
-            sku: result?.["SKU"]?.toString()?.trim() || "",
-            stock: result?.["Stock*"]?.toString()?.trim() || "",
-            stockQuantity: Number(result?.["Stock Quantity"]) || 0,
-            countries:
-              result?.["Countries where Stock Trades"]
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-            date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
-          },
+          inventory: inventoryUUId,
           complianeFile:
             result?.["Regulatory Compliance"]
               ?.split(",")
@@ -369,7 +433,7 @@ module.exports = {
                 ?.map((ele) => ele?.toString()?.trim()) || [],
           },
           category: result?.["Product Category*"]?.trim()?.replaceAll(" ", ""),
-          medicine_id: "PRDT-" + Math.random().toString(16).slice(2, 10),
+          medicine_id: productId,
           supplier_id,
           market: result?.["Product Market*"] || "new",
           isDeleted: false,
@@ -386,6 +450,10 @@ module.exports = {
             condition: result?.["Product Condition"]?.toString()?.trim() || "",
             minimumPurchaseUnit:
               result?.["Minimum Purchase Unit"]?.toString()?.trim() || "",
+            performaInvoiceFile:
+              result?.["Performa Invoice File*"]
+                ?.split(",")
+                ?.map((ele) => ele?.toString()?.trim()) || [],
           };
         }
 
@@ -531,7 +599,7 @@ module.exports = {
               allergens: result?.["Allergens"]?.toString()?.trim() || "",
               vegan: result?.["Vegan"] === "true" || false,
               crueltyFree: result?.["Cruelty-Free"] === "true" || false,
-              additivesSweeteners:
+              additivesNSweeteners:
                 result?.["Additives & Sweeteners"]?.toString()?.trim() || "",
             };
             break;
@@ -825,7 +893,7 @@ module.exports = {
               composition:
                 result?.["Composition / Ingredients*"]?.toString()?.trim() ||
                 "",
-              additivesAndSweeteners:
+              additivesNSweeteners:
                 result?.["Additives & Sweeteners*"]?.toString()?.trim() || "",
               dairyFree: result?.["Dairy Free*"]?.toString()?.trim() || "",
             };
@@ -867,6 +935,15 @@ module.exports = {
 
       if (!entries || entries?.length == 0) {
         return sendErrorResponse(res, 400, "Failed to add bulk products.");
+      }
+
+      if (inventoryArray?.length > 0) {
+        const inventories = await Inventory.insertMany(inventoryArray);
+        console.log("updatedResult", updatedResult);
+
+        if (!inventories || inventories?.length == 0) {
+          return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
+        }
       }
 
       // Remove the CSV file after processing
@@ -961,6 +1038,9 @@ module.exports = {
       const additionalFiles = await getFilePaths(req?.files, [
         "guidelinesFile",
       ]);
+      const secondaryMarketFiles = await getFilePaths(req?.files, [
+        "performaInvoiceFile",
+      ]);
       const healthNSafetyFiles = await getFilePaths(req?.files, [
         "safetyDatasheet",
         "healthHazardRating",
@@ -983,10 +1063,11 @@ module.exports = {
           ...req?.body,
           ...(generalFiles || []),
         },
-        inventory: {
-          ...req?.body,
-          ...(inventoryFiles || []),
-        },
+        // inventory: existingProduct?.inventory,
+        // inventory: {
+        //   ...req?.body,
+        //   ...(inventoryFiles || []),
+        // },
         complianceFile:
           complianceFiles.complianceFile ||
           existingProduct.complianceFile ||
@@ -1011,6 +1092,7 @@ module.exports = {
       if (market == "secondary") {
         updatedProduct["secondaryMarketDetails"] = {
           ...req?.body,
+          ...(secondaryMarketFiles || []),
         };
       }
 
@@ -1023,6 +1105,22 @@ module.exports = {
 
       if (!updatedProduct) {
         return sendErrorResponse(res, 400, "Failed to update the product.");
+      }
+
+      const updatedInventoryData = {
+        ...req?.body,
+        ...(inventoryFiles || []),
+      };
+
+      // Update the inventory in the database
+      const updatedInventory = await Product.findOneAndUpdate(
+        { uuid: existingProduct?.inventory },
+        updatedInventoryData,
+        { new: true }
+      );
+
+      if (!updatedInventory) {
+        return sendErrorResponse(res, 400, "Failed to update the inventory.");
       }
 
       return sendSuccessResponse(
@@ -1046,6 +1144,19 @@ module.exports = {
   deleteProduct: async (req, res) => {
     try {
       const { id } = req?.params;
+      const foundProduct = await Product?.findById(id);
+      if (!foundProduct) {
+        return sendErrorResponse(res, 500, "Failed fetching Product");
+      }
+
+      const uuid = foundProduct?.inventory;
+      const inventoryFound = await Inventory?.findOne({
+        uuid,
+      });
+      if (!inventoryFound) {
+        return sendErrorResponse(res, 500, "Failed fetching Inventory");
+      }
+
       const softDeletedProduct = await Product?.findByIdAndUpdate(
         id,
         {
@@ -1059,7 +1170,18 @@ module.exports = {
         return sendErrorResponse(res, 500, "Failed Soft Deleting Product");
       }
 
-      console.log("softDeletedProduct", softDeletedProduct);
+      const softDeletedInventory = await Inventory?.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            isDeleted: true,
+          },
+        },
+        { new: true }
+      );
+      if (!softDeletedInventory) {
+        return sendErrorResponse(res, 500, "Failed Soft Deleting Inventory");
+      }
 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {

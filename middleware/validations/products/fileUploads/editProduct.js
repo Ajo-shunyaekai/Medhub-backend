@@ -4,7 +4,7 @@ const { sendErrorResponse } = require("../../../../utils/commonResonse");
 const editProductFileMiddleware = (req, res, next) => {
   console.log("Custom middleware was called");
 
-  const { category } = req?.body;
+  const { category, market } = req?.body;
 
   // Helper function to check file limits for specific fields
   const checkFileLimitForField = (fieldName) => {
@@ -41,6 +41,22 @@ const editProductFileMiddleware = (req, res, next) => {
   checkFileLimitForField("pediatricianRecommendedFile");
   checkFileLimitForField("healthClaimsFile");
   checkFileLimitForField("interoperabilityFile");
+  checkFileLimitForField("performaInvoiceFile");
+
+  if (market == "secondary") {
+    // Check if the performaInvoiceFile is uploaded
+    if (
+      (req?.body?.performaInvoiceFile?.length || 0) +
+        (req?.files?.performaInvoiceFile?.length || 0) ===
+      0
+    ) {
+      const err = new Error(
+        "Performa Invoice File is required for Secondary Market Product."
+      );
+      logErrorToFile(err, req); // Log the error to a file for persistence
+      return sendErrorResponse(res, 400, err.message, err); // Send an error response back
+    }
+  }
 
   // Check conditions for the "SkinHairCosmeticSupplies" category
   if (category == "SkinHairCosmeticSupplies") {
@@ -58,22 +74,23 @@ const editProductFileMiddleware = (req, res, next) => {
         return sendErrorResponse(res, 400, err.message, err); // Send an error response back
       }
     }
+  }
 
-    if (req?.body?.pediatricianRecommendedFile == "Yes") {
-      // Check if the pediatricianRecommendedFile is uploaded
-      if (
-        (req?.body?.pediatricianRecommendedFileFile?.length || 0) +
-          (req?.files?.pediatricianRecommendedFileFile?.length || 0) ===
-        0
-      ) {
-        const err = new Error(
-          "Pediatrician Recommended file is required for SkinHairCosmeticSupplies when pediatricianRecommendedFile is Yes"
-        );
-        logErrorToFile(err, req); // Log the error to a file for persistence
-        return sendErrorResponse(res, 400, err.message, err); // Send an error response back
-      }
+  if (req?.body?.pediatricianRecommendedFile == "Yes") {
+    // Check if the pediatricianRecommendedFile is uploaded
+    if (
+      (req?.body?.pediatricianRecommendedFileFile?.length || 0) +
+        (req?.files?.pediatricianRecommendedFileFile?.length || 0) ===
+      0
+    ) {
+      const err = new Error(
+        "Pediatrician Recommended file is required for SkinHairCosmeticSupplies when pediatricianRecommendedFile is Yes"
+      );
+      logErrorToFile(err, req); // Log the error to a file for persistence
+      return sendErrorResponse(res, 400, err.message, err); // Send an error response back
     }
   }
+  // }
 
   // Check conditions for the "DiagnosticAndMonitoringDevices" category
   if (category == "DiagnosticAndMonitoringDevices") {

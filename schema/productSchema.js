@@ -92,29 +92,42 @@ const productSchema = new Schema(
       },
     },
     inventory: {
-      sku: {
-        type: String,
-        trim: true,
-      },
-      stock: {
-        type: String,
-        trim: true,
-        enum: ["In-stock", "Out of Stock", "On-demand"],
-      },
-      stockQuantity: {
-        type: Number,
-      },
-      countries: [
-        {
-          type: String,
-          trim: true,
-        },
-      ],
-      date: {
-        type: String,
-        trim: true,
-      },
+      type: String,
+      trim: true,
+      immutable: true,
+      unique: true,
     },
+    // inventory: {
+    //   sku: {
+    //     type: String,
+    //     trim: true,
+    //   },
+    //   stock: {
+    //     type: String,
+    //     trim: true,
+    //     enum: ["In-stock", "Out of Stock", "On-demand"],
+    //   },
+    //   stockQuantity: {
+    //     type: Number,
+    //   },
+    //   countries: [
+    //     {
+    //       type: String,
+    //       trim: true,
+    //     },
+    //   ],
+    //   date: {
+    //     type: String,
+    //     trim: true,
+    //   },
+    //   stockedInDetails: [
+    //     {
+    //       country: {type:String},
+    //       quantity: {type:Number},
+    //       type: {type:String},
+    //     }
+    //   ]
+    // },
     complianceFile: [
       {
         type: String,
@@ -212,15 +225,28 @@ const productSchema = new Schema(
           message: "Validation Error: Purchased On is required.",
         },
       },
-      countryAvailable: {
-        type: String,
-        validate: {
-          validator: function (v) {
-            return this.market === "secondary" ? !!v : true;
+      countryAvailable: [
+        {
+          type: String,
+          validate: {
+            validator: function (v) {
+              return this.market === "secondary" ? !!v : true;
+            },
+            message: "Validation Error: Country Available is required.",
           },
-          message: "Validation Error: Country Available is required.",
         },
-      },
+      ],
+      performaInvoiceFile: [
+        {
+          type: String,
+          validate: {
+            validator: function (v) {
+              return this.market === "secondary" ? !!v : true;
+            },
+            message: "Validation Error: Performa Invoice is required.",
+          },
+        },
+      ],
       condition: {
         type: String,
         validate: {
@@ -382,7 +408,7 @@ const productSchema = new Schema(
           validator: function (v) {
             return this.category === "Pharmaceuticals" ? !!v : true;
           },
-          message: "Validation Error: Drug Administration Routef is required.",
+          message: "Validation Error: Drug Administration Route is required.",
         },
       },
       drugClass: {
@@ -607,10 +633,6 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
-      purpose: {
-        type: String,
-        trim: true,
-      },
       moisturizers: {
         type: String,
         trim: true,
@@ -746,7 +768,7 @@ const productSchema = new Schema(
         type: Boolean,
         default: false,
       },
-      additivesSweeteners: {
+      additivesNSweeteners: {
         type: String,
         trim: true,
       },
@@ -1309,8 +1331,7 @@ const productSchema = new Schema(
           validator: function (v) {
             return this.category === "HomeHealthcareProducts" ? !!v : true;
           },
-          message:
-            "Subcategory is required for Hospital And Home Healthcare Products.",
+          message: "Subcategory is required for Home Healthcare Products.",
         },
       },
       anotherCategory: {
@@ -1387,8 +1408,7 @@ const productSchema = new Schema(
           validator: function (v) {
             return this.category === "AlternativeMedicines" ? !!v : true;
           },
-          message:
-            "Subcategory is required for Hospital And Alternative Medicines.",
+          message: "Subcategory is required for Alternative Medicines.",
         },
       },
       anotherCategory: {
@@ -1446,7 +1466,7 @@ const productSchema = new Schema(
               : true;
           },
           message:
-            "Subcategory is required for Hospital And Emergency And First Aid Supplies.",
+            "Subcategory is required for Emergency And First Aid Supplies.",
         },
       },
       anotherCategory: {
@@ -1514,7 +1534,7 @@ const productSchema = new Schema(
               : true;
           },
           message:
-            "Subcategory is required for Hospital And Disinfection And Hygiene Supplies.",
+            "Subcategory is required for Disinfection And Hygiene Supplies.",
         },
       },
       anotherCategory: {
@@ -1647,7 +1667,7 @@ const productSchema = new Schema(
           message: "Validation Error: Composition/Ingredients is required.",
         },
       },
-      additivesAndSweeteners: {
+      additivesNSweeteners: {
         type: String,
         trim: true,
         validate: {
