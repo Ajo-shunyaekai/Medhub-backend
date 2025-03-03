@@ -164,7 +164,8 @@ const generalValidationRules = [
     }),
 
   body("costPerProduct")
-    .optional()
+    .notEmpty()
+    .withMessage("Cost Per Product is required.")
     .trim()
     .matches(/^[a-zA-Z0-9\s]+$/)
     .withMessage(
@@ -172,7 +173,8 @@ const generalValidationRules = [
     ),
 
   body("sku")
-    .optional()
+    .notEmpty()
+    .withMessage("SKU is required.")
     .trim()
     .matches(/^[a-zA-Z0-9\s]+$/)
     .withMessage(
@@ -590,7 +592,7 @@ const categorySpecificValidationRules = [
           .optional()
           .isBoolean()
           .withMessage("Cruelty Free must be a boolean"),
-        body("additivesSweeteners").optional().trim(),
+        body("additivesNSweeteners").optional().trim(),
       ];
     }
     if (value === "MedicalConsumablesAndDisposables") {
@@ -1132,7 +1134,7 @@ const categorySpecificValidationRules = [
         body("composition")
           .notEmpty()
           .withMessage("Composition/Ingredients are required"),
-        body("additivesAndSweeteners")
+        body("additivesNSweeteners")
           .notEmpty()
           .withMessage("Additives & Sweeteners are required"),
         body("dairyFree")

@@ -398,7 +398,7 @@
 //     crueltyFree: {
 //       type: Boolean,
 //     },
-//     additivesSweeteners: {
+//     additivesNSweeteners: {
 //       type: String,
 //       trim: true,
 //     },
@@ -1146,7 +1146,7 @@
 //         "Validation Error: Composition/Ingredients is required.",
 //       ],
 //     },
-//     additivesAndSweeteners: {
+//     additivesNSweeteners: {
 //       type: String,
 //       trim: true,
 //       required: [true, "Validation Error: Additives & Sweeteners is required."],

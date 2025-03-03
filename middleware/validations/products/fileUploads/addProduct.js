@@ -4,7 +4,7 @@ const { sendErrorResponse } = require("../../../../utils/commonResonse");
 const addProductFileMiddleware = (req, res, next) => {
   console.log("Custom middleware was called", req?.body?.dermatologistTested);
 
-  const { category } = req?.body;
+  const { category, market } = req?.body;
 
   // Check if files are uploaded
   const uploadedFiles = req?.files ? Object.values(req.files) : [];
@@ -23,6 +23,17 @@ const addProductFileMiddleware = (req, res, next) => {
 
   // Log the uploaded files for debugging
   console.log(uploadedFiles);
+
+  if (market == "secondary") {
+    // Check if the performaInvoiceFile is uploaded
+    if (!req?.files?.performaInvoiceFile) {
+      const err = new Error(
+        "Performa Invoice File is required for Secondary Market Product."
+      );
+      logErrorToFile(err, req); // Log the error to a file for persistence
+      return sendErrorResponse(res, 400, err.message, err); // Send an error response back
+    }
+  }
 
   // Check conditions for the "SkinHairCosmeticSupplies" category
   if (category == "SkinHairCosmeticSupplies") {

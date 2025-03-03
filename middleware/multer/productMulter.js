@@ -212,6 +212,7 @@ const addProductUpload = (req, res, next) => {
     { name: "pediatricianRecommendedFile", maxCount: 4 },
     { name: "healthClaimsFile", maxCount: 4 },
     { name: "interoperabilityFile", maxCount: 4 },
+    { name: "performaInvoiceFile", maxCount: 4 },
   ])(req, res, (err) => {
     if (err) {
       console.error("Multer Error:", err); // Log the error to console for debugging
@@ -259,6 +260,10 @@ const editProductUpload = (req, res, next) => {
     {
       name: "interoperabilityFile",
       maxCount: getMaxCount("interoperabilityFile"),
+    },
+    {
+      name: "performaInvoiceFile",
+      maxCount: getMaxCount("performaInvoiceFile"),
     },
   ])(req, res, (err) => {
     if (err) {
