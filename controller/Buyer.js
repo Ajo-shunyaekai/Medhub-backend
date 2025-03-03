@@ -310,6 +310,140 @@ module.exports = {
     },
 
 
+    // mySupplierList: async (req, res, reqObj, callback) => {
+    //   try {
+    //     const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
+    //     const page_no = pageNo || 1;
+    //     const page_size = pageSize || 2;
+    //     const offset = (page_no - 1) * page_size;
+    
+    //     const countPipeline = [
+    //       {
+    //         $match: { buyer_id: buyer_id }
+    //       },
+    //       {
+    //         $lookup: {
+    //           from: 'orders',
+    //           let: { buyerId: "$buyer_id" },
+    //           pipeline: [
+    //             {
+    //               $match: {
+    //                 $expr: {
+    //                   $and: [
+    //                     { $eq: ["$buyer_id", "$$buyerId"] },
+    //                     { $eq: ["$status", "Completed"] }
+    //                   ]
+    //                 }
+    //               }
+    //             },
+    //             {
+    //               $group: {
+    //                 _id: "$supplier_id" 
+    //               }
+    //             }
+    //           ],
+    //           as: 'my_suppliers'
+    //         }
+    //       },
+    //       {
+    //         $unwind: "$my_suppliers" 
+    //       },
+    //       {
+    //         $lookup: {
+    //           from         : 'suppliers', 
+    //           localField   : 'my_suppliers._id', 
+    //           foreignField : 'supplier_id', 
+    //           as           : 'supplier_details'
+    //         }
+    //       },
+    //       {
+    //         $unwind: "$supplier_details" 
+    //       },
+    //       {
+    //         $count: "total_items" 
+    //       }
+    //     ];
+    
+    //     const paginatedPipeline = [
+    //       {
+    //         $match: { buyer_id: buyer_id }
+    //       },
+    //       {
+    //         $lookup: {
+    //           from : 'orders',
+    //           let  : { buyerId: "$buyer_id" },
+    //           pipeline: [
+    //             {
+    //               $match: {
+    //                 $expr: {
+    //                   $and: [
+    //                     { $eq: ["$buyer_id", "$$buyerId"] },
+    //                     { $eq: ["$status", "Completed"] }
+    //                   ]
+    //                 }
+    //               }
+    //             },
+    //             {
+    //               $group: {
+    //                 _id: "$supplier_id"
+    //               }
+    //             }
+    //           ],
+    //           as: 'my_suppliers'
+    //         }
+    //       },
+    //       {
+    //         $unwind: "$my_suppliers" 
+    //       },
+    //       {
+    //         $lookup: {
+    //           from         : 'suppliers', 
+    //           localField   : 'my_suppliers._id', 
+    //           foreignField : 'supplier_id', 
+    //           as           : 'supplier_details'
+    //         }
+    //       },
+    //       {
+    //         $unwind : "$supplier_details" 
+    //       },
+    //       {
+    //         $skip   : offset
+    //       },
+    //       {
+    //         $limit  : page_size
+    //       },
+    //       {
+    //         $project: {
+    //           supplier_details : 1, 
+    //           _id              : 0 
+    //         }
+    //       }
+    //     ];
+    
+    //     // Run the count query
+    //     const totalItemsResult = await Buyer.aggregate(countPipeline);
+    //     const totalItems       = totalItemsResult.length > 0 ? totalItemsResult[0].total_items : 0;
+    
+    //     // Run the paginated query
+    //     const paginatedResults = await Buyer.aggregate(paginatedPipeline);
+    
+    //     callback({
+    //       code: 200,
+    //       message: 'List fetched successfully',
+    //       result: {
+    //         totalItems        : totalItems,
+    //         totalItemsPerPage : page_size,
+    //         data              : paginatedResults
+    //       }
+    //     });
+    
+    //   } catch (error) {
+    //     console.log("Internal Server Error:", error);
+    //     logErrorToFile(error, req);
+    //     return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+    //   }
+    // },
+
     mySupplierList: async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
@@ -350,14 +484,22 @@ module.exports = {
           },
           {
             $lookup: {
-              from         : 'suppliers', 
-              localField   : 'my_suppliers._id', 
-              foreignField : 'supplier_id', 
-              as           : 'supplier_details'
+              from: 'suppliers', 
+              localField: 'my_suppliers._id', 
+              foreignField: 'supplier_id', 
+              pipeline: [
+                {
+                  $project: { 
+                    password: 0, 
+                    token: 0 
+                  }
+                }
+              ],
+              as: 'supplier_details'
             }
           },
           {
-            $unwind: "$supplier_details" 
+            $unwind: { path: "$supplier_details", preserveNullAndEmptyArrays: true }
           },
           {
             $count: "total_items" 
@@ -370,8 +512,8 @@ module.exports = {
           },
           {
             $lookup: {
-              from : 'orders',
-              let  : { buyerId: "$buyer_id" },
+              from: 'orders',
+              let: { buyerId: "$buyer_id" },
               pipeline: [
                 {
                   $match: {
@@ -397,32 +539,40 @@ module.exports = {
           },
           {
             $lookup: {
-              from         : 'suppliers', 
-              localField   : 'my_suppliers._id', 
-              foreignField : 'supplier_id', 
-              as           : 'supplier_details'
+              from: 'suppliers', 
+              localField: 'my_suppliers._id', 
+              foreignField: 'supplier_id', 
+              pipeline: [
+                {
+                  $project: { 
+                    password: 0, 
+                    token: 0 
+                  }
+                }
+              ],
+              as: 'supplier_details'
             }
           },
           {
-            $unwind : "$supplier_details" 
+            $unwind: { path: "$supplier_details", preserveNullAndEmptyArrays: true }
           },
           {
-            $skip   : offset
+            $skip: offset
           },
           {
-            $limit  : page_size
+            $limit: page_size
           },
           {
             $project: {
-              supplier_details : 1, 
-              _id              : 0 
+              supplier_details: 1, 
+              _id: 0 
             }
           }
         ];
     
         // Run the count query
         const totalItemsResult = await Buyer.aggregate(countPipeline);
-        const totalItems       = totalItemsResult.length > 0 ? totalItemsResult[0].total_items : 0;
+        const totalItems = totalItemsResult.length > 0 ? totalItemsResult[0].total_items : 0;
     
         // Run the paginated query
         const paginatedResults = await Buyer.aggregate(paginatedPipeline);
@@ -431,9 +581,9 @@ module.exports = {
           code: 200,
           message: 'List fetched successfully',
           result: {
-            totalItems        : totalItems,
-            totalItemsPerPage : page_size,
-            data              : paginatedResults
+            totalItems: totalItems,
+            totalItemsPerPage: page_size,
+            data: paginatedResults
           }
         });
     
@@ -443,6 +593,7 @@ module.exports = {
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
     },
+    
   
     supplierDetails : async (req, res, reqObj, callback) => {
       try {
@@ -1441,6 +1592,12 @@ module.exports = {
               // buyer          : { $arrayElemAt: ["$buyer", 0] },
             }
           },
+          {
+            $project: {
+              "supplier.password": 0,
+              "supplier.token": 0
+            }
+          },
           { $sort  : {createdAt: -1} },
           // { $skip  : offset },
           // { $limit : page_size },
@@ -1519,6 +1676,14 @@ module.exports = {
               updatedAt       : 1,
               supplier        : { $arrayElemAt: ["$supplier", 0] },
               buyer           : { $arrayElemAt: ["$buyer", 0] },
+            }
+          },
+          {
+            $project: {
+              "supplier.password": 0,
+              "supplier.token": 0,
+              "buyer.password": 0,
+              "buyer.token":0
             }
           },
           { $sort  : {createdAt: -1} },

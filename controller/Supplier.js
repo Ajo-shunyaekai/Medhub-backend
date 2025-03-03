@@ -863,6 +863,14 @@ module.exports = {
               buyer           : { $arrayElemAt: ["$buyer", 0] },
             }
           },
+          {
+            $project: {
+              "supplier.password": 0,
+              "supplier.token": 0,
+              "buyer.password": 0,
+              "buyer.token": 0
+            }
+          },
           { $sort  : {createdAt: -1} },
           // { $skip  : offset },
           // { $limit : page_size },
@@ -941,6 +949,14 @@ module.exports = {
               updatedAt       : 1,
               supplier        : { $arrayElemAt: ["$supplier", 0] },
               buyer           : { $arrayElemAt: ["$buyer", 0] },
+            }
+          },
+          {
+            $project: {
+              "supplier.password": 0,
+              "supplier.token": 0,
+              "buyer.password": 0,
+              "buyer.token": 0
             }
           },
           { $sort  : {createdAt: -1} },

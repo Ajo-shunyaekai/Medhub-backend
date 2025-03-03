@@ -1270,6 +1270,12 @@ module.exports = {
           }
         },
         {
+          $project: {
+            "supplier.password": 0,
+            "supplier.token": 0
+          }
+        },
+        {
           $sort: { created_at: -1 }
         },
         { $skip  : offset },
