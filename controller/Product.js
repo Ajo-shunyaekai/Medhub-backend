@@ -302,7 +302,7 @@ module.exports = {
       };
 
       if (market == "secondary") {
-        newProductData["secondaryMarketDetails"] = {
+        newProductData["secondayMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
@@ -452,7 +452,7 @@ module.exports = {
         };
 
         if (result?.["Product Market*"] == "secondary") {
-          updatedObject["secondaryMarketDetails"] = {
+          updatedObject["secondayMarketDetails"] = {
             purchasedOn: result?.["Purchased On"]?.toString()?.trim() || "",
             countryAvailable:
               (result?.["Country Available "] || result?.["Country Available"])
@@ -1102,7 +1102,7 @@ module.exports = {
       };
 
       if (market == "secondary") {
-        updatedProduct["secondaryMarketDetails"] = {
+        updatedProduct["secondayMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };

@@ -22,7 +22,7 @@ const addProductFileMiddleware = (req, res, next) => {
   // }
  
   // Log the uploaded files for debugging
-  console.log(uploadedFiles);
+  // console.log(uploadedFiles);
  
   if (market == "secondary") {
     // Check if the purchaseInvoiceFile is uploaded
