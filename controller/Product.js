@@ -246,7 +246,8 @@ module.exports = {
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePaths(req?.files, ["image"]);
-      const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      const inventoryFiles = [...req?.body?.countries];
       const complianceFiles = await getFilePaths(req?.files, [
         "complianceFile",
       ]);
@@ -267,8 +268,6 @@ module.exports = {
         req?.files,
         fileFields[category]
       );
-
-      console.log("categoryFiles", categoryFiles);
 
       const inventoryUUId = uuidv4();
       const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
@@ -303,7 +302,7 @@ module.exports = {
       };
 
       if (market == "secondary") {
-        newProductData[secondaryMarketDetails] = {
+        newProductData["secondaryMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
@@ -316,12 +315,24 @@ module.exports = {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
 
-      const newInventory = await Inventory.ceate({
+      const newInventoryDetails = {
         uuid: inventoryUUId,
         productId: newProduct?.medicine_id,
         ...req?.body,
+        stockedInDetails: JSON.parse(
+          req?.body?.stockedInDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
+        inventoryList: JSON.parse(
+          req?.body?.productPricingDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
         ...(inventoryFiles || []),
-      });
+      };
+
+      const newInventory = await Inventory.create(newInventoryDetails);
 
       if (!newInventory) {
         return sendErrorResponse(res, 400, "Failed to create new Inventory.");
@@ -365,7 +376,7 @@ module.exports = {
           productId,
           sku: result?.["SKU"]?.toString()?.trim() || "",
           stock: result?.["Stock*"]?.toString()?.trim() || "",
-          stockQuantity: Number(result?.["Stock Quantity"]) || 0,
+          // stockQuantity: Number(result?.["Stock Quantity"]) || 0,
           countries:
             result?.["Countries where Stock Trades"]
               ?.split(",")
@@ -401,8 +412,8 @@ module.exports = {
               result["Product Packaging Material Name (if Other)"]
                 ?.toString()
                 ?.trim() || "",
-            costPerProduct:
-              result?.["Cost Per Product"]?.toString()?.trim() || "",
+            // costPerProduct:
+            //   result?.["Cost Per Product"]?.toString()?.trim() || "",
           },
           inventory: inventoryUUId,
           complianeFile:
@@ -1031,7 +1042,8 @@ module.exports = {
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePaths(req?.files, ["image"]);
-      const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      const inventoryFiles = [...req?.body?.countries];
       const complianceFiles = await getFilePaths(req?.files, [
         "complianceFile",
       ]);
@@ -1109,6 +1121,16 @@ module.exports = {
 
       const updatedInventoryData = {
         ...req?.body,
+        stockedInDetails: JSON.parse(
+          req?.body?.stockedInDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
+        inventoryList: JSON.parse(
+          req?.body?.productPricingDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
         ...(inventoryFiles || []),
       };
 

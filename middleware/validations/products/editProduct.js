@@ -40,17 +40,17 @@ const editGeneralValidationRules = [
       return true;
     }),
 
-  body("countryAvailable")
-    .optional()
-    .custom((value, { req }) => {
-      // Only validate if  market is 'Secondary' and countryAvailable is provided
-      if (req.body.market === "secondary" && !value) {
-        throw new Error(
-          "Country Available is required when the market is 'Secondary'."
-        );
-      }
-      return true;
-    }),
+  // body("countryAvailable")
+  //   .optional()
+  //   .custom((value, { req }) => {
+  //     // Only validate if  market is 'Secondary' and countryAvailable is provided
+  //     if (req.body.market === "secondary" && !value) {
+  //       throw new Error(
+  //         "Country Available is required when the market is 'Secondary'."
+  //       );
+  //     }
+  //     return true;
+  //   }),
 
   body("minimumPurchaseUnit")
     .optional()
@@ -83,10 +83,11 @@ const editGeneralValidationRules = [
   body("upc")
     .optional()
     .trim()
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "UPC must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    // .matches(/^[a-zA-Z0-9\s]+$/)
+    // .withMessage(
+    //   "UPC must be alphanumeric (letters, numbers, and spaces only)."
+    // )
+    ,
 
   body("model")
     .notEmpty()
@@ -99,10 +100,11 @@ const editGeneralValidationRules = [
   body("brand")
     .optional()
     .trim()
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Brand Name must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    // .matches(/^[a-zA-Z0-9\s]+$/)
+    // .withMessage(
+    //   "Brand Name must be alphanumeric (letters, numbers, and spaces only)."
+    // )
+    ,
 
   body("form")
     .notEmpty()
@@ -163,21 +165,22 @@ const editGeneralValidationRules = [
       return true;
     }),
 
-  body("costPerProduct")
-    .optional()
-    .trim()
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Cost Per Product must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+  // body("costPerProduct")
+  //   .optional()
+  //   .trim()
+  //   .matches(/^[a-zA-Z0-9\s]+$/)
+  //   .withMessage(
+  //     "Cost Per Product must be alphanumeric (letters, numbers, and spaces only)."
+  //   ),
 
   body("sku")
     .optional()
     .trim()
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "SKU must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    // .matches(/^[a-zA-Z0-9\s]+$/)
+    // .withMessage(
+    //   "SKU must be alphanumeric (letters, numbers, and spaces only)."
+    // )
+    ,
 
   body("stock")
     .notEmpty()
@@ -187,30 +190,30 @@ const editGeneralValidationRules = [
       "Stock status must be 'In-stock', 'Out of Stock' or 'On-demand'"
     ),
 
-  body("stockQuantity")
-    .optional()
-    .trim()
-    .isInt({ gt: 0 })
-    .withMessage("Stock Quantity must be a positive integer."),
+  // body("stockQuantity")
+  //   .optional()
+  //   .trim()
+  //   .isInt({ gt: 0 })
+  //   .withMessage("Stock Quantity must be a positive integer."),
 
-  body("countries")
-    .optional()
-    .custom((value) => {
-      if (typeof value === "string") {
-        try {
-          value = JSON.parse(value); // Parse string if it looks like an array
-        } catch (e) {
-          throw new Error("Countries must be a valid array.");
-        }
-      }
-      if (
-        !Array.isArray(value) ||
-        !value.every((country) => typeof country === "string")
-      ) {
-        throw new Error("Countries must be an array of strings.");
-      }
-      return true;
-    }),
+  // body("countries")
+  //   .optional()
+  //   .custom((value) => {
+  //     if (typeof value === "string") {
+  //       try {
+  //         value = JSON.parse(value); // Parse string if it looks like an array
+  //       } catch (e) {
+  //         throw new Error("Countries must be a valid array.");
+  //       }
+  //     }
+  //     if (
+  //       !Array.isArray(value) ||
+  //       !value.every((country) => typeof country === "string")
+  //     ) {
+  //       throw new Error("Countries must be an array of strings.");
+  //     }
+  //     return true;
+  //   }),
 
   // body("date")
   //   .optional()
@@ -232,20 +235,22 @@ const editGeneralValidationRules = [
   body("storage")
     .optional()
     .trim()
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Storage Conditions must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    // .matches(/^[a-zA-Z0-9\s]+$/)
+    // .withMessage(
+    //   "Storage Conditions must be alphanumeric (letters, numbers, and spaces only)."
+    // )
+    ,
 
   body("other").optional().trim(),
 
   body("warranty")
     .optional()
     .trim()
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Warranty must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    // .matches(/^[a-zA-Z0-9\s]+$/)
+    // .withMessage(
+    //   "Warranty must be alphanumeric (letters, numbers, and spaces only)."
+    // )
+    ,
 
   // Category validation
   body("category")
