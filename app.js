@@ -9,6 +9,7 @@ const bodyParser = require("body-parser");
 const connect = require("./utils/dbConnection");
 const initializeSocket = require("./utils/socketHandler");
 const { Server } = require("socket.io");
+// const ffmpeg = require('fluent-ffmpeg');
 const sendEmail = require("./utils/emailService");
 const { contactUsContent } = require("./utils/emailContents");
 const EmailListing = require("./schema/emailListingSchema");
@@ -91,8 +92,9 @@ if (!fs.existsSync(uploadFolderPath)) {
 }
 
 // Serve video file from the uploads folder
+app.use("/videos", express.static(path.join(__dirname, "uploads/hls")));
 
-app.get("/video", (req, res) => {
+/*app.get("/video", (req, res) => {
   const videoPath = path.join(__dirname, "uploads", "video.mp4");
 
   if (!fs.existsSync(videoPath)) {
@@ -160,8 +162,8 @@ app.get("/video", (req, res) => {
     res.status(500).send("Error streaming video");
   }
 });
+*/
 
-// contact us Email sending route
 app.post("/send-email", async (req, res) => {
   const {
     username,
