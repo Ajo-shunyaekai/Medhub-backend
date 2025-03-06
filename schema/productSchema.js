@@ -19,6 +19,11 @@ const productSchema = new Schema(
         trim: true,
         required: [true, "Validation Error: Manufacturer is required."],
       },
+      aboutManufacturer: {
+        type: String,
+        trim: true,
+        required: [true, "Validation Error: Manufacturer is required."],
+      },
       countryOfOrigin: {
         type: String,
         trim: true,
@@ -86,10 +91,10 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
-      costPerProduct: {
-        type: String,
-        trim: true,
-      },
+      // costPerProduct: {
+      //   type: String,
+      //   trim: true,
+      // },
     },
     inventory: {
       type: String,
@@ -236,7 +241,7 @@ const productSchema = new Schema(
           },
         },
       ],
-      performaInvoiceFile: [
+      purchaseInvoiceFile: [
         {
           type: String,
           validate: {
@@ -428,7 +433,7 @@ const productSchema = new Schema(
       otcClassification: {
         type: String,
         trim: true,
-        enum: ["Category I", "Category II", "Category III"],
+        // enum: ["Category I", "Category II", "Category III"],
       },
       expiry: {
         type: String,
@@ -565,7 +570,7 @@ const productSchema = new Schema(
       otcClassification: {
         type: String,
         trim: true,
-        enum: ["Category I", "Category II", "Category III"],
+        // enum: ["Category I", "Category II", "Category III"],
       },
       expiry: {
         type: String,
@@ -740,7 +745,7 @@ const productSchema = new Schema(
       otcClassification: {
         type: String,
         trim: true,
-        enum: ["Category I", "Category II", "Category III"],
+        // enum: ["Category I", "Category II", "Category III"],
       },
       expiry: {
         type: String,
