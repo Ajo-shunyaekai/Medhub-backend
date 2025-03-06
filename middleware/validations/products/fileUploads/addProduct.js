@@ -15,20 +15,20 @@ const addProductFileMiddleware = (req, res, next) => {
     0
   );
 
-  if (totalFiles > 4) {
-    const err = new Error("You can only upload a maximum of 4 files.");
-    logErrorToFile(err, req); // Log the error to a file for persistence
-    return sendErrorResponse(res, 400, err.message, err); // Send an error response back
-  }
+  // if (totalFiles > 4) {
+  //   const err = new Error("You can only upload a maximum of 4 files.");
+  //   logErrorToFile(err, req); // Log the error to a file for persistence
+  //   return sendErrorResponse(res, 400, err.message, err); // Send an error response back
+  // }
 
   // Log the uploaded files for debugging
   console.log(uploadedFiles);
 
   if (market == "secondary") {
-    // Check if the performaInvoiceFile is uploaded
-    if (!req?.files?.performaInvoiceFile) {
+    // Check if the purchaseInvoiceFile is uploaded
+    if (!req?.files?.purchaseInvoiceFile) {
       const err = new Error(
-        "Performa Invoice File is required for Secondary Market Product."
+        "Purchase Invoice File is required for Secondary Market Product."
       );
       logErrorToFile(err, req); // Log the error to a file for persistence
       return sendErrorResponse(res, 400, err.message, err); // Send an error response back

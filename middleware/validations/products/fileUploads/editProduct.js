@@ -19,13 +19,13 @@ const editProductFileMiddleware = (req, res, next) => {
     // Total file count (saved + uploaded)
     const totalFiles = savedFileCount + uploadedFileCount;
 
-    if (totalFiles > 4) {
-      const err = new Error(
-        `You can only upload a maximum of 4 files for ${fieldName}. Currently, you have ${savedFileCount} saved files.`
-      );
-      logErrorToFile(err, req); // Log the error to a file for persistence
-      return sendErrorResponse(res, 400, err.message, err); // Send an error response back
-    }
+    // if (totalFiles > 4) {
+    //   const err = new Error(
+    //     `You can only upload a maximum of 4 files for ${fieldName}. Currently, you have ${savedFileCount} saved files.`
+    //   );
+    //   logErrorToFile(err, req); // Log the error to a file for persistence
+    //   return sendErrorResponse(res, 400, err.message, err); // Send an error response back
+    // }
   };
 
   // Check for different field names where file upload might happen
@@ -44,14 +44,14 @@ const editProductFileMiddleware = (req, res, next) => {
   checkFileLimitForField("performaInvoiceFile");
 
   if (market == "secondary") {
-    // Check if the performaInvoiceFile is uploaded
+    // Check if the purchaseInvoiceFile is uploaded
     if (
-      (req?.body?.performaInvoiceFile?.length || 0) +
-        (req?.files?.performaInvoiceFile?.length || 0) ===
+      (req?.body?.purchaseInvoiceFile?.length || 0) +
+        (req?.files?.purchaseInvoiceFile?.length || 0) ===
       0
     ) {
       const err = new Error(
-        "Performa Invoice File is required for Secondary Market Product."
+        "Purchase Invoice File is required for Secondary Market Product."
       );
       logErrorToFile(err, req); // Log the error to a file for persistence
       return sendErrorResponse(res, 400, err.message, err); // Send an error response back

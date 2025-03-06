@@ -44,17 +44,28 @@ module.exports = {
         });
       }
 
-      // Add lookup for Buyer or Supplier schema based on userSchemaReference
+      
+      // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
-          from: "Supplier",
-          localField: "supplier_id", // Reference field in the Product schema
-          foreignField: "_id", // Reference field in Supplier/Buyer schema
-          as: "userDetails", // Alias for the joined data
+          from: "suppliers", // Ensure the collection name matches
+          localField: "supplier_id", // Reference to supplier_id in the Product schema
+          foreignField: "_id", // Reference to supplier_id in the Supplier schema
+          as: "userDetails",
         },
       });
 
-      // Optionally, add a stage to unwind the lookup result if you expect only a single match
+      // Lookup Inventory based on the inventory field in Product
+      pipeline.push({
+        $lookup: {
+          from: "inventories", // Ensure the collection name matches
+          localField: "inventory", // Reference to the inventory field in Product
+          foreignField: "uuid", // Reference to uuid in Inventory schema
+          as: "inventoryDetails",
+        },
+      });
+
+      // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
       pipeline.push({
         $unwind: {
           path: "$userDetails",
@@ -62,17 +73,6 @@ module.exports = {
         },
       });
 
-      // Add lookup for Inventory collection to fetch inventory details based on the productId
-      pipeline.push({
-        $lookup: {
-          from: "Inventory", // Inventory collection
-          localField: "uuid", // Product ID
-          foreignField: "inventory", // Inventory's reference to Product (inventory)
-          as: "inventoryDetails", // Alias for the joined data
-        },
-      });
-
-      // Optionally, unwind the inventoryDetails if you expect only one inventory per product
       pipeline.push({
         $unwind: {
           path: "$inventoryDetails",
@@ -112,7 +112,7 @@ module.exports = {
       }
 
       // Instantiate ObjectId with `new` keyword
-      const productId = new mongoose.Types.ObjectId(id); // Explicitly using `new` keyword
+      const productId = new mongoose.Types.ObjectId(id);
 
       // Create the aggregation pipeline
       let pipeline = [];
@@ -126,17 +126,27 @@ module.exports = {
         });
       }
 
-      // Add lookup for Buyer or Supplier schema based on userSchemaReference
+      // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
-          from: "Supplier", // Specify the collection name directly
-          localField: "supplier_id", // Reference field in the Product schema
-          foreignField: "_id", // Reference field in Supplier/Buyer schema
-          as: "userDetails", // Alias for the joined data
+          from: "suppliers", // Ensure the collection name matches
+          localField: "supplier_id", // Reference to supplier_id in the Product schema
+          foreignField: "_id", // Reference to supplier_id in the Supplier schema
+          as: "userDetails",
         },
       });
 
-      // Optionally, add a stage to unwind the lookup result if you expect only a single match
+      // Lookup Inventory based on the inventory field in Product
+      pipeline.push({
+        $lookup: {
+          from: "inventories", // Ensure the collection name matches
+          localField: "inventory", // Reference to the inventory field in Product
+          foreignField: "uuid", // Reference to uuid in Inventory schema
+          as: "inventoryDetails",
+        },
+      });
+
+      // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
       pipeline.push({
         $unwind: {
           path: "$userDetails",
@@ -144,17 +154,6 @@ module.exports = {
         },
       });
 
-      // Add lookup for Inventory collection to fetch inventory details based on the productId
-      pipeline.push({
-        $lookup: {
-          from: "Inventory", // Inventory collection
-          localField: "uuid", // Product ID
-          foreignField: "inventory", // Inventory's reference to Product (inventory)
-          as: "inventoryDetails", // Alias for the joined data
-        },
-      });
-
-      // Optionally, unwind the inventoryDetails if you expect only one inventory per product
       pipeline.push({
         $unwind: {
           path: "$inventoryDetails",
@@ -302,7 +301,7 @@ module.exports = {
       };
 
       if (market == "secondary") {
-        newProductData["secondaryMarketDetails"] = {
+        newProductData["secondayMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
@@ -452,7 +451,7 @@ module.exports = {
         };
 
         if (result?.["Product Market*"] == "secondary") {
-          updatedObject["secondaryMarketDetails"] = {
+          updatedObject["secondayMarketDetails"] = {
             purchasedOn: result?.["Purchased On"]?.toString()?.trim() || "",
             countryAvailable:
               (result?.["Country Available "] || result?.["Country Available"])
@@ -1102,7 +1101,7 @@ module.exports = {
       };
 
       if (market == "secondary") {
-        updatedProduct["secondaryMarketDetails"] = {
+        updatedProduct["secondayMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
