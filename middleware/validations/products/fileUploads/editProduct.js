@@ -18,7 +18,7 @@ const editProductFileMiddleware = (req, res, next) => {
  
     // Total file count (saved + uploaded)
     const totalFiles = savedFileCount + uploadedFileCount;
- 
+
     // if (totalFiles > 4) {
     //   const err = new Error(
     //     `You can only upload a maximum of 4 files for ${fieldName}. Currently, you have ${savedFileCount} saved files.`

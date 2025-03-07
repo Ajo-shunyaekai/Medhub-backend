@@ -14,13 +14,13 @@ const addProductFileMiddleware = (req, res, next) => {
     (acc, fileList) => acc + fileList.length,
     0
   );
- 
+
   // if (totalFiles > 4) {
   //   const err = new Error("You can only upload a maximum of 4 files.");
   //   logErrorToFile(err, req); // Log the error to a file for persistence
   //   return sendErrorResponse(res, 400, err.message, err); // Send an error response back
   // }
- 
+  
   // Log the uploaded files for debugging
   // console.log(uploadedFiles);
  
