@@ -1,5 +1,7 @@
 require("dotenv").config();
 const { v4: uuidv4 } = require("uuid");
+const fs = require("fs");
+const path = require("path");
 const logErrorToFile = require("../logs/errorLogs");
 const {
   sendErrorResponse,
@@ -10,6 +12,7 @@ const Inventory = require("../schema/inventorySchema");
 const Buyer = require("../schema/buyerSchema");
 const Product = require("../schema/productSchema");
 const { default: mongoose } = require("mongoose");
+const csv = require("csv-parser");
 
 module.exports = {
   getAllProducts: async (req, res) => {
@@ -354,9 +357,39 @@ module.exports = {
     try {
       const { supplier_id } = req?.body;
       const filePath = req.file.path;
+      // Utility function to parse CSV
+const parseCSV = (filePath) => {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", (data) => results.push(data))
+      .on("end", () => resolve(results))
+      .on("error", (err) => reject(err));
+  });
+};
+
+
+// const parseCSV = (filePath) => {
+//   return new Promise((resolve, reject) => {
+//     const results = [];
+//     fs.createReadStream(filePath)
+//       .pipe(csv())
+//       .on("data", (data) => {
+//         const cleanedData = Object.keys(data).reduce((acc, key) => {
+//           const newKey = key.replace(/\*/g, "").trim(); // Remove * and trim spaces
+//           acc[newKey] = data[key];
+//           return acc;
+//         }, {});
+//         results.push(cleanedData);
+//       })
+//       .on("end", () => resolve(results))
+//       .on("error", (err) => reject(err));
+//   });
+// };
       // Parse the CSV file
       const results = await parseCSV(filePath);
-
+      console.log('results',results)
       // Check if the product exists
       const existingSupplier = await Supplier.findById(supplier_id);
       if (!existingSupplier) {
@@ -388,6 +421,7 @@ module.exports = {
             description:
               result?.["Product Description*"]?.toString()?.trim() || "",
             manufacturer: result?.["Manufacturer*"]?.toString()?.trim() || "",
+            aboutManufacturer: result?.["About Manufacturer*"]?.toString()?.trim() || "",
             countryOfOrigin:
               result?.["Country of origin*"]?.toString()?.trim() || "",
             upc: result?.["UPC"]?.toString()?.trim() || "",
@@ -468,7 +502,7 @@ module.exports = {
         }
 
         switch (result?.["Product Category*"]?.trim()?.replaceAll(" ", "")) {
-          case MedicalEquipmentAndDevices:
+          case 'MedicalEquipmentAndDevices':
             updatedObject["MedicalEquipmentAndDevices"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -496,7 +530,7 @@ module.exports = {
             };
             break;
 
-          case Pharmaceuticals:
+          case 'Pharmaceuticals':
             updatedObject["Pharmaceuticals"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -525,7 +559,7 @@ module.exports = {
             };
             break;
 
-          case SkinHairCosmeticSupplies:
+          case 'SkinHairCosmeticSupplies':
             updatedObject["SkinHairCosmeticSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -579,7 +613,7 @@ module.exports = {
             };
             break;
 
-          case VitalHealthAndWellness:
+          case 'VitalHealthAndWellness':
             updatedObject["VitalHealthAndWellness"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -614,7 +648,7 @@ module.exports = {
             };
             break;
 
-          case MedicalConsumablesAndDisposables:
+          case 'MedicalConsumablesAndDisposables':
             updatedObject["MedicalConsumablesAndDisposables"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -647,7 +681,7 @@ module.exports = {
             };
             break;
 
-          case LaboratorySupplies:
+          case 'LaboratorySupplies':
             updatedObject["LaboratorySupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -678,7 +712,7 @@ module.exports = {
             };
             break;
 
-          case DiagnosticAndMonitoringDevices:
+          case 'DiagnosticAndMonitoringDevices':
             updatedObject["DiagnosticAndMonitoringDevices"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -713,7 +747,7 @@ module.exports = {
             };
             break;
 
-          case HospitalAndClinicSupplies:
+          case 'HospitalAndClinicSupplies':
             updatedObject["HospitalAndClinicSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -737,7 +771,7 @@ module.exports = {
             };
             break;
 
-          case OrthopedicSupplies:
+          case 'OrthopedicSupplies':
             updatedObject["OrthopedicSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -759,7 +793,7 @@ module.exports = {
             };
             break;
 
-          case DentalProducts:
+          case 'DentalProducts':
             updatedObject["DentalProducts"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -780,7 +814,7 @@ module.exports = {
             };
             break;
 
-          case EyeCareSupplies:
+          case 'EyeCareSupplies':
             updatedObject["EyeCareSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -796,7 +830,7 @@ module.exports = {
             };
             break;
 
-          case HomeHealthcareProducts:
+          case 'HomeHealthcareProducts':
             updatedObject["HomeHealthcareProducts"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -828,7 +862,7 @@ module.exports = {
             };
             break;
 
-          case AlternativeMedicines:
+          case 'AlternativeMedicines':
             updatedObject["AlternativeMedicines"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -848,7 +882,7 @@ module.exports = {
             };
             break;
 
-          case EmergencyAndFirstAidSupplies:
+          case 'EmergencyAndFirstAidSupplies':
             updatedObject["EmergencyAndFirstAidSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -865,7 +899,7 @@ module.exports = {
             };
             break;
 
-          case DisinfectionAndHygieneSupplies:
+          case 'DisinfectionAndHygieneSupplies':
             updatedObject["DisinfectionAndHygieneSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -883,7 +917,7 @@ module.exports = {
             };
             break;
 
-          case NutritionAndDietaryProducts:
+          case 'NutritionAndDietaryProducts':
             updatedObject["NutritionAndDietaryProducts"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -909,7 +943,7 @@ module.exports = {
             };
             break;
 
-          case HealthcareITSolutions:
+          case 'HealthcareITSolutions':
             updatedObject["HealthcareITSolutions"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
