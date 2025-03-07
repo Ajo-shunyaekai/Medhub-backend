@@ -990,8 +990,8 @@ module.exports = {
         const filePaths = {};
         for (const field of fields) {
           const validPaths = (
-            req?.body[field]
-              ? JSON.parse(req.body[field]) // Replace single backslashes with double backslashes
+            req?.body[field]?.replaceAll("New","")
+              ? JSON.parse(req?.body[field]?.replaceAll("New","")) // Replace single backslashes with double backslashes
               : []
           )?.concat(req?.files[field]?.map((file) => file.filename));
           filePaths[field] =
@@ -1005,33 +1005,33 @@ module.exports = {
       // Define file fields for each category (same as addProduct)
       const fileFields = {
         MedicalEquipmentAndDevices: [
-          "specificationFile",
-          "performanceTestingReportFile",
+          "specificationFileNew",
+          "performanceTestingReportFileNew",
         ],
         Pharmaceuticals: [],
         SkinHairCosmeticSupplies: [
-          "dermatologistTestedFile",
-          "pediatricianRecommendedFile",
+          "dermatologistTestedFileNew",
+          "pediatricianRecommendedFileNew",
         ],
         VitalHealthAndWellness: [],
         MedicalConsumablesAndDisposables: [],
         LaboratorySupplies: [],
         DiagnosticAndMonitoringDevices: [
-          "specificationFile",
-          "performanceTestingReportFile",
+          "specificationFileNew",
+          "performanceTestingReportFileNew",
         ],
         HospitalAndClinicSupplies: [],
         OrthopedicSupplies: [],
         DentalProducts: [],
         EyeCareSupplies: [],
         HomeHealthcareProducts:
-          ["performanceTestingReportFile"]?.toString()?.trim() || "",
-        AlternativeMedicines: ["healthClaimsFile"]?.toString()?.trim() || "",
+          ["performanceTestingReportFileNew"]?.toString()?.trim() || "",
+        AlternativeMedicines: ["healthClaimsFileNew"]?.toString()?.trim() || "",
         EmergencyAndFirstAidSupplies: [],
         DisinfectionAndHygieneSupplies: [],
         NutritionAndDietaryProducts: [],
         HealthcareITSolutions:
-          ["interoperabilityFile"]?.toString()?.trim() || "",
+          ["interoperabilityFileNew"]?.toString()?.trim() || "",
       };
 
       // Check if the category exists in the fileFields object
@@ -1040,22 +1040,22 @@ module.exports = {
       }
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
-      const generalFiles = await getFilePaths(req?.files, ["image"]);
+      const generalFiles = await getFilePaths(req?.files, ["imageNew"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
       const inventoryFiles = [...req?.body?.countries];
       const complianceFiles = await getFilePaths(req?.files, [
-        "complianceFile",
+        "complianceFileNew",
       ]);
       const additionalFiles = await getFilePaths(req?.files, [
-        "guidelinesFile",
+        "guidelinesFileNew",
       ]);
       const secondaryMarketFiles = await getFilePaths(req?.files, [
-        "performaInvoiceFile",
+        "performaInvoiceFileNew",
       ]);
       const healthNSafetyFiles = await getFilePaths(req?.files, [
-        "safetyDatasheet",
-        "healthHazardRating",
-        "environmentalImpact",
+        "safetyDatasheetNew",
+        "healthHazardRatingNew",
+        "environmentalImpactNew",
       ]);
 
       // Retrieve file paths for the selected category only

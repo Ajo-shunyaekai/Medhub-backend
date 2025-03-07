@@ -29,25 +29,25 @@ const editProductFileMiddleware = (req, res, next) => {
   };
  
   // Check for different field names where file upload might happen
-  checkFileLimitForField("image");
-  checkFileLimitForField("complianceFile");
-  checkFileLimitForField("guidelinesFile");
-  checkFileLimitForField("safetyDatasheet");
-  checkFileLimitForField("healthHazardRating");
-  checkFileLimitForField("environmentalImpact");
-  checkFileLimitForField("specificationFile");
-  checkFileLimitForField("performanceTestingReportFile");
-  checkFileLimitForField("dermatologistTestedFile");
-  checkFileLimitForField("pediatricianRecommendedFile");
-  checkFileLimitForField("healthClaimsFile");
-  checkFileLimitForField("interoperabilityFile");
-  checkFileLimitForField("performaInvoiceFile");
+  checkFileLimitForField("imageNew");
+  checkFileLimitForField("complianceFileNew");
+  checkFileLimitForField("guidelinesFileNew");
+  checkFileLimitForField("safetyDatasheetNew");
+  checkFileLimitForField("healthHazardRatingNew");
+  checkFileLimitForField("environmentalImpactNew");
+  checkFileLimitForField("specificationFileNew");
+  checkFileLimitForField("performanceTestingReportFileNew");
+  checkFileLimitForField("dermatologistTestedFileNew");
+  checkFileLimitForField("pediatricianRecommendedFileNew");
+  checkFileLimitForField("healthClaimsFileNew");
+  checkFileLimitForField("interoperabilityFileNew");
+  checkFileLimitForField("performaInvoiceFileNew");
  
   if (market == "secondary") {
     // Check if the purchaseInvoiceFile is uploaded
     if (
       (req?.body?.purchaseInvoiceFile?.length || 0) +
-        (req?.files?.purchaseInvoiceFile?.length || 0) ===
+        (req?.files?.purchaseInvoiceFileNew?.length || 0) ===
       0
     ) {
       const err = new Error(
@@ -64,7 +64,7 @@ const editProductFileMiddleware = (req, res, next) => {
       // Check if the dermatologistTestedFile is uploaded
       if (
         (req?.body?.dermatologistTestedFile?.length || 0) +
-          (req?.files?.dermatologistTestedFile?.length || 0) ===
+          (req?.files?.dermatologistTestedFileNew?.length || 0) ===
         0
       ) {
         const err = new Error(
@@ -80,7 +80,7 @@ const editProductFileMiddleware = (req, res, next) => {
     // Check if the pediatricianRecommendedFile is uploaded
     if (
       (req?.body?.pediatricianRecommendedFileFile?.length || 0) +
-        (req?.files?.pediatricianRecommendedFileFile?.length || 0) ===
+        (req?.files?.pediatricianRecommendedFileFileNew?.length || 0) ===
       0
     ) {
       const err = new Error(
@@ -97,7 +97,7 @@ const editProductFileMiddleware = (req, res, next) => {
     // Check if the dermatologistTestedFile is uploaded
     if (
       (req?.body?.dermatologistTestedFile?.length || 0) +
-        (req?.files?.dermatologistTestedFile?.length || 0) ===
+        (req?.files?.dermatologistTestedFileNew?.length || 0) ===
       0
     ) {
       const err = new Error(
@@ -113,7 +113,7 @@ const editProductFileMiddleware = (req, res, next) => {
     // Check if the interoperabilityFile is uploaded
     if (
       (req?.body?.interoperabilityFile?.length || 0) +
-        (req?.files?.interoperabilityFile?.length || 0) ===
+        (req?.files?.interoperabilityFileNew?.length || 0) ===
       0
     ) {
       const err = new Error(

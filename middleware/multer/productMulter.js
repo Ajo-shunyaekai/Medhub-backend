@@ -234,35 +234,35 @@ const editProductUpload = (req, res, next) => {
   };
 
   upload.fields([
-    { name: "image", maxCount: getMaxCount("image") },
-    { name: "complianceFile", maxCount: getMaxCount("complianceFile") },
-    { name: "guidelinesFile", maxCount: getMaxCount("guidelinesFile") },
-    { name: "safetyDatasheet", maxCount: getMaxCount("safetyDatasheet") },
-    { name: "healthHazardRating", maxCount: getMaxCount("healthHazardRating") },
+    { name: "imageNew", maxCount: getMaxCount("image") },
+    { name: "complianceFileNew", maxCount: getMaxCount("complianceFile") },
+    { name: "guidelinesFileNew", maxCount: getMaxCount("guidelinesFile") },
+    { name: "safetyDatasheetNew", maxCount: getMaxCount("safetyDatasheet") },
+    { name: "healthHazardRatingNew", maxCount: getMaxCount("healthHazardRating") },
     {
-      name: "environmentalImpact",
+      name: "environmentalImpactNew",
       maxCount: getMaxCount("environmentalImpact"),
     },
-    { name: "specificationFile", maxCount: getMaxCount("specificationFile") },
+    { name: "specificationFileNew", maxCount: getMaxCount("specificationFile") },
     {
-      name: "performanceTestingReportFile",
+      name: "performanceTestingReportFileNew",
       maxCount: getMaxCount("performanceTestingReportFile"),
     },
     {
-      name: "dermatologistTestedFile",
+      name: "dermatologistTestedFileNew",
       maxCount: getMaxCount("dermatologistTestedFile"),
     },
     {
-      name: "pediatricianRecommendedFile",
+      name: "pediatricianRecommendedFileNew",
       maxCount: getMaxCount("pediatricianRecommendedFile"),
     },
-    { name: "healthClaimsFile", maxCount: getMaxCount("healthClaimsFile") },
+    { name: "healthClaimsFileNew", maxCount: getMaxCount("healthClaimsFile") },
     {
-      name: "interoperabilityFile",
+      name: "interoperabilityFileNew",
       maxCount: getMaxCount("interoperabilityFile"),
     },
     {
-      name: "purchaseInvoiceFile",
+      name: "purchaseInvoiceFileNew",
       maxCount: getMaxCount("purchaseInvoiceFile"),
     },
   ])(req, res, (err) => {
