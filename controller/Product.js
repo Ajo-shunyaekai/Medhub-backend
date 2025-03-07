@@ -369,24 +369,6 @@ const parseCSV = (filePath) => {
   });
 };
 
-
-// const parseCSV = (filePath) => {
-//   return new Promise((resolve, reject) => {
-//     const results = [];
-//     fs.createReadStream(filePath)
-//       .pipe(csv())
-//       .on("data", (data) => {
-//         const cleanedData = Object.keys(data).reduce((acc, key) => {
-//           const newKey = key.replace(/\*/g, "").trim(); // Remove * and trim spaces
-//           acc[newKey] = data[key];
-//           return acc;
-//         }, {});
-//         results.push(cleanedData);
-//       })
-//       .on("end", () => resolve(results))
-//       .on("error", (err) => reject(err));
-//   });
-// };
       // Parse the CSV file
       const results = await parseCSV(filePath);
       console.log('results',results)
