@@ -1722,7 +1722,7 @@ const categoriesData = [
     ],
   },
 ];
-
+ 
 const createCategory = (schema, name, subCategories) => ({
   schema,
   name,
@@ -1731,9 +1731,9 @@ const createCategory = (schema, name, subCategories) => ({
     anotherCategories: subCategory.anotherCategories,
   })),
 });
-
+ 
 const categoryArrays = categoriesData.map((category) =>
   createCategory(category.schema, category.name, category.subCategories)
 );
-
+ 
 module.exports = categoryArrays;
