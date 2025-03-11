@@ -17,7 +17,11 @@ const csv = require("csv-parser");
 module.exports = {
   getAllProducts: async (req, res) => {
     try {
-      const { supplier_id, market } = req?.query;
+      const { supplier_id, market, page_no = 1, page_size = 5 } = req?.query;
+
+        const pageNo = parseInt(page_no) || 1;  
+        const pageSize = parseInt(page_size) || 10;
+        const offset    = (pageNo - 1) * pageSize;
 
       // Create the aggregation pipeline
       let pipeline = [];
@@ -83,16 +87,29 @@ module.exports = {
         },
       });
 
-      // Execute the aggregation
-      const products = await Product.aggregate(pipeline);
+    // Get total count before applying pagination
+    const totalProducts = await Product.countDocuments({ 
+      isDeleted: false,
+      ...(market ? { market: market } : {}) 
+  });
+  
 
-      // Send the response with the products
-      return sendSuccessResponse(
-        res,
-        200,
-        "Success Fetching Product",
-        products
-      );
+    // pagination
+    pipeline.push({ $skip: offset });
+    pipeline.push({ $limit: pageSize });
+
+    // Execute the aggregation
+    const products = await Product.aggregate(pipeline);
+    const totalPages = Math.ceil(totalProducts / pageSize);
+
+    return sendSuccessResponse(res, 200, "Success Fetching Products", {
+        products,
+        totalItems: totalProducts,
+        currentPage: pageNo,
+        itemsPerPage: pageSize,
+        totalPages
+    });
+      
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
