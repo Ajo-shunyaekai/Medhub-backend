@@ -93,6 +93,9 @@ module.exports = {
       ...(market ? { market: market } : {}) 
   });
   
+    pipeline.push({ 
+      $sort: { createdAt: -1 } 
+  });
 
     // pagination
     pipeline.push({ $skip: offset });
