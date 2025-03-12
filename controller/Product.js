@@ -291,11 +291,33 @@ module.exports = {
         fileFields[category]
       );
 
+      if (category === "AlternativeMedicines") {
+        categoryFiles.healthClaimsFile = req.files?.healthClaimsFile
+          ? req.files.healthClaimsFile.map((file) => file.filename)
+          : [];
+      }
+      if (category === "HealthcareITSolutions") {
+        categoryFiles.interoperabilityFile = req.files?.interoperabilityFile
+          ? req.files.interoperabilityFile.map((file) => file.filename)
+          : [];
+      }
+      if (category === "HomeHealthcareProducts") {
+        categoryFiles.performanceTestingReportFile = req.files?.performanceTestingReportFile
+          ? req.files.performanceTestingReportFile.map((file) => file.filename)
+          : [];
+      }
+
+     let newProductData = {}
+      newProductData[category] = {
+        ...req?.body,
+        ...(categoryFiles || {}),
+      };
+
       const inventoryUUId = uuidv4();
       const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
 
       // Create new product with all necessary fields
-      const newProductData = {
+       newProductData = {
         ...req?.body,
         medicine_id,
         general: {
