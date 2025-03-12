@@ -63,13 +63,13 @@ const addProductFileMiddleware = (req, res, next) => {
   // Check conditions for the "DiagnosticAndMonitoringDevices" category
   if (category == "DiagnosticAndMonitoringDevices") {
     // Check if the dermatologistTestedFile is uploaded
-    if (!req?.files?.dermatologistTestedFile) {
-      const err = new Error(
-        "Dermatologist Tested file is required for Diagnostic And Monitoring Devices"
-      );
-      logErrorToFile(err, req); // Log the error to a file for persistence
-      return sendErrorResponse(res, 400, err.message, err); // Send an error response back
-    }
+    // if (!req?.files?.dermatologistTestedFile) {
+    //   const err = new Error(
+    //     "Dermatologist Tested file is required for Diagnostic And Monitoring Devices"
+    //   );
+    //   logErrorToFile(err, req); // Log the error to a file for persistence
+    //   return sendErrorResponse(res, 400, err.message, err); // Send an error response back
+    // }
   }
  
   // Check conditions for the "HealthcareITSolutions" category
