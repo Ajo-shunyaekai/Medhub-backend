@@ -1208,7 +1208,7 @@ const productSchema = new Schema(
       moistureResistance: {
         type: String,
         trim: true,
-        enum: ["Yes", "No"],
+        enum: ["Yes", "No" ,''],
       },
     },
     DentalProducts: {
