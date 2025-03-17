@@ -18,7 +18,7 @@ module.exports = {
   getAllProducts: async (req, res) => {
     try {
       const { supplier_id, market, page_no = 1, page_size = 5 } = req?.query;
-
+console.log('req?.query',req?.query)
         const pageNo = parseInt(page_no) || 1;  
         const pageSize = parseInt(page_size) || 10;
         const offset    = (pageNo - 1) * pageSize;
@@ -37,7 +37,8 @@ module.exports = {
       if (supplier_id) {
         pipeline.push({
           $match: {
-            supplier_id: mongoose.Types.ObjectId(supplier_id), // Ensure ObjectId type matching
+            // supplier_id: mongoose.Types.ObjectId(supplier_id), // Ensure ObjectId type matching
+            supplier_id: new mongoose.Types.ObjectId(supplier_id),
           },
         });
       }
