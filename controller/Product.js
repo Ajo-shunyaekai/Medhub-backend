@@ -228,7 +228,6 @@ module.exports = {
       const { category, market = "new" } = req?.body;
 
       console.log("req?.body", req?.files);
-
       // Define file fields for each category
       const fileFields = {
         MedicalEquipmentAndDevices: [
@@ -277,7 +276,7 @@ module.exports = {
         "guidelinesFile",
       ]);
       const secondaryMarketFiles = await getFilePaths(req?.files, [
-        "performaInvoiceFile",
+        "purchaseInvoiceFile",
       ]);
       const healthNSafetyFiles = await getFilePaths(req?.files, [
         "safetyDatasheet",
@@ -518,8 +517,8 @@ const parseCSV = (filePath) => {
             condition: result?.["Product Condition"]?.toString()?.trim() || "",
             minimumPurchaseUnit:
               result?.["Minimum Purchase Unit"]?.toString()?.trim() || "",
-            performaInvoiceFile:
-              result?.["Performa Invoice File*"]
+              purchaseInvoiceFile:
+              result?.["Purchase Invoice File*"]
                 ?.split(",")
                 ?.map((ele) => ele?.toString()?.trim()) || [],
           };
@@ -1108,7 +1107,7 @@ const parseCSV = (filePath) => {
         "guidelinesFileNew",
       ]);
       const secondaryMarketFiles = await getFilePaths(req?.files, [
-        "performaInvoiceFileNew",
+        "purchaseInvoiceFileNew",
       ]);
       const healthNSafetyFiles = await getFilePaths(req?.files, [
         "safetyDatasheetNew",
