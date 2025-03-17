@@ -801,6 +801,9 @@ const categorySpecificValidationRules = [
             "Trolleys & Storage Units",
             "Examination Tables",
             "Medical Furniture",
+            "First Aid Kits",
+            "Emergency Medical Equipment",
+            "Trauma Care Products"
           ])
           .withMessage("Sub Category is invalid."),
         body("anotherCategory").optional().trim(),
