@@ -1305,17 +1305,17 @@ const productSchema = new Schema(
       frame: {
         type: String,
         trim: true,
-        enum: ["Metal", "Plastic", "Rimless"],
+        enum: ["Metal", "Plastic", "Rimless", ''],
       },
       lens: {
         type: String,
         trim: true,
-        enum: ["Single Vision", "Bifocal", "Progressive", "Anti-Reflective"],
+        enum: ["Single Vision", "Bifocal", "Progressive", "Anti-Reflective", ''],
       },
       lensMaterial: {
         type: String,
         trim: true,
-        enum: ["Polycarbonate", "Glass", "Trivex"],
+        enum: ["Polycarbonate", "Glass", "Trivex", ''],
       },
       colorOptions: {
         type: String,
