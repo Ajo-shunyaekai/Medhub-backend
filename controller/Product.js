@@ -17,7 +17,7 @@ const csv = require("csv-parser");
 module.exports = {
   getAllProducts: async (req, res) => {
     try {
-      const { supplier_id, market, page_no = 1, page_size = 5 } = req?.query;
+      const { supplier_id, market, page_no = 1, page_size = 5, search_key = '' } = req?.query;
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -50,6 +50,17 @@ module.exports = {
           },
         });
       }
+
+      // search filter if search_key is provided
+      if (search_key && typeof search_key === "string" && 
+        search_key.trim() !== "" && search_key !== "null" && 
+        search_key !== "undefined") {
+        pipeline.push({
+            $match: {
+                "general.name": { $regex: search_key, $options: "i" }, 
+            },
+        });
+    }
 
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
@@ -87,10 +98,21 @@ module.exports = {
       });
 
       // Get total count before applying pagination
-      const totalProducts = await Product.countDocuments({
+      // const totalProducts = await Product.countDocuments({
+      //   isDeleted: false,
+      //   ...(market ? { market: market } : {}),
+      // });
+
+      const totalProductsQuery = {
         isDeleted: false,
         ...(market ? { market: market } : {}),
-      });
+        ...(search_key && typeof search_key === "string" && search_key.trim() !== "" && search_key !== "null" && search_key !== "undefined"
+            ? { "general.name": { $regex: search_key, $options: "i" } }
+            : {}),
+    };
+    
+    const totalProducts = await Product.countDocuments(totalProductsQuery);
+    
 
       pipeline.push({
         $sort: { createdAt: -1 },

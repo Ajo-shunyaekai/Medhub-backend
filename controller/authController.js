@@ -328,6 +328,7 @@ module.exports = {
           : null;
 
       if (emailExists) {
+        console.log('emailExists', emailExists, usertype)
         return sendErrorResponse(res, 409, "Email already exists");
       }
 
@@ -490,10 +491,21 @@ module.exports = {
           buyer,
           usertype
         );
+
+        //start -> for using ejs template
+        // const templateName = "userRegistration";
+        // const context = {
+        //   contact_person_name: buyer.contact_person_name,
+        //   userType: usertype,
+        // };
+        //end -> for using ejs template
+
         await sendEmail(
           confirmationEmailRecipients,
           confirmationSubject,
-          confirmationContent
+          confirmationContent,
+          // templateName, //ejs
+          // context, //ejs
         );
 
         return sendSuccessResponse(
