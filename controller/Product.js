@@ -18,10 +18,9 @@ module.exports = {
   getAllProducts: async (req, res) => {
     try {
       const { supplier_id, market, page_no = 1, page_size = 5 } = req?.query;
-console.log('req?.query',req?.query)
-        const pageNo = parseInt(page_no) || 1;  
-        const pageSize = parseInt(page_size) || 10;
-        const offset    = (pageNo - 1) * pageSize;
+      const pageNo = parseInt(page_no) || 1;
+      const pageSize = parseInt(page_size) || 10;
+      const offset = (pageNo - 1) * pageSize;
 
       // Create the aggregation pipeline
       let pipeline = [];
@@ -52,7 +51,6 @@ console.log('req?.query',req?.query)
         });
       }
 
-      
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
@@ -88,32 +86,31 @@ console.log('req?.query',req?.query)
         },
       });
 
-    // Get total count before applying pagination
-    const totalProducts = await Product.countDocuments({ 
-      isDeleted: false,
-      ...(market ? { market: market } : {}) 
-  });
-  
-    pipeline.push({ 
-      $sort: { createdAt: -1 } 
-  });
+      // Get total count before applying pagination
+      const totalProducts = await Product.countDocuments({
+        isDeleted: false,
+        ...(market ? { market: market } : {}),
+      });
 
-    // pagination
-    pipeline.push({ $skip: offset });
-    pipeline.push({ $limit: pageSize });
+      pipeline.push({
+        $sort: { createdAt: -1 },
+      });
 
-    // Execute the aggregation
-    const products = await Product.aggregate(pipeline);
-    const totalPages = Math.ceil(totalProducts / pageSize);
+      // pagination
+      pipeline.push({ $skip: offset });
+      pipeline.push({ $limit: pageSize });
 
-    return sendSuccessResponse(res, 200, "Success Fetching Products", {
+      // Execute the aggregation
+      const products = await Product.aggregate(pipeline);
+      const totalPages = Math.ceil(totalProducts / pageSize);
+
+      return sendSuccessResponse(res, 200, "Success Fetching Products", {
         products,
         totalItems: totalProducts,
         currentPage: pageNo,
         itemsPerPage: pageSize,
-        totalPages
-    });
-      
+        totalPages,
+      });
     } catch (error) {
       console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
@@ -267,19 +264,13 @@ console.log('req?.query',req?.query)
       }
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
-      const generalFiles = await getFilePaths(req?.files, ["image"]);
+      const generalFiles = await getFilePaths(["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
       const inventoryFiles = [...req?.body?.countries];
-      const complianceFiles = await getFilePaths(req?.files, [
-        "complianceFile",
-      ]);
-      const additionalFiles = await getFilePaths(req?.files, [
-        "guidelinesFile",
-      ]);
-      const secondaryMarketFiles = await getFilePaths(req?.files, [
-        "purchaseInvoiceFile",
-      ]);
-      const healthNSafetyFiles = await getFilePaths(req?.files, [
+      const complianceFiles = await getFilePaths(["complianceFile"]);
+      const additionalFiles = await getFilePaths(["guidelinesFile"]);
+      const secondaryMarketFiles = await getFilePaths(["purchaseInvoiceFile"]);
+      const healthNSafetyFiles = await getFilePaths([
         "safetyDatasheet",
         "healthHazardRating",
         "environmentalImpact",
@@ -302,12 +293,13 @@ console.log('req?.query',req?.query)
           : [];
       }
       if (category === "HomeHealthcareProducts") {
-        categoryFiles.performanceTestingReportFile = req.files?.performanceTestingReportFile
+        categoryFiles.performanceTestingReportFile = req.files
+          ?.performanceTestingReportFile
           ? req.files.performanceTestingReportFile.map((file) => file.filename)
           : [];
       }
 
-     let newProductData = {}
+      let newProductData = {};
       newProductData[category] = {
         ...req?.body,
         ...(categoryFiles || {}),
@@ -317,7 +309,7 @@ console.log('req?.query',req?.query)
       const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
 
       // Create new product with all necessary fields
-       newProductData = {
+      newProductData = {
         ...req?.body,
         medicine_id,
         general: {
@@ -400,20 +392,20 @@ console.log('req?.query',req?.query)
       const { supplier_id } = req?.body;
       const filePath = req.file.path;
       // Utility function to parse CSV
-const parseCSV = (filePath) => {
-  return new Promise((resolve, reject) => {
-    const results = [];
-    fs.createReadStream(filePath)
-      .pipe(csv())
-      .on("data", (data) => results.push(data))
-      .on("end", () => resolve(results))
-      .on("error", (err) => reject(err));
-  });
-};
+      const parseCSV = (filePath) => {
+        return new Promise((resolve, reject) => {
+          const results = [];
+          fs.createReadStream(filePath)
+            .pipe(csv())
+            .on("data", (data) => results.push(data))
+            .on("end", () => resolve(results))
+            .on("error", (err) => reject(err));
+        });
+      };
 
       // Parse the CSV file
       const results = await parseCSV(filePath);
-      console.log('results',results)
+      console.log("results", results);
       // Check if the product exists
       const existingSupplier = await Supplier.findById(supplier_id);
       if (!existingSupplier) {
@@ -445,7 +437,8 @@ const parseCSV = (filePath) => {
             description:
               result?.["Product Description*"]?.toString()?.trim() || "",
             manufacturer: result?.["Manufacturer*"]?.toString()?.trim() || "",
-            aboutManufacturer: result?.["About Manufacturer*"]?.toString()?.trim() || "",
+            aboutManufacturer:
+              result?.["About Manufacturer*"]?.toString()?.trim() || "",
             countryOfOrigin:
               result?.["Country of origin*"]?.toString()?.trim() || "",
             upc: result?.["UPC"]?.toString()?.trim() || "",
@@ -518,7 +511,7 @@ const parseCSV = (filePath) => {
             condition: result?.["Product Condition"]?.toString()?.trim() || "",
             minimumPurchaseUnit:
               result?.["Minimum Purchase Unit"]?.toString()?.trim() || "",
-              purchaseInvoiceFile:
+            purchaseInvoiceFile:
               result?.["Purchase Invoice File*"]
                 ?.split(",")
                 ?.map((ele) => ele?.toString()?.trim()) || [],
@@ -526,7 +519,7 @@ const parseCSV = (filePath) => {
         }
 
         switch (result?.["Product Category*"]?.trim()?.replaceAll(" ", "")) {
-          case 'MedicalEquipmentAndDevices':
+          case "MedicalEquipmentAndDevices":
             updatedObject["MedicalEquipmentAndDevices"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -554,7 +547,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'Pharmaceuticals':
+          case "Pharmaceuticals":
             updatedObject["Pharmaceuticals"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -583,7 +576,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'SkinHairCosmeticSupplies':
+          case "SkinHairCosmeticSupplies":
             updatedObject["SkinHairCosmeticSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -637,7 +630,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'VitalHealthAndWellness':
+          case "VitalHealthAndWellness":
             updatedObject["VitalHealthAndWellness"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -672,7 +665,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'MedicalConsumablesAndDisposables':
+          case "MedicalConsumablesAndDisposables":
             updatedObject["MedicalConsumablesAndDisposables"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -705,7 +698,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'LaboratorySupplies':
+          case "LaboratorySupplies":
             updatedObject["LaboratorySupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -736,7 +729,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'DiagnosticAndMonitoringDevices':
+          case "DiagnosticAndMonitoringDevices":
             updatedObject["DiagnosticAndMonitoringDevices"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -771,7 +764,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'HospitalAndClinicSupplies':
+          case "HospitalAndClinicSupplies":
             updatedObject["HospitalAndClinicSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -795,7 +788,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'OrthopedicSupplies':
+          case "OrthopedicSupplies":
             updatedObject["OrthopedicSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -817,7 +810,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'DentalProducts':
+          case "DentalProducts":
             updatedObject["DentalProducts"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -838,7 +831,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'EyeCareSupplies':
+          case "EyeCareSupplies":
             updatedObject["EyeCareSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -854,7 +847,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'HomeHealthcareProducts':
+          case "HomeHealthcareProducts":
             updatedObject["HomeHealthcareProducts"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -886,7 +879,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'AlternativeMedicines':
+          case "AlternativeMedicines":
             updatedObject["AlternativeMedicines"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -906,7 +899,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'EmergencyAndFirstAidSupplies':
+          case "EmergencyAndFirstAidSupplies":
             updatedObject["EmergencyAndFirstAidSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -923,7 +916,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'DisinfectionAndHygieneSupplies':
+          case "DisinfectionAndHygieneSupplies":
             updatedObject["DisinfectionAndHygieneSupplies"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -941,7 +934,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'NutritionAndDietaryProducts':
+          case "NutritionAndDietaryProducts":
             updatedObject["NutritionAndDietaryProducts"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -967,7 +960,7 @@ const parseCSV = (filePath) => {
             };
             break;
 
-          case 'HealthcareITSolutions':
+          case "HealthcareITSolutions":
             updatedObject["HealthcareITSolutions"] = {
               subCategory:
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
@@ -1043,53 +1036,117 @@ const parseCSV = (filePath) => {
         return sendErrorResponse(res, 404, "Product not found.");
       }
 
-      // Helper function to retrieve file paths
-      async function getFilePaths(uploadedFiles, fields) {
+      // Check if the inventory exists
+      const InventoryFound = await Inventory.findOne({
+        uuid: existingProduct?.inventory,
+      });
+      if (!InventoryFound) {
+        return sendErrorResponse(res, 404, "Inventory not found.");
+      }
+
+      // // // Helper function to retrieve file paths
+      // // async function getFilePaths(uploadedFiles, fields) {
+      // //   const filePaths = {};
+      // //   for (const field of fields) {
+      // //     const validPaths = (
+      // //       req?.body[field]?.replaceAll("New", "")
+      // //         ? JSON.parse(req?.body[field]?.replaceAll("New", "")) // Replace single backslashes with double backslashes
+      // //         : []
+      // //     )?.concat(req?.files[field]?.map((file) => file.filename));
+      // //     filePaths[field] =
+      // //       validPaths?.length > 0
+      // //         ? validPaths?.filter((filename) => filename != undefined)
+      // //         : [];
+      // //   }
+      // //   return filePaths;
+      // // }
+      // async function getFilePaths(fields) {
+      //   const filePaths = {};
+
+      //   for (const field of fields) {
+      //     // Step 1: Retrieve the old file names (without "New") from the existing product
+      //     const oldFieldName = field.replace("New", ""); // Remove 'New' to match the old field name
+      //     const oldFiles = req?.body?.[oldFieldName] || []; // Default to an empty array if no old files exist
+
+      //     // Step 2: Get the new file names (with 'New' suffix) from the current upload
+      //     const newFiles =
+      //       req?.files[field]?.map((file) => file.filename) || [];
+
+      //     // Step 3: Combine old and new files (remove duplicates)
+      //     const combinedFiles = [...oldFiles, ...newFiles].filter(
+      //       (filename, index, self) =>
+      //         filename && self?.indexOf(filename) === index
+      //     );
+
+      //     // Step 4: Store the combined file paths for each field
+      //     filePaths[field] = combinedFiles?.map(filename=>filename?.replace("New",""));
+      //   }
+
+      //   return filePaths;
+      // }
+      async function getFilePaths(fields) {
         const filePaths = {};
+
         for (const field of fields) {
-          const validPaths = (
-            req?.body[field]?.replaceAll("New","")
-              ? JSON.parse(req?.body[field]?.replaceAll("New","")) // Replace single backslashes with double backslashes
-              : []
-          )?.concat(req?.files[field]?.map((file) => file.filename));
-          filePaths[field] =
-            validPaths?.length > 0
-              ? validPaths?.filter((filename) => filename != undefined)
-              : [];
+          // Step 1: Retrieve the old file names (without "New") from the existing product
+          const oldFieldName = field.replace("New", ""); // Remove 'New' to match the old field name
+          const oldFiles = Array.isArray(req?.body?.[oldFieldName])
+            ? req?.body?.[oldFieldName]
+            : [req?.body?.[oldFieldName]] || []; // Default to an empty array if no old files exist
+
+          // Step 2: Get the new file names (with 'New' suffix) from the current upload
+          const newFiles =
+            req?.files?.[field + "New"]?.map((file) => file?.filename) || [];
+
+          // Step 3: Combine old and new files (remove duplicates)
+          const combinedFiles = [...oldFiles, ...newFiles]
+            ?.map((filename) => filename?.replaceAll("New", ""))
+            ?.filter((filename, index, self) => {
+              // Make sure filenames are strings and not arrays or broken down into characters
+              return (
+                typeof filename === "string" &&
+                filename &&
+                self.indexOf(filename) === index
+              );
+            });
+
+          // Step 4: Store the combined file paths for each field
+          filePaths[field] = combinedFiles;
         }
+
         return filePaths;
       }
 
       // Define file fields for each category (same as addProduct)
       const fileFields = {
         MedicalEquipmentAndDevices: [
-          "specificationFileNew",
-          "performanceTestingReportFileNew",
+          "specificationFile",
+          "performanceTestingReportFile",
         ],
         Pharmaceuticals: [],
         SkinHairCosmeticSupplies: [
-          "dermatologistTestedFileNew",
-          "pediatricianRecommendedFileNew",
+          "dermatologistTestedFile",
+          "pediatricianRecommendedFile",
         ],
         VitalHealthAndWellness: [],
         MedicalConsumablesAndDisposables: [],
         LaboratorySupplies: [],
         DiagnosticAndMonitoringDevices: [
-          "specificationFileNew",
-          "performanceTestingReportFileNew",
+          "specificationFile",
+          "performanceTestingReportFile",
         ],
         HospitalAndClinicSupplies: [],
         OrthopedicSupplies: [],
         DentalProducts: [],
         EyeCareSupplies: [],
         HomeHealthcareProducts:
-          ["performanceTestingReportFileNew"]?.toString()?.trim() || "",
-        AlternativeMedicines: ["healthClaimsFileNew"]?.toString()?.trim() || "",
+          ["performanceTestingReportFile"]?.toString()?.trim() || "",
+        AlternativeMedicines: ["healthClaimsFile"]?.toString()?.trim() || "",
         EmergencyAndFirstAidSupplies: [],
         DisinfectionAndHygieneSupplies: [],
         NutritionAndDietaryProducts: [],
         HealthcareITSolutions:
-          ["interoperabilityFileNew"]?.toString()?.trim() || "",
+          ["interoperabilityFile"]?.toString()?.trim() || "",
       };
 
       // Check if the category exists in the fileFields object
@@ -1098,31 +1155,20 @@ const parseCSV = (filePath) => {
       }
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
-      const generalFiles = await getFilePaths(req?.files, ["imageNew"]);
+      const generalFiles = await getFilePaths(["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
       const inventoryFiles = [...req?.body?.countries];
-      const complianceFiles = await getFilePaths(req?.files, [
-        "complianceFileNew",
-      ]);
-      const additionalFiles = await getFilePaths(req?.files, [
-        "guidelinesFileNew",
-      ]);
-      const secondaryMarketFiles = await getFilePaths(req?.files, [
-        "purchaseInvoiceFileNew",
-      ]);
-      const healthNSafetyFiles = await getFilePaths(req?.files, [
-        "safetyDatasheetNew",
-        "healthHazardRatingNew",
-        "environmentalImpactNew",
+      const complianceFiles = await getFilePaths(["complianceFile"]);
+      const additionalFiles = await getFilePaths(["guidelinesFile"]);
+      const secondaryMarketFiles = await getFilePaths(["purchaseInvoiceFile"]);
+      const healthNSafetyFiles = await getFilePaths([
+        "safetyDatasheet",
+        "healthHazardRating",
+        "environmentalImpact",
       ]);
 
       // Retrieve file paths for the selected category only
-      const categoryFiles = await getFilePaths(
-        req?.files,
-        fileFields[category]
-      );
-
-      console.log("\nfilePaths", complianceFiles.complianceFile);
+      const categoryFiles = await getFilePaths(fileFields[category]);
 
       // Update existing product data
       const updatedProductData = {
@@ -1178,21 +1224,13 @@ const parseCSV = (filePath) => {
 
       const updatedInventoryData = {
         ...req?.body,
-        stockedInDetails: JSON.parse(
-          req?.body?.stockedInDetails?.filter(
-            (value) => value != "[object Object]"
-          )
-        ),
-        inventoryList: JSON.parse(
-          req?.body?.productPricingDetails?.filter(
-            (value) => value != "[object Object]"
-          )
-        ),
+        stockedInDetails: JSON.parse(req?.body?.stockedInDetails),
+        inventoryList: JSON.parse(req?.body?.productPricingDetails),
         ...(inventoryFiles || []),
       };
 
       // Update the inventory in the database
-      const updatedInventory = await Product.findOneAndUpdate(
+      const updatedInventory = await Inventory.findOneAndUpdate(
         { uuid: existingProduct?.inventory },
         updatedInventoryData,
         { new: true }

@@ -221,16 +221,25 @@ const editGeneralValidationRules = [
   //   .withMessage("Date must be a valid date."),
 
   body("date")
-    .optional()
-    .custom((value) => {
-      if (value && !/^\d{2} [a-zA-Z]+ \d{4}$/.test(value)) {
-        throw new Error(
-          "Date must be in the format 'DD MMM YYYY' (e.g., '12 jan 2025')."
-        );
-      }
-      return true;
-    })
-    .withMessage("Date must be a valid date."),
+      .optional()
+      .custom((value) => {
+        // if (value && !/^\d{2} [a-zA-Z]+ \d{4}$/.test(value)) {
+        //   throw new Error(
+        //     "Date must be in the format 'DD MMM YYYY' (e.g., '12 jan 2025')."
+        //   );
+        // }
+  
+        if (
+          value &&
+          !/^\d{2}-(\d{2}|\w{3})-\d{4}$|^\d{2} \w{3} \d{4}$/.test(value)
+        ) {
+          throw new Error(
+            "Date must be in the format 'DD MMM YYYY' (e.g., '12 Feb 2025') or 'DD-MM-YYYY' (e.g., '12-02-2025')."
+          );
+        }
+        return true;
+      })
+      .withMessage("Date must be a valid date."),
 
   body("storage")
     .optional()
