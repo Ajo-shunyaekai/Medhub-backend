@@ -2,7 +2,7 @@
 // const { Medicine } = require('../schema/medicineSchema');
 // const Supplier = require('../schema/supplierSchema');
 // const Buyer = require('../schema/buyerSchema')
-// const sendEmail = require("../utils/emailService");
+// const {sendEmail} = require("../utils/emailService");
 // const { lowInventoryContent, 
 //     licenseExpiryEmail } = require("../utils/emailContents");
 

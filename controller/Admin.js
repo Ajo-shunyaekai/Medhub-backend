@@ -867,24 +867,24 @@ module.exports = {
         //         await sendMailFunc(recipientEmails.join(','), subject, body);
 
         const subject = "Welcome! Your Medhub Global Account Has Been Verified";
-        const body = `Dear ${updateProfile.contact_person_name}, <br /><br />
+        // const body = `Dear ${updateProfile.contact_person_name}, <br /><br />
  
-                We are pleased to inform you that the registration of your company <strong>${updateProfile.supplier_name}</strong>, on our website has been successfully approved!<br /><br />
+        //         We are pleased to inform you that the registration of your company <strong>${updateProfile.supplier_name}</strong>, on our website has been successfully approved!<br /><br />
  
-                You can now access your account using the following login details:<br /><br />
+        //         You can now access your account using the following login details:<br /><br />
  
-                <strong>Login URL:</strong> ${process.env.SUPPLIER_LOGIN_URL} <br />
-                <strong>Username:</strong> ${updateProfile.contact_person_email} <br />
-                <strong>Temporary Password:</strong> ${password} <br /><br />
+        //         <strong>Login URL:</strong> ${process.env.SUPPLIER_LOGIN_URL} <br />
+        //         <strong>Username:</strong> ${updateProfile.contact_person_email} <br />
+        //         <strong>Temporary Password:</strong> ${password} <br /><br />
  
-                Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
+        //         Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
  
-                Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
-                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+        //         Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
+        //         <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
  
-                Best regards, <br />
-                <strong>Medhub Global Team</strong>
-                `;
+        //         Best regards, <br />
+        //         <strong>Medhub Global Team</strong>
+        //         `;
 
         // Sending the email to multiple recipients
         const recipientEmails = [
@@ -893,14 +893,14 @@ module.exports = {
         ];
 
         //start -> for using ejs template
-        const templateName = "userRegistration";
+        const templateName = "userRegistrationApproval";
         const context = {
-          supplier_id: updateProfile?.supplier_id,
-          supplier_name: updateProfile?.supplier_name,
+          user_id: updateProfile?.supplier_id,
+          company_name: updateProfile?.supplier_name,
           contact_person_name: updateProfile?.contact_person_name,
           contact_person_email: updateProfile.contact_person_email,
           temp_password: password,
-          userType: 'supplier',
+          user_type: 'supplier',
         };
         //end -> for using ejs template
 
@@ -1297,33 +1297,53 @@ module.exports = {
 
         // sendMailFunc(updateStatus.buyer_email, 'Login Credentials for Medhub Global', body);
 
-        const subject = "Registration Approved at Medhub Global";
-        const body = `Dear ${updateStatus.contact_person_name}, <br /><br />
+        const subject = "Welcome! Your Medhub Global Account Has Been Verified";
+        // const body = `Dear ${updateStatus.contact_person_name}, <br /><br />
  
-                We are pleased to inform you that the registration of your company <strong>${updateStatus.buyer_name}</strong>, on our website has been successfully approved!<br /><br />
+        //         We are pleased to inform you that the registration of your company <strong>${updateStatus.buyer_name}</strong>, on our website has been successfully approved!<br /><br />
  
-                You can now access your account using the following login details:<br /><br />
+        //         You can now access your account using the following login details:<br /><br />
  
-                <strong>Login URL:</strong> ${process.env.BUYER_LOGIN_URL} <br />
-                <strong>Username:</strong> ${updateStatus.contact_person_email} <br />
-                <strong>Temporary Password:</strong> ${password} <br /><br />
+        //         <strong>Login URL:</strong> ${process.env.BUYER_LOGIN_URL} <br />
+        //         <strong>Username:</strong> ${updateStatus.contact_person_email} <br />
+        //         <strong>Temporary Password:</strong> ${password} <br /><br />
  
-                Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
+        //         Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
  
-                Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
+        //         Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
  
-                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+        //         <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
  
-                Best regards, <br />
-                <strong>Team Medhub Global Team</strong>
-                `;
+        //         Best regards, <br />
+        //         <strong>Team Medhub Global Team</strong>
+        //         `;
 
         // Sending the email to multiple recipients
         const recipientEmails = [
           updateStatus.contact_person_email,
           // "ajo@shunyaekai.tech",
         ];
-        await sendMailFunc(recipientEmails.join(","), subject, body);
+
+        //start -> for using ejs template
+        const templateName = "userRegistrationApproval";
+        const context = {
+          user_id: updateStatus?.buyer_id,
+          company_name: updateStatus?.buyer_name,
+          contact_person_name: updateStatus?.contact_person_name,
+          contact_person_email: updateStatus.contact_person_email,
+          temp_password: password,
+          user_type: 'buyer',
+        };
+        //end -> for using ejs template
+
+        // await sendMailFunc(recipientEmails.join(","), subject, body);
+
+        await sendTemplateEmail(
+          recipientEmails.join(","),
+          subject,
+          templateName,
+          context
+        )
 
         return callback({
           code: 200,

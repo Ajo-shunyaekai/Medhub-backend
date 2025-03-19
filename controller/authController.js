@@ -25,7 +25,7 @@ const ProfileEditRequest = require("../schema/profileEditRequestSchema");
 const { validation } = require("../utils/utilities");
 const path = require("path");
 const sendMailFunc = require("../utils/sendEmail");
-const {sendEmail} = require("../utils/emailService");
+const {sendEmail, sendTemplateEmail} = require("../utils/emailService");
 const { getTodayFormattedDate } = require("../utils/utilities");
 const {
   Medicine,
@@ -493,20 +493,21 @@ module.exports = {
         );
 
         //start -> for using ejs template
-        // const templateName = "userRegistration";
-        // const context = {
-        //   contact_person_name: buyer.contact_person_name,
-        //   userType: usertype,
-        // };
+        const templateName = "thankYou";
+        const context = {};
         //end -> for using ejs template
 
-        await sendEmail(
+        // await sendEmail(
+        //   confirmationEmailRecipients,
+        //   confirmationSubject,
+        //   confirmationContent,
+        // );
+         await sendTemplateEmail(
           confirmationEmailRecipients,
           confirmationSubject,
-          confirmationContent,
-          // templateName, //ejs
-          // context, //ejs
-        );
+          templateName,
+          context
+        )
 
         return sendSuccessResponse(
           res,
@@ -574,11 +575,22 @@ module.exports = {
           supplier,
           usertype
         );
-        await sendEmail(
+        //start -> for using ejs template
+        const templateName = "thankYou";
+        const context = {};
+        //end -> for using ejs template
+        // await sendEmail(
+        //   confirmationEmailRecipients,
+        //   confirmationSubject,
+        //   confirmationContent
+        // );
+
+        await sendTemplateEmail(
           confirmationEmailRecipients,
           confirmationSubject,
-          confirmationContent
-        );
+          templateName,
+          context
+        )
 
         return sendSuccessResponse(
           res,
