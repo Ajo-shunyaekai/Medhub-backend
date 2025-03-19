@@ -25,7 +25,7 @@ const ProfileEditRequest = require("../schema/profileEditRequestSchema");
 const { validation } = require("../utils/utilities");
 const path = require("path");
 const sendMailFunc = require("../utils/sendEmail");
-const sendEmail = require("../utils/emailService");
+const {sendEmail} = require("../utils/emailService");
 const { getTodayFormattedDate } = require("../utils/utilities");
 const {
   Medicine,

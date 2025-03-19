@@ -40,7 +40,8 @@ const {
 } = require("../utils/commonResonse");
 const logErrorToFile = require("../logs/errorLogs");
 const { generateProfileEditRequestEmail } = require("../utils/emailContents");
-const sendEmail = require("../utils/emailService");
+const {sendEmail, sendTemplateEmail }= require("../utils/emailService");
+
 
 const generatePassword = () => {
   const password = generator.generate({
@@ -865,7 +866,7 @@ module.exports = {
         //         const recipientEmails = [updateProfile.supplier_email, 'ajo@shunyaekai.tech'];  // Add more emails if needed
         //         await sendMailFunc(recipientEmails.join(','), subject, body);
 
-        const subject = "Registration Approved at Medhub Global";
+        const subject = "Welcome! Your Medhub Global Account Has Been Verified";
         const body = `Dear ${updateProfile.contact_person_name}, <br /><br />
  
                 We are pleased to inform you that the registration of your company <strong>${updateProfile.supplier_name}</strong>, on our website has been successfully approved!<br /><br />
@@ -890,7 +891,36 @@ module.exports = {
           updateProfile.contact_person_email,
           // "ajo@shunyaekai.tech",
         ];
-        await sendMailFunc(recipientEmails.join(","), subject, body);
+
+        //start -> for using ejs template
+        const templateName = "userRegistration";
+        const context = {
+          supplier_id: updateProfile?.supplier_id,
+          supplier_name: updateProfile?.supplier_name,
+          contact_person_name: updateProfile?.contact_person_name,
+          contact_person_email: updateProfile.contact_person_email,
+          temp_password: password,
+          userType: 'supplier',
+        };
+        //end -> for using ejs template
+
+        // await sendMailFunc(
+        //   recipientEmails.join(","), 
+        // subject, body);
+
+        // await sendEmail(
+        //   recipientEmails.join(","),
+        //   subject,
+        //   templateName,
+        //   context
+        // )
+
+        await sendTemplateEmail(
+          recipientEmails.join(","),
+          subject,
+          templateName,
+          context
+        )
 
         // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Medhub Global', body);
 

@@ -1,9 +1,46 @@
 <%- include('partials/header') %>
 
-<p>Dear <%= contact_person_name %>,</p>
-<p>Thank you for registering on Medhub Global as a <%= userType %>. We are thrilled to have you onboard!</p>
-<p>We are currently reviewing the details you provided during registration. Once the review process is complete, you will receive an email confirmation from our team.</p>
-<p>If you have any questions in the meantime, please feel free to reach out to our support team at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-<p>Thank you for choosing Medhub Global. We look forward to serving you!</p>
+<table align="center" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="container" style="background-color: #fff;">
+            <p class="account">Dear <%= contact_person_name %>,</p>
+            <p class="account">
+                <b>Account reference:</b> <%= supplier_id %>
+            </p>
+            <p class="suggestion">
+                Welcome to Medhub Global! We are delighted to inform you that the account for <%= supplier_name %> has
+                been successfully verified for the Medhub Global Marketplace.
+            </p>
+            <p class="suggestion">
+                To begin, please log in to your account using the credentials below. For your security, we recommend
+                changing your password upon your first login:
+            </p>
+            <p class="suggestion">
+                <span style="display: inline-block; margin-right: 10px;">•</span><b>Login URL:</b> 
+                <a href="https://medhub.global/supplier" style="color: #3D4EAF; text-decoration: none;"
+                    target="_blank">https://medhub.global/supplier</a> <br />
+                <span style="display: inline-block; margin-right: 10px;">•</span><b>Username:</b> <%= contact_person_email %><br />
+                <span style="display: inline-block; margin-right: 10px;">•</span><b>Temporary Password:</b> <%= temp_password %>
+            </p>
+            <p class="suggestion">
+                If you encounter any issues or have any questions, feel free to reach out to us at 
+                <b><a href="mailto:connect@medhub.global" style="color: #3D4EAF; text-decoration: none;">connect@medhub.global</a></b>.
+            </p>
+            <p class="suggestion">
+                Additionally, our team will connect with you shortly to assist with uploading your products or services to the marketplace.
+            </p>
+            <p class="suggestion">
+                Thank you for joining Medhub Global. We look forward to a successful partnership!
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td style="background-color: #fff;">
+            <p class="greet">
+                Best regards,<br /><b>Medhub Global Team</b><br />
+            </p>
+        </td>
+    </tr>
+</table>
 
 <%- include('partials/footer') %>

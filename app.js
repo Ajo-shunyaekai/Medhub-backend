@@ -10,7 +10,7 @@ const connect = require("./utils/dbConnection");
 const initializeSocket = require("./utils/socketHandler");
 const { Server } = require("socket.io");
 // const ffmpeg = require('fluent-ffmpeg');
-const sendEmail = require("./utils/emailService");
+const {sendEmail} = require("./utils/emailService");
 const { contactUsContent } = require("./utils/emailContents");
 const EmailListing = require("./schema/emailListingSchema");
 // require('./schedulers/tasks');

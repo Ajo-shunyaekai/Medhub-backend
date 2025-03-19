@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const ejs = require("ejs");
 const path = require("path");
+const fs = require("fs");
 
 const transporter = nodemailer.createTransport({
   host   : "smtp.gmail.com",
@@ -20,22 +21,76 @@ const transporter = nodemailer.createTransport({
  * @param {string} body - HTML content of the email.
  * @returns {Promise<void>} Resolves on successful email sending, rejects on error.
  */
-const sendEmail = async (recipients, subject, body) => {
-  try {
-    //ejs template path
-    // const templatePath = path.join(__dirname, "./emailTemplates", `${templateName}.ejs`);
+// const sendEmail = async (recipients, subject, templateName, context) => {
+//   try {
+//     //ejs template path
+//     const templatePath = path.join(__dirname, "./emailTemplates", `${templateName}.ejs`);
 
-    // const emailContent = await ejs.renderFile(templatePath, context, {
-    //   root: path.join(__dirname, "../emailTemplates"),
-    // });
+//     const emailContent = await ejs.renderFile(templatePath, context, {
+//       root: path.join(__dirname, "../emailTemplates"),
+//     });
+
+//     const mailOptions = {
+//       // from : process.env.SMTP_USER_ID,
+//       from: `Medhub Global<${process.env.SMTP_USER_ID}>`,
+//       to   : Array.isArray(recipients) ? recipients.join(",") : recipients,
+//       subject,
+//       // html: body,
+//       html: emailContent
+//     };
+    
+//     await transporter.sendMail(mailOptions);
+//   } catch (error) {
+//     console.error(`Error sending email to ${recipients}:`, error);
+//     throw error; // Re-throw error for further handling if needed.
+//   }
+// };
+
+const sendTemplateEmail = async (recipients, subject, templateName = null, context = {}, content = null) => {
+  try {
+    let emailContent = "";
+
+    if (templateName) {
+      console.log('templateName',templateName)
+      // If a template is provided, render it using EJS
+      const templatePath = path.resolve(__dirname, "./emailTemplates", `${templateName}.ejs`);
+
+      if (fs.existsSync(templatePath)) {
+        emailContent = await ejs.renderFile(templatePath, context);
+      } else {
+        console.error(`Template not found: ${templatePath}`);
+        throw new Error(`Email template '${templateName}' not found.`);
+      }
+    } else if (content) {
+      // If raw HTML content is provided, use it directly
+      emailContent = content;
+    } else {
+      throw new Error("No email template or content provided.");
+    }
 
     const mailOptions = {
+      from: `Medhub Global <${process.env.SMTP_USER_ID}>`,
+      to: Array.isArray(recipients) ? recipients.join(",") : recipients,
+      subject,
+      html: emailContent,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${recipients}`);
+  } catch (error) {
+    console.error(`Error sending email to ${recipients}:`, error);
+    throw error;
+  }
+};
+
+const sendEmail = async (recipients, subject, body) => {
+  try {
+    const mailOptions = {
       // from : process.env.SMTP_USER_ID,
-      from: `Medhub <${process.env.SMTP_USER_ID}>`,
+      from: `Medhub Global <${process.env.SMTP_USER_ID}>`,
       to   : Array.isArray(recipients) ? recipients.join(",") : recipients,
       subject,
       html: body,
-      // html: emailContent
     };
     
     await transporter.sendMail(mailOptions);
@@ -45,4 +100,9 @@ const sendEmail = async (recipients, subject, body) => {
   }
 };
 
-module.exports = sendEmail;
+
+module.exports = {
+  sendTemplateEmail,
+  sendEmail,
+};
+
