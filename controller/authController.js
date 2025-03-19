@@ -998,10 +998,24 @@ module.exports = {
       const recipientEmails = [email].filter(
         (email) => email
       );
+      //start -> for using ejs template
+        const templateName = "forgotPassword";
+        const context = {
+          otp: otp,
+          user_type: usertype,
+        };
+        //end -> for using ejs template
 
       // Prepare the email content
       const emailContent = await otpForResetPasswordContent(updatedUser, otp);
-      await sendEmail(recipientEmails, subject, emailContent);
+      // await sendEmail(recipientEmails, subject, emailContent);
+
+      await sendTemplateEmail(
+        recipientEmails,
+        subject,
+        templateName,
+        context
+      )
 
       // Success response
       return sendSuccessResponse(
