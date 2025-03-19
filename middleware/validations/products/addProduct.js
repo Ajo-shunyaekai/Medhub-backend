@@ -80,15 +80,11 @@ const generalValidationRules = [
     .notEmpty()
     .withMessage("Country of origin is required."),
 
-  body("upc")
-    .optional()
-    .trim()
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "UPC must be alphanumeric (letters, numbers, and spaces only)."
-    // )
-    ,
-
+  body("upc").optional().trim(),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "UPC must be alphanumeric (letters, numbers, and spaces only)."
+  // )
   body("model")
     .notEmpty()
     .withMessage("Part/Model Number is required.")
@@ -125,6 +121,14 @@ const generalValidationRules = [
     .matches(/^[a-zA-Z0-9\s]+$/)
     .withMessage(
       "Product Size/Volume must be alphanumeric (letters, numbers, and spaces only)."
+    ),
+
+  body("dimension")
+    .notEmpty()
+    .withMessage("Product Dimension is required.")
+    .matches(/^[a-zA-Z0-9\s]+$/)
+    .withMessage(
+      "Product Dimension must be alphanumeric (letters, numbers, and spaces only)."
     ),
 
   body("weight")
@@ -803,7 +807,7 @@ const categorySpecificValidationRules = [
             "Medical Furniture",
             "First Aid Kits",
             "Emergency Medical Equipment",
-            "Trauma Care Products"
+            "Trauma Care Products",
           ])
           .withMessage("Sub Category is invalid."),
         body("anotherCategory").optional().trim(),

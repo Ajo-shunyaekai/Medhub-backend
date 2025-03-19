@@ -62,6 +62,11 @@ const productSchema = new Schema(
         trim: true,
         required: [true, "Validation Error: Product Size/Volumn is required."],
       },
+      dimension: {
+        type: String,
+        trim: true,
+        required: [true, "Validation Error: Product Dimension is required."],
+      },
       weight: {
         type: Number,
         required: [true, "Validation Error: Product Weight is required."],
@@ -102,41 +107,16 @@ const productSchema = new Schema(
       immutable: true,
       unique: true,
     },
-    // inventory: {
-    //   sku: {
-    //     type: String,
-    //     trim: true,
-    //   },
-    //   stock: {
-    //     type: String,
-    //     trim: true,
-    //     enum: ["In-stock", "Out of Stock", "On-demand"],
-    //   },
-    //   stockQuantity: {
-    //     type: Number,
-    //   },
-    //   countries: [
-    //     {
-    //       type: String,
-    //       trim: true,
-    //     },
-    //   ],
-    //   date: {
-    //     type: String,
-    //     trim: true,
-    //   },
-    //   stockedInDetails: [
-    //     {
-    //       country: {type:String},
-    //       quantity: {type:Number},
-    //       type: {type:String},
-    //     }
-    //   ]
-    // },
     complianceFile: [
       {
         type: String,
         trim: true,
+      },
+    ],
+    complianceAndCertificationFileNDate: [
+      {
+        file: { type: String },
+        date: { type: String },
       },
     ],
     storage: {
@@ -1069,7 +1049,7 @@ const productSchema = new Schema(
           "Medical Furniture",
           "First Aid Kits",
           "Emergency Medical Equipment",
-          "Trauma Care Products"
+          "Trauma Care Products",
         ],
         validate: {
           validator: function (v) {
@@ -1211,7 +1191,7 @@ const productSchema = new Schema(
       moistureResistance: {
         type: String,
         trim: true,
-        enum: ["Yes", "No" ,''],
+        enum: ["Yes", "No", ""],
       },
     },
     DentalProducts: {
@@ -1308,17 +1288,23 @@ const productSchema = new Schema(
       frame: {
         type: String,
         trim: true,
-        enum: ["Metal", "Plastic", "Rimless", ''],
+        enum: ["Metal", "Plastic", "Rimless", ""],
       },
       lens: {
         type: String,
         trim: true,
-        enum: ["Single Vision", "Bifocal", "Progressive", "Anti-Reflective", ''],
+        enum: [
+          "Single Vision",
+          "Bifocal",
+          "Progressive",
+          "Anti-Reflective",
+          "",
+        ],
       },
       lensMaterial: {
         type: String,
         trim: true,
-        enum: ["Polycarbonate", "Glass", "Trivex", ''],
+        enum: ["Polycarbonate", "Glass", "Trivex", ""],
       },
       colorOptions: {
         type: String,

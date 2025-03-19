@@ -80,15 +80,11 @@ const editGeneralValidationRules = [
     .notEmpty()
     .withMessage("Country of origin is required."),
 
-  body("upc")
-    .optional()
-    .trim()
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "UPC must be alphanumeric (letters, numbers, and spaces only)."
-    // )
-    ,
-
+  body("upc").optional().trim(),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "UPC must be alphanumeric (letters, numbers, and spaces only)."
+  // )
   body("model")
     .notEmpty()
     .withMessage("Part/Model Number is required.")
@@ -97,15 +93,11 @@ const editGeneralValidationRules = [
       "Part/Model Number must be alphanumeric (letters, numbers, and spaces only)."
     ),
 
-  body("brand")
-    .optional()
-    .trim()
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "Brand Name must be alphanumeric (letters, numbers, and spaces only)."
-    // )
-    ,
-
+  body("brand").optional().trim(),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "Brand Name must be alphanumeric (letters, numbers, and spaces only)."
+  // )
   body("form")
     .notEmpty()
     .withMessage("Type/Form is required.")
@@ -126,6 +118,14 @@ const editGeneralValidationRules = [
     .matches(/^[a-zA-Z0-9\s]+$/)
     .withMessage(
       "Product Size/Volume must be alphanumeric (letters, numbers, and spaces only)."
+    ),
+
+  body("dimension")
+    .notEmpty()
+    .withMessage("Product Dimension is required.")
+    .matches(/^[a-zA-Z0-9\s]+$/)
+    .withMessage(
+      "Product Dimension must be alphanumeric (letters, numbers, and spaces only)."
     ),
 
   body("weight")
@@ -173,15 +173,11 @@ const editGeneralValidationRules = [
   //     "Cost Per Product must be alphanumeric (letters, numbers, and spaces only)."
   //   ),
 
-  body("sku")
-    .optional()
-    .trim()
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "SKU must be alphanumeric (letters, numbers, and spaces only)."
-    // )
-    ,
-
+  body("sku").optional().trim(),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "SKU must be alphanumeric (letters, numbers, and spaces only)."
+  // )
   body("stock")
     .notEmpty()
     .withMessage("Product Stock is required.")
@@ -221,46 +217,38 @@ const editGeneralValidationRules = [
   //   .withMessage("Date must be a valid date."),
 
   body("date")
-      .optional()
-      .custom((value) => {
-        // if (value && !/^\d{2} [a-zA-Z]+ \d{4}$/.test(value)) {
-        //   throw new Error(
-        //     "Date must be in the format 'DD MMM YYYY' (e.g., '12 jan 2025')."
-        //   );
-        // }
-  
-        if (
-          value &&
-          !/^\d{2}-(\d{2}|\w{3})-\d{4}$|^\d{2} \w{3} \d{4}$/.test(value)
-        ) {
-          throw new Error(
-            "Date must be in the format 'DD MMM YYYY' (e.g., '12 Feb 2025') or 'DD-MM-YYYY' (e.g., '12-02-2025')."
-          );
-        }
-        return true;
-      })
-      .withMessage("Date must be a valid date."),
-
-  body("storage")
     .optional()
-    .trim()
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "Storage Conditions must be alphanumeric (letters, numbers, and spaces only)."
-    // )
-    ,
+    .custom((value) => {
+      // if (value && !/^\d{2} [a-zA-Z]+ \d{4}$/.test(value)) {
+      //   throw new Error(
+      //     "Date must be in the format 'DD MMM YYYY' (e.g., '12 jan 2025')."
+      //   );
+      // }
 
+      if (
+        value &&
+        !/^\d{2}-(\d{2}|\w{3})-\d{4}$|^\d{2} \w{3} \d{4}$/.test(value)
+      ) {
+        throw new Error(
+          "Date must be in the format 'DD MMM YYYY' (e.g., '12 Feb 2025') or 'DD-MM-YYYY' (e.g., '12-02-2025')."
+        );
+      }
+      return true;
+    })
+    .withMessage("Date must be a valid date."),
+
+  body("storage").optional().trim(),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "Storage Conditions must be alphanumeric (letters, numbers, and spaces only)."
+  // )
   body("other").optional().trim(),
 
-  body("warranty")
-    .optional()
-    .trim()
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "Warranty must be alphanumeric (letters, numbers, and spaces only)."
-    // )
-    ,
-
+  body("warranty").optional().trim(),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "Warranty must be alphanumeric (letters, numbers, and spaces only)."
+  // )
   // Category validation
   body("category")
     .notEmpty()
@@ -806,7 +794,7 @@ const editCategorySpecificValidationRules = [
             "Medical Furniture",
             "First Aid Kits",
             "Emergency Medical Equipment",
-            "Trauma Care Products"
+            "Trauma Care Products",
           ])
           .withMessage("Sub Category is invalid."),
         body("anotherCategory").optional().trim(),
