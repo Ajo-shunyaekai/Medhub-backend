@@ -229,11 +229,22 @@ module.exports = {
   addProduct: async (req, res) => {
     try {
       // Helper function to retrieve file paths
-      async function getFilePaths(uploadedFiles, fields, objeName) {
+      async function getFilePaths(fields = []) {
         const filePaths = {};
+
+        // Make sure fields is an array and req.files is an object
+        if (!Array.isArray(fields)) {
+          console.error(
+            "Expected fields to be an array, but received:",
+            fields
+          );
+          return filePaths; // Return an empty filePaths object
+        }
+
+        // Iterate over the fields array
         for (const field of fields) {
-          if (uploadedFiles[field] && uploadedFiles[field].length > 0) {
-            const validPaths = uploadedFiles[field]
+          if (req?.files?.[field] && req?.files?.[field]?.length > 0) {
+            const validPaths = req?.files?.[field]
               .map((file) => file.filename) // Map to file paths
               .filter((path) => path && path.trim() !== ""); // Filter out empty strings
 
@@ -242,12 +253,12 @@ module.exports = {
             filePaths[field] = []; // Assign empty array if no files are present
           }
         }
+
         return filePaths;
       }
 
       const { category, market = "new" } = req?.body;
 
-      console.log("req?.body", req?.files);
       // Define file fields for each category
       const fileFields = {
         MedicalEquipmentAndDevices: [
@@ -301,7 +312,7 @@ module.exports = {
       // Retrieve file paths for the selected category only
       const categoryFiles = await getFilePaths(
         req?.files,
-        fileFields[category]
+        fileFields[category] || []
       );
 
       if (category === "AlternativeMedicines") {
@@ -330,6 +341,27 @@ module.exports = {
       const inventoryUUId = uuidv4();
       const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
 
+      let complianceAndCertificationFileNDateParsed;
+
+      if (typeof req?.body?.complianceAndCertificationFileNDate == "string") {
+        try {
+          complianceAndCertificationFileNDateParsed = JSON.parse(
+            req.body.complianceAndCertificationFileNDate
+          )?.filter((value) => value != "[object Object]");
+        } catch (error) {
+          // Handle the case where the JSON parsing fails
+          console.log("Internal Server Error:", error);
+          logErrorToFile(error, req);
+          return;
+        }
+      } else {
+        complianceAndCertificationFileNDateParsed = JSON.parse(
+          req.body?.complianceAndCertificationFileNDate?.filter(
+            (value) => value != "[object Object]"
+          )
+        );
+      }
+
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -339,11 +371,12 @@ module.exports = {
           ...(generalFiles || []),
         },
         inventory: inventoryUUId,
-        // inventory: {
-        //   ...req?.body,
-        //   ...(inventoryFiles || []),
-        // },
         complianceFile: complianceFiles.complianceFile,
+        complianceAndCertificationFileNDate:
+          complianceAndCertificationFileNDateParsed?.map((ele, index) => ({
+            file: complianceFiles?.complianceFile?.[index] || "",
+            date: ele?.date || "",
+          })),
         additional: {
           ...req?.body,
           ...(additionalFiles || []),
@@ -1066,46 +1099,7 @@ module.exports = {
         return sendErrorResponse(res, 404, "Inventory not found.");
       }
 
-      // // // Helper function to retrieve file paths
-      // // async function getFilePaths(uploadedFiles, fields) {
-      // //   const filePaths = {};
-      // //   for (const field of fields) {
-      // //     const validPaths = (
-      // //       req?.body[field]?.replaceAll("New", "")
-      // //         ? JSON.parse(req?.body[field]?.replaceAll("New", "")) // Replace single backslashes with double backslashes
-      // //         : []
-      // //     )?.concat(req?.files[field]?.map((file) => file.filename));
-      // //     filePaths[field] =
-      // //       validPaths?.length > 0
-      // //         ? validPaths?.filter((filename) => filename != undefined)
-      // //         : [];
-      // //   }
-      // //   return filePaths;
-      // // }
-      // async function getFilePaths(fields) {
-      //   const filePaths = {};
-
-      //   for (const field of fields) {
-      //     // Step 1: Retrieve the old file names (without "New") from the existing product
-      //     const oldFieldName = field.replace("New", ""); // Remove 'New' to match the old field name
-      //     const oldFiles = req?.body?.[oldFieldName] || []; // Default to an empty array if no old files exist
-
-      //     // Step 2: Get the new file names (with 'New' suffix) from the current upload
-      //     const newFiles =
-      //       req?.files[field]?.map((file) => file.filename) || [];
-
-      //     // Step 3: Combine old and new files (remove duplicates)
-      //     const combinedFiles = [...oldFiles, ...newFiles].filter(
-      //       (filename, index, self) =>
-      //         filename && self?.indexOf(filename) === index
-      //     );
-
-      //     // Step 4: Store the combined file paths for each field
-      //     filePaths[field] = combinedFiles?.map(filename=>filename?.replace("New",""));
-      //   }
-
-      //   return filePaths;
-      // }
+      // Helper function to retrieve file paths
       async function getFilePaths(fields) {
         const filePaths = {};
 
