@@ -777,7 +777,7 @@ module.exports = {
         return sendErrorResponse(
           res,
           400,
-          "Registration Confirmation is stilpending with the admin"
+          "Registration Confirmation is still pending with the admin"
         );
       }
 
@@ -843,9 +843,24 @@ module.exports = {
         (email) => email
       );
 
+      //start -> for using ejs template
+      const templateName = "forgotPassword";
+      const context = {
+        otp: otp,
+        user_type: usertype,
+      };
+      //end -> for using ejs template
+
       // Prepare the email content
       const emailContent = await otpForResetPasswordContent(updatedUser, otp);
-      await sendEmail(recipientEmails, subject, emailContent);
+      // await sendEmail(recipientEmails, subject, emailContent);
+
+      await sendTemplateEmail(
+        recipientEmails,
+        subject,
+        templateName,
+        context
+      )
 
       // Success response
       return sendSuccessResponse(
@@ -899,7 +914,7 @@ module.exports = {
         return sendErrorResponse(
           res,
           400,
-          "Registration Confirmation is stilpending with the admin"
+          "Registration Confirmation is still pending with the admin"
         );
       }
 
