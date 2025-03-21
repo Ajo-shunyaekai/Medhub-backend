@@ -47,7 +47,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = mime.extension(file.mimetype) || "bin"; // Default to 'bin' for unknown MIME types
-    cb(null, `${file.fieldname}-${Date.now()}.${ext}`); // Use a timestamp for unique filenames
+    cb(null, `${file.fieldname}-${file.originalname?.replaceAll(" ","")}-${Date.now()}.${ext}`); // Use a timestamp for unique filenames
   },
 });
 const storageEdit = multer.diskStorage({
@@ -57,7 +57,7 @@ const storageEdit = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = mime.extension(file.mimetype) || "bin"; // Default to 'bin' for unknown MIME types
-    cb(null, `${file.fieldname?.replaceAll("New","")}-${Date.now()}.${ext}`); // Use a timestamp for unique filenames
+    cb(null, `${file.fieldname?.replaceAll("New","")}-${file.originalname?.replaceAll(" ","")}-${Date.now()}.${ext}`); // Use a timestamp for unique filenames
   },
 });
 

@@ -17,7 +17,13 @@ const csv = require("csv-parser");
 module.exports = {
   getAllProducts: async (req, res) => {
     try {
-      const { supplier_id, market, page_no = 1, page_size = 5, search_key = '' } = req?.query;
+      const {
+        supplier_id,
+        market,
+        page_no = 1,
+        page_size = 5,
+        search_key = "",
+      } = req?.query;
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -52,15 +58,19 @@ module.exports = {
       }
 
       // search filter if search_key is provided
-      if (search_key && typeof search_key === "string" && 
-        search_key.trim() !== "" && search_key !== "null" && 
-        search_key !== "undefined") {
+      if (
+        search_key &&
+        typeof search_key === "string" &&
+        search_key.trim() !== "" &&
+        search_key !== "null" &&
+        search_key !== "undefined"
+      ) {
         pipeline.push({
-            $match: {
-                "general.name": { $regex: search_key, $options: "i" }, 
-            },
+          $match: {
+            "general.name": { $regex: search_key, $options: "i" },
+          },
         });
-    }
+      }
 
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
@@ -106,13 +116,16 @@ module.exports = {
       const totalProductsQuery = {
         isDeleted: false,
         ...(market ? { market: market } : {}),
-        ...(search_key && typeof search_key === "string" && search_key.trim() !== "" && search_key !== "null" && search_key !== "undefined"
-            ? { "general.name": { $regex: search_key, $options: "i" } }
-            : {}),
-    };
-    
-    const totalProducts = await Product.countDocuments(totalProductsQuery);
-    
+        ...(search_key &&
+        typeof search_key === "string" &&
+        search_key.trim() !== "" &&
+        search_key !== "null" &&
+        search_key !== "undefined"
+          ? { "general.name": { $regex: search_key, $options: "i" } }
+          : {}),
+      };
+
+      const totalProducts = await Product.countDocuments(totalProductsQuery);
 
       pipeline.push({
         $sort: { createdAt: -1 },
@@ -1186,6 +1199,36 @@ module.exports = {
       // Retrieve file paths for the selected category only
       const categoryFiles = await getFilePaths(fileFields[category]);
 
+      let complianceAndCertificationFileNDateParsed;
+
+      // if (typeof req?.body?.complianceAndCertificationFileNDate == "string") {
+      //   try {
+      //     console.log("\nfirst")
+      //     complianceAndCertificationFileNDateParsed = JSON.parse(
+      //       req.body.complianceAndCertificationFileNDate
+      //     )?.filter((value) => value != "[object Object]");
+      //   } catch (error) {
+      //     // Handle the case where the JSON parsing fails
+      //     console.log("Internal Server Error:", error);
+      //     logErrorToFile(error, req);
+      //     return;
+      //   }
+      // } else {
+      //   console.log("\nsecond")
+      //   complianceAndCertificationFileNDateParsed = JSON.parse(
+      //     req.body?.complianceAndCertificationFileNDate?.filter(
+      //       (value) => {
+      //         console.log("vallue",typeof req?.body?.complianceAndCertificationFileNDate, value)
+      //         return (value != "[object Object]")}
+      //     )
+      //   );
+      // }
+      complianceAndCertificationFileNDateParsed = JSON.parse(
+        req.body?.complianceAndCertificationFileNDate?.filter((value) => {
+          return value != "[object Object]";
+        })
+      );
+
       // Update existing product data
       const updatedProductData = {
         ...existingProduct._doc, // Use the existing product data
@@ -1199,10 +1242,20 @@ module.exports = {
         //   ...req?.body,
         //   ...(inventoryFiles || []),
         // },
-        complianceFile:
-          complianceFiles.complianceFile ||
-          existingProduct.complianceFile ||
-          [],
+        complianceFile: complianceFiles.complianceFile || [],
+        complianceAndCertificationFileNDate:
+          complianceAndCertificationFileNDateParsed?.map((ele, index) => {
+            return {
+              // file: complianceFiles?.complianceFile?.[index] || "",
+              file:
+                typeof ele?.file != "string"
+                  ? complianceFiles?.complianceFile?.find((filename) =>
+                      filename?.includes(ele?.file?.path?.replaceAll("./", ""))
+                    )
+                  : ele?.file || "",
+              date: ele?.date || "",
+            };
+          }),
         additional: {
           ...req?.body,
           ...(additionalFiles || []),
@@ -1212,16 +1265,13 @@ module.exports = {
           ...(healthNSafetyFiles || []),
         },
         [category]: {
-          // ...existingProduct[category],
-          // ...categoryFiles || [],
-          // ...req?.body,
           ...req?.body,
           ...(categoryFiles || []),
         }, // Update category-specific fields
       };
 
       if (market == "secondary") {
-        updatedProduct["secondayMarketDetails"] = {
+        updatedProductData["secondayMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
@@ -1240,8 +1290,16 @@ module.exports = {
 
       const updatedInventoryData = {
         ...req?.body,
-        stockedInDetails: JSON.parse(req?.body?.stockedInDetails),
-        inventoryList: JSON.parse(req?.body?.productPricingDetails),
+        stockedInDetails: JSON.parse(
+          req?.body?.stockedInDetails?.filter(
+            (value) => value != "[object Object]"
+          ) || []
+        ),
+        inventoryList: JSON.parse(
+          req?.body?.productPricingDetails?.filter(
+            (value) => value != "[object Object]"
+          ) || []
+        ),
         ...(inventoryFiles || []),
       };
 
