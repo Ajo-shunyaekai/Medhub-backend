@@ -16,6 +16,8 @@ const {
   editProduct,
   deleteProduct,
   addBulkProducts,
+  productSuppliers,
+  otherProducts,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -72,6 +74,21 @@ router.post(
   checkCommonUserAuthentication,
   deleteProduct
 );
+
+router.post(
+  `/get-suppliers/:id`,
+  checkAuthorization,
+  checkCommonUserAuthentication,
+  productSuppliers
+);
+
+router.post(
+  `/get-other-products/:id`,
+  checkAuthorization,
+  checkCommonUserAuthentication,
+  otherProducts
+);
+
 
 router.post(`/:id`, checkAuthorization, getProductDetails);
 
