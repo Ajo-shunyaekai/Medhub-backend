@@ -15,6 +15,528 @@ const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
 
 module.exports = {
+  // getAllProducts1: async (req, res) => {
+  //   try {
+  //     const {
+  //       supplier_id,
+  //       market,
+  //       page_no = 1,
+  //       page_size = 5,
+  //       search_key = "",
+  //       category,
+  //       quantity,
+  //       price,
+  //     } = req?.query;
+  //     const pageNo = parseInt(page_no) || 1;
+  //     const pageSize = parseInt(page_size) || 10;
+  //     const offset = (pageNo - 1) * pageSize;
+
+  //     // Create the aggregation pipeline
+  //     let pipeline = [];
+
+  //     // Add match condition
+  //     pipeline.push({
+  //       $match: {
+  //         isDeleted: false, // Only products that are not deleted
+  //         ...(supplier_id && {
+  //           supplier_id: new mongoose.Types.ObjectId(supplier_id),
+  //         }),
+  //         ...(market && { market: market }),
+  //         ...(category && { category: category }),
+  //         ...(search_key &&
+  //           typeof search_key === "string" &&
+  //           search_key.trim() !== "" &&
+  //           search_key !== "null" &&
+  //           search_key !== "undefined" && {
+  //             "general.name": { $regex: search_key, $options: "i" },
+  //           }),
+  //         ...(category &&
+  //           typeof category === "string" &&
+  //           category.trim() !== "" &&
+  //           category !== "null" &&
+  //           category !== "undefined" && {
+  //             category: { $regex: category, $options: "i" },
+  //           }),
+  //         ...(quantity &&
+  //           !isNaN(quantity) && {
+  //             "general.quantity": { $lte: parseInt(quantity, 10) },
+  //           }),
+  //       },
+  //     });
+
+  //     // Lookup Supplier (userDetails) based on supplier_id in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "suppliers", // Ensure the collection name matches
+  //         localField: "supplier_id", // Reference to supplier_id in the Product schema
+  //         foreignField: "_id", // Reference to supplier_id in the Supplier schema
+  //         as: "userDetails",
+  //       },
+  //     });
+
+  //     // Lookup Inventory based on the inventory field in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "inventories", // Ensure the collection name matches
+  //         localField: "inventory", // Reference to the inventory field in Product
+  //         foreignField: "uuid", // Reference to uuid in Inventory schema
+  //         as: "inventoryDetails",
+  //       },
+  //     });
+
+  //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$userDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
+  //       },
+  //     });
+
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$inventoryDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+  //       },
+  //     });
+
+  //     const totalProductsQuery = {
+  //       isDeleted: false,
+  //       ...(market ? { market: market } : {}),
+  //       ...(search_key &&
+  //       typeof search_key === "string" &&
+  //       search_key.trim() !== "" &&
+  //       search_key !== "null" &&
+  //       search_key !== "undefined"
+  //         ? { "general.name": { $regex: search_key, $options: "i" } }
+  //         : {}),
+  //     };
+
+  //     const totalProducts = await Product.countDocuments(totalProductsQuery);
+
+  //     pipeline.push({
+  //       $sort: { createdAt: -1 },
+  //     });
+
+  //     // pagination
+  //     pipeline.push({ $skip: offset });
+  //     pipeline.push({ $limit: pageSize });
+
+  //     // Execute the aggregation
+  //     const products = await Product.aggregate(pipeline);
+  //     const totalPages = Math.ceil(totalProducts / pageSize);
+
+  //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
+  //       products,
+  //       totalItems: totalProducts,
+  //       currentPage: pageNo,
+  //       itemsPerPage: pageSize,
+  //       totalPages,
+  //     });
+  //   } catch (error) {
+  //     console.log("Internal Server Error:", error);
+  //     logErrorToFile(error, req);
+  //     return sendErrorResponse(
+  //       res,
+  //       500,
+  //       "An unexpected error occurred. Please try again later.",
+  //       error
+  //     );
+  //   }
+  // },
+
+  // getAllProducts2: async (req, res) => {
+  //   try {
+  //     const {
+  //       supplier_id,
+  //       market,
+  //       page_no = 1,
+  //       page_size = 5,
+  //       search_key = "",
+  //       category,
+  //       quantity,
+  //       price,
+  //     } = req?.query;
+  //     const pageNo = parseInt(page_no) || 1;
+  //     const pageSize = parseInt(page_size) || 10;
+  //     const offset = (pageNo - 1) * pageSize;
+
+  //     // Create the aggregation pipeline
+  //     let pipeline = [];
+
+  //     // Add match condition
+  //     pipeline.push({
+  //       $match: {
+  //         isDeleted: false, // Only products that are not deleted
+  //         ...(supplier_id && {
+  //           supplier_id: new mongoose.Types.ObjectId(supplier_id),
+  //         }),
+  //         ...(market && { market: market }),
+  //         ...(category && { category: category }),
+  //         ...(search_key &&
+  //           typeof search_key === "string" &&
+  //           search_key.trim() !== "" &&
+  //           search_key !== "null" &&
+  //           search_key !== "undefined" && {
+  //             "general.name": { $regex: search_key, $options: "i" },
+  //           }),
+  //         ...(category &&
+  //           typeof category === "string" &&
+  //           category.trim() !== "" &&
+  //           category !== "null" &&
+  //           category !== "undefined" && {
+  //             category: { $regex: category, $options: "i" },
+  //           }),
+  //         ...(quantity &&
+  //           !isNaN(quantity) && {
+  //             "general.quantity": { $lte: parseInt(quantity, 10) },
+  //           }),
+  //       },
+  //     });
+
+  //     // Lookup Supplier (userDetails) based on supplier_id in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "suppliers", // Ensure the collection name matches
+  //         localField: "supplier_id", // Reference to supplier_id in the Product schema
+  //         foreignField: "_id", // Reference to supplier_id in the Supplier schema
+  //         as: "userDetails",
+  //       },
+  //     });
+
+  //     // Lookup Inventory based on the inventory field in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "inventories", // Ensure the collection name matches
+  //         localField: "inventory", // Reference to the inventory field in Product
+  //         foreignField: "uuid", // Reference to uuid in Inventory schema
+  //         as: "inventoryDetails",
+  //       },
+  //     });
+
+  //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$userDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
+  //       },
+  //     });
+
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$inventoryDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+  //       },
+  //     });
+
+  //     // Aggregating price and quantity by inventory UUID
+  //     pipeline.push({
+  //       $group: {
+  //         _id: "$_id", // Group by product id
+  //         general: { $first: "$general" },
+  //         inventory: { $first: "$inventory" },
+  //         complianceFile: { $first: "$complianceFile" },
+  //         complianceAndCertificationFileNDate: {
+  //           $first: "$complianceAndCertificationFileNDate",
+  //         },
+  //         storage: { $first: "$storage" },
+  //         additional: { $first: "$additional" },
+  //         guidelinesFile: { $first: "$guidelinesFile" },
+  //         healthNSafety: { $first: "$healthNSafety" },
+  //         category: { $first: "$category" },
+  //         medicine_id: { $first: "$medicine_id" },
+  //         supplier_id: { $first: "$supplier_id" },
+  //         market: { $first: "$market" },
+  //         secondayMarketDetails: { $first: "$secondayMarketDetails" },
+  //         isDeleted: { $first: "$isDeleted" },
+  //         bulkUpload: { $first: "$bulkUpload" },
+  //         MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+  //         Pharmaceuticals: { $first: "$Pharmaceuticals" },
+  //         SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+  //         VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+  //         MedicalConsumablesAndDisposables: {
+  //           $first: "$MedicalConsumablesAndDisposables",
+  //         },
+  //         LaboratorySupplies: { $first: "$LaboratorySupplies" },
+  //         DiagnosticAndMonitoringDevices: {
+  //           $first: "$DiagnosticAndMonitoringDevices",
+  //         },
+  //         HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+  //         OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+  //         HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+  //         AlternativeMedicines: { $first: "$AlternativeMedicines" },
+  //         NutritionAndDietaryProducts: {
+  //           $first: "$NutritionAndDietaryProducts",
+  //         },
+  //         HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
+  //         createdAt: { $first: "$createdAt" },
+  //         updatedAt: { $first: "$updatedAt" },
+  //         __v: { $first: "$__v" },
+  //         DentalProducts: { $first: "$DentalProducts" },
+  //         DisinfectionAndHygieneSupplies: {
+  //           $first: "$DisinfectionAndHygieneSupplies",
+  //         },
+  //         EmergencyAndFirstAidSupplies: {
+  //           $first: "$EmergencyAndFirstAidSupplies",
+  //         },
+  //         EyeCareSupplies: { $first: "$EyeCareSupplies" },
+  //         priceQuantityDetails: {
+  //           // Aggregate price and quantity into an array
+  //           $push: {
+  //             price: "$inventoryDetails.price",
+  //             quantity: "$inventoryDetails.quantity",
+  //           },
+  //         },
+  //         userDetails: { $first: "$userDetails" }, // Keep first userDetails match
+  //         inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+  //         priceQuantityDetails: {
+  //           // Aggregate price and quantity from the inventoryList
+  //           $push: {
+  //             price: "$inventoryDetails.inventoryList.price",
+  //             quantity: "$inventoryDetails.inventoryList.quantity",
+  //           },
+  //         },
+  //       },
+  //     });
+
+  //     // Add any additional steps like sorting or pagination
+  //     const totalProductsQuery = {
+  //       isDeleted: false,
+  //       ...(market ? { market: market } : {}),
+  //       ...(search_key &&
+  //       typeof search_key === "string" &&
+  //       search_key.trim() !== "" &&
+  //       search_key !== "null" &&
+  //       search_key !== "undefined"
+  //         ? { "general.name": { $regex: search_key, $options: "i" } }
+  //         : {}),
+  //     };
+
+  //     const totalProducts = await Product.countDocuments(totalProductsQuery);
+
+  //     pipeline.push({
+  //       $sort: { createdAt: -1 },
+  //     });
+
+  //     // pagination
+  //     pipeline.push({ $skip: offset });
+  //     pipeline.push({ $limit: pageSize });
+
+  //     // Execute the aggregation
+  //     const products = await Product.aggregate(pipeline);
+  //     const totalPages = Math.ceil(totalProducts / pageSize);
+
+  //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
+  //       products,
+  //       totalItems: totalProducts,
+  //       currentPage: pageNo,
+  //       itemsPerPage: pageSize,
+  //       totalPages,
+  //     });
+  //   } catch (error) {
+  //     console.log("Internal Server Error:", error);
+  //     logErrorToFile(error, req);
+  //     return sendErrorResponse(
+  //       res,
+  //       500,
+  //       "An unexpected error occurred. Please try again later.",
+  //       error
+  //     );
+  //   }
+  // },
+
+  // getAllProducts3: async (req, res) => {
+  //   try {
+  //     const {
+  //       supplier_id,
+  //       market,
+  //       page_no = 1,
+  //       page_size = 5,
+  //       search_key = "",
+  //       category,
+  //       quantity,
+  //     } = req?.query;
+  //     const pageNo = parseInt(page_no) || 1;
+  //     const pageSize = parseInt(page_size) || 10;
+  //     const offset = (pageNo - 1) * pageSize;
+
+  //     const { price = [] } = req?.body;
+
+  //     // Create the aggregation pipeline
+  //     let pipeline = [];
+
+  //     // Add match condition
+  //     pipeline.push({
+  //       $match: {
+  //         isDeleted: false, // Only products that are not deleted
+  //         ...(supplier_id && {
+  //           supplier_id: new mongoose.Types.ObjectId(supplier_id),
+  //         }),
+  //         ...(market && { market: market }),
+  //         ...(category && { category: category }),
+  //         ...(search_key &&
+  //           typeof search_key === "string" &&
+  //           search_key.trim() !== "" &&
+  //           search_key !== "null" &&
+  //           search_key !== "undefined" && {
+  //             "general.name": { $regex: search_key, $options: "i" },
+  //           }),
+  //         ...(category &&
+  //           typeof category === "string" &&
+  //           category.trim() !== "" &&
+  //           category !== "null" &&
+  //           category !== "undefined" && {
+  //             category: { $regex: category, $options: "i" },
+  //           }),
+  //         ...(quantity &&
+  //           !isNaN(quantity) && {
+  //             "general.quantity": { $lte: parseInt(quantity, 10) },
+  //           }),
+  //       },
+  //     });
+
+  //     // Lookup Supplier (userDetails) based on supplier_id in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "suppliers", // Ensure the collection name matches
+  //         localField: "supplier_id", // Reference to supplier_id in the Product schema
+  //         foreignField: "_id", // Reference to supplier_id in the Supplier schema
+  //         as: "userDetails",
+  //       },
+  //     });
+
+  //     // Lookup Inventory based on the inventory field in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "inventories", // Ensure the collection name matches
+  //         localField: "inventory", // Reference to the inventory field in Product
+  //         foreignField: "uuid", // Reference to uuid in Inventory schema
+  //         as: "inventoryDetails",
+  //       },
+  //     });
+
+  //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$userDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
+  //       },
+  //     });
+
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$inventoryDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+  //       },
+  //     });
+
+  //     // Unwind the inventoryList so that each inventory item can be processed individually
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$inventoryDetails.inventoryList",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+  //       },
+  //     });
+
+  //     // Aggregating price and quantity by inventory UUID and inventoryList
+  //     pipeline.push({
+  //       $group: {
+  //         _id: "$_id", // Group by product id
+  //         general: { $first: "$general" },
+  //         inventory: { $first: "$inventory" },
+  //         complianceFile: { $first: "$complianceFile" },
+  //         complianceAndCertificationFileNDate: {
+  //           $first: "$complianceAndCertificationFileNDate",
+  //         },
+  //         storage: { $first: "$storage" },
+  //         additional: { $first: "$additional" },
+  //         guidelinesFile: { $first: "$guidelinesFile" },
+  //         healthNSafety: { $first: "$healthNSafety" },
+  //         category: { $first: "$category" },
+  //         medicine_id: { $first: "$medicine_id" },
+  //         supplier_id: { $first: "$supplier_id" },
+  //         market: { $first: "$market" },
+  //         secondayMarketDetails: { $first: "$secondayMarketDetails" },
+  //         isDeleted: { $first: "$isDeleted" },
+  //         bulkUpload: { $first: "$bulkUpload" },
+  //         userDetails: { $first: "$userDetails" },
+  //         inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+  //         priceQuantityDetails: {
+  //           // Aggregate price and quantity from the inventoryList
+  //           $push: {
+  //             price: "$inventoryDetails.inventoryList.price",
+  //             quantity: "$inventoryDetails.inventoryList.quantity",
+  //             deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
+  //           },
+  //         },
+  //         createdAt: { $first: "$createdAt" },
+  //         updatedAt: { $first: "$updatedAt" },
+  //         __v: { $first: "$__v" },
+  //       },
+  //     });
+
+  //     // Price range filter (if price array is provided)
+  //     if (price && price.length > 0) {
+  //       const priceConditions = price.map((p) => ({
+  //         priceQuantityDetails: {
+  //           $elemMatch: {
+  //             price: { $gte: parseInt(p, 10) - 10, $lte: parseInt(p, 10) },
+  //           },
+  //         },
+  //       }));
+
+  //       pipeline.push({
+  //         $match: {
+  //           $or: priceConditions, // Price filtering based on array values
+  //         },
+  //       });
+  //     }
+
+  //     // Add any additional steps like sorting or pagination
+  //     const totalProductsQuery = {
+  //       isDeleted: false,
+  //       ...(market ? { market: market } : {}),
+  //       ...(search_key &&
+  //       typeof search_key === "string" &&
+  //       search_key.trim() !== "" &&
+  //       search_key !== "null" &&
+  //       search_key !== "undefined"
+  //         ? { "general.name": { $regex: search_key, $options: "i" } }
+  //         : {}),
+  //     };
+
+  //     const totalProducts = await Product.countDocuments(totalProductsQuery);
+
+  //     pipeline.push({
+  //       $sort: { createdAt: -1 },
+  //     });
+
+  //     // pagination
+  //     pipeline.push({ $skip: offset });
+  //     pipeline.push({ $limit: pageSize });
+
+  //     // Execute the aggregation
+  //     const products = await Product.aggregate(pipeline);
+  //     const totalPages = Math.ceil(totalProducts / pageSize);
+
+  //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
+  //       products,
+  //       totalItems: totalProducts,
+  //       currentPage: pageNo,
+  //       itemsPerPage: pageSize,
+  //       totalPages,
+  //     });
+  //   } catch (error) {
+  //     console.log("Internal Server Error:", error);
+  //     logErrorToFile(error, req);
+  //     return sendErrorResponse(
+  //       res,
+  //       500,
+  //       "An unexpected error occurred. Please try again later.",
+  //       error
+  //     );
+  //   }
+  // },
+
   getAllProducts: async (req, res) => {
     try {
       const {
@@ -23,54 +545,54 @@ module.exports = {
         page_no = 1,
         page_size = 5,
         search_key = "",
+        category,
+        // quantity,
+        // price,
       } = req?.query;
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
 
+      const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
+
       // Create the aggregation pipeline
       let pipeline = [];
 
-      // Match documents where isDeleted is false
+      // Add match condition
       pipeline.push({
         $match: {
           isDeleted: false, // Only products that are not deleted
+          ...(supplier_id && {
+            supplier_id: new mongoose.Types.ObjectId(supplier_id),
+          }),
+          ...(market && { market: market }),
+          ...(category && { category: category }),
+          ...(search_key &&
+            typeof search_key === "string" &&
+            search_key.trim() !== "" &&
+            search_key !== "null" &&
+            search_key !== "undefined" && {
+              "general.name": { $regex: search_key, $options: "i" },
+            }),
+          ...(category &&
+            typeof category === "string" &&
+            category.trim() !== "" &&
+            category !== "null" &&
+            category !== "undefined" && {
+              category: { $regex: category, $options: "i" },
+            }),
+          ...(quantity?.min &&
+            quantity?.max &&
+            !isNaN(quantity?.min) &&
+            !isNaN(quantity?.max) && {
+              // "general.quantity": { $lte: parseInt(quantity, 10) },
+              "general.quantity": {
+                $gte: parseInt(quantity?.min, 10),
+                $lte: parseInt(quantity?.max, 10),
+              },
+            }),
         },
       });
-
-      // Match documents based on the supplier_id query parameter
-      if (supplier_id) {
-        pipeline.push({
-          $match: {
-            // supplier_id: mongoose.Types.ObjectId(supplier_id), // Ensure ObjectId type matching
-            supplier_id: new mongoose.Types.ObjectId(supplier_id),
-          },
-        });
-      }
-
-      // Match documents based on the market query parameter
-      if (market) {
-        pipeline.push({
-          $match: {
-            market: market,
-          },
-        });
-      }
-
-      // search filter if search_key is provided
-      if (
-        search_key &&
-        typeof search_key === "string" &&
-        search_key.trim() !== "" &&
-        search_key !== "null" &&
-        search_key !== "undefined"
-      ) {
-        pipeline.push({
-          $match: {
-            "general.name": { $regex: search_key, $options: "i" },
-          },
-        });
-      }
 
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
@@ -107,12 +629,83 @@ module.exports = {
         },
       });
 
-      // Get total count before applying pagination
-      // const totalProducts = await Product.countDocuments({
-      //   isDeleted: false,
-      //   ...(market ? { market: market } : {}),
-      // });
+      // Unwind the inventoryList so that each inventory item can be processed individually
+      pipeline.push({
+        $unwind: {
+          path: "$inventoryDetails.inventoryList",
+          preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+        },
+      });
 
+      // Aggregating price and quantity by inventory UUID and inventoryList
+      pipeline.push({
+        $group: {
+          _id: "$_id", // Group by product id
+          general: { $first: "$general" },
+          inventory: { $first: "$inventory" },
+          complianceFile: { $first: "$complianceFile" },
+          complianceAndCertificationFileNDate: {
+            $first: "$complianceAndCertificationFileNDate",
+          },
+          storage: { $first: "$storage" },
+          additional: { $first: "$additional" },
+          guidelinesFile: { $first: "$guidelinesFile" },
+          healthNSafety: { $first: "$healthNSafety" },
+          category: { $first: "$category" },
+          medicine_id: { $first: "$medicine_id" },
+          supplier_id: { $first: "$supplier_id" },
+          market: { $first: "$market" },
+          secondayMarketDetails: { $first: "$secondayMarketDetails" },
+          isDeleted: { $first: "$isDeleted" },
+          bulkUpload: { $first: "$bulkUpload" },
+          userDetails: { $first: "$userDetails" },
+          inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+          priceQuantityDetails: {
+            // Aggregate price and quantity from the inventoryList
+            $push: {
+              price: "$inventoryDetails.inventoryList.price",
+              quantity: "$inventoryDetails.inventoryList.quantity",
+              deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
+            },
+          },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          __v: { $first: "$__v" },
+        },
+      });
+
+      if (price?.min && price?.max) {
+        pipeline.push({
+          $match: {
+            priceQuantityDetails: {
+              $elemMatch: {
+                // price: { $lte: parseInt(price, 10) },
+                price: {
+                  $gte: parseInt(price?.min, 10),
+                  $lte: parseInt(price?.max, 10),
+                },
+              },
+            },
+          },
+        });
+      }
+
+      if (deliveryTime?.min && deliveryTime?.max) {
+        pipeline.push({
+          $match: {
+            priceQuantityDetails: {
+              $elemMatch: {
+                deliveryTime: {
+                  $gte: parseInt(deliveryTime?.min, 10),
+                  $lte: parseInt(deliveryTime?.max, 10),
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
         ...(market ? { market: market } : {}),
@@ -473,14 +1066,12 @@ module.exports = {
 
       // Parse the CSV file
       const results = await parseCSV(filePath);
-      console.log("results", results);
       // Check if the product exists
       const existingSupplier = await Supplier.findById(supplier_id);
       if (!existingSupplier) {
         return sendErrorResponse(res, 404, "Supplier not found.");
       }
 
-      console.log("results", results);
       const inventoryArray = [];
 
       const updatedResult = results?.map((result) => {
@@ -1060,7 +1651,6 @@ module.exports = {
 
       // Insert multiple records into MongoDB
       const entries = await Product.insertMany(updatedResult);
-      console.log("updatedResult", updatedResult);
 
       if (!entries || entries?.length == 0) {
         return sendErrorResponse(res, 400, "Failed to add bulk products.");
@@ -1068,7 +1658,6 @@ module.exports = {
 
       if (inventoryArray?.length > 0) {
         const inventories = await Inventory.insertMany(inventoryArray);
-        console.log("updatedResult", updatedResult);
 
         if (!inventories || inventories?.length == 0) {
           return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
@@ -1203,7 +1792,6 @@ module.exports = {
 
       // if (typeof req?.body?.complianceAndCertificationFileNDate == "string") {
       //   try {
-      //     console.log("\nfirst")
       //     complianceAndCertificationFileNDateParsed = JSON.parse(
       //       req.body.complianceAndCertificationFileNDate
       //     )?.filter((value) => value != "[object Object]");
@@ -1214,11 +1802,9 @@ module.exports = {
       //     return;
       //   }
       // } else {
-      //   console.log("\nsecond")
       //   complianceAndCertificationFileNDateParsed = JSON.parse(
       //     req.body?.complianceAndCertificationFileNDate?.filter(
       //       (value) => {
-      //         console.log("vallue",typeof req?.body?.complianceAndCertificationFileNDate, value)
       //         return (value != "[object Object]")}
       //     )
       //   );
@@ -1372,6 +1958,64 @@ module.exports = {
       );
       if (!softDeletedInventory) {
         return sendErrorResponse(res, 500, "Failed Soft Deleting Inventory");
+      }
+
+      return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
+    } catch (error) {
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
+    }
+  },
+
+  productSuppliers: async (req, res) => {
+    try {
+      const { id } = req?.params;
+      const foundProduct = await Product?.findById(id);
+      if (!foundProduct) {
+        return sendErrorResponse(res, 500, "Failed fetching Product");
+      }
+
+      const uuid = foundProduct?.inventory;
+      const inventoryFound = await Inventory?.findOne({
+        uuid,
+      });
+      if (!inventoryFound) {
+        return sendErrorResponse(res, 500, "Failed fetching Inventory");
+      }
+
+      return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
+    } catch (error) {
+      console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
+    }
+  },
+
+  otherProducts: async (req, res) => {
+    try {
+      const { id } = req?.params;
+      const foundProduct = await Product?.findById(id);
+      if (!foundProduct) {
+        return sendErrorResponse(res, 500, "Failed fetching Product");
+      }
+
+      const uuid = foundProduct?.inventory;
+      const inventoryFound = await Inventory?.findOne({
+        uuid,
+      });
+      if (!inventoryFound) {
+        return sendErrorResponse(res, 500, "Failed fetching Inventory");
       }
 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
