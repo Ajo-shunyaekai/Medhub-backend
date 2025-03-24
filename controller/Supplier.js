@@ -1248,8 +1248,8 @@ module.exports = {
      getAllSuppliersList: async (req, res) => {
       try {
         const { usertype } = req?.headers;
-        const { filterKey, filterValue, searchKey = '', filterCountry = '', pageNo = 1, pageSize = 1 } = req?.query;
-
+        const { filterKey, filterValue, searchKey = '',  filterCountry = '', type = '', pageNo = 1, pageSize = 1 } = req?.query;
+console.log('req?.query',req?.query)
         const page_no = parseInt(pageNo) || 1;
         const page_size = parseInt(pageSize) || 2;
         const offSet = parseInt(page_no - 1) * page_size;
@@ -1313,11 +1313,19 @@ module.exports = {
         let query = { account_status: 1 };
         
         if (searchKey) {
-          query.supplier_name = { $regex: new RegExp(searchKey, 'i') };
+          // query.supplier_name = { $regex: new RegExp(searchKey, 'i') };
+          query.$or = [
+            { supplier_name: { $regex: new RegExp(searchKey, 'i') } },
+            { tax_no: { $regex: new RegExp(searchKey, 'i') } }
+          ];
         }
         
         if (filterCountry) {
           query.country_of_origin = filterCountry;
+        }
+
+        if (type) {
+          query.supplier_type = type;
         }
     
         let data;
