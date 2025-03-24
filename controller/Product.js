@@ -13,7 +13,7 @@ const Buyer = require("../schema/buyerSchema");
 const Product = require("../schema/productSchema");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
-
+ 
 module.exports = {
   // getAllProducts1: async (req, res) => {
   //   try {
@@ -30,10 +30,10 @@ module.exports = {
   //     const pageNo = parseInt(page_no) || 1;
   //     const pageSize = parseInt(page_size) || 10;
   //     const offset = (pageNo - 1) * pageSize;
-
+ 
   //     // Create the aggregation pipeline
   //     let pipeline = [];
-
+ 
   //     // Add match condition
   //     pipeline.push({
   //       $match: {
@@ -63,7 +63,7 @@ module.exports = {
   //           }),
   //       },
   //     });
-
+ 
   //     // Lookup Supplier (userDetails) based on supplier_id in Product
   //     pipeline.push({
   //       $lookup: {
@@ -73,7 +73,7 @@ module.exports = {
   //         as: "userDetails",
   //       },
   //     });
-
+ 
   //     // Lookup Inventory based on the inventory field in Product
   //     pipeline.push({
   //       $lookup: {
@@ -83,7 +83,7 @@ module.exports = {
   //         as: "inventoryDetails",
   //       },
   //     });
-
+ 
   //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
   //     pipeline.push({
   //       $unwind: {
@@ -91,14 +91,14 @@ module.exports = {
   //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
   //       },
   //     });
-
+ 
   //     pipeline.push({
   //       $unwind: {
   //         path: "$inventoryDetails",
   //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
   //       },
   //     });
-
+ 
   //     const totalProductsQuery = {
   //       isDeleted: false,
   //       ...(market ? { market: market } : {}),
@@ -110,21 +110,21 @@ module.exports = {
   //         ? { "general.name": { $regex: search_key, $options: "i" } }
   //         : {}),
   //     };
-
+ 
   //     const totalProducts = await Product.countDocuments(totalProductsQuery);
-
+ 
   //     pipeline.push({
   //       $sort: { createdAt: -1 },
   //     });
-
+ 
   //     // pagination
   //     pipeline.push({ $skip: offset });
   //     pipeline.push({ $limit: pageSize });
-
+ 
   //     // Execute the aggregation
   //     const products = await Product.aggregate(pipeline);
   //     const totalPages = Math.ceil(totalProducts / pageSize);
-
+ 
   //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
   //       products,
   //       totalItems: totalProducts,
@@ -143,7 +143,7 @@ module.exports = {
   //     );
   //   }
   // },
-
+ 
   // getAllProducts2: async (req, res) => {
   //   try {
   //     const {
@@ -159,10 +159,10 @@ module.exports = {
   //     const pageNo = parseInt(page_no) || 1;
   //     const pageSize = parseInt(page_size) || 10;
   //     const offset = (pageNo - 1) * pageSize;
-
+ 
   //     // Create the aggregation pipeline
   //     let pipeline = [];
-
+ 
   //     // Add match condition
   //     pipeline.push({
   //       $match: {
@@ -192,7 +192,7 @@ module.exports = {
   //           }),
   //       },
   //     });
-
+ 
   //     // Lookup Supplier (userDetails) based on supplier_id in Product
   //     pipeline.push({
   //       $lookup: {
@@ -202,7 +202,7 @@ module.exports = {
   //         as: "userDetails",
   //       },
   //     });
-
+ 
   //     // Lookup Inventory based on the inventory field in Product
   //     pipeline.push({
   //       $lookup: {
@@ -212,7 +212,7 @@ module.exports = {
   //         as: "inventoryDetails",
   //       },
   //     });
-
+ 
   //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
   //     pipeline.push({
   //       $unwind: {
@@ -220,14 +220,14 @@ module.exports = {
   //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
   //       },
   //     });
-
+ 
   //     pipeline.push({
   //       $unwind: {
   //         path: "$inventoryDetails",
   //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
   //       },
   //     });
-
+ 
   //     // Aggregating price and quantity by inventory UUID
   //     pipeline.push({
   //       $group: {
@@ -297,7 +297,7 @@ module.exports = {
   //         },
   //       },
   //     });
-
+ 
   //     // Add any additional steps like sorting or pagination
   //     const totalProductsQuery = {
   //       isDeleted: false,
@@ -310,21 +310,21 @@ module.exports = {
   //         ? { "general.name": { $regex: search_key, $options: "i" } }
   //         : {}),
   //     };
-
+ 
   //     const totalProducts = await Product.countDocuments(totalProductsQuery);
-
+ 
   //     pipeline.push({
   //       $sort: { createdAt: -1 },
   //     });
-
+ 
   //     // pagination
   //     pipeline.push({ $skip: offset });
   //     pipeline.push({ $limit: pageSize });
-
+ 
   //     // Execute the aggregation
   //     const products = await Product.aggregate(pipeline);
   //     const totalPages = Math.ceil(totalProducts / pageSize);
-
+ 
   //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
   //       products,
   //       totalItems: totalProducts,
@@ -343,7 +343,7 @@ module.exports = {
   //     );
   //   }
   // },
-
+ 
   // getAllProducts3: async (req, res) => {
   //   try {
   //     const {
@@ -358,12 +358,12 @@ module.exports = {
   //     const pageNo = parseInt(page_no) || 1;
   //     const pageSize = parseInt(page_size) || 10;
   //     const offset = (pageNo - 1) * pageSize;
-
+ 
   //     const { price = [] } = req?.body;
-
+ 
   //     // Create the aggregation pipeline
   //     let pipeline = [];
-
+ 
   //     // Add match condition
   //     pipeline.push({
   //       $match: {
@@ -393,7 +393,7 @@ module.exports = {
   //           }),
   //       },
   //     });
-
+ 
   //     // Lookup Supplier (userDetails) based on supplier_id in Product
   //     pipeline.push({
   //       $lookup: {
@@ -403,7 +403,7 @@ module.exports = {
   //         as: "userDetails",
   //       },
   //     });
-
+ 
   //     // Lookup Inventory based on the inventory field in Product
   //     pipeline.push({
   //       $lookup: {
@@ -413,7 +413,7 @@ module.exports = {
   //         as: "inventoryDetails",
   //       },
   //     });
-
+ 
   //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
   //     pipeline.push({
   //       $unwind: {
@@ -421,14 +421,14 @@ module.exports = {
   //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
   //       },
   //     });
-
+ 
   //     pipeline.push({
   //       $unwind: {
   //         path: "$inventoryDetails",
   //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
   //       },
   //     });
-
+ 
   //     // Unwind the inventoryList so that each inventory item can be processed individually
   //     pipeline.push({
   //       $unwind: {
@@ -436,7 +436,7 @@ module.exports = {
   //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
   //       },
   //     });
-
+ 
   //     // Aggregating price and quantity by inventory UUID and inventoryList
   //     pipeline.push({
   //       $group: {
@@ -473,7 +473,7 @@ module.exports = {
   //         __v: { $first: "$__v" },
   //       },
   //     });
-
+ 
   //     // Price range filter (if price array is provided)
   //     if (price && price.length > 0) {
   //       const priceConditions = price.map((p) => ({
@@ -483,14 +483,14 @@ module.exports = {
   //           },
   //         },
   //       }));
-
+ 
   //       pipeline.push({
   //         $match: {
   //           $or: priceConditions, // Price filtering based on array values
   //         },
   //       });
   //     }
-
+ 
   //     // Add any additional steps like sorting or pagination
   //     const totalProductsQuery = {
   //       isDeleted: false,
@@ -503,21 +503,21 @@ module.exports = {
   //         ? { "general.name": { $regex: search_key, $options: "i" } }
   //         : {}),
   //     };
-
+ 
   //     const totalProducts = await Product.countDocuments(totalProductsQuery);
-
+ 
   //     pipeline.push({
   //       $sort: { createdAt: -1 },
   //     });
-
+ 
   //     // pagination
   //     pipeline.push({ $skip: offset });
   //     pipeline.push({ $limit: pageSize });
-
+ 
   //     // Execute the aggregation
   //     const products = await Product.aggregate(pipeline);
   //     const totalPages = Math.ceil(totalProducts / pageSize);
-
+ 
   //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
   //       products,
   //       totalItems: totalProducts,
@@ -536,7 +536,7 @@ module.exports = {
   //     );
   //   }
   // },
-
+ 
   getAllProducts: async (req, res) => {
     try {
       const {
@@ -552,12 +552,12 @@ module.exports = {
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-
+ 
       const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
-
+ 
       // Create the aggregation pipeline
       let pipeline = [];
-
+ 
       // Add match condition
       pipeline.push({
         $match: {
@@ -593,7 +593,7 @@ module.exports = {
             }),
         },
       });
-
+ 
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
@@ -603,7 +603,7 @@ module.exports = {
           as: "userDetails",
         },
       });
-
+ 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
@@ -613,7 +613,7 @@ module.exports = {
           as: "inventoryDetails",
         },
       });
-
+ 
       // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
       pipeline.push({
         $unwind: {
@@ -621,14 +621,14 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
         },
       });
-
+ 
       pipeline.push({
         $unwind: {
           path: "$inventoryDetails",
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Unwind the inventoryList so that each inventory item can be processed individually
       pipeline.push({
         $unwind: {
@@ -636,7 +636,7 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Aggregating price and quantity by inventory UUID and inventoryList
       pipeline.push({
         $group: {
@@ -673,7 +673,7 @@ module.exports = {
           __v: { $first: "$__v" },
         },
       });
-
+ 
       if (price?.min && price?.max) {
         pipeline.push({
           $match: {
@@ -689,7 +689,7 @@ module.exports = {
           },
         });
       }
-
+ 
       if (deliveryTime?.min && deliveryTime?.max) {
         pipeline.push({
           $match: {
@@ -704,7 +704,7 @@ module.exports = {
           },
         });
       }
-
+ 
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
@@ -717,21 +717,21 @@ module.exports = {
           ? { "general.name": { $regex: search_key, $options: "i" } }
           : {}),
       };
-
+ 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
-
+ 
       pipeline.push({
         $sort: { createdAt: -1 },
       });
-
+ 
       // pagination
       pipeline.push({ $skip: offset });
       pipeline.push({ $limit: pageSize });
-
+ 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
       const totalPages = Math.ceil(totalProducts / pageSize);
-
+ 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
         products,
         totalItems: totalProducts,
@@ -750,22 +750,22 @@ module.exports = {
       );
     }
   },
-
+ 
   getProductDetails: async (req, res) => {
     try {
       const { id } = req?.params;
-
+ 
       // Check if id is a valid ObjectId
       if (!mongoose.isValidObjectId(id)) {
         return sendErrorResponse(res, 400, "Invalid product ID format.", null);
       }
-
+ 
       // Instantiate ObjectId with `new` keyword
       const productId = new mongoose.Types.ObjectId(id);
-
+ 
       // Create the aggregation pipeline
       let pipeline = [];
-
+ 
       // Match documents based on the query params
       if (productId) {
         pipeline.push({
@@ -774,7 +774,7 @@ module.exports = {
           },
         });
       }
-
+ 
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
@@ -784,7 +784,7 @@ module.exports = {
           as: "userDetails",
         },
       });
-
+ 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
@@ -794,7 +794,7 @@ module.exports = {
           as: "inventoryDetails",
         },
       });
-
+ 
       // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
       pipeline.push({
         $unwind: {
@@ -802,17 +802,17 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
         },
       });
-
+ 
       pipeline.push({
         $unwind: {
           path: "$inventoryDetails",
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
-
+ 
       // Send the response with the products
       return sendSuccessResponse(
         res,
@@ -831,13 +831,13 @@ module.exports = {
       );
     }
   },
-
+ 
   addProduct: async (req, res) => {
     try {
       // Helper function to retrieve file paths
       async function getFilePaths(fields = []) {
         const filePaths = {};
-
+ 
         // Make sure fields is an array and req.files is an object
         if (!Array.isArray(fields)) {
           console.error(
@@ -846,25 +846,25 @@ module.exports = {
           );
           return filePaths; // Return an empty filePaths object
         }
-
+ 
         // Iterate over the fields array
         for (const field of fields) {
           if (req?.files?.[field] && req?.files?.[field]?.length > 0) {
             const validPaths = req?.files?.[field]
               .map((file) => file.filename) // Map to file paths
               .filter((path) => path && path.trim() !== ""); // Filter out empty strings
-
+ 
             filePaths[field] = validPaths.length > 0 ? validPaths : []; // Use valid paths or empty array
           } else {
             filePaths[field] = []; // Assign empty array if no files are present
           }
         }
-
+ 
         return filePaths;
       }
-
+ 
       const { category, market = "new" } = req?.body;
-
+ 
       // Define file fields for each category
       const fileFields = {
         MedicalEquipmentAndDevices: [
@@ -896,12 +896,12 @@ module.exports = {
         HealthcareITSolutions:
           ["interoperabilityFile"]?.toString()?.trim() || "",
       };
-
+ 
       // Check if the category exists in the fileFields object
       if (!fileFields[category]) {
         return sendErrorResponse(res, 400, "Invalid category specified.");
       }
-
+ 
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePaths(["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
@@ -914,13 +914,13 @@ module.exports = {
         "healthHazardRating",
         "environmentalImpact",
       ]);
-
+ 
       // Retrieve file paths for the selected category only
       const categoryFiles = await getFilePaths(
         req?.files,
         fileFields[category] || []
       );
-
+ 
       if (category === "AlternativeMedicines") {
         categoryFiles.healthClaimsFile = req.files?.healthClaimsFile
           ? req.files.healthClaimsFile.map((file) => file.filename)
@@ -937,18 +937,18 @@ module.exports = {
           ? req.files.performanceTestingReportFile.map((file) => file.filename)
           : [];
       }
-
+ 
       let newProductData = {};
       newProductData[category] = {
         ...req?.body,
         ...(categoryFiles || {}),
       };
-
+ 
       const inventoryUUId = uuidv4();
       const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
-
+ 
       let cNCFileNDateParsed;
-
+ 
       if (typeof req?.body?.cNCFileNDate == "string") {
         try {
           cNCFileNDateParsed = JSON.parse(
@@ -967,7 +967,7 @@ module.exports = {
           )
         );
       }
-
+ 
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -997,21 +997,21 @@ module.exports = {
         market,
         idDeleted: false,
       };
-
+ 
       if (market == "secondary") {
         newProductData["secondayMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
       }
-
+ 
       // Create the new product
       const newProduct = await Product.create(newProductData);
-
+ 
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
-
+ 
       const newInventoryDetails = {
         uuid: inventoryUUId,
         productId: newProduct?.medicine_id,
@@ -1028,13 +1028,13 @@ module.exports = {
         ),
         ...(inventoryFiles || []),
       };
-
+ 
       const newInventory = await Inventory.create(newInventoryDetails);
-
+ 
       if (!newInventory) {
         return sendErrorResponse(res, 400, "Failed to create new Inventory.");
       }
-
+ 
       return sendSuccessResponse(res, 200, "Success", newProduct);
     } catch (error) {
       console.error("Internal Server Error:", error);
@@ -1047,7 +1047,7 @@ module.exports = {
       );
     }
   },
-
+ 
   addBulkProducts: async (req, res) => {
     try {
       const { supplier_id } = req?.body;
@@ -1063,7 +1063,7 @@ module.exports = {
             .on("error", (err) => reject(err));
         });
       };
-
+ 
       // Parse the CSV file
       const results = await parseCSV(filePath);
       // Check if the product exists
@@ -1071,13 +1071,13 @@ module.exports = {
       if (!existingSupplier) {
         return sendErrorResponse(res, 404, "Supplier not found.");
       }
-
+ 
       const inventoryArray = [];
-
+ 
       const updatedResult = results?.map((result) => {
         const productId = "PRDT-" + Math.random().toString(16).slice(2, 10);
         const inventoryUUId = uuidv4();
-
+ 
         inventoryArray.push({
           uuid: inventoryUUId,
           productId,
@@ -1159,7 +1159,7 @@ module.exports = {
           isDeleted: false,
           bulkUpload: true,
         };
-
+ 
         if (result?.["Product Market*"] == "secondary") {
           updatedObject["secondayMarketDetails"] = {
             purchasedOn: result?.["Purchased On"]?.toString()?.trim() || "",
@@ -1176,7 +1176,7 @@ module.exports = {
                 ?.map((ele) => ele?.toString()?.trim()) || [],
           };
         }
-
+ 
         switch (result?.["Product Category*"]?.trim()?.replaceAll(" ", "")) {
           case "MedicalEquipmentAndDevices":
             updatedObject["MedicalEquipmentAndDevices"] = {
@@ -1205,7 +1205,7 @@ module.exports = {
                   ?.map((ele) => ele?.toString()?.trim()) || [],
             };
             break;
-
+ 
           case "Pharmaceuticals":
             updatedObject["Pharmaceuticals"] = {
               subCategory:
@@ -1234,7 +1234,7 @@ module.exports = {
               allergens: result?.["Allergens"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "SkinHairCosmeticSupplies":
             updatedObject["SkinHairCosmeticSupplies"] = {
               subCategory:
@@ -1288,7 +1288,7 @@ module.exports = {
               fillerType: result?.["Filler Type"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "VitalHealthAndWellness":
             updatedObject["VitalHealthAndWellness"] = {
               subCategory:
@@ -1323,7 +1323,7 @@ module.exports = {
                 result?.["Additives & Sweeteners"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "MedicalConsumablesAndDisposables":
             updatedObject["MedicalConsumablesAndDisposables"] = {
               subCategory:
@@ -1356,7 +1356,7 @@ module.exports = {
               coating: result?.[""]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "LaboratorySupplies":
             updatedObject["LaboratorySupplies"] = {
               subCategory:
@@ -1387,7 +1387,7 @@ module.exports = {
                   ?.map((ele) => ele?.toString()?.trim()) || [],
             };
             break;
-
+ 
           case "DiagnosticAndMonitoringDevices":
             updatedObject["DiagnosticAndMonitoringDevices"] = {
               subCategory:
@@ -1422,7 +1422,7 @@ module.exports = {
                   ?.map((ele) => ele?.toString()?.trim()) || [],
             };
             break;
-
+ 
           case "HospitalAndClinicSupplies":
             updatedObject["HospitalAndClinicSupplies"] = {
               subCategory:
@@ -1446,7 +1446,7 @@ module.exports = {
               elasticity: result?.["Elasticity"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "OrthopedicSupplies":
             updatedObject["OrthopedicSupplies"] = {
               subCategory:
@@ -1468,7 +1468,7 @@ module.exports = {
                 result?.["Moisture Resistance"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "DentalProducts":
             updatedObject["DentalProducts"] = {
               subCategory:
@@ -1489,7 +1489,7 @@ module.exports = {
                 result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "EyeCareSupplies":
             updatedObject["EyeCareSupplies"] = {
               subCategory:
@@ -1505,7 +1505,7 @@ module.exports = {
               colorOptions: result?.["Color Options"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "HomeHealthcareProducts":
             updatedObject["HomeHealthcareProducts"] = {
               subCategory:
@@ -1537,7 +1537,7 @@ module.exports = {
                 result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "AlternativeMedicines":
             updatedObject["AlternativeMedicines"] = {
               subCategory:
@@ -1557,7 +1557,7 @@ module.exports = {
                 "",
             };
             break;
-
+ 
           case "EmergencyAndFirstAidSupplies":
             updatedObject["EmergencyAndFirstAidSupplies"] = {
               subCategory:
@@ -1574,7 +1574,7 @@ module.exports = {
               foldability: result?.["Foldability*"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "DisinfectionAndHygieneSupplies":
             updatedObject["DisinfectionAndHygieneSupplies"] = {
               subCategory:
@@ -1592,7 +1592,7 @@ module.exports = {
               fragrance: result?.["Fragrance"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "NutritionAndDietaryProducts":
             updatedObject["NutritionAndDietaryProducts"] = {
               subCategory:
@@ -1618,7 +1618,7 @@ module.exports = {
               dairyFree: result?.["Dairy Free*"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           case "HealthcareITSolutions":
             updatedObject["HealthcareITSolutions"] = {
               subCategory:
@@ -1641,32 +1641,32 @@ module.exports = {
                 result?.["Core Functionalities*"]?.toString()?.trim() || "",
             };
             break;
-
+ 
           default:
             break;
         }
-
+ 
         return updatedObject;
       });
-
+ 
       // Insert multiple records into MongoDB
       const entries = await Product.insertMany(updatedResult);
-
+ 
       if (!entries || entries?.length == 0) {
         return sendErrorResponse(res, 400, "Failed to add bulk products.");
       }
-
+ 
       if (inventoryArray?.length > 0) {
         const inventories = await Inventory.insertMany(inventoryArray);
-
+ 
         if (!inventories || inventories?.length == 0) {
           return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
         }
       }
-
+ 
       // Remove the CSV file after processing
       fs.unlinkSync(filePath);
-
+ 
       res
         .status(200)
         .json({ message: "Data successfully uploaded", data: entries });
@@ -1681,18 +1681,18 @@ module.exports = {
       );
     }
   },
-
+ 
   editProduct: async (req, res) => {
     try {
       const { category, market = "new" } = req?.body;
       const { productId } = req?.params;
-
+ 
       // Check if the product exists
       const existingProduct = await Product.findById(productId);
       if (!existingProduct) {
         return sendErrorResponse(res, 404, "Product not found.");
       }
-
+ 
       // Check if the inventory exists
       const InventoryFound = await Inventory.findOne({
         uuid: existingProduct?.inventory,
@@ -1700,22 +1700,22 @@ module.exports = {
       if (!InventoryFound) {
         return sendErrorResponse(res, 404, "Inventory not found.");
       }
-
+ 
       // Helper function to retrieve file paths
       async function getFilePaths(fields) {
         const filePaths = {};
-
+ 
         for (const field of fields) {
           // Step 1: Retrieve the old file names (without "New") from the existing product
           const oldFieldName = field.replace("New", ""); // Remove 'New' to match the old field name
           const oldFiles = Array.isArray(req?.body?.[oldFieldName])
             ? req?.body?.[oldFieldName]
             : [req?.body?.[oldFieldName]] || []; // Default to an empty array if no old files exist
-
+ 
           // Step 2: Get the new file names (with 'New' suffix) from the current upload
           const newFiles =
             req?.files?.[field + "New"]?.map((file) => file?.filename) || [];
-
+ 
           // Step 3: Combine old and new files (remove duplicates)
           const combinedFiles = [...oldFiles, ...newFiles]
             ?.map((filename) => filename?.replaceAll("New", ""))
@@ -1727,14 +1727,14 @@ module.exports = {
                 self.indexOf(filename) === index
               );
             });
-
+ 
           // Step 4: Store the combined file paths for each field
           filePaths[field] = combinedFiles;
         }
-
+ 
         return filePaths;
       }
-
+ 
       // Define file fields for each category (same as addProduct)
       const fileFields = {
         MedicalEquipmentAndDevices: [
@@ -1766,12 +1766,12 @@ module.exports = {
         HealthcareITSolutions:
           ["interoperabilityFile"]?.toString()?.trim() || "",
       };
-
+ 
       // Check if the category exists in the fileFields object
       if (!fileFields[category]) {
         return sendErrorResponse(res, 400, "Invalid category specified.");
       }
-
+ 
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePaths(["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
@@ -1784,12 +1784,12 @@ module.exports = {
         "healthHazardRating",
         "environmentalImpact",
       ]);
-
+ 
       // Retrieve file paths for the selected category only
       const categoryFiles = await getFilePaths(fileFields[category]);
-
+ 
       let cNCFileNDateParsed;
-
+ 
       // if (typeof req?.body?.cNCFileNDate == "string") {
       //   try {
       //     cNCFileNDateParsed = JSON.parse(
@@ -1814,7 +1814,7 @@ module.exports = {
           return value != "[object Object]";
         })
       );
-
+ 
       // Update existing product data
       const updatedProductData = {
         ...existingProduct._doc, // Use the existing product data
@@ -1855,25 +1855,25 @@ module.exports = {
           ...(categoryFiles || []),
         }, // Update category-specific fields
       };
-
+ 
       if (market == "secondary") {
         updatedProductData["secondayMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
       }
-
+ 
       // Update the product in the database
       const updatedProduct = await Product.findByIdAndUpdate(
         productId,
         updatedProductData,
         { new: true }
       );
-
+ 
       if (!updatedProduct) {
         return sendErrorResponse(res, 400, "Failed to update the product.");
       }
-
+ 
       const updatedInventoryData = {
         ...req?.body,
         stockedInDetails: JSON.parse(
@@ -1888,18 +1888,18 @@ module.exports = {
         ),
         ...(inventoryFiles || []),
       };
-
+ 
       // Update the inventory in the database
       const updatedInventory = await Inventory.findOneAndUpdate(
         { uuid: existingProduct?.inventory },
         updatedInventoryData,
         { new: true }
       );
-
+ 
       if (!updatedInventory) {
         return sendErrorResponse(res, 400, "Failed to update the inventory.");
       }
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -1917,7 +1917,7 @@ module.exports = {
       );
     }
   },
-
+ 
   deleteProduct: async (req, res) => {
     try {
       const { id } = req?.params;
@@ -1925,7 +1925,7 @@ module.exports = {
       if (!foundProduct) {
         return sendErrorResponse(res, 500, "Failed fetching Product");
       }
-
+ 
       const uuid = foundProduct?.inventory;
       const inventoryFound = await Inventory?.findOne({
         uuid,
@@ -1933,7 +1933,7 @@ module.exports = {
       if (!inventoryFound) {
         return sendErrorResponse(res, 500, "Failed fetching Inventory");
       }
-
+ 
       const softDeletedProduct = await Product?.findByIdAndUpdate(
         id,
         {
@@ -1946,7 +1946,7 @@ module.exports = {
       if (!softDeletedProduct) {
         return sendErrorResponse(res, 500, "Failed Soft Deleting Product");
       }
-
+ 
       const softDeletedInventory = await Inventory?.findByIdAndUpdate(
         id,
         {
@@ -1959,7 +1959,7 @@ module.exports = {
       if (!softDeletedInventory) {
         return sendErrorResponse(res, 500, "Failed Soft Deleting Inventory");
       }
-
+ 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
       console.log("Internal Server Error:", error);
@@ -1972,7 +1972,7 @@ module.exports = {
       );
     }
   },
-
+ 
   productSuppliers: async (req, res) => {
     try {
       const { id } = req?.params;
@@ -1988,14 +1988,14 @@ module.exports = {
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-
+ 
       const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
-
+ 
       const foundProduct = await Product?.findById(id);
       if (!foundProduct) {
         return sendErrorResponse(res, 500, "Failed fetching Product");
       }
-
+ 
       const uuid = foundProduct?.inventory;
       const inventoryFound = await Inventory?.findOne({
         uuid,
@@ -2003,9 +2003,9 @@ module.exports = {
       if (!inventoryFound) {
         return sendErrorResponse(res, 500, "Failed fetching Inventory");
       }
-
+ 
       let pipeline = [];
-
+ 
       pipeline?.push({
         $match: {
           isDeleted: false,
@@ -2036,7 +2036,7 @@ module.exports = {
           as: "userDetails",
         },
       });
-
+ 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
@@ -2046,7 +2046,7 @@ module.exports = {
           as: "inventoryDetails",
         },
       });
-
+ 
       // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
       pipeline.push({
         $unwind: {
@@ -2054,14 +2054,14 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
         },
       });
-
+ 
       pipeline.push({
         $unwind: {
           path: "$inventoryDetails",
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Unwind the inventoryList so that each inventory item can be processed individually
       pipeline.push({
         $unwind: {
@@ -2069,7 +2069,7 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Aggregating price and quantity by inventory UUID and inventoryList
       pipeline.push({
         $group: {
@@ -2106,7 +2106,7 @@ module.exports = {
           __v: { $first: "$__v" },
         },
       });
-
+ 
       if (price?.min && price?.max) {
         pipeline.push({
           $match: {
@@ -2122,7 +2122,7 @@ module.exports = {
           },
         });
       }
-
+ 
       if (deliveryTime?.min && deliveryTime?.max) {
         pipeline.push({
           $match: {
@@ -2137,27 +2137,27 @@ module.exports = {
           },
         });
       }
-
+ 
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
         ...(market ? { market: foundProduct?.market } : {}),
       };
-
+ 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
-
+ 
       pipeline.push({
         $sort: { createdAt: -1 },
       });
-
+ 
       // pagination
       pipeline.push({ $skip: offset });
       pipeline.push({ $limit: pageSize });
-
+ 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
       const totalPages = Math.ceil(totalProducts / pageSize);
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -2170,7 +2170,7 @@ module.exports = {
           totalPages,
         }
       );
-
+ 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
       console.log("Internal Server Error:", error);
@@ -2183,7 +2183,7 @@ module.exports = {
       );
     }
   },
-
+ 
   otherProducts: async (req, res) => {
     try {
       const { id } = req?.params;
@@ -2198,14 +2198,14 @@ module.exports = {
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-
+ 
       const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
-
+ 
       const foundProduct = await Product?.findById(id);
       if (!foundProduct) {
         return sendErrorResponse(res, 500, "Failed fetching Product");
       }
-
+ 
       const uuid = foundProduct?.inventory;
       const inventoryFound = await Inventory?.findOne({
         uuid,
@@ -2215,7 +2215,7 @@ module.exports = {
       }
       
       let pipeline = [];
-
+ 
       pipeline?.push({
         $match: {
           isDeleted: false,
@@ -2243,7 +2243,7 @@ module.exports = {
           as: "userDetails",
         },
       });
-
+ 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
@@ -2253,7 +2253,7 @@ module.exports = {
           as: "inventoryDetails",
         },
       });
-
+ 
       // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
       pipeline.push({
         $unwind: {
@@ -2261,14 +2261,14 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
         },
       });
-
+ 
       pipeline.push({
         $unwind: {
           path: "$inventoryDetails",
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Unwind the inventoryList so that each inventory item can be processed individually
       pipeline.push({
         $unwind: {
@@ -2276,7 +2276,7 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Aggregating price and quantity by inventory UUID and inventoryList
       pipeline.push({
         $group: {
@@ -2313,7 +2313,7 @@ module.exports = {
           __v: { $first: "$__v" },
         },
       });
-
+ 
       if (price?.min && price?.max) {
         pipeline.push({
           $match: {
@@ -2329,7 +2329,7 @@ module.exports = {
           },
         });
       }
-
+ 
       if (deliveryTime?.min && deliveryTime?.max) {
         pipeline.push({
           $match: {
@@ -2344,27 +2344,27 @@ module.exports = {
           },
         });
       }
-
+ 
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
         ...(market ? { market: foundProduct?.market } : {}),
       };
-
+ 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
-
+ 
       pipeline.push({
         $sort: { createdAt: -1 },
       });
-
+ 
       // pagination
       pipeline.push({ $skip: offset });
       pipeline.push({ $limit: pageSize });
-
+ 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
       const totalPages = Math.ceil(totalProducts / pageSize);
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -2377,7 +2377,7 @@ module.exports = {
           totalPages,
         }
       );
-
+ 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
       console.log("Internal Server Error:", error);
