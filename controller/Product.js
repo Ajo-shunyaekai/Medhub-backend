@@ -235,8 +235,8 @@ module.exports = {
   //         general: { $first: "$general" },
   //         inventory: { $first: "$inventory" },
   //         complianceFile: { $first: "$complianceFile" },
-  //         complianceAndCertificationFileNDate: {
-  //           $first: "$complianceAndCertificationFileNDate",
+  //         cNCFileNDate: {
+  //           $first: "$cNCFileNDate",
   //         },
   //         storage: { $first: "$storage" },
   //         additional: { $first: "$additional" },
@@ -444,8 +444,8 @@ module.exports = {
   //         general: { $first: "$general" },
   //         inventory: { $first: "$inventory" },
   //         complianceFile: { $first: "$complianceFile" },
-  //         complianceAndCertificationFileNDate: {
-  //           $first: "$complianceAndCertificationFileNDate",
+  //         cNCFileNDate: {
+  //           $first: "$cNCFileNDate",
   //         },
   //         storage: { $first: "$storage" },
   //         additional: { $first: "$additional" },
@@ -644,8 +644,8 @@ module.exports = {
           general: { $first: "$general" },
           inventory: { $first: "$inventory" },
           complianceFile: { $first: "$complianceFile" },
-          complianceAndCertificationFileNDate: {
-            $first: "$complianceAndCertificationFileNDate",
+          cNCFileNDate: {
+            $first: "$cNCFileNDate",
           },
           storage: { $first: "$storage" },
           additional: { $first: "$additional" },
@@ -947,12 +947,12 @@ module.exports = {
       const inventoryUUId = uuidv4();
       const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
 
-      let complianceAndCertificationFileNDateParsed;
+      let cNCFileNDateParsed;
 
-      if (typeof req?.body?.complianceAndCertificationFileNDate == "string") {
+      if (typeof req?.body?.cNCFileNDate == "string") {
         try {
-          complianceAndCertificationFileNDateParsed = JSON.parse(
-            req.body.complianceAndCertificationFileNDate
+          cNCFileNDateParsed = JSON.parse(
+            req.body.cNCFileNDate
           )?.filter((value) => value != "[object Object]");
         } catch (error) {
           // Handle the case where the JSON parsing fails
@@ -961,8 +961,8 @@ module.exports = {
           return;
         }
       } else {
-        complianceAndCertificationFileNDateParsed = JSON.parse(
-          req.body?.complianceAndCertificationFileNDate?.filter(
+        cNCFileNDateParsed = JSON.parse(
+          req.body?.cNCFileNDate?.filter(
             (value) => value != "[object Object]"
           )
         );
@@ -978,8 +978,8 @@ module.exports = {
         },
         inventory: inventoryUUId,
         complianceFile: complianceFiles.complianceFile,
-        complianceAndCertificationFileNDate:
-          complianceAndCertificationFileNDateParsed?.map((ele, index) => ({
+        cNCFileNDate:
+          cNCFileNDateParsed?.map((ele, index) => ({
             file: complianceFiles?.complianceFile?.[index] || "",
             date: ele?.date || "",
           })),
@@ -1788,12 +1788,12 @@ module.exports = {
       // Retrieve file paths for the selected category only
       const categoryFiles = await getFilePaths(fileFields[category]);
 
-      let complianceAndCertificationFileNDateParsed;
+      let cNCFileNDateParsed;
 
-      // if (typeof req?.body?.complianceAndCertificationFileNDate == "string") {
+      // if (typeof req?.body?.cNCFileNDate == "string") {
       //   try {
-      //     complianceAndCertificationFileNDateParsed = JSON.parse(
-      //       req.body.complianceAndCertificationFileNDate
+      //     cNCFileNDateParsed = JSON.parse(
+      //       req.body.cNCFileNDate
       //     )?.filter((value) => value != "[object Object]");
       //   } catch (error) {
       //     // Handle the case where the JSON parsing fails
@@ -1802,15 +1802,15 @@ module.exports = {
       //     return;
       //   }
       // } else {
-      //   complianceAndCertificationFileNDateParsed = JSON.parse(
-      //     req.body?.complianceAndCertificationFileNDate?.filter(
+      //   cNCFileNDateParsed = JSON.parse(
+      //     req.body?.cNCFileNDate?.filter(
       //       (value) => {
       //         return (value != "[object Object]")}
       //     )
       //   );
       // }
-      complianceAndCertificationFileNDateParsed = JSON.parse(
-        req.body?.complianceAndCertificationFileNDate?.filter((value) => {
+      cNCFileNDateParsed = JSON.parse(
+        req.body?.cNCFileNDate?.filter((value) => {
           return value != "[object Object]";
         })
       );
@@ -1829,8 +1829,8 @@ module.exports = {
         //   ...(inventoryFiles || []),
         // },
         complianceFile: complianceFiles.complianceFile || [],
-        complianceAndCertificationFileNDate:
-          complianceAndCertificationFileNDateParsed?.map((ele, index) => {
+        cNCFileNDate:
+          cNCFileNDateParsed?.map((ele, index) => {
             return {
               // file: complianceFiles?.complianceFile?.[index] || "",
               file:
@@ -2077,8 +2077,8 @@ module.exports = {
           general: { $first: "$general" },
           inventory: { $first: "$inventory" },
           complianceFile: { $first: "$complianceFile" },
-          complianceAndCertificationFileNDate: {
-            $first: "$complianceAndCertificationFileNDate",
+          cNCFileNDate: {
+            $first: "$cNCFileNDate",
           },
           storage: { $first: "$storage" },
           additional: { $first: "$additional" },
@@ -2284,8 +2284,8 @@ module.exports = {
           general: { $first: "$general" },
           inventory: { $first: "$inventory" },
           complianceFile: { $first: "$complianceFile" },
-          complianceAndCertificationFileNDate: {
-            $first: "$complianceAndCertificationFileNDate",
+          cNCFileNDate: {
+            $first: "$cNCFileNDate",
           },
           storage: { $first: "$storage" },
           additional: { $first: "$additional" },
