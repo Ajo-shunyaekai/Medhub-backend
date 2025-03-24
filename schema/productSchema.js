@@ -113,7 +113,7 @@ const productSchema = new Schema(
         trim: true,
       },
     ],
-    complianceAndCertificationFileNDate: [
+    cNCFileNDate: [
       {
         file: { type: String },
         date: { type: String },

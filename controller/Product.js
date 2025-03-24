@@ -235,8 +235,8 @@ module.exports = {
   //         general: { $first: "$general" },
   //         inventory: { $first: "$inventory" },
   //         complianceFile: { $first: "$complianceFile" },
-  //         complianceAndCertificationFileNDate: {
-  //           $first: "$complianceAndCertificationFileNDate",
+  //         cNCFileNDate: {
+  //           $first: "$cNCFileNDate",
   //         },
   //         storage: { $first: "$storage" },
   //         additional: { $first: "$additional" },
@@ -444,8 +444,8 @@ module.exports = {
   //         general: { $first: "$general" },
   //         inventory: { $first: "$inventory" },
   //         complianceFile: { $first: "$complianceFile" },
-  //         complianceAndCertificationFileNDate: {
-  //           $first: "$complianceAndCertificationFileNDate",
+  //         cNCFileNDate: {
+  //           $first: "$cNCFileNDate",
   //         },
   //         storage: { $first: "$storage" },
   //         additional: { $first: "$additional" },
@@ -644,8 +644,8 @@ module.exports = {
           general: { $first: "$general" },
           inventory: { $first: "$inventory" },
           complianceFile: { $first: "$complianceFile" },
-          complianceAndCertificationFileNDate: {
-            $first: "$complianceAndCertificationFileNDate",
+          cNCFileNDate: {
+            $first: "$cNCFileNDate",
           },
           storage: { $first: "$storage" },
           additional: { $first: "$additional" },
@@ -949,10 +949,10 @@ module.exports = {
 
       let complianceAndCertificationFileNDateParsed;
 
-      if (typeof req?.body?.complianceAndCertificationFileNDate == "string") {
+      if (typeof req?.body?.cNCFileNDate == "string") {
         try {
           complianceAndCertificationFileNDateParsed = JSON.parse(
-            req.body.complianceAndCertificationFileNDate
+            req.body.cNCFileNDate
           )?.filter((value) => value != "[object Object]");
         } catch (error) {
           // Handle the case where the JSON parsing fails
@@ -962,7 +962,7 @@ module.exports = {
         }
       } else {
         complianceAndCertificationFileNDateParsed = JSON.parse(
-          req.body?.complianceAndCertificationFileNDate?.filter(
+          req.body?.cNCFileNDate?.filter(
             (value) => value != "[object Object]"
           )
         );
@@ -978,7 +978,7 @@ module.exports = {
         },
         inventory: inventoryUUId,
         complianceFile: complianceFiles.complianceFile,
-        complianceAndCertificationFileNDate:
+        cNCFileNDate:
           complianceAndCertificationFileNDateParsed?.map((ele, index) => ({
             file: complianceFiles?.complianceFile?.[index] || "",
             date: ele?.date || "",
@@ -1790,10 +1790,10 @@ module.exports = {
 
       let complianceAndCertificationFileNDateParsed;
 
-      // if (typeof req?.body?.complianceAndCertificationFileNDate == "string") {
+      // if (typeof req?.body?.cNCFileNDate == "string") {
       //   try {
       //     complianceAndCertificationFileNDateParsed = JSON.parse(
-      //       req.body.complianceAndCertificationFileNDate
+      //       req.body.cNCFileNDate
       //     )?.filter((value) => value != "[object Object]");
       //   } catch (error) {
       //     // Handle the case where the JSON parsing fails
@@ -1803,14 +1803,14 @@ module.exports = {
       //   }
       // } else {
       //   complianceAndCertificationFileNDateParsed = JSON.parse(
-      //     req.body?.complianceAndCertificationFileNDate?.filter(
+      //     req.body?.cNCFileNDate?.filter(
       //       (value) => {
       //         return (value != "[object Object]")}
       //     )
       //   );
       // }
       complianceAndCertificationFileNDateParsed = JSON.parse(
-        req.body?.complianceAndCertificationFileNDate?.filter((value) => {
+        req.body?.cNCFileNDate?.filter((value) => {
           return value != "[object Object]";
         })
       );
@@ -1829,7 +1829,7 @@ module.exports = {
         //   ...(inventoryFiles || []),
         // },
         complianceFile: complianceFiles.complianceFile || [],
-        complianceAndCertificationFileNDate:
+        cNCFileNDate:
           complianceAndCertificationFileNDateParsed?.map((ele, index) => {
             return {
               // file: complianceFiles?.complianceFile?.[index] || "",
@@ -2077,8 +2077,8 @@ module.exports = {
           general: { $first: "$general" },
           inventory: { $first: "$inventory" },
           complianceFile: { $first: "$complianceFile" },
-          complianceAndCertificationFileNDate: {
-            $first: "$complianceAndCertificationFileNDate",
+          cNCFileNDate: {
+            $first: "$cNCFileNDate",
           },
           storage: { $first: "$storage" },
           additional: { $first: "$additional" },
@@ -2284,8 +2284,8 @@ module.exports = {
           general: { $first: "$general" },
           inventory: { $first: "$inventory" },
           complianceFile: { $first: "$complianceFile" },
-          complianceAndCertificationFileNDate: {
-            $first: "$complianceAndCertificationFileNDate",
+          cNCFileNDate: {
+            $first: "$cNCFileNDate",
           },
           storage: { $first: "$storage" },
           additional: { $first: "$additional" },
