@@ -1613,7 +1613,7 @@ const categoriesData = [
   },
   //   -------------------------------------   Disinfection and Hygiene Supplies  -------------------------------------
   {
-    schema: "disinfectionAndHygieneSuppliesSchema",
+    schema: "DisinfectionAndHygieneSupplies",
     name: "Disinfection and Hygiene Supplies",
     subCategories: [
       {
