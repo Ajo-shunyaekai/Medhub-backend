@@ -76,15 +76,14 @@ const editGeneralValidationRules = [
       "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
     ),
 
+  body("aboutManufacturer")
+    .notEmpty()
+    .withMessage("About Manufacturer is required."),
+
   body("countryOfOrigin")
     .notEmpty()
     .withMessage("Country of origin is required."),
 
-  body("upc").optional().trim(),
-  // .matches(/^[a-zA-Z0-9\s]+$/)
-  // .withMessage(
-  //   "UPC must be alphanumeric (letters, numbers, and spaces only)."
-  // )
   body("model")
     .notEmpty()
     .withMessage("Part/Model Number is required.")
@@ -93,11 +92,6 @@ const editGeneralValidationRules = [
       "Part/Model Number must be alphanumeric (letters, numbers, and spaces only)."
     ),
 
-  body("brand").optional().trim(),
-  // .matches(/^[a-zA-Z0-9\s]+$/)
-  // .withMessage(
-  //   "Brand Name must be alphanumeric (letters, numbers, and spaces only)."
-  // )
   body("form")
     .notEmpty()
     .withMessage("Type/Form is required.")
@@ -112,22 +106,6 @@ const editGeneralValidationRules = [
     .isInt({ gt: 0 })
     .withMessage("Product Quantity must be a positive integer."),
 
-  body("volumn")
-    .notEmpty()
-    .withMessage("Product Size/Volume is required.")
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Product Size/Volume must be alphanumeric (letters, numbers, and spaces only)."
-    ),
-
-  body("dimension")
-    .notEmpty()
-    .withMessage("Product Dimension is required.")
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Product Dimension must be alphanumeric (letters, numbers, and spaces only)."
-    ),
-
   body("weight")
     .notEmpty()
     .withMessage("Product Weight is required.")
@@ -136,48 +114,35 @@ const editGeneralValidationRules = [
 
   body("unit").notEmpty().withMessage("Product Weight Unit is required."),
 
-  body("packageType")
-    .notEmpty()
-    .withMessage("Product Packaging Type is required."),
+  // body("packageType")
+  //   .notEmpty()
+  //   .withMessage("Product Packaging Type is required."),
 
-  body("packageMaterial")
-    .notEmpty()
-    .withMessage("Product Packaging Material is required.")
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Product Packaging Material must be alphanumeric (letters, numbers, and spaces only)."
-    ),
-
-  body("packageMaterialIfOther")
-    .optional()
-    .custom((value, { req }) => {
-      // Only validate if packageMaterial is 'Other' and packageMaterialIfOther is provided
-      if (req.body.packageMaterial === "Other" && !value) {
-        throw new Error(
-          "Product Packaging Other Material is required when packaging material is 'Other'."
-        );
-      }
-      if (value && !/^[a-zA-Z0-9\s]+$/.test(value)) {
-        throw new Error(
-          "Product Packaging Other Material must be alphanumeric (letters and numbers only)."
-        );
-      }
-      return true;
-    }),
-
-  // body("costPerProduct")
-  //   .optional()
-  //   .trim()
+  // body("packageMaterial")
+  //   .notEmpty()
+  //   .withMessage("Product Packaging Material is required.")
   //   .matches(/^[a-zA-Z0-9\s]+$/)
   //   .withMessage(
-  //     "Cost Per Product must be alphanumeric (letters, numbers, and spaces only)."
+  //     "Product Packaging Material must be alphanumeric (letters, numbers, and spaces only)."
   //   ),
 
-  body("sku").optional().trim(),
-  // .matches(/^[a-zA-Z0-9\s]+$/)
-  // .withMessage(
-  //   "SKU must be alphanumeric (letters, numbers, and spaces only)."
-  // )
+  // body("packageMaterialIfOther")
+  //   .optional()
+  //   .custom((value, { req }) => {
+  //     // Only validate if packageMaterial is 'Other' and packageMaterialIfOther is provided
+  //     if (req.body.packageMaterial === "Other" && !value) {
+  //       throw new Error(
+  //         "Product Packaging Other Material is required when packaging material is 'Other'."
+  //       );
+  //     }
+  //     if (value && !/^[a-zA-Z0-9\s]+$/.test(value)) {
+  //       throw new Error(
+  //         "Product Packaging Other Material must be alphanumeric (letters and numbers only)."
+  //       );
+  //     }
+  //     return true;
+  //   }),
+
   body("stock")
     .notEmpty()
     .withMessage("Product Stock is required.")
@@ -216,39 +181,27 @@ const editGeneralValidationRules = [
   //   .isDate()
   //   .withMessage("Date must be a valid date."),
 
-  body("date")
-    .optional()
-    .custom((value) => {
-      // if (value && !/^\d{2} [a-zA-Z]+ \d{4}$/.test(value)) {
-      //   throw new Error(
-      //     "Date must be in the format 'DD MMM YYYY' (e.g., '12 jan 2025')."
-      //   );
-      // }
+  // body("date")
+  //   .optional()
+  //   .custom((value) => {
+  //     // if (value && !/^\d{2} [a-zA-Z]+ \d{4}$/.test(value)) {
+  //     //   throw new Error(
+  //     //     "Date must be in the format 'DD MMM YYYY' (e.g., '12 jan 2025')."
+  //     //   );
+  //     // }
 
-      if (
-        value &&
-        !/^\d{2}-(\d{2}|\w{3})-\d{4}$|^\d{2} \w{3} \d{4}$/.test(value)
-      ) {
-        throw new Error(
-          "Date must be in the format 'DD MMM YYYY' (e.g., '12 Feb 2025') or 'DD-MM-YYYY' (e.g., '12-02-2025')."
-        );
-      }
-      return true;
-    })
-    .withMessage("Date must be a valid date."),
+  //     if (
+  //       value &&
+  //       !/^\d{2}-(\d{2}|\w{3})-\d{4}$|^\d{2} \w{3} \d{4}$/.test(value)
+  //     ) {
+  //       throw new Error(
+  //         "Date must be in the format 'DD MMM YYYY' (e.g., '12 Feb 2025') or 'DD-MM-YYYY' (e.g., '12-02-2025')."
+  //       );
+  //     }
+  //     return true;
+  //   })
+  //   .withMessage("Date must be a valid date."),
 
-  body("storage").optional().trim(),
-  // .matches(/^[a-zA-Z0-9\s]+$/)
-  // .withMessage(
-  //   "Storage Conditions must be alphanumeric (letters, numbers, and spaces only)."
-  // )
-  body("other").optional().trim(),
-
-  body("warranty").optional().trim(),
-  // .matches(/^[a-zA-Z0-9\s]+$/)
-  // .withMessage(
-  //   "Warranty must be alphanumeric (letters, numbers, and spaces only)."
-  // )
   // Category validation
   body("category")
     .notEmpty()
@@ -297,40 +250,9 @@ const editCategorySpecificValidationRules = [
             "Elderly Care Products",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("specification").optional().trim(),
-
-        body("diagnosticFunctions").optional().trim(),
-        body("interoperability")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Interoperability must be alphanumeric (letters and numbers only)."
-          ),
-        body("laserType")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Laser Type must be alphanumeric (letters and numbers only)."
-          ),
-        body("coolingSystem")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Cooling System must be alphanumeric (letters and numbers only)."
-          ),
-        body("spotSize")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Spot Size must be alphanumeric (letters and numbers only)."
-          ),
-        body("performanceTestingReport").optional().trim(),
+        body("specification")
+          .notEmpty()
+          .withMessage("Specification is required."),
       ];
     }
     if (value === "Pharmaceuticals") {
@@ -347,7 +269,6 @@ const editCategorySpecificValidationRules = [
             "Specialized Treatments",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("genericName")
           .notEmpty()
           .withMessage("Generic Name is required.")
@@ -368,12 +289,6 @@ const editCategorySpecificValidationRules = [
           .notEmpty()
           .withMessage("Composition/Ingredients is required.")
           .trim(),
-        body("formulation").optional().trim(),
-        body("purpose").optional().trim(),
-        body("drugAdministrationRoute")
-          .notEmpty()
-          .withMessage("Drug Administration Route is required.")
-          .trim(),
         body("drugClass")
           .notEmpty()
           .withMessage("Drug Class is required.")
@@ -382,15 +297,6 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Drug Class must be alphanumeric (letters and numbers only)."
           ),
-        body("controlledSubstance")
-          .optional()
-          .isBoolean()
-          .withMessage("Controlled Substance must be a boolean"),
-        body("otcClassification")
-          .optional()
-          .trim()
-          .isIn(["Category I", "Category II", "Category III"])
-          .withMessage("OTC Classification is invalid."),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -399,8 +305,6 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
           ),
-        body("sideEffectsAndWarnings").optional().trim(),
-        body("allergens").optional().trim(),
       ];
     }
     if (value === "SkinHairCosmeticSupplies") {
@@ -423,22 +327,6 @@ const editCategorySpecificValidationRules = [
             "Chemical Peels",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("fragrance").optional().trim(),
-        body("spf")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage("SPF must be alphanumeric (letters and numbers only)."),
-        body("vegan")
-          .optional()
-          .isBoolean()
-          .withMessage("Vegan must be a boolean"),
-        body("crueltyFree")
-          .optional()
-          .isBoolean()
-          .withMessage("Cruelty-Free must be a boolean"),
-        body("formulation").optional().trim(),
         body("strength")
           .notEmpty()
           .withMessage("Strength is required.")
@@ -455,6 +343,7 @@ const editCategorySpecificValidationRules = [
           .notEmpty()
           .withMessage("Target Condition is required.")
           .trim(),
+        body("purpose").notEmpty().withMessage("Purpose is required.").trim(),
         body("drugAdministrationRoute")
           .notEmpty()
           .withMessage("Drug Administration Route is required.")
@@ -464,11 +353,6 @@ const editCategorySpecificValidationRules = [
           .withMessage("Drug Class is required.")
           .trim(),
         body("controlledSubstance").optional().trim(),
-        body("otcClassification")
-          .optional()
-          .trim()
-          .isIn(["Category I", "Category II", "Category III"])
-          .withMessage("OTC Classification is invalid."),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -477,8 +361,6 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
           ),
-        body("sideEffectsAndWarnings").optional().trim(),
-        body("allergens").optional().trim(),
         body("dermatologistTested")
           .notEmpty()
           .withMessage("Dermatologist Tested is required.")
@@ -490,32 +372,6 @@ const editCategorySpecificValidationRules = [
           .withMessage("Pediatrician Recommended is required.")
           .isIn(["Yes", "No"])
           .withMessage("Pediatrician Recommended is invalid."),
-
-        body("elasticity")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Elasticity must be alphanumeric (letters and numbers only)."
-          ),
-        body("adhesiveness")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Adhesiveness must be alphanumeric (letters and numbers only)."
-          ),
-        body("thickness")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Thickness must be alphanumeric (letters and numbers only)."
-          ),
-        body("concentration").optional().trim(),
-        body("purpose").optional().trim(),
-        body("moisturizers").optional().trim(),
-        body("fillerType").optional().trim(),
       ];
     }
     if (value === "VitalHealthAndWellness") {
@@ -532,7 +388,6 @@ const editCategorySpecificValidationRules = [
             "Weight Management",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("healthBenefit")
           .notEmpty()
           .withMessage("Health Benefit is required.")
@@ -557,7 +412,6 @@ const editCategorySpecificValidationRules = [
           .notEmpty()
           .withMessage("Composition/Ingredients is required.")
           .trim(),
-        body("purpose").optional().trim(),
         body("drugAdministrationRoute")
           .notEmpty()
           .withMessage("Drug Administration Route is required.")
@@ -566,15 +420,6 @@ const editCategorySpecificValidationRules = [
           .notEmpty()
           .withMessage("Drug Class is required.")
           .trim(),
-        body("controlledSubstance")
-          .optional()
-          .isBoolean()
-          .withMessage("Controlled Substance must be a boolean"),
-        body("otcClassification")
-          .optional()
-          .trim()
-          .isIn(["Category I", "Category II", "Category III"])
-          .withMessage("OTC Classification is invalid."),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -583,17 +428,6 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
           ),
-        body("sideEffectsAndWarnings").optional().trim(),
-        body("allergens").optional().trim(),
-        body("vegan")
-          .optional()
-          .isBoolean()
-          .withMessage("Vegan must be a boolean"),
-        body("crueltyFree")
-          .optional()
-          .isBoolean()
-          .withMessage("Cruelty Free must be a boolean"),
-        body("additivesNSweeteners").optional().trim(),
       ];
     }
     if (value === "MedicalConsumablesAndDisposables") {
@@ -610,26 +444,6 @@ const editCategorySpecificValidationRules = [
             "Syringes, IV Sets & Catheters",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("thickness")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Thickness must be alphanumeric (letters and numbers only)."
-          ),
-        body("powdered")
-          .optional()
-          .isBoolean()
-          .withMessage("Powdered must be a boolean"),
-        body("productMaterial")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Product Material must be alphanumeric (letters and numbers only)."
-          ),
-        body("purpose").optional().trim(),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -638,118 +452,64 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
           ),
-        body("texture")
-          .optional()
-          .isBoolean()
-          .withMessage("Texture must be a boolean"),
-        body("sterilized")
-          .optional()
-          .isBoolean()
-          .withMessage("Sterilized must be a boolean"),
-        body("chemicalResistance").optional().trim(),
-        body("allergens").optional().trim(),
-        body("filtrationEfficiency")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Filtration Efficiency must be alphanumeric (letters and numbers only)."
-          ),
-        body("breathability")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Breathability must be alphanumeric (letters and numbers only)."
-          ),
-        body("layerCount")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Layer Count must be alphanumeric (letters and numbers only)."
-          ),
-        body("fluidResistance")
-          .optional()
-          .isBoolean()
-          .withMessage("Fluid Resistance must be a boolean"),
-        // body("filtrationType").optional().trim(),
-        body("filtrationType")
-          .isArray()
-          .withMessage("Filtration Type must be an array.")
-          .custom((value) => {
-            // Ensure that each item in the array is a string and is trimmed
-            value.forEach((item, index) => {
-              if (typeof item !== "string" || item.trim() === "") {
-                throw new Error(
-                  `Filtration Type at index ${index} must be a non-empty string`
-                );
-              }
-            });
-            return true;
-          })
-          .optional(),
-        body("shape").optional().trim(),
-        body("coating").optional().trim(),
       ];
     }
-    if (value === "LaboratorySupplies") {
-      // Validation for LaboratorySupplies Category
-      return [
-        body("subCategory")
-          .notEmpty()
-          .withMessage("Sub Category is required.")
-          .isIn([
-            "Test kits",
-            "Microscopes & Lab Equipment",
-            "Chemicals & Reagents",
-            "Lab Consumables",
-          ])
-          .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("magnificationRange").optional().trim(),
-        body("objectiveLenses").optional().trim(),
-        body("powerSource").optional().trim(),
-        body("resolution").optional().trim(),
-        body("connectivity").optional().trim(),
-        body("shape").optional().trim(),
-        body("coating").optional().trim(),
-        body("purpose").optional().trim(),
-        body("casNumber").optional().trim(),
-        body("grade").optional().trim(),
-        body("concentration").optional().trim(),
-        body("physicalState")
-          .isArray()
-          .withMessage("Physical State must be an array.")
-          .custom((value) => {
-            // Ensure that each item in the array is a string and is trimmed
-            value.forEach((item, index) => {
-              if (typeof item !== "string" || item.trim() === "") {
-                throw new Error(
-                  `Physical State at index ${index} must be a non-empty string`
-                );
-              }
-            });
-            return true;
-          })
-          .optional(),
-        body("hazardClassification")
-          .isArray()
-          .withMessage("Hazard Classification must be an array.")
-          .custom((value) => {
-            // Ensure that each item in the array is a string and is trimmed
-            value.forEach((item, index) => {
-              if (typeof item !== "string" || item.trim() === "") {
-                throw new Error(
-                  `Hazard Classification at index ${index} must be a non-empty string`
-                );
-              }
-            });
-            return true;
-          })
-          .optional(),
-      ];
-    }
+    // if (value === "LaboratorySupplies") {
+    //   // Validation for LaboratorySupplies Category
+    //   return [
+    //     body("subCategory")
+    //       .notEmpty()
+    //       .withMessage("Sub Category is required.")
+    //       .isIn([
+    //         "Test kits",
+    //         "Microscopes & Lab Equipment",
+    //         "Chemicals & Reagents",
+    //         "Lab Consumables",
+    //       ])
+    //       .withMessage("Sub Category is invalid."),
+    //     body("magnificationRange").optional().trim(),
+    //     body("objectiveLenses").optional().trim(),
+    //     body("powerSource").optional().trim(),
+    //     body("resolution").optional().trim(),
+    //     body("connectivity").optional().trim(),
+    //     body("shape").optional().trim(),
+    //     body("coating").optional().trim(),
+    //     body("purpose").optional().trim(),
+    //     body("casNumber").optional().trim(),
+    //     body("grade").optional().trim(),
+    //     body("concentration").optional().trim(),
+    //     body("physicalState")
+    //       .isArray()
+    //       .withMessage("Physical State must be an array.")
+    //       .custom((value) => {
+    //         // Ensure that each item in the array is a string and is trimmed
+    //         value.forEach((item, index) => {
+    //           if (typeof item !== "string" || item.trim() === "") {
+    //             throw new Error(
+    //               `Physical State at index ${index} must be a non-empty string`
+    //             );
+    //           }
+    //         });
+    //         return true;
+    //       })
+    //       .optional(),
+    //     body("hazardClassification")
+    //       .isArray()
+    //       .withMessage("Hazard Classification must be an array.")
+    //       .custom((value) => {
+    //         // Ensure that each item in the array is a string and is trimmed
+    //         value.forEach((item, index) => {
+    //           if (typeof item !== "string" || item.trim() === "") {
+    //             throw new Error(
+    //               `Hazard Classification at index ${index} must be a non-empty string`
+    //             );
+    //           }
+    //         });
+    //         return true;
+    //       })
+    //       .optional(),
+    //   ];
+    // }
     if (value === "DiagnosticAndMonitoringDevices") {
       // Validation for DiagnosticAndMonitoringDevices Category
       return [
@@ -763,7 +523,6 @@ const editCategorySpecificValidationRules = [
             "Wearable Health Devices",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("specification")
           .notEmpty()
           .withMessage("Specification is required."),
@@ -771,14 +530,6 @@ const editCategorySpecificValidationRules = [
         body("diagnosticFunctions")
           .notEmpty()
           .withMessage("Diagnostic Functions is required."),
-        body("measurementRange").optional().trim(),
-        body("flowRate").optional().trim(),
-        body("concentration").optional().trim(),
-        body("noiseLevel").optional().trim(),
-        body("maintenanceNotes").optional().trim(),
-        body("compatibleEquipment").optional().trim(),
-        body("usageRate").optional().trim(),
-        body("performanceTestingReport").optional().trim(),
       ];
     }
     if (value === "HospitalAndClinicSupplies") {
@@ -797,40 +548,6 @@ const editCategorySpecificValidationRules = [
             "Trauma Care Products",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("adhesiveness")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Adhesiveness must be alphanumeric (letters and numbers only)."
-          ),
-        body("absorbency")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Absorbency must be alphanumeric (letters and numbers only)."
-          ),
-        body("thickness")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Thickness must be alphanumeric (letters and numbers only)."
-          ),
-        body("powdered")
-          .optional()
-          .isBoolean()
-          .withMessage("Powdered must be a boolean"),
-        body("productMaterial")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Product Material must be alphanumeric (letters and numbers only)."
-          ),
-        body("purpose").optional().trim(),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -838,26 +555,6 @@ const editCategorySpecificValidationRules = [
           .matches(/^[a-zA-Z0-9\s]+$/)
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
-        body("texture")
-          .optional()
-          .isBoolean()
-          .withMessage("Texture must be a boolean"),
-        body("sterilized")
-          .optional()
-          .isBoolean()
-          .withMessage("Sterilized must be a boolean"),
-        body("chemicalResistance").optional().trim(),
-        body("fluidResistance")
-          .optional()
-          .isBoolean()
-          .withMessage("Fluid Resistance must be a boolean"),
-        body("elasticity")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Elasticity must be alphanumeric (letters and numbers only)."
           ),
       ];
     }
@@ -874,43 +571,9 @@ const editCategorySpecificValidationRules = [
             "Rehabilitation Equipment",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("breathability").optional().trim(),
-        body("colorOptions").optional().trim(),
-        body("elasticity")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Elasticity must be alphanumeric (letters and numbers only)."
-          ),
-        body("sterilized")
-          .optional()
-          .isBoolean()
-          .withMessage("Sterilized must be a boolean"),
-        body("absorbency")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Absorbency must be alphanumeric (letters and numbers only)."
-          ),
-        body("purpose").optional().trim(),
         body("targetCondition")
           .notEmpty()
           .withMessage("Target Condition is required."),
-        body("coating")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Strength must be alphanumeric (letters and numbers only)."
-          ),
-        body("strength").notEmpty().withMessage("Strength is required."),
-        body("moistureResistance")
-          .optional()
-          .isIn(["Yes", "No"])
-          .withMessage("Moisture Resistance must be Yes or No"),
       ];
     }
     if (value === "DentalProducts") {
@@ -926,19 +589,6 @@ const editCategorySpecificValidationRules = [
             "Dental Consumables",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("productMaterial")
-          .optional()
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Product Material must be alphanumeric (letters and numbers only)."
-          ),
-        body("purpose").optional().trim(),
-        body("targetCondition").optional().trim(),
-        body("maintenanceNotes").optional().trim(),
-        body("compatibleEquipment").optional().trim(),
-        body("usageRate").optional().trim(),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -962,27 +612,6 @@ const editCategorySpecificValidationRules = [
             "Eye Drops and Ointments",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("lensPower").optional().trim(),
-        body("baseCurve").optional().trim(),
-        body("diameter").optional().trim(),
-        body("frame")
-          .optional()
-          .isIn(["Metal", "Plastic", "Rimless"])
-          .withMessage("Frame type must be one of: Metal, Plastic, Rimless"),
-        body("lens")
-          .optional()
-          .isIn(["Single Vision", "Bifocal", "Progressive", "Anti-Reflective"])
-          .withMessage(
-            "Lens type must be one of: Single Vision, Bifocal, Progressive, Anti-Reflective"
-          ),
-        body("lensMaterial")
-          .optional()
-          .isIn(["Polycarbonate", "Glass", "Trivex"])
-          .withMessage(
-            "Lens Material must be one of: Polycarbonate, Glass, Trivex"
-          ),
-        body("colorOptions").optional().trim(),
       ];
     }
     if (value === "HomeHealthcareProducts") {
@@ -998,18 +627,6 @@ const editCategorySpecificValidationRules = [
             "Elderly Care Products",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
-        body("colorOptions").optional().trim(),
-        body("maxWeightCapacity").optional().trim(),
-        body("gripType").optional().trim(),
-        body("foldability").optional().trim(),
-        body("lockingMechanism").optional().trim(),
-        body("typeOfSupport").optional().trim(),
-        body("flowRate").optional().trim(),
-        body("concentration").optional().trim(),
-        body("batteryType").optional().trim(),
-        body("batterySize").optional().trim(),
-        body("performanceTestingReport").optional().trim(),
 
         body("expiry")
           .notEmpty()
@@ -1029,7 +646,6 @@ const editCategorySpecificValidationRules = [
           .withMessage("Sub Category is required.")
           .isIn(["Homeopathy", "Ayurvedic"])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -1038,9 +654,6 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
           ),
-        body("healthClaims").optional().trim(),
-
-        body("purpose").optional().trim(),
         body("composition")
           .notEmpty()
           .withMessage("Composition/Ingredients is required."),
@@ -1058,7 +671,6 @@ const editCategorySpecificValidationRules = [
             "Trauma Care Products",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -1082,12 +694,9 @@ const editCategorySpecificValidationRules = [
           .withMessage("Sub Category is required.")
           .isIn(["Hand Sanitizers", "Air Purifiers", "Cleaning Agents"])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("composition")
           .notEmpty()
           .withMessage("Composition/Ingredients is required."),
-        body("concentration").optional().trim(),
-        body("formulation").optional().trim(),
         body("expiry")
           .notEmpty()
           .withMessage("Shelf Life/Expiry is required.")
@@ -1096,7 +705,6 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
           ),
-        body("fragrance").optional().trim(),
       ];
     }
     if (value === "NutritionAndDietaryProducts") {
@@ -1111,7 +719,6 @@ const editCategorySpecificValidationRules = [
             "Meal Replacement Solutions",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("flavorOptions")
           .notEmpty()
           .withMessage("Flavor Options are required"),
@@ -1127,11 +734,6 @@ const editCategorySpecificValidationRules = [
           .withMessage(
             "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
           ),
-        body("vegan")
-          .optional()
-          .isBoolean()
-          .withMessage("Vegan must be a boolean"),
-        body("purpose").optional().trim(),
         body("healthBenefit")
           .notEmpty()
           .withMessage("Health Benefit is required."),
@@ -1161,7 +763,6 @@ const editCategorySpecificValidationRules = [
             "IoT-Enabled Medical Devices",
           ])
           .withMessage("Sub Category is invalid."),
-        body("anotherCategory").optional().trim(),
         body("license").notEmpty().withMessage("License is required."),
         body("scalabilityInfo")
           .notEmpty()
