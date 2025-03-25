@@ -16,7 +16,7 @@ const inventorrySchema = new Schema(
     sku: {
       type: String,
       trim: true,
-      required: [true, "Validation Error: SKU is required"],
+      // required: [true, "Validation Error: SKU is required"],
     },
     stock: {
       type: String,
@@ -37,20 +37,29 @@ const inventorrySchema = new Schema(
     date: {
       type: String,
       trim: true,
-      required: [true, "Validation Error: Date of Manufacture is required"],
+      // required: [true, "Validation Error: Date of Manufacture is required"],
     },
     stockedInDetails: [
       {
         country: { type: String },
         quantity: { type: Number },
-        type: { type: String },
+        // type: { type: String },
       },
     ],
     inventoryList: [
       {
-        quantity: { type: String },
-        price: { type: Number },
-        deliveryTime: { type: String },
+        quantity: {
+          type: String,
+          required: [true, "Validation Error: inventoryList quantity is required"],
+        },
+        price: {
+          type: Number,
+          required: [true, "Validation Error: inventoryList price is required"],
+        },
+        deliveryTime: {
+          type: String,
+          required: [true, "Validation Error: inventoryList deliveryTime is required"],
+        },
       },
     ],
     isDeleted: {

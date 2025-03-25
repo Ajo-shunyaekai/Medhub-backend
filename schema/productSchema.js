@@ -22,7 +22,7 @@ const productSchema = new Schema(
       aboutManufacturer: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Manufacturer is required."],
+        required: [true, "Validation Error: About Manufacturer is required."],
       },
       countryOfOrigin: {
         type: String,
@@ -60,12 +60,10 @@ const productSchema = new Schema(
       volumn: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Product Size/Volumn is required."],
       },
       dimension: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Product Dimension is required."],
       },
       weight: {
         type: Number,
@@ -79,27 +77,15 @@ const productSchema = new Schema(
       packageType: {
         type: String,
         trim: true,
-        required: [
-          true,
-          "Validation Error: Product Packaging Type is required.",
-        ],
       },
       packageMaterial: {
         type: String,
         trim: true,
-        required: [
-          true,
-          "Validation Error: Product Packaging Material is required.",
-        ],
       },
       packageMaterialIfOther: {
         type: String,
         trim: true,
       },
-      // costPerProduct: {
-      //   type: String,
-      //   trim: true,
-      // },
     },
     inventory: {
       type: String,
@@ -277,7 +263,7 @@ const productSchema = new Schema(
             return this.category === "MedicalEquipmentAndDevices" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Medical Equipment and Devices.",
+            "Validation Error: Sub Category is required for Medical Equipment and Devices.",
         },
       },
       anotherCategory: {
@@ -287,11 +273,19 @@ const productSchema = new Schema(
       specification: {
         type: String,
         trim: true,
+        // required: [true, "Validation Error: Specification is required."],
+        validate: {
+          validator: function (v) {
+            return this.category === "MedicalEquipmentAndDevices" ? !!v : true;
+          },
+          message: "Validation Error: Specification is required.",
+        },
       },
       specificationFile: [
         {
           type: String,
           trim: true,
+          // required: [true, "Validation Error: Specification File is required."],
         },
       ],
       diagnosticFunctions: {
@@ -341,7 +335,7 @@ const productSchema = new Schema(
             return this.category === "Pharmaceuticals" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Pharmaceuticals.",
+            "Validation Error: Sub Category is required for Pharmaceuticals.",
         },
       },
       anotherCategory: {
@@ -389,12 +383,12 @@ const productSchema = new Schema(
       drugAdministrationRoute: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "Pharmaceuticals" ? !!v : true;
-          },
-          message: "Validation Error: Drug Administration Route is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "Pharmaceuticals" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Drug Administration Route is required.",
+        // },
       },
       drugClass: {
         type: String,
@@ -456,7 +450,7 @@ const productSchema = new Schema(
             return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Skin Hair Cosmetic Supplies.",
+            "Validation Error: Sub Category is required for Skin Hair Cosmetic Supplies.",
         },
       },
       anotherCategory: {
@@ -643,7 +637,7 @@ const productSchema = new Schema(
             return this.category === "VitalHealthAndWellness" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Vital Health And Wellness.",
+            "Validation Error: Sub Category is required for Vital Health And Wellness.",
         },
       },
       anotherCategory: {
@@ -776,7 +770,7 @@ const productSchema = new Schema(
               : true;
           },
           message:
-            "Subcategory is required for Medical Consumables AndDisposables.",
+            "Sub Category is required for Medical Consumables AndDisposables.",
         },
       },
       anotherCategory: {
@@ -873,7 +867,7 @@ const productSchema = new Schema(
             return this.category === "LaboratorySupplies" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Laboratory Supplies.",
+            "Validation Error: Sub Category is required for Laboratory Supplies.",
         },
       },
       anotherCategory: {
@@ -954,7 +948,7 @@ const productSchema = new Schema(
               : true;
           },
           message:
-            "Subcategory is required for Diagnostic And Monitoring Devices.",
+            "Sub Category is required for Diagnostic And Monitoring Devices.",
         },
       },
       anotherCategory: {
@@ -1056,7 +1050,7 @@ const productSchema = new Schema(
             return this.category === "HospitalAndClinicSupplies" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Hospital And Clinic Supplies.",
+            "Validation Error: Sub Category is required for Hospital And Clinic Supplies.",
         },
       },
       anotherCategory: {
@@ -1133,7 +1127,7 @@ const productSchema = new Schema(
             return this.category === "OrthopedicSupplies" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Orthopedic Supplies.",
+            "Validation Error: Sub Category is required for Orthopedic Supplies.",
         },
       },
       anotherCategory: {
@@ -1209,7 +1203,7 @@ const productSchema = new Schema(
             return this.category === "DentalProducts" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Hospital And Dental Products.",
+            "Validation Error: Sub Category is required for Hospital And Dental Products.",
         },
       },
       anotherCategory: {
@@ -1266,7 +1260,7 @@ const productSchema = new Schema(
             return this.category === "EyeCareSupplies" ? !!v : true;
           },
           message:
-            "Subcategory is required for Hospital And Eye Care Supplies.",
+            "Sub Category is required for Hospital And Eye Care Supplies.",
         },
       },
       anotherCategory: {
@@ -1325,7 +1319,7 @@ const productSchema = new Schema(
           validator: function (v) {
             return this.category === "HomeHealthcareProducts" ? !!v : true;
           },
-          message: "Subcategory is required for Home Healthcare Products.",
+          message: "Sub Category is required for Home Healthcare Products.",
         },
       },
       anotherCategory: {
@@ -1402,7 +1396,7 @@ const productSchema = new Schema(
           validator: function (v) {
             return this.category === "AlternativeMedicines" ? !!v : true;
           },
-          message: "Subcategory is required for Alternative Medicines.",
+          message: "Sub Category is required for Alternative Medicines.",
         },
       },
       anotherCategory: {
@@ -1460,7 +1454,7 @@ const productSchema = new Schema(
               : true;
           },
           message:
-            "Subcategory is required for Emergency And First Aid Supplies.",
+            "Sub Category is required for Emergency And First Aid Supplies.",
         },
       },
       anotherCategory: {
@@ -1528,7 +1522,7 @@ const productSchema = new Schema(
               : true;
           },
           message:
-            "Subcategory is required for Disinfection And Hygiene Supplies.",
+            "Sub Category is required for Disinfection And Hygiene Supplies.",
         },
       },
       anotherCategory: {
@@ -1586,7 +1580,7 @@ const productSchema = new Schema(
             return this.category === "NutritionAndDietaryProducts" ? !!v : true;
           },
           message:
-            "Subcategory is required for Nutrition And Dietary Products.",
+            "Sub Category is required for Nutrition And Dietary Products.",
         },
       },
       anotherCategory: {
@@ -1699,7 +1693,7 @@ const productSchema = new Schema(
             return this.category === "HealthcareITSolutions" ? !!v : true;
           },
           message:
-            "Validation Error: Subcategory is required for Healthcare IT Solutions.",
+            "Validation Error: Sub Category is required for Healthcare IT Solutions.",
         },
       },
       anotherCategory: {
@@ -1754,7 +1748,7 @@ const productSchema = new Schema(
             validator: function (v) {
               return this.category === "HealthcareITSolutions" ? !!v : true;
             },
-            message: "Validation Error: Interoperability is required.",
+            message: "Validation Error: Interoperability File is required.",
           },
         },
       ],
