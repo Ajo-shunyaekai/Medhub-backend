@@ -951,9 +951,22 @@ module.exports = {
 
       if (typeof req?.body?.cNCFileNDate == "string") {
         try {
-          cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
-            (value) => value != "[object Object]"
-          );
+          // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
+          //   (value) => value != "[object Object]"
+          // );
+          if (Array.isArray(req?.body?.cNCFileNDate)) {
+            cNCFileNDateParsed = req.body.cNCFileNDate.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else if (typeof req?.body?.cNCFileNDate === "string") {
+            // If it's a string, try to parse it as JSON and filter
+            cNCFileNDateParsed = JSON.parse(req.body?.cNCFileNDate)?.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else {
+            // Handle case where cNCFileNDate is neither an array nor a string
+            throw new Error("Invalid cNCFileNDate format.");
+          }
         } catch (error) {
           // Handle the case where the JSON parsing fails
           console.log("Internal Server Error:", error);
@@ -1792,32 +1805,54 @@ module.exports = {
       // Retrieve file paths for the selected category only
       const categoryFiles = await getFilePaths(fileFields[category]);
 
+      // let cNCFileNDateParsed;
+
+      // // if (typeof req?.body?.cNCFileNDate == "string") {
+      // //   try {
+      // //     cNCFileNDateParsed = JSON.parse(
+      // //       req.body.cNCFileNDate
+      // //     )?.filter((value) => value != "[object Object]");
+      // //   } catch (error) {
+      // //     // Handle the case where the JSON parsing fails
+      // //     console.log("Internal Server Error:", error);
+      // //     logErrorToFile(error, req);
+      // //     return;
+      // //   }
+      // // } else {
+      // //   cNCFileNDateParsed = JSON.parse(
+      // //     req.body?.cNCFileNDate?.filter(
+      // //       (value) => {
+      // //         return (value != "[object Object]")}
+      // //     )
+      // //   );
+      // // }
+      // cNCFileNDateParsed = JSON.parse(
+      //   req.body?.cNCFileNDate?.filter((value) => {
+      //     return value != "[object Object]";
+      //   })
+      // );
       let cNCFileNDateParsed;
 
-      // if (typeof req?.body?.cNCFileNDate == "string") {
-      //   try {
-      //     cNCFileNDateParsed = JSON.parse(
-      //       req.body.cNCFileNDate
-      //     )?.filter((value) => value != "[object Object]");
-      //   } catch (error) {
-      //     // Handle the case where the JSON parsing fails
-      //     console.log("Internal Server Error:", error);
-      //     logErrorToFile(error, req);
-      //     return;
-      //   }
-      // } else {
-      //   cNCFileNDateParsed = JSON.parse(
-      //     req.body?.cNCFileNDate?.filter(
-      //       (value) => {
-      //         return (value != "[object Object]")}
-      //     )
-      //   );
-      // }
-      cNCFileNDateParsed = JSON.parse(
-        req.body?.cNCFileNDate?.filter((value) => {
-          return value != "[object Object]";
-        })
-      );
+      try {
+        // Check if cNCFileNDate exists and is an array before applying filter
+        if (Array.isArray(req?.body?.cNCFileNDate)) {
+          cNCFileNDateParsed = req.body.cNCFileNDate.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else if (typeof req?.body?.cNCFileNDate === "string") {
+          // If it's a string, try to parse it as JSON and filter
+          cNCFileNDateParsed = JSON.parse(req.body?.cNCFileNDate)?.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else {
+          // Handle case where cNCFileNDate is neither an array nor a string
+          throw new Error("Invalid cNCFileNDate format.");
+        }
+      } catch (error) {
+        console.log("Error while parsing cNCFileNDate:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 400, "Invalid cNCFileNDate format.");
+      }
 
       // Update existing product data
       const updatedProductData = {

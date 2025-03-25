@@ -61,6 +61,10 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
+      volumeUnit: {
+        type: String,
+        trim: true,
+      },
       dimension: {
         type: String,
         trim: true,
