@@ -35,9 +35,24 @@ const addProductFileMiddleware = require("../middleware/validations/products/fil
 
 router.post(`/`, checkAuthorization, getAllProducts); // according to the market, user
 
-
 router.post(
   `/add-bulk-products`,
+  checkAuthorization,
+  checkCommonUserAuthentication,
+  CSVupload.single("csvfile"),
+  addBulkProducts
+);
+
+router.post(
+  `/preview-bulk-products`,
+  checkAuthorization,
+  checkCommonUserAuthentication,
+  CSVupload.single("csvfile"),
+  addBulkProducts
+);
+
+router.post(
+  `/edit-bulk-products`,
   checkAuthorization,
   checkCommonUserAuthentication,
   CSVupload.single("csvfile"),

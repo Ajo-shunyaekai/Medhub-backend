@@ -2,7 +2,6 @@ const logErrorToFile = require("../../../../logs/errorLogs");
 const { sendErrorResponse } = require("../../../../utils/commonResonse");
  
 const addProductFileMiddleware = (req, res, next) => {
-  console.log("Custom middleware was called", req?.body?.dermatologistTested);
  
   const { category, market } = req?.body;
  
@@ -22,7 +21,6 @@ const addProductFileMiddleware = (req, res, next) => {
   // }
   
   // Log the uploaded files for debugging
-  // console.log(uploadedFiles);
  
   if (market == "secondary") {
     // Check if the purchaseInvoiceFile is uploaded

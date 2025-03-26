@@ -989,17 +989,36 @@ module.exports = {
         },
         inventory: inventoryUUId,
         complianceFile: complianceFiles.complianceFile,
-        cNCFileNDate: cNCFileNDateParsed?.map((ele, index) => ({
-          file:
-            typeof ele?.file != "string"
-              ? complianceFiles?.complianceFile?.find((filename) => {
-                  return filename?.includes(
-                    ele?.file?.path?.replaceAll("./", "")?.replaceAll(" ", "")
-                  );
-                })
-              : ele?.file || complianceFiles?.complianceFile?.[index] || "",
-          date: ele?.date || "",
-        })),
+        cNCFileNDate: cNCFileNDateParsed
+          ?.map((ele, index) => {
+
+            return {
+              file:
+                typeof ele?.file !== "string"
+                  ? complianceFiles?.complianceFile?.find((filename) => {
+                      const path = ele?.file?.path;
+
+                      // Ensure path is defined and log the file path
+                      if (!path) {
+                        return false; // If there's no path, skip this entry
+                      }
+
+                      const ext = path.split(".").pop(); // Get the file extension
+
+                      const sanitizedPath = path
+                        .replaceAll("./", "")
+                        .replaceAll(" ", "")
+                        .replaceAll(`.${ext}`, "");
+
+                      // Match file by sanitized name
+                      return filename?.includes(sanitizedPath);
+                    })
+                  : ele?.file || complianceFiles?.complianceFile?.[index] || "",
+
+              date: ele?.date || "", // Log the date being used (if any)
+            };
+          })
+          ?.filter((ele) => ele?.file || ele?.date),
         additional: {
           ...req?.body,
           ...(additionalFiles || []),
@@ -1814,7 +1833,6 @@ module.exports = {
       // //     )?.filter((value) => value != "[object Object]");
       // //   } catch (error) {
       // //     // Handle the case where the JSON parsing fails
-      // //     console.log("Internal Server Error:", error);
       // //     logErrorToFile(error, req);
       // //     return;
       // //   }
@@ -1869,20 +1887,57 @@ module.exports = {
         // },
 
         complianceFile: complianceFiles.complianceFile || [],
-        cNCFileNDate: cNCFileNDateParsed?.map((ele, index) => {
-          return {
-            // file: complianceFiles?.complianceFile?.[index] || "",
-            file:
-              typeof ele?.file != "string"
-                ? complianceFiles?.complianceFile?.find((filename) => {
-                    return filename?.includes(
-                      ele?.file?.path?.replaceAll("./", "")?.replaceAll(" ", "")
-                    );
-                  })
-                : ele?.file || complianceFiles?.complianceFile?.[index] || "",
-            date: ele?.date || "",
-          };
-        }),
+        // cNCFileNDate: JSON.parse(cNCFileNDateParsed)
+        //   ?.map((ele, index) => {
+        //     return {
+        //       // file: complianceFiles?.complianceFile?.[index] || "",
+        //       file:
+        //         typeof ele?.file != "string"
+        //           ? complianceFiles?.complianceFile?.find((filename) => {
+        //               const ext =
+        //                 ele?.file?.path?.split?.[
+        //                   ele?.file?.path?.split?.length - 1
+        //                 ];
+        //               return filename?.includes(
+        //                 ele?.file?.path
+        //                   ?.replaceAll("./", "")
+        //                   ?.replaceAll(" ", "")
+        //                   ?.replaceAll("." + ext, "")
+        //               );
+        //             })
+        //           : ele?.file || complianceFiles?.complianceFile?.[index] || "",
+        //       date: ele?.date || "",
+        //     };
+        //   })
+        cNCFileNDate: JSON.parse(cNCFileNDateParsed)
+          ?.map((ele, index) => {
+            return {
+              file:
+                typeof ele?.file !== "string"
+                  ? complianceFiles?.complianceFile?.find((filename) => {
+                      const path = ele?.file?.path;
+
+                      // Ensure path is defined and log the file path
+                      if (!path) {
+                        return false; // If there's no path, skip this entry
+                      }
+
+                      const ext = path.split(".").pop(); // Get the file extension
+                      const sanitizedPath = path
+                        .replaceAll("./", "")
+                        .replaceAll(" ", "")
+                        .replaceAll(`.${ext}`, "");
+
+
+                      // Match file by sanitized name
+                      return filename?.includes(sanitizedPath);
+                    })
+                  : ele?.file || complianceFiles?.complianceFile?.[index] || "",
+
+              date: ele?.date || "", // Log the date being used (if any)
+            };
+          })
+          ?.filter((ele) => ele?.file || ele?.date),
         additional: {
           ...req?.body,
           ...(additionalFiles || []),
@@ -1903,6 +1958,7 @@ module.exports = {
           ...(secondaryMarketFiles || []),
         };
       }
+
       // Update the product in the database
       const updatedProduct = await Product.findByIdAndUpdate(
         productId,

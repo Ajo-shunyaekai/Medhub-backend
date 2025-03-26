@@ -51,7 +51,6 @@ const sendTemplateEmail = async (recipients, subject, templateName = null, conte
     let emailContent = "";
 
     if (templateName) {
-      console.log('templateName',templateName)
       // If a template is provided, render it using EJS
       const templatePath = path.resolve(__dirname, "./emailTemplates", `${templateName}.ejs`);
 
@@ -76,7 +75,6 @@ const sendTemplateEmail = async (recipients, subject, templateName = null, conte
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`Email sent to ${recipients}`);
   } catch (error) {
     console.error(`Error sending email to ${recipients}:`, error);
     throw error;

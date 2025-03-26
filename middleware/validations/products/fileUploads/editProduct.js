@@ -2,7 +2,6 @@ const logErrorToFile = require("../../../../logs/errorLogs");
 const { sendErrorResponse } = require("../../../../utils/commonResonse");
  
 const editProductFileMiddleware = (req, res, next) => {
-  console.log("Custom middleware was called");
  
   const { category, market } = req?.body;
  

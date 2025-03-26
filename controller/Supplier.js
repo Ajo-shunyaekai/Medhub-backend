@@ -1249,7 +1249,6 @@ module.exports = {
       try {
         const { usertype } = req?.headers;
         const { filterKey, filterValue, searchKey = '',  filterCountry = '', type = '', pageNo = 1, pageSize = 1 } = req?.query;
-console.log('req?.query',req?.query)
         const page_no = parseInt(pageNo) || 1;
         const page_size = parseInt(pageSize) || 2;
         const offSet = parseInt(page_no - 1) * page_size;

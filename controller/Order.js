@@ -319,7 +319,6 @@ module.exports = {
                company_reg_address, locality, land_mark, city, state, country, pincode, 
                mode_of_transport, address_type, extra_services } = reqObj;
         // const {full_name, email, mobile_number, company_reg_address, locality, land_mark, city, state, country, pincode, adderssType } = reqObj.buyer_logistics_data
-    console.log('reqObj',reqObj)
         if (!mongoose.Types.ObjectId.isValid(buyer_id)) {
           return callback({ code: 400, message: 'Invalid buyer ID', result: null });
         }

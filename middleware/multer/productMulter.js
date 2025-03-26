@@ -47,7 +47,12 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = mime.extension(file.mimetype) || "bin"; // Default to 'bin' for unknown MIME types
-    cb(null, `${file.fieldname}-${file.originalname?.replaceAll(" ","")}-${Date.now()}.${ext}`); // Use a timestamp for unique filenames
+    cb(
+      null,
+      `${file.fieldname?.replaceAll("New", "")}-${file.originalname
+        ?.replaceAll(" ", "")
+        ?.replaceAll("." + ext, "")}-${Date.now()}.${ext}`
+    ); // Use a timestamp for unique filenames
   },
 });
 const storageEdit = multer.diskStorage({
@@ -57,7 +62,12 @@ const storageEdit = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = mime.extension(file.mimetype) || "bin"; // Default to 'bin' for unknown MIME types
-    cb(null, `${file.fieldname?.replaceAll("New","")}-${file.originalname?.replaceAll(" ","")}-${Date.now()}.${ext}`); // Use a timestamp for unique filenames
+    cb(
+      null,
+      `${file.fieldname?.replaceAll("New", "")}-${file.originalname
+        ?.replaceAll(" ", "")
+        ?.replaceAll("." + ext, "")}-${Date.now()}.${ext}`
+    ); // Use a timestamp for unique filenames
   },
 });
 
@@ -104,12 +114,18 @@ const editProductUpload = (req, res, next) => {
     { name: "complianceFileNew", maxCount: getMaxCount("complianceFile") },
     { name: "guidelinesFileNew", maxCount: getMaxCount("guidelinesFile") },
     { name: "safetyDatasheetNew", maxCount: getMaxCount("safetyDatasheet") },
-    { name: "healthHazardRatingNew", maxCount: getMaxCount("healthHazardRating") },
+    {
+      name: "healthHazardRatingNew",
+      maxCount: getMaxCount("healthHazardRating"),
+    },
     {
       name: "environmentalImpactNew",
       maxCount: getMaxCount("environmentalImpact"),
     },
-    { name: "specificationFileNew", maxCount: getMaxCount("specificationFile") },
+    {
+      name: "specificationFileNew",
+      maxCount: getMaxCount("specificationFile"),
+    },
     {
       name: "performanceTestingReportFileNew",
       maxCount: getMaxCount("performanceTestingReportFile"),
