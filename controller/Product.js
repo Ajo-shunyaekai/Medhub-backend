@@ -660,6 +660,33 @@ module.exports = {
           bulkUpload: { $first: "$bulkUpload" },
           userDetails: { $first: "$userDetails" },
           inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+          MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+          Pharmaceuticals: { $first: "$Pharmaceuticals" },
+          SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+          VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+          MedicalConsumablesAndDisposables: {
+            $first: "$MedicalConsumablesAndDisposables",
+          },
+          LaboratorySupplies: { $first: "$LaboratorySupplies" },
+          DiagnosticAndMonitoringDevices: {
+            $first: "$DiagnosticAndMonitoringDevices",
+          },
+          HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+          OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+          DentalProducts: { $first: "$DentalProducts" },
+          EyeCareSupplies: { $first: "$EyeCareSupplies" },
+          HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+          AlternativeMedicines: { $first: "$AlternativeMedicines" },
+          EmergencyAndFirstAidSupplies: {
+            $first: "$EmergencyAndFirstAidSupplies",
+          },
+          DisinfectionAndHygieneSupplies: {
+            $first: "$DisinfectionAndHygieneSupplies",
+          },
+          NutritionAndDietaryProducts: {
+            $first: "$NutritionAndDietaryProducts",
+          },
+          HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
           priceQuantityDetails: {
             // Aggregate price and quantity from the inventoryList
             $push: {
@@ -991,7 +1018,6 @@ module.exports = {
         complianceFile: complianceFiles.complianceFile,
         cNCFileNDate: cNCFileNDateParsed
           ?.map((ele, index) => {
-
             return {
               file:
                 typeof ele?.file !== "string"
@@ -1928,7 +1954,6 @@ module.exports = {
                         .replaceAll(" ", "")
                         .replaceAll(`.${ext}`, "");
 
-
                       // Match file by sanitized name
                       return filename?.includes(sanitizedPath);
                     })
@@ -2189,6 +2214,33 @@ module.exports = {
           bulkUpload: { $first: "$bulkUpload" },
           userDetails: { $first: "$userDetails" },
           inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+          MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+          Pharmaceuticals: { $first: "$Pharmaceuticals" },
+          SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+          VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+          MedicalConsumablesAndDisposables: {
+            $first: "$MedicalConsumablesAndDisposables",
+          },
+          LaboratorySupplies: { $first: "$LaboratorySupplies" },
+          DiagnosticAndMonitoringDevices: {
+            $first: "$DiagnosticAndMonitoringDevices",
+          },
+          HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+          OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+          DentalProducts: { $first: "$DentalProducts" },
+          EyeCareSupplies: { $first: "$EyeCareSupplies" },
+          HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+          AlternativeMedicines: { $first: "$AlternativeMedicines" },
+          EmergencyAndFirstAidSupplies: {
+            $first: "$EmergencyAndFirstAidSupplies",
+          },
+          DisinfectionAndHygieneSupplies: {
+            $first: "$DisinfectionAndHygieneSupplies",
+          },
+          NutritionAndDietaryProducts: {
+            $first: "$NutritionAndDietaryProducts",
+          },
+          HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
           priceQuantityDetails: {
             // Aggregate price and quantity from the inventoryList
             $push: {
@@ -2396,6 +2448,33 @@ module.exports = {
           bulkUpload: { $first: "$bulkUpload" },
           userDetails: { $first: "$userDetails" },
           inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+          MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+          Pharmaceuticals: { $first: "$Pharmaceuticals" },
+          SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+          VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+          MedicalConsumablesAndDisposables: {
+            $first: "$MedicalConsumablesAndDisposables",
+          },
+          LaboratorySupplies: { $first: "$LaboratorySupplies" },
+          DiagnosticAndMonitoringDevices: {
+            $first: "$DiagnosticAndMonitoringDevices",
+          },
+          HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+          OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+          DentalProducts: { $first: "$DentalProducts" },
+          EyeCareSupplies: { $first: "$EyeCareSupplies" },
+          HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+          AlternativeMedicines: { $first: "$AlternativeMedicines" },
+          EmergencyAndFirstAidSupplies: {
+            $first: "$EmergencyAndFirstAidSupplies",
+          },
+          DisinfectionAndHygieneSupplies: {
+            $first: "$DisinfectionAndHygieneSupplies",
+          },
+          NutritionAndDietaryProducts: {
+            $first: "$NutritionAndDietaryProducts",
+          },
+          HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
           priceQuantityDetails: {
             // Aggregate price and quantity from the inventoryList
             $push: {
