@@ -328,7 +328,6 @@ module.exports = {
           : null;
 
       if (emailExists) {
-        console.log('emailExists', emailExists, usertype)
         return sendErrorResponse(res, 409, "Email already exists");
       }
 
@@ -704,7 +703,6 @@ module.exports = {
 
   getLoggedinUserProfileDetails: async (req, res) => {
     try {
-      console.log('getLoggedinUserProfileDetails', req)
       const { accesstoken, usertype } = req.headers;
       const { id } = req?.params;
 

@@ -32,7 +32,6 @@ const plans = [
 module.exports = {
   createSubscription: async (req, res) => {
     try {
-      console.log('REQBODY', req.body)
       const { plan_name, duration, email, userType, userId } = req?.body;
       const plan = plans?.find(
         (plan) => plan?.plan_name === plan_name && plan?.duration === duration
@@ -41,7 +40,6 @@ module.exports = {
       if (!plan) {
         return res?.status(400)?.json({ message: "Plan not found!!" });
       }
-      console.log('plan', plan)
 
       // Check if customer exists by email
       const customers = await stripe.customers.list({
@@ -74,7 +72,6 @@ module.exports = {
         cancel_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/failure`,
         customer: customer.id, // Use the existing or new customer
       });
-      console.log('session', session)
       return sendSuccessResponse(
         res,
         200,
@@ -274,7 +271,6 @@ module.exports = {
           "Invoice have already been sent to the email!"
         );
       }
-      console.log("req?.body?.user", usertype);
       const file = req.file || {};
       // Check if file is attached to the request
       if (!req.file) return sendErrorResponse(res, 500, "No file uploaded");
@@ -402,7 +398,6 @@ module.exports = {
           console.error("Error sending admin email:", error);
           logErrorToFile(error, req);
         } else {
-          console.log("Admin email sent successfully");
         }
       });
 

@@ -288,8 +288,6 @@ const editAddress = async (req, res) => {
 // Delete an address
 const deleteAddress = async (req, res) => {
   try {
-    console.log('deleteAddress', req.body)
-    console.log('deleteAddressPrams', req.params)
     // return false
     const { userId, addressId } = req.params; // addressId = id of the address to delete
 

@@ -41,7 +41,6 @@ const addressValidationRules = [
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
-  console.log('errors')
   if (!errors.isEmpty()) {
     
     console.log("Internal Server Error:", errors.array());

@@ -433,7 +433,6 @@ module.exports = {
         'Enquiry'
       );
       if (!updatedOrderHistory || !updatedOrderHistory.orderHistory) {
-        console.log("Failed to update order history:", updatedOrderHistory?.message);
       }  
 
           callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry });

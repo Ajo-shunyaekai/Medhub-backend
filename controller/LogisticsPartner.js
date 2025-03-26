@@ -135,7 +135,6 @@ const addLogisticsPartner = async (req, res) => {
 
 const getLogisticsDashboardData = async (req, res) => {
   try {
-    console.log("getLogisticsStatusCount", req.headers);
 
     const statusCounts = await Logistics.aggregate([
       {
@@ -166,8 +165,6 @@ const getLogisticsDashboardData = async (req, res) => {
 
 const getLogisticsList = async (req, res) => {
   try {
-    console.log("getLogisticsList", req.headers);
-    console.log("req.query", req.query);
 
     const { client_id, status, pageNo, pageSize } = req.query;
     const page_no = Number(pageNo) || 1;

@@ -7,12 +7,10 @@ function initializeSocket(server) {
   });
 
   io.on("connection", (socket) => {
-    // console.log('User connected:', socket.id);
 
     // Registration handlers
     ["register", "registerBuyer", "registerAdmin"].forEach((event) => {
       socket.on(event, (userId) => {
-        // console.log(`${event.replace('register', '')} registered: ${userId}`);
         socket.join(userId);
       });
     });
