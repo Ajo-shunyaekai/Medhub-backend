@@ -6,12 +6,9 @@ const categoriesData = [
     subCategories: [
       {
         name: "Diagnostic Tools",
-        anotherCategories: [
-          "Imaging Tools",
-          "Blood Testing Tools",
-          "Services",
-          "Other",
-        ],
+        anotherCategories: ["Imaging Tools", "Blood Testing Tools", "Services"]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Imaging Equipment",
@@ -26,8 +23,9 @@ const categoriesData = [
           "Infrared Cameras",
           "MRI",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Surgical Instruments",
@@ -69,8 +67,9 @@ const categoriesData = [
           "Suction Tubes (e.g., Yankauer, Poole suction tips)",
           "Sponges and Sponge Forceps",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Monitoring Devices",
@@ -112,8 +111,9 @@ const categoriesData = [
           "Alarm Monitoring Systems",
           "Access Control Monitors",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Monitoring Devices",
@@ -155,8 +155,9 @@ const categoriesData = [
           "Suction Tubes (e.g., Yankauer, Poole suction tips)",
           "Sponges and Sponge Forceps",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Mobility Aids",
@@ -205,8 +206,9 @@ const categoriesData = [
           "Grab Bars (for home or vehicle use)",
           "Anti-Slip Mats",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Respiratory Care",
@@ -250,8 +252,9 @@ const categoriesData = [
           "Breathing Trainers (e.g., PowerBreathe)",
           "Oxygen Masks and Nasal Cannulas",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Elderly Care Products",
@@ -308,10 +311,11 @@ const categoriesData = [
           "Video Calling Devices (e.g., simplified tablets)",
           "Voice-Activated Assistants (e.g., Alexa, Google Home)",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Pharmaceuticals  -------------------------------------
   {
@@ -361,8 +365,9 @@ const categoriesData = [
           "Erectile Dysfunction Medications",
           "Laxatives",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Over-the-Counter Medications",
@@ -406,8 +411,9 @@ const categoriesData = [
           "Ear Drops",
           "Antiseptics",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Vaccines",
@@ -454,8 +460,9 @@ const categoriesData = [
           "uberculosis (BCG) Vaccine",
           "SV (Respiratory Syncytial Virus) Vaccine",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Generic Drugs",
@@ -506,8 +513,9 @@ const categoriesData = [
           "BPH Medications",
           "Erectile Dysfunction Medications",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Specialized Treatments",
@@ -563,10 +571,11 @@ const categoriesData = [
           "Organ Transplantation",
           "Arrhythmias",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Skin, Hair and Cosmetic Supplies  -------------------------------------
   {
@@ -618,8 +627,9 @@ const categoriesData = [
           "Detoxifying Masks",
           "Leave-On Treatment Masks",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Hair Care",
@@ -668,8 +678,9 @@ const categoriesData = [
           "Chemical Hair Relaxers",
           "Perming Solutions",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Personal Hygiene",
@@ -702,8 +713,9 @@ const categoriesData = [
           "Regular washing of clothes",
           "Keeping clothes clean and free of germs",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Baby Care",
@@ -739,8 +751,9 @@ const categoriesData = [
           "Soft, comfortable clothing that allows for easy movement",
           "Swaddling and sleep sacks for comfort and warmth",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Anti-aging Solutions",
@@ -768,8 +781,9 @@ const categoriesData = [
           "Proper hair cleansing and nourishment",
           "Collagen supplements",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Skin Graft",
@@ -799,8 +813,9 @@ const categoriesData = [
           "Facial Reconstruction",
           "Scar Revision",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Anti-Scar & Healing Ointments",
@@ -829,8 +844,9 @@ const categoriesData = [
           "Burn Ointments (e.g., Silver Sulfadiazine)",
           "Post-Surgical Scar Ointments",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Burn Care Solutions",
@@ -862,8 +878,9 @@ const categoriesData = [
           "Pain Relief and Wound Management",
           "Over-the-Counter Pain Relief",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Dermal Fillers & Injectables",
@@ -887,8 +904,9 @@ const categoriesData = [
           "Restylane Silk",
           "Hyaluronic acid fillers",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Laser Treatment Devices",
@@ -913,8 +931,9 @@ const categoriesData = [
           "Pulsed Dye Lasers (PDL)",
           "PicoLasers",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Chemical Peels",
@@ -934,10 +953,11 @@ const categoriesData = [
           "Lactic Acid Peels",
           "Mandelic Acid Peels",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Vital Health and Wellness  -------------------------------------
   {
@@ -955,8 +975,9 @@ const categoriesData = [
           "Sleep Trackers",
           "ECG Wearables",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Herbal & Alternative Medicines",
@@ -969,8 +990,9 @@ const categoriesData = [
           "Adaptogens",
           "Medicinal Mushrooms",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Immune Boosters",
@@ -983,8 +1005,9 @@ const categoriesData = [
           "Mushroom Immunity Blends",
           "Herbal Immunity Tonics",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Vitamins & Supplements",
@@ -997,8 +1020,9 @@ const categoriesData = [
           "Magnesium Supplements",
           "Omega-3 & Fish Oil",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Weight Management",
@@ -1011,10 +1035,11 @@ const categoriesData = [
           "Metabolism Boosters",
           "Fiber Supplements",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Medical Consumables and Disposables  -------------------------------------
   {
@@ -1032,8 +1057,9 @@ const categoriesData = [
           "Foam Dressings",
           "Transparent Film Dressings",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Gloves, Masks, & Protective gear",
@@ -1046,8 +1072,9 @@ const categoriesData = [
           "Face Shields",
           "Protective Gowns",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Sterilization Products",
@@ -1059,8 +1086,9 @@ const categoriesData = [
           "Sterilization Pouches",
           "Indicator Strips",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Surgical Sutures & Adhesives",
@@ -1072,8 +1100,9 @@ const categoriesData = [
           "Wound Closure Strips",
           "Tissue Sealants",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Syringes, IV Sets & Catheters",
@@ -1092,10 +1121,11 @@ const categoriesData = [
           "Wound Closure Strips",
           "Tissue Sealants",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Laboratory Supplies  -------------------------------------
   {
@@ -1113,8 +1143,9 @@ const categoriesData = [
           "Allergy Testing Kits",
           "Rapid Diagnostic Test Kits",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Microscopes & Lab Equipment",
@@ -1127,8 +1158,9 @@ const categoriesData = [
           "Autoclaves",
           "pH Meters",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Chemicals & Reagents",
@@ -1141,8 +1173,9 @@ const categoriesData = [
           "Biochemical Reagents",
           "Cell Culture Reagents",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Lab Consumables",
@@ -1155,10 +1188,11 @@ const categoriesData = [
           "Lab Gloves",
           "Centrifuge Tubes",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Diagnostic and Monitoring Devices  -------------------------------------
   {
@@ -1175,8 +1209,9 @@ const categoriesData = [
           "Blood Sample Kits",
           "Glucose Control Solutions",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Blood Pressure Monitors",
@@ -1188,8 +1223,9 @@ const categoriesData = [
           "Smart BP Monitors",
           "Cuffs & Accessories",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Oxygen Concentrators",
@@ -1201,8 +1237,9 @@ const categoriesData = [
           "Oxygen Masks & Tubing",
           "Humidifier Bottles",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Wearable Health Devices",
@@ -1215,10 +1252,11 @@ const categoriesData = [
           "Temperature Monitoring Devices",
           "Pulse Oximeters",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Hospital and Clinic Supplies  -------------------------------------
   {
@@ -1236,8 +1274,9 @@ const categoriesData = [
           "Transport Stretchers",
           "Bariatric Beds",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Trolleys & Storage Units",
@@ -1250,8 +1289,9 @@ const categoriesData = [
           "Bedside Lockers",
           "Storage Cabinets",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Examination Tables",
@@ -1262,8 +1302,9 @@ const categoriesData = [
           "Portable Examination Tables",
           "Hydraulic Examination Tables",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Medical Furniture",
@@ -1276,8 +1317,9 @@ const categoriesData = [
           "Reclining Chairs",
           "Bedside Tables",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "First Aid Kits",
@@ -1289,8 +1331,9 @@ const categoriesData = [
           "Burn Care Kits",
           "Emergency Medical",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Emergency Medical Equipment",
@@ -1302,8 +1345,9 @@ const categoriesData = [
           "Transport Ventilators",
           "Oxygen Supply Kits",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Trauma Care Products",
@@ -1315,10 +1359,11 @@ const categoriesData = [
           "Trauma Stretchers",
           "Emergency Wound Care Kits",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Orthopedic Supplies  -------------------------------------
   {
@@ -1337,8 +1382,9 @@ const categoriesData = [
           "Hand & Finger Supports",
           "Neck Braces",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Splints & Casting Materials",
@@ -1351,8 +1397,9 @@ const categoriesData = [
           "Fiberglass Casting",
           "Orthopedic Casting Tape",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Prosthetics",
@@ -1365,8 +1412,9 @@ const categoriesData = [
           "Above-Knee Prostheses",
           "Prosthetic Accessories",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Rehabilitation Equipment",
@@ -1379,10 +1427,11 @@ const categoriesData = [
           "Walking Aids",
           "Balance Trainers",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Dental Products  -------------------------------------
   {
@@ -1400,8 +1449,9 @@ const categoriesData = [
           "Surgical Instruments",
           "Crown and Bridge Instruments",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Orthodontic Supplies",
@@ -1415,8 +1465,9 @@ const categoriesData = [
           "Orthodontic Wax",
           "Elastic Bands",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Dental Chairs and Accessories",
@@ -1429,8 +1480,9 @@ const categoriesData = [
           "Armrests",
           "Patient Positioning Equipment",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Dental Consumables",
@@ -1444,10 +1496,11 @@ const categoriesData = [
           "Impression Materials",
           "Disposables",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Eye Care Supplies  -------------------------------------
   {
@@ -1464,8 +1517,9 @@ const categoriesData = [
           "Extended-Wear Lenses",
           "Contact Lens Solution",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Eyewear",
@@ -1478,8 +1532,9 @@ const categoriesData = [
           "Protective Eyewear",
           "Fashion Eyewear",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Eyewear Lenses",
@@ -1492,8 +1547,9 @@ const categoriesData = [
           "High Index Lenses",
           "Scratch-Resistant Lenses",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Eye Drops and Ointments",
@@ -1505,10 +1561,11 @@ const categoriesData = [
           "Antibacterial Ointments",
           "Steroid Eye Ointments",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Home Healthcare Products  -------------------------------------
   {
@@ -1526,8 +1583,9 @@ const categoriesData = [
           "Stair Lifts",
           "Walking Frames",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Respiratory Care",
@@ -1540,8 +1598,9 @@ const categoriesData = [
           "Respiratory Masks",
           "Humidifiers",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Patient Monitoring Devices",
@@ -1554,8 +1613,9 @@ const categoriesData = [
           "Thermometers",
           "Wearable Health Monitors",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Elderly Care Products",
@@ -1568,10 +1628,11 @@ const categoriesData = [
           "Incontinence Products",
           "Pressure Relief Cushions",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Alternative Medicines  -------------------------------------
   {
@@ -1590,8 +1651,9 @@ const categoriesData = [
           "Remedies for Skin conditions",
           "Remedies for Allergies",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Ayurvedic",
@@ -1606,10 +1668,11 @@ const categoriesData = [
           "Chlorine-Based Disinfectants",
           "Hydrogen Peroxide Disinfectants",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Disinfection and Hygiene Supplies  -------------------------------------
   {
@@ -1626,8 +1689,9 @@ const categoriesData = [
           "Antibacterial Hand Sprays",
           "Moisturizing Hand Sanitizers",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Air Purifiers",
@@ -1639,8 +1703,9 @@ const categoriesData = [
           "Ozone Generators",
           "Smart Air Purifiers with App Control",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Cleaning Agents",
@@ -1652,10 +1717,11 @@ const categoriesData = [
           "Industrial Cleaning Solutions",
           "Biodegradable Cleaning Agents",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Nutrition and Dietary Products  -------------------------------------
   {
@@ -1674,8 +1740,9 @@ const categoriesData = [
           "Pea Protein",
           "Hemp Protein",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Specialized Nutrition",
@@ -1690,8 +1757,9 @@ const categoriesData = [
           "Low-Carb Nutrition",
           "Medical Nutrition for Chronic Diseases",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Meal Replacement Solutions",
@@ -1703,10 +1771,11 @@ const categoriesData = [
           "Fiber-Rich Meal Replacements",
           "Gluten-Free Meal Replacements",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Healthcare IT Solutions  -------------------------------------
   {
@@ -1724,8 +1793,9 @@ const categoriesData = [
           "Inventory Management for Hospitals",
           "Insurance Claim Processing Software",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Telemedicine Platforms",
@@ -1738,8 +1808,9 @@ const categoriesData = [
           "Mobile Telemedicine Apps",
           "HIPAA-Compliant Video Conferencing Tools",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "IoT-Enabled Medical Devices",
@@ -1753,10 +1824,11 @@ const categoriesData = [
           "Wireless Blood Pressure Monitors",
           "Cloud-Based Health Monitoring Solutions",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
-    ],
+    ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Emergency and First Aid Supplies  -------------------------------------
   {
@@ -1773,8 +1845,9 @@ const categoriesData = [
           "Burn Care Kits",
           "Emergency Medical",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Emergency Medical Equipment",
@@ -1786,8 +1859,9 @@ const categoriesData = [
           "Transport Ventilators",
           "Oxygen Supply Kits",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
       {
         name: "Trauma Care Products",
@@ -1799,12 +1873,13 @@ const categoriesData = [
           "Trauma Stretchers",
           "Emergency Wound Care Kits",
           "Services",
-          "Other",
-        ],
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
       },
     ],
   },
-];
+]?.sort((a, b) => a?.name?.localeCompare(b?.name));
 
 const createCategory = (schema, name, subCategories) => ({
   schema,
