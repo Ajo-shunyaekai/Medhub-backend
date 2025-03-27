@@ -111,7 +111,7 @@ module.exports = {
 
             const formattedOrderItems = orderItems.map(item => ({
                 medicine_id       : item.medicine_id,
-                medicine_name     : item.medicine_details.medicine_name,
+                medicine_name     : item.medicine_details.medicine_name || item?.medicine_details?.general?.name,
                 quantity_required : item.quantity_required,
                 est_delivery_days : item.est_delivery_days,
                 unit_price        : item.unit_price,
@@ -502,7 +502,7 @@ module.exports = {
                 },
                 {
                     $lookup: {
-                        from         : "medicines",
+                        from         : "products",
                         localField   : "order_items.medicine_id",
                         foreignField : "medicine_id",
                         as           : "medicine_details"
@@ -569,6 +569,7 @@ module.exports = {
                 }
             ])            
             .then((data) => {
+                console.log(data)
                 callback({ code: 200, message: 'Purchase Order details' , result: data[0]});
             })
             .catch((err) => {

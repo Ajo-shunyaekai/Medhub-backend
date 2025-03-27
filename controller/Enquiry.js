@@ -166,7 +166,7 @@ module.exports = {
                 },
                 {
                     $lookup: {
-                        from         : "medicines",
+                        from         : "products",
                         localField   : "items.medicine_id",
                         foreignField : "medicine_id",
                         as           : "medicine_details"
@@ -193,6 +193,7 @@ module.exports = {
                             $push: {
                                 _id               : "$items._id",
                                 medicine_id       : "$items.medicine_id",
+                                medicine_name     : "$medicine_details.general.medicine_name",
                                 unit_price        : "$items.unit_price",
                                 quantity_required : "$items.quantity_required",
                                 est_delivery_days : "$items.est_delivery_days",
@@ -217,7 +218,7 @@ module.exports = {
                             { $unwind: "$quotation_items" },
                             {
                                 $lookup: {
-                                    from         : "medicines",
+                                    from         : "products",
                                     localField   : "quotation_items.medicine_id",
                                     foreignField : "medicine_id",
                                     as           : "quotation_medicine_details"
@@ -347,12 +348,15 @@ module.exports = {
                 }
             ])
             .then((data) => {
+                console.log(data)
+                // return false
                 callback({ code: 200, message: 'Enquiry details', result: data[0] });
             })
             .catch((err) => {
                 callback({ code: 400, message: 'Error while fetching enquiry details', result: err });
             });
-        } catch (error) {
+        } 
+        catch (error) {
             console.log("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);

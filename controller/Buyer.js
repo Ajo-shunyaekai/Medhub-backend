@@ -1156,6 +1156,7 @@ module.exports = {
     //----------------------------- support --------------------------------------//
 
     addToList : async (req, res, reqObj, callback) => {
+      console.log('reqObj',reqObj)
       try {
         const existingList = await List.findOne({
           buyer_id    : reqObj.buyer_id,
@@ -1188,7 +1189,7 @@ module.exports = {
               callback({ code: 400, message: "Error while adding to existing list", result: err });
             });
         } else {
-
+console.log('not exists')
           const listId = 'LST-' + Math.random().toString(16).slice(2);
     
           const newList = new List({
@@ -1254,7 +1255,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from         : "medicines",
+              from         : "products",
               localField   : "item_details.medicine_id",
               foreignField : "medicine_id",
               as           : "medicine_details"
@@ -1267,7 +1268,7 @@ module.exports = {
             $lookup: {
               from         : "suppliers",
               localField   : "medicine_details.supplier_id",
-              foreignField : "supplier_id",
+              foreignField : "_id",
               as           : "supplier_details"
             }
           },
@@ -1289,9 +1290,9 @@ module.exports = {
                   est_delivery_days : "$item_details.est_delivery_days",
                   quantity_required : "$item_details.quantity_required",
                   target_price      : "$item_details.target_price",
-                  medicine_image    : "$medicine_details.medicine_image",
-                  medicine_name     : "$medicine_details.medicine_name",
-                  total_quantity    : "$medicine_details.total_quantity"
+                  medicine_image    : "$medicine_details.general.image",
+                  medicine_name     : "$medicine_details.general.name",
+                  total_quantity    : "$medicine_details.general.quantity"
                 }
               }
             }
@@ -1319,6 +1320,8 @@ module.exports = {
         ])
         
         .then( async(data) => {
+          console.log(data)
+          // return false
           const totalItems = await List.countDocuments({buyer_id: buyer_id});
           const totalPages = Math.ceil(totalItems / page_size);
 

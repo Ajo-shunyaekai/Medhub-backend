@@ -2126,6 +2126,20 @@ module.exports = {
         return sendErrorResponse(res, 500, "Failed fetching Inventory");
       }
 
+      let searchFilter = {};
+
+      if (search_key && search_key !== "null") {
+        const decodedSearchKey = decodeURIComponent(search_key).trim(); // Decode the URL-encoded string
+      
+        searchFilter = {
+          $or: [
+            { "userDetails.supplier_name": { $regex: decodedSearchKey, $options: "i" } }, // Match supplier name
+            { "general.name": { $regex: decodedSearchKey, $options: "i" } }, // Match product name
+          ],
+        };
+      }
+
+
       let pipeline = [];
 
       pipeline?.push({
@@ -2137,6 +2151,7 @@ module.exports = {
           },
           ...(market && { market: foundProduct?.market }),
           ...(category && { category: foundProduct?.category }),
+          ...searchFilter,
           ...(quantity?.min &&
             quantity?.max &&
             !isNaN(quantity?.min) &&
@@ -2292,6 +2307,7 @@ module.exports = {
         isDeleted: false,
         "general.name": { $regex: foundProduct?.general?.name, $options: "i" },
         ...(market ? { market: foundProduct?.market } : {}),
+        ...searchFilter
       };
 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
