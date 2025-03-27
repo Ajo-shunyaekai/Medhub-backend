@@ -2096,7 +2096,7 @@ module.exports = {
 
   productSuppliers: async (req, res) => {
     try {
-      const { id } = req?.query;
+      const { id } = req?.params;
       const {
         market,
         page_no = 1,
@@ -2106,6 +2106,7 @@ module.exports = {
         // quantity,
         // price,
       } = req?.query;
+      console.log(req?.query)
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
