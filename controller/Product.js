@@ -2096,7 +2096,7 @@ module.exports = {
 
   productSuppliers: async (req, res) => {
     try {
-      const { id } = req?.params;
+      const { id } = req?.query;
       const {
         market,
         page_no = 1,
@@ -2289,6 +2289,7 @@ module.exports = {
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
+        "general.name": { $regex: foundProduct?.general?.name, $options: "i" },
         ...(market ? { market: foundProduct?.market } : {}),
       };
 
@@ -2523,7 +2524,8 @@ module.exports = {
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
-        ...(market ? { market: foundProduct?.market } : {}),
+        // ...(market ? { market: foundProduct?.market } : {}),
+        supplier_id: new mongoose.Types.ObjectId(foundProduct?.supplier_id),
       };
 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
