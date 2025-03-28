@@ -1310,7 +1310,14 @@ module.exports = {
         // Merge dateFilter with filterCondition to apply both filters
         const combinedFilter = { ...filterCondition, ...dateFilter };
       
-        let query = { account_status: 1 };
+        // let query = { account_status: 1 };
+        let query = { 
+          account_status: 1, 
+          $or: [
+            { test_account: 0 }, 
+            { test_account: { $exists: false } } // Include documents where test_account is missing
+          ] 
+        };
         
         if (searchKey) {
           // query.supplier_name = { $regex: new RegExp(searchKey, 'i') };
