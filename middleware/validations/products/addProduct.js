@@ -78,7 +78,7 @@ const generalValidationRules = [
 
   body("aboutManufacturer")
     .notEmpty()
-    .withMessage("About Manufacturer is required."),
+    .withMessage("Short Description is required."),
 
   body("countryOfOrigin")
     .notEmpty()

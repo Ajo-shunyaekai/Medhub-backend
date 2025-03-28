@@ -22,7 +22,7 @@ const productSchema = new Schema(
       aboutManufacturer: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: About Manufacturer is required."],
+        required: [true, "Validation Error: Short Description is required."],
       },
       countryOfOrigin: {
         type: String,
