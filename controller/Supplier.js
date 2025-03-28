@@ -276,6 +276,7 @@ module.exports = {
 
     supplierProfileDetails : async(req, res, reqObj, callback) => {
       try {
+        console.log('here')
         const fields = {
           token : 0,
           password : 0

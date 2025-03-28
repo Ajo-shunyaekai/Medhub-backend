@@ -45,7 +45,7 @@ module.exports = () => {
         req.body.data.supplierMobile = supplierPhoneNumber;
         req.body.data.buyer_country_code = buyerCountryCode;
         req.body.data.buyerMobile = buyerPhoneNumber;
-        handleController(Order.buyerOrderDetails, req, res)
+        handleController(Controller.editPO, req, res)
     });
 
     return routes

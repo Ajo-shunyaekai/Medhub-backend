@@ -819,13 +819,31 @@ module.exports = {
         action === "accept" ? 1 : action === "reject" ? 2 : "";
       const newProfileStatus = 1;
 
-      const updateProfile = await Supplier.findOneAndUpdate(
-        { supplier_id: supplier_id },
-        {
+      const now = new Date();
+        const formattedDate = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+
+        let updateFields = {
           account_status: newAccountStatus,
           profile_status: newProfileStatus,
-          sales_person_name,
-        },
+          sales_person_name
+      };
+
+      if (action === "accept") {
+          updateFields.account_accepted_date = formattedDate;
+      } else if (action === "reject") {
+          updateFields.account_rejected_date = formattedDate;
+      }
+
+
+      const updateProfile = await Supplier.findOneAndUpdate(
+        { supplier_id: supplier_id },
+        // {
+        //   account_status: newAccountStatus,
+        //   profile_status: newProfileStatus,
+        //   sales_person_name,
+        // },
+        updateFields,
         { new: true }
       );
 
@@ -1252,13 +1270,31 @@ module.exports = {
         action === "accept" ? 1 : action === "reject" ? 2 : "";
       const newProfileStatus = 1;
 
-      const updateStatus = await Buyer.findOneAndUpdate(
-        { buyer_id: buyer_id },
-        {
+      const now = new Date();
+        const formattedDate = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+
+        let updateFields = {
           account_status: newAccountStatus,
           profile_status: newProfileStatus,
-          sales_person_name,
-        },
+          sales_person_name
+      };
+
+      if (action === "accept") {
+          updateFields.account_accepted_date = formattedDate;
+      } else if (action === "reject") {
+          updateFields.account_rejected_date = formattedDate;
+      }
+
+
+      const updateStatus = await Buyer.findOneAndUpdate(
+        { buyer_id: buyer_id },
+        // {
+        //   account_status: newAccountStatus,
+        //   profile_status: newProfileStatus,
+        //   sales_person_name,
+        // },
+        updateFields,
         { new: true }
       );
 

@@ -241,6 +241,12 @@ const buyerSchema = new Schema(
         default: "Registered",
       },
     },
+    account_accepted_date: {
+      type: String,
+    },
+    account_rejected_date: {
+      type: String,
+    },
     subscriptionEmail: {
       type: String,
       default: "",
