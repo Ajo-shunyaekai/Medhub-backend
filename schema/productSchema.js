@@ -69,6 +69,10 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
+      dimensionUnit: {
+        type: String,
+        trim: true,
+      },
       weight: {
         type: Number,
         required: [true, "Validation Error: Product Weight is required."],
