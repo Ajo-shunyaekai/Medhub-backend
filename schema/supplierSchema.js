@@ -248,6 +248,10 @@ const supplierSchema = new Schema(
     account_rejected_date: {
       type: String,
     },
+    test_account: {
+      type: Number,
+      default: 0
+    },
     subscriptionEmail: {
       type: String,
       default: "",
