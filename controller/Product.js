@@ -603,7 +603,12 @@ module.exports = {
         return sendErrorResponse(res, 400, "Failed to create new Inventory.");
       }
 
-      return sendSuccessResponse(res, 200, "Product Added Succesfully", newProduct);
+      return sendSuccessResponse(
+        res,
+        200,
+        "Product Added Succesfully",
+        newProduct
+      );
     } catch (error) {
       console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
@@ -1617,15 +1622,19 @@ module.exports = {
 
       if (search_key && search_key !== "null") {
         const decodedSearchKey = decodeURIComponent(search_key).trim(); // Decode the URL-encoded string
-      
+
         searchFilter = {
           $or: [
-            { "userDetails.supplier_name": { $regex: decodedSearchKey, $options: "i" } }, // Match supplier name
+            {
+              "userDetails.supplier_name": {
+                $regex: decodedSearchKey,
+                $options: "i",
+              },
+            }, // Match supplier name
             { "general.name": { $regex: decodedSearchKey, $options: "i" } }, // Match product name
           ],
         };
       }
-
 
       let pipeline = [];
 
@@ -1794,7 +1803,7 @@ module.exports = {
         isDeleted: false,
         "general.name": { $regex: foundProduct?.general?.name, $options: "i" },
         ...(market ? { market: foundProduct?.market } : {}),
-        ...searchFilter
+        ...searchFilter,
       };
 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
@@ -2144,7 +2153,8 @@ module.exports = {
           image:
             result?.["Product Image"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele) || [], // array
           description:
             result?.["Product Description*"]?.toString()?.trim() || "",
           // // End of General
@@ -2178,11 +2188,12 @@ module.exports = {
           // // cNCFileNDate
           // complianceFile: result?.["Regulatory Compliance"]
           // ?.split(",")
-          // ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          // ?.map((ele) => ele?.toString()?.trim())?.filter(ele=>ele) || [], // array
           file:
             result?.["Regulatory Compliance"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele) || [], // array
           date3: result?.["Date of Expiry"]?.toString()?.trim() || "",
 
           // // End of cNCFileNDate
@@ -2191,11 +2202,13 @@ module.exports = {
           safetyDatasheet:
             result?.["Safety Datasheet"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele) || [], // array
           healthHazardRating:
             result?.["Health Hazard Rating"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele) || [], // array
           environmentalImpact:
             result?.["Environmental Impact"]
               ?.split(",")
