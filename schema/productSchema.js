@@ -82,6 +82,10 @@ const productSchema = new Schema(
         trim: true,
         required: [true, "Validation Error: Product Weight Unit is required."],
       },
+      tax: {
+        type: Number,
+        required: [true, "Validation Error: Tax Percentage is required."],
+      },
       packageType: {
         type: String,
         trim: true,

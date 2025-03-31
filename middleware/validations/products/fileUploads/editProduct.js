@@ -92,20 +92,20 @@ const editProductFileMiddleware = (req, res, next) => {
   // }
  
   // Check conditions for the "DiagnosticAndMonitoringDevices" category
-  if (category == "DiagnosticAndMonitoringDevices") {
-    // Check if the dermatologistTestedFile is uploaded
-    if (
-      (req?.body?.dermatologistTestedFile?.length || 0) +
-        (req?.files?.dermatologistTestedFileNew?.length || 0) ===
-      0
-    ) {
-      const err = new Error(
-        "Dermatologist Tested file is required for DiagnosticAndMonitoringDevices"
-      );
-      logErrorToFile(err, req); // Log the error to a file for persistence
-      return sendErrorResponse(res, 400, err.message, err); // Send an error response back
-    }
-  }
+  // if (category == "DiagnosticAndMonitoringDevices") {
+  //   // Check if the dermatologistTestedFile is uploaded
+  //   if (
+  //     (req?.body?.dermatologistTestedFile?.length || 0) +
+  //       (req?.files?.dermatologistTestedFileNew?.length || 0) ===
+  //     0
+  //   ) {
+  //     const err = new Error(
+  //       "Dermatologist Tested file is required for DiagnosticAndMonitoringDevices"
+  //     );
+  //     logErrorToFile(err, req); // Log the error to a file for persistence
+  //     return sendErrorResponse(res, 400, err.message, err); // Send an error response back
+  //   }
+  // }
  
   // Check conditions for the "HealthcareITSolutions" category
   if (category == "HealthcareITSolutions") {

@@ -1097,7 +1097,7 @@ module.exports = {
         return sendErrorResponse(res, 400, "Failed to create new Inventory.");
       }
 
-      return sendSuccessResponse(res, 200, "Success", newProduct);
+      return sendSuccessResponse(res, 200, "Product Added Succesfully", newProduct);
     } catch (error) {
       console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
