@@ -28,10 +28,33 @@ module.exports = {
         page_no = 1,
         page_size = 5,
         search_key = "",
-        category,
+        category = "",
+        subCategory = "",
+       level3Category = ""
         // quantity,
         // price,
       } = req?.query;
+      console.log('req?.query',req?.query)
+      
+      const formatToPascalCase = (str) => {
+        return str
+          .trim()
+          .split(/\s+/) // Split by spaces
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+          .join(""); // Join words without spaces
+      };
+    
+      // Format category, subCategory, and level3Category
+      const formattedCategory = formatToPascalCase(category);
+      const formattedSubCategory = formatToPascalCase(subCategory);
+      const formattedLevel3Category = formatToPascalCase(level3Category);
+      
+      console.log("Formatted Category:", formattedCategory); 
+      // Output: "DiagnosticAndMonitoringDevices"
+      
+      console.log("Formatted SubCategory:", formattedSubCategory);
+      console.log("Formatted Level3Category:", formattedLevel3Category);
+
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
