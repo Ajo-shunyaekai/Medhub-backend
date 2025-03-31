@@ -415,7 +415,6 @@ module.exports = {
         if (!updatedOrder) {
           return callback({ code: 404, message: 'Order not found', result: null });
         }
-        console.log('updatedOrder',updatedOrder)
         // return false
         //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
         const updatedOrderHistory = await addStageToOrderHistory(req, updatedOrder?._id, 'Delivery Details Submitted', new Date(), updatedOrder?._id, 'Order',)
@@ -523,7 +522,6 @@ module.exports = {
 
     //new code
     submitPickupDetails: async (req, res, reqObj, callback) => {
-      console.log('REQOBJ',reqObj)
       // return false
       try {
         const {
