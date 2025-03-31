@@ -13,530 +13,13 @@ const Buyer = require("../schema/buyerSchema");
 const Product = require("../schema/productSchema");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
+const {
+  getFieldName,
+  validateFields,
+  handleProductCategorySwitch,
+} = require("../utils/bulkUploadProduct");
 
 module.exports = {
-  // getAllProducts1: async (req, res) => {
-  //   try {
-  //     const {
-  //       supplier_id,
-  //       market,
-  //       page_no = 1,
-  //       page_size = 5,
-  //       search_key = "",
-  //       category,
-  //       quantity,
-  //       price,
-  //     } = req?.query;
-  //     const pageNo = parseInt(page_no) || 1;
-  //     const pageSize = parseInt(page_size) || 10;
-  //     const offset = (pageNo - 1) * pageSize;
-
-  //     // Create the aggregation pipeline
-  //     let pipeline = [];
-
-  //     // Add match condition
-  //     pipeline.push({
-  //       $match: {
-  //         isDeleted: false, // Only products that are not deleted
-  //         ...(supplier_id && {
-  //           supplier_id: new mongoose.Types.ObjectId(supplier_id),
-  //         }),
-  //         ...(market && { market: market }),
-  //         ...(category && { category: category }),
-  //         ...(search_key &&
-  //           typeof search_key === "string" &&
-  //           search_key.trim() !== "" &&
-  //           search_key !== "null" &&
-  //           search_key !== "undefined" && {
-  //             "general.name": { $regex: search_key, $options: "i" },
-  //           }),
-  //         ...(category &&
-  //           typeof category === "string" &&
-  //           category.trim() !== "" &&
-  //           category !== "null" &&
-  //           category !== "undefined" && {
-  //             category: { $regex: category, $options: "i" },
-  //           }),
-  //         ...(quantity &&
-  //           !isNaN(quantity) && {
-  //             "general.quantity": { $lte: parseInt(quantity, 10) },
-  //           }),
-  //       },
-  //     });
-
-  //     // Lookup Supplier (userDetails) based on supplier_id in Product
-  //     pipeline.push({
-  //       $lookup: {
-  //         from: "suppliers", // Ensure the collection name matches
-  //         localField: "supplier_id", // Reference to supplier_id in the Product schema
-  //         foreignField: "_id", // Reference to supplier_id in the Supplier schema
-  //         as: "userDetails",
-  //       },
-  //     });
-
-  //     // Lookup Inventory based on the inventory field in Product
-  //     pipeline.push({
-  //       $lookup: {
-  //         from: "inventories", // Ensure the collection name matches
-  //         localField: "inventory", // Reference to the inventory field in Product
-  //         foreignField: "uuid", // Reference to uuid in Inventory schema
-  //         as: "inventoryDetails",
-  //       },
-  //     });
-
-  //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
-  //     pipeline.push({
-  //       $unwind: {
-  //         path: "$userDetails",
-  //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
-  //       },
-  //     });
-
-  //     pipeline.push({
-  //       $unwind: {
-  //         path: "$inventoryDetails",
-  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
-  //       },
-  //     });
-
-  //     const totalProductsQuery = {
-  //       isDeleted: false,
-  //       ...(market ? { market: market } : {}),
-  //       ...(search_key &&
-  //       typeof search_key === "string" &&
-  //       search_key.trim() !== "" &&
-  //       search_key !== "null" &&
-  //       search_key !== "undefined"
-  //         ? { "general.name": { $regex: search_key, $options: "i" } }
-  //         : {}),
-  //     };
-
-  //     const totalProducts = await Product.countDocuments(totalProductsQuery);
-
-  //     pipeline.push({
-  //       $sort: { createdAt: -1 },
-  //     });
-
-  //     // pagination
-  //     pipeline.push({ $skip: offset });
-  //     pipeline.push({ $limit: pageSize });
-
-  //     // Execute the aggregation
-  //     const products = await Product.aggregate(pipeline);
-  //     const totalPages = Math.ceil(totalProducts / pageSize);
-
-  //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
-  //       products,
-  //       totalItems: totalProducts,
-  //       currentPage: pageNo,
-  //       itemsPerPage: pageSize,
-  //       totalPages,
-  //     });
-  //   } catch (error) {
-  //     console.log("Internal Server Error:", error);
-  //     logErrorToFile(error, req);
-  //     return sendErrorResponse(
-  //       res,
-  //       500,
-  //       "An unexpected error occurred. Please try again later.",
-  //       error
-  //     );
-  //   }
-  // },
-
-  // getAllProducts2: async (req, res) => {
-  //   try {
-  //     const {
-  //       supplier_id,
-  //       market,
-  //       page_no = 1,
-  //       page_size = 5,
-  //       search_key = "",
-  //       category,
-  //       quantity,
-  //       price,
-  //     } = req?.query;
-  //     const pageNo = parseInt(page_no) || 1;
-  //     const pageSize = parseInt(page_size) || 10;
-  //     const offset = (pageNo - 1) * pageSize;
-
-  //     // Create the aggregation pipeline
-  //     let pipeline = [];
-
-  //     // Add match condition
-  //     pipeline.push({
-  //       $match: {
-  //         isDeleted: false, // Only products that are not deleted
-  //         ...(supplier_id && {
-  //           supplier_id: new mongoose.Types.ObjectId(supplier_id),
-  //         }),
-  //         ...(market && { market: market }),
-  //         ...(category && { category: category }),
-  //         ...(search_key &&
-  //           typeof search_key === "string" &&
-  //           search_key.trim() !== "" &&
-  //           search_key !== "null" &&
-  //           search_key !== "undefined" && {
-  //             "general.name": { $regex: search_key, $options: "i" },
-  //           }),
-  //         ...(category &&
-  //           typeof category === "string" &&
-  //           category.trim() !== "" &&
-  //           category !== "null" &&
-  //           category !== "undefined" && {
-  //             category: { $regex: category, $options: "i" },
-  //           }),
-  //         ...(quantity &&
-  //           !isNaN(quantity) && {
-  //             "general.quantity": { $lte: parseInt(quantity, 10) },
-  //           }),
-  //       },
-  //     });
-
-  //     // Lookup Supplier (userDetails) based on supplier_id in Product
-  //     pipeline.push({
-  //       $lookup: {
-  //         from: "suppliers", // Ensure the collection name matches
-  //         localField: "supplier_id", // Reference to supplier_id in the Product schema
-  //         foreignField: "_id", // Reference to supplier_id in the Supplier schema
-  //         as: "userDetails",
-  //       },
-  //     });
-
-  //     // Lookup Inventory based on the inventory field in Product
-  //     pipeline.push({
-  //       $lookup: {
-  //         from: "inventories", // Ensure the collection name matches
-  //         localField: "inventory", // Reference to the inventory field in Product
-  //         foreignField: "uuid", // Reference to uuid in Inventory schema
-  //         as: "inventoryDetails",
-  //       },
-  //     });
-
-  //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
-  //     pipeline.push({
-  //       $unwind: {
-  //         path: "$userDetails",
-  //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
-  //       },
-  //     });
-
-  //     pipeline.push({
-  //       $unwind: {
-  //         path: "$inventoryDetails",
-  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
-  //       },
-  //     });
-
-  //     // Aggregating price and quantity by inventory UUID
-  //     pipeline.push({
-  //       $group: {
-  //         _id: "$_id", // Group by product id
-  //         general: { $first: "$general" },
-  //         inventory: { $first: "$inventory" },
-  //         complianceFile: { $first: "$complianceFile" },
-  //         cNCFileNDate: {
-  //           $first: "$cNCFileNDate",
-  //         },
-  //         storage: { $first: "$storage" },
-  //         additional: { $first: "$additional" },
-  //         guidelinesFile: { $first: "$guidelinesFile" },
-  //         healthNSafety: { $first: "$healthNSafety" },
-  //         category: { $first: "$category" },
-  //         medicine_id: { $first: "$medicine_id" },
-  //         supplier_id: { $first: "$supplier_id" },
-  //         market: { $first: "$market" },
-  //         secondayMarketDetails: { $first: "$secondayMarketDetails" },
-  //         isDeleted: { $first: "$isDeleted" },
-  //         bulkUpload: { $first: "$bulkUpload" },
-  //         MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
-  //         Pharmaceuticals: { $first: "$Pharmaceuticals" },
-  //         SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
-  //         VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
-  //         MedicalConsumablesAndDisposables: {
-  //           $first: "$MedicalConsumablesAndDisposables",
-  //         },
-  //         LaboratorySupplies: { $first: "$LaboratorySupplies" },
-  //         DiagnosticAndMonitoringDevices: {
-  //           $first: "$DiagnosticAndMonitoringDevices",
-  //         },
-  //         HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
-  //         OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
-  //         HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
-  //         AlternativeMedicines: { $first: "$AlternativeMedicines" },
-  //         NutritionAndDietaryProducts: {
-  //           $first: "$NutritionAndDietaryProducts",
-  //         },
-  //         HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
-  //         createdAt: { $first: "$createdAt" },
-  //         updatedAt: { $first: "$updatedAt" },
-  //         __v: { $first: "$__v" },
-  //         DentalProducts: { $first: "$DentalProducts" },
-  //         DisinfectionAndHygieneSupplies: {
-  //           $first: "$DisinfectionAndHygieneSupplies",
-  //         },
-  //         EmergencyAndFirstAidSupplies: {
-  //           $first: "$EmergencyAndFirstAidSupplies",
-  //         },
-  //         EyeCareSupplies: { $first: "$EyeCareSupplies" },
-  //         priceQuantityDetails: {
-  //           // Aggregate price and quantity into an array
-  //           $push: {
-  //             price: "$inventoryDetails.price",
-  //             quantity: "$inventoryDetails.quantity",
-  //           },
-  //         },
-  //         userDetails: { $first: "$userDetails" }, // Keep first userDetails match
-  //         inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
-  //         priceQuantityDetails: {
-  //           // Aggregate price and quantity from the inventoryList
-  //           $push: {
-  //             price: "$inventoryDetails.inventoryList.price",
-  //             quantity: "$inventoryDetails.inventoryList.quantity",
-  //           },
-  //         },
-  //       },
-  //     });
-
-  //     // Add any additional steps like sorting or pagination
-  //     const totalProductsQuery = {
-  //       isDeleted: false,
-  //       ...(market ? { market: market } : {}),
-  //       ...(search_key &&
-  //       typeof search_key === "string" &&
-  //       search_key.trim() !== "" &&
-  //       search_key !== "null" &&
-  //       search_key !== "undefined"
-  //         ? { "general.name": { $regex: search_key, $options: "i" } }
-  //         : {}),
-  //     };
-
-  //     const totalProducts = await Product.countDocuments(totalProductsQuery);
-
-  //     pipeline.push({
-  //       $sort: { createdAt: -1 },
-  //     });
-
-  //     // pagination
-  //     pipeline.push({ $skip: offset });
-  //     pipeline.push({ $limit: pageSize });
-
-  //     // Execute the aggregation
-  //     const products = await Product.aggregate(pipeline);
-  //     const totalPages = Math.ceil(totalProducts / pageSize);
-
-  //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
-  //       products,
-  //       totalItems: totalProducts,
-  //       currentPage: pageNo,
-  //       itemsPerPage: pageSize,
-  //       totalPages,
-  //     });
-  //   } catch (error) {
-  //     console.log("Internal Server Error:", error);
-  //     logErrorToFile(error, req);
-  //     return sendErrorResponse(
-  //       res,
-  //       500,
-  //       "An unexpected error occurred. Please try again later.",
-  //       error
-  //     );
-  //   }
-  // },
-
-  // getAllProducts3: async (req, res) => {
-  //   try {
-  //     const {
-  //       supplier_id,
-  //       market,
-  //       page_no = 1,
-  //       page_size = 5,
-  //       search_key = "",
-  //       category,
-  //       quantity,
-  //     } = req?.query;
-  //     const pageNo = parseInt(page_no) || 1;
-  //     const pageSize = parseInt(page_size) || 10;
-  //     const offset = (pageNo - 1) * pageSize;
-
-  //     const { price = [] } = req?.body;
-
-  //     // Create the aggregation pipeline
-  //     let pipeline = [];
-
-  //     // Add match condition
-  //     pipeline.push({
-  //       $match: {
-  //         isDeleted: false, // Only products that are not deleted
-  //         ...(supplier_id && {
-  //           supplier_id: new mongoose.Types.ObjectId(supplier_id),
-  //         }),
-  //         ...(market && { market: market }),
-  //         ...(category && { category: category }),
-  //         ...(search_key &&
-  //           typeof search_key === "string" &&
-  //           search_key.trim() !== "" &&
-  //           search_key !== "null" &&
-  //           search_key !== "undefined" && {
-  //             "general.name": { $regex: search_key, $options: "i" },
-  //           }),
-  //         ...(category &&
-  //           typeof category === "string" &&
-  //           category.trim() !== "" &&
-  //           category !== "null" &&
-  //           category !== "undefined" && {
-  //             category: { $regex: category, $options: "i" },
-  //           }),
-  //         ...(quantity &&
-  //           !isNaN(quantity) && {
-  //             "general.quantity": { $lte: parseInt(quantity, 10) },
-  //           }),
-  //       },
-  //     });
-
-  //     // Lookup Supplier (userDetails) based on supplier_id in Product
-  //     pipeline.push({
-  //       $lookup: {
-  //         from: "suppliers", // Ensure the collection name matches
-  //         localField: "supplier_id", // Reference to supplier_id in the Product schema
-  //         foreignField: "_id", // Reference to supplier_id in the Supplier schema
-  //         as: "userDetails",
-  //       },
-  //     });
-
-  //     // Lookup Inventory based on the inventory field in Product
-  //     pipeline.push({
-  //       $lookup: {
-  //         from: "inventories", // Ensure the collection name matches
-  //         localField: "inventory", // Reference to the inventory field in Product
-  //         foreignField: "uuid", // Reference to uuid in Inventory schema
-  //         as: "inventoryDetails",
-  //       },
-  //     });
-
-  //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
-  //     pipeline.push({
-  //       $unwind: {
-  //         path: "$userDetails",
-  //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
-  //       },
-  //     });
-
-  //     pipeline.push({
-  //       $unwind: {
-  //         path: "$inventoryDetails",
-  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
-  //       },
-  //     });
-
-  //     // Unwind the inventoryList so that each inventory item can be processed individually
-  //     pipeline.push({
-  //       $unwind: {
-  //         path: "$inventoryDetails.inventoryList",
-  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
-  //       },
-  //     });
-
-  //     // Aggregating price and quantity by inventory UUID and inventoryList
-  //     pipeline.push({
-  //       $group: {
-  //         _id: "$_id", // Group by product id
-  //         general: { $first: "$general" },
-  //         inventory: { $first: "$inventory" },
-  //         complianceFile: { $first: "$complianceFile" },
-  //         cNCFileNDate: {
-  //           $first: "$cNCFileNDate",
-  //         },
-  //         storage: { $first: "$storage" },
-  //         additional: { $first: "$additional" },
-  //         guidelinesFile: { $first: "$guidelinesFile" },
-  //         healthNSafety: { $first: "$healthNSafety" },
-  //         category: { $first: "$category" },
-  //         medicine_id: { $first: "$medicine_id" },
-  //         supplier_id: { $first: "$supplier_id" },
-  //         market: { $first: "$market" },
-  //         secondayMarketDetails: { $first: "$secondayMarketDetails" },
-  //         isDeleted: { $first: "$isDeleted" },
-  //         bulkUpload: { $first: "$bulkUpload" },
-  //         userDetails: { $first: "$userDetails" },
-  //         inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
-  //         priceQuantityDetails: {
-  //           // Aggregate price and quantity from the inventoryList
-  //           $push: {
-  //             price: "$inventoryDetails.inventoryList.price",
-  //             quantity: "$inventoryDetails.inventoryList.quantity",
-  //             deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
-  //           },
-  //         },
-  //         createdAt: { $first: "$createdAt" },
-  //         updatedAt: { $first: "$updatedAt" },
-  //         __v: { $first: "$__v" },
-  //       },
-  //     });
-
-  //     // Price range filter (if price array is provided)
-  //     if (price && price.length > 0) {
-  //       const priceConditions = price.map((p) => ({
-  //         priceQuantityDetails: {
-  //           $elemMatch: {
-  //             price: { $gte: parseInt(p, 10) - 10, $lte: parseInt(p, 10) },
-  //           },
-  //         },
-  //       }));
-
-  //       pipeline.push({
-  //         $match: {
-  //           $or: priceConditions, // Price filtering based on array values
-  //         },
-  //       });
-  //     }
-
-  //     // Add any additional steps like sorting or pagination
-  //     const totalProductsQuery = {
-  //       isDeleted: false,
-  //       ...(market ? { market: market } : {}),
-  //       ...(search_key &&
-  //       typeof search_key === "string" &&
-  //       search_key.trim() !== "" &&
-  //       search_key !== "null" &&
-  //       search_key !== "undefined"
-  //         ? { "general.name": { $regex: search_key, $options: "i" } }
-  //         : {}),
-  //     };
-
-  //     const totalProducts = await Product.countDocuments(totalProductsQuery);
-
-  //     pipeline.push({
-  //       $sort: { createdAt: -1 },
-  //     });
-
-  //     // pagination
-  //     pipeline.push({ $skip: offset });
-  //     pipeline.push({ $limit: pageSize });
-
-  //     // Execute the aggregation
-  //     const products = await Product.aggregate(pipeline);
-  //     const totalPages = Math.ceil(totalProducts / pageSize);
-
-  //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
-  //       products,
-  //       totalItems: totalProducts,
-  //       currentPage: pageNo,
-  //       itemsPerPage: pageSize,
-  //       totalPages,
-  //     });
-  //   } catch (error) {
-  //     console.log("Internal Server Error:", error);
-  //     logErrorToFile(error, req);
-  //     return sendErrorResponse(
-  //       res,
-  //       500,
-  //       "An unexpected error occurred. Please try again later.",
-  //       error
-  //     );
-  //   }
-  // },
-
   getAllProducts: async (req, res) => {
     try {
       const {
@@ -1277,8 +760,7 @@ module.exports = {
               genericName: result?.["Generic Name*"]?.toString()?.trim() || "",
               strength: result?.["Strength*"]?.toString()?.trim() || "",
               composition:
-                result?.["Composition / Ingredients*"]?.toString()?.trim() ||
-                "",
+                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
               formulation: result?.["Formulation"]?.toString()?.trim() || "",
               purpose: result?.["Purpose"]?.toString()?.trim() || "",
               drugAdministrationRoute:
@@ -1289,8 +771,7 @@ module.exports = {
                 result?.["Controlled Substance"] === "true" || false,
               otcClassification:
                 result?.["OTC Classification"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               sideEffectsAndWarnings:
                 result?.["Side Effects and Warnings"]?.toString()?.trim() || "",
               allergens: result?.["Allergens"]?.toString()?.trim() || "",
@@ -1310,8 +791,7 @@ module.exports = {
               formulation: result?.["Formulation"]?.toString()?.trim() || "",
               strength: result?.["Strength"]?.toString()?.trim() || "",
               composition:
-                result?.["Composition / Ingredients*"]?.toString()?.trim() ||
-                "",
+                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
               purpose: result?.["Purpose*"]?.toString()?.trim() || "",
               targetCondition:
                 result?.["Target Condition*"]?.toString()?.trim() || "",
@@ -1323,8 +803,7 @@ module.exports = {
                 result?.["Controlled Substance"] === "true" || false,
               otcClassification:
                 result?.["OTC Classification"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               sideEffectsAndWarnings:
                 result?.["Side Effects and Warnings"]?.toString()?.trim() || "",
               allergens: result?.["Allergens"]?.toString()?.trim() || "",
@@ -1362,8 +841,7 @@ module.exports = {
               genericName: result?.["Generic Name*"]?.toString()?.trim() || "",
               strength: result?.["Strength*"]?.toString()?.trim() || "",
               composition:
-                result?.["Composition / Ingredients*"]?.toString()?.trim() ||
-                "",
+                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
               formulation: result?.["Formulation"]?.toString()?.trim() || "",
               purpose: result?.["Purpose"]?.toString()?.trim() || "",
               drugAdministrationRoute:
@@ -1374,8 +852,7 @@ module.exports = {
                 result?.["Controlled Substance"] === "true" || false,
               otcClassification:
                 result?.["OTC Classification"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               sideEffectsAndWarnings:
                 result?.["Side Effects and Warnings"]?.toString()?.trim() || "",
               allergens: result?.["Allergens"]?.toString()?.trim() || "",
@@ -1397,8 +874,7 @@ module.exports = {
               productMaterial:
                 result?.["Product Material"]?.toString()?.trim() || "",
               purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               texture: result?.["Texture"] === "true" || false,
               sterilized: result?.["Sterilized"] === "true" || false,
               chemicalResistance:
@@ -1498,8 +974,7 @@ module.exports = {
               productMaterial:
                 result?.["Product Material"]?.toString()?.trim() || "",
               purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               texture: result?.["Texture"] === "true" || false,
               sterilized: result?.["Sterilized"] === "true" || false,
               chemicalResistance:
@@ -1547,8 +1022,7 @@ module.exports = {
               compatibleEquipment:
                 result?.["Compatible Equipment"]?.toString()?.trim() || "",
               usageRate: result?.["Usage Rate"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
             };
             break;
 
@@ -1595,8 +1069,7 @@ module.exports = {
                 result?.["Performance Testing Report File"]
                   ?.split(",")
                   ?.map((ele) => ele?.toString()?.trim()) || [],
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
             };
             break;
 
@@ -1606,8 +1079,7 @@ module.exports = {
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
               anotherCategory:
                 result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               healthClaims: result?.["Health Claims"]?.toString()?.trim() || "",
               healthClaimsFile:
                 result?.["Health Claims File"]
@@ -1615,8 +1087,7 @@ module.exports = {
                   ?.map((ele) => ele?.toString()?.trim()) || [],
               purpose: result?.["Purpose"]?.toString()?.trim() || "",
               composition:
-                result?.["Composition / Ingredients*"]?.toString()?.trim() ||
-                "",
+                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
             };
             break;
 
@@ -1626,11 +1097,9 @@ module.exports = {
                 result?.["Product Sub Category*"]?.toString()?.trim() || "",
               anotherCategory:
                 result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               composition:
-                result?.["Composition / Ingredients*"]?.toString()?.trim() ||
-                "",
+                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
               productLongevity:
                 result?.["Product Longevity*"]?.toString()?.trim() || "",
               foldability: result?.["Foldability*"]?.toString()?.trim() || "",
@@ -1644,13 +1113,11 @@ module.exports = {
               anotherCategory:
                 result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
               composition:
-                result?.["Composition / Ingredients*"]?.toString()?.trim() ||
-                "",
+                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
               concentration:
                 result?.["Concentration"]?.toString()?.trim() || "",
               formulation: result?.["Formulation"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               fragrance: result?.["Fragrance"]?.toString()?.trim() || "",
             };
             break;
@@ -1666,15 +1133,13 @@ module.exports = {
               aminoAcidProfile:
                 result?.["Amino Acid Profile*"]?.toString()?.trim() || "",
               fatContent: result?.["Fat Content*"]?.toString()?.trim() || "",
-              expiry:
-                result?.["Shelf Life / Expiry*"]?.toString()?.trim() || "",
+              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
               vegan: result?.["Vegan"] === "true" || false,
               purpose: result?.["Purpose"]?.toString()?.trim() || "",
               healthBenefit:
                 result?.["Health Benefit*"]?.toString()?.trim() || "",
               composition:
-                result?.["Composition / Ingredients*"]?.toString()?.trim() ||
-                "",
+                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
               additivesNSweeteners:
                 result?.["Additives & Sweeteners*"]?.toString()?.trim() || "",
               dairyFree: result?.["Dairy Free*"]?.toString()?.trim() || "",
@@ -2106,7 +1571,6 @@ module.exports = {
         // quantity,
         // price,
       } = req?.query;
-      console.log(req?.query)
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -2575,6 +2039,284 @@ module.exports = {
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
       console.log("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
+    }
+  },
+
+  previewBulkUpload: async (req, res) => {
+    try {
+      const { supplier_id } = req?.body;
+      const filePath = req.file.path;
+      // Utility function to parse CSV
+      const parseCSV = (filePath) => {
+        return new Promise((resolve, reject) => {
+          const results = [];
+          fs.createReadStream(filePath)
+            .pipe(csv())
+            .on("data", (data) => results.push(data))
+            .on("end", () => resolve(results))
+            .on("error", (err) => reject(err));
+        });
+      };
+
+      // Parse the CSV file
+      const results = await parseCSV(filePath);
+      // Check if the product exists
+      const existingSupplier = await Supplier.findById(supplier_id);
+      if (!existingSupplier) {
+        return sendErrorResponse(res, 404, "Supplier not found.");
+      }
+
+      const inventoryArray = [];
+
+      const updatedResult = results?.map((result) => {
+        const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+        const inventoryUUId = uuidv4();
+
+        inventoryArray.push({
+          uuid: inventoryUUId,
+          medicine_id,
+          sku: result?.["SKU"]?.toString()?.trim() || "",
+          stock: result?.["Stock*"]?.toString()?.trim() || "",
+          // stockQuantity: Number(result?.["Stock Quantity"]) || 0,
+          countries:
+            result?.["Countries where Stock Trades"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [],
+          date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
+        });
+        let updatedObject = {
+          // // General
+          model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
+          name: result?.["Product Name*"]?.toString()?.trim() || "",
+          category: result?.["Product Category*"]?.toString()?.trim() || "",
+          upc:
+            result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
+          aboutManufacturer:
+            result?.["Short Description*"]?.toString()?.trim() || "",
+          brand: result?.["Brand Name"]?.toString()?.trim() || "",
+          form: result?.["Product Type/Form*"]?.toString()?.trim() || "",
+          quantity: Number(result?.["Product Total Quantity*"]) || 0,
+          volumn: result?.["Product Volume"]?.toString()?.trim() || "",
+          volumeUnit: result?.["Product Volume Unit"]?.toString()?.trim() || "",
+          dimension: result?.["Product Dimension"]?.toString()?.trim() || "",
+          weight: Number(result?.["Product Weight*"]) || 0,
+          unit: result?.["Product Weight Units*"]?.toString()?.trim() || "",
+          packageType:
+            result?.["Product Packaging Type"]?.toString()?.trim() || "",
+          packageMaterial:
+            result?.["Product Packaging Material"]?.toString()?.trim() || "",
+          storage: result?.["Storage Conditions"]?.toString()?.trim() || "",
+          manufacturer:
+            result?.["Manufacturer Name*"]?.toString()?.trim() || "",
+          countryOfOrigin:
+            result?.["Manufacturer Contry of Origin*"]?.toString()?.trim() ||
+            "",
+          image:
+            result?.["Product Image"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          description:
+            result?.["Product Description*"]?.toString()?.trim() || "",
+          // // End of General
+
+          // inventory: inventoryUUId,
+
+          // // Inventory
+          // uuid: inventoryUUId,
+          // medicine_id,
+          date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
+          sku: result?.["SKU"]?.toString()?.trim() || "",
+          stock: result?.["Stock*"]?.toString()?.trim() || "",
+          countries:
+            result?.["Stocked in Countries*"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [],
+          date2: result?.["Date of Manufacture"]?.toString()?.trim() || "",
+          // // stockedInDetails
+          country:
+            result?.["Country where Stock Trades"]?.toString()?.trim() || "",
+          quantity: Number(result?.["Stock Quantity"]) || 0,
+          // // End of stockedInDetails
+
+          // // inventoryList
+          quantity2: Number(result?.["Quantity*"]) || 0,
+          price: Number(result?.["Cost Per Product*"]) || 0,
+          deliveryTime: Number(result?.["Est. Delivery Time*"]) || 0,
+          // // End of inventoryList
+
+          // // End of Inventory
+          // // cNCFileNDate
+          // complianceFile: result?.["Regulatory Compliance"]
+          // ?.split(",")
+          // ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          file:
+            result?.["Regulatory Compliance"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          date3: result?.["Date of Expiry"]?.toString()?.trim() || "",
+
+          // // End of cNCFileNDate
+
+          // // healthNSafety
+          safetyDatasheet:
+            result?.["Safety Datasheet"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          healthHazardRating:
+            result?.["Health Hazard Rating"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          environmentalImpact:
+            result?.["Environmental Impact"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], //aray
+          // end of healthNSafety
+
+          // // additional
+          warranty: result?.["Warranty"]?.toString()?.trim() || "",
+          guidelinesFile: result?.["User Guidelines"]?.toString()?.trim() || "",
+          other: result?.["Other Information"]?.toString()?.trim() || "",
+          // // end of additional
+
+          // medicine_id: medicine_id || "",
+          // supplier_id: existingSupplier?._id || "",
+          // market: "new",
+          // isDeleted: false,
+          // bulkUpload: true,
+        };
+
+        // Call the helper function to handle category-specific updates
+        updatedObject = {
+          ...updatedObject,
+          ...handleProductCategorySwitch(result),
+        };
+
+        return updatedObject;
+      });
+
+      const previewResponse = updatedResult?.map((elem, index) => {
+        const elemCat = elem?.category;
+
+        // Loop through each key in the object
+        for (const key in elem) {
+          if (elem.hasOwnProperty(key)) {
+            // Check if the key is a direct property of the object
+            if (
+              (elemCat == "Medical Equipment and Devices" &&
+                key == "specification") ||
+              (elemCat == "Pharmaceuticals" &&
+                (key == "genericName" ||
+                  key == "strength" ||
+                  key == "composition" ||
+                  key == "drugClass")) ||
+              (elemCat == "Skin, Hair and Cosmetic Supplies" &&
+                (key == "purpose" ||
+                  key == "targetCondition" ||
+                  key == "composition" ||
+                  key == "drugAdministrationRoute" ||
+                  key == "dermatologistTested" ||
+                  key == "drugClass")) ||
+              (elemCat == "Vital Health and Wellness" &&
+                (key == "healthBenefit" ||
+                  key == "genericName" ||
+                  key == "strength" ||
+                  key == "composition" ||
+                  key == "drugAdministrationRoute" ||
+                  key == "drugClass")) ||
+              (elemCat == "Diagnostic and Monitoring Devices" &&
+                (key == "specification" || key == "diagnosticFunctions")) ||
+              (elemCat == "Orthopedic Supplies" &&
+                (key == "targetCondition" || key == "strength")) ||
+              (elemCat == "Alternative Medicines" && key == "composition") ||
+              (elemCat == "Emergency and First Aid Supplies" &&
+                (key == "composition" ||
+                  key == "productLongevity" ||
+                  key == "foldability")) ||
+              (elemCat == "Disinfection and Hygiene Supplies" &&
+                key == "composition") ||
+              (elemCat == "Nutrition and Dietary Products" &&
+                key == "composition") ||
+              (elemCat == "Healthcare IT Solutions" &&
+                key == "interoperability")
+            ) {
+              // You can also use this structure if you want to save the results in an object for each key
+              elem[key] = {
+                value: elem[key],
+                fieldName: getFieldName(key, true),
+                error: validateFields(
+                  getFieldName(key, true)?.includes("*"),
+                  elem[key],
+                  getFieldName(key, true),
+                  typeof elem[key]
+                ),
+              };
+            } else {
+              // You can also use this structure if you want to save the results in an object for each key
+              elem[key] = {
+                value: elem[key],
+                fieldName: getFieldName(key),
+                error: validateFields(
+                  getFieldName(key)?.includes("*"),
+                  elem[key],
+                  getFieldName(key),
+                  typeof elem[key]
+                ),
+              };
+            }
+          }
+        }
+        return elem;
+      });
+
+      const previewHeadings = Object?.values(previewResponse?.[0])?.map(
+        (field) => field?.fieldName
+      );
+
+      // // Insert multiple records into MongoDB
+      // const entries = await Product.insertMany(updatedResult);
+
+      // if (!entries || entries?.length == 0) {
+      //   return sendErrorResponse(res, 400, "Failed to add bulk products.");
+      // }
+
+      // if (inventoryArray?.length > 0) {
+      //   const inventories = await Inventory.insertMany(inventoryArray);
+
+      //   if (!inventories || inventories?.length == 0) {
+      //     return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
+      //   }
+      // }
+
+      // Remove the CSV file after processing
+      fs.unlinkSync(filePath);
+
+      return sendSuccessResponse(res, 200, "Success", {
+        headings: previewHeadings || [],
+        mainContent: previewResponse,
+      });
+    } catch (error) {
+      console.error("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
+    }
+  },
+
+  bulkUpload: async (req, res) => {
+    try {
+    } catch (error) {
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,

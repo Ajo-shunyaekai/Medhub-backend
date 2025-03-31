@@ -192,7 +192,7 @@ module.exports = {
         }
         next();
       } else if (supplier_id) {
-        lo
+        // lo
         const supplier = await Supplier.findOne({ token: accesstoken });
 
         if (!supplier) {
