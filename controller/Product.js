@@ -2259,6 +2259,10 @@ module.exports = {
         return elem;
       });
 
+      const previewHeadings = Object?.values(previewResponse?.[0])?.map(
+        (field) => field?.fieldName
+      );
+
       // // Insert multiple records into MongoDB
       // const entries = await Product.insertMany(updatedResult);
 
@@ -2277,16 +2281,10 @@ module.exports = {
       // Remove the CSV file after processing
       fs.unlinkSync(filePath);
 
-      
-      return sendSuccessResponse(
-        res,
-        200,
-        "Success",
-        { 
-          headings: [],
-          mainContent: previewResponse
-        }
-      );
+      return sendSuccessResponse(res, 200, "Success", {
+        headings: previewHeadings || [],
+        mainContent: previewResponse,
+      });
     } catch (error) {
       console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
