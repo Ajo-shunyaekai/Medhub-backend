@@ -46,7 +46,7 @@ module.exports = {
               callback({code: 401});
             }) 
         } catch (error) {
-          console.log("Internal Server Error:", error);
+          console.error("Internal Server Error:", error);
           logErrorToFile(error, req);
           return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -71,7 +71,7 @@ module.exports = {
             callback({code: 401, message: 'Invalid Password'});
         }
       }catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
@@ -90,7 +90,7 @@ module.exports = {
           callback({code: 400, message: 'Error in saving OTP' });
         })
       }catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
@@ -115,7 +115,7 @@ module.exports = {
         }
 
       }catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
@@ -147,7 +147,7 @@ module.exports = {
           callback({ code: 500, message: 'Error in updating the password'});
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -171,7 +171,7 @@ module.exports = {
             callback({ code: 400, message: 'Error in updating the profile'});
           }
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -185,7 +185,7 @@ module.exports = {
           console.error('Error:', error);
       });
       }catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -199,7 +199,7 @@ module.exports = {
           console.error('Error:', error);
       });
       }catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }

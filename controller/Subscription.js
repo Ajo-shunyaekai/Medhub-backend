@@ -79,7 +79,7 @@ module.exports = {
         session
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -232,7 +232,7 @@ module.exports = {
         return sendErrorResponse(res, 400, "Payment session not complete");
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -423,7 +423,7 @@ module.exports = {
         "Invoice have been sent to the email!"
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -449,7 +449,7 @@ module.exports = {
         subscriptionDetails
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,

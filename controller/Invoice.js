@@ -138,7 +138,7 @@ module.exports = {
             return callback({code: 400, message: 'Error while creating the invoice'})
         })
        } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
        }
@@ -245,7 +245,7 @@ module.exports = {
 
           callback({ code: 200, message: 'Payment Status Updated', result: response });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -443,7 +443,7 @@ module.exports = {
             callback({ code: 400, message: "Error while fetching details", result: err });
           });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }

@@ -47,14 +47,12 @@ function initializeSocket(server) {
 
         if (targetId) {
           io.to(targetId).emit(emit, message);
-          // console.log(`${event} notification sent to ${targetId}`);
         }
       });
     });
 
     // Handle disconnection
     socket.on("disconnect", () => {
-      // console.log('User disconnected: ', socket.id);
     });
   });
 

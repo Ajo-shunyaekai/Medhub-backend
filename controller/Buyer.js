@@ -115,7 +115,7 @@ module.exports = {
                 callback({code: 400 , message: "Error While Submiiting Buyer Registration Request"})
               })
           } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
           } 
@@ -168,7 +168,7 @@ module.exports = {
               callback({code: 401, message: "Incorrect Password"});
           }
         }catch (error) {
-          console.log("Internal Server Error:", error);
+          console.error("Internal Server Error:", error);
           logErrorToFile(error, req);
           return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
        }
@@ -244,7 +244,7 @@ module.exports = {
             //     callback({ code: 400, message: 'Error in updating the buyer profile', error: updateProfile});
             //   })
         } catch (error) {
-          console.log("Internal Server Error:", error);
+          console.error("Internal Server Error:", error);
           logErrorToFile(error, req);
           return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -265,7 +265,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching buyer details'})
       });
       }catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -303,7 +303,7 @@ module.exports = {
           }
         callback({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -438,7 +438,7 @@ module.exports = {
     //     });
     
     //   } catch (error) {
-    //     console.log("Internal Server Error:", error);
+    //     console.error("Internal Server Error:", error);
     //     logErrorToFile(error, req);
     //     return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     //   }
@@ -588,7 +588,7 @@ module.exports = {
         });
     
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -608,7 +608,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching supplier details'})
       });
       }catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -695,7 +695,7 @@ module.exports = {
               callback({ code: 400, message: "Error fetching medicine list", result: err});
             });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -771,7 +771,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer supplier order list', result: err})
         })
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1040,7 +1040,7 @@ module.exports = {
     
         callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1099,7 +1099,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer seller country', result: err})
         })
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1134,7 +1134,7 @@ module.exports = {
         })
 
      } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
      }
@@ -1148,7 +1148,7 @@ module.exports = {
           callback({code: 200, message : 'buyer support list fetched successfully', result: data})
          })
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1156,7 +1156,6 @@ module.exports = {
     //----------------------------- support --------------------------------------//
 
     addToList : async (req, res, reqObj, callback) => {
-      console.log('reqObj',reqObj)
       try {
         const existingList = await List.findOne({
           buyer_id    : reqObj.buyer_id,
@@ -1189,7 +1188,6 @@ module.exports = {
               callback({ code: 400, message: "Error while adding to existing list", result: err });
             });
         } else {
-console.log('not exists')
           const listId = 'LST-' + Math.random().toString(16).slice(2);
     
           const newList = new List({
@@ -1222,7 +1220,7 @@ console.log('not exists')
             });
         }
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1320,7 +1318,6 @@ console.log('not exists')
         ])
         
         .then( async(data) => {
-          console.log(data)
           // return false
           const totalItems = await List.countDocuments({buyer_id: buyer_id});
           const totalPages = Math.ceil(totalItems / page_size);
@@ -1337,7 +1334,7 @@ console.log('not exists')
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1376,7 +1373,7 @@ console.log('not exists')
         }
         callback({ code: 200, message: "Deleted Successfully", result: returnObj });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1544,7 +1541,7 @@ console.log('not exists')
   
           callback({ code: 200, message: "Enquiries sent successfully", result: returnObj });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1623,7 +1620,7 @@ console.log('not exists')
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1711,7 +1708,7 @@ console.log('not exists')
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1745,7 +1742,7 @@ console.log('not exists')
       callback({ code: 200, message: "Status Updated", result: updateNotifications });
 
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -1774,7 +1771,7 @@ console.log('not exists')
           callback({ code: 400, message: "Error while fetching count", result: err });
         });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }

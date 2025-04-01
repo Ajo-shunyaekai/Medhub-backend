@@ -248,7 +248,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
         }
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }

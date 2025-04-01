@@ -100,7 +100,7 @@ const validateUserInput = [
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log("Internal Server Error:", errors.array());
+    console.error("Internal Server Error:", errors.array());
     logErrorToFile(errors.array(), req);
     return sendErrorResponse(res, 400, "Validation Error", errors.array());
   }

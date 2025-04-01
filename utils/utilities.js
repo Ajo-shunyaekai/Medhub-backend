@@ -240,7 +240,7 @@ module.exports = {
                 res.send(response);
             });
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(
                 res,

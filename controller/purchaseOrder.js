@@ -190,7 +190,7 @@ module.exports = {
 
             callback({ code: 200, message: 'Purchase Order Created Successfully', data: newPO });
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -334,7 +334,7 @@ module.exports = {
             callback({code: 400, message: 'Error while fetching PO list', result: err})
             })
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -569,7 +569,6 @@ module.exports = {
                 }
             ])            
             .then((data) => {
-                console.log(data)
                 callback({ code: 200, message: 'Purchase Order details' , result: data[0]});
             })
             .catch((err) => {
@@ -580,7 +579,7 @@ module.exports = {
                 // callback({ code: 400, message: 'Error while fetching purchase order details' , result: err});   
             })
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -687,7 +686,7 @@ module.exports = {
 
             callback({ code: 200, message: 'Purchase Order updated successfully', data: purchaseOrder });
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }

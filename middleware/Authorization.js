@@ -24,7 +24,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -46,7 +46,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -72,7 +72,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -98,7 +98,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -120,7 +120,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -143,7 +143,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -169,7 +169,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -207,7 +207,7 @@ module.exports = {
         return res.status(404).send({ message: "Invalid Access" });
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }
@@ -239,7 +239,7 @@ module.exports = {
       }
       next();
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
     }

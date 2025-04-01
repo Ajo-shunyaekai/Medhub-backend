@@ -182,9 +182,7 @@ app.post("/send-email", async (req, res) => {
       if (!existingSubscriber) {
         const newSubscriber = new EmailListing({ username, email, phone });
         await newSubscriber.save();
-        // console.log(`User subscribed to mailing list: ${email}`);
       } else {
-        // console.log(`User already subscribed: ${email}`);
       }
     }
 

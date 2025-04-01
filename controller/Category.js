@@ -21,7 +21,7 @@ module.exports = {
                 return callback({code: 400, message: "Error while adding category" });
                })
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -35,7 +35,7 @@ module.exports = {
               callback({code: 400, message : 'Error in fetching categories list',error: err})
           });
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }     
@@ -45,7 +45,7 @@ module.exports = {
         try {
 
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }

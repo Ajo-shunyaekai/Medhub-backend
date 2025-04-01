@@ -600,7 +600,7 @@ module.exports = {
 
       // Additional handling for other user types (Seller) would go here
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -690,7 +690,7 @@ module.exports = {
         user2
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -731,7 +731,7 @@ module.exports = {
 
       return sendSuccessResponse(res, 200, "User Found.", user);
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -867,7 +867,7 @@ module.exports = {
         "Mail sent to the registered email."
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1037,7 +1037,7 @@ module.exports = {
         "Mail sent to the registered email."
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1135,7 +1135,7 @@ module.exports = {
       // Success response
       return sendSuccessResponse(res, 200, "OTP verified successfully.");
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1227,7 +1227,7 @@ module.exports = {
         "Password has been successfully updated."
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1329,7 +1329,7 @@ module.exports = {
         "Password has been successfully updated."
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1836,7 +1836,7 @@ module.exports = {
         );
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
