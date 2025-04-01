@@ -49,10 +49,6 @@ module.exports = {
       const formattedSubCategory = formatToPascalCase(subCategory);
       const formattedLevel3Category = formatToPascalCase(level3Category);
 
-      console.log('formattedCategory',formattedCategory)
-      console.log('formattedSubCategory',subCategory)
-      console.log('formattedLevel3Category',level3Category)
-
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -98,24 +94,40 @@ module.exports = {
       //   },
       // });
 
-
       pipeline.push({
         $match: {
           isDeleted: false, // Only products that are not deleted
-          ...(supplier_id && { supplier_id: new mongoose.Types.ObjectId(supplier_id) }),
+          ...(supplier_id && {
+            supplier_id: new mongoose.Types.ObjectId(supplier_id),
+          }),
           ...(market && { market: market }),
-          ...(formattedCategory && { category: { $regex: formattedCategory, $options: "i" } }),
-          ...(subCategory && { [`${formattedCategory}.subCategory`]: { $regex: subCategory, $options: "i" } }),
-          ...(level3Category && { [`${formattedCategory}.anotherCategory`]: { $regex: level3Category, $options: "i" } }),
+          ...(formattedCategory && {
+            category: { $regex: formattedCategory, $options: "i" },
+          }),
+          ...(subCategory && {
+            [`${formattedCategory}.subCategory`]: {
+              $regex: subCategory,
+              $options: "i",
+            },
+          }),
+          ...(level3Category && {
+            [`${formattedCategory}.anotherCategory`]: {
+              $regex: level3Category,
+              $options: "i",
+            },
+          }),
           ...(search_key && {
             "general.name": { $regex: search_key, $options: "i" },
           }),
-          ...(quantity?.min && quantity?.max && !isNaN(quantity?.min) && !isNaN(quantity?.max) && {
-            "general.quantity": {
-              $gte: parseInt(quantity?.min, 10),
-              $lte: parseInt(quantity?.max, 10),
-            },
-          }),
+          ...(quantity?.min &&
+            quantity?.max &&
+            !isNaN(quantity?.min) &&
+            !isNaN(quantity?.max) && {
+              "general.quantity": {
+                $gte: parseInt(quantity?.min, 10),
+                $lte: parseInt(quantity?.max, 10),
+              },
+            }),
         },
       });
 
@@ -831,34 +843,39 @@ module.exports = {
         //       date: ele?.date || "",
         //     };
         //   })
-        cNCFileNDate: JSON.parse(cNCFileNDateParsed)
-          ?.map((ele, index) => {
-            return {
-              file:
-                typeof ele?.file !== "string"
-                  ? complianceFiles?.complianceFile?.find((filename) => {
-                      const path = ele?.file?.path;
+        cNCFileNDate:
+          cNCFileNDateParsed?.length > 0
+            ? JSON.parse(cNCFileNDateParsed)
+                ?.map((ele, index) => {
+                  return {
+                    file:
+                      typeof ele?.file !== "string"
+                        ? complianceFiles?.complianceFile?.find((filename) => {
+                            const path = ele?.file?.path;
 
-                      // Ensure path is defined and log the file path
-                      if (!path) {
-                        return false; // If there's no path, skip this entry
-                      }
+                            // Ensure path is defined and log the file path
+                            if (!path) {
+                              return false; // If there's no path, skip this entry
+                            }
 
-                      const ext = path.split(".").pop(); // Get the file extension
-                      const sanitizedPath = path
-                        .replaceAll("./", "")
-                        .replaceAll(" ", "")
-                        .replaceAll(`.${ext}`, "");
+                            const ext = path.split(".").pop(); // Get the file extension
+                            const sanitizedPath = path
+                              .replaceAll("./", "")
+                              .replaceAll(" ", "")
+                              .replaceAll(`.${ext}`, "");
 
-                      // Match file by sanitized name
-                      return filename?.includes(sanitizedPath);
-                    })
-                  : ele?.file || complianceFiles?.complianceFile?.[index] || "",
+                            // Match file by sanitized name
+                            return filename?.includes(sanitizedPath);
+                          })
+                        : ele?.file ||
+                          complianceFiles?.complianceFile?.[index] ||
+                          "",
 
-              date: ele?.date || "", // Log the date being used (if any)
-            };
-          })
-          ?.filter((ele) => ele?.file || ele?.date),
+                    date: ele?.date || "", // Log the date being used (if any)
+                  };
+                })
+                ?.filter((ele) => ele?.file || ele?.date)
+            : cNCFileNDateParsed,
         additional: {
           ...req?.body,
           ...(additionalFiles || []),
