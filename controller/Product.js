@@ -49,6 +49,10 @@ module.exports = {
       const formattedSubCategory = formatToPascalCase(subCategory);
       const formattedLevel3Category = formatToPascalCase(level3Category);
 
+      console.log('formattedCategory',formattedCategory)
+      console.log('formattedSubCategory',subCategory)
+      console.log('formattedLevel3Category',level3Category)
+
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -59,38 +63,59 @@ module.exports = {
       let pipeline = [];
 
       // Add match condition
+      // pipeline.push({
+      //   $match: {
+      //     isDeleted: false, // Only products that are not deleted
+      //     ...(supplier_id && {
+      //       supplier_id: new mongoose.Types.ObjectId(supplier_id),
+      //     }),
+      //     ...(market && { market: market }),
+      //     ...(category && { category: category }),
+      //     ...(search_key &&
+      //       typeof search_key === "string" &&
+      //       search_key.trim() !== "" &&
+      //       search_key !== "null" &&
+      //       search_key !== "undefined" && {
+      //         "general.name": { $regex: search_key, $options: "i" },
+      //       }),
+      //     ...(category &&
+      //       typeof category === "string" &&
+      //       category.trim() !== "" &&
+      //       category !== "null" &&
+      //       category !== "undefined" && {
+      //         category: { $regex: category, $options: "i" },
+      //       }),
+      //     ...(quantity?.min &&
+      //       quantity?.max &&
+      //       !isNaN(quantity?.min) &&
+      //       !isNaN(quantity?.max) && {
+      //         // "general.quantity": { $lte: parseInt(quantity, 10) },
+      //         "general.quantity": {
+      //           $gte: parseInt(quantity?.min, 10),
+      //           $lte: parseInt(quantity?.max, 10),
+      //         },
+      //       }),
+      //   },
+      // });
+
+
       pipeline.push({
         $match: {
           isDeleted: false, // Only products that are not deleted
-          ...(supplier_id && {
-            supplier_id: new mongoose.Types.ObjectId(supplier_id),
-          }),
+          ...(supplier_id && { supplier_id: new mongoose.Types.ObjectId(supplier_id) }),
           ...(market && { market: market }),
-          ...(category && { category: category }),
-          ...(search_key &&
-            typeof search_key === "string" &&
-            search_key.trim() !== "" &&
-            search_key !== "null" &&
-            search_key !== "undefined" && {
-              "general.name": { $regex: search_key, $options: "i" },
-            }),
-          ...(category &&
-            typeof category === "string" &&
-            category.trim() !== "" &&
-            category !== "null" &&
-            category !== "undefined" && {
-              category: { $regex: category, $options: "i" },
-            }),
-          ...(quantity?.min &&
-            quantity?.max &&
-            !isNaN(quantity?.min) &&
-            !isNaN(quantity?.max) && {
-              // "general.quantity": { $lte: parseInt(quantity, 10) },
-              "general.quantity": {
-                $gte: parseInt(quantity?.min, 10),
-                $lte: parseInt(quantity?.max, 10),
-              },
-            }),
+          ...(formattedCategory && { category: { $regex: formattedCategory, $options: "i" } }),
+          ...(subCategory && { [`${formattedCategory}.subCategory`]: { $regex: subCategory, $options: "i" } }),
+          ...(level3Category && { [`${formattedCategory}.anotherCategory`]: { $regex: level3Category, $options: "i" } }),
+          ...(search_key && {
+            "general.name": { $regex: search_key, $options: "i" },
+          }),
+          ...(quantity?.min && quantity?.max && !isNaN(quantity?.min) && !isNaN(quantity?.max) && {
+            "general.quantity": {
+              $gte: parseInt(quantity?.min, 10),
+              $lte: parseInt(quantity?.max, 10),
+            },
+          }),
         },
       });
 
