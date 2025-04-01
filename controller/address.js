@@ -65,7 +65,7 @@ const getAddress = async (req, res) => {
       address: updatedAddress,
     });
   } catch (error) {
-    console.log("Internal Server Error:", error);
+    console.error("Internal Server Error:", error);
     logErrorToFile(error, req);
     return sendErrorResponse(
       res,
@@ -168,7 +168,7 @@ const addAddress = async (req, res) => {
       address: userAddress,
     });
   } catch (error) {
-    console.log("Internal Server Error:", error);
+    console.error("Internal Server Error:", error);
     logErrorToFile(error, req);
     return sendErrorResponse(
       res,
@@ -274,7 +274,7 @@ const editAddress = async (req, res) => {
       updatedAddress: userAddress.addresses[addressIndex],
     });
   } catch (error) {
-    console.log("Internal Server Error:", error);
+    console.error("Internal Server Error:", error);
     logErrorToFile(error, req);
     return sendErrorResponse(
       res,
@@ -315,7 +315,7 @@ const deleteAddress = async (req, res) => {
 
     res.status(200).json({ code: 200, message: "Address deleted successfully" });
   } catch (error) {
-    console.log("Internal Server Error:", error);
+    console.error("Internal Server Error:", error);
     logErrorToFile(error, req);
     return sendErrorResponse(
       res,

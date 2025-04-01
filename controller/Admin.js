@@ -123,7 +123,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -169,7 +169,7 @@ module.exports = {
         callback({ code: 401, message: "Incorrect Password" });
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -210,7 +210,7 @@ module.exports = {
         });
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -247,7 +247,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -275,7 +275,7 @@ module.exports = {
           callback({ code: 400, message: "Error in fetching users list" });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -325,7 +325,7 @@ module.exports = {
         callback({ code: 400, message: "Failed to update user status" });
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -420,7 +420,7 @@ module.exports = {
         result: returnObj,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -480,7 +480,7 @@ module.exports = {
 
       res.status(200).send(csv);
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -541,7 +541,7 @@ module.exports = {
 
       res.status(200).send(csv);
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -575,7 +575,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -751,8 +751,8 @@ module.exports = {
             result: error,
           });
         });
-    } catch (err) {
-      console.log("Internal Server Error:", error);
+    } catch (error) {
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -794,8 +794,8 @@ module.exports = {
       res.setHeader("Content-Disposition", "attachment; filename=users.csv");
 
       res.status(200).send(csv);
-    } catch (err) {
-      console.log("Internal Server Error:", error);
+    } catch (error) {
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -966,7 +966,7 @@ module.exports = {
         return callback({ code: 400, message: "Invalid action" });
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1021,7 +1021,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1117,7 +1117,7 @@ module.exports = {
         result: returnObj,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1148,7 +1148,7 @@ module.exports = {
           callback({ code: 400, message: "Error in fetching buyer details" });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1245,7 +1245,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1405,7 +1405,7 @@ module.exports = {
         return callback({ code: 400, message: "Invalid action" });
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1796,7 +1796,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1851,7 +1851,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1995,7 +1995,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2184,7 +2184,7 @@ module.exports = {
         result: resultObj,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2307,7 +2307,7 @@ module.exports = {
         result: resultObj,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2375,7 +2375,7 @@ module.exports = {
         fetchUpdateProfileRequests(supplierEdit, callback);
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2456,7 +2456,7 @@ module.exports = {
         { updatedProfileReq, updatedProfile }
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2699,7 +2699,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2832,7 +2832,7 @@ module.exports = {
         result: updateStatus,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2957,7 +2957,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -3117,7 +3117,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -3269,7 +3269,7 @@ module.exports = {
             result: updatedMedicine,
           });
         } catch (error) {
-          console.log("Internal Server Error:", error);
+          console.error("Internal Server Error:", error);
           logErrorToFile(error, req);
           return sendErrorResponse(
             res,
@@ -3335,7 +3335,7 @@ module.exports = {
             result,
           });
         } catch (error) {
-          console.log("Internal Server Error:", error);
+          console.error("Internal Server Error:", error);
           logErrorToFile(error, req);
           return sendErrorResponse(
             res,
@@ -3346,7 +3346,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -3473,7 +3473,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -3715,7 +3715,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -3746,7 +3746,7 @@ module.exports = {
           callback({ code: 400, message: "Error while updating", result: err });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -3917,7 +3917,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -4044,7 +4044,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -4651,7 +4651,7 @@ module.exports = {
         result,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -4752,7 +4752,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -4846,7 +4846,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -4895,7 +4895,7 @@ module.exports = {
         result: updateNotifications,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -5057,7 +5057,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -5344,7 +5344,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -5556,7 +5556,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -5756,7 +5756,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -5958,7 +5958,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -6138,7 +6138,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -6351,7 +6351,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -6556,7 +6556,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -6681,7 +6681,7 @@ module.exports = {
         usersList
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -6805,7 +6805,7 @@ module.exports = {
         userProfileEditRequest
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -6967,7 +6967,7 @@ module.exports = {
         updatedUserReq
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,

@@ -1236,7 +1236,7 @@ const validateFields = (checkValidation, value, fieldName, type) => {
         } else {
           errMsg = `Please enter a valid number for ${fieldName}.`;
         }
-      }else{
+      } else {
         if (value == 0) {
           errMsg = `Please enter a valid number for ${fieldName}.`;
         }
@@ -1265,7 +1265,7 @@ const validateFields = (checkValidation, value, fieldName, type) => {
 
     return false; // Return false if validation isn't checked
   } catch (error) {
-    console.log("Internal Server Error:", error);
+    console.error("Internal Server Error:", error);
     // Ensure logErrorToFile and sendErrorResponse functions are available if needed
     logErrorToFile(error, req); // Only if req is available
     return sendErrorResponse(
@@ -1277,4 +1277,88 @@ const validateFields = (checkValidation, value, fieldName, type) => {
   }
 };
 
-module.exports = { handleProductCategorySwitch, getFieldName, validateFields };
+const getCategoryName = (value) => {
+  let catName;
+
+  switch (value) {
+    case "Alternative Medicines":
+      catName = "AlternativeMedicines";
+      break;
+
+    case "Dental Products":
+      catName = "DentalProducts";
+      break;
+
+    case "Diagnostic and Monitoring Devices":
+      catName = "DiagnosticAndMonitoringDevices";
+      break;
+
+    case "Disinfection and Hygiene Supplies":
+      catName = "DisinfectionAndHygieneSupplies";
+      break;
+
+    case "Emergency and First Aid Supplies":
+      catName = "EmergencyAndFirstAidSupplies";
+      break;
+
+    case "Eye Care Supplies":
+      catName = "EyeCareSupplies";
+      break;
+
+    case "Healthcare IT Solutions":
+      catName = "HealthcareITSolutions";
+      break;
+
+    case "Hospital and Clinic Supplies":
+      catName = "HospitalAndClinicSupplies";
+      break;
+
+    case "Home Healthcare Products":
+      catName = "HomeHealthcareProducts";
+      break;
+
+    case "Laboratory Supplies":
+      catName = "LaboratorySupplies";
+      break;
+
+    case "Medical Consumables and Disposables":
+      catName = "MedicalConsumablesAndDisposables";
+      break;
+
+    case "Medical Equipment and Devices":
+      catName = "MedicalEquipmentAndDevices";
+      break;
+
+    case "Nutrition and Dietary Products":
+      catName = "NutritionAndDietaryProducts";
+      break;
+
+    case "Orthopedic Supplies":
+      catName = "OrthopedicSupplies";
+      break;
+
+    case "Pharmaceuticals":
+      catName = "Pharmaceuticals";
+      break;
+
+    case "Skin, Hair and Cosmetic Supplies":
+      catName = "SkinHairCosmeticSupplies";
+      break;
+
+    case "Vital Health and Wellness":
+      catName = "VitalHealthAndWellness";
+      break;
+
+    default:
+      break;
+  }
+
+  return catName;
+};
+
+module.exports = {
+  handleProductCategorySwitch,
+  getFieldName,
+  validateFields,
+  getCategoryName,
+};

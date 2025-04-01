@@ -17,6 +17,7 @@ const {
   getFieldName,
   validateFields,
   handleProductCategorySwitch,
+  getCategoryName,
 } = require("../utils/bulkUploadProduct");
 
 module.exports = {
@@ -30,30 +31,23 @@ module.exports = {
         search_key = "",
         category = "",
         subCategory = "",
-       level3Category = ""
+        level3Category = "",
         // quantity,
         // price,
       } = req?.query;
-      console.log('req?.query',req?.query)
-      
+
       const formatToPascalCase = (str) => {
         return str
           .trim()
           .split(/\s+/) // Split by spaces
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
           .join(""); // Join words without spaces
       };
-    
+
       // Format category, subCategory, and level3Category
       const formattedCategory = formatToPascalCase(category);
       const formattedSubCategory = formatToPascalCase(subCategory);
       const formattedLevel3Category = formatToPascalCase(level3Category);
-      
-      console.log("Formatted Category:", formattedCategory); 
-      // Output: "DiagnosticAndMonitoringDevices"
-      
-      console.log("Formatted SubCategory:", formattedSubCategory);
-      console.log("Formatted Level3Category:", formattedLevel3Category);
 
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
@@ -273,7 +267,7 @@ module.exports = {
         totalPages,
       });
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -354,7 +348,7 @@ module.exports = {
         products
       );
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -502,7 +496,7 @@ module.exports = {
           }
         } catch (error) {
           // Handle the case where the JSON parsing fails
-          console.log("Internal Server Error:", error);
+          console.error("Internal Server Error:", error);
           logErrorToFile(error, req);
           return;
         }
@@ -611,622 +605,6 @@ module.exports = {
       );
     } catch (error) {
       console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
-    }
-  },
-
-  addBulkProducts: async (req, res) => {
-    try {
-      const { supplier_id } = req?.body;
-      const filePath = req.file.path;
-      // Utility function to parse CSV
-      const parseCSV = (filePath) => {
-        return new Promise((resolve, reject) => {
-          const results = [];
-          fs.createReadStream(filePath)
-            .pipe(csv())
-            .on("data", (data) => results.push(data))
-            .on("end", () => resolve(results))
-            .on("error", (err) => reject(err));
-        });
-      };
-
-      // Parse the CSV file
-      const results = await parseCSV(filePath);
-      // Check if the product exists
-      const existingSupplier = await Supplier.findById(supplier_id);
-      if (!existingSupplier) {
-        return sendErrorResponse(res, 404, "Supplier not found.");
-      }
-
-      const inventoryArray = [];
-
-      const updatedResult = results?.map((result) => {
-        const productId = "PRDT-" + Math.random().toString(16).slice(2, 10);
-        const inventoryUUId = uuidv4();
-
-        inventoryArray.push({
-          uuid: inventoryUUId,
-          productId,
-          sku: result?.["SKU"]?.toString()?.trim() || "",
-          stock: result?.["Stock*"]?.toString()?.trim() || "",
-          // stockQuantity: Number(result?.["Stock Quantity"]) || 0,
-          countries:
-            result?.["Countries where Stock Trades"]
-              ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [],
-          date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
-        });
-        let updatedObject = {
-          general: {
-            name: result?.["Product Name*"]?.toString()?.trim() || "",
-            description:
-              result?.["Product Description*"]?.toString()?.trim() || "",
-            manufacturer: result?.["Manufacturer*"]?.toString()?.trim() || "",
-            aboutManufacturer:
-              result?.["About Manufacturer*"]?.toString()?.trim() || "",
-            countryOfOrigin:
-              result?.["Country of origin*"]?.toString()?.trim() || "",
-            upc: result?.["UPC"]?.toString()?.trim() || "",
-            model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
-            image:
-              result?.["Product Image"]
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-            brand: result?.["Brand Name"]?.toString()?.trim() || "",
-            form: result?.["Type / Form*"]?.toString()?.trim() || "",
-            quantity: Number(result?.["Product Quantity*"]) || 0,
-            volumn:
-              result?.["Product Size / Volumn*"]?.toString()?.trim() || "",
-            weight: Number(result?.["Product Weight*"]) || 0,
-            unit: result?.["Unit*"]?.toString()?.trim() || "",
-            packageType:
-              result?.["Product Packaging Type*"]?.toString()?.trim() || "",
-            packageMaterial:
-              result?.["Product Packaging Material*"]?.toString()?.trim() || "",
-            packageMaterialIfOther:
-              result["Product Packaging Material Name (if Other)"]
-                ?.toString()
-                ?.trim() || "",
-            // costPerProduct:
-            //   result?.["Cost Per Product"]?.toString()?.trim() || "",
-          },
-          inventory: inventoryUUId,
-          complianeFile:
-            result?.["Regulatory Compliance"]
-              ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [],
-          storage: result?.["Storage Conditions"]?.toString()?.trim() || "",
-          additional: {
-            other: result?.["Other Information"]?.toString()?.trim() || "",
-            guidelinesFile:
-              result?.["User Guidelines"]
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-            warranty: result?.["Warranty"]?.toString()?.trim() || "",
-          },
-          healthNSafety: {
-            safetyDatasheet:
-              result?.["Safety Datasheet"]
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-            healthHazardRating:
-              result?.["Health Hazard Rating"]
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-            environmentalImpact:
-              result?.["Environmental Impact"]
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-          },
-          category: result?.["Product Category*"]?.trim()?.replaceAll(" ", ""),
-          medicine_id: productId,
-          supplier_id,
-          market: result?.["Product Market*"] || "new",
-          isDeleted: false,
-          bulkUpload: true,
-        };
-
-        if (result?.["Product Market*"] == "secondary") {
-          updatedObject["secondayMarketDetails"] = {
-            purchasedOn: result?.["Purchased On"]?.toString()?.trim() || "",
-            countryAvailable:
-              (result?.["Country Available "] || result?.["Country Available"])
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-            condition: result?.["Product Condition"]?.toString()?.trim() || "",
-            minimumPurchaseUnit:
-              result?.["Minimum Purchase Unit"]?.toString()?.trim() || "",
-            purchaseInvoiceFile:
-              result?.["Purchase Invoice File*"]
-                ?.split(",")
-                ?.map((ele) => ele?.toString()?.trim()) || [],
-          };
-        }
-
-        switch (result?.["Product Category*"]?.trim()?.replaceAll(" ", "")) {
-          case "MedicalEquipmentAndDevices":
-            updatedObject["MedicalEquipmentAndDevices"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              specification:
-                result?.["Specification"]?.toString()?.trim() || "",
-              specificationFile:
-                result?.["Specification File"]?.toString()?.trim() || "",
-              diagnosticFunctions:
-                result?.["Diagnostic Functions"]?.toString()?.trim() || "",
-              interoperability:
-                result?.["Interoperability"]?.toString()?.trim() || "",
-              laserType: result?.["Laser Type"]?.toString()?.trim() || "",
-              coolingSystem:
-                result?.["Cooling System"]?.toString()?.trim() || "",
-              spotSize: result?.["Spot Size"]?.toString()?.trim() || "",
-              performanceTestingReport:
-                result?.["Performance Testing Report"]?.toString()?.trim() ||
-                "",
-              performanceTestingReportFile:
-                result?.["Performance Testing Report File"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-            };
-            break;
-
-          case "Pharmaceuticals":
-            updatedObject["Pharmaceuticals"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              genericName: result?.["Generic Name*"]?.toString()?.trim() || "",
-              strength: result?.["Strength*"]?.toString()?.trim() || "",
-              composition:
-                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-              formulation: result?.["Formulation"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              drugAdministrationRoute:
-                result?.["Drug Administration Route*"]?.toString()?.trim() ||
-                "",
-              drugClass: result?.["Drug Class*"]?.toString()?.trim() || "",
-              controlledSubstance:
-                result?.["Controlled Substance"] === "true" || false,
-              otcClassification:
-                result?.["OTC Classification"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              sideEffectsAndWarnings:
-                result?.["Side Effects and Warnings"]?.toString()?.trim() || "",
-              allergens: result?.["Allergens"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "SkinHairCosmeticSupplies":
-            updatedObject["SkinHairCosmeticSupplies"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              fragrance: result?.["Fragrance"]?.toString()?.trim() || "",
-              spf: result?.["SPF"]?.toString()?.trim() || "",
-              vegan: result?.["Vegan"] === "true" || false,
-              crueltyFree: result?.["Cruelty-Free"] === "true" || false,
-              formulation: result?.["Formulation"]?.toString()?.trim() || "",
-              strength: result?.["Strength"]?.toString()?.trim() || "",
-              composition:
-                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose*"]?.toString()?.trim() || "",
-              targetCondition:
-                result?.["Target Condition*"]?.toString()?.trim() || "",
-              drugAdministrationRoute:
-                result?.["Drug Administration Route*"]?.toString()?.trim() ||
-                "",
-              drugClass: result?.["Drug Class*"]?.toString()?.trim() || "",
-              controlledSubstance:
-                result?.["Controlled Substance"] === "true" || false,
-              otcClassification:
-                result?.["OTC Classification"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              sideEffectsAndWarnings:
-                result?.["Side Effects and Warnings"]?.toString()?.trim() || "",
-              allergens: result?.["Allergens"]?.toString()?.trim() || "",
-              dermatologistTested:
-                result?.["Dermatologist Tested*"]?.toString()?.trim() || "",
-              dermatologistTestedFile:
-                result?.["Dermatologist Tested File"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              pediatricianRecommended:
-                result?.["Pediatrician Recommended*"]?.toString()?.trim() || "",
-              pediatricianRecommendedFile:
-                result?.["Pediatrician Recommended File"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              elasticity: result?.["Elasticity"]?.toString()?.trim() || "",
-              adhesiveness: result?.["Adhesiveness"]?.toString()?.trim() || "",
-              thickness: result?.["Thickness"]?.toString()?.trim() || "",
-              concentration:
-                result?.["Concentration"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              moisturizers: result?.["Moisturizers"]?.toString()?.trim() || "",
-              fillerType: result?.["Filler Type"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "VitalHealthAndWellness":
-            updatedObject["VitalHealthAndWellness"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              healthBenefit:
-                result?.["Health Benefit*"]?.toString()?.trim() || "",
-              genericName: result?.["Generic Name*"]?.toString()?.trim() || "",
-              strength: result?.["Strength*"]?.toString()?.trim() || "",
-              composition:
-                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-              formulation: result?.["Formulation"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              drugAdministrationRoute:
-                result?.["Drug Administration Route*"]?.toString()?.trim() ||
-                "",
-              drugClass: result?.["Drug Class*"]?.toString()?.trim() || "",
-              controlledSubstance:
-                result?.["Controlled Substance"] === "true" || false,
-              otcClassification:
-                result?.["OTC Classification"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              sideEffectsAndWarnings:
-                result?.["Side Effects and Warnings"]?.toString()?.trim() || "",
-              allergens: result?.["Allergens"]?.toString()?.trim() || "",
-              vegan: result?.["Vegan"] === "true" || false,
-              crueltyFree: result?.["Cruelty-Free"] === "true" || false,
-              additivesNSweeteners:
-                result?.["Additives & Sweeteners"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "MedicalConsumablesAndDisposables":
-            updatedObject["MedicalConsumablesAndDisposables"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              thickness: result?.["Thickness"]?.toString()?.trim() || "",
-              powdered: result?.["Powdered"] === "true" || false,
-              productMaterial:
-                result?.["Product Material"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              texture: result?.["Texture"] === "true" || false,
-              sterilized: result?.["Sterilized"] === "true" || false,
-              chemicalResistance:
-                result?.["Chemical Resistance"]?.toString()?.trim() || "",
-              allergens: result?.["Allergens"]?.toString()?.trim() || "",
-              filtrationEfficiency:
-                result?.["Filtration Efficiency"]?.toString()?.trim() || "",
-              breathability:
-                result?.["Breathability"]?.toString()?.trim() || "",
-              layerCount: result?.["Layer Count"]?.toString()?.trim() || "",
-              fluidResistance: result?.["Fluid Resistance"] === "true" || false,
-              filtrationType:
-                result?.["Filtration Type"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              shape: result?.[""]?.toString()?.trim() || "",
-              coating: result?.[""]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "LaboratorySupplies":
-            updatedObject["LaboratorySupplies"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              magnificationRange:
-                result?.["Magnification Range"]?.toString()?.trim() || "",
-              objectiveLenses:
-                result?.["Objective Lenses"]?.toString()?.trim() || "",
-              powerSource: result?.["Power Source"]?.toString()?.trim() || "",
-              resolution: result?.["Resolution"]?.toString()?.trim() || "",
-              connectivity: result?.["Connectivity"]?.toString()?.trim() || "",
-              shape: result?.["Shape"]?.toString()?.trim() || "",
-              coating: result?.["Coating"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              casNumber: result?.["CAS Number"]?.toString()?.trim() || "",
-              grade: result?.["Grade"]?.toString()?.trim() || "",
-              concentration:
-                result?.["Concentration"]?.toString()?.trim() || "",
-              physicalState:
-                result?.["Physical State"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              hazardClassification:
-                result?.["Hazard Classification"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-            };
-            break;
-
-          case "DiagnosticAndMonitoringDevices":
-            updatedObject["DiagnosticAndMonitoringDevices"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              specification:
-                result?.["Specification*"]?.toString()?.trim() || "",
-              specificationFile:
-                result?.["Specification File*"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              diagnosticFunctions:
-                result?.["Diagnostic Functions*"]?.toString()?.trim() || "",
-              measurementRange:
-                result?.["Measurement Range"]?.toString()?.trim() || "",
-              flowRate: result?.["Flow Rate"]?.toString()?.trim() || "",
-              concentration:
-                result?.["Concentration"]?.toString()?.trim() || "",
-              noiseLevel: result?.["Noise Level"]?.toString()?.trim() || "",
-              maintenanceNotes:
-                result?.["Maintenance Notes"]?.toString()?.trim() || "",
-              compatibleEquipment:
-                result?.["Compatible Equipment"]?.toString()?.trim() || "",
-              usageRate: result?.["Usage Rate"]?.toString()?.trim() || "",
-              performanceTestingReport:
-                result?.["Performance Testing Report"]?.toString()?.trim() ||
-                "",
-              performanceTestingReportFile:
-                result?.["Performance Testing Report File"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-            };
-            break;
-
-          case "HospitalAndClinicSupplies":
-            updatedObject["HospitalAndClinicSupplies"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              adhesiveness: result?.["Adhesiveness"]?.toString()?.trim() || "",
-              absorbency: result?.["Absorbency"]?.toString()?.trim() || "",
-              thickness: result?.["Thickness"]?.toString()?.trim() || "",
-              powdered: result?.["Powdered"] === "true" || false,
-              productMaterial:
-                result?.["Product Material"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              texture: result?.["Texture"] === "true" || false,
-              sterilized: result?.["Sterilized"] === "true" || false,
-              chemicalResistance:
-                result?.["Chemical Resistance"]?.toString()?.trim() || "",
-              fluidResistance: result?.["Fluid Resistance"] === "true" || false,
-              elasticity: result?.["Elasticity"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "OrthopedicSupplies":
-            updatedObject["OrthopedicSupplies"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              breathability:
-                result?.["Breathability"]?.toString()?.trim() || "",
-              colorOptions: result?.["Color Options"]?.toString()?.trim() || "",
-              elasticity: result?.["Elasticity"]?.toString()?.trim() || "",
-              sterilized: result?.["Sterilized"] === "true" || false,
-              absorbency: result?.["Absorbency"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              targetCondition:
-                result?.["Target Condition*"]?.toString()?.trim() || "",
-              coating: result?.["Coating"]?.toString()?.trim() || "",
-              strength: result?.["Strength*"]?.toString()?.trim() || "",
-              moistureResistance:
-                result?.["Moisture Resistance"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "DentalProducts":
-            updatedObject["DentalProducts"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              productMaterial:
-                result?.["Product Material"]?.toString()?.trim() || "",
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              targetCondition:
-                result?.["Target Condition"]?.toString()?.trim() || "",
-              maintenanceNotes:
-                result?.["Maintenance Notes"]?.toString()?.trim() || "",
-              compatibleEquipment:
-                result?.["Compatible Equipment"]?.toString()?.trim() || "",
-              usageRate: result?.["Usage Rate"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "EyeCareSupplies":
-            updatedObject["EyeCareSupplies"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              lensPower: result?.["Lens Power"]?.toString()?.trim() || "",
-              baseCurve: result?.["Base Curve"]?.toString()?.trim() || "",
-              diameter: result?.["Diameter"]?.toString()?.trim() || "",
-              frame: result?.["Frame"]?.toString()?.trim() || "",
-              lens: result?.["Lens"]?.toString()?.trim() || "",
-              lensMaterial: result?.["Lens Material"]?.toString()?.trim() || "",
-              colorOptions: result?.["Color Options"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "HomeHealthcareProducts":
-            updatedObject["HomeHealthcareProducts"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              colorOptions: result?.["Color Options"]?.toString()?.trim() || "",
-              maxWeightCapacity:
-                result?.["Max Weight Capacity"]?.toString()?.trim() || "",
-              gripType: result?.["Grip Type"]?.toString()?.trim() || "",
-              foldability: result?.["Foldability"]?.toString()?.trim() || "",
-              lockingMechanism:
-                result?.["Locking Mechanism"]?.toString()?.trim() || "",
-              typeOfSupport:
-                result?.["Type of Support"]?.toString()?.trim() || "",
-              flowRate: result?.["Flow Rate"]?.toString()?.trim() || "",
-              concentration:
-                result?.["Concentration"]?.toString()?.trim() || "",
-              batteryType: result?.["Battery Type"]?.toString()?.trim() || "",
-              batterySize: result?.["Battery Size"]?.toString()?.trim() || "",
-              performanceTestingReport:
-                result?.["Performance Testing Report"]?.toString()?.trim() ||
-                "",
-              performanceTestingReportFile:
-                result?.["Performance Testing Report File"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "AlternativeMedicines":
-            updatedObject["AlternativeMedicines"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              healthClaims: result?.["Health Claims"]?.toString()?.trim() || "",
-              healthClaimsFile:
-                result?.["Health Claims File"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              composition:
-                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "EmergencyAndFirstAidSupplies":
-            updatedObject["EmergencyAndFirstAidSupplies"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              composition:
-                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-              productLongevity:
-                result?.["Product Longevity*"]?.toString()?.trim() || "",
-              foldability: result?.["Foldability*"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "DisinfectionAndHygieneSupplies":
-            updatedObject["DisinfectionAndHygieneSupplies"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              composition:
-                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-              concentration:
-                result?.["Concentration"]?.toString()?.trim() || "",
-              formulation: result?.["Formulation"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              fragrance: result?.["Fragrance"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "NutritionAndDietaryProducts":
-            updatedObject["NutritionAndDietaryProducts"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              flavorOptions:
-                result?.["Flavor Options*"]?.toString()?.trim() || "",
-              aminoAcidProfile:
-                result?.["Amino Acid Profile*"]?.toString()?.trim() || "",
-              fatContent: result?.["Fat Content*"]?.toString()?.trim() || "",
-              expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
-              vegan: result?.["Vegan"] === "true" || false,
-              purpose: result?.["Purpose"]?.toString()?.trim() || "",
-              healthBenefit:
-                result?.["Health Benefit*"]?.toString()?.trim() || "",
-              composition:
-                result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-              additivesNSweeteners:
-                result?.["Additives & Sweeteners*"]?.toString()?.trim() || "",
-              dairyFree: result?.["Dairy Free*"]?.toString()?.trim() || "",
-            };
-            break;
-
-          case "HealthcareITSolutions":
-            updatedObject["HealthcareITSolutions"] = {
-              subCategory:
-                result?.["Product Sub Category*"]?.toString()?.trim() || "",
-              anotherCategory:
-                result?.["Product 3rd Sub Category"]?.toString()?.trim() || "",
-              license: result?.["License*"]?.toString()?.trim() || "",
-              scalabilityInfo:
-                result?.["Scalability Info*"]?.toString()?.trim() || "",
-              addOns: result?.["Add-Ons*"]?.toString()?.trim() || "",
-              interoperability:
-                result?.["Interoperability*"]?.toString()?.trim() || "",
-              interoperabilityFile:
-                result?.["Interoperability File*"]
-                  ?.split(",")
-                  ?.map((ele) => ele?.toString()?.trim()) || [],
-              userAccess: result?.["User Access*"]?.toString()?.trim() || "",
-              keyFeatures: result?.["Key Features*"]?.toString()?.trim() || "",
-              coreFunctionalities:
-                result?.["Core Functionalities*"]?.toString()?.trim() || "",
-            };
-            break;
-
-          default:
-            break;
-        }
-
-        return updatedObject;
-      });
-
-      // Insert multiple records into MongoDB
-      const entries = await Product.insertMany(updatedResult);
-
-      if (!entries || entries?.length == 0) {
-        return sendErrorResponse(res, 400, "Failed to add bulk products.");
-      }
-
-      if (inventoryArray?.length > 0) {
-        const inventories = await Inventory.insertMany(inventoryArray);
-
-        if (!inventories || inventories?.length == 0) {
-          return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
-        }
-      }
-
-      // Remove the CSV file after processing
-      fs.unlinkSync(filePath);
-
-      res
-        .status(200)
-        .json({ message: "Data successfully uploaded", data: entries });
-    } catch (error) {
-      console.log("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1386,7 +764,7 @@ module.exports = {
           throw new Error("Invalid cNCFileNDate format.");
         }
       } catch (error) {
-        console.log("Error while parsing cNCFileNDate:", error);
+        console.error("Error while parsing cNCFileNDate:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 400, "Invalid cNCFileNDate format.");
       }
@@ -1576,7 +954,7 @@ module.exports = {
 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -1835,7 +1213,7 @@ module.exports = {
 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2067,10 +1445,8 @@ module.exports = {
           totalPages,
         }
       );
-
-      return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
-      console.log("Internal Server Error:", error);
+      console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
       return sendErrorResponse(
         res,
@@ -2127,6 +1503,10 @@ module.exports = {
           // // General
           model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
           name: result?.["Product Name*"]?.toString()?.trim() || "",
+          // category:
+          //   getCategoryName(
+          //     result?.["Product Category*"]?.toString()?.trim()
+          //   ) || "",
           category: result?.["Product Category*"]?.toString()?.trim() || "",
           upc:
             result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
@@ -2350,6 +1730,20 @@ module.exports = {
   },
 
   bulkUpload: async (req, res) => {
+    try {
+    } catch (error) {
+      console.error("Internal Server Error:", error);
+      logErrorToFile(error, req);
+      return sendErrorResponse(
+        res,
+        500,
+        "An unexpected error occurred. Please try again later.",
+        error
+      );
+    }
+  },
+
+  csvDownload: async (req, res) => {
     try {
     } catch (error) {
       console.error("Internal Server Error:", error);

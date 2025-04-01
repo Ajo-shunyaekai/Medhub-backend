@@ -131,7 +131,7 @@ module.exports = {
             callback({code: 400, message: 'Error while fetching enquiry list', result: err})
             })
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -348,7 +348,6 @@ module.exports = {
                 }
             ])
             .then((data) => {
-                console.log(data)
                 // return false
                 callback({ code: 200, message: 'Enquiry details', result: data[0] });
             })
@@ -357,7 +356,7 @@ module.exports = {
             });
         } 
         catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -441,7 +440,7 @@ module.exports = {
 
           callback({ code: 200, message: 'Quotation Successfully Submitted', result: updatedEnquiry });
       } catch (error) {
-        console.log("Internal Server Error:", error);
+        console.error("Internal Server Error:", error);
         logErrorToFile(error, req);
         return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
       }
@@ -478,7 +477,7 @@ module.exports = {
 
             callback({ code: 200, message: `Quotation ${msg} Successfully`, result: updatedEnquiry, });
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -535,7 +534,7 @@ module.exports = {
             await sendMailFunc(supplier.contact_person_email, 'Inquiry Cancelled!', body);
             callback({ code: 200, message: 'Inquiry Cancelled Successfully', result: updatedEnquiry });
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }
@@ -718,7 +717,7 @@ module.exports = {
             };
             return res?.status(200)?.send({code: 200, message: 'Enquiry list', result: returnObj})
         } catch (error) {
-            console.log("Internal Server Error:", error);
+            console.error("Internal Server Error:", error);
             logErrorToFile(error, req);
             return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
         }

@@ -15,7 +15,7 @@ const {
   addProduct,
   editProduct,
   deleteProduct,
-  addBulkProducts,
+  bulkUpload,
   productSuppliers,
   otherProducts,
   previewBulkUpload,
@@ -37,11 +37,11 @@ const addProductFileMiddleware = require("../middleware/validations/products/fil
 router.post(`/`, checkAuthorization, getAllProducts); // according to the market, user
 
 router.post(
-  `/add-bulk-products`,
+  `/upload-bulk-products`,
   checkAuthorization,
   checkCommonUserAuthentication,
   CSVupload.single("csvfile"),
-  addBulkProducts
+  bulkUpload
 );
 router.post(
   `/preview-bulk-products`,
@@ -51,21 +51,6 @@ router.post(
   previewBulkUpload
 );
 
-router.post(
-  `/preview-bulk-products`,
-  checkAuthorization,
-  checkCommonUserAuthentication,
-  CSVupload.single("csvfile"),
-  addBulkProducts
-);
-
-router.post(
-  `/edit-bulk-products`,
-  checkAuthorization,
-  checkCommonUserAuthentication,
-  CSVupload.single("csvfile"),
-  addBulkProducts
-);
 
 router.post(
   `/add`,
