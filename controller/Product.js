@@ -58,42 +58,6 @@ module.exports = {
       // Create the aggregation pipeline
       let pipeline = [];
 
-      // Add match condition
-      // pipeline.push({
-      //   $match: {
-      //     isDeleted: false, // Only products that are not deleted
-      //     ...(supplier_id && {
-      //       supplier_id: new mongoose.Types.ObjectId(supplier_id),
-      //     }),
-      //     ...(market && { market: market }),
-      //     ...(category && { category: category }),
-      //     ...(search_key &&
-      //       typeof search_key === "string" &&
-      //       search_key.trim() !== "" &&
-      //       search_key !== "null" &&
-      //       search_key !== "undefined" && {
-      //         "general.name": { $regex: search_key, $options: "i" },
-      //       }),
-      //     ...(category &&
-      //       typeof category === "string" &&
-      //       category.trim() !== "" &&
-      //       category !== "null" &&
-      //       category !== "undefined" && {
-      //         category: { $regex: category, $options: "i" },
-      //       }),
-      //     ...(quantity?.min &&
-      //       quantity?.max &&
-      //       !isNaN(quantity?.min) &&
-      //       !isNaN(quantity?.max) && {
-      //         // "general.quantity": { $lte: parseInt(quantity, 10) },
-      //         "general.quantity": {
-      //           $gte: parseInt(quantity?.min, 10),
-      //           $lte: parseInt(quantity?.max, 10),
-      //         },
-      //       }),
-      //   },
-      // });
-
       pipeline.push({
         $match: {
           isDeleted: false, // Only products that are not deleted
@@ -784,32 +748,6 @@ module.exports = {
 
       // Retrieve file paths for the selected category only
       const categoryFiles = await getFilePaths(fileFields[category]);
-
-      // let cNCFileNDateParsed;
-
-      // // if (typeof req?.body?.cNCFileNDate == "string") {
-      // //   try {
-      // //     cNCFileNDateParsed = JSON.parse(
-      // //       req.body.cNCFileNDate
-      // //     )?.filter((value) => value != "[object Object]");
-      // //   } catch (error) {
-      // //     // Handle the case where the JSON parsing fails
-      // //     logErrorToFile(error, req);
-      // //     return;
-      // //   }
-      // // } else {
-      // //   cNCFileNDateParsed = JSON.parse(
-      // //     req.body?.cNCFileNDate?.filter(
-      // //       (value) => {
-      // //         return (value != "[object Object]")}
-      // //     )
-      // //   );
-      // // }
-      // cNCFileNDateParsed = JSON.parse(
-      //   req.body?.cNCFileNDate?.filter((value) => {
-      //     return value != "[object Object]";
-      //   })
-      // );
       let cNCFileNDateParsed;
 
       try {
@@ -841,35 +779,8 @@ module.exports = {
           ...req?.body,
           ...(generalFiles || []),
         },
-        // inventory: existingProduct?.inventory,
-        // inventory: {
-        //   ...req?.body,
-        //   ...(inventoryFiles || []),
-        // },
 
         complianceFile: complianceFiles.complianceFile || [],
-        // cNCFileNDate: JSON.parse(cNCFileNDateParsed)
-        //   ?.map((ele, index) => {
-        //     return {
-        //       // file: complianceFiles?.complianceFile?.[index] || "",
-        //       file:
-        //         typeof ele?.file != "string"
-        //           ? complianceFiles?.complianceFile?.find((filename) => {
-        //               const ext =
-        //                 ele?.file?.path?.split?.[
-        //                   ele?.file?.path?.split?.length - 1
-        //                 ];
-        //               return filename?.includes(
-        //                 ele?.file?.path
-        //                   ?.replaceAll("./", "")
-        //                   ?.replaceAll(" ", "")
-        //                   ?.replaceAll("." + ext, "")
-        //               );
-        //             })
-        //           : ele?.file || complianceFiles?.complianceFile?.[index] || "",
-        //       date: ele?.date || "",
-        //     };
-        //   })
         cNCFileNDate:
           cNCFileNDateParsed?.length > 0
             ? JSON.parse(cNCFileNDateParsed)
@@ -1566,6 +1477,8 @@ module.exports = {
         const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
         const inventoryUUId = uuidv4();
 
+        const productId = result?.["Product Id*"]?.toString()?.trim() || null;
+
         inventoryArray.push({
           uuid: inventoryUUId,
           medicine_id,
@@ -1579,6 +1492,7 @@ module.exports = {
           date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
         });
         let updatedObject = {
+          _id: productId ? productId : undefined, // Add _id if Product Id* exists
           // // General
           model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
           name: result?.["Product Name*"]?.toString()?.trim() || "",
@@ -1597,8 +1511,11 @@ module.exports = {
           volumn: result?.["Product Volume"]?.toString()?.trim() || "",
           volumeUnit: result?.["Product Volume Unit"]?.toString()?.trim() || "",
           dimension: result?.["Product Dimension"]?.toString()?.trim() || "",
+          dimensionUnit:
+            result?.["Product Dimension Unit"]?.toString()?.trim() || "",
           weight: Number(result?.["Product Weight*"]) || 0,
           unit: result?.["Product Weight Units*"]?.toString()?.trim() || "",
+          tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
           packageType:
             result?.["Product Packaging Type"]?.toString()?.trim() || "",
           packageMaterial:
@@ -1638,7 +1555,8 @@ module.exports = {
           // // End of stockedInDetails
 
           // // inventoryList
-          quantity2: Number(result?.["Quantity*"]) || 0,
+          quantity2: Number(result?.["Quantity From*"]) || 0,
+          quantity3: Number(result?.["Quantity To*"]) || 0,
           price: Number(result?.["Cost Per Product*"]) || 0,
           deliveryTime: Number(result?.["Est. Delivery Time*"]) || 0,
           // // End of inventoryList
@@ -1676,7 +1594,10 @@ module.exports = {
 
           // // additional
           warranty: result?.["Warranty"]?.toString()?.trim() || "",
-          guidelinesFile: result?.["User Guidelines"]?.toString()?.trim() || "",
+          guidelinesFile:
+            result?.["User Guidelines"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], //aray
           other: result?.["Other Information"]?.toString()?.trim() || "",
           // // end of additional
 
@@ -1745,24 +1666,26 @@ module.exports = {
               elem[key] = {
                 value: elem[key],
                 fieldName: getFieldName(key, true),
-                error: validateFields(
-                  getFieldName(key, true)?.includes("*"),
-                  elem[key],
-                  getFieldName(key, true),
-                  typeof elem[key]
-                ),
+                error:
+                  validateFields(
+                    getFieldName(key, true)?.includes("*"),
+                    elem[key],
+                    getFieldName(key, true),
+                    typeof elem[key]
+                  ) || undefined,
               };
             } else {
               // You can also use this structure if you want to save the results in an object for each key
               elem[key] = {
                 value: elem[key],
                 fieldName: getFieldName(key),
-                error: validateFields(
-                  getFieldName(key)?.includes("*"),
-                  elem[key],
-                  getFieldName(key),
-                  typeof elem[key]
-                ),
+                error:
+                  validateFields(
+                    getFieldName(key)?.includes("*"),
+                    elem[key],
+                    getFieldName(key),
+                    typeof elem[key]
+                  ) || undefined,
               };
             }
           }
@@ -1774,27 +1697,25 @@ module.exports = {
         (field) => field?.fieldName
       );
 
-      // // Insert multiple records into MongoDB
-      // const entries = await Product.insertMany(updatedResult);
+      const entriesWithErrors = previewResponse?.filter((item) =>
+        Object.values(item).some((field) => field.error)
+      );
 
-      // if (!entries || entries?.length == 0) {
-      //   return sendErrorResponse(res, 400, "Failed to add bulk products.");
-      // }
-
-      // if (inventoryArray?.length > 0) {
-      //   const inventories = await Inventory.insertMany(inventoryArray);
-
-      //   if (!inventories || inventories?.length == 0) {
-      //     return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
-      //   }
-      // }
+      // Filter out elements without errors
+      const entriesWithoutErrors = previewResponse?.filter(
+        (item) => !Object.values(item).some((field) => field.error)
+      );
 
       // Remove the CSV file after processing
       fs.unlinkSync(filePath);
 
       return sendSuccessResponse(res, 200, "Success", {
         headings: previewHeadings || [],
-        mainContent: previewResponse,
+        // mainContent: previewResponse,
+        entriesWithErrors: entriesWithErrors || [],
+        entriesWithErrorsCount: entriesWithErrors?.length,
+        entriesWithoutErrors: entriesWithoutErrors || [],
+        entriesWithoutErrorsCount: entriesWithoutErrors?.length,
       });
     } catch (error) {
       console.error("Internal Server Error:", error);
@@ -1810,6 +1731,86 @@ module.exports = {
 
   bulkUpload: async (req, res) => {
     try {
+      const { products } = req?.body;
+      // Extract the value of each key
+      const inventoryArray = [];
+      const extractedValues = products?.map((item) => {
+        const inventoryUUId = uuidv4();
+        const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+        const extracted = {};
+
+        const inventoryObj = {
+          uuid: inventoryUUId,
+          productId: medicine_id,
+          sku: item?.sku?.value,
+          stock: item?.sku?.value,
+          countries: item?.countries?.value,
+          date: item?.date2?.value,
+          stockedInDetails: [
+            {
+              country: item?.country?.value,
+              quantity: item?.quantity?.value,
+              // type: "",
+            },
+          ],
+          inventoryList: [
+            {
+              quantityFrom: item?.quantity2?.value,
+              quantityTo: item?.quantity3?.value,
+              price: item?.price?.value,
+              deliveryTime: item?.deliveryTime?.value,
+            },
+          ],
+          isDeleted: false,
+        };
+        inventoryArray?.push(inventoryObj);
+        // const category_name = item?.category?.value;
+        for (const [key, field] of Object.entries(item)) {
+          if (key == "category") {
+            extracted[key] = getCategoryName(field?.value);
+          } else {
+            extracted[key] = field.value; // Extract the value
+          }
+        }
+        delete extracted?._id;
+        return {
+          ...extracted,
+          general: extracted,
+          // complianceFile: extracted,
+          // cNCFileNDate: extracted,
+          additional: extracted,
+          market: "new",
+          isDeleted: false,
+          bulkUpload: true,
+          healthNSafety: extracted,
+          inventory: inventoryUUId,
+          medicine_id,
+          [extracted?.category]: { ...extracted },
+        };
+      });
+
+      console.log("\n\n\n\nextractedValues", extractedValues);
+
+      // Insert multiple records into MongoDB
+      const entries = await Product.insertMany(extractedValues);
+
+      if (!entries || entries?.length == 0) {
+        return sendErrorResponse(res, 400, "Failed to add bulk products.");
+      }
+
+      if (inventoryArray?.length > 0) {
+        const inventories = await Inventory.insertMany(inventoryArray);
+
+        if (!inventories || inventories?.length == 0) {
+          return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
+        }
+      }
+      return sendSuccessResponse(
+        res,
+        200,
+        "Success Bulk Upload of Products.",
+        entries
+      );
     } catch (error) {
       console.error("Internal Server Error:", error);
       logErrorToFile(error, req);

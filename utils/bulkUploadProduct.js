@@ -464,12 +464,20 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Product Dimension";
       break;
 
+    case "dimensionUnit":
+      fieldName = "Product Dimension Unit";
+      break;
+
     case "weight":
       fieldName = "Product Weight*";
       break;
 
     case "unit":
       fieldName = "Product Weight Units*";
+      break;
+
+    case "tax":
+      fieldName = "Product Tax%*";
       break;
 
     case "packageType":
@@ -529,7 +537,11 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "quantity2":
-      fieldName = "Quantity*";
+      fieldName = "Quantity From*";
+      break;
+
+    case "quantity3":
+      fieldName = "Quantity To*";
       break;
 
     case "price":
@@ -1260,10 +1272,10 @@ const validateFields = (checkValidation, value, fieldName, type) => {
 
     // If checkValidation is true, return the error message (or false if there's no error)
     if (checkValidation) {
-      return errMsg || false;
+      return errMsg || undefined;
     }
 
-    return false; // Return false if validation isn't checked
+    return undefined; // Return false if validation isn't checked
   } catch (error) {
     console.error("Internal Server Error:", error);
     // Ensure logErrorToFile and sendErrorResponse functions are available if needed
@@ -1280,7 +1292,7 @@ const validateFields = (checkValidation, value, fieldName, type) => {
 const getCategoryName = (value) => {
   let catName;
 
-  switch (value) {
+  switch (value?.trim()) {
     case "Alternative Medicines":
       catName = "AlternativeMedicines";
       break;
