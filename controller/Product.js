@@ -270,6 +270,18 @@ module.exports = {
       }
 
       // Add any additional steps like sorting or pagination
+      // const totalProductsQuery = {
+      //   isDeleted: false,
+      //   ...(market ? { market: market } : {}),
+      //   ...(search_key &&
+      //   typeof search_key === "string" &&
+      //   search_key.trim() !== "" &&
+      //   search_key !== "null" &&
+      //   search_key !== "undefined"
+      //     ? { "general.name": { $regex: search_key, $options: "i" } }
+      //     : {}),
+      // };
+
       const totalProductsQuery = {
         isDeleted: false,
         ...(market ? { market: market } : {}),
@@ -280,6 +292,21 @@ module.exports = {
         search_key !== "undefined"
           ? { "general.name": { $regex: search_key, $options: "i" } }
           : {}),
+        ...(formattedCategory && {
+          category: { $regex: formattedCategory, $options: "i" },
+        }),
+        ...(formattedSubCategory && {
+          [`${formattedCategory}.subCategory`]: {
+            $regex: formattedSubCategory,
+            $options: "i",
+          },
+        }),
+        ...(formattedLevel3Category && {
+          [`${formattedCategory}.anotherCategory`]: {
+            $regex: formattedLevel3Category,
+            $options: "i",
+          },
+        }),
       };
 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
@@ -1304,6 +1331,9 @@ module.exports = {
           supplier_id: new mongoose.Types.ObjectId(foundProduct?.supplier_id),
           // ...(market && { market: foundProduct?.market }),
           // ...(category && { category: foundProduct?.category }),
+          ...(search_key && {
+            "general.name": { $regex: search_key, $options: "i" },
+          }),
           ...(quantity?.min &&
             quantity?.max &&
             !isNaN(quantity?.min) &&
@@ -1459,6 +1489,13 @@ module.exports = {
         isDeleted: false,
         // ...(market ? { market: foundProduct?.market } : {}),
         supplier_id: new mongoose.Types.ObjectId(foundProduct?.supplier_id),
+        ...(search_key &&
+          typeof search_key === "string" &&
+          search_key.trim() !== "" &&
+          search_key !== "null" &&
+          search_key !== "undefined"
+            ? { "general.name": { $regex: search_key, $options: "i" } }
+            : {}),
       };
 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
