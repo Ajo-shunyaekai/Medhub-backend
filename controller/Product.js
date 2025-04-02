@@ -1454,6 +1454,7 @@ module.exports = {
     try {
       const { supplier_id } = req?.body;
       const filePath = req.file.path;
+
       // Utility function to parse CSV
       const parseCSV = (filePath) => {
         return new Promise((resolve, reject) => {
@@ -1468,28 +1469,26 @@ module.exports = {
 
       // Parse the CSV file
       const results = await parseCSV(filePath);
+
       // Check if the product exists
       const existingSupplier = await Supplier.findById(supplier_id);
       if (!existingSupplier) {
         return sendErrorResponse(res, 404, "Supplier not found.");
       }
 
-      const inventoryArray = [];
-
       const updatedResult = results?.map((result) => {
-        const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
-        const inventoryUUId = uuidv4();
         let updatedObject = {
           // _id: productId ? productId : undefined, // Add _id if Product Id* exists
-          // // General
           model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
           name: result?.["Product Name*"]?.toString()?.trim() || "",
-          // category:
-          //   getCategoryName(
-          //     result?.["Product Category*"]?.toString()?.trim()
-          //   ) || "",
           category: result?.["Product Category*"]?.toString()?.trim() || "",
-          composition: result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
+          subCategory:
+            result?.["Product Sub Category*"]?.toString()?.trim() || "",
+          anotherCategory:
+            result?.["Product Sub Category (Level 3)"]?.toString()?.trim() ||
+            "",
+          composition:
+            result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
           expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
           upc:
             result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
@@ -1497,7 +1496,8 @@ module.exports = {
             result?.["Short Description*"]?.toString()?.trim() || "",
           brand: result?.["Brand Name"]?.toString()?.trim() || "",
           form: result?.["Product Type/Form*"]?.toString()?.trim() || "",
-          quantity: Number(result?.["Product Total Quantity*"]) || 0,
+          // quantity: Number(result?.["Product Total Quantity*"]) || 0,
+          quantity: Number(result?.["Product Total Quantity*"]) || 0 || 0,
           volumn: result?.["Product Volume"]?.toString()?.trim() || "",
           volumeUnit: result?.["Product Volume Unit"]?.toString()?.trim() || "",
           dimension: result?.["Product Dimension"]?.toString()?.trim() || "",
@@ -1523,13 +1523,6 @@ module.exports = {
               ?.filter((ele) => ele) || [], // array
           description:
             result?.["Product Description*"]?.toString()?.trim() || "",
-          // // End of General
-
-          // inventory: inventoryUUId,
-
-          // // Inventory
-          // uuid: inventoryUUId,
-          // medicine_id,
           date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
           sku: result?.["SKU"]?.toString()?.trim() || "",
           stock: result?.["Stock*"]?.toString()?.trim() || "",
@@ -1537,35 +1530,18 @@ module.exports = {
             result?.["Stocked in Countries*"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim()) || [],
-          // date2: result?.["Date of Manufacture"]?.toString()?.trim() || "",
-          // // stockedInDetails
           country:
             result?.["Country where Stock Trades"]?.toString()?.trim() || "",
-          quantity: Number(result?.["Stock Quantity"]) || 0,
-          // // End of stockedInDetails
-
-          // // inventoryList
           quantity2: Number(result?.["Quantity From*"]) || 0,
           quantity3: Number(result?.["Quantity To*"]) || 0,
           price: Number(result?.["Cost Per Product*"]) || 0,
           deliveryTime: Number(result?.["Est. Delivery Time*"]) || 0,
-          // // End of inventoryList
-
-          // // End of Inventory
-          // // cNCFileNDate
-          // complianceFile: result?.["Regulatory Compliance"]
-          // ?.split(",")
-          // ?.map((ele) => ele?.toString()?.trim())?.filter(ele=>ele) || [], // array
           file:
             result?.["Regulatory Compliance"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
               ?.filter((ele) => ele) || [], // array
           date3: result?.["Date of Expiry"]?.toString()?.trim() || "",
-
-          // // End of cNCFileNDate
-
-          // // healthNSafety
           safetyDatasheet:
             result?.["Safety Datasheet"]
               ?.split(",")
@@ -1580,22 +1556,12 @@ module.exports = {
             result?.["Environmental Impact"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim()) || [], //aray
-          // end of healthNSafety
-
-          // // additional
           warranty: result?.["Warranty"]?.toString()?.trim() || "",
           guidelinesFile:
             result?.["User Guidelines"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim()) || [], //aray
           other: result?.["Other Information"]?.toString()?.trim() || "",
-          // // end of additional
-
-          // medicine_id: medicine_id || "",
-          // supplier_id: existingSupplier?._id || "",
-          // market: "new",
-          // isDeleted: false,
-          // bulkUpload: true,
         };
 
         // Call the helper function to handle category-specific updates
@@ -1652,11 +1618,10 @@ module.exports = {
 
       return sendSuccessResponse(res, 200, "Success", {
         headings: previewHeadings || [],
-        // mainContent: previewResponse,
         entriesWithErrors: entriesWithErrors || [],
-        entriesWithErrorsCount: entriesWithErrors?.length,
+        entriesWithErrorsCount: entriesWithErrors?.length || 0,
         entriesWithoutErrors: entriesWithoutErrors || [],
-        entriesWithoutErrorsCount: entriesWithoutErrors?.length,
+        entriesWithoutErrorsCount: entriesWithoutErrors?.length || 0,
       });
     } catch (error) {
       console.error("Internal Server Error:", error);
@@ -1734,7 +1699,6 @@ module.exports = {
         };
       });
 
-      console.log("\n\n\n\nextractedValues", extractedValues);
 
       // Insert multiple records into MongoDB
       const entries = await Product.insertMany(extractedValues);

@@ -432,6 +432,14 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Product Category*";
       break;
 
+    case "subCategory":
+      fieldName = "Product Sub Category*";
+      break;
+
+    case "anotherCategory":
+      fieldName = "Product Sub Category (Level 3)";
+      break;
+
     case "upc":
       fieldName = "UPC (Universal Product Code)";
       break;
@@ -530,10 +538,6 @@ const getFieldName = (key, additionalCheck) => {
 
     case "country":
       fieldName = "Country where Stock Trades";
-      break;
-
-    case "quantity":
-      fieldName = "Stock Quantity";
       break;
 
     case "quantity2":
@@ -1078,7 +1082,7 @@ const getFieldName = (key, additionalCheck) => {
     case "controlledSubstance":
       fieldName = "Controlled Substance";
       break;
-    
+
     case "sideEffectsAndWarnings":
       fieldName = "Side Effects and Warnings";
       break;
