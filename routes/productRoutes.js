@@ -19,6 +19,7 @@ const {
   productSuppliers,
   otherProducts,
   previewBulkUpload,
+  csvDownload,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -41,6 +42,13 @@ router.post(
   checkAuthorization,
   checkCommonUserAuthentication,
   bulkUpload
+);
+
+router.post(
+  `/csv-download`,
+  checkAuthorization,
+  checkCommonUserAuthentication,
+  csvDownload
 );
 
 router.post(

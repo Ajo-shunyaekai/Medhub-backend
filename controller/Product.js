@@ -13,6 +13,8 @@ const Buyer = require("../schema/buyerSchema");
 const Product = require("../schema/productSchema");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
+const { parse } = require("json2csv");
+
 const {
   getFieldName,
   validateFields,
@@ -1401,12 +1403,12 @@ module.exports = {
         // ...(market ? { market: foundProduct?.market } : {}),
         supplier_id: new mongoose.Types.ObjectId(foundProduct?.supplier_id),
         ...(search_key &&
-          typeof search_key === "string" &&
-          search_key.trim() !== "" &&
-          search_key !== "null" &&
-          search_key !== "undefined"
-            ? { "general.name": { $regex: search_key, $options: "i" } }
-            : {}),
+        typeof search_key === "string" &&
+        search_key.trim() !== "" &&
+        search_key !== "null" &&
+        search_key !== "undefined"
+          ? { "general.name": { $regex: search_key, $options: "i" } }
+          : {}),
       };
 
       const totalProducts = await Product.countDocuments(totalProductsQuery);
@@ -1492,7 +1494,7 @@ module.exports = {
           date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
         });
         let updatedObject = {
-          _id: productId ? productId : undefined, // Add _id if Product Id* exists
+          // _id: productId ? productId : undefined, // Add _id if Product Id* exists
           // // General
           model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
           name: result?.["Product Name*"]?.toString()?.trim() || "",
@@ -1825,6 +1827,47 @@ module.exports = {
 
   csvDownload: async (req, res) => {
     try {
+      const { products } = req?.body;
+
+      // Extract the value of each key and dynamically set the field names
+      const extractedValues = products?.map((item) => {
+        const extracted = {};
+
+        for (const [key, field] of Object.entries(item)) {
+          let value = field.value; // Get the field value
+
+          // If the value is an array, join it as a string
+          if (Array.isArray(value)) {
+            value = value.join(", ");
+          }
+
+          // If the value is a number and it's 0, replace it with an empty string
+          if (
+            !isNaN(Number(value)) &&
+            typeof value === "number" &&
+            value === 0
+          ) {
+            value = "";
+          }
+
+          // Remove the "_id" field if present
+          if (key === "_id") continue;
+
+          extracted[getFieldName(key)] = String(value); // Assign the mapped field name and the value
+        }
+
+        return extracted;
+      });
+
+      // Convert the flattened data to CSV
+      const csv = parse(extractedValues);
+
+      // Set headers for file download
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=product.csv");
+
+      // Send the CSV file as a response
+      res.status(200).send(csv);
     } catch (error) {
       console.error("Internal Server Error:", error);
       logErrorToFile(error, req);
