@@ -617,7 +617,7 @@ module.exports = {
             const buyer = await Buyer.findOne({ buyer_id: buyer_id });
             
             const purchaseOrder = await PurchaseOrder.findOne({ purchaseOrder_id });
-            
+      
             if (!purchaseOrder) {
                 return callback({ code: 404, message: 'Purchase Order not found' });
             }

@@ -1699,7 +1699,6 @@ module.exports = {
         };
       });
 
-
       // Insert multiple records into MongoDB
       const entries = await Product.insertMany(extractedValues);
 
