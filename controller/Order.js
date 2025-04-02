@@ -63,7 +63,7 @@ module.exports = {
 
         const supplier = await Supplier.findOne({ supplier_id: reqObj.supplier_id });
         const buyer = await Buyer.findOne({ buyer_id: reqObj.buyer_id });
-
+     
         const newOrder = new Order({
             order_id          : orderId,
             enquiry_id        : reqObj.enquiry_id,
@@ -270,6 +270,7 @@ module.exports = {
         })
         .catch((err) => {
             logErrorToFile(err, req);
+            console.error("Error:", err);
             return callback({code: 400, message: 'Error while creating the order'})
         })
        } catch (error) {
