@@ -639,7 +639,7 @@ module.exports = {
 
     editMedicine : async (req, res, reqObj, callback) => {
       try {
-        const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
+        const { product_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
           dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
           country_of_origin, stocked_in, registered_in, available_for, description, medicine_image } = reqObj;
 
@@ -663,7 +663,7 @@ module.exports = {
       }));
 
       const newMedicineObj = {
-          medicine_id,
+          product_id,
           supplier_id,
           medicine_name,
           medicine_type : 'new_medicine',
@@ -688,7 +688,7 @@ module.exports = {
           edit_status : 0
       };
 
-      const medicine = await Medicine.findOne({ supplier_id: supplier_id, medicine_id: medicine_id });
+      const medicine = await Medicine.findOne({ supplier_id: supplier_id, product_id: product_id });
   
         if (!medicine) {
             return callback({ code: 404, message: 'Medicine Not Found' });
@@ -709,7 +709,7 @@ module.exports = {
       const { purchased_on, country_available_in, min_purchase_unit, unit_price, condition, invoice_image, quantity } = reqObj;
 
       const secondaryMarketMedicineObj = {
-          medicine_id,
+          product_id,
           supplier_id,
           medicine_name,
           medicine_type : 'secondary_medicine',
@@ -1034,8 +1034,8 @@ module.exports = {
               {
                 $lookup: {
                   from         : "medicineinventories",
-                  localField   : "medicine_id",
-                  foreignField : "medicine_id",
+                  localField   : "product_id",
+                  foreignField : "product_id",
                   as           : "inventory",
                 },
               },
@@ -1044,7 +1044,7 @@ module.exports = {
               },
               {
                 $project: {
-                  medicine_id       : 1,
+                  product_id       : 1,
                   supplier_id       : 1,
                   medicine_name     : 1,
                   medicine_image    : 1,
@@ -1072,7 +1072,7 @@ module.exports = {
               
               {
                 $project: {
-                  medicine_id       : 1,
+                  product_id       : 1,
                   supplier_id       : 1,
                   medicine_name     : 1,
                   medicine_image    : 1,
@@ -1137,7 +1137,7 @@ module.exports = {
               },
               {
                 $project: {
-                  medicine_id       : 1,
+                  product_id       : 1,
                   supplier_id       : 1,
                   medicine_name     : 1,
                   medicine_image    : 1,
@@ -1160,7 +1160,7 @@ module.exports = {
               },
               {
                 $project: {
-                  medicine_id       : 1,
+                  product_id       : 1,
                   supplier_id       : 1,
                   medicine_name     : 1,
                   medicine_image    : 1,

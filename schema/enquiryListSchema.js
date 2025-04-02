@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
 const enquiryItemSchema = new Schema({
-    medicine_id: {
+    product_id: {
         type: String,
         required: true
     },
@@ -33,7 +33,7 @@ const enquiryItemSchema = new Schema({
 });
 
 const enquiryQuotationchema = new Schema({
-    medicine_id: {
+    product_id: {
         type: String,
         required: true
     },

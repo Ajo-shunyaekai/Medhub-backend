@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const medicineInventorySchema = new mongoose.Schema({
-  medicine_id: {
+  product_id: {
     type: String,
     required: true,
     unique: true

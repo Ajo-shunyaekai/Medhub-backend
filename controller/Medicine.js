@@ -70,7 +70,7 @@ module.exports = {
 
   addMedicine: async (req, res, reqObj, callback) => {
     try {
-      const medicine_id = "MED-" + Math.random().toString(16).slice(2, 10);
+      const product_id = "MED-" + Math.random().toString(16).slice(2, 10);
   
       let stockedInDetails = reqObj.stocked_in_details;
       if (typeof stockedInDetails === 'string') {
@@ -108,7 +108,7 @@ module.exports = {
   
       // Create medicine object
       const medicineData = {
-        medicine_id,
+        product_id,
         supplier_id,
         supplierId : supplierDetails?._id,
         medicine_name,
@@ -165,7 +165,7 @@ module.exports = {
         from     : 'supplier',
         to       : 'admin',
         from_id  : supplier_id,
-        event_id : medicine_id,
+        event_id : product_id,
         message  : `${product_type === 'new' ? 'New medicine' : 'New secondary medicine'} request from ${supplier_id}`,
         status   : 0
       });
@@ -287,7 +287,7 @@ module.exports = {
             {
               
                 $project: {
-                    medicine_id       : 1,
+                    product_id       : 1,
                     supplier_id       : 1,
                     medicine_name     : 1,
                     medicine_image    : 1,
@@ -341,19 +341,19 @@ module.exports = {
     try {
       Medicine.aggregate([
         {
-          $match: { medicine_id: reqObj.medicine_id },
+          $match: { product_id: reqObj.product_id },
         },
         {
           $lookup: {
             from         : "medicineinventories",
-            localField   : "medicine_id",
-            foreignField : "medicine_id",
+            localField   : "product_id",
+            foreignField : "product_id",
             as           : "inventory",
           },
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                    : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,
@@ -394,7 +394,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                    : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,
@@ -442,7 +442,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                    : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,
@@ -485,7 +485,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                    : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,
@@ -577,7 +577,7 @@ module.exports = {
               return callback({ code: 400, message: "Invalid format for stocked_in_details" });
           }
       }
-      const { medicine_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
+      const { product_id, product_type, supplier_id, medicine_name, composition, strength, type_of_form, shelf_life, 
               dossier_type, dossier_status, product_category, total_quantity, gmp_approvals, shipping_time, tags, 
               unit_tax, country_of_origin, stocked_in, registered_in, available_for, description, medicine_image,
               manufacturer_name, manufacturer_country_of_origin, manufacturer_description, stocked_in_details,
@@ -606,7 +606,7 @@ module.exports = {
 
         if (product_type === 'new') {
             const newMedicineObj = {
-              medicine_id,
+              product_id,
               supplier_id,
               medicine_name,
               medicine_type : 'new_medicine',
@@ -636,7 +636,7 @@ module.exports = {
               edit_status: 0
             };
 
-            const medicine = await Medicine.findOne({ supplier_id: supplier_id, medicine_id: medicine_id });
+            const medicine = await Medicine.findOne({ supplier_id: supplier_id, product_id: product_id });
 
               if (!medicine) {
                   return callback({ code: 404, message: 'Medicine Not Found' });
@@ -647,7 +647,7 @@ module.exports = {
               newMedEdit.save()
               .then(async(savedMedicine) => {
                 const updatedMedicine = await Medicine.findOneAndUpdate(
-                  { supplier_id: supplier_id, medicine_id: medicine_id },
+                  { supplier_id: supplier_id, product_id: product_id },
                   { edit_status: 0 },
                   { new: true }
                 );
@@ -665,7 +665,7 @@ module.exports = {
                   from            : 'supplier',
                   to              : 'admin',
                   from_id         : supplier_id,
-                  event_id        : medicine_id,
+                  event_id        : product_id,
                   message         : `New Edit Medicine Request from ${supplier_id}`,
                   status          : 0
                 });
@@ -700,7 +700,7 @@ module.exports = {
       } 
       else if(product_type === 'secondary market') {
           const secondaryMarketMedicineObj = {
-              medicine_id,
+              product_id,
               supplier_id,
               medicine_name,
               medicine_type : 'secondary_medicine',
@@ -740,7 +740,7 @@ module.exports = {
           secondaryMedEdit.save()
           .then(async(savedMedicine) => {
             const updatedMedicine = await Medicine.findOneAndUpdate(
-              { supplier_id : supplier_id, medicine_id: medicine_id },
+              { supplier_id : supplier_id, product_id: product_id },
               { edit_status : 0 },
               { new         : true }
             );
@@ -756,7 +756,7 @@ module.exports = {
               from            : 'supplier',
               to              : 'admin',
               from_id         : supplier_id,
-              event_id        : medicine_id,
+              event_id        : product_id,
               message         : `New Secondary Medicine Edit Request from ${supplier_id}`,
               status          : 0
             });
@@ -825,7 +825,7 @@ module.exports = {
 
 //         // // Validate required fields
 //         // const requiredFields = [
-//         //     'medicine_id', 'supplier_id', 'medicine_name',
+//         //     'product_id', 'supplier_id', 'medicine_name',
 //         //     'medicine_category', 'strength', 'type_of_form', 'shelf_life',
 //         //     'dossier_type', 'dossier_status', 'total_quantity', 'gmp_approvals',
 //         //     'shipping_time', 'unit_tax', 'country_of_origin', 'available_for',
@@ -843,7 +843,7 @@ module.exports = {
 
 //         // Transform the request object to match the schema requirements
 //         // const transformedReqObj = {
-//         //     medicine_id:  reqObj.medicine_id,
+//         //     product_id:  reqObj.product_id,
 //         //     supplier_id:  reqObj.supplier_id ,
 //         //     medicine_name: { value: reqObj.medicine_name },
 //         //     composition: { value: reqObj.composition },
@@ -909,7 +909,7 @@ module.exports = {
 
 //         // Fetch the original medicine data
 //         // const originalMedicine = await Medicine.findOne({ 
-//         //     medicine_id: reqObj.medicine_id, 
+//         //     product_id: reqObj.product_id, 
 //         //     supplier_id: reqObj.supplier_id 
 //         // });
         
@@ -918,7 +918,7 @@ module.exports = {
 //         // }
 //         // Fetch the original medicine data
 //         const originalMedicine = await Medicine.findOne({ 
-//           medicine_id: reqObj.medicine_id, 
+//           product_id: reqObj.product_id, 
 //           supplier_id: reqObj.supplier_id 
 //       });
       
@@ -930,7 +930,7 @@ module.exports = {
 //       const setIsChanged = (newValue, originalValue) => newValue !== originalValue;
 
 //       const transformedReqObj = {
-//           medicine_id: reqObj.medicine_id,
+//           product_id: reqObj.product_id,
 //           supplier_id: reqObj.supplier_id,
 //           medicine_name: { value: reqObj.medicine_name, isChanged: setIsChanged(reqObj.medicine_name, originalMedicine.medicine_name) },
 //           composition: { value: reqObj.composition, isChanged: setIsChanged(reqObj.composition, originalMedicine.composition) },
@@ -996,7 +996,7 @@ module.exports = {
 //         // Update the original medicine's edit status
 //         const updatedMedicine = await Medicine.findOneAndUpdate(
 //             { 
-//                 medicine_id: reqObj.medicine_id, 
+//                 product_id: reqObj.product_id, 
 //                 supplier_id: reqObj.supplier_id 
 //             },
 //             { edit_status: 0 },
@@ -1017,7 +1017,7 @@ module.exports = {
 //             from: 'supplier',
 //             to: 'admin',
 //             from_id: reqObj.supplier_id,
-//             event_id: reqObj.medicine_id,
+//             event_id: reqObj.product_id,
 //             message: `New ${reqObj.product_type} Edit Medicine Request from ${reqObj.supplier_id}`,
 //             status: 0,
 //         });
@@ -1051,7 +1051,7 @@ module.exports = {
 
   medicineEditList : async (req, res, reqObj, callback) => {
     try {
-      const { status, pageNo, pageSize, medicine_id, supplier_id } = reqObj
+      const { status, pageNo, pageSize, product_id, supplier_id } = reqObj
 
         const page_no   = pageNo || 1
         const page_size = pageSize || 10
@@ -1101,7 +1101,7 @@ module.exports = {
   similarMedicineList: async (req, res, reqObj, callback) => {
     try {
       const {
-        medicine_name, medicine_id, medicine_type, status, supplier_id,
+        medicine_name, product_id, medicine_type, status, supplier_id,
         pageNo, pageSize, price_range, quantity_range, delivery_time, in_stock, searchKey
       } = reqObj;
   
@@ -1113,7 +1113,7 @@ module.exports = {
         medicine_type : medicine_type,
         medicine_name : medicine_name,
         status        : status,
-        // medicine_id: { $ne: medicine_id }
+        // product_id: { $ne: product_id }
       };
   
       if (in_stock && in_stock.length > 0) {
@@ -1217,7 +1217,7 @@ module.exports = {
         {
           $group: {
             _id: {
-              medicine_id          : '$medicine_id',
+              product_id          : '$product_id',
               medicine_type        : '$medicine_type',
               medicine_name        : '$medicine_name',
               status               : '$status',
@@ -1245,7 +1245,7 @@ module.exports = {
         {
           $project: {
             _id                  : 0,
-            medicine_id          : '$_id.medicine_id',
+            product_id          : '$_id.product_id',
             medicine_type        : '$_id.medicine_type',
             medicine_name        : '$_id.medicine_name',
             status               : '$_id.status',
@@ -1334,7 +1334,7 @@ module.exports = {
 
   otherMedicineList: async (req, res, reqObj, callback) => {
     try {
-        const { medicine_name, medicine_id, medicine_type, status, supplier_id, pageNo, pageSize } = reqObj;
+        const { medicine_name, product_id, medicine_type, status, supplier_id, pageNo, pageSize } = reqObj;
         const page_no = pageNo || 1;
         const page_size = pageSize || 10;
         const offset = (page_no - 1) * page_size;
@@ -1345,12 +1345,12 @@ module.exports = {
                     medicine_type : medicine_type,
                     supplier_id   : supplier_id,
                     status        : status,
-                    medicine_id   : { $ne: medicine_id }
+                    product_id   : { $ne: product_id }
                 }
             },
             {
                 $project: {
-                    medicine_id          : 1,
+                    product_id          : 1,
                     supplier_id          : 1,
                     medicine_name        : 1,
                     medicine_image       : 1,
@@ -1383,7 +1383,7 @@ module.exports = {
                 medicine_type : medicine_type,
                 supplier_id   : supplier_id,
                 status        : status,
-                medicine_id   : { $ne: medicine_id }
+                product_id   : { $ne: product_id }
             }).then(totalItems => {
                 const totalPages = Math.ceil(totalItems / page_size);
                 const returnObj = {
@@ -1509,7 +1509,7 @@ module.exports = {
           {
             
               $project: {
-                  medicine_id       : 1,
+                  product_id       : 1,
                   supplier_id       : 1,
                   supplierId        : 1,
                   medicine_name     : 1,
@@ -1555,8 +1555,8 @@ module.exports = {
           {
             $lookup: {
               from         : "medicineinventories",
-              localField   : "medicine_id",
-              foreignField : "medicine_id",
+              localField   : "product_id",
+              foreignField : "product_id",
               as           : "inventory",
             },
           },
@@ -1565,7 +1565,7 @@ module.exports = {
           },
           {
             $project: {
-              medicine_id       : 1,
+              product_id        : 1,
               supplier_id       : 1,
               supplierId        : 1,
               medicine_name     : 1,
@@ -1593,7 +1593,7 @@ module.exports = {
           
           {
             $project: {
-              medicine_id       : 1,
+              product_id        : 1,
               supplier_id       : 1,
               supplierId        : 1,
               medicine_name     : 1,
@@ -1750,7 +1750,7 @@ module.exports = {
           {
             
               $project: {
-                  medicine_id       : 1,
+                  product_id        : 1,
                   supplier_id       : 1,
                   supplierId        : 1,
                   medicine_name     : 1,
@@ -1791,8 +1791,8 @@ module.exports = {
           {
             $lookup: {
               from         : "medicineinventories",
-              localField   : "medicine_id",
-              foreignField : "medicine_id",
+              localField   : "product_id",
+              foreignField : "product_id",
               as           : "inventory",
             },
           },
@@ -1801,7 +1801,7 @@ module.exports = {
           },
           {
             $project: {
-              medicine_id       : 1,
+              product_id        : 1,
               supplier_id       : 1,
               supplierId        : 1,
               medicine_name     : 1,
@@ -1827,7 +1827,7 @@ module.exports = {
           
           {
             $project: {
-              medicine_id       : 1,
+              product_id        : 1,
               supplier_id       : 1,
               supplierId        : 1,
               medicine_name     : 1,
@@ -1881,19 +1881,19 @@ module.exports = {
       const { usertype } = req?.headers;
       const data = await Medicine.aggregate([
         {
-          $match: { medicine_id: req?.params?.id },
+          $match: { product_id: req?.params?.id },
         },
         {
           $lookup: {
             from         : "medicineinventories",
-            localField   : "medicine_id",
-            foreignField : "medicine_id",
+            localField   : "product_id",
+            foreignField : "product_id",
             as           : "inventory",
           },
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                     : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,
@@ -1934,7 +1934,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                    : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,
@@ -1982,7 +1982,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                     : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,
@@ -2025,7 +2025,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id                    : 1,
+            product_id                     : 1,
             supplier_id                    : 1,
             medicine_name                  : 1,
             medicine_type                  : 1,

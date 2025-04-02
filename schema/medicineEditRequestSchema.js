@@ -6,7 +6,7 @@ const baseOptions = {
 };
 
 const medicineEditRequest = new mongoose.Schema({
-  medicine_id: {
+  product_id: {
     type: String,
     required: true,
     // unique: true
