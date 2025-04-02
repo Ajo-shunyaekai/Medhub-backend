@@ -476,7 +476,7 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Product Weight Units*";
       break;
 
-    case "tax":
+    case "unit_tax":
       fieldName = "Product Tax%*";
       break;
 
@@ -524,9 +524,9 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Stocked in Countries*";
       break;
 
-    case "date2":
-      fieldName = "Date of Manufactur";
-      break;
+    // case "date2":
+    //   fieldName = "Date of Manufacture";
+    //   break;
 
     case "country":
       fieldName = "Country where Stock Trades";
@@ -675,9 +675,7 @@ const getFieldName = (key, additionalCheck) => {
     // case "DisinfectionAndHygieneSupplies":
 
     case "composition":
-      fieldName = additionalCheck
-        ? "Composition/Ingredients*"
-        : "Composition/Ingredients";
+      fieldName = "Composition/Ingredients*";
       break;
 
     case "concentration":
@@ -692,10 +690,6 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Fragrance";
       break;
 
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
-      break;
-
     // case "EmergencyAndFirstAidSupplies":
     case "productLongevity":
       fieldName = "Product Longevity*";
@@ -703,10 +697,6 @@ const getFieldName = (key, additionalCheck) => {
 
     case "foldability":
       fieldName = "Foldability*";
-      break;
-
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
       break;
 
     // case "EyeCareSupplies":
@@ -792,10 +782,6 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Texture";
       break;
 
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
-      break;
-
     case "sterilized":
       fieldName = "Sterilized";
       break;
@@ -863,10 +849,6 @@ const getFieldName = (key, additionalCheck) => {
 
     case "performanceTestingReportFile":
       fieldName = "Performance Testing Report File";
-      break;
-
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
       break;
 
     // case "LaboratorySupplies":
@@ -951,10 +933,6 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Texture";
       break;
 
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
-      break;
-
     case "allergens":
       fieldName = "Allergens";
       break;
@@ -1033,10 +1011,6 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Vegan";
       break;
 
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
-      break;
-
     // case "OrthopedicSupplies"
     case "moistureResistance":
       fieldName = "Moisture Resistance";
@@ -1104,10 +1078,7 @@ const getFieldName = (key, additionalCheck) => {
     case "controlledSubstance":
       fieldName = "Controlled Substance";
       break;
-
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
-      break;
+    
     case "sideEffectsAndWarnings":
       fieldName = "Side Effects and Warnings";
       break;
@@ -1197,17 +1168,9 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Allergens";
       break;
 
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
-      break;
-
     // case "VitalHealthAndWellness":
     case "controlledSubstance":
       fieldName = "Controlled Substance";
-      break;
-
-    case "expiry":
-      fieldName = "Shelf Life/Expiry*";
       break;
 
     case "sideEffectsAndWarnings":
@@ -1368,9 +1331,51 @@ const getCategoryName = (value) => {
   return catName;
 };
 
+const additionalCheckFieldName = (elemCat, key) => {
+  // Check if the key is a direct property of the object
+  if (
+    (elemCat == "Medical Equipment and Devices" && key == "specification") ||
+    (elemCat == "Pharmaceuticals" &&
+      (key == "genericName" ||
+        key == "strength" ||
+        key == "composition" ||
+        key == "drugClass")) ||
+    (elemCat == "Skin, Hair and Cosmetic Supplies" &&
+      (key == "purpose" ||
+        key == "targetCondition" ||
+        key == "composition" ||
+        key == "drugAdministrationRoute" ||
+        key == "dermatologistTested" ||
+        key == "drugClass")) ||
+    (elemCat == "Vital Health and Wellness" &&
+      (key == "healthBenefit" ||
+        key == "genericName" ||
+        key == "strength" ||
+        key == "composition" ||
+        key == "drugAdministrationRoute" ||
+        key == "drugClass")) ||
+    (elemCat == "Diagnostic and Monitoring Devices" &&
+      (key == "specification" || key == "diagnosticFunctions")) ||
+    (elemCat == "Orthopedic Supplies" &&
+      (key == "targetCondition" || key == "strength")) ||
+    (elemCat == "Alternative Medicines" && key == "composition") ||
+    (elemCat == "Emergency and First Aid Supplies" &&
+      (key == "composition" ||
+        key == "productLongevity" ||
+        key == "foldability")) ||
+    (elemCat == "Disinfection and Hygiene Supplies" && key == "composition") ||
+    (elemCat == "Nutrition and Dietary Products" && key == "composition") ||
+    (elemCat == "Healthcare IT Solutions" && key == "interoperability")
+  ) {
+    return true;
+  }
+  return false;
+};
+
 module.exports = {
   handleProductCategorySwitch,
   getFieldName,
   validateFields,
   getCategoryName,
+  additionalCheckFieldName,
 };

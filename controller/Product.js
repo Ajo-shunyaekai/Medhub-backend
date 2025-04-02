@@ -20,6 +20,7 @@ const {
   validateFields,
   handleProductCategorySwitch,
   getCategoryName,
+  additionalCheckFieldName,
 } = require("../utils/bulkUploadProduct");
 
 module.exports = {
@@ -1478,21 +1479,6 @@ module.exports = {
       const updatedResult = results?.map((result) => {
         const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
         const inventoryUUId = uuidv4();
-
-        const productId = result?.["Product Id*"]?.toString()?.trim() || null;
-
-        inventoryArray.push({
-          uuid: inventoryUUId,
-          medicine_id,
-          sku: result?.["SKU"]?.toString()?.trim() || "",
-          stock: result?.["Stock*"]?.toString()?.trim() || "",
-          // stockQuantity: Number(result?.["Stock Quantity"]) || 0,
-          countries:
-            result?.["Countries where Stock Trades"]
-              ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [],
-          date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
-        });
         let updatedObject = {
           // _id: productId ? productId : undefined, // Add _id if Product Id* exists
           // // General
@@ -1503,6 +1489,8 @@ module.exports = {
           //     result?.["Product Category*"]?.toString()?.trim()
           //   ) || "",
           category: result?.["Product Category*"]?.toString()?.trim() || "",
+          composition: result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
+          expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
           upc:
             result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
           aboutManufacturer:
@@ -1517,7 +1505,7 @@ module.exports = {
             result?.["Product Dimension Unit"]?.toString()?.trim() || "",
           weight: Number(result?.["Product Weight*"]) || 0,
           unit: result?.["Product Weight Units*"]?.toString()?.trim() || "",
-          tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
+          unit_tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
           packageType:
             result?.["Product Packaging Type"]?.toString()?.trim() || "",
           packageMaterial:
@@ -1549,7 +1537,7 @@ module.exports = {
             result?.["Stocked in Countries*"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim()) || [],
-          date2: result?.["Date of Manufacture"]?.toString()?.trim() || "",
+          // date2: result?.["Date of Manufacture"]?.toString()?.trim() || "",
           // // stockedInDetails
           country:
             result?.["Country where Stock Trades"]?.toString()?.trim() || "",
@@ -1625,71 +1613,22 @@ module.exports = {
         // Loop through each key in the object
         for (const key in elem) {
           if (elem.hasOwnProperty(key)) {
-            // Check if the key is a direct property of the object
-            if (
-              (elemCat == "Medical Equipment and Devices" &&
-                key == "specification") ||
-              (elemCat == "Pharmaceuticals" &&
-                (key == "genericName" ||
-                  key == "strength" ||
-                  key == "composition" ||
-                  key == "drugClass")) ||
-              (elemCat == "Skin, Hair and Cosmetic Supplies" &&
-                (key == "purpose" ||
-                  key == "targetCondition" ||
-                  key == "composition" ||
-                  key == "drugAdministrationRoute" ||
-                  key == "dermatologistTested" ||
-                  key == "drugClass")) ||
-              (elemCat == "Vital Health and Wellness" &&
-                (key == "healthBenefit" ||
-                  key == "genericName" ||
-                  key == "strength" ||
-                  key == "composition" ||
-                  key == "drugAdministrationRoute" ||
-                  key == "drugClass")) ||
-              (elemCat == "Diagnostic and Monitoring Devices" &&
-                (key == "specification" || key == "diagnosticFunctions")) ||
-              (elemCat == "Orthopedic Supplies" &&
-                (key == "targetCondition" || key == "strength")) ||
-              (elemCat == "Alternative Medicines" && key == "composition") ||
-              (elemCat == "Emergency and First Aid Supplies" &&
-                (key == "composition" ||
-                  key == "productLongevity" ||
-                  key == "foldability")) ||
-              (elemCat == "Disinfection and Hygiene Supplies" &&
-                key == "composition") ||
-              (elemCat == "Nutrition and Dietary Products" &&
-                key == "composition") ||
-              (elemCat == "Healthcare IT Solutions" &&
-                key == "interoperability")
-            ) {
-              // You can also use this structure if you want to save the results in an object for each key
-              elem[key] = {
-                value: elem[key],
-                fieldName: getFieldName(key, true),
-                error:
-                  validateFields(
-                    getFieldName(key, true)?.includes("*"),
-                    elem[key],
-                    getFieldName(key, true),
-                    typeof elem[key]
-                  ) || undefined,
-              };
-            } else {
-              // You can also use this structure if you want to save the results in an object for each key
-              elem[key] = {
-                value: elem[key],
-                fieldName: getFieldName(key),
-                error:
-                  validateFields(
-                    getFieldName(key)?.includes("*"),
-                    elem[key],
-                    getFieldName(key),
-                    typeof elem[key]
-                  ) || undefined,
-              };
-            }
+            const fieldName = getFieldName(
+              key,
+              additionalCheckFieldName(elemCat, key)
+            );
+
+            elem[key] = {
+              value: elem[key],
+              fieldName: fieldName,
+              error:
+                validateFields(
+                  fieldName?.includes("*"),
+                  elem[key],
+                  fieldName,
+                  typeof elem[key]
+                ) || undefined,
+            };
           }
         }
         return elem;
@@ -1745,14 +1684,13 @@ module.exports = {
           uuid: inventoryUUId,
           productId: medicine_id,
           sku: item?.sku?.value,
-          stock: item?.sku?.value,
+          stock: item?.stock?.value,
           countries: item?.countries?.value,
-          date: item?.date2?.value,
+          date: item?.date?.value,
           stockedInDetails: [
             {
               country: item?.country?.value,
               quantity: item?.quantity?.value,
-              // type: "",
             },
           ],
           inventoryList: [
@@ -1778,8 +1716,13 @@ module.exports = {
         return {
           ...extracted,
           general: extracted,
-          // complianceFile: extracted,
-          // cNCFileNDate: extracted,
+          complianceFile: [extracted?.file?.[0] || ""],
+          cNCFileNDate: [
+            {
+              file: extracted?.file?.[0] || "",
+              date: extracted?.date3 || "",
+            },
+          ],
           additional: extracted,
           market: "new",
           isDeleted: false,
@@ -1831,6 +1774,7 @@ module.exports = {
 
       // Extract the value of each key and dynamically set the field names
       const extractedValues = products?.map((item) => {
+        const elemCat = item?.category;
         const extracted = {};
 
         for (const [key, field] of Object.entries(item)) {
@@ -1853,7 +1797,8 @@ module.exports = {
           // Remove the "_id" field if present
           if (key === "_id") continue;
 
-          extracted[getFieldName(key)] = String(value); // Assign the mapped field name and the value
+          extracted[getFieldName(key, additionalCheckFieldName(elemCat, key))] =
+            String(value); // Assign the mapped field name and the value
         }
 
         return extracted;
