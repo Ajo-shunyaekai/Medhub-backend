@@ -1734,8 +1734,6 @@ module.exports = {
         };
       });
 
-      console.log("\n\n\n\nextractedValues", extractedValues);
-
       // Insert multiple records into MongoDB
       const entries = await Product.insertMany(extractedValues);
 
