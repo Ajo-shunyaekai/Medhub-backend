@@ -28,8 +28,8 @@ module.exports = {
               {
                   $lookup: {
                       from: 'medicineinventories', 
-                      localField: 'medicine_id', 
-                      foreignField: 'medicine_id', 
+                      localField: 'product_id', 
+                      foreignField: 'product_id', 
                       as: 'inventory'
                   }
               },
@@ -58,8 +58,8 @@ module.exports = {
                       {
                           $lookup: {
                               from: 'medicineinventories', 
-                              localField: 'medicine_id', 
-                              foreignField: 'medicine_id', 
+                              localField: 'product_id', 
+                              foreignField: 'product_id', 
                               as: 'inventory'
                           }
                       },
@@ -76,8 +76,8 @@ module.exports = {
                     {
                         $lookup: {
                             from: 'medicineinventories', 
-                            localField: 'medicine_id', 
-                            foreignField: 'medicine_id', 
+                            localField: 'product_id', 
+                            foreignField: 'product_id', 
                             as: 'inventory'
                         }
                     },
@@ -119,8 +119,8 @@ module.exports = {
                       {
                           $lookup: {
                               from: 'medicineinventories', 
-                              localField: 'medicine_id', 
-                              foreignField: 'medicine_id', 
+                              localField: 'product_id', 
+                              foreignField: 'product_id', 
                               as: 'inventory'
                           }
                       },
@@ -133,8 +133,8 @@ module.exports = {
                 {
                     $lookup: {
                         from: 'medicineinventories', 
-                        localField: 'medicine_id', 
-                        foreignField: 'medicine_id', 
+                        localField: 'product_id', 
+                        foreignField: 'product_id', 
                         as: 'inventory'
                     }
                 },

@@ -1515,7 +1515,7 @@ module.exports = {
   //       $lookup: {
   //         from         : "medicines",
   //         localField   : "items.product_id",
-  //         foreignField : "medicine_id",
+  //         foreignField : "product_id",
   //         as           : "medicine"
   //       }
   //     },
@@ -1702,7 +1702,7 @@ module.exports = {
           $lookup: {
             from: "medicines",
             localField: "items.product_id",
-            foreignField: "medicine_id",
+            foreignField: "product_id",
             as: "medicine",
           },
         },
@@ -1908,8 +1908,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "items.product_id",
+            foreignField: "product_id",
             as: "medicine",
           },
         },
@@ -2567,8 +2567,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "items.product_id",
+            foreignField: "product_id",
             as: "medicine",
           },
         },
@@ -2714,7 +2714,7 @@ module.exports = {
     try {
       const {
         admin_id,
-        medicine_id,
+        product_id,
         supplier_id,
         supplier_email,
         supplier_contact_email,
@@ -2723,7 +2723,7 @@ module.exports = {
         rejectionReason,
       } = reqObj;
 
-      const medicine = await Medicine.findOne({ medicine_id, supplier_id });
+      const medicine = await Medicine.findOne({ product_id, supplier_id });
       const supplier = await Supplier.findOne({ supplier_id: supplier_id });
 
       if (!medicine) {
@@ -2737,7 +2737,7 @@ module.exports = {
 
       // Ensure both status and edit_status are updated correctly
       const updateStatus = await Medicine.findOneAndUpdate(
-        { medicine_id, supplier_id }, // Query to find the document
+        { product_id, supplier_id }, // Query to find the document
         { status: newMedicineStatus, edit_status: newMedicineStatus }, // Fields to update
         { new: true } // Return the updated document
       );
@@ -2758,7 +2758,7 @@ module.exports = {
         subject = "Medicine Added Successfully";
         body = `Dear ${supplier.contact_person_name}, <br /><br />
                       We are pleased to inform you that your medicine request has been approved and successfully added to our records. Below are the details for your reference: <br /><br />
-                      <strong>Medicine ID:</strong> ${updateStatus.medicine_id} <br />
+                      <strong>Medicine ID:</strong> ${updateStatus.product_id} <br />
                       <strong>Medicine Name:</strong> ${updateStatus.medicine_name} <br />
                       <strong>Supplier ID:</strong> ${updateStatus.supplier_id} <br /><br />
                       If you require further assistance or have any queries, feel free to contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>. <br /><br />
@@ -2782,8 +2782,8 @@ module.exports = {
           to: "supplier",
           from_id: admin_id,
           to_id: supplier_id,
-          event_id: medicine_id,
-          message: `${medicine_id}: Your listing has been approved and is now live!`,
+          event_id: product_id,
+          message: `${product_id}: Your listing has been approved and is now live!`,
           status: 0,
         });
         await newNotification.save();
@@ -2791,7 +2791,7 @@ module.exports = {
         // subject = 'Medicine Request Rejected';
         // body = `Hello ${supplier_name}, <br />
         //     We regret to inform you that your medicine request has been rejected. <br />
-        //     Medicine ID: ${updateStatus.medicine_id} <br />
+        //     Medicine ID: ${updateStatus.product_id} <br />
         //     Supplier ID: ${updateStatus.supplier_id} <br />
         //     Reason: ${rejectionReason || 'Data Mismatch'} <br />
         //     <br /><br />
@@ -2810,8 +2810,8 @@ module.exports = {
           to: "supplier",
           from_id: admin_id,
           to_id: supplier_id,
-          event_id: medicine_id,
-          message: `${medicine_id}: Your listing has been disapproved.`,
+          event_id: product_id,
+          message: `${product_id}: Your listing has been disapproved.`,
           status: 0,
         });
         await newNotification.save();
@@ -2862,8 +2862,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicineinventories",
-            localField: "medicine_id",
-            foreignField: "medicine_id",
+            localField: "product_id",
+            foreignField: "product_id",
             as: "inventory",
           },
         },
@@ -2872,7 +2872,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_image: 1,
@@ -2897,7 +2897,7 @@ module.exports = {
 
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_image: 1,
@@ -2972,19 +2972,19 @@ module.exports = {
     try {
       Medicine.aggregate([
         {
-          $match: { medicine_id: reqObj.medicine_id },
+          $match: { product_id: reqObj.product_id },
         },
         {
           $lookup: {
             from: "medicineinventories",
-            localField: "medicine_id",
-            foreignField: "medicine_id",
+            localField: "product_id",
+            foreignField: "product_id",
             as: "inventory",
           },
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             composition: 1,
@@ -3012,7 +3012,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             composition: 1,
@@ -3041,7 +3041,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             composition: 1,
@@ -3065,7 +3065,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             composition: 1,
@@ -3130,9 +3130,9 @@ module.exports = {
 
   acceptRejectEditMedicineReq: async (req, res, reqObj, callback) => {
     try {
-      const { medicine_id, supplier_id, action, admin_id } = reqObj;
+      const { product_id, supplier_id, action, admin_id } = reqObj;
 
-      const medicine = await EditMedicine.findOne({ medicine_id, supplier_id });
+      const medicine = await EditMedicine.findOne({ product_id, supplier_id });
       const supplier = await Supplier.findOne({ supplier_id: supplier_id });
 
       if (!medicine) {
@@ -3147,7 +3147,7 @@ module.exports = {
 
       if (editMedicineStatus === 1) {
         let updateObj = {
-          medicine_id: medicine.medicine_id,
+          product_id: medicine.product_id,
           supplier_id: medicine.supplier_id,
           medicine_name: medicine.medicine_name,
           composition: medicine.composition,
@@ -3199,7 +3199,7 @@ module.exports = {
         try {
           // Update the edit status in the EditMedicine collection
           await EditMedicine.findOneAndUpdate(
-            { supplier_id, medicine_id },
+            { supplier_id, product_id },
             { $set: { edit_status: editMedicineStatus } }
           );
 
@@ -3209,14 +3209,14 @@ module.exports = {
           if (medicine.medicine_type === "new_medicine") {
             event = "editnewmedicine";
             updatedMedicine = await NewMedicine.findOneAndUpdate(
-              { supplier_id, medicine_id },
+              { supplier_id, product_id },
               { $set: updateObj },
               { new: true }
             );
           } else if (medicine.medicine_type === "secondary_medicine") {
             event = "editsecondarymedicine";
             updatedMedicine = await SecondaryMarketMedicine.findOneAndUpdate(
-              { supplier_id, medicine_id },
+              { supplier_id, product_id },
               { $set: updateObj },
               { new: true }
             );
@@ -3230,7 +3230,7 @@ module.exports = {
           }
 
           // Delete the edit request from the EditMedicine collection after successful update
-          await EditMedicine.deleteOne({ medicine_id, supplier_id });
+          await EditMedicine.deleteOne({ product_id, supplier_id });
 
           const notificationId =
             "NOT-" + Math.random().toString(16).slice(2, 10);
@@ -3242,8 +3242,8 @@ module.exports = {
             to: "supplier",
             from_id: admin_id,
             to_id: supplier_id,
-            event_id: medicine_id,
-            message: ` ${medicine_id}: Your listing has been approved and is now live!`,
+            event_id: product_id,
+            message: ` ${product_id}: Your listing has been approved and is now live!`,
             status: 0,
           });
           await newNotification.save();
@@ -3251,7 +3251,7 @@ module.exports = {
           const subject = "Medicine Edit Request Accepted Successfully";
           const body = `Hello ${medicine.supplier_name}, <br />
                           Your medicine edit request has been approved and changes are live now. <br />
-                          Medicine ID: ${updatedMedicine.medicine_id} <br />
+                          Medicine ID: ${updatedMedicine.product_id} <br />
                           Supplier ID: ${updatedMedicine.supplier_id} <br />
                           <br /><br />
                           <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
@@ -3282,7 +3282,7 @@ module.exports = {
         try {
           // Update the edit status to rejected in the EditMedicine collection
           const result = await EditMedicine.findOneAndUpdate(
-            { supplier_id, medicine_id },
+            { supplier_id, product_id },
             { $set: { edit_status: editMedicineStatus } }
           );
 
@@ -3291,13 +3291,13 @@ module.exports = {
           if (medicine.medicine_type === "new_medicine") {
             event = "editnewmedicinerequest";
             await Medicine.findOneAndUpdate(
-              { supplier_id, medicine_id },
+              { supplier_id, product_id },
               { $set: { edit_status: editMedicineStatus } }
             );
           } else if (medicine.medicine_type === "secondary_medicine") {
             event = "editnewmedicinerequest";
             await Medicine.findOneAndUpdate(
-              { supplier_id, medicine_id },
+              { supplier_id, product_id },
               { $set: { edit_status: editMedicineStatus } }
             );
           }
@@ -3312,8 +3312,8 @@ module.exports = {
             to: "supplier",
             from_id: admin_id,
             to_id: supplier_id,
-            event_id: medicine_id,
-            message: ` ${medicine_id}: Your listing has been disapproved!`,
+            event_id: product_id,
+            message: ` ${product_id}: Your listing has been disapproved!`,
             status: 0,
           });
           await newNotification.save();
@@ -3321,7 +3321,7 @@ module.exports = {
           // const subject = 'Medicine Edit Request Rejected';
           // const body = `Hello ${medicine.supplier_name}, <br />
           //               Your medicine edit request has been rejected. <br />
-          //               Medicine ID: ${updatedMedicine.medicine_id} <br />
+          //               Medicine ID: ${updatedMedicine.product_id} <br />
           //               Supplier ID: ${updatedMedicine.supplier_id} <br />
           //               <br /><br />
           //               Thanks & Regards, <br />
@@ -3376,8 +3376,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicineinventories",
-            localField: "medicine_id",
-            foreignField: "medicine_id",
+            localField: "product_id",
+            foreignField: "product_id",
             as: "inventory",
           },
         },
@@ -3386,7 +3386,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_image: 1,
@@ -3412,7 +3412,7 @@ module.exports = {
 
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_image: 1,
@@ -3489,19 +3489,19 @@ module.exports = {
     try {
       EditMedicine.aggregate([
         {
-          $match: { medicine_id: reqObj.medicine_id },
+          $match: { product_id: reqObj.product_id },
         },
         {
           $lookup: {
             from: "medicineinventories",
-            localField: "medicine_id",
-            foreignField: "medicine_id",
+            localField: "product_id",
+            foreignField: "product_id",
             as: "inventory",
           },
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_type: 1,
@@ -3542,7 +3542,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_type: 1,
@@ -3590,7 +3590,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_type: 1,
@@ -3633,7 +3633,7 @@ module.exports = {
         },
         {
           $project: {
-            medicine_id: 1,
+            product_id: 1,
             supplier_id: 1,
             medicine_name: 1,
             medicine_type: 1,
@@ -3728,10 +3728,10 @@ module.exports = {
 
   deleteMedicine: async (req, res, reqObj, callback) => {
     try {
-      const { medicine_id, supplier_id } = reqObj;
+      const { product_id, supplier_id } = reqObj;
 
       Medicine.findOneAndUpdate(
-        { medicine_id: medicine_id, supplier_id: supplier_id },
+        { product_id: product_id, supplier_id: supplier_id },
         { $set: { status: 3 } },
         { new: true }
       )
@@ -5100,8 +5100,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "items.product_id",
+            foreignField: "product_id",
             as: "medicine_details",
           },
         },
@@ -5129,7 +5129,7 @@ module.exports = {
             items: {
               $push: {
                 _id: "$items._id",
-                medicine_id: "$items.medicine_id",
+                product_id: "$items.product_id",
                 unit_price: "$items.unit_price",
                 quantity_required: "$items.quantity_required",
                 est_delivery_days: "$items.est_delivery_days",
@@ -5155,8 +5155,8 @@ module.exports = {
               {
                 $lookup: {
                   from: "medicines",
-                  localField: "quotation_items.medicine_id",
-                  foreignField: "medicine_id",
+                  localField: "quotation_items.product_id",
+                  foreignField: "product_id",
                   as: "quotation_medicine_details",
                 },
               },
@@ -5174,7 +5174,7 @@ module.exports = {
                   quotation_items: {
                     $push: {
                       _id: "$quotation_items._id",
-                      medicine_id: "$quotation_items.medicine_id",
+                      product_id: "$quotation_items.product_id",
                       unit_price: "$quotation_items.unit_price",
                       quantity_required: "$quotation_items.quantity_required",
                       est_delivery_days: "$quotation_items.est_delivery_days",
@@ -5429,8 +5429,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "items.product_id",
+            foreignField: "product_id",
             as: "medicine",
           },
         },
@@ -5645,8 +5645,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "items.product_id",
+            foreignField: "product_id",
             as: "medicine",
           },
         },
@@ -6008,8 +6008,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "order_items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "order_items.product_id",
+            foreignField: "product_id",
             as: "medicine_details",
           },
         },
@@ -6224,8 +6224,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "items.product_id",
+            foreignField: "product_id",
             as: "medicine",
           },
         },
@@ -6441,8 +6441,8 @@ module.exports = {
         {
           $lookup: {
             from: "medicines",
-            localField: "items.medicine_id",
-            foreignField: "medicine_id",
+            localField: "items.product_id",
+            foreignField: "product_id",
             as: "medicine",
           },
         },

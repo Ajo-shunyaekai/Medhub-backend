@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
 const orderItemSchema = new Schema({
-    medicine_id: {
+    product_id: {
         type: String,
         required: true
     },

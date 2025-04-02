@@ -25,13 +25,13 @@ const listSchema = new Schema({
     ref: "Supplier",
     required: [true, "Supplier Id is required"],
   },
-  // medicine_id: {
+  // product_id: {
   //     type: String,
   //     required: true,
   // },
   item_details: [
     {
-      medicine_id: String,
+      product_id: String,
       quantity: String,
       unit_price: String,
       est_delivery_days: String,

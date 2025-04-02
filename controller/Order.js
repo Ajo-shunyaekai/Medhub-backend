@@ -146,7 +146,7 @@ module.exports = {
 
         //for out of stock email notification
         // for (const item of reqObj.orderItems) {
-        //   const medicine = await Medicine.findOne({ medicine_id: item.medicine_id });
+        //   const medicine = await Medicine.findOne({ product_id: item.product_id });
         //   if (medicine) {
         //     // Convert quantity_required to a number if it's a string
         //     let quantityRequired;
@@ -155,12 +155,12 @@ module.exports = {
         //     } else if (typeof item.quantity_required === "number") {
         //       quantityRequired = item.quantity_required;
         //     } else {
-        //       throw new Error(`Invalid quantity_required value for medicine ${medicine.medicine_id}: ${item.quantity_required}`);
+        //       throw new Error(`Invalid quantity_required value for medicine ${medicine.product_id}: ${item.quantity_required}`);
         //     }
             
         //     // Validate the quantity is a valid number
         //     if (isNaN(quantityRequired) || quantityRequired <= 0) {
-        //       throw new Error(`Invalid quantity value for medicine ${medicine.medicine_id}: ${quantityRequired}`);
+        //       throw new Error(`Invalid quantity value for medicine ${medicine.product_id}: ${quantityRequired}`);
         //     }
             
         //     // Convert current total_quantity to a number if it's a string
@@ -168,18 +168,18 @@ module.exports = {
         //     if (typeof medicine.total_quantity === "string") {
         //       currentQuantity = parseInt(medicine.total_quantity, 10);
         //       if (isNaN(currentQuantity)) {
-        //         throw new Error(`Invalid total_quantity value for medicine ${medicine.medicine_id}: ${medicine.total_quantity}`);
+        //         throw new Error(`Invalid total_quantity value for medicine ${medicine.product_id}: ${medicine.total_quantity}`);
         //       }
         //     } else if (typeof medicine.total_quantity === "number") {
         //       currentQuantity = medicine.total_quantity;
         //     } else {
-        //       throw new Error(`Unexpected total_quantity type for medicine ${medicine.medicine_id}: ${typeof medicine.total_quantity}`);
+        //       throw new Error(`Unexpected total_quantity type for medicine ${medicine.product_id}: ${typeof medicine.total_quantity}`);
         //     }
             
         //     // Calculate new quantity
         //     const newQuantity = currentQuantity - quantityRequired;
         //     if (newQuantity < 0) {
-        //       throw new Error(`Insufficient stock for medicine ${medicine.medicine_id}. Required: ${quantityRequired}, Available: ${currentQuantity}`);
+        //       throw new Error(`Insufficient stock for medicine ${medicine.product_id}. Required: ${quantityRequired}, Available: ${currentQuantity}`);
         //     }
             
         //     // Update medicine quantity with $set instead of $inc
@@ -205,7 +205,7 @@ module.exports = {
         //       await sendEmail(recipientEmails, subject, body);
         //     }
         //   } else {
-        //     console.warn(`Medicine with ID ${item.medicine_id} not found`);
+        //     console.warn(`Medicine with ID ${item.product_id} not found`);
         //   }
         // }
        
@@ -763,7 +763,7 @@ module.exports = {
               $lookup: {
                 from         : "medicines",
                 localField   : "items.product_id",
-                foreignField : "medicine_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -943,8 +943,8 @@ module.exports = {
                 {
                   $lookup: {
                     from         : "medicines",
-                     localField  : "items.medicine_id",
-                    foreignField : "medicine_id",
+                     localField  : "items.product_id",
+                    foreignField : "product_id",
                     as           : "medicine"
                   }
                 },
@@ -1202,8 +1202,8 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                localField   : "items.medicine_id",
-                foreignField : "medicine_id",
+                localField   : "items.product_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -1377,8 +1377,8 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                localField   : "items.medicine_id",
-                foreignField : "medicine_id",
+                localField   : "items.product_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -1538,7 +1538,7 @@ module.exports = {
               $lookup: {
                 from         : "medicines",
                 localField   : "items.product_id",
-                foreignField : "medicine_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -1720,8 +1720,8 @@ module.exports = {
               {
                   $lookup: {
                       from         : "medicines",
-                      localField   : "items.medicine_id",
-                      foreignField : "medicine_id",
+                      localField   : "items.product_id",
+                      foreignField : "product_id",
                       as           : "medicine"
                   }
               },
@@ -1927,8 +1927,8 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                localField   : "items.medicine_id",
-                foreignField : "medicine_id",
+                localField   : "items.product_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -2105,7 +2105,7 @@ module.exports = {
               $lookup: {
                 from         : "medicines",
                 localField   : "items.product_id",
-                foreignField : "medicine_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -2444,8 +2444,8 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                localField   : "items.medicine_id",
-                foreignField : "medicine_id",
+                localField   : "items.product_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -2500,8 +2500,8 @@ module.exports = {
             {
               $lookup: {
                 from: "medicines",
-                localField: "items.medicine_id",
-                foreignField: "medicine_id",
+                localField: "items.product_id",
+                foreignField: "product_id",
                 as: "medicine",
               },
             },
@@ -2675,7 +2675,7 @@ module.exports = {
               $lookup: {
                 from: "medicines",
                 localField: "items.product_id",
-                foreignField: "medicine_id",
+                foreignField: "product_id",
                 as: "medicine",
               },
             },
@@ -2777,7 +2777,7 @@ module.exports = {
               $lookup: {
                 from: "medicines",
                 localField: "items.product_id",
-                foreignField: "medicine_id",
+                foreignField: "product_id",
                 as: "medicine",
               },
             },
@@ -2873,7 +2873,7 @@ module.exports = {
               $lookup: {
                 from         : "medicines",
                 localField   : "items.product_id",
-                foreignField : "medicine_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -3008,7 +3008,7 @@ module.exports = {
               $lookup: {
                 from: "medicines",
                 localField: "items.product_id",
-                foreignField: "medicine_id",
+                foreignField: "product_id",
                 as: "medicine",
               },
             },
@@ -3089,7 +3089,7 @@ module.exports = {
         })
         
         // Convert Mongoose document to plain object and flatten"
-        const flattenedData = productsArr.map(item => flattenData(item, [], ["order_id", "buyer_name", "supplier_name", "medicine_name", "medicine_id", "quantity_required", "unit_price", "total_amount", "target_price", "counter_price"], 'order_list')); // `toObject()` removes internal Mongoose metadata
+        const flattenedData = productsArr.map(item => flattenData(item, [], ["order_id", "buyer_name", "supplier_name", "medicine_name", "product_id", "quantity_required", "unit_price", "total_amount", "target_price", "counter_price"], 'order_list')); // `toObject()` removes internal Mongoose metadata
 
         // Convert the flattened data to CSV
         const csv = parse(flattenedData);
@@ -3211,8 +3211,8 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                 localField   : "items.medicine_id",
-                foreignField : "medicine_id",
+                 localField   : "items.product_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -3430,8 +3430,8 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicines",
-                 localField  : "items.medicine_id",
-                foreignField : "medicine_id",
+                 localField  : "items.product_id",
+                foreignField : "product_id",
                 as           : "medicine"
               }
             },
@@ -3648,8 +3648,8 @@ module.exports = {
             {
                 $lookup: {
                     from         : "medicines",
-                    localField   : "items.medicine_id",
-                    foreignField : "medicine_id",
+                    localField   : "items.product_id",
+                    foreignField : "product_id",
                     as           : "medicine"
                 }
             },

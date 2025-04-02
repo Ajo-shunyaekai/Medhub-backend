@@ -156,7 +156,7 @@ module.exports = {
           guidelinesFile: { $first: "$guidelinesFile" },
           healthNSafety: { $first: "$healthNSafety" },
           category: { $first: "$category" },
-          medicine_id: { $first: "$medicine_id" },
+          product_id: { $first: "$product_id" },
           supplier_id: { $first: "$supplier_id" },
           market: { $first: "$market" },
           secondayMarketDetails: { $first: "$secondayMarketDetails" },
@@ -503,7 +503,7 @@ module.exports = {
       };
 
       const inventoryUUId = uuidv4();
-      const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+      const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
 
       let cNCFileNDateParsed;
 
@@ -540,7 +540,7 @@ module.exports = {
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
-        medicine_id,
+        product_id,
         general: {
           ...req?.body,
           ...(generalFiles || []),
@@ -607,7 +607,7 @@ module.exports = {
 
       const newInventoryDetails = {
         uuid: inventoryUUId,
-        productId: newProduct?.medicine_id,
+        productId: newProduct?.product_id,
         ...req?.body,
         stockedInDetails: JSON.parse(
           req?.body?.stockedInDetails?.filter(
@@ -1079,7 +1079,7 @@ module.exports = {
           guidelinesFile: { $first: "$guidelinesFile" },
           healthNSafety: { $first: "$healthNSafety" },
           category: { $first: "$category" },
-          medicine_id: { $first: "$medicine_id" },
+          product_id: { $first: "$product_id" },
           supplier_id: { $first: "$supplier_id" },
           market: { $first: "$market" },
           secondayMarketDetails: { $first: "$secondayMarketDetails" },
@@ -1318,7 +1318,7 @@ module.exports = {
           guidelinesFile: { $first: "$guidelinesFile" },
           healthNSafety: { $first: "$healthNSafety" },
           category: { $first: "$category" },
-          medicine_id: { $first: "$medicine_id" },
+          product_id: { $first: "$product_id" },
           supplier_id: { $first: "$supplier_id" },
           market: { $first: "$market" },
           secondayMarketDetails: { $first: "$secondayMarketDetails" },
@@ -1642,12 +1642,12 @@ module.exports = {
       const inventoryArray = [];
       const extractedValues = products?.map((item) => {
         const inventoryUUId = uuidv4();
-        const medicine_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+        const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
         const extracted = {};
 
         const inventoryObj = {
           uuid: inventoryUUId,
-          productId: medicine_id,
+          productId: product_id,
           sku: item?.sku?.value,
           stock: item?.stock?.value,
           countries: item?.countries?.value,
@@ -1694,7 +1694,7 @@ module.exports = {
           bulkUpload: true,
           healthNSafety: extracted,
           inventory: inventoryUUId,
-          medicine_id,
+          product_id,
           [extracted?.category]: { ...extracted },
         };
       });

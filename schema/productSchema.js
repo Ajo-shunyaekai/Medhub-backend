@@ -181,7 +181,7 @@ const productSchema = new Schema(
       required: [true, "Validation Error: Category is required."],
       immutable: true,
     },
-    medicine_id: {
+    product_id: {
       type: String,
       required: [true, "Validation Error: User Schema Reference is required."],
       immutable: true,

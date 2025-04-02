@@ -633,8 +633,8 @@ module.exports = {
             {
               $lookup: {
                 from         : "medicineinventories",
-                localField   : "medicine_id",
-                foreignField : "medicine_id",
+                localField   : "product_id",
+                foreignField : "product_id",
                 as           : "productInventory",
               },
             },
@@ -643,7 +643,7 @@ module.exports = {
             },
             {
               $project: {
-                medicine_id       : 1,
+                product_id       : 1,
                 supplier_id       : 1,
                 medicine_name     : 1,
                 composition       : 1,
@@ -1167,7 +1167,7 @@ module.exports = {
     
         if (existingList) {
           existingList.item_details.push({
-            medicine_id       : reqObj.medicine_id,
+            product_id        : reqObj.product_id,
             quantity          : reqObj.quantity,
             unit_price        : reqObj.unit_price,
             est_delivery_days : reqObj.est_delivery_time,
@@ -1197,7 +1197,7 @@ module.exports = {
             supplierId  : supplierDetails?._id,
             supplier_id : reqObj.supplier_id,
             item_details: [{
-              medicine_id       : reqObj.medicine_id,
+              product_id        : reqObj.product_id,
               quantity          : reqObj.quantity,
               unit_price        : reqObj.unit_price,
               est_delivery_days : reqObj.est_delivery_time,
@@ -1254,8 +1254,8 @@ module.exports = {
           {
             $lookup: {
               from         : "products",
-              localField   : "item_details.medicine_id",
-              foreignField : "medicine_id",
+              localField   : "item_details.product_id",
+              foreignField : "product_id",
               as           : "medicine_details"
             }
           },
@@ -1282,7 +1282,7 @@ module.exports = {
               item_details : {
                 $push: {
                   _id               : "$item_details._id",
-                  medicine_id       : "$item_details.medicine_id",
+                  product_id        : "$item_details.product_id",
                   quantity          : "$item_details.quantity",
                   unit_price        : "$item_details.unit_price",
                   est_delivery_days : "$item_details.est_delivery_days",
@@ -1342,7 +1342,7 @@ module.exports = {
 
     deleteListItem: async (req, res, reqObj, callback) => {
       try {
-        const { buyer_id, medicine_id, supplier_id, item_id, list_id } = reqObj;
+        const { buyer_id, product_id, supplier_id, item_id, list_id } = reqObj;
         const itemIds = item_id.map(id => id.trim()).filter(id => ObjectId.isValid(id)).map(id => new ObjectId(id));
     
         if (itemIds.length === 0) {
@@ -1414,13 +1414,13 @@ module.exports = {
               }
   
               item_details.forEach(detail => {
-                  const { medicine_id, unit_price, quantity_required, est_delivery_days, target_price, item_id } = detail;
-                  if (!medicine_id || !unit_price || !quantity_required || !est_delivery_days || !target_price) {
+                  const { product_id, unit_price, quantity_required, est_delivery_days, target_price, item_id } = detail;
+                  if (!product_id || !unit_price || !quantity_required || !est_delivery_days || !target_price) {
                       throw new Error('Missing required item fields');
                   }
                   acc[supplier_id].items.push({
                       item_id,
-                      medicine_id,
+                      product_id,
                       unit_price,
                       quantity_required,
                       est_delivery_days,
@@ -1508,7 +1508,7 @@ module.exports = {
             const supplier = await Supplier.findOne({ supplier_id: supplier_id });
               const { supplier_name, supplier_email, supplier_contact_email, items } = groupedItems[supplier_id];
               if (supplier?.contact_person_email) {
-                  const itemsList = items.map(item => `Medicine ID: ${item.medicine_id}`).join('<br />');
+                  const itemsList = items.map(item => `Medicine ID: ${item.product_id}`).join('<br />');
                   const subject = `New Product Inquiry Received from ${buyer.buyer_name}`
                   const body = `Dear ${supplier?.contact_person_name},<br /><br />
 

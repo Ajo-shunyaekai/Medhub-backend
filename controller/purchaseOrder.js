@@ -94,14 +94,14 @@ module.exports = {
             });
     
             orderItems.forEach(orderItem => {
-                const enquiryItem = enquiry.items.find(item => item.medicine_id === orderItem.medicine_id);
+                const enquiryItem = enquiry.items.find(item => item.product_id === orderItem.product_id);
                 if (enquiryItem) {
                     enquiryItem.status = 'PO created';
                 } 
             });
 
             rejectedItems.forEach(rejectedItem => {
-                const enquiryItem = enquiry.items.find(item => item.medicine_id === rejectedItem.medicine_id);
+                const enquiryItem = enquiry.items.find(item => item.product_id === rejectedItem.product_id);
                 if (enquiryItem) {
                     enquiryItem.status = 'rejected';
                 } 
@@ -110,7 +110,7 @@ module.exports = {
             await enquiry.save();
 
             const formattedOrderItems = orderItems.map(item => ({
-                medicine_id       : item.medicine_id,
+                product_id       : item.product_id,
                 medicine_name     : item.medicine_details.medicine_name || item?.medicine_details?.general?.name,
                 quantity_required : item.quantity_required,
                 est_delivery_days : item.est_delivery_days,
@@ -382,8 +382,8 @@ module.exports = {
             //     {
             //         $lookup: {
             //             from         : "medicines",
-            //             localField   : "order_items.medicine_id",
-            //             foreignField : "medicine_id",
+            //             localField   : "order_items.product_id",
+            //             foreignField : "product_id",
             //             as           : "medicine_details"
             //         }
             //     },
@@ -503,8 +503,8 @@ module.exports = {
                 {
                     $lookup: {
                         from         : "products",
-                        localField   : "order_items.medicine_id",
-                        foreignField : "medicine_id",
+                        localField   : "order_items.product_id",
+                        foreignField : "product_id",
                         as           : "medicine_details"
                     }
                 },
@@ -644,7 +644,7 @@ module.exports = {
             
             if (orderItems) {
                 purchaseOrder.order_items = orderItems.map(item => ({
-                    medicine_id       : item.medicine_id,
+                    product_id       : item.product_id,
                     medicine_name     : item.medicine_name,
                     quantity_required : item.quantity_required,
                     est_delivery_days : item.est_delivery_days,

@@ -323,8 +323,8 @@ module.exports = {
           {
             $lookup: {
               from         : "medicines",
-              localField   : "items.medicine_id",
-              foreignField : "medicine_id",
+              localField   : "items.product_id",
+              foreignField : "product_id",
               as           : "medicine"
             }
           },

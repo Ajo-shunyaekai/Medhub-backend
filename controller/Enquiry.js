@@ -167,8 +167,8 @@ module.exports = {
                 {
                     $lookup: {
                         from         : "products",
-                        localField   : "items.medicine_id",
-                        foreignField : "medicine_id",
+                        localField   : "items.product_id",
+                        foreignField : "product_id",
                         as           : "medicine_details"
                     }
                 },
@@ -192,7 +192,7 @@ module.exports = {
                         items: {
                             $push: {
                                 _id               : "$items._id",
-                                medicine_id       : "$items.medicine_id",
+                                product_id       : "$items.product_id",
                                 medicine_name     : "$medicine_details.general.medicine_name",
                                 unit_price        : "$items.unit_price",
                                 quantity_required : "$items.quantity_required",
@@ -219,8 +219,8 @@ module.exports = {
                             {
                                 $lookup: {
                                     from         : "products",
-                                    localField   : "quotation_items.medicine_id",
-                                    foreignField : "medicine_id",
+                                    localField   : "quotation_items.product_id",
+                                    foreignField : "product_id",
                                     as           : "quotation_medicine_details"
                                 }
                             },
@@ -238,7 +238,7 @@ module.exports = {
                                     quotation_items: {
                                         $push: {
                                             _id               : "$quotation_items._id",
-                                            medicine_id       : "$quotation_items.medicine_id",
+                                            product_id       : "$quotation_items.product_id",
                                             unit_price        : "$quotation_items.unit_price",
                                             quantity_required : "$quotation_items.quantity_required",
                                             est_delivery_days : "$quotation_items.est_delivery_days",
