@@ -1477,6 +1477,7 @@ module.exports = {
       }
 
       const updatedResult = results?.map((result) => {
+        // console.log("\nresult?.[Product Category*]", Number(result?.["Quantity From*"]))
         let updatedObject = {
           // _id: productId ? productId : undefined, // Add _id if Product Id* exists
           model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
@@ -1484,19 +1485,12 @@ module.exports = {
           category: result?.["Product Category*"]?.toString()?.trim() || "",
           subCategory:
             result?.["Product Sub Category*"]?.toString()?.trim() || "",
-          anotherCategory:
-            result?.["Product Sub Category (Level 3)"]?.toString()?.trim() ||
-            "",
-          composition:
-            result?.["Composition/Ingredients*"]?.toString()?.trim() || "",
-          expiry: result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "",
           upc:
             result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
           aboutManufacturer:
             result?.["Short Description*"]?.toString()?.trim() || "",
           brand: result?.["Brand Name"]?.toString()?.trim() || "",
           form: result?.["Product Type/Form*"]?.toString()?.trim() || "",
-          // quantity: Number(result?.["Product Total Quantity*"]) || 0,
           quantity: Number(result?.["Product Total Quantity*"]) || 0 || 0,
           volumn: result?.["Product Volume"]?.toString()?.trim() || "",
           volumeUnit: result?.["Product Volume Unit"]?.toString()?.trim() || "",
@@ -1532,6 +1526,7 @@ module.exports = {
               ?.map((ele) => ele?.toString()?.trim()) || [],
           country:
             result?.["Country where Stock Trades"]?.toString()?.trim() || "",
+          quantity1: Number(result?.["Stock Quantity"]) || 0 || 0,
           quantity2: Number(result?.["Quantity From*"]) || 0,
           quantity3: Number(result?.["Quantity To*"]) || 0,
           price: Number(result?.["Cost Per Product*"]) || 0,
@@ -1655,7 +1650,7 @@ module.exports = {
           stockedInDetails: [
             {
               country: item?.country?.value,
-              quantity: item?.quantity?.value,
+              quantity: item?.quantity1?.value,
             },
           ],
           inventoryList: [

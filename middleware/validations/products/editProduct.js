@@ -113,7 +113,7 @@ const editGeneralValidationRules = [
     .withMessage("Product Weight must be a positive number."),
 
   body("unit").notEmpty().withMessage("Product Weight Unit is required."),
-  body("tax").notEmpty().withMessage("Tax Percentage is required."),
+  body("unit_tax").notEmpty().withMessage("Tax Percentage is required."),
 
   // body("packageType")
   //   .notEmpty()
