@@ -3,8 +3,10 @@ const handleProductCategorySwitch = (result) => {
 
   switch (result?.["Product Category*"]?.trim()) {
     case "Alternative Medicines":
-      updatedObject["composition"] =
-        result?.["Composition/Ingredients*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["composition"] =
+          result?.["Composition/Ingredients*"]?.toString()?.trim() || "");
       updatedObject["healthClaims"] =
         result?.["Health Claims"]?.toString()?.trim() || "";
       updatedObject["healthClaimsFile"] =
@@ -17,8 +19,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Dental Products":
-      updatedObject["productMaterial"] =
-        result?.["Product Material"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["productMaterial"] =
+          result?.["Product Material"]?.toString()?.trim() || "");
       updatedObject["purpose"] = result?.["Purpose"]?.toString()?.trim() || "";
       updatedObject["targetCondition"] =
         result?.["Target Condition"]?.toString()?.trim() || "";
@@ -33,8 +37,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Diagnostic and Monitoring Devices":
-      updatedObject["diagnosticFunctions"] =
-        result?.["Diagnostic Functions*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["diagnosticFunctions"] =
+          result?.["Diagnostic Functions*"]?.toString()?.trim() || "");
       updatedObject["flowRate"] =
         result?.["Flow Rate"]?.toString()?.trim() || "";
       updatedObject["concentration"] =
@@ -64,8 +70,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Disinfection and Hygiene Supplies":
-      updatedObject["composition"] =
-        result?.["Composition/Ingredients*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["composition"] =
+          result?.["Composition/Ingredients*"]?.toString()?.trim() || "");
       updatedObject["concentration"] =
         result?.["Concentration"]?.toString()?.trim() || "";
       updatedObject["formulation"] =
@@ -77,8 +85,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Emergency and First Aid Supplies":
-      updatedObject["composition"] =
-        result?.["Composition/Ingredients*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["composition"] =
+          result?.["Composition/Ingredients*"]?.toString()?.trim() || "");
       updatedObject["productLongevity"] =
         result?.["Product Longevity*"]?.toString()?.trim() || "";
       updatedObject["foldability"] =
@@ -88,7 +98,9 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Eye Care Supplies":
-      updatedObject["frame"] = result?.["Frame"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["frame"] = result?.["Frame"]?.toString()?.trim() || "");
       updatedObject["lens"] = result?.["Lens"]?.toString()?.trim() || "";
       updatedObject["lensMaterial"] =
         result?.["Lens Material"]?.toString()?.trim() || "";
@@ -103,8 +115,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Healthcare IT Solutions":
-      updatedObject["scalabilityInfo"] =
-        result?.["Scalability Info*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["scalabilityInfo"] =
+          result?.["Scalability Info*"]?.toString()?.trim() || "");
       updatedObject["license"] = result?.["License*"]?.toString()?.trim() || "";
       updatedObject["addOns"] = result?.["Add-Ons*"]?.toString()?.trim() || "";
       updatedObject["userAccess"] =
@@ -122,8 +136,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Hospital and Clinic Supplies":
-      updatedObject["thickness"] =
-        result?.["Thickness"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["thickness"] =
+          result?.["Thickness"]?.toString()?.trim() || "");
       updatedObject["productMaterial"] =
         result?.["Product Material"]?.toString()?.trim() || "";
       updatedObject["purpose"] = result?.["Purpose"]?.toString()?.trim() || "";
@@ -145,8 +161,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Home Healthcare Products":
-      updatedObject["colorOptions"] =
-        result?.["Color Options"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["colorOptions"] =
+          result?.["Color Options"]?.toString()?.trim() || "");
       updatedObject["maxWeightCapacity"] =
         result?.["Max Weight Capacity"]?.toString()?.trim() || "";
       updatedObject["gripType"] =
@@ -176,10 +194,12 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Laboratory Supplies":
-      updatedObject["physicalState"] =
-        result?.["Physical State"]
-          ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["physicalState"] =
+          result?.["Physical State"]
+            ?.split(",")
+            ?.map((ele) => ele?.toString()?.trim()) || []);
       updatedObject["hazardClassification"] =
         result?.["Hazard Classification"]
           ?.split(",")
@@ -205,8 +225,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Medical Consumables and Disposables":
-      updatedObject["thickness"] =
-        result?.["Thickness"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["thickness"] =
+          result?.["Thickness"]?.toString()?.trim() || "");
       updatedObject["productMaterial"] =
         result?.["Product Material"]?.toString()?.trim() || "";
       updatedObject["filtrationType"] =
@@ -236,8 +258,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Medical Equipment and Devices":
-      updatedObject["interoperability"] =
-        result?.["Interoperability"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["interoperability"] =
+          result?.["Interoperability"]?.toString()?.trim() || "");
       updatedObject["laserType"] =
         result?.["Laser Type"]?.toString()?.trim() || "";
       updatedObject["coolingSystem"] =
@@ -261,8 +285,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Nutrition and Dietary Products":
-      updatedObject["dairyFree"] =
-        result?.["Dairy Free*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["dairyFree"] =
+          result?.["Dairy Free*"]?.toString()?.trim() || "");
       updatedObject["flavorOptions"] =
         result?.["Flavor Options*"]?.toString()?.trim() || "";
       updatedObject["aminoAcidProfile"] =
@@ -282,8 +308,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Orthopedic Supplies":
-      updatedObject["strength"] =
-        result?.["Strength*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["strength"] =
+          result?.["Strength*"]?.toString()?.trim() || "");
       updatedObject["moistureResistance"] =
         result?.["Moisture Resistance"]?.toString()?.trim() || "";
       updatedObject["purpose"] = result?.["Purpose"]?.toString()?.trim() || "";
@@ -302,8 +330,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Pharmaceuticals":
-      updatedObject["genericName"] =
-        result?.["Generic Name*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["genericName"] =
+          result?.["Generic Name*"]?.toString()?.trim() || "");
       updatedObject["drugClass"] =
         result?.["Drug Class*"]?.toString()?.trim() || "";
       updatedObject["strength"] =
@@ -328,11 +358,13 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Skin, Hair and Cosmetic Supplies":
-      updatedObject["spf"] = result?.["SPF"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["spf"] = result?.["SPF"]?.toString()?.trim() || "");
       updatedObject["fragrance"] =
         result?.["Fragrance"]?.toString()?.trim() || "";
       updatedObject["strength"] =
-        result?.["Strength"]?.toString()?.trim() || "";
+        result?.["Strength*"]?.toString()?.trim() || "";
       updatedObject["elasticity"] =
         result?.["Elasticity"]?.toString()?.trim() || "";
       updatedObject["adhesiveness"] =
@@ -384,8 +416,10 @@ const handleProductCategorySwitch = (result) => {
       break;
 
     case "Vital Health and Wellness":
-      updatedObject["healthBenefit"] =
-        result?.["Health Benefit*"]?.toString()?.trim() || "";
+      (updatedObject["anotherCategory"] =
+        result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || ""),
+        (updatedObject["healthBenefit"] =
+          result?.["Health Benefit*"]?.toString()?.trim() || "");
       updatedObject["genericName"] =
         result?.["Generic Name*"]?.toString()?.trim() || "";
       updatedObject["strength"] =
@@ -532,12 +566,12 @@ const getFieldName = (key, additionalCheck) => {
       fieldName = "Stocked in Countries*";
       break;
 
-    // case "date2":
-    //   fieldName = "Date of Manufacture";
-    //   break;
-
     case "country":
       fieldName = "Country where Stock Trades";
+      break;
+
+    case "quantity1":
+      fieldName = "Stock Quantity";
       break;
 
     case "quantity2":
@@ -605,7 +639,7 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "expiry":
-      fieldName = "Shelf Life/Expiry*";
+      fieldName = additionalCheck ? "Shelf Life/Expiry*" : "Shelf Life/Expiry";
       break;
 
     // case "DentalProducts":
@@ -679,7 +713,9 @@ const getFieldName = (key, additionalCheck) => {
     // case "DisinfectionAndHygieneSupplies":
 
     case "composition":
-      fieldName = "Composition/Ingredients*";
+      fieldName = additionalCheck
+        ? "Composition/Ingredients*"
+        : "Composition/Ingredients";
       break;
 
     case "concentration":
@@ -1338,14 +1374,31 @@ const getCategoryName = (value) => {
 const additionalCheckFieldName = (elemCat, key) => {
   // Check if the key is a direct property of the object
   if (
+    (elemCat == "Medical Consumables and Disposables" && key == "expiry") ||
+    (elemCat == "Diagnostic and Monitoring Devices" &&
+      (key == "specification" || key == "diagnosticFunctions")) ||
+    (elemCat == "Hospital and Clinic Supplies" && key == "expiry") ||
+    (elemCat == "Orthopedic Supplies" &&
+      (key == "targetCondition" || key == "strength")) ||
+    (elemCat == "Dental Products" && key == "expiry") ||
+    (elemCat == "Home Healthcare Products" && key == "expiry") ||
+    (elemCat == "Alternative Medicines" &&
+      (key == "composition" || key == "expiry")) ||
+    (elemCat == "Emergency and First Aid Supplies" &&
+      (key == "composition" ||
+        key == "expiry" ||
+        key == "productLongevity" ||
+        key == "foldability")) ||
     (elemCat == "Medical Equipment and Devices" && key == "specification") ||
     (elemCat == "Pharmaceuticals" &&
       (key == "genericName" ||
         key == "strength" ||
+        key == "expiry" ||
         key == "composition" ||
         key == "drugClass")) ||
     (elemCat == "Skin, Hair and Cosmetic Supplies" &&
       (key == "purpose" ||
+        key == "expiry" ||
         key == "targetCondition" ||
         key == "composition" ||
         key == "drugAdministrationRoute" ||
@@ -1353,22 +1406,16 @@ const additionalCheckFieldName = (elemCat, key) => {
         key == "drugClass")) ||
     (elemCat == "Vital Health and Wellness" &&
       (key == "healthBenefit" ||
+        key == "expiry" ||
         key == "genericName" ||
         key == "strength" ||
         key == "composition" ||
         key == "drugAdministrationRoute" ||
         key == "drugClass")) ||
-    (elemCat == "Diagnostic and Monitoring Devices" &&
-      (key == "specification" || key == "diagnosticFunctions")) ||
-    (elemCat == "Orthopedic Supplies" &&
-      (key == "targetCondition" || key == "strength")) ||
-    (elemCat == "Alternative Medicines" && key == "composition") ||
-    (elemCat == "Emergency and First Aid Supplies" &&
-      (key == "composition" ||
-        key == "productLongevity" ||
-        key == "foldability")) ||
-    (elemCat == "Disinfection and Hygiene Supplies" && key == "composition") ||
-    (elemCat == "Nutrition and Dietary Products" && key == "composition") ||
+    (elemCat == "Disinfection and Hygiene Supplies" &&
+      (key == "composition" || key == "expiry")) ||
+    (elemCat == "Nutrition and Dietary Products" &&
+      (key == "composition" || key == "expiry")) ||
     (elemCat == "Healthcare IT Solutions" && key == "interoperability")
   ) {
     return true;
