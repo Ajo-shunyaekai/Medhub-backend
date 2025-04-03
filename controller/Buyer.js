@@ -15,6 +15,7 @@ const PurchaseOrder = require('../schema/purchaseOrderSchema')
 const Notification       = require('../schema/notificationSchema')
 const OrderHistory = require("../schema/orderHistorySchema");
 const Invoice  = require('../schema/invoiceSchema')
+const Product  = require('../schema/productSchema')
 const nodemailer         = require('nodemailer');
 const {sendEmail,sendTemplateEmail} = require('../utils/emailService')
 const {getTodayFormattedDate}  = require('../utils/utilities');
@@ -614,70 +615,151 @@ module.exports = {
       }
     },
 
+    // supplierProductList : async (req, res, reqObj, callback) => {
+    //   try {
+    //     const { supplier_id, pageNo, pageSize, medicine_type } = reqObj
+  
+    //     const page_no   = pageNo || 1
+    //     const page_size = pageSize || 2
+    //     const offset    = (page_no - 1) * page_size
+
+    //       Medicine.aggregate([
+    //         {
+    //           $match : {
+    //             supplier_id   : supplier_id,
+    //             status        : 1,
+    //             medicine_type : medicine_type
+    //           }
+    //         },
+    //         {
+    //           $lookup: {
+    //             from         : "medicineinventories",
+    //             localField   : "product_id",
+    //             foreignField : "product_id",
+    //             as           : "productInventory",
+    //           },
+    //         },
+    //         {
+    //           $sort: { created_at: -1 } 
+    //         },
+    //         {
+    //           $project: {
+    //             product_id       : 1,
+    //             supplier_id       : 1,
+    //             medicine_name     : 1,
+    //             composition       : 1,
+    //             dossier_type      : 1,
+    //             dossier_status    : 1,
+    //             stocked_in        : 1,
+    //             medicine_type     : 1,
+    //             gmp_approvals     : 1,
+    //             shipping_time     : 1,
+    //             tags              : 1,
+    //             available_for     : 1,
+    //             description       : 1,
+    //             medicine_image    : 1,
+    //             drugs_name        : 1,
+    //             country_of_origin : 1,
+    //             registered_in     : 1,
+    //             comments          : 1,
+    //             dosage_form       : 1,
+    //             category_name     : 1,
+    //             strength          : 1,
+    //             quantity          : 1,
+    //             inventory_info    : 1,
+    //             productInventory  : {
+    //               $arrayElemAt: ["$productInventory", 0],
+    //             },
+    //           },
+    //         },
+    //         { $skip: offset },
+    //         { $limit: page_size },
+    //       ])
+    //         .then((data) => {
+    //           Medicine.countDocuments({supplier_id : supplier_id, status: 1, medicine_type: medicine_type})
+    //           .then(totalItems => {
+
+    //               const totalPages = Math.ceil(totalItems / page_size);
+    //               const returnObj = {
+    //                 data,
+    //                 totalPages,
+    //                 totalItems
+    //               }
+    //               callback({ code: 200, message: "Supplier product list fetched successfully", result: returnObj });
+    //           })
+    //           .catch((err) => {
+    //             callback({code: 400, message: "Error while fetching supplier product list", result: err});
+    //           })
+    //         })
+    //         .catch((err) => {
+    //           logErrorToFile(err, req);
+    //           callback({ code: 400, message: "Error fetching medicine list", result: err});
+    //         });
+    //   } catch (error) {
+    //     console.error("Internal Server Error:", error);
+    //     logErrorToFile(error, req);
+    //     return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+    //   }
+    // },
+
     supplierProductList : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize, medicine_type } = reqObj
-  
+        console.log('reqObj', reqObj)
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
         const offset    = (page_no - 1) * page_size
 
-          Medicine.aggregate([
-            {
-              $match : {
-                supplier_id   : supplier_id,
-                status        : 1,
-                medicine_type : medicine_type
+        const supplier = await Supplier.findOne({supplier_id: supplier_id})
+        console.log('supplier', supplier)
+        Product.aggregate([
+          {
+              $match: {
+                  supplier_id: supplier._id,
+                  market: medicine_type
               }
-            },
-            {
+          },
+          {
               $lookup: {
-                from         : "medicineinventories",
-                localField   : "product_id",
-                foreignField : "product_id",
-                as           : "productInventory",
-              },
-            },
-            {
-              $sort: { created_at: -1 } 
-            },
-            {
+                  from: "inventories",
+                  localField: "inventory",
+                  foreignField: "uuid",
+                  as: "inventoryDetails"
+              }
+          },
+          {
+              $addFields: {
+                  categoryObject: {
+                      $getField: {
+                          field: "$category",
+                          input: "$$ROOT"
+                      }
+                  }
+              }
+          },
+          {
               $project: {
-                product_id       : 1,
-                supplier_id       : 1,
-                medicine_name     : 1,
-                composition       : 1,
-                dossier_type      : 1,
-                dossier_status    : 1,
-                stocked_in        : 1,
-                medicine_type     : 1,
-                gmp_approvals     : 1,
-                shipping_time     : 1,
-                tags              : 1,
-                available_for     : 1,
-                description       : 1,
-                medicine_image    : 1,
-                drugs_name        : 1,
-                country_of_origin : 1,
-                registered_in     : 1,
-                comments          : 1,
-                dosage_form       : 1,
-                category_name     : 1,
-                strength          : 1,
-                quantity          : 1,
-                inventory_info    : 1,
-                productInventory  : {
-                  $arrayElemAt: ["$productInventory", 0],
-                },
-              },
-            },
-            { $skip: offset },
-            { $limit: page_size },
-          ])
+                  _id: 1,
+                  supplier_id: 1,
+                  product_id: 1,
+                  market: 1,
+                  inventory: 1,
+                  storage: 1,
+                  category: 1,
+                  isDeleted: 1,
+                  bulkUpload: 1,
+                  general: 1,
+                  categoryObject: 1 ,// Dynamically extracted category object
+                  inventoryDetails: 1
+              }
+          },
+          { $skip: offset },
+          { $limit: page_size }
+      ])
             .then((data) => {
-              Medicine.countDocuments({supplier_id : supplier_id, status: 1, medicine_type: medicine_type})
+              Product.countDocuments({supplier_id : supplier._id, market: medicine_type})
               .then(totalItems => {
-
+console.log('datea', data)
                   const totalPages = Math.ceil(totalItems / page_size);
                   const returnObj = {
                     data,
