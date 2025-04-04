@@ -8,7 +8,7 @@ const Notification = require('../schema/notificationSchema')
 const nodemailer         = require('nodemailer');
 const { addStageToOrderHistory } = require('./orderHistory');
 const logErrorToFile = require('../logs/errorLogs');
-const { sendErrorResponse } = require('../utils/commonResonse');
+const { sendErrorResponse, handleCatchBlockError } = require('../utils/commonResonse');
 
 var transporter = nodemailer.createTransport({
   host   : "smtp.gmail.com",
@@ -190,9 +190,7 @@ module.exports = {
 
             callback({ code: 200, message: 'Purchase Order Created Successfully', data: newPO });
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+            handleCatchBlockError(req, res, error);
         }
     },
 
@@ -334,9 +332,7 @@ module.exports = {
             callback({code: 400, message: 'Error while fetching PO list', result: err})
             })
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
         }
     },
 
@@ -579,9 +575,7 @@ module.exports = {
                 // callback({ code: 400, message: 'Error while fetching purchase order details' , result: err});   
             })
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
         }
     },
 
@@ -686,9 +680,7 @@ module.exports = {
 
             callback({ code: 200, message: 'Purchase Order updated successfully', data: purchaseOrder });
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
         }
     },
     

@@ -5,7 +5,7 @@ const Buyer = require("../schema/buyerSchema");
 const { validationResult } = require("express-validator");
 const { default: mongoose } = require("mongoose");
 const logErrorToFile = require("../logs/errorLogs");
-const { sendErrorResponse } = require("../utils/commonResonse");
+const { sendErrorResponse, handleCatchBlockError } = require("../utils/commonResonse");
 
 const getAddress = async (req, res) => {
   try {
@@ -65,14 +65,7 @@ const getAddress = async (req, res) => {
       address: updatedAddress,
     });
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    logErrorToFile(error, req);
-    return sendErrorResponse(
-      res,
-      500,
-      "An unexpected error occurred. Please try again later.",
-      error
-    );
+    handleCatchBlockError(req, res, error);
   }
 };
 
@@ -168,14 +161,7 @@ const addAddress = async (req, res) => {
       address: userAddress,
     });
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    logErrorToFile(error, req);
-    return sendErrorResponse(
-      res,
-      500,
-      "An unexpected error occurred. Please try again later.",
-      error
-    );
+    handleCatchBlockError(req, res, error);
   }
 };
 
@@ -226,14 +212,7 @@ const getAddressById = async (req, res) => {
       address,
     });
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    logErrorToFile(error, req);
-    return sendErrorResponse(
-      res,
-      500,
-      "An unexpected error occurred. Please try again later.",
-      error
-    );
+    handleCatchBlockError(req, res, error);
   }
 };
 
@@ -274,14 +253,7 @@ const editAddress = async (req, res) => {
       updatedAddress: userAddress.addresses[addressIndex],
     });
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    logErrorToFile(error, req);
-    return sendErrorResponse(
-      res,
-      500,
-      "",
-      error
-    );
+    handleCatchBlockError(req, res, error);
   }
 };
 
@@ -315,14 +287,7 @@ const deleteAddress = async (req, res) => {
 
     res.status(200).json({ code: 200, message: "Address deleted successfully" });
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    logErrorToFile(error, req);
-    return sendErrorResponse(
-      res,
-      500,
-      "An unexpected error occurred. Please try again later.",
-      error
-    );
+    handleCatchBlockError(req, res, error);
   }
 };
 

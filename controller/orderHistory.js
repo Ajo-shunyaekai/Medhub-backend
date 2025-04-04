@@ -8,7 +8,7 @@ const Order = require("../schema/orderSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const OrderHistory = require("../schema/orderHistorySchema");
 const logErrorToFile = require("../logs/errorLogs");
-const { sendErrorResponse } = require("../utils/commonResonse");
+const { sendErrorResponse, handleCatchBlockError } = require("../utils/commonResonse");
 
 
 
@@ -78,9 +78,7 @@ const getOrderHistory = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    logErrorToFile(error, req);
-    return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+    handleCatchBlockError(req, res, error);
   }
 };
 
@@ -174,9 +172,7 @@ const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageRefer
       orderHistory: updatedOrderHistory,
     };
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    logErrorToFile(error, req);
-    return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+    handleCatchBlockError(req, res, error);
   }
 };
 

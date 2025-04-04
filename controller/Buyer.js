@@ -20,7 +20,7 @@ const nodemailer         = require('nodemailer');
 const {sendEmail,sendTemplateEmail} = require('../utils/emailService')
 const {getTodayFormattedDate}  = require('../utils/utilities');
 const logErrorToFile = require('../logs/errorLogs');
-const { sendErrorResponse } = require('../utils/commonResonse');
+const { sendErrorResponse, handleCatchBlockError } = require('../utils/commonResonse');
 
 
 module.exports = {
@@ -116,9 +116,7 @@ module.exports = {
                 callback({code: 400 , message: "Error While Submiiting Buyer Registration Request"})
               })
           } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+            handleCatchBlockError(req, res, error);
           } 
     },
 
@@ -169,9 +167,7 @@ module.exports = {
               callback({code: 401, message: "Incorrect Password"});
           }
         }catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
        }
     },
 
@@ -245,9 +241,7 @@ module.exports = {
             //     callback({ code: 400, message: 'Error in updating the buyer profile', error: updateProfile});
             //   })
         } catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
         }
     },
 
@@ -266,9 +260,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching buyer details'})
       });
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -304,9 +296,7 @@ module.exports = {
           }
         callback({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -589,9 +579,7 @@ module.exports = {
         });
     
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
     
@@ -609,9 +597,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching supplier details'})
       });
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -705,13 +691,11 @@ module.exports = {
     supplierProductList : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize, medicine_type } = reqObj
-        console.log('reqObj', reqObj)
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
         const offset    = (page_no - 1) * page_size
 
         const supplier = await Supplier.findOne({supplier_id: supplier_id})
-        console.log('supplier', supplier)
         Product.aggregate([
           {
               $match: {
@@ -759,7 +743,6 @@ module.exports = {
             .then((data) => {
               Product.countDocuments({supplier_id : supplier._id, market: medicine_type})
               .then(totalItems => {
-console.log('datea', data)
                   const totalPages = Math.ceil(totalItems / page_size);
                   const returnObj = {
                     data,
@@ -777,9 +760,7 @@ console.log('datea', data)
               callback({ code: 400, message: "Error fetching medicine list", result: err});
             });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -853,9 +834,7 @@ console.log('datea', data)
           callback({code: 400, message : 'error while fetching buyer supplier order list', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -1122,9 +1101,7 @@ console.log('datea', data)
     
         callback({ code: 200, message: 'Buyer dashboard order details fetched successfully', result });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
     
@@ -1181,9 +1158,7 @@ console.log('datea', data)
           callback({code: 400, message : 'error while fetching buyer seller country', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -1216,9 +1191,7 @@ console.log('datea', data)
         })
 
      } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
      }
     },
 
@@ -1230,9 +1203,7 @@ console.log('datea', data)
           callback({code: 200, message : 'buyer support list fetched successfully', result: data})
          })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
     //----------------------------- support --------------------------------------//
@@ -1302,9 +1273,7 @@ console.log('datea', data)
             });
         }
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -1416,9 +1385,7 @@ console.log('datea', data)
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -1455,9 +1422,7 @@ console.log('datea', data)
         }
         callback({ code: 200, message: "Deleted Successfully", result: returnObj });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -1623,9 +1588,7 @@ console.log('datea', data)
   
           callback({ code: 200, message: "Enquiries sent successfully", result: returnObj });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
   
@@ -1702,9 +1665,7 @@ console.log('datea', data)
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -1790,9 +1751,7 @@ console.log('datea', data)
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
      },
 
@@ -1824,9 +1783,7 @@ console.log('datea', data)
       callback({ code: 200, message: "Status Updated", result: updateNotifications });
 
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     },
 
@@ -1853,9 +1810,7 @@ console.log('datea', data)
           callback({ code: 400, message: "Error while fetching count", result: err });
         });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
       }
     }
     

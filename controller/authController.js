@@ -47,6 +47,7 @@ const {
 const {
   sendErrorResponse,
   sendSuccessResponse,
+  handleCatchBlockError,
 } = require("../utils/commonResonse");
 const logErrorToFile = require("../logs/errorLogs");
 
@@ -600,14 +601,7 @@ module.exports = {
 
       // Additional handling for other user types (Seller) would go here
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -690,14 +684,7 @@ module.exports = {
         user2
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -731,14 +718,7 @@ module.exports = {
 
       return sendSuccessResponse(res, 200, "User Found.", user);
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -867,14 +847,7 @@ module.exports = {
         "Mail sent to the registered email."
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1037,14 +1010,7 @@ module.exports = {
         "Mail sent to the registered email."
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1135,14 +1101,7 @@ module.exports = {
       // Success response
       return sendSuccessResponse(res, 200, "OTP verified successfully.");
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1227,14 +1186,7 @@ module.exports = {
         "Password has been successfully updated."
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1329,14 +1281,7 @@ module.exports = {
         "Password has been successfully updated."
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1836,14 +1781,7 @@ module.exports = {
         );
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 };

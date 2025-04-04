@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 const { flattenData } = require('../utils/csvConverter');
 const logErrorToFile = require('../logs/errorLogs');
-const { sendErrorResponse } = require('../utils/commonResonse');
+const { sendErrorResponse, handleCatchBlockError } = require('../utils/commonResonse');
 
 module.exports = {
     
@@ -116,9 +116,7 @@ module.exports = {
             })
             
         } catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
         }
     },
 
@@ -165,9 +163,7 @@ module.exports = {
             callback({code: 401, message: 'Incorrect Password'});
         }
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
     },
 
@@ -183,9 +179,7 @@ module.exports = {
 
       callback({ code: 200, message: "Filter values", result: [result] });
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
      }
     },
 
@@ -268,9 +262,7 @@ module.exports = {
 
       // callback({ code: 200, message: "Filter values", result: [result] });
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
      }
     },
 
@@ -288,9 +280,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching supplier details'})
       });
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
     },
 
@@ -314,9 +304,7 @@ module.exports = {
           callback({code: 400, message : 'Error in fetching Buyer details'})
       });
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
     },
 
@@ -353,9 +341,7 @@ module.exports = {
 
         // Supplier.findOneAndUpdate({supplier_id : supplier_id},{$set: {password :}})
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
     },
     
@@ -572,9 +558,7 @@ module.exports = {
     
         callback({ code: 200, message: 'Supplier dashboard order details fetched successfully', result });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
     },
     
@@ -631,9 +615,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching supplier buyer country', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
     },
 
@@ -751,9 +733,7 @@ module.exports = {
       });
   }
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
      }
     },
 
@@ -787,9 +767,7 @@ module.exports = {
          })
  
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
      },
  
@@ -801,9 +779,7 @@ module.exports = {
           callback({code: 200, message : 'supplier support details fetched successfully', result: data})
           })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
     },
  
@@ -893,9 +869,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
      },
 
@@ -981,9 +955,7 @@ module.exports = {
           callback({code: 400, message : 'error while fetching buyer list', result: err})
         })
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
      },
 
@@ -1006,9 +978,7 @@ module.exports = {
       callback({ code: 200, message: "Status Updated", result: updateNotifications });
 
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
      },
 
@@ -1210,9 +1180,7 @@ module.exports = {
           }
         
         } catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
         }
      },
 
@@ -1239,9 +1207,7 @@ module.exports = {
           callback({ code: 400, message: "Error while fetching count", result: err });
         });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
      },
 
@@ -1361,9 +1327,7 @@ module.exports = {
     
         res?.status(200)?.send({ code: 200, message: 'Supplier list fetched successfully', result: returnObj });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
      },
 
@@ -1470,9 +1434,7 @@ module.exports = {
 
         res.status(200).send(csv);
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
       }
      }
    }

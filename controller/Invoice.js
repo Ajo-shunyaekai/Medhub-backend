@@ -7,7 +7,7 @@ const Enquiry  = require('../schema/enquiryListSchema')
 const Notification = require('../schema/notificationSchema')
 const nodemailer         = require('nodemailer');
 const logErrorToFile = require('../logs/errorLogs')
-const { sendErrorResponse } = require('../utils/commonResonse')
+const { sendErrorResponse, handleCatchBlockError } = require('../utils/commonResonse')
 
 
   const transporter = nodemailer.createTransport({
@@ -138,9 +138,7 @@ module.exports = {
             return callback({code: 400, message: 'Error while creating the invoice'})
         })
        } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
        }
     },
 
@@ -245,9 +243,7 @@ module.exports = {
 
           callback({ code: 200, message: 'Payment Status Updated', result: response });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
       }
     },
   
@@ -443,9 +439,7 @@ module.exports = {
             callback({ code: 400, message: "Error while fetching details", result: err });
           });
       } catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
       }
     },
 

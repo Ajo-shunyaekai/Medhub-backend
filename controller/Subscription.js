@@ -3,6 +3,7 @@ const logErrorToFile = require("../logs/errorLogs");
 const {
   sendErrorResponse,
   sendSuccessResponse,
+  handleCatchBlockError,
 } = require("../utils/commonResonse");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
@@ -79,14 +80,7 @@ module.exports = {
         session
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -232,14 +226,7 @@ module.exports = {
         return sendErrorResponse(res, 400, "Payment session not complete");
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -423,14 +410,7 @@ module.exports = {
         "Invoice have been sent to the email!"
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -449,14 +429,7 @@ module.exports = {
         subscriptionDetails
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 };

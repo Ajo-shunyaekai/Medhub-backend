@@ -37,6 +37,7 @@ const { flattenData } = require("../utils/csvConverter");
 const {
   sendErrorResponse,
   sendSuccessResponse,
+  handleCatchBlockError,
 } = require("../utils/commonResonse");
 const logErrorToFile = require("../logs/errorLogs");
 const { generateProfileEditRequestEmail } = require("../utils/emailContents");
@@ -123,14 +124,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -169,14 +163,7 @@ module.exports = {
         callback({ code: 401, message: "Incorrect Password" });
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -210,14 +197,7 @@ module.exports = {
         });
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -247,14 +227,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -275,14 +248,7 @@ module.exports = {
           callback({ code: 400, message: "Error in fetching users list" });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -325,14 +291,7 @@ module.exports = {
         callback({ code: 400, message: "Failed to update user status" });
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
   //------------------------ supplier ------------------------//
@@ -420,14 +379,7 @@ module.exports = {
         result: returnObj,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -480,14 +432,7 @@ module.exports = {
 
       res.status(200).send(csv);
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -541,14 +486,7 @@ module.exports = {
 
       res.status(200).send(csv);
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -575,14 +513,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -752,14 +683,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -795,14 +719,7 @@ module.exports = {
 
       res.status(200).send(csv);
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -966,14 +883,7 @@ module.exports = {
         return callback({ code: 400, message: "Invalid action" });
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1021,14 +931,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
   //------------------------ supplier ------------------------//
@@ -1117,14 +1020,7 @@ module.exports = {
         result: returnObj,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1148,14 +1044,7 @@ module.exports = {
           callback({ code: 400, message: "Error in fetching buyer details" });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1245,14 +1134,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1405,14 +1287,7 @@ module.exports = {
         return callback({ code: 400, message: "Invalid action" });
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1796,14 +1671,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1851,14 +1719,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1995,14 +1856,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
   //------------------------ buyer ------------------------//
@@ -2184,14 +2038,7 @@ module.exports = {
         result: resultObj,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -2307,14 +2154,7 @@ module.exports = {
         result: resultObj,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -2375,14 +2215,7 @@ module.exports = {
         fetchUpdateProfileRequests(supplierEdit, callback);
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -2456,14 +2289,7 @@ module.exports = {
         { updatedProfileReq, updatedProfile }
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -2699,14 +2525,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -2832,14 +2651,7 @@ module.exports = {
         result: updateStatus,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -2957,14 +2769,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -3117,14 +2922,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -3346,14 +3144,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -3473,14 +3264,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -3715,14 +3499,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -3746,14 +3523,7 @@ module.exports = {
           callback({ code: 400, message: "Error while updating", result: err });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
   //------------------------------ medicine -------------------------------//
@@ -3917,14 +3687,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -4044,14 +3807,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -4651,14 +4407,7 @@ module.exports = {
         result,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
   //----------------------------- dashboard details -------------------------------------//
@@ -4752,14 +4501,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -4846,14 +4588,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -4895,14 +4630,7 @@ module.exports = {
         result: updateNotifications,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
   //------------------------------ notifications -------------------------------//
@@ -5057,14 +4785,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -5344,14 +5065,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
   //------------------------------ inquiries -------------------------------//
@@ -5556,14 +5270,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -5756,14 +5463,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -5958,14 +5658,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -6138,14 +5831,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -6351,14 +6037,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -6556,14 +6235,7 @@ module.exports = {
           });
         });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -6681,14 +6353,7 @@ module.exports = {
         usersList
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -6805,14 +6470,7 @@ module.exports = {
         userProfileEditRequest
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -6967,14 +6625,7 @@ module.exports = {
         updatedUserReq
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 };
