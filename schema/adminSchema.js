@@ -41,6 +41,17 @@ const adminSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    lastLogin: {
+      type: Date
+    },
+    loginHistory: [
+      {
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],   
   },
   { timestamps: true }
 );

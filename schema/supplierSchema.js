@@ -269,6 +269,17 @@ const supplierSchema = new Schema(
         },
       },
     ],
+    lastLogin: {
+      type: Date
+    },
+    loginHistory: [
+      {
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],    
   },
   { timestamps: true }
 );
