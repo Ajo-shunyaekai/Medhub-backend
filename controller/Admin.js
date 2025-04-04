@@ -1766,26 +1766,26 @@ module.exports = {
         {
           $unwind: "$items",
         },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     "items.medicine_image": {
+        //       $arrayElemAt: ["$medicine.medicine_image", 0],
+        //     },
+        //     "items.item_price": {
+        //       $toDouble: {
+        //         $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
+        //       },
+        //     },
+        //   },
+        // },
         {
           $group: {
             _id: "$_id",
@@ -2390,28 +2390,28 @@ module.exports = {
         {
           $unwind: "$items",
         },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.drugs_name": { $arrayElemAt: ["$medicine.drugs_name", 0] },
-            "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     "items.medicine_image": {
+        //       $arrayElemAt: ["$medicine.medicine_image", 0],
+        //     },
+        //     "items.drugs_name": { $arrayElemAt: ["$medicine.drugs_name", 0] },
+        //     "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
+        //     "items.item_price": {
+        //       $toDouble: {
+        //         $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
+        //       },
+        //     },
+        //   },
+        // },
         {
           $group: {
             _id: "$_id",
@@ -4884,7 +4884,7 @@ module.exports = {
               { $unwind: "$quotation_items" },
               {
                 $lookup: {
-                  from: "medicines",
+                  from: "products",
                   localField: "quotation_items.product_id",
                   foreignField: "product_id",
                   as: "quotation_medicine_details",
@@ -5149,26 +5149,26 @@ module.exports = {
         {
           $unwind: "$items",
         },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     "items.medicine_image": {
+        //       $arrayElemAt: ["$medicine.medicine_image", 0],
+        //     },
+        //     "items.item_price": {
+        //       $toDouble: {
+        //         $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
+        //       },
+        //     },
+        //   },
+        // },
         {
           $group: {
             _id: "$_id",
@@ -5358,27 +5358,27 @@ module.exports = {
         {
           $unwind: "$items",
         },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     "items.medicine_image": {
+        //       $arrayElemAt: ["$medicine.medicine_image", 0],
+        //     },
+        //     "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
+        //     "items.item_price": {
+        //       $toDouble: {
+        //         $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
+        //       },
+        //     },
+        //   },
+        // },
         {
           $group: {
             _id: "$_id",
@@ -5916,26 +5916,26 @@ module.exports = {
         {
           $unwind: "$items",
         },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     "items.medicine_image": {
+        //       $arrayElemAt: ["$medicine.medicine_image", 0],
+        //     },
+        //     "items.item_price": {
+        //       $toDouble: {
+        //         $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
+        //       },
+        //     },
+        //   },
+        // },
         {
           $group: {
             _id: "$_id",
@@ -6126,27 +6126,27 @@ module.exports = {
         {
           $unwind: "$items",
         },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     "items.medicine_image": {
+        //       $arrayElemAt: ["$medicine.medicine_image", 0],
+        //     },
+        //     "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
+        //     "items.item_price": {
+        //       $toDouble: {
+        //         $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
+        //       },
+        //     },
+        //   },
+        // },
         {
           $group: {
             _id: "$_id",
