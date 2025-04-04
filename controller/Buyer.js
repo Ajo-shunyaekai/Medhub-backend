@@ -705,13 +705,13 @@ module.exports = {
     supplierProductList : async (req, res, reqObj, callback) => {
       try {
         const { supplier_id, pageNo, pageSize, medicine_type } = reqObj
-        console.log('reqObj', reqObj)
+
         const page_no   = pageNo || 1
         const page_size = pageSize || 2
         const offset    = (page_no - 1) * page_size
 
         const supplier = await Supplier.findOne({supplier_id: supplier_id})
-        console.log('supplier', supplier)
+
         Product.aggregate([
           {
               $match: {
@@ -753,13 +753,13 @@ module.exports = {
                   inventoryDetails: 1
               }
           },
+          { $sort: { createdAt: -1 } },
           { $skip: offset },
           { $limit: page_size }
       ])
             .then((data) => {
               Product.countDocuments({supplier_id : supplier._id, market: medicine_type})
               .then(totalItems => {
-console.log('datea', data)
                   const totalPages = Math.ceil(totalItems / page_size);
                   const returnObj = {
                     data,
