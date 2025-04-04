@@ -22,6 +22,7 @@ const path = require('path');
 const { flattenData } = require('../utils/csvConverter');
 const logErrorToFile = require('../logs/errorLogs');
 const { sendErrorResponse, handleCatchBlockError } = require('../utils/commonResonse');
+const { getLoginFrequencyLast90Days } = require("../utils/userUtils");
 
 module.exports = {
     
@@ -274,7 +275,12 @@ module.exports = {
         }
         Supplier.findOne({supplier_id: req?.params?.id}).select(fields) 
         .then((data) => {
-          callback({code: 200, message : 'Supplier details fetched successfully', result:data})
+          const loginFrequency = getLoginFrequencyLast90Days(data.loginHistory);
+          const resultData = {
+            ...data.toObject(),
+            loginFrequencyLast90Days: loginFrequency,
+          };
+          callback({code: 200, message : 'Supplier details fetched successfully', result:resultData})
       }).catch((error) => {
           console.error('Error:', error);
           callback({code: 400, message : 'Error in fetching supplier details'})

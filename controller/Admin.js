@@ -1573,26 +1573,26 @@ module.exports = {
         {
           $unwind: "$items",
         },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     "items.medicine_image": {
+        //       $arrayElemAt: ["$medicine.medicine_image", 0],
+        //     },
+        //     "items.item_price": {
+        //       $toDouble: {
+        //         $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
+        //       },
+        //     },
+        //   },
+        // },
         {
           $group: {
             _id: "$_id",
@@ -4818,14 +4818,22 @@ module.exports = {
         {
           $unwind: "$items",
         },
+        // {
+        //   $lookup: {
+        //     from: "medicines",
+        //     localField: "items.product_id",
+        //     foreignField: "product_id",
+        //     as: "medicine_details",
+        //   },
+        // },
         {
           $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine_details",
-          },
-        },
+              from         : "products",
+              localField   : "items.product_id",
+              foreignField : "product_id",
+              as           : "medicine_details"
+          }
+      },
         {
           $unwind: {
             path: "$medicine_details",
@@ -4851,6 +4859,7 @@ module.exports = {
               $push: {
                 _id: "$items._id",
                 product_id: "$items.product_id",
+                medicine_name     : "$medicine_details.general.medicine_name",
                 unit_price: "$items.unit_price",
                 quantity_required: "$items.quantity_required",
                 est_delivery_days: "$items.est_delivery_days",
@@ -5700,7 +5709,7 @@ module.exports = {
         },
         {
           $lookup: {
-            from: "medicines",
+            from: "products",
             localField: "order_items.product_id",
             foreignField: "product_id",
             as: "medicine_details",
