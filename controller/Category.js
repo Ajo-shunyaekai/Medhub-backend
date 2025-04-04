@@ -1,6 +1,6 @@
 const logErrorToFile = require('../logs/errorLogs');
 const Category           = require('../schema/categorySchema');
-const { sendErrorResponse } = require('../utils/commonResonse');
+const { sendErrorResponse, handleCatchBlockError } = require('../utils/commonResonse');
 
 
 module.exports = {
@@ -21,9 +21,7 @@ module.exports = {
                 return callback({code: 400, message: "Error while adding category" });
                })
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+            handleCatchBlockError(req, res, error);
         }
     },
 
@@ -35,9 +33,7 @@ module.exports = {
               callback({code: 400, message : 'Error in fetching categories list',error: err})
           });
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+            handleCatchBlockError(req, res, error);
         }     
     },
 
@@ -45,9 +41,7 @@ module.exports = {
         try {
 
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+            handleCatchBlockError(req, res, error);
         }
     },
 

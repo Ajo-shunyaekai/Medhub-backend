@@ -3,7 +3,7 @@ const jwt            = require('jsonwebtoken');
 const Guest          = require('../schema/guestSchema')
 const {generateOtp}  = require('../utils/utilities');
 const logErrorToFile = require('../logs/errorLogs');
-const { sendErrorResponse } = require('../utils/commonResonse');
+const { sendErrorResponse, handleCatchBlockError } = require('../utils/commonResonse');
 
 module.exports = {
 
@@ -33,9 +33,7 @@ module.exports = {
         })
         }
       }catch (error) {
-        console.error("Internal Server Error:", error);
-        logErrorToFile(error, req);
-        return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+        handleCatchBlockError(req, res, error);
     }
     },
 
@@ -59,9 +57,7 @@ module.exports = {
           }
   
         }catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
        }
     },
 

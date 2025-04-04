@@ -6,9 +6,21 @@ const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    console.error("Internal Server Error:", errors.array());
-    logErrorToFile(errors.array(), req);
-    return sendErrorResponse(res, 400, "Validation Error", errors.array());
+    console.error(
+      "Internal Server Error:",
+      errors.array()?.map((ele) => ele?.msg)
+    );
+    logErrorToFile(
+      errors.array()?.map((ele) => ele?.msg),
+      req,
+      "express-validator"
+    );
+    return sendErrorResponse(
+      res,
+      400,
+      "Validation Error",
+      errors.array()?.map((ele) => ele?.msg)
+    );
   }
 
   next();

@@ -49,9 +49,7 @@ module.exports = {
               callback({code: 401});
             }) 
         } catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
         }
     },
 
@@ -74,9 +72,7 @@ module.exports = {
               callback({code: 401, message: 'Incorrect Password'});
           }
         }catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+          handleCatchBlockError(req, res, error);
        }
     },
 }

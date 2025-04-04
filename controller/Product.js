@@ -6,6 +6,7 @@ const logErrorToFile = require("../logs/errorLogs");
 const {
   sendErrorResponse,
   sendSuccessResponse,
+  handleCatchBlockError,
 } = require("../utils/commonResonse");
 const Supplier = require("../schema/supplierSchema");
 const Inventory = require("../schema/inventorySchema");
@@ -298,14 +299,7 @@ module.exports = {
         totalPages,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -379,14 +373,7 @@ module.exports = {
         products
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -635,14 +622,7 @@ module.exports = {
         newProduct
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -882,14 +862,7 @@ module.exports = {
         updatedProduct
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -937,14 +910,7 @@ module.exports = {
 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1196,14 +1162,7 @@ module.exports = {
 
       return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1439,14 +1398,7 @@ module.exports = {
         }
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1619,14 +1571,7 @@ module.exports = {
         entriesWithoutErrorsCount: entriesWithoutErrors?.length || 0,
       });
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1715,14 +1660,7 @@ module.exports = {
         entries
       );
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -1772,14 +1710,7 @@ module.exports = {
       // Send the CSV file as a response
       res.status(200).send(csv);
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(
-        res,
-        500,
-        "An unexpected error occurred. Please try again later.",
-        error
-      );
+      handleCatchBlockError(req, res, error);
     }
   },
 };
