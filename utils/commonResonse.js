@@ -26,7 +26,7 @@ const handleCatchBlockError = async (req, res, error) => {
     let errObj = error;
     let dbError = false;
 
-    if (error instanceof mongoose?.Error?.ValidationError) {
+    if (mongoose.Error.ValidationError && error instanceof mongoose.Error.ValidationError) {
       const messages = Object.values(error?.errors).map(
         (error) => error?.message
       );
@@ -35,32 +35,32 @@ const handleCatchBlockError = async (req, res, error) => {
       message = "Validation failed";
       statusCode = 400;
       errObj = uniqueMessages;
-    } else if (error instanceof mongoose?.Error?.CastError) {
+    } else if (mongoose.Error.CastError && error instanceof mongoose.Error.CastError) {
       dbError = true;
       message = `Invalid value for ${error.path}`;
       statusCode = 400;
       errObj = error?.errors;
-    } else if (error instanceof mongoose?.Error?.VersionError) {
+    } else if (mongoose.Error.VersionError && error instanceof mongoose.Error.VersionError) {
       dbError = true;
       message = "Version mismatch error";
       statusCode = 409;
       errObj = error?.errors;
-    } else if (error instanceof mongoose?.Error?.DivergentArrayError) {
+    } else if (mongoose.Error.DivergentArrayError && error instanceof mongoose.Error.DivergentArrayError) {
       dbError = true;
       message = "Array projection error";
       statusCode = 400;
       errObj = error?.errors;
-    } else if (error instanceof mongoose?.Error?.MongooseServerSelectionError) {
+    } else if (mongoose.Error.MongooseServerSelectionError && error instanceof mongoose.Error.MongooseServerSelectionError) {
       dbError = true;
       message = "Unable to connect to the database";
       statusCode = 500;
       errObj = error?.errors;
-    } else if (error instanceof mongoose?.Error?.OverwriteModelError) {
+    } else if (mongoose.Error.OverwriteModelError && error instanceof mongoose.Error.OverwriteModelError) {
       dbError = true;
       message = "Model has already been defined";
       statusCode = 500;
       errObj = error?.errors;
-    } else if (error instanceof mongoose?.Error?.ObjectExpectedError) {
+    } else if (mongoose.Error.ObjectExpectedError && error instanceof mongoose.Error.ObjectExpectedError) {
       dbError = true;
       message = "Expected an object value";
       statusCode = 400;

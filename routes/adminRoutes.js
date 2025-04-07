@@ -7,25 +7,25 @@ const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  
 
 module.exports = () => {
 
-    routes.post('/register', checkAuthorization, (req, res) => handleController(Controller.register, req, res));
+    // routes.post('/register', checkAuthorization, (req, res) => handleController(Controller.register, req, res));
 
-    routes.post('/login', checkAuthorization, (req, res) => handleController(Controller.login, req, res));
+    // routes.post('/login', checkAuthorization, (req, res) => handleController(Controller.login, req, res));
 
-    routes.post('/edit-profile', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.editAdminProfile, req, res));
+    // routes.post('/edit-profile', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.editAdminProfile, req, res));
 
-    routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.adminProfileDetails, req, res));
+    // routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.adminProfileDetails, req, res));
 
-    routes.post('/get-user-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getUserList, req, res));
+    // routes.post('/get-user-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getUserList, req, res));
 
-    routes.post('/block-unblock-user', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.blockUnblockUser, req, res));
+    // routes.post('/block-unblock-user', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.blockUnblockUser, req, res));
 
-    routes.post('/get-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getSupplierList, req, res));
+    // routes.post('/get-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getSupplierList, req, res));
 
     routes.post('/get-supplier-list-csv', checkAuthorization, checkCommonUserAuthentication, Controller.getSupplierCSVList);
     
     routes.post('/get-buyer-list-csv', checkAuthorization, checkCommonUserAuthentication, Controller.getBuyerCSVList);
 
-    routes.post('/get-supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierDetails, req, res));
+    // routes.post('/get-supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierDetails, req, res));
 
     routes.post('/get-supplier-reg-req-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getRegReqList, req, res));
 
@@ -35,7 +35,7 @@ module.exports = () => {
 
     routes.post('/get-buyer-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getBuyerList, req, res));
 
-    routes.post('/get-buyer-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerDetails, req, res));
+    // routes.post('/get-buyer-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerDetails, req, res));
 
     routes.post('/get-buyer-reg-req-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getBuyerRegReqList, req, res));
 
@@ -59,9 +59,9 @@ module.exports = () => {
 
     routes.post('/get-medicine-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.allMedicineList, req, res));
 
-    routes.post('/medicine-details', checkAuthorization, (req, res) => handleController(Controller.getMedicineDetails, req, res));
+    // routes.post('/medicine-details', checkAuthorization, (req, res) => handleController(Controller.getMedicineDetails, req, res));
 
-    routes.post('/all-medicine-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(MedicineController.allMedicineList, req, res));
+    // routes.post('/all-medicine-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(MedicineController.allMedicineList, req, res));
 
     routes.post('/get-support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportList, req, res));
 
@@ -71,7 +71,7 @@ module.exports = () => {
 
     routes.post('/buyer-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerOrdersList, req, res));
 
-    routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.orderDetails, req, res));
+    // routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.orderDetails, req, res));
 
     routes.post('/get-notification-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getNotificationList, req, res));
 
@@ -79,17 +79,13 @@ module.exports = () => {
 
     routes.post('/update-notification-status', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.updateStatus, req, res));
 
-    routes.post('/get-inquiry-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.inquiriesList, req, res));
+    // routes.post('/get-inquiry-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.inquiriesList, req, res));
 
     routes.post('/get-inquiry-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.inquiryDetails, req, res));
 
-    routes.post('/get-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.invoicesList, req, res));
+    // routes.post('/get-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.invoicesList, req, res));
 
-    routes.post('/get-invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.invoiceDetails, req, res));
-
-    routes.post('/get-po-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getPOList, req, res));
-
-    routes.post('/get-po-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getPODetails, req, res));
+    // routes.post('/get-invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.invoiceDetails, req, res));
     
     routes.post('/get-transaction-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.transactionList, req, res));
 

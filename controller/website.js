@@ -28,7 +28,7 @@ module.exports = {
       const subject = "Inquiry from Medhub Global";
       // const recipientEmails = [process.env.SMTP_USER_ID, "ajo@shunyaekai.tech"];
       const recipientEmails = ["platform@medhub.global"];
-    //   const recipientEmails = ["ajo@shunyaekai.tech"]
+      // const recipientEmails = ["ajo@shunyaekai.tech"]
       const emailContent = await contactUsContent(req.body);
       // const result = await sendEmail({ username, email, subject, phone, message, checkbox });
       await sendEmail(recipientEmails, subject, emailContent);

@@ -20,13 +20,13 @@ module.exports = () => {
 
     routes.post('/submit-pickup-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.submitPickupDetails, req, res));
 
-    routes.post('/buyer-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerOrdersList, req, res));
+    // routes.post('/buyer-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerOrdersList, req, res));
     
     routes.post('/get-all-order-list', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListAllUsers);
     
     routes.post('/get-order-list-csv', checkAuthorization, checkCommonUserAuthentication, Order?.getOrderListCSV);
 
-    routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerOrderDetails, req, res));
+    // routes.post('/order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerOrderDetails, req, res));
 
     routes.post('/get-specific-order-details/:id', checkAuthorization, checkCommonUserAuthentication, Order?.getSpecificOrderDetails);
 
@@ -62,19 +62,19 @@ module.exports = () => {
         handleController(Order.orderComplaint, req, res, obj)
     });
 
-    routes.post('/buyer-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerInvoicesList, req, res));
+    // routes.post('/buyer-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerInvoicesList, req, res));
 
-    routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerInvoiceDetails, req, res));
+    // routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerInvoiceDetails, req, res));
 
-    routes.post('/supplier-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.supplierOrdersList, req, res));
+    // routes.post('/supplier-order-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.supplierOrdersList, req, res));
 
-    routes.post('/supplier-order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.supplierOrderDetails, req, res));
+    // routes.post('/supplier-order-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.supplierOrderDetails, req, res));
 
-    routes.post('/supplier-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.supplierInvoicesList, req, res));
+    // routes.post('/supplier-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.supplierInvoicesList, req, res));
 
     routes.post('/get-all-invoice-list', checkAuthorization, checkCommonUserAuthentication, Order.getInvoiceListForAllUsers);
 
-    routes.post('/proforma-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController( Order.proformaInvoiceList, req, res));
+    // routes.post('/proforma-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController( Order.proformaInvoiceList, req, res));
 
     routes.post('/sales-filter', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.orderSalesFilterList, req, res));
 

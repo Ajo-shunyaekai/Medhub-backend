@@ -31,7 +31,7 @@ module.exports = () => {
        handleController(Invoice.updatePaymentStatus, req, res, obj)
     });
 
-    routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Invoice.invoiceDetails, req, res));
+    // routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Invoice.invoiceDetails, req, res));
 
     routes.post('/get-specific-invoice-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Invoice.invoiceDetails, req, res));
  
