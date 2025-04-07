@@ -34,6 +34,7 @@ const listSchema = new Schema({
       product_id: String,
       quantity: String,
       unit_price: String,
+      unit_tax: Number,
       est_delivery_days: String,
       quantity_required: String,
       target_price: String,

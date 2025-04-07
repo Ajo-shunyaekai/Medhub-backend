@@ -141,6 +141,7 @@ module.exports = {
         quantity_required: item.quantity_required,
         est_delivery_days: item.est_delivery_days,
         unit_price: item.unit_price,
+        unit_tax: item.unit_tax,
         total_amount: item.totalAmount,
         counter_price: item.counter_price,
         target_price: item.target_price,

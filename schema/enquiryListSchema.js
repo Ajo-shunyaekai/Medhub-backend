@@ -9,6 +9,10 @@ const enquiryItemSchema = new Schema({
     unit_price: {
         type: String,
         required: true
+    }, 
+    unit_tax: {
+        type: Number,
+        required: true
     },
     quantity_required: {
         type: String,
@@ -39,6 +43,10 @@ const enquiryQuotationchema = new Schema({
     },
     unit_price: {
         type: String,
+        required: true
+    },
+    unit_tax: {
+        type: Number,
         required: true
     },
     quantity_required: {

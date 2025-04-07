@@ -190,9 +190,10 @@ module.exports = {
                         items: {
                             $push: {
                                 _id               : "$items._id",
-                                product_id       : "$items.product_id",
+                                product_id        : "$items.product_id",
                                 medicine_name     : "$medicine_details.general.medicine_name",
                                 unit_price        : "$items.unit_price",
+                                unit_tax          : "$items.unit_tax",
                                 quantity_required : "$items.quantity_required",
                                 est_delivery_days : "$items.est_delivery_days",
                                 target_price      : "$items.target_price",
@@ -236,8 +237,9 @@ module.exports = {
                                     quotation_items: {
                                         $push: {
                                             _id               : "$quotation_items._id",
-                                            product_id       : "$quotation_items.product_id",
+                                            product_id        : "$quotation_items.product_id",
                                             unit_price        : "$quotation_items.unit_price",
+                                            unit_tax          : "$quotation_items.unit_tax",
                                             quantity_required : "$quotation_items.quantity_required",
                                             est_delivery_days : "$quotation_items.est_delivery_days",
                                             target_price      : "$quotation_items.target_price",

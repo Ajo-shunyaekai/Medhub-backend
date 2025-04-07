@@ -1256,12 +1256,13 @@ module.exports = {
               product_id        : reqObj.product_id,
               quantity          : reqObj.quantity,
               unit_price        : reqObj.unit_price,
+              unit_tax          : reqObj.unit_tax,
               est_delivery_days : reqObj.est_delivery_time,
               quantity_required : reqObj.quantity_required,
               target_price      : reqObj.target_price
             }]
           });
-    
+        
           newList.save()
             .then(async(data) => {
               const listCount = await List.countDocuments({buyer_id: reqObj.buyer_id})
@@ -1339,6 +1340,7 @@ module.exports = {
                   product_id        : "$item_details.product_id",
                   quantity          : "$item_details.quantity",
                   unit_price        : "$item_details.unit_price",
+                  unit_tax          : "$item_details.unit_tax",
                   est_delivery_days : "$item_details.est_delivery_days",
                   quantity_required : "$item_details.quantity_required",
                   target_price      : "$item_details.target_price",
@@ -1462,16 +1464,18 @@ module.exports = {
                       items: []
                   };
               }
-  
+
               item_details.forEach(detail => {
-                  const { product_id, unit_price, quantity_required, est_delivery_days, target_price, item_id } = detail;
-                  if (!product_id || !unit_price || !quantity_required || !est_delivery_days || !target_price) {
-                      throw new Error('Missing required item fields');
+                console.log('detail',detail)
+                  const { product_id, unit_price, unit_tax, quantity_required, est_delivery_days, target_price, item_id } = detail;
+                  if (!product_id || !unit_price || !unit_tax ||  !quantity_required || !est_delivery_days || !target_price) {
+                      throw new Error('Missing required item fieldssss');
                   }
                   acc[supplier_id].items.push({
                       item_id,
                       product_id,
                       unit_price,
+                      unit_tax,
                       quantity_required,
                       est_delivery_days,
                       target_price,

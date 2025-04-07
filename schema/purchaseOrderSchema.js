@@ -22,6 +22,10 @@ const orderItemSchema = new Schema({
         type: String,
         required: true
     },
+    unit_tax: {
+        type: Number,
+        required: true
+    },
     total_amount: {
         type: String,
         required: true
