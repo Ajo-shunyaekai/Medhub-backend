@@ -1,8 +1,6 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const Buyer = require("../schema/buyerSchema");
-const User = require("../schema/userSchema");
-const Seller = require("../schema/sellerSchema");
 const Supplier = require("../schema/supplierSchema");
 const Admin = require("../schema/adminSchema");
 const LogisticsPartner = require('../schema/logisticsCompanySchema');

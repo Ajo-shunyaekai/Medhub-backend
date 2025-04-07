@@ -4,7 +4,6 @@ const nodemailer = require("nodemailer");
 const moment = require("moment");
 const generator = require("generate-password");
 const Admin = require("../schema/adminSchema");
-const User = require("../schema/userSchema");
 const Order = require("../schema/orderSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
