@@ -1656,7 +1656,9 @@ module.exports = {
       return sendSuccessResponse(
         res,
         200,
-        "Success Bulk Upload of Products.",
+        ` ${entries.length} ${
+          entries?.length == 1 ? "product" : "products"
+        } have been uploaded successfully.`,
         entries
       );
     } catch (error) {
