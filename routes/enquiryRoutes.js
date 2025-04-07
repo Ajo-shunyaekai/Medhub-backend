@@ -11,7 +11,7 @@ const {checkAuthorization, checkCommonUserAuthentication}  = require('../middlew
 
 module.exports = () => {    
     
-    routes.post('/enquiry-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Enquiry.getEnquiryList, req, res));
+    // routes.post('/enquiry-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Enquiry.getEnquiryList, req, res));
 
     routes.post('/enquiry-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Enquiry.getEnquiryDetails, req, res));
 

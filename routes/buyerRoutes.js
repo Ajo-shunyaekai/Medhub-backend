@@ -19,13 +19,13 @@ module.exports = () => {
 
     routes.post('/get-specific-buyer-details/:id', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerProfileDetails, req, res));
     
-    routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerProfileDetails, req, res));
+    // routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerProfileDetails, req, res));
 
-    routes.post('/supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierList, req, res));
+    // routes.post('/supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierList, req, res));
 
     routes.post('/my-supplier-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.mySupplierList, req, res));
 
-    routes.post('/supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierDetails, req, res));
+    // routes.post('/supplier-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierDetails, req, res));
 
     routes.post('/supplier-product-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierProductList, req, res));
 
@@ -35,9 +35,9 @@ module.exports = () => {
 
     routes.post('/orders-seller-country', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerOrderSellerCountry, req, res));
 
-    routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportList, req, res));
+    // routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportList, req, res));
 
-    routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportDetails, req, res));
+    // routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportDetails, req, res));
 
     routes.post('/add-to-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.addToList, req, res));
 

@@ -116,7 +116,7 @@ router.post(`/update-password/:id`, updatePassword);
 
 router.post(`/edit-profile/:id`, checkAuthorization, validateUserInput, handleValidationErrors, updateProfileAndSendEditRequest);
 
-router.put(`/:id`, checkAuthorization, cpUpload, validateUserInput, handleValidationErrors, updateProfileAndSendEditRequest);
+// router.put(`/:id`, checkAuthorization, cpUpload, validateUserInput, handleValidationErrors, updateProfileAndSendEditRequest);
 
 router.post(`/:id`, getLoggedinUserProfileDetails);
 
