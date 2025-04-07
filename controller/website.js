@@ -1,7 +1,7 @@
 const { contactUsContent } = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
 const EmailListing = require("../schema/emailListingSchema");
-
+ 
 module.exports = {
   websiteEnquiryEmail: async (req, res) => {
     const {
@@ -24,7 +24,7 @@ module.exports = {
         } else {
         }
       }
-
+ 
       const subject = "Inquiry from Medhub Global";
       // const recipientEmails = [process.env.SMTP_USER_ID, "ajo@shunyaekai.tech"];
       const recipientEmails = ["platform@medhub.global"];
