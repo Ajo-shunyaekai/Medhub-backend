@@ -393,6 +393,7 @@ module.exports = {
         payment_terms: regObj.payment_terms,
         estimated_delivery_time: regObj.estimated_delivery_time,
         tags: regObj.tags,
+        categories: regObj.categories,
         registration_no: regObj.registration_no,
         vat_reg_no: regObj.vat_reg_no,
         activity_code: regObj.activity_code,

@@ -56,11 +56,11 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
-    tax_no: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    // tax_no: {
+    //   type: String,
+    //   required: true,
+    //   trim: true,
+    // },
     registration_no: {
       type: String,
       required: true,
@@ -168,6 +168,13 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
+    categories: [
+      {
+        type: String,
+        required: true,
+        trim: true,
+      },
+    ],
     activity_code: {
       type: String,
       required: true,
