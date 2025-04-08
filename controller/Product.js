@@ -476,10 +476,7 @@ module.exports = {
             throw new Error("Invalid cNCFileNDate format.");
           }
         } catch (error) {
-          // Handle the case where the JSON parsing fails
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return;
+          handleCatchBlockError(req, res, error);
         }
       } else {
         cNCFileNDateParsed = JSON.parse(

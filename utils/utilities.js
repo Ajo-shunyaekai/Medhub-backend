@@ -1,6 +1,6 @@
 const randomstring = require('randomstring');
 const logErrorToFile = require('../logs/errorLogs');
-const { sendErrorResponse } = require('./commonResonse');
+const { sendErrorResponse, handleCatchBlockError } = require('./commonResonse');
 
 module.exports = {
 
@@ -240,14 +240,7 @@ module.exports = {
                 res.send(response);
             });
         } catch (error) {
-            console.error("Internal Server Error:", error);
-            logErrorToFile(error, req);
-            return sendErrorResponse(
-                res,
-                500,
-                "An unexpected error occurred. Please try again later.",
-                error
-            );
+            handleCatchBlockError(req, res, error);
         }
     }
     

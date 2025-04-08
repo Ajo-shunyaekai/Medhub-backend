@@ -1,3 +1,4 @@
+const { handleCatchBlockError } = require("./commonResonse");
 const handleProductCategorySwitch = (result) => {
   let updatedObject = {};
 
@@ -1280,15 +1281,7 @@ const validateFields = (checkValidation, value, fieldName, type) => {
 
     return undefined; // Return false if validation isn't checked
   } catch (error) {
-    console.error("Internal Server Error:", error);
-    // Ensure logErrorToFile and sendErrorResponse functions are available if needed
-    logErrorToFile(error, req); // Only if req is available
-    return sendErrorResponse(
-      res,
-      500,
-      "An unexpected error occurred. Please try again later.",
-      error
-    );
+    handleCatchBlockError(req, res, error);
   }
 };
 
