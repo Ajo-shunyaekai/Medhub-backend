@@ -62,41 +62,43 @@ module.exports = {
       // Create the aggregation pipeline
       let pipeline = [];
 
+      const totalProductsQuery = {
+        isDeleted: false, // Only products that are not deleted
+        ...(supplier_id && {
+          supplier_id: new mongoose.Types.ObjectId(supplier_id),
+        }),
+        ...(market && { market: market }),
+        ...(formattedCategory && {
+          category: { $regex: formattedCategory, $options: "i" },
+        }),
+        ...(subCategory && {
+          [`${formattedCategory}.subCategory`]: {
+            $regex: subCategory,
+            $options: "i",
+          },
+        }),
+        ...(level3Category && {
+          [`${formattedCategory}.anotherCategory`]: {
+            $regex: level3Category,
+            $options: "i",
+          },
+        }),
+        ...(search_key && {
+          "general.name": { $regex: search_key, $options: "i" },
+        }),
+        ...(quantity?.min &&
+          quantity?.max &&
+          !isNaN(quantity?.min) &&
+          !isNaN(quantity?.max) && {
+            "general.quantity": {
+              $gte: parseInt(quantity?.min, 10),
+              $lte: parseInt(quantity?.max, 10),
+            },
+          }),
+      };
+
       pipeline.push({
-        $match: {
-          isDeleted: false, // Only products that are not deleted
-          ...(supplier_id && {
-            supplier_id: new mongoose.Types.ObjectId(supplier_id),
-          }),
-          ...(market && { market: market }),
-          ...(formattedCategory && {
-            category: { $regex: formattedCategory, $options: "i" },
-          }),
-          ...(subCategory && {
-            [`${formattedCategory}.subCategory`]: {
-              $regex: subCategory,
-              $options: "i",
-            },
-          }),
-          ...(level3Category && {
-            [`${formattedCategory}.anotherCategory`]: {
-              $regex: level3Category,
-              $options: "i",
-            },
-          }),
-          ...(search_key && {
-            "general.name": { $regex: search_key, $options: "i" },
-          }),
-          ...(quantity?.min &&
-            quantity?.max &&
-            !isNaN(quantity?.min) &&
-            !isNaN(quantity?.max) && {
-              "general.quantity": {
-                $gte: parseInt(quantity?.min, 10),
-                $lte: parseInt(quantity?.max, 10),
-              },
-            }),
-        },
+        $match: totalProductsQuery,
       });
 
       // Lookup Supplier (userDetails) based on supplier_id in Product
@@ -237,47 +239,7 @@ module.exports = {
         });
       }
 
-      // Add any additional steps like sorting or pagination
-      // const totalProductsQuery = {
-      //   isDeleted: false,
-      //   ...(market ? { market: market } : {}),
-      //   ...(search_key &&
-      //   typeof search_key === "string" &&
-      //   search_key.trim() !== "" &&
-      //   search_key !== "null" &&
-      //   search_key !== "undefined"
-      //     ? { "general.name": { $regex: search_key, $options: "i" } }
-      //     : {}),
-      // };
-
-      const totalProductsQuery = {
-        isDeleted: false,
-        ...(market ? { market: market } : {}),
-        ...(search_key &&
-        typeof search_key === "string" &&
-        search_key.trim() !== "" &&
-        search_key !== "null" &&
-        search_key !== "undefined"
-          ? { "general.name": { $regex: search_key, $options: "i" } }
-          : {}),
-        ...(formattedCategory && {
-          category: { $regex: formattedCategory, $options: "i" },
-        }),
-        ...(formattedSubCategory && {
-          [`${formattedCategory}.subCategory`]: {
-            $regex: formattedSubCategory,
-            $options: "i",
-          },
-        }),
-        ...(formattedLevel3Category && {
-          [`${formattedCategory}.anotherCategory`]: {
-            $regex: formattedLevel3Category,
-            $options: "i",
-          },
-        }),
-      };
-
-      const totalProducts = await Product.countDocuments(totalProductsQuery);
+      // const totalProducts = await Product.countDocuments(totalProductsQuery);
 
       pipeline.push({
         $sort: { createdAt: -1 },
@@ -289,6 +251,7 @@ module.exports = {
 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
+      const totalProducts = (await products?.length) || 0;
       const totalPages = Math.ceil(totalProducts / pageSize);
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
@@ -965,27 +928,30 @@ module.exports = {
 
       let pipeline = [];
 
-      pipeline?.push({
-        $match: {
-          isDeleted: false,
-          "general.name": {
-            $regex: foundProduct?.general?.name,
-            $options: "i",
-          },
-          ...(market && { market: foundProduct?.market }),
-          ...(category && { category: foundProduct?.category }),
-          ...searchFilter,
-          ...(quantity?.min &&
-            quantity?.max &&
-            !isNaN(quantity?.min) &&
-            !isNaN(quantity?.max) && {
-              // "general.quantity": { $lte: parseInt(quantity, 10) },
-              "general.quantity": {
-                $gte: parseInt(quantity?.min, 10),
-                $lte: parseInt(quantity?.max, 10),
-              },
-            }),
+      // Add any additional steps like sorting or pagination
+      const totalProductsQuery = {
+        isDeleted: false,
+        "general.name": {
+          $regex: foundProduct?.general?.name,
+          $options: "i",
         },
+        ...(market && { market: foundProduct?.market }),
+        ...(category && { category: foundProduct?.category }),
+        ...searchFilter,
+        ...(quantity?.min &&
+          quantity?.max &&
+          !isNaN(quantity?.min) &&
+          !isNaN(quantity?.max) && {
+            // "general.quantity": { $lte: parseInt(quantity, 10) },
+            "general.quantity": {
+              $gte: parseInt(quantity?.min, 10),
+              $lte: parseInt(quantity?.max, 10),
+            },
+          }),
+      };
+
+      pipeline?.push({
+        $match: totalProductsQuery,
       });
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
@@ -1125,16 +1091,6 @@ module.exports = {
         });
       }
 
-      // Add any additional steps like sorting or pagination
-      const totalProductsQuery = {
-        isDeleted: false,
-        "general.name": { $regex: foundProduct?.general?.name, $options: "i" },
-        ...(market ? { market: foundProduct?.market } : {}),
-        ...searchFilter,
-      };
-
-      const totalProducts = await Product.countDocuments(totalProductsQuery);
-
       pipeline.push({
         $sort: { createdAt: -1 },
       });
@@ -1145,6 +1101,7 @@ module.exports = {
 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
+      const totalProducts = (await products?.length) || 0;
       const totalPages = Math.ceil(totalProducts / pageSize);
 
       return sendSuccessResponse(
@@ -1159,8 +1116,6 @@ module.exports = {
           totalPages,
         }
       );
-
-      return sendSuccessResponse(res, 200, "Success Soft Deleting Product");
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
@@ -1198,26 +1153,30 @@ module.exports = {
 
       let pipeline = [];
 
-      pipeline?.push({
-        $match: {
-          isDeleted: false,
-          supplier_id: new mongoose.Types.ObjectId(foundProduct?.supplier_id),
-          // ...(market && { market: foundProduct?.market }),
-          // ...(category && { category: foundProduct?.category }),
-          ...(search_key && {
-            "general.name": { $regex: search_key, $options: "i" },
+      // Add any additional steps like sorting or pagination
+      const totalProductsQuery = {
+        isDeleted: false,
+        supplier_id: new mongoose.Types.ObjectId(foundProduct?.supplier_id),
+        ...(foundProduct?.market && { market: foundProduct?.market }),
+        _id: { $ne: new mongoose.Types.ObjectId(id) }, // Exclude the product with the same _id
+        // ...(category && { category: foundProduct?.category }),
+        ...(search_key && {
+          "general.name": { $regex: search_key, $options: "i" },
+        }),
+        ...(quantity?.min &&
+          quantity?.max &&
+          !isNaN(quantity?.min) &&
+          !isNaN(quantity?.max) && {
+            // "general.quantity": { $lte: parseInt(quantity, 10) },
+            "general.quantity": {
+              $gte: parseInt(quantity?.min, 10),
+              $lte: parseInt(quantity?.max, 10),
+            },
           }),
-          ...(quantity?.min &&
-            quantity?.max &&
-            !isNaN(quantity?.min) &&
-            !isNaN(quantity?.max) && {
-              // "general.quantity": { $lte: parseInt(quantity, 10) },
-              "general.quantity": {
-                $gte: parseInt(quantity?.min, 10),
-                $lte: parseInt(quantity?.max, 10),
-              },
-            }),
-        },
+      };
+
+      pipeline?.push({
+        $match: totalProductsQuery,
       });
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
@@ -1357,22 +1316,6 @@ module.exports = {
         });
       }
 
-      // Add any additional steps like sorting or pagination
-      const totalProductsQuery = {
-        isDeleted: false,
-        // ...(market ? { market: foundProduct?.market } : {}),
-        supplier_id: new mongoose.Types.ObjectId(foundProduct?.supplier_id),
-        ...(search_key &&
-        typeof search_key === "string" &&
-        search_key.trim() !== "" &&
-        search_key !== "null" &&
-        search_key !== "undefined"
-          ? { "general.name": { $regex: search_key, $options: "i" } }
-          : {}),
-      };
-
-      const totalProducts = await Product.countDocuments(totalProductsQuery);
-
       pipeline.push({
         $sort: { createdAt: -1 },
       });
@@ -1383,6 +1326,7 @@ module.exports = {
 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
+      const totalProducts = (await products?.length) || 0;
       const totalPages = Math.ceil(totalProducts / pageSize);
 
       return sendSuccessResponse(
