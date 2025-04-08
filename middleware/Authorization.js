@@ -5,7 +5,7 @@ const Supplier = require("../schema/supplierSchema");
 const Admin = require("../schema/adminSchema");
 const LogisticsPartner = require('../schema/logisticsCompanySchema');
 const logErrorToFile = require("../logs/errorLogs");
-const { sendErrorResponse } = require("../utils/commonResonse");
+const { sendErrorResponse, handleCatchBlockError } = require("../utils/commonResonse");
 
 module.exports = {
   checkAuthorization: async (req, res, next) => {
@@ -22,9 +22,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -44,9 +42,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -70,9 +66,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -96,9 +90,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
   //this is working fine
@@ -118,9 +110,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -141,9 +131,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -167,9 +155,7 @@ module.exports = {
 
       next();
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -205,9 +191,7 @@ module.exports = {
         return res.status(404).send({ message: "Invalid Access" });
       }
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 
@@ -237,9 +221,7 @@ module.exports = {
       }
       next();
     } catch (error) {
-      console.error("Internal Server Error:", error);
-      logErrorToFile(error, req);
-      return sendErrorResponse(res, 500, "An unexpected error occurred. Please try again later.", error);
+      handleCatchBlockError(req, res, error);
     }
   },
 };

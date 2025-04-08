@@ -10,7 +10,7 @@ const connect = require("./utils/dbConnection");
 const initializeSocket = require("./utils/socketHandler");
 // const ffmpeg = require('fluent-ffmpeg');
 const logErrorToFile = require("./logs/errorLogs");
-const { sendErrorResponse } = require("./utils/commonResonse");
+const { sendErrorResponse, handleCatchBlockError } = require("./utils/commonResonse");
 const { rateLimiter } = require("./middleware/expressRateLimiter");
 const { corsOptions } = require("./config/corsOptions");
 // require('./schedulers/tasks');
@@ -42,13 +42,7 @@ require("./index")(app);
 
 // Error-handling middleware
 app.use((err, req, res, next) => {
-  logErrorToFile(err, req); // Log the error
-  return sendErrorResponse(
-    res,
-    500,
-    "An unexpected error occurred. Please try again later.",
-    err
-  );
+  handleCatchBlockError(req, res, err);
 });
 
 const ADMIN_ID = process.env.ADMIN_ID;

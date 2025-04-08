@@ -225,13 +225,12 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
                     <li><strong>Status:</strong> ${status}</li>
                 </ul>
 
-                ${status== 'Approved'
-                  ?
-                `<p>
+                ${
+                  status == "Approved"
+                    ? `<p>
                     We are pleased to inform you that your profile edit request has been approved. Your changes have been successfully updated. If you have any further modifications or inquiries, please feel free to reach out at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
                 </p>`
-                :
-                `<p>
+                    : `<p>
                     Unfortunately, your profile edit request has been rejected. If you would like to know more about the reasons for this decision or if you would like to submit a revised request, please contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
                 </p>`
                 }
@@ -248,6 +247,177 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
     `;
 };
 
+const createInvoiceContent = (buyer, reqObj) => {
+  return `Dear ${buyer.contact_person_name},<br /><br />
+
+                      We are pleased to inform you that the invoice for your order <strong>${reqObj.orderId}</strong> has been successfully generated.<br /><br />
+                      
+                      <strong>Total Payable Amount:</strong> ${reqObj.totalPayableAmount} USD<br /><br />
+                      
+                      You can review the invoice details by logging into your account on our platform. If you have any questions or require further assistance, please do not hesitate to contact us.<br /><br />
+                      
+                      <p>For support, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                      
+                      Best regards,<br />
+                      <strong>Medhub Global Team</strong>`;
+};
+
+const updatePaymentStatusContent = (
+  supplier,
+  invoice_id,
+  order_id,
+  amount_paid
+) => {
+  return `Dear ${supplier.supplier_name},<br /><br />
+
+                      We are pleased to inform you that the payment for <strong>Invoice ${invoice_id}</strong> associated with <strong>Order ${order_id}</strong> has been successfully completed.<br /><br />
+
+                      <strong>Total Amount Paid:</strong> ${amount_paid} USD<br /><br />
+
+                      If you require any further assistance, please do not hesitate to contact us.<br /><br />
+
+                      <p>For support, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+
+                      Best regards,<br />
+                      <strong>Medhub Global Team</strong>`;
+};
+
+const submitQuotationContent = (buyer, enquiry_id) => {
+  return `Hello ${buyer.buyer_name}, <br />
+                                You’ve received a quote from the supplier for <strong>${enquiry_id}</strong>.<br />
+                                <br /><br />
+                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                                Thanks & Regards <br />
+                                Medhub Global Team`;
+};
+
+const cancelEnquiryContent = (supplier, buyer, enquiry_id) => {
+  return `Hello ${supplier.contact_person_name}, <br />
+                                Inquiry request has been cancelled by ${buyer.contact_person_name} for <strong>${enquiry_id}</strong>.<br />
+                                <br /><br />
+                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                                Thanks & Regards <br />
+                                Medhub Global Team`;
+};
+
+const createOrderContent = (buyer, itemsTable) => {
+  return `
+                <p>Dear ${buyer.contact_person_name},</p>
+ 
+                <p>We are pleased to confirm your order with the following details:</p>
+ 
+                ${itemsTable}
+ 
+                <p>Your order is now being processed, and we will keep you informed about its progress. If you have any questions or require further assistance, please do not hesitate to contact us.</p>
+ 
+                <p>For any inquiries, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+ 
+                <p>Best regards,<br/><strong>Medhub Global Team</strong></p>
+                `;
+};
+
+const bookLogisticsContent = (supplier, buyer, order_id) => {
+  return `Hello ${supplier.contact_person_name}, <br /><br />
+  Logistics Drop Details have been successfully submitted by <strong>${buyer.contact_person_name}</strong> for <strong>Order ID: ${order_id}</strong>.<br /><br />
+  
+  Please review the details and proceed accordingly.<br /><br />
+
+  Thanks & Regards, <br />
+  <strong>MedHub Global Team</strong>`;
+};
+
+const sendEmailConfirmationContent = (
+  userFound,
+  name,
+  subscriptionStartDate,
+  subscriptionEndDate,
+  amount
+) => {
+  return `
+          <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+              <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+                <tr>
+                  <td>
+                    <h2 style="text-align: center; color: #333;">Thank You for Subscribing!</h2>
+                    <p style="color: #555; font-size: 16px;">Dear <strong>${userFound?.contact_person_name}</strong>,</p>
+                    <p style="color: #555; font-size: 16px;">Thank you for subscribing to our service! We are excited to have you onboard.</p>
+      
+                    <h3 style="color: #333;">Subscription Details:</h3>
+                    <ul style="color: #555; font-size: 16px;">
+                      <li><strong>Subscription Plan:</strong> ${name}</li>
+                      <li><strong>Start Date:</strong> ${subscriptionStartDate}</li>
+                      <li><strong>End Date:</strong> ${subscriptionEndDate}</li>
+                    </ul>
+      
+                    <h3 style="color: #333;">Payment Details:</h3>
+                    <ul style="color: #555; font-size: 16px;">
+                      <li><strong>Amount Paid:</strong> $ ${amount}</li>
+                      <li><strong>Payment Date:</strong> ${subscriptionStartDate}</li>
+                    </ul>
+      
+                    <p style="color: #555; font-size: 16px;">If you have any questions, feel free to contact our support team at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+      
+                    <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+                  </td>
+                </tr>
+              </table>
+      
+              <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
+                <p>&copy; 2025 Medhub Global. All rights reserved.</p>
+                <p>If you did not subscribe to this service, please ignore this email.</p>
+              </footer>
+            </body>
+          </html>
+        `;
+};
+
+const adminMailOptionsContent = (
+  userFound,
+  name,
+  subscriptionStartDate,
+  subscriptionEndDate,
+  usertype,
+  amount
+) => {
+  return `
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+            <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+              <tr>
+                <td>
+                  <h2 style="text-align: center; color: #333;">New Subscription and Payment Confirmation</h2>
+                  <p style="color: #555; font-size: 16px;">Dear Admin,</p>
+                  <p style="color: #555; font-size: 16px;">A new subscription has been successfully created for the user <strong>${
+                    userFound?.contact_person_name
+                  }</strong>.</p>
+
+                  <h3 style="color: #333;">Subscription Details:</h3>
+                  <ul style="color: #555; font-size: 16px;">
+                    <li><strong>Subscription Plan:</strong> ${name}</li>
+                    <li><strong>Start Date:</strong> ${subscriptionStartDate}</li>
+                    <li><strong>End Date:</strong> ${subscriptionEndDate}</li>
+                    <li><strong>User Type:</strong> ${
+                      usertype?.toLowerCase() == "buyer" ? "Buyer" : "Supplier"
+                    }</li>
+                  </ul>
+
+                  <h3 style="color: #333;">Payment Details:</h3>
+                  <ul style="color: #555; font-size: 16px;">
+                    <li><strong>Amount Paid:</strong> $ ${amount}</li>
+                    <li><strong>Payment Date:</strong> ${subscriptionStartDate}</li>
+                  </ul>
+
+                  <p style="color: #555; font-size: 16px;">If you need more details, please check the subscription records in the system.</p>
+                  <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+      `;
+};
+
 module.exports = {
   contactUsContent,
   buyerRegistrationContent,
@@ -258,4 +428,12 @@ module.exports = {
   lowInventoryContent,
   licenseExpiryEmail,
   generateProfileEditRequestEmail,
+  createInvoiceContent,
+  updatePaymentStatusContent,
+  submitQuotationContent,
+  cancelEnquiryContent,
+  createOrderContent,
+  bookLogisticsContent,
+  sendEmailConfirmationContent,
+  adminMailOptionsContent,
 };

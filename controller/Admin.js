@@ -40,8 +40,7 @@ const {
 } = require("../utils/commonResonse");
 const logErrorToFile = require("../logs/errorLogs");
 const { generateProfileEditRequestEmail } = require("../utils/emailContents");
-const {sendEmail, sendTemplateEmail }= require("../utils/emailService");
-
+const { sendEmail, sendTemplateEmail } = require("../utils/emailService");
 
 const generatePassword = () => {
   const password = generator.generate({
@@ -736,21 +735,25 @@ module.exports = {
       const newProfileStatus = 1;
 
       const now = new Date();
-        const formattedDate = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+      const formattedDate = `${String(now.getDate()).padStart(2, "0")}-${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}-${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+        now.getSeconds()
+      ).padStart(2, "0")}`;
 
-
-        let updateFields = {
-          account_status: newAccountStatus,
-          profile_status: newProfileStatus,
-          sales_person_name
+      let updateFields = {
+        account_status: newAccountStatus,
+        profile_status: newProfileStatus,
+        sales_person_name,
       };
 
       if (action === "accept") {
-          updateFields.account_accepted_date = formattedDate;
+        updateFields.account_accepted_date = formattedDate;
       } else if (action === "reject") {
-          updateFields.account_rejected_date = formattedDate;
+        updateFields.account_rejected_date = formattedDate;
       }
-
 
       const updateProfile = await Supplier.findOneAndUpdate(
         { supplier_id: supplier_id },
@@ -802,20 +805,20 @@ module.exports = {
 
         const subject = "Welcome! Your Medhub Global Account Has Been Verified";
         // const body = `Dear ${updateProfile.contact_person_name}, <br /><br />
- 
+
         //         We are pleased to inform you that the registration of your company <strong>${updateProfile.supplier_name}</strong>, on our website has been successfully approved!<br /><br />
- 
+
         //         You can now access your account using the following login details:<br /><br />
- 
+
         //         <strong>Login URL:</strong> ${process.env.SUPPLIER_LOGIN_URL} <br />
         //         <strong>Username:</strong> ${updateProfile.contact_person_email} <br />
         //         <strong>Temporary Password:</strong> ${password} <br /><br />
- 
+
         //         Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
- 
+
         //         Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
         //         <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
- 
+
         //         Best regards, <br />
         //         <strong>Medhub Global Team</strong>
         //         `;
@@ -834,12 +837,12 @@ module.exports = {
           contact_person_name: updateProfile?.contact_person_name,
           contact_person_email: updateProfile.contact_person_email,
           temp_password: password,
-          user_type: 'supplier',
+          user_type: "supplier",
         };
         //end -> for using ejs template
 
         // await sendMailFunc(
-        //   recipientEmails.join(","), 
+        //   recipientEmails.join(","),
         // subject, body);
 
         // await sendEmail(
@@ -854,7 +857,7 @@ module.exports = {
           subject,
           templateName,
           context
-        )
+        );
 
         // sendMailFunc(updateProfile.supplier_email, 'Login Credentials for Medhub Global', body);
 
@@ -1152,21 +1155,25 @@ module.exports = {
       const newProfileStatus = 1;
 
       const now = new Date();
-        const formattedDate = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+      const formattedDate = `${String(now.getDate()).padStart(2, "0")}-${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}-${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+        now.getSeconds()
+      ).padStart(2, "0")}`;
 
-
-        let updateFields = {
-          account_status: newAccountStatus,
-          profile_status: newProfileStatus,
-          sales_person_name
+      let updateFields = {
+        account_status: newAccountStatus,
+        profile_status: newProfileStatus,
+        sales_person_name,
       };
 
       if (action === "accept") {
-          updateFields.account_accepted_date = formattedDate;
+        updateFields.account_accepted_date = formattedDate;
       } else if (action === "reject") {
-          updateFields.account_rejected_date = formattedDate;
+        updateFields.account_rejected_date = formattedDate;
       }
-
 
       const updateStatus = await Buyer.findOneAndUpdate(
         { buyer_id: buyer_id },
@@ -1216,21 +1223,21 @@ module.exports = {
 
         const subject = "Welcome! Your Medhub Global Account Has Been Verified";
         // const body = `Dear ${updateStatus.contact_person_name}, <br /><br />
- 
+
         //         We are pleased to inform you that the registration of your company <strong>${updateStatus.buyer_name}</strong>, on our website has been successfully approved!<br /><br />
- 
+
         //         You can now access your account using the following login details:<br /><br />
- 
+
         //         <strong>Login URL:</strong> ${process.env.BUYER_LOGIN_URL} <br />
         //         <strong>Username:</strong> ${updateStatus.contact_person_email} <br />
         //         <strong>Temporary Password:</strong> ${password} <br /><br />
- 
+
         //         Please log in to your account and change your password upon your first login to ensure the security of your account. Should you encounter any issues or have any questions, our support team is available to assist you.<br /><br />
- 
+
         //         Thank you for joining our platform. We look forward to a successful partnership!<br /><br />
- 
+
         //         <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
- 
+
         //         Best regards, <br />
         //         <strong>Team Medhub Global Team</strong>
         //         `;
@@ -1249,7 +1256,7 @@ module.exports = {
           contact_person_name: updateStatus?.contact_person_name,
           contact_person_email: updateStatus.contact_person_email,
           temp_password: password,
-          user_type: 'buyer',
+          user_type: "buyer",
         };
         //end -> for using ejs template
 
@@ -1260,7 +1267,7 @@ module.exports = {
           subject,
           templateName,
           context
-        )
+        );
 
         return callback({
           code: 200,
@@ -1524,7 +1531,6 @@ module.exports = {
         // callback({ code: 400, message: "Invalid filterValue provided" });
         // return;
       }
-
 
       Order.aggregate([
         {
@@ -2656,7 +2662,6 @@ module.exports = {
 
   allMedicineList: async (req, res, reqObj, callback) => {
     try {
-
       const { searchKey, pageNo, pageSize, medicineType, status } = reqObj;
 
       const page_no = pageNo || 1;
@@ -3066,14 +3071,7 @@ module.exports = {
             result: updatedMedicine,
           });
         } catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(
-            res,
-            500,
-            "An unexpected error occurred. Please try again later.",
-            error
-          );
+          handleCatchBlockError(req, res, error);
         }
       } else if (editMedicineStatus === 2) {
         try {
@@ -3132,14 +3130,8 @@ module.exports = {
             result,
           });
         } catch (error) {
-          console.error("Internal Server Error:", error);
-          logErrorToFile(error, req);
-          return sendErrorResponse(
-            res,
-            500,
-            "Error while rejecting the edit request",
-            error
-          );
+          handleCatchBlockError(req, res, error);
+          y;
         }
       }
     } catch (error) {
@@ -3268,7 +3260,6 @@ module.exports = {
   },
 
   editMedicineDetails: async (req, res, reqObj, callback) => {
-
     try {
       EditMedicine.aggregate([
         {
@@ -4827,12 +4818,12 @@ module.exports = {
         // },
         {
           $lookup: {
-              from         : "products",
-              localField   : "items.product_id",
-              foreignField : "product_id",
-              as           : "medicine_details"
-          }
-      },
+            from: "products",
+            localField: "items.product_id",
+            foreignField: "product_id",
+            as: "medicine_details",
+          },
+        },
         {
           $unwind: {
             path: "$medicine_details",
@@ -4858,7 +4849,7 @@ module.exports = {
               $push: {
                 _id: "$items._id",
                 product_id: "$items.product_id",
-                medicine_name     : "$medicine_details.general.medicine_name",
+                medicine_name: "$medicine_details.general.medicine_name",
                 unit_price: "$items.unit_price",
                 quantity_required: "$items.quantity_required",
                 est_delivery_days: "$items.est_delivery_days",
@@ -5480,7 +5471,6 @@ module.exports = {
   //------------------------------ PO -------------------------------//
   getPOList: async (req, res, reqObj, callback) => {
     try {
-
       const { supplier_id, buyer_id, status, pageNo, pageSize, filterValue } =
         reqObj;
       const page_no = pageNo || 1;
@@ -6487,7 +6477,6 @@ module.exports = {
       const { id } = req?.params;
       const { type, status, admin_id } = req?.body;
 
-
       const userReq = await ProfileEditRequest?.findById(id);
       if (!userReq) {
         return sendErrorResponse(res, 400, "No Request Found.");
@@ -6590,9 +6579,7 @@ module.exports = {
         from: "admin",
         from_id: admin_id,
         to_id:
-          type === "buyer"
-            ? userToUpdate?.buyer_id
-            : userToUpdate?.supplier_id,
+          type === "buyer" ? userToUpdate?.buyer_id : userToUpdate?.supplier_id,
         event_id: userReq.perId,
         message:
           status === "Approved"
