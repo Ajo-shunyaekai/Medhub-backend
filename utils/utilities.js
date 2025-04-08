@@ -96,7 +96,7 @@ module.exports = {
                 { field: 'interested_in', message: 'Interested in Field is required' },
                 { field: 'license_no', message: 'License no Field is required' },
                 { field: 'license_expiry_date', message: 'License Expiry Date Field is required' },
-                { field: 'tax_no', message: 'Tax no Field is required' },
+                // { field: 'tax_no', message: 'Tax no Field is required' },
                 { field: 'registration_no', message: 'Registration no Field is required' },
                 { field: 'description', message: 'Description Field is required' }
             ],
@@ -114,7 +114,7 @@ module.exports = {
                 { field: 'country_of_origin', message: 'Country of origin Field is required' },
                 { field: 'country_of_operation', message: 'Country of operation Field is required' },
                 { field: 'license_no', message: 'License no Field is required' },
-                { field: 'tax_no', message: 'Tax no Field is required' },
+                // { field: 'tax_no', message: 'Tax no Field is required' },
                 { field: 'registration_no', message: 'Registration no Field is required' },
                 { field: 'description', message: 'Description Field is required' }
             ],

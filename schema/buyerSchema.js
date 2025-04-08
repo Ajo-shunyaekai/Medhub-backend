@@ -131,11 +131,11 @@ const buyerSchema = new Schema(
       trim: true,
       required: [true, "Validation Error : license_expiry_date is required"],
     },
-    tax_no: {
-      type: String,
-      trim: true,
-      required: [true, "Validation Error : tax_no is required"],
-    },
+    // tax_no: {
+    //   type: String,
+    //   trim: true,
+    //   required: [true, "Validation Error : tax_no is required"],
+    // },
 
     description: {
       type: String,
