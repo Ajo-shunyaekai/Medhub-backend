@@ -1,13 +1,13 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 const ejs = require("ejs");
 const path = require("path");
 const fs = require("fs");
 
 const transporter = nodemailer.createTransport({
-  host   : "smtp.gmail.com",
-  port   : 587,
-  secure : false, // true for 465, false for other ports
-  type   : "oauth2",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  type: "oauth2",
   auth: {
     user: process.env.SMTP_USER_ID,
     pass: process.env.SMTP_USER_PASSWORD,
@@ -38,7 +38,7 @@ const transporter = nodemailer.createTransport({
 //       // html: body,
 //       html: emailContent
 //     };
-    
+
 //     await transporter.sendMail(mailOptions);
 //   } catch (error) {
 //     console.error(`Error sending email to ${recipients}:`, error);
@@ -46,13 +46,23 @@ const transporter = nodemailer.createTransport({
 //   }
 // };
 
-const sendTemplateEmail = async (recipients, subject, templateName = null, context = {}, content = null) => {
+const sendTemplateEmail = async (
+  recipients,
+  subject,
+  templateName = null,
+  context = {},
+  content = null
+) => {
   try {
     let emailContent = "";
 
     if (templateName) {
       // If a template is provided, render it using EJS
-      const templatePath = path.resolve(__dirname, "./emailTemplates", `${templateName}.ejs`);
+      const templatePath = path.resolve(
+        __dirname,
+        "./emailTemplates",
+        `${templateName}.ejs`
+      );
 
       if (fs.existsSync(templatePath)) {
         emailContent = await ejs.renderFile(templatePath, context);
@@ -81,16 +91,17 @@ const sendTemplateEmail = async (recipients, subject, templateName = null, conte
   }
 };
 
-const sendEmail = async (recipients, subject, body) => {
+const sendEmail = async (recipients, subject, body, attachments) => {
   try {
     const mailOptions = {
       // from : process.env.SMTP_USER_ID,
       from: `Medhub Global <${process.env.SMTP_USER_ID}>`,
-      to   : Array.isArray(recipients) ? recipients.join(",") : recipients,
+      to: Array.isArray(recipients) ? recipients.join(",") : recipients,
       subject,
       html: body,
+      ...(attachments && { attachments }), // Correct way to include attachments conditionally
     };
-    
+
     await transporter.sendMail(mailOptions);
   } catch (error) {
     console.error(`Error sending email to ${recipients}:`, error);
@@ -98,9 +109,7 @@ const sendEmail = async (recipients, subject, body) => {
   }
 };
 
-
 module.exports = {
   sendTemplateEmail,
   sendEmail,
 };
-
