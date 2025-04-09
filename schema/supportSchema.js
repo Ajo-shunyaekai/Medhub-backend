@@ -15,15 +15,23 @@ const supportSchema = new Schema({
     type: String,
     required: true,
   },
-  order_id: {
+  user_type: {
     type: String,
     required: true,
   },
-  usertype: {
+  // order_id: {
+  //   type: String,
+  //   required: true,
+  // },
+  // reason: {
+  //   type: String,
+  //   required: true,
+  // },
+  subject: {
     type: String,
     required: true,
   },
-  reason: {
+  message: {
     type: String,
     required: true,
   },

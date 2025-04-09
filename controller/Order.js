@@ -696,72 +696,211 @@ module.exports = {
     }
   },
 
-  orderFeedback: async (req, res, reqObj, callback) => {
+  // orderFeedback: async (req, res, reqObj, callback) => {
+  //   try {
+  //     console.log('reqObj', reqObj)
+      
+  //     const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
+
+  //     const newSupport = new Support({
+  //       support_id: supportId,
+  //       user_id: reqObj.buyer_id || reqObj.supplier_id,
+  //       user_type: reqObj.usertype,
+  //       // order_id: reqObj.order_id,
+  //       support_type: reqObj.support_type,
+  //       // reason: reqObj.feedback,
+  //       subject: reqObj.subject,
+  //       message: reqObj.message,
+  //       support_image: reqObj.feedback_image,
+  //       status: 0,
+  //     });
+  //     console.log('newSupport', newSupport)
+  //     // return false
+  //     newSupport
+  //       .save()
+  //       .then(async(data) => {
+  //         const subject = `New Enquiry Received - ${supportId}`;
+  //         const body = `
+  //         <div style="font-family: Arial, sans-serif; padding: 10px; line-height: 1.6;">
+  //           <h2>New Enquiry Feedback Received</h2>
+  //           <p><strong>Support ID:</strong> ${supportId}</p>
+  //           <p><strong>User ID:</strong> ${reqObj.buyer_id || reqObj.supplier_id}</p>
+  //           <p><strong>User Type:</strong> ${reqObj.usertype}</p>
+  //           <p><strong>Support Type:</strong> ${reqObj.support_type}</p>
+  //           ${reqObj.order_id ? `<p><strong>Related Order ID:</strong> ${reqObj.order_id}</p>` : ""}
+  //           <p><strong>Subject:</strong> ${reqObj.subject}</p>
+  //           <p><strong>Message:</strong><br/> ${reqObj.message}</p>
+  //           ${
+  //             reqObj.feedback_image?.length > 0
+  //               ? `<p><strong>Attached Image(s):</strong><br/> ${reqObj.feedback_image
+  //                   .map((img) => `<div>${img}</div>`)
+  //                   .join("")}</p>`
+  //               : ""
+  //           }
+  //           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
+  //         </div>
+  //       `;
+  //       const recipientEmails = ['ajo@shunyaekai.tech']
+        
+        
+  //           let attachments;
+
+  //           if (reqObj.feedback_image && reqObj.feedback_image.length > 0) {
+  //             attachments = reqObj.feedback_image.map(filename => ({
+  //               filename,
+  //               path: path.join(__dirname, "..", "uploads", "buyer", "order", "feedback_images", filename),
+  //             }));
+  //           }
+
+  //           await sendEmail(recipientEmails, subject, body, attachments);
+  //         callback({
+  //           code: 200,
+  //           message: "Feedback submitted Successfully",
+  //           result: data,
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         callback({
+  //           code: 400,
+  //           message: "Error while submitting feedback",
+  //           result: err,
+  //         });
+  //       });
+  //   } catch (error) {
+  //     handleCatchBlockError(req, res, error);
+  //   }
+  // },
+
+  // orderComplaint: async (req, res, reqObj, callback) => {
+  //   try {
+  //     console.log('reqObj', reqObj)
+  //     const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
+
+  //     const newSupport = new Support({
+  //       support_id: supportId,
+  //       user_id: reqObj.buyer_id || reqObj.supplier_id,
+  //       user_type: reqObj.usertype,
+  //       support_type: reqObj.support_type,
+  //        // order_id: reqObj.order_id,
+  //       // reason: reqObj.complaint,
+  //       subject: reqObj.subject,
+  //       message: reqObj.message,
+  //       support_image: reqObj.complaint_image,
+  //       status: 0,
+  //     });
+  //     console.log('newSupport', newSupport)
+  //     // return false
+  //     newSupport
+  //       .save()
+  //       .then( async(data) => {
+
+  //         const subject = `New Complaint Received - ${supportId}`;
+  //         const body = `
+  //         <div style="font-family: Arial, sans-serif; padding: 10px; line-height: 1.6;">
+  //           <h2>New Complaint  Received</h2>
+  //           <p><strong>Support ID:</strong> ${supportId}</p>
+  //           <p><strong>User ID:</strong> ${reqObj.buyer_id || reqObj.supplier_id}</p>
+  //           <p><strong>User Type:</strong> ${reqObj.usertype}</p>
+  //           <p><strong>Support Type:</strong> ${reqObj.support_type}</p>
+  //           ${reqObj.order_id ? `<p><strong>Related Order ID:</strong> ${reqObj.order_id}</p>` : ""}
+  //           <p><strong>Subject:</strong> ${reqObj.subject}</p>
+  //           <p><strong>Message:</strong><br/> ${reqObj.message}</p>
+  //           ${
+  //             reqObj.complaint_image?.length > 0
+  //               ? `<p><strong>Attached Image(s):</strong><br/> ${reqObj.feedback_image
+  //                   .map((img) => `<div>${img}</div>`)
+  //                   .join("")}</p>`
+  //               : ""
+  //           }
+  //           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
+  //         </div>
+  //       `;
+  //       const recipientEmails = ['ajo@shunyaekai.tech']
+        
+        
+  //           let attachments;
+
+  //           if (reqObj.complaint_image && reqObj.complaint_image.length > 0) {
+  //             attachments = reqObj.complaint_image.map(filename => ({
+  //               filename,
+  //               path: path.join(__dirname, "..", "uploads", "buyer", "order", "complaint_images", filename),
+  //             }));
+  //           }
+
+  //           await sendEmail(recipientEmails, subject, body, attachments);
+  //         callback({
+  //           code: 200,
+  //           message: "Complaint submitted Successfully",
+  //           result: data,
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         callback({
+  //           code: 400,
+  //           message: "Error while submitting complaint",
+  //           result: err,
+  //         });
+  //       });
+  //   } catch (error) {
+  //     handleCatchBlockError(req, res, error);
+  //   }
+  // },
+
+  supportSubmission: async(req, res, reqObj, callback) => {
     try {
       const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
-
+  
+      const imageField = reqObj.support_type === 'feedback' ? reqObj.feedback_image : reqObj.complaint_image;
+      const uploadDir = reqObj.support_type === 'feedback' ? "feedback_images" : "complaint_images";
+      const subjectLabel = reqObj.support_type === 'feedback' ? "Feedback" : "Complaint";
+  
       const newSupport = new Support({
         support_id: supportId,
         user_id: reqObj.buyer_id || reqObj.supplier_id,
-        usertype: reqObj.usertype,
-        order_id: reqObj.order_id,
+        user_type: reqObj.usertype,
         support_type: reqObj.support_type,
-        reason: reqObj.feedback,
-        support_image: reqObj.feedback_image,
+        subject: reqObj.subject,
+        message: reqObj.message,
+        support_image: imageField,
         status: 0,
       });
-      newSupport
-        .save()
-        .then((data) => {
-          callback({
-            code: 200,
-            message: "Feedback submitted Successfully",
-            result: data,
-          });
-        })
-        .catch((err) => {
-          callback({
-            code: 400,
-            message: "Error while submitting feedback",
-            result: err,
-          });
-        });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  orderComplaint: async (req, res, reqObj, callback) => {
-    try {
-      const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
-
-      const newSupport = new Support({
-        support_id: supportId,
-        user_id: reqObj.buyer_id || reqObj.supplier_id,
-        usertype: reqObj.usertype,
-        order_id: reqObj.order_id,
-        support_type: reqObj.support_type,
-        reason: reqObj.complaint,
-        support_image: reqObj.complaint_image,
-        status: 0,
+  
+      const savedSupport = await newSupport.save();
+  
+      const emailSubject = `New ${subjectLabel} Received - ${supportId}`;
+      const emailBody = `
+        <div style="font-family: Arial, sans-serif; padding: 10px; line-height: 1.6;">
+          <h2>New ${subjectLabel} Received</h2>
+          <p><strong>Support ID:</strong> ${supportId}</p>
+          <p><strong>User ID:</strong> ${reqObj.buyer_id || reqObj.supplier_id}</p>
+          <p><strong>User Type:</strong> ${reqObj.usertype}</p>
+          <p><strong>Support Type:</strong> ${reqObj.support_type}</p>
+          ${reqObj.order_id ? `<p><strong>Related Order ID:</strong> ${reqObj.order_id}</p>` : ""}
+          <p><strong>Subject:</strong> ${reqObj.subject}</p>
+          <p><strong>Message:</strong><br/> ${reqObj.message}</p>
+          ${
+            imageField?.length > 0
+              ? `<p><strong>Attached Image(s):</strong><br/> ${imageField.map((img) => `<div>${img}</div>`).join("")}</p>`
+              : ""
+          }
+          <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
+        </div>
+      `;
+  
+      const attachments = imageField?.length > 0
+        ? imageField.map((filename) => ({
+            filename,
+            path: path.join(__dirname, "..", "uploads", "buyer", "order", uploadDir, filename),
+          }))
+        : [];
+  
+      await sendEmail(['ajo@shunyaekai.tech'], emailSubject, emailBody, attachments);
+  
+      callback({
+        code: 200,
+        message: `${subjectLabel} submitted Successfully`,
+        result: savedSupport,
       });
-
-      newSupport
-        .save()
-        .then((data) => {
-          callback({
-            code: 200,
-            message: "Complaint submitted Successfully",
-            result: data,
-          });
-        })
-        .catch((err) => {
-          callback({
-            code: 400,
-            message: "Error while submitting complaint",
-            result: err,
-          });
-        });
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }

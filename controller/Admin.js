@@ -3531,24 +3531,14 @@ module.exports = {
       let filterCondition = {};
 
       if (filterKey === "buyer") {
-        filterCondition = { usertype: "buyer" };
+        filterCondition = { user_type: "buyer" };
       } else if (filterKey === "supplier") {
-        filterCondition = { usertype: "supplier" };
+        filterCondition = { user_type: "supplier" };
       }
 
       if (supportType) {
         filterCondition.support_type = supportType;
       }
-
-      // const data       = await Support.find(filterCondition).select().sort({createdAt: -1}).skip(offSet).limit(page_size);
-      // const totalItems = await Support.countDocuments(filterCondition);
-
-      // const totalPages = Math.ceil(totalItems / page_size);
-      // const returnObj = {
-      //   data,
-      //   totalPages,
-      //   totalItems
-      // };
 
       Support.aggregate([
         {

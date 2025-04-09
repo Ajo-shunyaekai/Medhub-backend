@@ -32,7 +32,7 @@ module.exports = () => {
 
     routes.post('/cancel-order', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.cancelOrder, req, res));
 
-    routes.post('/submit-order-feedback', checkAuthorization, checkCommonUserAuthentication, imageUploadMiddleware, (req, res) => {
+    routes.post('/submit-feedback', checkAuthorization, checkCommonUserAuthentication, imageUploadMiddleware, (req, res) => {
 
         if (!req.files['feedback_image'] || req.files['feedback_image'].length === 0) {
             res.send({ code: 415, message: 'Feedback Image is required!', errObj: {} });
@@ -44,10 +44,11 @@ module.exports = () => {
             feedback_image: req.files['feedback_image'].map(file => path.basename(file.path))
         }
 
-        handleController(Order.orderFeedback, req, res, obj)
+        // handleController(Order.orderFeedback, req, res, obj)
+        handleController(Order.supportSubmission, req, res, obj)
     });
 
-    routes.post('/submit-order-complaint', checkAuthorization, checkCommonUserAuthentication, imageUploadMiddleware, (req, res) => {
+    routes.post('/submit-complaint', checkAuthorization, checkCommonUserAuthentication, imageUploadMiddleware, (req, res) => {
 
         if (!req.files['complaint_image'] || req.files['complaint_image'].length === 0) {
             res.send({ code: 415, message: 'Complaint Image is required!', errObj: {} });
@@ -59,7 +60,8 @@ module.exports = () => {
             complaint_image: req.files['complaint_image'].map(file => path.basename(file.path))
         }
 
-        handleController(Order.orderComplaint, req, res, obj)
+        // handleController(Order.orderComplaint, req, res, obj)
+        handleController(Order.supportSubmission, req, res, obj)
     });
 
     // routes.post('/buyer-invoice-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Order.buyerInvoicesList, req, res));
