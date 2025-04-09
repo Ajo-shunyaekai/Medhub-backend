@@ -34,7 +34,7 @@ const initializeInvoiceNumber = async () => {
 };
 
 module.exports = {
-    
+
   supportSubmission: async(req, res, reqObj, callback) => {
     try {
       const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
@@ -75,6 +75,7 @@ module.exports = {
           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
         </div>
       `;
+      const recipientEmail = ['ajo@shunyaekai.tech']
   
       const attachments = imageField?.length > 0
         ? imageField.map((filename) => ({
@@ -83,7 +84,7 @@ module.exports = {
           }))
         : [];
   
-      await sendEmail(['ajo@shunyaekai.tech'], emailSubject, emailBody, attachments);
+      await sendEmail(recipientEmail, emailSubject, emailBody, attachments);
   
       callback({
         code: 200,
