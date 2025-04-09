@@ -198,7 +198,7 @@ const productSchema = new Schema(
       required: [true, "Validation Error: Product Market is required."],
       immutable: true,
     },
-    secondayMarketDetails: {
+    secondaryMarketDetails: {
       purchasedOn: {
         type: String,
         validate: {
