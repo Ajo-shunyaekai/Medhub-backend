@@ -162,7 +162,7 @@ module.exports = {
           product_id: { $first: "$product_id" },
           supplier_id: { $first: "$supplier_id" },
           market: { $first: "$market" },
-          secondayMarketDetails: { $first: "$secondayMarketDetails" },
+          secondaryMarketDetails: { $first: "$secondaryMarketDetails" },
           isDeleted: { $first: "$isDeleted" },
           bulkUpload: { $first: "$bulkUpload" },
           userDetails: { $first: "$userDetails" },
@@ -539,7 +539,7 @@ module.exports = {
       };
 
       if (market == "secondary") {
-        newProductData["secondayMarketDetails"] = {
+        newProductData["secondaryMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
@@ -772,7 +772,7 @@ module.exports = {
       };
 
       if (market == "secondary") {
-        updatedProductData["secondayMarketDetails"] = {
+        updatedProductData["secondaryMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
@@ -1011,7 +1011,7 @@ module.exports = {
           product_id: { $first: "$product_id" },
           supplier_id: { $first: "$supplier_id" },
           market: { $first: "$market" },
-          secondayMarketDetails: { $first: "$secondayMarketDetails" },
+          secondaryMarketDetails: { $first: "$secondaryMarketDetails" },
           isDeleted: { $first: "$isDeleted" },
           bulkUpload: { $first: "$bulkUpload" },
           userDetails: { $first: "$userDetails" },
@@ -1236,7 +1236,7 @@ module.exports = {
           product_id: { $first: "$product_id" },
           supplier_id: { $first: "$supplier_id" },
           market: { $first: "$market" },
-          secondayMarketDetails: { $first: "$secondayMarketDetails" },
+          secondaryMarketDetails: { $first: "$secondaryMarketDetails" },
           isDeleted: { $first: "$isDeleted" },
           bulkUpload: { $first: "$bulkUpload" },
           userDetails: { $first: "$userDetails" },
