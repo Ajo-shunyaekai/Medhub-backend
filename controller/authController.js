@@ -103,9 +103,9 @@ module.exports = {
         ) {
           return sendErrorResponse(res, 415, "Company Logo is required.");
         }
-        if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
-          return sendErrorResponse(res, 415, "Company tax image is required.");
-        }
+        // if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
+        //   return sendErrorResponse(res, 415, "Company tax image is required.");
+        // }
         if (
           !req.files["license_image"] ||
           req.files["license_image"].length === 0
@@ -116,16 +116,16 @@ module.exports = {
             "Company license image is required."
           );
         }
-        if (
-          !req.files["certificate_image"] ||
-          req.files["certificate_image"].length === 0
-        ) {
-          return sendErrorResponse(
-            res,
-            415,
-            "Company certificate image is required."
-          );
-        }
+        // if (
+        //   !req.files["certificate_image"] ||
+        //   req.files["certificate_image"].length === 0
+        // ) {
+        //   return sendErrorResponse(
+        //     res,
+        //     415,
+        //     "Company certificate image is required."
+        //   );
+        // }
         if (
           req?.body?.buyer_type == "Medical Practitioner" &&
           (!req.files["medical_practitioner_image"] ||
@@ -180,10 +180,10 @@ module.exports = {
           license_image: req.files["license_image"].map((file) =>
             path.basename(file.path)
           ),
-          tax_image: req.files["tax_image"].map((file) =>
-            path.basename(file.path)
-          ),
-          certificate_image: req.files["certificate_image"].map((file) =>
+          // tax_image: req.files["tax_image"]?.map((file) =>
+          //   path.basename(file.path)
+          // ),
+          certificate_image: req.files["certificate_image"]?.map((file) =>
             path.basename(file.path)
           ),
           medical_certificate:
