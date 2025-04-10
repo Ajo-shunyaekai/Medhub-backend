@@ -1466,7 +1466,6 @@ module.exports = {
               }
 
               item_details.forEach(detail => {
-                console.log('detail',detail)
                   const { product_id, unit_price, unit_tax, quantity_required, est_delivery_days, target_price, item_id } = detail;
                   if (!product_id || !unit_price || !unit_tax ||  !quantity_required || !est_delivery_days || !target_price) {
                       throw new Error('Missing required item fieldssss');

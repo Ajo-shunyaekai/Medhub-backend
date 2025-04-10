@@ -410,19 +410,58 @@ module.exports = {
             "license_image",
             "tax_image",
             "certificate_image",
+            "certificateFileNDate",
+            "medical_certificate",
             "profile_status",
             "createdAt",
             "updatedAt",
             "token",
             "password",
+            "otp",
+            "otpCount",
+            "otpLimitReachedAt",
+            "otpExpiry",
+            "test_account",
+            "currentSubscription",
+            "subscriptionsHistory",
           ],
           [],
           "supplier_list"
         )
       ); // `toObject()` removes internal Mongoose metadata
 
+
+      // Define desired column order
+      const fields = [
+        'Supplier Id',
+        'Supplier Name',
+        'Supplier Type',
+        'Supplier Email',
+        'Supplier Country Code',
+        'Supplier Mobile',
+        'Contact Person Name',
+        'Designation',
+        'Contact Person Email',
+        'Contact Person Country Code',
+        'Contact Person Mobile No',
+        'Sales Person Name',
+        'Description',
+        'License No',
+        'License Expiry Date',
+        'Registration No',
+        'Vat Reg No',
+        'Country Of Origin',
+        'Country Of Operation',
+        'Categories',
+        'Tags',
+        'Last Login',
+        'Login Frequency',
+        'Account Status'
+      ];
+
+
       // Convert the flattened data to CSV
-      const csv = parse(flattenedData);
+      const csv = parse(flattenedData, {fields});
 
       // Set headers for file download
       res.setHeader("Content-Type", "text/csv");

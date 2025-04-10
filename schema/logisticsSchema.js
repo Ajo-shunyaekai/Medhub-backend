@@ -36,10 +36,10 @@ const logisticsSchema = new mongoose.Schema({
         type: String, // P - pending, A - accepted ,   
         required: [true, "Validation Error : Status is required"],
       },
-    lastLogin: {
+    last_login: {
     type: Date
     },
-    loginHistory: [
+    login_history: [
     {
         date: {
         type: Date,

@@ -764,18 +764,6 @@ module.exports = {
         user2.list_count = listCount;
       }
 
-      // await (
-      //   usertype === "Buyer"
-      //     ? Buyer.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } })
-      //     : usertype === "Admin"
-      //     ? Admin.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } })
-      //     : usertype === "Supplier"
-      //     ? Supplier.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } })
-      //     : usertype === "Logistics"
-      //     ? LogisticsPartner.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } })
-      //     : null
-      // );
-
       const Model =
         usertype === "Buyer"
           ? Buyer

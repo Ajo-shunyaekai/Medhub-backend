@@ -1,3 +1,19 @@
+const {getLoginFrequencyLast90Days} = require('./userUtils')
+
+
+const formatDateTime = (dateString) => {
+  const date = new Date(dateString);
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yy = String(date.getFullYear()).slice(-2);
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  const sec = String(date.getSeconds()).padStart(2, '0');
+
+  return `${dd}-${mm}-${yy}, ${hh}:${min}:${sec}`;
+};
+
+
 // Function to flatten data and remove internal Mongoose properties
 const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
   let result = {};
@@ -10,6 +26,14 @@ const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
     if (obj.hasOwnProperty(key) && !key.startsWith("$")) {
       let newKey = prefix ? `${prefix}.${key}` : key;
 
+      // Special handling for login_history
+      if (key === 'login_history' && Array.isArray(obj[key])) {
+        const loginFrequency = getLoginFrequencyLast90Days(obj[key]);
+        result["Login Frequency"] = loginFrequency;
+        continue; // skip further processing of login_history
+      }
+
+
       newKey = newKey?.replaceAll("_", " ");
       const newArr = newKey?.split(" ");
       const NewArrCaps = newArr?.map(
@@ -17,7 +41,9 @@ const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
       );
       newKey = NewArrCaps?.join()?.replaceAll(",", " ");
 
-      if (newKey === 'Account Status') {
+      if (key === 'last_login') {
+        result["Last Login"] = formatDateTime(obj[key]);
+      } else if (newKey === 'Account Status') {
         if (obj[key] === 0) {
           result[newKey] = 'Pending';
         } else if (obj[key] === 1) {
