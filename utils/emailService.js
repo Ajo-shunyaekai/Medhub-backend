@@ -99,7 +99,7 @@ const sendEmail = async (recipients, subject, body, attachments) => {
       to: Array.isArray(recipients) ? recipients.join(",") : recipients,
       subject,
       html: body,
-      ...(attachments && { attachments }), // Correct way to include attachments conditionally
+      ...(attachments && { attachments }), //include attachments conditionally
     };
 
     await transporter.sendMail(mailOptions);

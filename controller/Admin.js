@@ -3531,24 +3531,14 @@ module.exports = {
       let filterCondition = {};
 
       if (filterKey === "buyer") {
-        filterCondition = { usertype: "buyer" };
+        filterCondition = { user_type: "buyer" };
       } else if (filterKey === "supplier") {
-        filterCondition = { usertype: "supplier" };
+        filterCondition = { user_type: "supplier" };
       }
 
       if (supportType) {
         filterCondition.support_type = supportType;
       }
-
-      // const data       = await Support.find(filterCondition).select().sort({createdAt: -1}).skip(offSet).limit(page_size);
-      // const totalItems = await Support.countDocuments(filterCondition);
-
-      // const totalPages = Math.ceil(totalItems / page_size);
-      // const returnObj = {
-      //   data,
-      //   totalPages,
-      //   totalItems
-      // };
 
       Support.aggregate([
         {
@@ -3586,6 +3576,8 @@ module.exports = {
             usertype: 1,
             order_id: 1,
             reason: 1,
+            subject: 1,
+            message: 1,
             support_image: 1,
             status: 1,
             createdAt: 1,
@@ -3610,6 +3602,8 @@ module.exports = {
             usertype: 1,
             order_id: 1,
             reason: 1,
+            subject: 1,
+            message: 1,
             support_image: 1,
             status: 1,
             createdAt: 1,
@@ -3723,6 +3717,8 @@ module.exports = {
             usertype: 1,
             order_id: 1,
             reason: 1,
+            subject: 1,
+            message: 1,
             support_image: 1,
             status: 1,
             createdAt: 1,
@@ -3746,6 +3742,8 @@ module.exports = {
             usertype: 1,
             order_id: 1,
             reason: 1,
+            subject: 1,
+            message: 1,
             support_image: 1,
             status: 1,
             createdAt: 1,
