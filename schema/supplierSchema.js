@@ -151,6 +151,12 @@ const supplierSchema = new Schema(
         trim: true,
       },
     ],
+    certificateFileNDate: [
+      {
+        file: { type: String },
+        date: { type: String },
+      },
+    ],
     medical_certificate: [
       {
         type: String,
@@ -257,7 +263,7 @@ const supplierSchema = new Schema(
     },
     test_account: {
       type: Number,
-      default: 0
+      default: 0,
     },
     subscriptionEmail: {
       type: String,
@@ -277,7 +283,7 @@ const supplierSchema = new Schema(
       },
     ],
     lastLogin: {
-      type: Date
+      type: Date,
     },
     loginHistory: [
       {
@@ -286,7 +292,7 @@ const supplierSchema = new Schema(
           default: Date.now,
         },
       },
-    ],    
+    ],
   },
   { timestamps: true }
 );

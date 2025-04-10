@@ -7,8 +7,8 @@ const Admin = require("../schema/adminSchema");
 const Order = require("../schema/orderSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
-const LogisticsPartner   = require('../schema/logisticsCompanySchema')
-const Logistics = require('../schema/logisticsSchema');
+const LogisticsPartner = require("../schema/logisticsCompanySchema");
+const Logistics = require("../schema/logisticsSchema");
 const List = require("../schema/addToListSchema");
 const BuyerEdit = require("../schema/buyerEditSchema");
 const SupplierEdit = require("../schema/supplierEditSchema");
@@ -24,7 +24,7 @@ const ProfileEditRequest = require("../schema/profileEditRequestSchema");
 const { validation } = require("../utils/utilities");
 const path = require("path");
 const sendMailFunc = require("../utils/sendEmail");
-const {sendEmail, sendTemplateEmail} = require("../utils/emailService");
+const { sendEmail, sendTemplateEmail } = require("../utils/emailService");
 const { getTodayFormattedDate } = require("../utils/utilities");
 const {
   Medicine,
@@ -49,7 +49,7 @@ const {
   handleCatchBlockError,
 } = require("../utils/commonResonse");
 const logErrorToFile = require("../logs/errorLogs");
-const { updateLoginInfo } = require("../utils/userUtils")
+const { updateLoginInfo } = require("../utils/userUtils");
 
 module.exports = {
   registerUser: async (req, res) => {
@@ -221,9 +221,9 @@ module.exports = {
         ) {
           return sendErrorResponse(res, 415, "Supplier Logo is required.");
         }
-        if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
-          return sendErrorResponse(res, 415, "Supplier tax image is required.");
-        }
+        // if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
+        //   return sendErrorResponse(res, 415, "Supplier tax image is required.");
+        // }
         if (
           !req.files["license_image"] ||
           req.files["license_image"].length === 0
@@ -235,16 +235,16 @@ module.exports = {
           );
         }
 
-        if (
-          !req.files["certificate_image"] ||
-          req.files["certificate_image"].length === 0
-        ) {
-          return sendErrorResponse(
-            res,
-            415,
-            "Supplier Certificate image is required."
-          );
-        }
+        // if (
+        //   !req.files["certificate_image"] ||
+        //   req.files["certificate_image"].length === 0
+        // ) {
+        //   return sendErrorResponse(
+        //     res,
+        //     415,
+        //     "Supplier Certificate image is required."
+        //   );
+        // }
         if (
           req?.body?.supplier_type == "Medical Practitioner" &&
           (!req.files["medical_practitioner_image"] ||
@@ -281,12 +281,13 @@ module.exports = {
           license_image: req.files["license_image"].map((file) =>
             path.basename(file.path)
           ),
-          tax_image: req.files["tax_image"].map((file) =>
-            path.basename(file.path)
-          ),
-          certificate_image: req.files["certificate_image"].map((file) =>
-            path.basename(file.path)
-          ),
+          tax_image:
+            req.files["tax_image"]?.map((file) => path.basename(file.path)) ||
+            [],
+          certificate_image:
+            req.files["certificate_image"]?.map((file) =>
+              path.basename(file.path)
+            ) || [],
           medical_certificate:
             req?.files?.["medical_practitioner_image"]?.map((file) =>
               path.basename(file.path)
@@ -352,6 +353,35 @@ module.exports = {
       const token = jwt.sign(data, jwtSecretKey);
       const saltRounds = 10;
 
+      let certificateFileNDateParsed;
+
+      if (typeof req?.body?.certificateFileNDate == "string") {
+        try {
+          // certificateFileNDateParsed = JSON.parse(req.body.certificateFileNDate)?.filter(
+          //   (value) => value != "[object Object]"
+          // );
+          if (Array.isArray(req?.body?.certificateFileNDate)) {
+            certificateFileNDateParsed = req.body.certificateFileNDate.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else if (typeof req?.body?.certificateFileNDate === "string") {
+            // If it's a string, try to parse it as JSON and filter
+            certificateFileNDateParsed = JSON.parse(req.body?.certificateFileNDate)?.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else {
+            // Handle case where certificateFileNDate is neither an array nor a string
+            throw new Error("Invalid certificateFileNDate format.");
+          }
+        } catch (error) {
+          handleCatchBlockError(req, res, error);
+        }
+      } else {
+        certificateFileNDateParsed = JSON.parse(
+          req.body?.certificateFileNDate?.filter((value) => value != "[object Object]")
+        );
+      }
+
       // Create instances of Admin, Supplier, and Buyer models based on user type
       const newAdmin = new Admin({
         admin_id: userId,
@@ -402,6 +432,35 @@ module.exports = {
         token: token,
         account_status: 0,
         profile_status: 0,
+        certificateFileNDate: certificateFileNDateParsed
+        ?.map((ele, index) => {
+          return {
+            file:
+              typeof ele?.file !== "string"
+                ? regObj?.certificate_image?.find((filename) => {
+                    const path = ele?.file?.path;
+
+                    // Ensure path is defined and log the file path
+                    if (!path) {
+                      return false; // If there's no path, skip this entry
+                    }
+
+                    const ext = path.split(".").pop(); // Get the file extension
+
+                    const sanitizedPath = path
+                      ?.replaceAll("./", "")
+                      ?.replaceAll(" ", "")
+                      ?.replaceAll(`.${ext}`, "");
+
+                    // Match file by sanitized name
+                    return filename?.includes(sanitizedPath);
+                  })
+                : ele?.file || regObj?.certificate_image?.[index] || "",
+
+            date: ele?.date || "", // Log the date being used (if any)
+          };
+        })
+        ?.filter((ele) => ele?.file || ele?.date),
       });
 
       const newBuyer = new Buyer({
@@ -438,6 +497,35 @@ module.exports = {
         token: token,
         account_status: 0,
         profile_status: 0,
+        certificateFileNDate: certificateFileNDateParsed
+          ?.map((ele, index) => {
+            return {
+              file:
+                typeof ele?.file !== "string"
+                  ? regObj?.certificate_image?.find((filename) => {
+                      const path = ele?.file?.path;
+
+                      // Ensure path is defined and log the file path
+                      if (!path) {
+                        return false; // If there's no path, skip this entry
+                      }
+
+                      const ext = path.split(".").pop(); // Get the file extension
+
+                      const sanitizedPath = path
+                        .replaceAll("./", "")
+                        .replaceAll(" ", "")
+                        .replaceAll(`.${ext}`, "");
+
+                      // Match file by sanitized name
+                      return filename?.includes(sanitizedPath);
+                    })
+                  : ele?.file || regObj?.certificate_image?.[index] || "",
+
+              date: ele?.date || "", // Log the date being used (if any)
+            };
+          })
+          ?.filter((ele) => ele?.file || ele?.date),
       });
 
       // Hash password
@@ -599,8 +687,6 @@ module.exports = {
           `Supplier Registration Request Submitted Successfully.`
         );
       }
-
-      // Additional handling for other user types (Seller) would go here
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
@@ -691,20 +777,19 @@ module.exports = {
       // );
 
       const Model =
-  usertype === "Buyer"
-    ? Buyer
-    : usertype === "Admin"
-    ? Admin
-    : usertype === "Supplier"
-    ? Supplier
-    : usertype === "Logistics"
-    ? LogisticsPartner
-    : null;
+        usertype === "Buyer"
+          ? Buyer
+          : usertype === "Admin"
+          ? Admin
+          : usertype === "Supplier"
+          ? Supplier
+          : usertype === "Logistics"
+          ? LogisticsPartner
+          : null;
 
-if (Model) {
-  await updateLoginInfo(Model, user._id);
-}
-      
+      if (Model) {
+        await updateLoginInfo(Model, user._id);
+      }
 
       return sendSuccessResponse(
         res,
@@ -846,9 +931,7 @@ if (Model) {
       // Email settings and content
       // const adminEmail = "platform@medhub.global";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [email].filter(
-        (email) => email
-      );
+      const recipientEmails = [email].filter((email) => email);
 
       //start -> for using ejs template
       const templateName = "forgotPassword";
@@ -862,12 +945,7 @@ if (Model) {
       const emailContent = await otpForResetPasswordContent(updatedUser, otp);
       // await sendEmail(recipientEmails, subject, emailContent);
 
-      await sendTemplateEmail(
-        recipientEmails,
-        subject,
-        templateName,
-        context
-      )
+      await sendTemplateEmail(recipientEmails, subject, templateName, context);
 
       // Success response
       return sendSuccessResponse(
@@ -879,7 +957,6 @@ if (Model) {
       handleCatchBlockError(req, res, error);
     }
   },
-
 
   verifyEmailAndResendOTP: async (req, res) => {
     try {
@@ -1010,27 +1087,20 @@ if (Model) {
       // Email settings and content
       // const adminEmail = "platform@medhub.global";
       const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
-      const recipientEmails = [email].filter(
-        (email) => email
-      );
+      const recipientEmails = [email].filter((email) => email);
       //start -> for using ejs template
-        const templateName = "forgotPassword";
-        const context = {
-          otp: otp,
-          user_type: usertype,
-        };
-        //end -> for using ejs template
+      const templateName = "forgotPassword";
+      const context = {
+        otp: otp,
+        user_type: usertype,
+      };
+      //end -> for using ejs template
 
       // Prepare the email content
       const emailContent = await otpForResetPasswordContent(updatedUser, otp);
       // await sendEmail(recipientEmails, subject, emailContent);
 
-      await sendTemplateEmail(
-        recipientEmails,
-        subject,
-        templateName,
-        context
-      )
+      await sendTemplateEmail(recipientEmails, subject, templateName, context);
 
       // Success response
       return sendSuccessResponse(
@@ -1669,7 +1739,6 @@ if (Model) {
       };
 
       const sendProfileEditRequest = async (user, userType, address) => {
-
         const perId = "PER-" + Math.random().toString(16).slice(2, 10);
         const ProfileEdit =
           // userType === "Buyer" ? BuyerProfileEdit : SupplierProfileEdit;
@@ -1741,11 +1810,10 @@ if (Model) {
           );
         }
 
-        const newProfileEditReq = await sendProfileEditRequest(
-          user,
-          usertype,
-          { ...changedUpdatedddress.newObj, type: "Registered" }
-        );
+        const newProfileEditReq = await sendProfileEditRequest(user, usertype, {
+          ...changedUpdatedddress.newObj,
+          type: "Registered",
+        });
         if (!newProfileEditReq) {
           return sendSuccessResponse(
             res,
@@ -1790,11 +1858,10 @@ if (Model) {
       }
 
       if (!changePersonalDetails && sendRequestToAdmin) {
-        const newProfileEditReq = await sendProfileEditRequest(
-          user,
-          usertype,
-          { ...changedUpdatedddress.newObj, type: "Registered" }
-        );
+        const newProfileEditReq = await sendProfileEditRequest(user, usertype, {
+          ...changedUpdatedddress.newObj,
+          type: "Registered",
+        });
         if (!newProfileEditReq) {
           return sendErrorResponse(
             res,

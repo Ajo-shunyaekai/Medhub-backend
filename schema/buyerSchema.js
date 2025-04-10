@@ -163,6 +163,12 @@ const buyerSchema = new Schema(
         required: [true, "Validation Error : certificate_image is required"],
       },
     ],
+    certificateFileNDate: [
+      {
+        file: { type: String },
+        date: { type: String },
+      },
+    ],
     medical_certificate: [
       {
         type: String,
@@ -265,7 +271,7 @@ const buyerSchema = new Schema(
       },
     ],
     lastLogin: {
-      type: Date
+      type: Date,
     },
     loginHistory: [
       {
@@ -274,7 +280,7 @@ const buyerSchema = new Schema(
           default: Date.now,
         },
       },
-    ],    
+    ],
   },
   { timestamps: true }
 );
