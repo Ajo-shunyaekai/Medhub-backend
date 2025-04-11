@@ -7,7 +7,7 @@ const { handleResponse, handleController } = require("../utils/utilities");
 const { validation } = require("../utils/utilities");
 const {
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const createMulterMiddleware = require("../utils/imageUpload");
 
@@ -23,14 +23,14 @@ module.exports = () => {
   routes.post(
     "/create-invoice",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) => handleController(Invoice.createInvoice, req, res)
   );
 
   routes.post(
     "/update-payment-status",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     imageUploadMiddleware,
     async (req, res) => {
       if (
@@ -55,12 +55,12 @@ module.exports = () => {
     }
   );
 
-  // routes.post('/invoice-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Invoice.invoiceDetails, req, res));
+  // routes.post('/invoice-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Invoice.invoiceDetails, req, res));
 
   routes.post(
     "/get-specific-invoice-details/:id",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) => handleController(Invoice.invoiceDetails, req, res)
   );
 

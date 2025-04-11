@@ -6,7 +6,7 @@ const { handleResponse, handleController } = require("../utils/utilities");
 const { validation } = require("../utils/utilities");
 const {
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const createMulterMiddleware = require("../utils/imageUpload");
 
@@ -31,7 +31,7 @@ module.exports = () => {
   routes.post(
     "/add-medicine",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     medicineUploadMiddleware,
     (req, res) => {
       if (
@@ -95,7 +95,7 @@ module.exports = () => {
   routes.post(
     "/medicine-list",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) => handleController(Controller.allMedicineList, req, res)
   );
 
@@ -106,7 +106,7 @@ module.exports = () => {
   routes.post(
     "/edit-medicine",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     medicineUploadMiddleware,
     (req, res) => {
       let allProductImages = [];
