@@ -408,15 +408,7 @@ module.exports = {
             "__v",
             "supplier_image",
             "license_image",
-            "tax_image",
-            "certificate_image",
-            "certificateFileNDate",
-            "medical_certificate",
-            "profile_status",
-            "createdAt",
-            "updatedAt",
-            "token",
-            "password",
+            "tax_image", 
             "otp",
             "otpCount",
             "otpLimitReachedAt",
@@ -474,6 +466,7 @@ module.exports = {
   },
 
   getBuyerCSVList: async (req, res) => {
+    console.log('req?.body', req?.body)
     try {
       const { pageNo, pageSize, filterKey, filterValue } = req?.body;
 
@@ -514,8 +507,37 @@ module.exports = {
         )
       ); // `toObject()` removes internal Mongoose metadata
 
+      // Define desired column order
+      const fields = [
+        'Buyer Id',
+        'Buyer Name',
+        'Buyer Type',
+        'Buyer Email',
+        'Buyer Country Code',
+        'Buyer Mobile',
+        'Contact Person Name',
+        'Designation',
+        'Contact Person Email',
+        'Contact Person Country Code',
+        'Contact Person Mobile No',
+        'Sales Person Name',
+        'Description',
+        'License No',
+        'License Expiry Date',
+        'Registration No',
+        'Vat Reg No',
+        'Country Of Origin',
+        'Country Of Operation',
+        'Interested In',
+        'Tags',
+        'Account Created At',
+        'Last Login',
+        'Login Frequency',
+        'Account Status'
+      ];
+
       // Convert the flattened data to CSV
-      const csv = parse(flattenedData);
+      const csv = parse(flattenedData, {fields});
 
       // Set headers for file download
       res.setHeader("Content-Type", "text/csv");
