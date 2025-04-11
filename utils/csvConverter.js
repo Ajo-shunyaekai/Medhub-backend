@@ -31,6 +31,8 @@ const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
         const loginFrequency = getLoginFrequencyLast90Days(obj[key]);
         result["Login Frequency"] = loginFrequency;
         continue; // skip further processing of login_history
+      } else if (key === 'createdAt') {
+        result["Account Created At"] = formatDateTime(obj[key]);
       }
 
 
@@ -59,6 +61,8 @@ const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
         obj[key] !== null
       ) {
         Object.assign(result, flattenData(obj[key], newKey)); // Recursively flatten nested objects
+      } else if (Array.isArray(obj[key])) {
+        result[newKey] = obj[key].join(', ');
       } else {
         result[newKey] = obj[key]; // Directly add key-value if it's not an object
       }

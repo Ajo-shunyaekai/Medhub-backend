@@ -446,6 +446,7 @@ module.exports = {
         'Country Of Operation',
         'Categories',
         'Tags',
+        'Account Created At',
         'Last Login',
         'Login Frequency',
         'Account Status'
@@ -497,7 +498,6 @@ module.exports = {
             "tax_image",
             "certificate_image",
             "profile_status",
-            "createdAt",
             "updatedAt",
             "token",
             "password",
