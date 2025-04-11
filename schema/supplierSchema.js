@@ -279,10 +279,10 @@ const supplierSchema = new Schema(
         },
       },
     ],
-    lastLogin: {
+    last_login: {
       type: Date,
     },
-    loginHistory: [
+    login_history: [
       {
         date: {
           type: Date,

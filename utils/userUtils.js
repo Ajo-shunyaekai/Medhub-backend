@@ -4,8 +4,8 @@ const updateLoginInfo = async (Model, userId) => {
     await Model.updateOne(
       { _id: userId },
       {
-        $set: { lastLogin: now },
-        $push: { loginHistory: { date: now } },
+        $set: { last_login: now },
+        $push: { login_history: { date: now } },
       }
     );
   };

@@ -577,7 +577,7 @@ const registerUser = async (req, res) => {
         buyer,
         usertype
       );
-
+      
       //start -> for using ejs template
       const templateName = "thankYou";
       const context = {};
@@ -594,6 +594,7 @@ const registerUser = async (req, res) => {
         templateName,
         context
       );
+
 
       return sendSuccessResponse(
         res,

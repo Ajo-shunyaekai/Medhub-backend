@@ -41,10 +41,10 @@ const adminSchema = new Schema(
       type: Date,
       default: Date.now,
     },
-    lastLogin: {
+    last_login: {
       type: Date
     },
-    loginHistory: [
+    login_history: [
       {
         date: {
           type: Date,
