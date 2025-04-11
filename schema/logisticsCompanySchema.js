@@ -1,4 +1,7 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const logisticsPartnerSchema = new mongoose.Schema(
   {
@@ -27,10 +30,6 @@ const logisticsPartnerSchema = new mongoose.Schema(
       match: /^\+?\d{10,15}$/,
     },
     password: {
-      type: String,
-      required: true,
-    },
-    token: {
       type: String,
       required: true,
     },
@@ -64,7 +63,7 @@ const logisticsPartnerSchema = new mongoose.Schema(
       default: Date.now,
     },
     lastLogin: {
-      type: Date
+      type: Date,
     },
     loginHistory: [
       {
@@ -73,12 +72,50 @@ const logisticsPartnerSchema = new mongoose.Schema(
           default: Date.now,
         },
       },
-    ],   
+    ],
+    refreshToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+logisticsPartnerSchema?.pre("save", async function (next) {
+  if (!this.isModified("password")) return next(); // if password is NOT modified, skip hashing
+
+  this.password = await bcrypt.hash(
+    this.password,
+    Number(process.env.BCRYPT_SALT_ROUNDS)
+  );
+  next();
+});
+
+logisticsPartnerSchema.methods.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+logisticsPartnerSchema.methods.generateAccessToken = async function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      user_id: this.partner_id,
+    },
+    process.env.JWT_ACCESS_TOKEN_SECRET,
+    { expiresIn: Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2)}
+  );
+};
+
+logisticsPartnerSchema.methods.generateRefreshToken = async function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRY }
+  );
+};
 
 const LogisticsPartner = mongoose.model(
   "LogisticsPartner",

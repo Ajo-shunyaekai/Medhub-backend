@@ -698,7 +698,6 @@ module.exports = {
 
   // orderFeedback: async (req, res, reqObj, callback) => {
   //   try {
-  //     console.log('reqObj', reqObj)
       
   //     const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
 
@@ -714,7 +713,6 @@ module.exports = {
   //       support_image: reqObj.feedback_image,
   //       status: 0,
   //     });
-  //     console.log('newSupport', newSupport)
   //     // return false
   //     newSupport
   //       .save()
@@ -773,7 +771,6 @@ module.exports = {
 
   // orderComplaint: async (req, res, reqObj, callback) => {
   //   try {
-  //     console.log('reqObj', reqObj)
   //     const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
 
   //     const newSupport = new Support({
@@ -788,7 +785,6 @@ module.exports = {
   //       support_image: reqObj.complaint_image,
   //       status: 0,
   //     });
-  //     console.log('newSupport', newSupport)
   //     // return false
   //     newSupport
   //       .save()

@@ -3,7 +3,7 @@ var routes                                       = express.Router();
 const Controller                                 = require('../controller/Admin')
 const MedicineController                         = require('../controller/Medicine')
 const { handleResponse, handleController }                         = require('../utils/utilities');
-const {checkAuthorization, checkAuthentication, checkCommonUserAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, checkCommonUserAuthentication}  = require('../middleware/Authorization');
 
 module.exports = () => {
 

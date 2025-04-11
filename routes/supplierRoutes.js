@@ -8,8 +8,8 @@ const { handleResponse, handleController } = require("../utils/utilities");
 const { validation } = require("../utils/utilities");
 const {
   checkAuthorization,
-  checkAuthentication,
   checkCommonUserAuthentication,
+  authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const createMulterMiddleware = require("../utils/imageUpload");
 
@@ -104,8 +104,9 @@ module.exports = () => {
 
   routes.post(
     "/orders-buyer-country",
-    checkAuthorization,
-    checkCommonUserAuthentication,
+    // checkAuthorization,
+    // checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) =>
       handleController(Controller.supplierOrderSupplierCountry, req, res)
   );

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -73,97 +74,6 @@ const sendMailFunc = (email, subject, body) => {
 };
 
 module.exports = {
-  register: async (req, res, reqObj, callback) => {
-    try {
-      const adminId = "ADM-" + Math.random().toString(16).slice(2, 10);
-      let jwtSecretKey = process.env.APP_SECRET;
-      let data = { time: Date(), email: reqObj.email };
-      const token = jwt.sign(data, jwtSecretKey);
-      const saltRounds = 10;
-
-      const newAdmin = new Admin({
-        admin_id: adminId,
-        user_name: reqObj.name,
-        email: reqObj.email,
-        password: reqObj.password,
-        token: token,
-      });
-
-      bcrypt
-        .genSalt(saltRounds)
-        .then((salt) => {
-          return bcrypt.hash(newAdmin.password, salt);
-        })
-        .then((hashedPassword) => {
-          newAdmin.password = hashedPassword;
-
-          newAdmin
-            .save()
-            .then((response) => {
-              callback({
-                code: 200,
-                message: "Admin regisrtation successfull",
-                result: response,
-              });
-            })
-            .catch((err) => {
-              callback({
-                code: 400,
-                message: "Admin registration failed",
-                result: err,
-              });
-            });
-        })
-        .catch((error) => {
-          callback({
-            code: 400,
-            message: "Error in generating salt or hashing password",
-            result: error,
-          });
-        });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  login: async (req, res, reqObj, callback) => {
-    try {
-      const password = reqObj.password;
-      const email = reqObj.email;
-
-      const admin = await Admin.findOne({ email: email });
-
-      if (!admin) {
-        return callback({
-          code: 404,
-          message: "Email not found",
-          result: admin,
-        });
-      }
-
-      const isMatch = await bcrypt.compare(password, admin.password);
-
-      const adminDetails = {
-        _id: admin._id,
-        admin_id: admin.admin_id,
-        user_name: admin.user_name,
-        email: admin.email,
-        token: admin.token,
-      };
-
-      if (isMatch) {
-        callback({
-          code: 200,
-          message: "Admin Login Successfull",
-          result: adminDetails,
-        });
-      } else {
-        callback({ code: 401, message: "Incorrect Password" });
-      }
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
 
   editAdminProfile: async (req, res, reqObj, callback) => {
     try {
@@ -775,7 +685,7 @@ module.exports = {
 
       if (action === "accept") {
         let password = generatePassword();
-        const saltRounds = 10;
+        const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         updateProfile.password = hashedPassword;
         await updateProfile.save();
@@ -1195,7 +1105,7 @@ module.exports = {
 
       if (action === "accept") {
         let password = generatePassword();
-        const saltRounds = 10;
+        const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         updateStatus.password = hashedPassword;
         await updateStatus.save();

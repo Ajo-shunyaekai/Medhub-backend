@@ -10,6 +10,7 @@ const mime = require("mime-types");
 const {
   checkAuthorization,
   checkCommonUserAuthentication,
+  authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const router = express.Router();
 const {
@@ -23,6 +24,7 @@ const {
   // addProfileEditRequest,
   verifyEmailAndResendOTP,
   updateProfileAndSendEditRequest,
+  logoutUser,
 } = require(`../controller/authController`);
 const { sendErrorResponse } = require("../utils/commonResonse");
 const {
@@ -121,6 +123,7 @@ const cpUpload = (req, res, next) => {
 router.post(`/register`, checkAuthorization, cpUpload, registerUser);
 
 router.post(`/login`, loginUser);
+router.post(`/logout`, authenticationNAuthorization, logoutUser);
 
 router.post(`/verify-email`, verifyEmailAndResendOTP);
 router.post(`/resend-otp`, verifyEmailAndResendOTP);

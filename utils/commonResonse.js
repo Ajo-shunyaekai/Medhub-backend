@@ -10,6 +10,11 @@ const sendSuccessResponse = (res, statusCode, message, data = null) => {
   });
 };
 
+const cookiesOptions = {
+  httpOnly: true,
+  secure: true,
+};
+
 // Common Error Response Function
 const sendErrorResponse = (res, statusCode, message, result = null) => {
   return res?.status(statusCode).send({
@@ -19,10 +24,12 @@ const sendErrorResponse = (res, statusCode, message, result = null) => {
   });
 };
 
-const handleCatchBlockError = async (req, res, error) => {
+const handleCatchBlockError = async (req, res, error, middlewareObj) => {
   try {
-    let message = "An unexpected error occurred. Please try again later.";
-    let statusCode = 500;
+    let message =
+      middlewareObj?.message ||
+      "An unexpected error occurred. Please try again later.";
+    let statusCode = middlewareObj?.status || 500;
     let errObj = error;
     let dbError = false;
 
@@ -106,4 +113,5 @@ module.exports = {
   sendSuccessResponse,
   sendErrorResponse,
   handleCatchBlockError,
+  cookiesOptions,
 };

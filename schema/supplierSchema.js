@@ -1,5 +1,8 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const supplierSchema = new Schema(
   {
@@ -203,12 +206,6 @@ const supplierSchema = new Schema(
       type: Number, // 0- pending, 1 - accepted, 2- rejected
       required: true,
     },
-    token: {
-      type: String,
-      required: true,
-      trim: true,
-      unique: true,
-    },
     otp: {
       type: Number,
     },
@@ -293,8 +290,46 @@ const supplierSchema = new Schema(
         },
       },
     ],
+    refreshToken: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
+
+supplierSchema?.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  this.password = await bcrypt.hash(
+    this.password,
+    Number(process.env.BCRYPT_SALT_ROUNDS)
+  );
+  next();
+});
+
+supplierSchema.methods.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+supplierSchema.methods.generateAccessToken = async function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      user_id: this.supplier_id,
+    },
+    process.env.JWT_ACCESS_TOKEN_SECRET,
+    { expiresIn: Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2)}
+  );
+};
+
+supplierSchema.methods.generateRefreshToken = async function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRY }
+  );
+};
 
 module.exports = mongoose.model("Supplier", supplierSchema);
