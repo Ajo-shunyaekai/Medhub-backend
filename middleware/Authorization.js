@@ -13,11 +13,11 @@ const {
 const {
   generateAccessAndRefeshToken,
 } = require("../controller/authController");
-
+ 
 const checkAuthorization = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
-
+ 
     if (!token) {
       res.status(401).send({ message: "Auth Token is Missing" });
     } else {
@@ -31,22 +31,25 @@ const checkAuthorization = async (req, res, next) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const authenticationNAuthorization = async (req, res, next) => {
   try {
-    const { usertype } = req.headers;
-    const { accessToken, refreshToken } = req.cookies;
-
+    console.log("req.headers", req?.headers);
+    const { usertype, token1, token2 } = req.headers;
+    // const { accessToken, refreshToken } = req.cookies;
+ 
     if (!usertype) {
       return sendErrorResponse(res, 401, "User type missing.");
     }
-
+    const accessToken = token1;
+    const refreshToken = token2;
+ 
     if (!accessToken) {
       return sendErrorResponse(res, 401, "Access token missing.");
     }
-
+ 
     let decodedToken;
-
+ 
     const Model =
       usertype === "Buyer"
         ? Buyer
@@ -57,21 +60,21 @@ const authenticationNAuthorization = async (req, res, next) => {
         : usertype === "Logistics"
         ? LogisticsPartner
         : null;
-
+ 
     try {
       decodedToken = jwt.verify(
         accessToken,
         process.env.JWT_ACCESS_TOKEN_SECRET
       );
-
+ 
       const user = await Model?.findById(decodedToken?._id)?.select(
         "-password -refreshToken"
       );
-
+ 
       if (!user) {
         return sendErrorResponse(res, 401, "Invalid token.");
       }
-
+ 
       req.userFromMiddleware = user;
       next();
     } catch (err) {
@@ -85,26 +88,26 @@ const authenticationNAuthorization = async (req, res, next) => {
             "Session expired. Please login again."
           );
         }
-
+ 
         try {
           const decodedRefresh = jwt.verify(
             refreshToken,
             process.env.JWT_REFRESH_TOKEN_SECRET
           );
-
+ 
           const user = await Model?.findById(decodedRefresh?._id);
           if (!user) {
             return sendErrorResponse(res, 401, "Invalid refresh token.");
           }
-
+ 
           // Refresh token valid → issue new access token
           const newAccessToken = await user.generateAccessToken();
-
+ 
           // Set new access token in cookies
           res.cookie("accessToken", newAccessToken, cookiesOptions);
-
+ 
           decodedToken = jwt.decode(newAccessToken); // Use new token
-
+ 
           req.userFromMiddleware = user;
           next();
         } catch (refreshError) {
@@ -126,7 +129,7 @@ const authenticationNAuthorization = async (req, res, next) => {
     });
   }
 };
-
+ 
 module.exports = {
   checkAuthorization,
   authenticationNAuthorization,
