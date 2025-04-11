@@ -32,36 +32,6 @@ const checkAuthorization = async (req, res, next) => {
   }
 };
 
-const checkCommonUserAuthentication = async (req, res, next) => {
-  const { accesstoken, usertype, supplier_id, seller_id, buyer_id, client_id } =
-    req.headers;
-  const admin_id = req.headers?.admin_id || req?.body?.admin_id;
-  try {
-    let user = null;
-
-    if (usertype === "Buyer") {
-      user = await Buyer.findOne({ token: accesstoken });
-    } else if (usertype === "Admin") {
-      user = await Admin.findOne({ token: accesstoken });
-    } else if (usertype === "Supplier") {
-      user = await Supplier.findOne({ token: accesstoken });
-    } else if (usertype === "Logistics") {
-      user = await LogisticsPartner.findOne({ token: accesstoken });
-    }
-
-    if (!user) {
-      return res.status(400).send({ message: "Invalid Access Token" });
-    }
-
-    if (user.status === 0) {
-      return res.status(400).send({ message: "Access Denied" });
-    }
-    next();
-  } catch (error) {
-    handleCatchBlockError(req, res, error);
-  }
-};
-
 const authenticationNAuthorization = async (req, res, next) => {
   try {
     const { usertype } = req.headers;
@@ -159,6 +129,5 @@ const authenticationNAuthorization = async (req, res, next) => {
 
 module.exports = {
   checkAuthorization,
-  checkCommonUserAuthentication,
   authenticationNAuthorization,
 };

@@ -9,7 +9,6 @@ const { imageUpload } = require("../utils/imageUpload");
 const mime = require("mime-types");
 const {
   checkAuthorization,
-  checkCommonUserAuthentication,
   authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const router = express.Router();

@@ -6,11 +6,11 @@ const path                = require('path');
 const Controller             = require('../controller/purchaseOrder')
 const { handleResponse, handleController }  = require('../utils/utilities');
 const { validation }      = require('../utils/utilities')
-const {checkAuthorization, checkCommonUserAuthentication}  = require('../middleware/Authorization');
+const {checkAuthorization, authenticationNAuthorization}  = require('../middleware/Authorization');
 
 module.exports = () => {
     
-    routes.post('/create-po', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    routes.post('/create-po', checkAuthorization, authenticationNAuthorization, (req, res) => {
         
         const { supplierMobile, buyerMobile } = req.body.data;
         const countryCodeRegex = /^\+\d+/;
@@ -28,11 +28,11 @@ module.exports = () => {
         handleController(Controller.createPO, req, res)
     });
 
-    routes.post('/get-po-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getPOList, req, res));
+    routes.post('/get-po-list', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.getPOList, req, res));
 
-    routes.post('/get-po-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.getPODetails, req, res));
+    routes.post('/get-po-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.getPODetails, req, res));
 
-    routes.post('/edit-po', checkAuthorization, checkCommonUserAuthentication, (req, res) => {
+    routes.post('/edit-po', checkAuthorization, authenticationNAuthorization, (req, res) => {
         const { supplierMobile, buyerMobile } = req.body.data;
         const countryCodeRegex = /^\+\d+/;
 

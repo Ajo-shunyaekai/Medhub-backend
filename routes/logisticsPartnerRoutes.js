@@ -9,7 +9,7 @@ const {
 } = require("../controller/LogisticsPartner");
 const {
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const {
   logisticsPartnerValidationRules,
@@ -18,32 +18,32 @@ const {
 router.post(
   "/add-logistics-partner",
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   logisticsPartnerValidationRules,
   addLogisticsPartner
 );
 router.post(
   "/get-logistics-dashboard-data",
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   getLogisticsDashboardData
 );
 router.post(
   "/get-logistics-request-list",
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   getLogisticsList
 );
 router.post(
   "/get-logistics-details/:requestId",
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   getLogisticsDetails
 );
 router.post(
   "/update-logistics-details",
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   updateLogisticsRequest
 );
 

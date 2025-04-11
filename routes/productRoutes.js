@@ -1,7 +1,7 @@
 const express = require("express");
 const {
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const router = express.Router();
 const {
@@ -40,21 +40,21 @@ router.post(`/`, checkAuthorization, getAllProducts); // according to the market
 router.post(
   `/bulk-upload`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   bulkUpload
 );
 
 router.post(
   `/csv-download`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   csvDownload
 );
 
 router.post(
   `/preview-bulk-products`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   CSVupload.single("csvfile"),
   previewBulkUpload
 );
@@ -62,7 +62,7 @@ router.post(
 router.post(
   `/add`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   addProductUpload,
   categorySpecificValidationRules,
   generalValidationRules,
@@ -74,7 +74,7 @@ router.post(
 router.post(
   `/edit/:productId`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   editProductUpload,
   editCategorySpecificValidationRules,
   editGeneralValidationRules,
@@ -86,21 +86,21 @@ router.post(
 router.post(
   `/delete/:id`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   deleteProduct
 );
 
 router.post(
   `/get-suppliers/:id`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   productSuppliers
 );
 
 router.post(
   `/get-other-products/:id`,
   checkAuthorization,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
   otherProducts
 );
 
