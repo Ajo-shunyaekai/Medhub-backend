@@ -690,19 +690,19 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password, usertype } = req.body;
-
+ 
     if (!usertype) {
       return sendErrorResponse(res, 400, "Cannot Identify User.");
     }
-
+ 
     if (!email) {
       return sendErrorResponse(res, 400, "Email isrequired.");
     }
-
+ 
     if (!password) {
       return sendErrorResponse(res, 400, "Password isrequired.");
     }
-
+ 
     // Find the user based on user type
     const user =
       usertype === "Buyer"
@@ -714,7 +714,7 @@ const loginUser = async (req, res) => {
         : usertype === "Logistics"
         ? await LogisticsPartner.findOne({ email })
         : null;
-
+ 
     if (!user) {
       return sendErrorResponse(
         res,
@@ -722,20 +722,20 @@ const loginUser = async (req, res) => {
         "User not found. Please enter registered email."
       );
     }
-
+ 
     // Check if the password matches
     // const isPasswordValid = await bcrypt.compare(password, user?.password);
     const isPasswordValid = await user?.isPasswordCorrect(password);
-
+ 
     if (!isPasswordValid) {
       return sendErrorResponse(res, 401, "Incorrect Password.");
     }
-
+ 
     const { accessToken, refreshToken } = await generateAccessAndRefeshToken(
       user?._id,
       usertype
     );
-
+ 
     // Fetch user details excluding sensitive information
     let loggedinUser =
       usertype === "Buyer"
@@ -755,7 +755,7 @@ const loginUser = async (req, res) => {
             .select("-password -createdAt -updatedAt -__v")
             .lean()
         : null;
-
+ 
     if (usertype === "Buyer") {
       // Count documents in the List collection for the buyer
       const listCount = await List.countDocuments({
@@ -763,7 +763,7 @@ const loginUser = async (req, res) => {
       });
       loggedinUser.list_count = listCount;
     }
-
+ 
     const Model =
       usertype === "Buyer"
         ? Buyer
@@ -774,15 +774,15 @@ const loginUser = async (req, res) => {
         : usertype === "Logistics"
         ? LogisticsPartner
         : null;
-
+ 
     if (Model) {
       await updateLoginInfo(Model, user._id);
     }
-
+ 
     res
       .cookie("accessToken", accessToken, cookiesOptions)
       .cookie("refreshToken", refreshToken, cookiesOptions);
-
+ 
     return sendSuccessResponse(res, 200, `${usertype} Login Successful.`, {
       ...loggedinUser,
       accessToken,
