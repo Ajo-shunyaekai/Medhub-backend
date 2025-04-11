@@ -8,8 +8,7 @@ const { handleResponse, handleController } = require("../utils/utilities");
 const { validation } = require("../utils/utilities");
 const {
   checkAuthorization,
-  checkAuthentication,
-  checkCommonUserAuthentication,
+  authenticationNAuthorization,
 } = require("../middleware/Authorization");
 const createMulterMiddleware = require("../utils/imageUpload");
 
@@ -41,7 +40,7 @@ module.exports = () => {
     handleController(Controller.filterValues, req, res)
   );
 
-  // routes.post('/edit-supplier-request', checkAuthorization, checkCommonUserAuthentication, supplierUploadMiddleware, async (req, res) => {
+  // routes.post('/edit-supplier-request', checkAuthorization, authenticationNAuthorization, supplierUploadMiddleware, async (req, res) => {
   //     if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
   //         res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
   //         return;
@@ -84,20 +83,20 @@ module.exports = () => {
   routes.post(
     "/get-specific-supplier-details/:id",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) => handleController(Controller.supplierProfileDetails, req, res)
   );
 
-  // routes.post('/profile-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supplierProfileDetails, req, res));
+  // routes.post('/profile-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supplierProfileDetails, req, res));
 
-  // routes.post('/buyer-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.buyerDetails, req, res));
+  // routes.post('/buyer-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.buyerDetails, req, res));
 
-  // routes.post('/change-password', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.changePassword, req, res));
+  // routes.post('/change-password', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.changePassword, req, res));
 
   routes.post(
     "/orders-summary-details",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) =>
       handleController(Controller.supplierDashboardOrderDetails, req, res)
   );
@@ -105,26 +104,26 @@ module.exports = () => {
   routes.post(
     "/orders-buyer-country",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) =>
       handleController(Controller.supplierOrderSupplierCountry, req, res)
   );
 
-  // routes.post('/support-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportList, req, res));
+  // routes.post('/support-list', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supportList, req, res));
 
-  // routes.post('/support-details', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.supportDetails, req, res));
+  // routes.post('/support-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supportDetails, req, res));
 
   routes.post(
     "/get-notification-list",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) => handleController(Controller.getNotificationList, req, res)
   );
 
   routes.post(
     "/get-notification-details-list",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) =>
       handleController(Controller.getNotificationDetailsList, req, res)
   );
@@ -132,30 +131,30 @@ module.exports = () => {
   routes.post(
     "/update-notification-status",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) => handleController(Controller.updateStatus, req, res)
   );
 
-  // routes.post('/medicine-request-list', checkAuthorization, checkCommonUserAuthentication, (req, res) => handleController(Controller.medicinRequestList, req, res));
+  // routes.post('/medicine-request-list', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.medicinRequestList, req, res));
 
   routes.post(
     "/get-invoice-count",
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     (req, res) => handleController(Controller.getInvoiceCount, req, res)
   );
 
   routes.post(
     `/get-all-suppliers-list`,
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     Controller.getAllSuppliersList
   );
 
   routes.post(
     `/get-csv-suppliers-list`,
     checkAuthorization,
-    checkCommonUserAuthentication,
+    authenticationNAuthorization,
     Controller.getCSVSuppliersList
   );
 

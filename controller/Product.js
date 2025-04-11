@@ -1370,7 +1370,6 @@ module.exports = {
       }
 
       const updatedResult = results?.map((result) => {
-        // console.log("\nresult?.[Product Category*]", Number(result?.["Quantity From*"]))
         let updatedObject = {
           // _id: productId ? productId : undefined, // Add _id if Product Id* exists
           model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
