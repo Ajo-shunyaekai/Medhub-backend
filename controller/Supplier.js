@@ -1043,4 +1043,36 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
+
+  supplierProfileDetails: async (req, res, reqObj, callback) => {
+    try {
+      const fields = {
+        token: 0,
+        password: 0,
+      };
+      Supplier.findOne({ supplier_id: req?.params?.id })
+        .select(fields)
+        .then((data) => {
+          const loginFrequency = getLoginFrequencyLast90Days(data.loginHistory);
+          const resultData = {
+            ...data.toObject(),
+            loginFrequencyLast90Days: loginFrequency,
+          };
+          callback({
+            code: 200,
+            message: "Supplier details fetched successfully",
+            result: resultData,
+          });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          callback({
+            code: 400,
+            message: "Error in fetching supplier details",
+          });
+        });
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
 };

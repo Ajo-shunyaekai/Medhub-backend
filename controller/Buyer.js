@@ -25,6 +25,25 @@ const {
 } = require("../utils/commonResonse");
 
 module.exports = {
+  buyerProfileDetails : async(req, res, reqObj, callback) => {
+    try {
+      // Buyer.findOne({buyer_id: reqObj.buyer_id}).select('buyer_id buyer_name email mobile country_code company_name')
+      const fields = {
+        token    : 0,
+        password : 0
+      }
+      Buyer.findOne({buyer_id: req?.params?.id}).select(fields)  
+      .then((data) => {
+        callback({code: 200, message : 'Buyer details fetched successfully', result:data})
+    }).catch((error) => {
+        console.error('Error:', error);
+        callback({code: 400, message : 'Error in fetching buyer details'})
+    });
+    }catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+  
   mySupplierList: async (req, res, reqObj, callback) => {
     try {
       const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
