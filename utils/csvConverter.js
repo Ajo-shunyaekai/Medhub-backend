@@ -32,7 +32,9 @@ const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
         result["Login Frequency"] = loginFrequency;
         continue; // skip further processing of login_history
       } else if (key === 'createdAt') {
-        result["Account Created At"] = formatDateTime(obj[key]);
+        result["Account Creation Date"] = formatDateTime(obj[key]);
+      } else if (key === 'subscription_name') {
+        result['Payment Plan'] = obj[key];
       }
 
 

@@ -34,7 +34,6 @@ const checkAuthorization = async (req, res, next) => {
  
 const authenticationNAuthorization = async (req, res, next) => {
   try {
-    console.log("req.headers", req?.headers);
     const { usertype, token1, token2 } = req.headers;
     // const { accessToken, refreshToken } = req.cookies;
  
