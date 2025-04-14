@@ -4,15 +4,11 @@ const Buyer = require("../schema/buyerSchema");
 const Supplier = require("../schema/supplierSchema");
 const Admin = require("../schema/adminSchema");
 const LogisticsPartner = require("../schema/logisticsCompanySchema");
-const logErrorToFile = require("../logs/errorLogs");
 const {
   sendErrorResponse,
   handleCatchBlockError,
   cookiesOptions,
 } = require("../utils/commonResonse");
-const {
-  generateAccessAndRefeshToken,
-} = require("../controller/authController");
 
 const checkAuthorization = async (req, res, next) => {
   try {
@@ -34,12 +30,14 @@ const checkAuthorization = async (req, res, next) => {
 
 const authenticationNAuthorization = async (req, res, next) => {
   try {
-    const { usertype } = req.headers;
-    const { accessToken, refreshToken } = req.cookies;
+    const { usertype, token1, token2 } = req.headers;
+    // const { accessToken, refreshToken } = req.cookies;
 
     if (!usertype) {
       return sendErrorResponse(res, 401, "User type missing.");
     }
+    const accessToken = token1;
+    const refreshToken = token2;
 
     if (!accessToken) {
       return sendErrorResponse(res, 401, "Access token missing.");

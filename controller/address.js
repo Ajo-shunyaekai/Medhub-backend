@@ -5,7 +5,10 @@ const Buyer = require("../schema/buyerSchema");
 const { validationResult } = require("express-validator");
 const { default: mongoose } = require("mongoose");
 const logErrorToFile = require("../logs/errorLogs");
-const { sendErrorResponse, handleCatchBlockError } = require("../utils/commonResonse");
+const {
+  sendErrorResponse,
+  handleCatchBlockError,
+} = require("../utils/commonResonse");
 
 const getAddress = async (req, res) => {
   try {
@@ -56,7 +59,6 @@ const getAddress = async (req, res) => {
             ...user?.supplier_address,
           },
         ...(address.addresses || []), // Ensure addresses is an array or empty array if not present
-        
       ],
     };
 
@@ -71,7 +73,6 @@ const getAddress = async (req, res) => {
 
 const addAddress = async (req, res) => {
   try {
-    
     const { usertype, admin_id, supplier_id, buyer_id } = req?.headers;
     const {
       full_name,
@@ -168,9 +169,8 @@ const addAddress = async (req, res) => {
 const getAddressById = async (req, res) => {
   try {
     const { usertype, admin_id, supplier_id, buyer_id } = req.headers;
-    const { userId, addressId } = req.params; 
+    const { userId, addressId } = req.params;
 
-    
     let user;
     if (usertype === "Admin") {
       user = await Admin.findOne({ admin_id });
@@ -195,7 +195,7 @@ const getAddressById = async (req, res) => {
       });
     }
 
-    // Find specific address 
+    // Find specific address
     const address = userAddress.addresses.find(
       (addr) => addr._id.toString() === addressId
     );
@@ -219,7 +219,7 @@ const getAddressById = async (req, res) => {
 // Edit an address
 const editAddress = async (req, res) => {
   try {
-    const { userId, addressId } = req.params; 
+    const { userId, addressId } = req.params;
     const updatedData = req.body; // Data to update
 
     // Find the user address document
@@ -285,10 +285,18 @@ const deleteAddress = async (req, res) => {
     // Save the updated user address document
     await userAddress.save();
 
-    res.status(200).json({ code: 200, message: "Address deleted successfully" });
+    res
+      .status(200)
+      .json({ code: 200, message: "Address deleted successfully" });
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
 
-module.exports = { getAddress, addAddress, getAddressById,  editAddress, deleteAddress };
+module.exports = {
+  getAddress,
+  addAddress,
+  getAddressById,
+  editAddress,
+  deleteAddress,
+};

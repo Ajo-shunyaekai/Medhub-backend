@@ -8,30 +8,6 @@ const {
   checkAuthorization,
   authenticationNAuthorization,
 } = require("../middleware/Authorization");
-const createMulterMiddleware = require("../utils/imageUpload");
-
-const buyerUploadMiddleware = createMulterMiddleware([
-  {
-    fieldName: "buyer_image",
-    uploadPath: "./uploads/buyer/buyer_images",
-    maxCount: 1,
-  },
-  {
-    fieldName: "tax_image",
-    uploadPath: "./uploads/buyer/tax_images",
-    maxCount: 4,
-  },
-  {
-    fieldName: "license_image",
-    uploadPath: "./uploads/buyer/license_images",
-    maxCount: 4,
-  },
-  {
-    fieldName: "certificate_image",
-    uploadPath: "./uploads/buyer/certificate_images",
-    maxCount: 4,
-  },
-]);
 
 module.exports = () => {
   routes.post(
@@ -41,18 +17,12 @@ module.exports = () => {
     (req, res) => handleController(Controller.buyerProfileDetails, req, res)
   );
 
-  // routes.post('/profile-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.buyerProfileDetails, req, res));
-
-  // routes.post('/supplier-list', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supplierList, req, res));
-
   routes.post(
     "/my-supplier-list",
     checkAuthorization,
     authenticationNAuthorization,
     (req, res) => handleController(Controller.mySupplierList, req, res)
   );
-
-  // routes.post('/supplier-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supplierDetails, req, res));
 
   routes.post(
     "/supplier-product-list",
@@ -82,10 +52,6 @@ module.exports = () => {
     authenticationNAuthorization,
     (req, res) => handleController(Controller.buyerOrderSellerCountry, req, res)
   );
-
-  // routes.post('/support-list', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supportList, req, res));
-
-  // routes.post('/support-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supportDetails, req, res));
 
   routes.post(
     "/add-to-list",

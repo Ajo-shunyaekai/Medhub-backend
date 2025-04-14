@@ -3,9 +3,7 @@ const { sendErrorResponse } = require("../../utils/commonResonse");
 const logErrorToFile = require("../../logs/errorLogs");
 
 const addressValidationRules = [
-  body("full_name")
-    .notEmpty()
-    .withMessage("Full name is required"),
+  body("full_name").notEmpty().withMessage("Full name is required"),
 
   body("mobile_number").notEmpty().withMessage("Phone number is required"),
 
@@ -13,15 +11,11 @@ const addressValidationRules = [
     .notEmpty()
     .withMessage("Company Address is required"),
 
-  body("locality")
-    .notEmpty()
-    .withMessage("Locality is required"),
+  body("locality").notEmpty().withMessage("Locality is required"),
 
   body("lamd_mark").optional(),
 
-  body("country")
-    .notEmpty()
-    .withMessage("Country is required"),
+  body("country").notEmpty().withMessage("Country is required"),
 
   body("state").optional(),
 
@@ -42,12 +36,11 @@ const addressValidationRules = [
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    
     console.error("Internal Server Error:", errors.array());
     logErrorToFile(errors.array(), req);
     return sendErrorResponse(res, 400, "Validation Error", errors.array());
   }
-  
+
   next();
 };
 

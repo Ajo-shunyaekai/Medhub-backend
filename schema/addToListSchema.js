@@ -25,10 +25,6 @@ const listSchema = new Schema({
     ref: "Supplier",
     required: [true, "Supplier Id is required"],
   },
-  // product_id: {
-  //     type: String,
-  //     required: true,
-  // },
   item_details: [
     {
       product_id: String,
@@ -46,28 +42,8 @@ const listSchema = new Schema({
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
-  // quantity: {
-  //     type: String,
-  //     required: true,
-  // },
-  // unit_price: {
-  //     type: String,
-  //     required: true,
-  // },
-  // est_delivery_time: {
-  //     type: String,
-  //     required: true,
-  // },
-  // quantity_required: {
-  //     type: String,
-  //     required: true,
-  // },
-  // target_price: {
-  //     type: String,
-  //     required: true,
-  // }
-})
+    default: Date.now,
+  },
+});
 
 module.exports = mongoose.model("List", listSchema);

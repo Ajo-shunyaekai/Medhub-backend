@@ -19,7 +19,12 @@ const connection = () => {
     .catch((err) => {
       console.error("Internal Server Error:", err);
       logErrorToFile(err, undefined);
-      return sendErrorResponse(undefined, 500, "Error in connecting to MongoDB", err);
+      return sendErrorResponse(
+        undefined,
+        500,
+        "Error in connecting to MongoDB",
+        err
+      );
     });
 };
 

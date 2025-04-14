@@ -141,8 +141,6 @@ router.post(
   updateProfileAndSendEditRequest
 );
 
-// router.put(`/:id`, checkAuthorization, cpUpload, validateUserInput, handleValidationErrors, updateProfileAndSendEditRequest);
-
 router.post(`/:id`, getLoggedinUserProfileDetails);
 
 module.exports = router;

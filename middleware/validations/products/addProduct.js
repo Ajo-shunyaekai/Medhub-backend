@@ -40,18 +40,6 @@ const generalValidationRules = [
       return true;
     }),
 
-  // body("countryAvailable")
-  //   .optional()
-  //   .custom((value, { req }) => {
-  //     // Only validate if  market is 'Secondary' and countryAvailable is provided
-  //     if (req.body.market === "secondary" && !value) {
-  //       throw new Error(
-  //         "Country Available is required when the market is 'Secondary'."
-  //       );
-  //     }
-  //     return true;
-  //   }),
-
   body("minimumPurchaseUnit")
     .optional()
     .custom((value, { req }) => {
@@ -114,44 +102,6 @@ const generalValidationRules = [
 
   body("unit").notEmpty().withMessage("Product Weight Unit is required."),
   body("unit_tax").notEmpty().withMessage("Tax Percentage is required."),
-  // body("packageType")
-  //   .notEmpty()
-  //   .withMessage("Product Packaging Type is required."),
-
-  // body("packageMaterial")
-  //   .notEmpty()
-  //   .withMessage("Product Packaging Material is required.")
-  //   .matches(/^[a-zA-Z0-9\s]+$/)
-  //   .withMessage(
-  //     "Product Packaging Material must be alphanumeric (letters, numbers, and spaces only)."
-  //   ),
-
-  // body("packageMaterialIfOther")
-  //   .optional()
-  //   .custom((value, { req }) => {
-  //     // Only validate if packageMaterial is 'Other' and packageMaterialIfOther is provided
-  //     if (req.body.packageMaterial === "Other" && !value) {
-  //       throw new Error(
-  //         "Product Packaging Other Material is required when packaging material is 'Other'."
-  //       );
-  //     }
-  //     if (value && !/^[a-zA-Z0-9\s]+$/.test(value)) {
-  //       throw new Error(
-  //         "Product Packaging Other Material must be alphanumeric (letters and numbers only)."
-  //       );
-  //     }
-  //     return true;
-  //   }),
-
-  // body("sku")
-  //   .notEmpty()
-  //   .withMessage("SKU is required.")
-  //   .trim()
-  //   .matches(/^[a-zA-Z0-9\s]+$/)
-  //   .withMessage(
-  //     "SKU must be alphanumeric (letters, numbers, and spaces only)."
-  //   ),
-
   body("stock")
     .notEmpty()
     .withMessage("Product Stock is required.")
@@ -159,57 +109,6 @@ const generalValidationRules = [
     .withMessage(
       "Stock status must be 'In-stock', 'Out of Stock' or 'On-demand'"
     ),
-
-  // body("stockQuantity")
-  //   .optional()
-  //   .trim()
-  //   .isInt({ gt: 0 })
-  //   .withMessage("Stock Quantity must be a positive integer."),
-
-  // body("countries")
-  //   .optional()
-  //   .custom((value) => {
-  //     if (typeof value === "string") {
-  //       try {
-  //         value = JSON.parse(value); // Parse string if it looks like an array
-  //       } catch (e) {
-  //         throw new Error("Countries must be a valid array.");
-  //       }
-  //     }
-  //     if (
-  //       !Array.isArray(value) ||
-  //       !value.every((country) => typeof country === "string")
-  //     ) {
-  //       throw new Error("Countries must be an array of strings.");
-  //     }
-  //     return true;
-  //   }),
-
-  // body("date")
-  //   .optional()
-  //   .isDate()
-  //   .withMessage("Date must be a valid date."),
-
-  // body("date")
-  //   .optional()
-  //   .custom((value) => {
-  //     // if (value && !/^\d{2} [a-zA-Z]+ \d{4}$/.test(value)) {
-  //     //   throw new Error(
-  //     //     "Date must be in the format 'DD MMM YYYY' (e.g., '12 jan 2025')."
-  //     //   );
-  //     // }
-
-  //     if (
-  //       value &&
-  //       !/^\d{2}-(\d{2}|\w{3})-\d{4}$|^\d{2} \w{3} \d{4}$/.test(value)
-  //     ) {
-  //       throw new Error(
-  //         "Date must be in the format 'DD MMM YYYY' (e.g., '12 Feb 2025') or 'DD-MM-YYYY' (e.g., '12-02-2025')."
-  //       );
-  //     }
-  //     return true;
-  //   })
-  //   .withMessage("Date must be a valid date."),
 
   // Category validation
   body("category")
@@ -463,62 +362,7 @@ const categorySpecificValidationRules = [
           ),
       ];
     }
-    // if (value === "LaboratorySupplies") {
-    //   // Validation for LaboratorySupplies Category
-    //   return [
-    //     body("subCategory")
-    //       .notEmpty()
-    //       .withMessage("Sub Category is required.")
-    //       .isIn([
-    //         "Test kits",
-    //         "Microscopes & Lab Equipment",
-    //         "Chemicals & Reagents",
-    //         "Lab Consumables",
-    //       ])
-    //       .withMessage("Sub Category is invalid."),
-    //     body("magnificationRange").optional().trim(),
-    //     body("objectiveLenses").optional().trim(),
-    //     body("powerSource").optional().trim(),
-    //     body("resolution").optional().trim(),
-    //     body("connectivity").optional().trim(),
-    //     body("shape").optional().trim(),
-    //     body("coating").optional().trim(),
-    //     body("purpose").optional().trim(),
-    //     body("casNumber").optional().trim(),
-    //     body("grade").optional().trim(),
-    //     body("concentration").optional().trim(),
-    //     body("physicalState")
-    //       .isArray()
-    //       .withMessage("Physical State must be an array.")
-    //       .custom((value) => {
-    //         // Ensure that each item in the array is a string and is trimmed
-    //         value.forEach((item, index) => {
-    //           if (typeof item !== "string" || item.trim() === "") {
-    //             throw new Error(
-    //               `Physical State at index ${index} must be a non-empty string`
-    //             );
-    //           }
-    //         });
-    //         return true;
-    //       })
-    //       .optional(),
-    //     body("hazardClassification")
-    //       .isArray()
-    //       .withMessage("Hazard Classification must be an array.")
-    //       .custom((value) => {
-    //         // Ensure that each item in the array is a string and is trimmed
-    //         value.forEach((item, index) => {
-    //           if (typeof item !== "string" || item.trim() === "") {
-    //             throw new Error(
-    //               `Hazard Classification at index ${index} must be a non-empty string`
-    //             );
-    //           }
-    //         });
-    //         return true;
-    //       })
-    //       .optional(),
-    //   ];
-    // }
+
     if (value === "DiagnosticAndMonitoringDevices") {
       // Validation for DiagnosticAndMonitoringDevices Category
       return [

@@ -12,9 +12,18 @@ module.exports = function (app) {
     { paths: ["/supplier.html"], file: "supplier.html" },
     { paths: ["/pricing.html", "/pricing"], file: "pricing.html" },
     { paths: ["/contact-us.html", "/contact-us"], file: "contact-us.html" },
-    { paths: ["/privacy-policy.html", "/privacy-policy"], file: "privacy-policy.html" },
-    { paths: ["/terms-and-conditions.html", "/terms-and-conditions"], file: "terms-and-conditions.html" },
-    { paths: ["/request-a-demo.html", "/request-a-demo"], file: "request-a-demo.html" },
+    {
+      paths: ["/privacy-policy.html", "/privacy-policy"],
+      file: "privacy-policy.html",
+    },
+    {
+      paths: ["/terms-and-conditions.html", "/terms-and-conditions"],
+      file: "terms-and-conditions.html",
+    },
+    {
+      paths: ["/request-a-demo.html", "/request-a-demo"],
+      file: "request-a-demo.html",
+    },
   ];
 
   routes.forEach((route) => {

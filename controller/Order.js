@@ -23,7 +23,10 @@ const {
   sendErrorResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
-const { createOrderContent, bookLogisticsContent } = require("../utils/emailContents");
+const {
+  createOrderContent,
+  bookLogisticsContent,
+} = require("../utils/emailContents");
 
 const initializeInvoiceNumber = async () => {
   const count = await Invoice.countDocuments();
@@ -85,12 +88,6 @@ module.exports = {
         total_amount_paid: 0,
         pending_amount: reqObj.data.totalAmount,
         order_status: "active",
-        // payment_terms     : reqObj.payment_terms,
-        // est_delivery_time : reqObj.est_delivery_time,
-        // shipping_details  : reqObj.shipping_details,
-        // remarks           : reqObj.remarks,
-        // invoice_number    : invoiceNumberDoc.last_invoice_number
-        // total_price  : reqObj.total_price,
       });
 
       newOrder
@@ -448,7 +445,11 @@ module.exports = {
 
       const subject = `Logistics Drop Details Submitted for Order ID: ${order_id}`;
       const recipientEmails = [supplier.contact_person_email];
-      const emailContent = await bookLogisticsContent(supplier, buyer, order_id)
+      const emailContent = await bookLogisticsContent(
+        supplier,
+        buyer,
+        order_id
+      );
       await sendEmail(recipientEmails, subject, emailContent);
       callback({
         code: 200,
@@ -696,160 +697,21 @@ module.exports = {
     }
   },
 
-  // orderFeedback: async (req, res, reqObj, callback) => {
-  //   try {
-      
-  //     const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
-
-  //     const newSupport = new Support({
-  //       support_id: supportId,
-  //       user_id: reqObj.buyer_id || reqObj.supplier_id,
-  //       user_type: reqObj.usertype,
-  //       // order_id: reqObj.order_id,
-  //       support_type: reqObj.support_type,
-  //       // reason: reqObj.feedback,
-  //       subject: reqObj.subject,
-  //       message: reqObj.message,
-  //       support_image: reqObj.feedback_image,
-  //       status: 0,
-  //     });
-  //     // return false
-  //     newSupport
-  //       .save()
-  //       .then(async(data) => {
-  //         const subject = `New Enquiry Received - ${supportId}`;
-  //         const body = `
-  //         <div style="font-family: Arial, sans-serif; padding: 10px; line-height: 1.6;">
-  //           <h2>New Enquiry Feedback Received</h2>
-  //           <p><strong>Support ID:</strong> ${supportId}</p>
-  //           <p><strong>User ID:</strong> ${reqObj.buyer_id || reqObj.supplier_id}</p>
-  //           <p><strong>User Type:</strong> ${reqObj.usertype}</p>
-  //           <p><strong>Support Type:</strong> ${reqObj.support_type}</p>
-  //           ${reqObj.order_id ? `<p><strong>Related Order ID:</strong> ${reqObj.order_id}</p>` : ""}
-  //           <p><strong>Subject:</strong> ${reqObj.subject}</p>
-  //           <p><strong>Message:</strong><br/> ${reqObj.message}</p>
-  //           ${
-  //             reqObj.feedback_image?.length > 0
-  //               ? `<p><strong>Attached Image(s):</strong><br/> ${reqObj.feedback_image
-  //                   .map((img) => `<div>${img}</div>`)
-  //                   .join("")}</p>`
-  //               : ""
-  //           }
-  //           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
-  //         </div>
-  //       `;
-  //       const recipientEmails = ['ajo@shunyaekai.tech']
-        
-        
-  //           let attachments;
-
-  //           if (reqObj.feedback_image && reqObj.feedback_image.length > 0) {
-  //             attachments = reqObj.feedback_image.map(filename => ({
-  //               filename,
-  //               path: path.join(__dirname, "..", "uploads", "buyer", "order", "feedback_images", filename),
-  //             }));
-  //           }
-
-  //           await sendEmail(recipientEmails, subject, body, attachments);
-  //         callback({
-  //           code: 200,
-  //           message: "Feedback submitted Successfully",
-  //           result: data,
-  //         });
-  //       })
-  //       .catch((err) => {
-  //         callback({
-  //           code: 400,
-  //           message: "Error while submitting feedback",
-  //           result: err,
-  //         });
-  //       });
-  //   } catch (error) {
-  //     handleCatchBlockError(req, res, error);
-  //   }
-  // },
-
-  // orderComplaint: async (req, res, reqObj, callback) => {
-  //   try {
-  //     const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
-
-  //     const newSupport = new Support({
-  //       support_id: supportId,
-  //       user_id: reqObj.buyer_id || reqObj.supplier_id,
-  //       user_type: reqObj.usertype,
-  //       support_type: reqObj.support_type,
-  //        // order_id: reqObj.order_id,
-  //       // reason: reqObj.complaint,
-  //       subject: reqObj.subject,
-  //       message: reqObj.message,
-  //       support_image: reqObj.complaint_image,
-  //       status: 0,
-  //     });
-  //     // return false
-  //     newSupport
-  //       .save()
-  //       .then( async(data) => {
-
-  //         const subject = `New Complaint Received - ${supportId}`;
-  //         const body = `
-  //         <div style="font-family: Arial, sans-serif; padding: 10px; line-height: 1.6;">
-  //           <h2>New Complaint  Received</h2>
-  //           <p><strong>Support ID:</strong> ${supportId}</p>
-  //           <p><strong>User ID:</strong> ${reqObj.buyer_id || reqObj.supplier_id}</p>
-  //           <p><strong>User Type:</strong> ${reqObj.usertype}</p>
-  //           <p><strong>Support Type:</strong> ${reqObj.support_type}</p>
-  //           ${reqObj.order_id ? `<p><strong>Related Order ID:</strong> ${reqObj.order_id}</p>` : ""}
-  //           <p><strong>Subject:</strong> ${reqObj.subject}</p>
-  //           <p><strong>Message:</strong><br/> ${reqObj.message}</p>
-  //           ${
-  //             reqObj.complaint_image?.length > 0
-  //               ? `<p><strong>Attached Image(s):</strong><br/> ${reqObj.feedback_image
-  //                   .map((img) => `<div>${img}</div>`)
-  //                   .join("")}</p>`
-  //               : ""
-  //           }
-  //           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
-  //         </div>
-  //       `;
-  //       const recipientEmails = ['ajo@shunyaekai.tech']
-        
-        
-  //           let attachments;
-
-  //           if (reqObj.complaint_image && reqObj.complaint_image.length > 0) {
-  //             attachments = reqObj.complaint_image.map(filename => ({
-  //               filename,
-  //               path: path.join(__dirname, "..", "uploads", "buyer", "order", "complaint_images", filename),
-  //             }));
-  //           }
-
-  //           await sendEmail(recipientEmails, subject, body, attachments);
-  //         callback({
-  //           code: 200,
-  //           message: "Complaint submitted Successfully",
-  //           result: data,
-  //         });
-  //       })
-  //       .catch((err) => {
-  //         callback({
-  //           code: 400,
-  //           message: "Error while submitting complaint",
-  //           result: err,
-  //         });
-  //       });
-  //   } catch (error) {
-  //     handleCatchBlockError(req, res, error);
-  //   }
-  // },
-
-  supportSubmission: async(req, res, reqObj, callback) => {
+  supportSubmission: async (req, res, reqObj, callback) => {
     try {
       const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
-  
-      const imageField = reqObj.support_type === 'feedback' ? reqObj.feedback_image : reqObj.complaint_image;
-      const uploadDir = reqObj.support_type === 'feedback' ? "feedback_images" : "complaint_images";
-      const subjectLabel = reqObj.support_type === 'feedback' ? "Feedback" : "Complaint";
-  
+
+      const imageField =
+        reqObj.support_type === "feedback"
+          ? reqObj.feedback_image
+          : reqObj.complaint_image;
+      const uploadDir =
+        reqObj.support_type === "feedback"
+          ? "feedback_images"
+          : "complaint_images";
+      const subjectLabel =
+        reqObj.support_type === "feedback" ? "Feedback" : "Complaint";
+
       const newSupport = new Support({
         support_id: supportId,
         user_id: reqObj.buyer_id || reqObj.supplier_id,
@@ -860,1190 +722,65 @@ module.exports = {
         support_image: imageField,
         status: 0,
       });
-  
+
       const savedSupport = await newSupport.save();
-  
+
       const emailSubject = `New ${subjectLabel} Received - ${supportId}`;
       const emailBody = `
         <div style="font-family: Arial, sans-serif; padding: 10px; line-height: 1.6;">
           <h2>New ${subjectLabel} Received</h2>
           <p><strong>Support ID:</strong> ${supportId}</p>
-          <p><strong>User ID:</strong> ${reqObj.buyer_id || reqObj.supplier_id}</p>
+          <p><strong>User ID:</strong> ${
+            reqObj.buyer_id || reqObj.supplier_id
+          }</p>
           <p><strong>User Type:</strong> ${reqObj.usertype}</p>
           <p><strong>Support Type:</strong> ${reqObj.support_type}</p>
-          ${reqObj.order_id ? `<p><strong>Related Order ID:</strong> ${reqObj.order_id}</p>` : ""}
+          ${
+            reqObj.order_id
+              ? `<p><strong>Related Order ID:</strong> ${reqObj.order_id}</p>`
+              : ""
+          }
           <p><strong>Subject:</strong> ${reqObj.subject}</p>
           <p><strong>Message:</strong><br/> ${reqObj.message}</p>
           ${
             imageField?.length > 0
-              ? `<p><strong>Attached Image(s):</strong><br/> ${imageField.map((img) => `<div>${img}</div>`).join("")}</p>`
+              ? `<p><strong>Attached Image(s):</strong><br/> ${imageField
+                  .map((img) => `<div>${img}</div>`)
+                  .join("")}</p>`
               : ""
           }
           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
         </div>
       `;
-  
-      const attachments = imageField?.length > 0
-        ? imageField.map((filename) => ({
-            filename,
-            path: path.join(__dirname, "..", "uploads", "buyer", "order", uploadDir, filename),
-          }))
-        : [];
-  
-      await sendEmail(['ajo@shunyaekai.tech'], emailSubject, emailBody, attachments);
-  
+
+      const attachments =
+        imageField?.length > 0
+          ? imageField.map((filename) => ({
+              filename,
+              path: path.join(
+                __dirname,
+                "..",
+                "uploads",
+                "buyer",
+                "order",
+                uploadDir,
+                filename
+              ),
+            }))
+          : [];
+
+      await sendEmail(
+        ["ajo@shunyaekai.tech"],
+        emailSubject,
+        emailBody,
+        attachments
+      );
+
       callback({
         code: 200,
         message: `${subjectLabel} submitted Successfully`,
         result: savedSupport,
       });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  buyerInvoicesList: async (req, res, reqObj, callback) => {
-    try {
-      const { page_no, limit, filterKey, buyer_id } = reqObj;
-      const pageNo = page_no || 2;
-      const pageSize = limit || 2;
-      const offset = (pageNo - 1) * pageSize;
-
-      Invoices.aggregate([
-        {
-          $match: {
-            buyer_id: buyer_id,
-            status: filterKey,
-          },
-        },
-        {
-          $lookup: {
-            from: "buyers",
-            localField: "buyer_id",
-            foreignField: "buyer_id",
-            as: "buyer",
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            items: 1,
-            payment_terms: 1,
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            mode_of_payment: 1,
-            created_at: 1,
-            buyer: { $arrayElemAt: ["$buyer", 0] },
-          },
-        },
-        {
-          $unwind: "$items",
-        },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            invoice_id: { $first: "$invoice_id" },
-            order_id: { $first: "$order_id" },
-            enquiry_id: { $first: "$enquiry_id" },
-            purchaseOrder_id: { $first: "$purchaseOrder_id" },
-            buyer_id: { $first: "$buyer_id" },
-            supplier_id: { $first: "$supplier_id" },
-            invoice_no: { $first: "$invoice_no" },
-            invoice_date: { $first: "$invoice_date" },
-            buyer_name: { $first: "$buyer_name" },
-            buyer_address: { $first: "$buyer_address" },
-            buyer_country: { $first: "$buyer_country" },
-            buyer_vat_reg_no: { $first: "$buyer_vat_reg_no" },
-            supplier_name: { $first: "$supplier_name" },
-            supplier_address: { $first: "$supplier_address" },
-            supplier_country: { $first: "$supplier_country" },
-            supplier_vat_reg_no: { $first: "$supplier_vat_reg_no" },
-            items: { $push: "$items" },
-            payment_terms: { $first: "$payment_terms" },
-            total_payable_amount: { $first: "$total_payable_amount" },
-            total_amount_paid: { $first: "$total_amount_paid" },
-            pending_amount: { $first: "$pending_amount" },
-            account_number: { $first: "$account_number" },
-            sort_code: { $first: "$sort_code" },
-            transaction_image: { $first: "$transaction_image" },
-            invoice_status: { $first: "$invoice_status" },
-            status: { $first: "$status" },
-            payment_status: { $first: "$payment_status" },
-            mode_of_payment: { $first: "$mode_of_payment" },
-            created_at: { $first: "$created_at" },
-            buyer: { $first: "$buyer" },
-            totalPrice: { $sum: "$items.item_price" },
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            items: 1,
-            payment_terms: 1,
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            mode_of_payment: 1,
-            created_at: 1,
-            totalPrice: 1,
-            "buyer.buyer_image": 1,
-            "buyer.buyer_name": 1,
-            "buyer.buyer_address": 1,
-            "buyer.buyer_type": 1,
-            "buyer.country_of_origin": 1,
-          },
-        },
-        { $sort: { created_at: -1 } },
-        { $skip: offset },
-        { $limit: pageSize },
-      ])
-        .then((data) => {
-          Invoices.countDocuments({
-            status: filterKey,
-            buyer_id: buyer_id,
-          }).then((totalItems) => {
-            const totalPages = Math.ceil(totalItems / pageSize);
-
-            const responseData = {
-              data,
-              totalPages,
-              totalItems,
-            };
-            callback({
-              code: 200,
-              message: "List Fetched successfully",
-              result: responseData,
-            });
-          });
-        })
-        .catch((err) => {
-          logErrorToFile(err, req);
-          callback({
-            code: 400,
-            message: "Error in fetching order list",
-            result: err,
-          });
-        });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  buyerInvoiceDetails: async (req, res, reqObj, callback) => {
-    try {
-      const { page_no, limit, filterKey, buyer_id } = reqObj;
-      const pageNo = page_no || 2;
-      const pageSize = limit || 2;
-      const offset = (pageNo - 1) * pageSize;
-
-      Invoices.aggregate([
-        {
-          $match: {
-            buyer_id: buyer_id,
-            status: filterKey,
-          },
-        },
-        {
-          $lookup: {
-            from: "buyers",
-            localField: "buyer_id",
-            foreignField: "buyer_id",
-            as: "buyer",
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            items: 1,
-            payment_terms: 1,
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            created_at: 1,
-            buyer: { $arrayElemAt: ["$buyer", 0] },
-          },
-        },
-        {
-          $unwind: "$items",
-        },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            invoice_id: { $first: "$invoice_id" },
-            order_id: { $first: "$order_id" },
-            enquiry_id: { $first: "$enquiry_id" },
-            purchaseOrder_id: { $first: "$purchaseOrder_id" },
-            buyer_id: { $first: "$buyer_id" },
-            supplier_id: { $first: "$supplier_id" },
-            invoice_no: { $first: "$invoice_no" },
-            invoice_date: { $first: "$invoice_date" },
-            buyer_name: { $first: "$buyer_name" },
-            buyer_address: { $first: "$buyer_address" },
-            buyer_country: { $first: "$buyer_country" },
-            buyer_vat_reg_no: { $first: "$buyer_vat_reg_no" },
-            supplier_name: { $first: "$supplier_name" },
-            supplier_address: { $first: "$supplier_address" },
-            supplier_country: { $first: "$supplier_country" },
-            supplier_vat_reg_no: { $first: "$supplier_vat_reg_no" },
-            items: { $push: "$items" },
-            payment_terms: { $first: "$payment_terms" },
-            total_payable_amount: { $first: "$total_payable_amount" },
-            total_amount_paid: { $first: "$total_amount_paid" },
-            pending_amount: { $first: "$pending_amount" },
-            account_number: { $first: "$account_number" },
-            sort_code: { $first: "$sort_code" },
-            transaction_image: { $first: "$transaction_image" },
-            invoice_status: { $first: "$invoice_status" },
-            status: { $first: "$status" },
-            payment_status: { $first: "$payment_status" },
-            created_at: { $first: "$created_at" },
-            buyer: { $first: "$buyer" },
-            totalPrice: { $sum: "$items.item_price" },
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            items: 1,
-            payment_terms: 1,
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            created_at: 1,
-            totalPrice: 1,
-            "buyer.buyer_image": 1,
-            "buyer.buyer_name": 1,
-            "buyer.buyer_address": 1,
-            "buyer.buyer_type": 1,
-          },
-        },
-        { $sort: { created_at: -1 } },
-        { $skip: offset },
-        { $limit: pageSize },
-      ])
-        .then((data) => {
-          Invoices.countDocuments({
-            status: filterKey,
-            buyer_id: buyer_id,
-          }).then((totalItems) => {
-            const totalPages = Math.ceil(totalItems / pageSize);
-
-            const responseData = {
-              data,
-              totalPages,
-              totalItems,
-            };
-            callback({
-              code: 200,
-              message: "List Fetched successfully",
-              result: responseData,
-            });
-          });
-        })
-        .catch((err) => {
-          logErrorToFile(err, req);
-          callback({
-            code: 400,
-            message: "Error in fetching order list",
-            result: err,
-          });
-        });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  supplierOrdersList: async (req, res, reqObj, callback) => {
-    try {
-      const { page_no, limit, filterKey, supplier_id } = reqObj;
-
-      const pageNo = page_no || 1;
-      const pageSize = limit || 2;
-      const offset = (pageNo - 1) * pageSize;
-
-      const adjustedFilterKey =
-        filterKey === "order-request" ? "pending" : filterKey;
-
-      Order.aggregate([
-        {
-          $match: {
-            supplier_id: supplier_id,
-            order_status: adjustedFilterKey,
-          },
-        },
-        {
-          $lookup: {
-            from: "buyers",
-            localField: "buyer_id",
-            foreignField: "buyer_id",
-            as: "buyer",
-          },
-        },
-        {
-          $project: {
-            order_id: 1,
-            supplier_id: 1,
-            buyer_name: 1,
-            buyer_id: 1,
-            items: 1,
-            payment_terms: 1,
-            est_delivery_time: 1,
-            shipping_details: 1,
-            remarks: 1,
-            order_status: 1,
-            status: 1,
-            invoice_no: 1,
-            created_at: 1,
-            buyer: { $arrayElemAt: ["$buyer", 0] },
-          },
-        },
-        {
-          $unwind: "$items",
-        },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            order_id: { $first: "$order_id" },
-            supplier_id: { $first: "$supplier_id" },
-            buyer_name: { $first: "$buyer_name" },
-            buyer_id: { $first: "$buyer_id" },
-            items: { $push: "$items" },
-            payment_terms: { $first: "$payment_terms" },
-            est_delivery_time: { $first: "$est_delivery_time" },
-            shipping_details: { $first: "$shipping_details" },
-            remarks: { $first: "$remarks" },
-            order_status: { $first: "$order_status" },
-            status: { $first: "$status" },
-            invoice_no: { $first: "$invoice_no" },
-            created_at: { $first: "$created_at" },
-            buyer: { $first: "$buyer" },
-            totalPrice: { $sum: "$items.item_price" },
-          },
-        },
-        {
-          $project: {
-            order_id: 1,
-            supplier_id: 1,
-            buyer_name: 1,
-            buyer_id: 1,
-            items: 1,
-            payment_terms: 1,
-            est_delivery_time: 1,
-            shipping_details: 1,
-            remarks: 1,
-            order_status: 1,
-            status: 1,
-            invoice_no: 1,
-            created_at: 1,
-            totalPrice: 1,
-            "buyer.buyer_image": 1,
-            "buyer.buyer_name": 1,
-          },
-        },
-        { $sort: { created_at: -1 } },
-        { $skip: offset },
-        { $limit: pageSize },
-      ])
-        .then((data) => {
-          Order.countDocuments({
-            order_status: adjustedFilterKey,
-            supplier_id: supplier_id,
-          }).then((totalItems) => {
-            const totalPages = Math.ceil(totalItems / pageSize);
-
-            const responseData = {
-              data,
-              totalPages,
-              totalItems,
-            };
-            callback({
-              code: 200,
-              message: "Supplier Order List Fetched successfully",
-              result: responseData,
-            });
-          });
-        })
-        .catch((err) => {
-          logErrorToFile(err, req);
-          callback({
-            code: 400,
-            message: "Error in fetching order list",
-            result: err,
-          });
-        });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  supplierOrderDetails: async (req, res, reqObj, callback) => {
-    try {
-      const { buyer_id, order_id, filterKey } = reqObj;
-
-      Order.aggregate([
-        {
-          $match: {
-            order_id: order_id,
-            // buyer_id: buyer_id,
-            // order_status: filterKey
-          },
-        },
-        {
-          $lookup: {
-            from: "suppliers",
-            localField: "supplier_id",
-            foreignField: "supplier_id",
-            as: "supplier",
-          },
-        },
-        {
-          $lookup: {
-            from: "buyers",
-            localField: "buyer_id",
-            foreignField: "buyer_id",
-            as: "buyer",
-          },
-        },
-        {
-          $lookup: {
-            from: "enquiries",
-            localField: "enquiry_id",
-            foreignField: "enquiry_id",
-            as: "enquiry",
-          },
-        },
-        {
-          $lookup: {
-            from: "invoices",
-            localField: "order_id",
-            foreignField: "order_id",
-            as: "invoices",
-          },
-        },
-        {
-          $addFields: {
-            invoices: {
-              $sortArray: {
-                input: "$invoices",
-                sortBy: { created_at: -1 },
-              },
-            },
-          },
-        },
-        {
-          $project: {
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            buyer_company: 1,
-            supplier_id: 1,
-            buyer_name: 1,
-            buyer_email: 1,
-            buyer_mobile: 1,
-            buyer_address: 1,
-            supplier_name: 1,
-            supplier_email: 1,
-            supplier_address: 1,
-            supplier_mobile: 1,
-            items: 1,
-            payment_terms: 1,
-            deposit_requested: 1,
-            // deposit_due       : 1,
-            deposit_due_date: 1,
-            est_delivery_time: 1,
-            shipping_details: 1,
-            remarks: 1,
-            order_status: 1,
-            status: 1,
-            invoice_status: 1,
-            invoice_number: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            payment_due_date: 1,
-            total_due_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            logistics_details: 1,
-            shipment_details: 1,
-            coordinators: 1,
-            created_at: 1,
-            supplier: { $arrayElemAt: ["$supplier", 0] },
-            buyer: { $arrayElemAt: ["$buyer", 0] },
-            enquiry: { $arrayElemAt: ["$enquiry", 0] },
-            invoices: 1,
-          },
-        },
-        {
-          $unwind: "$items",
-        },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.drugs_name": { $arrayElemAt: ["$medicine.drugs_name", 0] },
-            "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            order_id: { $first: "$order_id" },
-            enquiry_id: { $first: "$enquiry_id" },
-            purchaseOrder_id: { $first: "$purchaseOrder_id" },
-            buyer_id: { $first: "$buyer_id" },
-            buyer_company: { $first: "$buyer_company" },
-            buyer_name: { $first: "$buyer_name" },
-            buyer_email: { $first: "$buyer_email" },
-            buyer_address: { $first: "$buyer_address" },
-            buyer_mobile: { $first: "$buyer_mobile" },
-            buyer_country_code: { $first: "$buyer_country_code" },
-            supplier_name: { $first: "$supplier_name" },
-            supplier_email: { $first: "$supplier_email" },
-            supplier_mobile: { $first: "$supplier_mobile" },
-            supplier_address: { $first: "$supplier_address" },
-            country_of_origin: { $first: "$country_of_origin" },
-            supplier_id: { $first: "$supplier_id" },
-            items: { $push: "$items" },
-            payment_terms: { $first: "$payment_terms" },
-            deposit_requested: { $first: "$deposit_requested" },
-            // deposit_due        : { $first: "$deposit_due" },
-            deposit_due_date: { $first: "$deposit_due_date" },
-            est_delivery_time: { $first: "$est_delivery_time" },
-            shipping_details: { $first: "$shipping_details" },
-            remarks: { $first: "$remarks" },
-            order_status: { $first: "$order_status" },
-            status: { $first: "$status" },
-            invoice_status: { $first: "$invoice_status" },
-            invoice_number: { $first: "$invoice_number" },
-            invoice_no: { $first: "$invoice_no" },
-            invoice_date: { $first: "$invoice_date" },
-            payment_due_date: { $first: "$payment_due_date" },
-            logistics_details: { $first: "$logistics_details" },
-            shipment_details: { $first: "$shipment_details" },
-            coordinators: { $first: "$coordinators" },
-            total_due_amount: { $first: "$total_due_amount" },
-            total_amount_paid: { $first: "$total_amount_paid" },
-            pending_amount: { $first: "$pending_amount" },
-            created_at: { $first: "$created_at" },
-            supplier: { $first: "$supplier" },
-            buyer: { $first: "$buyer" },
-            enquiry: { $first: "$enquiry" },
-            invoices: { $first: "$invoices" }, // Group the invoice details
-            totalPrice: { $sum: "$items.item_price" },
-          },
-        },
-        {
-          $project: {
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            buyer_company: 1,
-            supplier_id: 1,
-            buyer_name: 1,
-            buyer_email: 1,
-            buyer_mobile: 1,
-            buyer_country_code: 1,
-            buyer_address: 1,
-            supplier_name: 1,
-            supplier_email: 1,
-            supplier_address: 1,
-            supplier_mobile: 1,
-            items: 1,
-            payment_terms: 1,
-            deposit_requested: 1,
-            // deposit_due       : 1,
-            deposit_due_date: 1,
-            est_delivery_time: 1,
-            shipping_details: 1,
-            remarks: 1,
-            order_status: 1,
-            status: 1,
-            invoice_status: 1,
-            invoice_number: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            payment_due_date: 1,
-            logistics_details: { $arrayElemAt: ["$logistics_details", 0] },
-            shipment_details: 1,
-            coordinators: 1,
-            total_due_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            created_at: 1,
-            totalPrice: 1,
-            invoices: 1,
-            "supplier.supplier_image": 1,
-            "supplier.supplier_name": 1,
-            "supplier.supplier_email": 1,
-            "supplier.supplier_mobile": 1,
-            "supplier.supplier_country_code": 1,
-            "supplier.contact_person_mobile_no": 1,
-            "supplier.contact_person_country_code": 1,
-            "supplier.estimated_delivery_time": 1,
-            "supplier.supplier_address": 1,
-            "supplier.country_of_origin": 1,
-            "supplier.vat_reg_no": 1,
-            "supplier.bank_details": 1,
-            "enquiry.enquiry_id": 1,
-            "enquiry.payment_terms": 1,
-            "buyer.buyer_image": 1,
-            "buyer.buyer_name": 1,
-            "buyer.buyer_email": 1,
-            "buyer.buyer_mobile": 1,
-            "buyer.buyer_country_code": 1,
-            "buyer.contact_person_mobile": 1,
-            "buyer.contact_person_country_code": 1,
-            "buyer.buyer_address": 1,
-            "buyer.buyer_type": 1,
-            "buyer.country_of_origin": 1,
-            "buyer.country_of_origin": 1,
-            "buyer.vat_reg_no": 1,
-          },
-        },
-      ])
-        .then((data) => {
-          callback({
-            code: 200,
-            message: "Details Fetched successfully",
-            result: data[0],
-          });
-        })
-        .catch((err) => {
-          logErrorToFile(err, req);
-          callback({
-            code: 400,
-            message: "Error in fetching order details",
-            result: err,
-          });
-        });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  supplierInvoicesList: async (req, res, reqObj, callback) => {
-    try {
-      const { page_no, limit, filterKey, supplier_id } = reqObj;
-      const pageNo = page_no || 2;
-      const pageSize = limit || 2;
-      const offset = (pageNo - 1) * pageSize;
-
-      Invoices.aggregate([
-        {
-          $match: {
-            supplier_id: supplier_id,
-            status: filterKey,
-          },
-        },
-        {
-          $lookup: {
-            from: "suppliers",
-            localField: "supplier_id",
-            foreignField: "supplier_id",
-            as: "supplier",
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            items: 1,
-            payment_terms: 1,
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            mode_of_payment: 1,
-            created_at: 1,
-            supplier: { $arrayElemAt: ["$supplier", 0] },
-          },
-        },
-        {
-          $unwind: "$items",
-        },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            invoice_id: { $first: "$invoice_id" },
-            order_id: { $first: "$order_id" },
-            enquiry_id: { $first: "$enquiry_id" },
-            purchaseOrder_id: { $first: "$purchaseOrder_id" },
-            buyer_id: { $first: "$buyer_id" },
-            supplier_id: { $first: "$supplier_id" },
-            invoice_no: { $first: "$invoice_no" },
-            invoice_date: { $first: "$invoice_date" },
-            buyer_name: { $first: "$buyer_name" },
-            buyer_address: { $first: "$buyer_address" },
-            buyer_country: { $first: "$buyer_country" },
-            buyer_vat_reg_no: { $first: "$buyer_vat_reg_no" },
-            supplier_name: { $first: "$supplier_name" },
-            supplier_address: { $first: "$supplier_address" },
-            supplier_country: { $first: "$supplier_country" },
-            supplier_vat_reg_no: { $first: "$supplier_vat_reg_no" },
-            items: { $push: "$items" },
-            payment_terms: { $first: "$payment_terms" },
-            total_payable_amount: { $first: "$total_payable_amount" },
-            total_amount_paid: { $first: "$total_amount_paid" },
-            pending_amount: { $first: "$pending_amount" },
-            account_number: { $first: "$account_number" },
-            sort_code: { $first: "$sort_code" },
-            transaction_image: { $first: "$transaction_image" },
-            invoice_status: { $first: "$invoice_status" },
-            status: { $first: "$status" },
-            payment_status: { $first: "$payment_status" },
-            mode_of_payment: { $first: "$mode_of_payment" },
-            created_at: { $first: "$created_at" },
-            supplier: { $first: "$supplier" },
-            totalPrice: { $sum: "$items.item_price" },
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            items: 1,
-            payment_terms: 1,
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            mode_of_payment: 1,
-            created_at: 1,
-            totalPrice: 1,
-            "supplier.supplier_image": 1,
-            "supplier.supplier_name": 1,
-            "supplier.supplier_address": 1,
-            "supplier.supplier_type": 1,
-          },
-        },
-        { $sort: { created_at: -1 } },
-        { $skip: offset },
-        { $limit: pageSize },
-      ])
-        .then((data) => {
-          Invoices.countDocuments({
-            status: filterKey,
-            supplier_id: supplier_id,
-          }).then((totalItems) => {
-            const totalPages = Math.ceil(totalItems / pageSize);
-
-            const responseData = {
-              data,
-              totalPages,
-              totalItems,
-            };
-            callback({
-              code: 200,
-              message: "List Fetched successfully",
-              result: responseData,
-            });
-          });
-        })
-        .catch((err) => {
-          logErrorToFile(err, req);
-          callback({
-            code: 400,
-            message: "Error in fetching order list",
-            result: err,
-          });
-        });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  proformaInvoiceList: async (req, res, reqObj, callback) => {
-    try {
-      const { page_no, limit, filterKey, buyer_id } = reqObj;
-
-      const pageNo = page_no || 1;
-      const pageSize = limit || 1;
-      const offset = (pageNo - 1) * pageSize;
-
-      Order.aggregate([
-        {
-          $match: {
-            buyer_id: reqObj.buyer_id,
-            order_status: reqObj.filterKey,
-          },
-        },
-        {
-          $lookup: {
-            from: "suppliers",
-            localField: "supplier_id",
-            foreignField: "supplier_id",
-            as: "supplier",
-          },
-        },
-        {
-          $lookup: {
-            from: "buyers",
-            localField: "buyer_id",
-            foreignField: "buyer_id",
-            as: "buyer",
-          },
-        },
-        {
-          $project: {
-            order_id: 1,
-            enquiry_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_email: 1,
-            buyer_mobile: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_email: 1,
-            supplier_mobile: 1,
-            items: 1,
-            total_due_amount: 1,
-            payment_terms: 1,
-            est_delivery_time: 1,
-            shipping_details: 1,
-            remarks: 1,
-            order_status: 1,
-            invoice_no: 1,
-            created_at: 1,
-            supplier: { $arrayElemAt: ["$supplier", 0] },
-            buyer: { $arrayElemAt: ["$buyer", 0] },
-          },
-        },
-        {
-          $unwind: "$items",
-        },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            order_id: { $first: "$order_id" },
-            enquiry_id: { $first: "$enquiry_id" },
-            buyer_id: { $first: "$buyer_id" },
-            supplier_id: { $first: "$supplier_id" },
-            buyer_name: { $first: "$buyer_name" },
-            buyer_address: { $first: "$buyer_address" },
-            buyer_email: { $first: "$buyer_email" },
-            buyer_mobile: { $first: "$buyer_mobile" },
-            supplier_name: { $first: "$supplier_name" },
-            supplier_address: { $first: "$supplier_address" },
-            supplier_email: { $first: "$supplier_email" },
-            supplier_mobile: { $first: "$supplier_mobile" },
-            items: { $push: "$items" },
-            total_due_amount: { $first: "$total_due_amount" },
-            payment_terms: { $first: "$payment_terms" },
-            est_delivery_time: { $first: "$est_delivery_time" },
-            shipping_details: { $first: "$shipping_details" },
-            remarks: { $first: "$remarks" },
-            order_status: { $first: "$order_status" },
-            invoice_no: { $first: "$invoice_no" },
-            created_at: { $first: "$created_at" },
-            buyer: { $first: "$buyer" },
-            supplier: { $first: "$supplier" },
-            totalPrice: { $sum: "$items.item_price" },
-          },
-        },
-        {
-          $project: {
-            order_id: 1,
-            enquiry_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_email: 1,
-            buyer_mobile: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_email: 1,
-            supplier_mobile: 1,
-            items: 1,
-            total_due_amount: 1,
-            payment_terms: 1,
-            est_delivery_time: 1,
-            shipping_details: 1,
-            remarks: 1,
-            order_status: 1,
-            invoice_no: 1,
-            created_at: 1,
-            totalPrice: 1,
-            "buyer.buyer_image": 1,
-            "buyer.buyer_name": 1,
-            "buyer.buyer_address": 1,
-            "supplier.supplier_image": 1,
-            "supplier.supplier_name": 1,
-            "supplier.supplier_address": 1,
-          },
-        },
-        { $sort: { created_at: -1 } },
-        // { $skip  : offset },
-        // { $limit : pageSize },
-      ])
-        .then((data) => {
-          Order.countDocuments({
-            order_status: filterKey,
-            buyer_id: buyer_id,
-          }).then((totalItems) => {
-            const totalPages = Math.ceil(totalItems / pageSize);
-
-            const responseData = {
-              data,
-              totalPages,
-              totalItems,
-            };
-            callback({
-              code: 200,
-              message: "List Fetched successfully",
-              result: responseData,
-            });
-          });
-        })
-        .catch((err) => {
-          logErrorToFile(err, req);
-          callback({
-            code: 400,
-            message: "Error in fetching order list",
-            result: err,
-          });
-        });
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
@@ -2142,17 +879,6 @@ module.exports = {
         },
       ])
         .then((data) => {
-          // Order.countDocuments({order_status : filterKey, buyer_id: buyer_id})
-          // .then(totalItems => {
-          //     const totalPages = Math.ceil(totalItems / pageSize);
-
-          //     const responseData = {
-          //         data,
-          //         totalPages,
-          //         totalItems
-          //     }
-          //     callback({ code: 200, message: "List Fetched successfully", result: responseData });
-          // })
           callback({
             code: 200,
             message: "List Fetched successfully",
@@ -2175,15 +901,11 @@ module.exports = {
   getInvoiceListForAllUsers: async (req, res) => {
     try {
       const { usertype, buyer_id, supplier_id, admin_id } = req?.headers;
-      // const { page_no, limit, filterKey, buyer_id, supplier_id, page_size } = req?.body;
       const {
         pageNo = undefined,
         filterKey = undefined,
         pageSize = undefined,
       } = req?.query;
-      // const pageNo = page_no || 2;
-      // const pageSize = limit || page_size || 2;
-      // const page_size = pageSize || 2
       const offset = (parseInt(pageNo) - 1) * parseInt(pageSize);
 
       // Match conditions based on usertype
@@ -2427,14 +1149,7 @@ module.exports = {
         ]);
       }
 
-      // if (!data || data.length === 0) {
-      //   return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
-      // }
-
       const totalItems = await Invoices.countDocuments(matchCondition); // Count based on correct match condition
-      // if (!totalItems) {
-      //   return res.status(400).send({ code: 400, message: "Error in fetching order list", result: "Error in fetching order list" });
-      // }
 
       const totalPages = Math.ceil(totalItems / parseInt(pageSize));
       const responseData = {
@@ -2456,11 +1171,8 @@ module.exports = {
   getOrderListAllUsers: async (req, res) => {
     try {
       const { usertype, buyer_id, supplier_id, admin_id } = req?.headers;
-      // const { page_no, limit, filterKey, buyer_id, filterValue, supplier_id, admin_id } = req?.body;
       const { pageNo, pageSize, filterKey, filterValue } = req?.query;
-
-      // const pageNo = req?.body?.pageNo || page_no || 1;
-      // const pageSize = req?.body?.pageSize || limit || 2;
+      
       const offset = (parseInt(pageNo) - 1) * parseInt(pageSize);
 
       const adjustedFilterKey =
@@ -3288,8 +2000,6 @@ module.exports = {
           {
             $match: {
               order_id: order_id,
-              // buyer_id     : buyer_id,
-              // order_status : filterKey
             },
           },
           {
@@ -3508,8 +2218,6 @@ module.exports = {
           {
             $match: {
               order_id: order_id,
-              // buyer_id: buyer_id,
-              // order_status: filterKey
             },
           },
           {

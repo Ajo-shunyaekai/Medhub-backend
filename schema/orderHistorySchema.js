@@ -12,10 +12,6 @@ const orderHistorySchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Order",
     },
-    // logisticPartnerId: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "LogisticsPartner",
-    // },
     logisticId: {
       type: Schema.Types.ObjectId,
       ref: "Logistics",
@@ -35,31 +31,36 @@ const orderHistorySchema = new Schema(
       {
         name: {
           type: String,
-          enum: ['Inquiry Raised', 'Quotation Submitted', 'Purchase Order Created', 'Order Created', 'Delivery Details Submitted', 'Pick up Details Submitted', 'Logistics Request Sent', 'Order Initiated by Logistic Partner'],
+          enum: [
+            "Inquiry Raised",
+            "Quotation Submitted",
+            "Purchase Order Created",
+            "Order Created",
+            "Delivery Details Submitted",
+            "Pick up Details Submitted",
+            "Logistics Request Sent",
+            "Order Initiated by Logistic Partner",
+          ],
           required: true,
         },
         date: {
           type: Date,
           default: Date.now, // Store the date when this stage happens
         },
-        // description: {
-        //   type: String,
-        //   default: "", // Optional field for additional details (e.g., buyer's comments, etc.)
-        // },
         referenceId: {
-          type: Schema.Types.Mixed,  // Flexible to accept any reference
+          type: Schema.Types.Mixed, // Flexible to accept any reference
           required: [true, "Reference is required at each stage"],
         },
         referenceType: {
-          type: String,  // A string that will store the model name (Enquiry, PurchaseOrder, etc.)
-          required: true,  // Each stage must define the model type for the reference
+          type: String, // A string that will store the model name (Enquiry, PurchaseOrder, etc.)
+          required: true, // Each stage must define the model type for the reference
         },
       },
     ],
   },
   {
-    timestamps: true,  // Automatically add createdAt and updatedAt fields
+    timestamps: true, // Automatically add createdAt and updatedAt fields
   }
 );
 
-module.exports = mongoose.model("OrderHistory", orderHistorySchema);  // Export the model
+module.exports = mongoose.model("OrderHistory", orderHistorySchema); // Export the model

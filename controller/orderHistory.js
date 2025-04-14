@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Admin = require("../schema/adminSchema");
 const Address = require("../schema/addressSchema");
 const Enquiry = require("../schema/enquiryListSchema");
@@ -8,9 +8,10 @@ const Order = require("../schema/orderSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const OrderHistory = require("../schema/orderHistorySchema");
 const logErrorToFile = require("../logs/errorLogs");
-const { sendErrorResponse, handleCatchBlockError } = require("../utils/commonResonse");
-
-
+const {
+  sendErrorResponse,
+  handleCatchBlockError,
+} = require("../utils/commonResonse");
 
 const getOrderHistory = async (req, res) => {
   try {
@@ -39,8 +40,7 @@ const getOrderHistory = async (req, res) => {
     }
 
     const updatedOrderHistory = await Promise.all(
-      orderHistory?.stages?.map(async (stage,index) => {
-
+      orderHistory?.stages?.map(async (stage, index) => {
         let schemaNameToSearchFrom;
 
         switch (stage?.referenceType) {
@@ -76,16 +76,20 @@ const getOrderHistory = async (req, res) => {
       message: "Success get Order History!",
       orderHistory: updatedOrderHistory,
     });
-
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
 
-
-const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageReference, stageReferenceType ) => {
+const addStageToOrderHistory = async (
+  req,
+  id,
+  stageName,
+  stageDate,
+  stageReference,
+  stageReferenceType
+) => {
   try {
-
     let filterKey;
     switch (stageReferenceType) {
       case "Enquiry":
@@ -93,11 +97,11 @@ const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageRefer
         break;
 
       case "Order":
-        filterKey = stageName == 'Order Created' ? "enquiryId" : "orderId";
+        filterKey = stageName == "Order Created" ? "enquiryId" : "orderId";
         break;
 
       default:
-        filterKey = "orderId"; 
+        filterKey = "orderId";
         break;
     }
 
@@ -120,37 +124,32 @@ const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageRefer
       referenceType: stageReferenceType,
     };
 
-    // let updateFields = {
-    //   $push: stageName == 'Pick up Details Submitted'? { stages: stageDetails, additionalStageDetails } : { stages: stageDetails },
-    // };
-
     let updateFields = {};
-    
+
     // If the stage is 'Pick up Details Submitted', add both stages
-    if (stageName === 'Pick up Details Submitted') {
+    if (stageName === "Pick up Details Submitted") {
       const additionalStageDetails = {
         name: "Logistics Request Sent",
         date: new Date(stageDate.getTime() + 2 * 60 * 1000),
         referenceId: stageReference,
         referenceType: stageReferenceType,
       };
-      
+
       updateFields = {
         $push: {
           stages: {
-            $each: [stageDetails, additionalStageDetails]
-          }
-        }
+            $each: [stageDetails, additionalStageDetails],
+          },
+        },
       };
     } else {
       updateFields = {
-        $push: { stages: stageDetails }
+        $push: { stages: stageDetails },
       };
     }
-    
 
     // If stageReferenceType is "Order" and stageName is "Order Created", set the orderId field as well
-    if (stageReferenceType == 'Order' && stageName === "Order Created") {
+    if (stageReferenceType == "Order" && stageName === "Order Created") {
       updateFields.$set = { orderId: stageReference };
     }
 
@@ -175,7 +174,5 @@ const addStageToOrderHistory = async ( req, id, stageName, stageDate, stageRefer
     handleCatchBlockError(req, res, error);
   }
 };
-
-
 
 module.exports = { getOrderHistory, addStageToOrderHistory };

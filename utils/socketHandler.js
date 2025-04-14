@@ -7,7 +7,6 @@ function initializeSocket(server) {
   });
 
   io.on("connection", (socket) => {
-
     // Registration handlers
     ["register", "registerBuyer", "registerAdmin"].forEach((event) => {
       socket.on(event, (userId) => {
@@ -52,8 +51,7 @@ function initializeSocket(server) {
     });
 
     // Handle disconnection
-    socket.on("disconnect", () => {
-    });
+    socket.on("disconnect", () => {});
   });
 
   return io;

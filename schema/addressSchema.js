@@ -52,8 +52,8 @@ const userAddressSchema = new mongoose.Schema(
     addresses: [addressSchema],
     default: {
       type: Schema.Types.ObjectId,
-      ref: "Address"
-    }
+      ref: "Address",
+    },
   },
   { timestamps: true }
 );
@@ -61,5 +61,5 @@ const userAddressSchema = new mongoose.Schema(
 // Exporting the models correctly
 module.exports = {
   Address: mongoose.model("Address", addressSchema),
-  UserAddress: mongoose.model("UserAddress", userAddressSchema)
+  UserAddress: mongoose.model("UserAddress", userAddressSchema),
 };
