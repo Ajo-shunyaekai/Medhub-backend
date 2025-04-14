@@ -40,58 +40,12 @@ module.exports = () => {
     handleController(Controller.filterValues, req, res)
   );
 
-  // routes.post('/edit-supplier-request', checkAuthorization, authenticationNAuthorization, supplierUploadMiddleware, async (req, res) => {
-  //     if (!req.files['supplier_image'] || req.files['supplier_image'].length === 0) {
-  //         res.send({ code: 415, message: 'Supplier Logo is required!', errObj: {} });
-  //         return;
-  //     }
-  //     if (!req.files['tax_image'] || req.files['tax_image'].length === 0) {
-  //         res.send({ code: 415, message: 'Supplier tax image is required!', errObj: {} });
-  //         return;
-  //     }
-  //     if (!req.files['license_image'] || req.files['license_image'].length === 0) {
-  //         res.send({ code: 415, message: 'Supplier license image is required!', errObj: {} });
-  //         return;
-  //     }
-
-  //     const supplierCountryCode     = req.body.supplier_mobile_no.split(" ")[0];
-  //     const supplier_mobile_number  = req.body.supplier_mobile_no.split(" ").slice(1).join(" ")
-  //     const person_mob_no           = req.body.contact_person_mobile.split(" ").slice(1).join(" ")
-  //     const personCountryCode       = req.body.contact_person_mobile.split(" ")[0];
-
-  //     const editObj = {
-  //         ...req.body,
-  //         supplier_mobile             : supplier_mobile_number,
-  //         supplier_country_code       : supplierCountryCode,
-  //         contact_person_mobile_no    : person_mob_no,
-  //         contact_person_country_code : personCountryCode,
-  //         supplier_image              : req.files['supplier_image'].map(file => path.basename(file.path)),
-  //         license_image               : req.files['license_image'].map(file => path.basename(file.path)),
-  //         tax_image                   : req.files['tax_image'].map(file => path.basename(file.path))
-  //     }
-
-  //     const errObj = validation(editObj, 'supplierEdit')
-
-  //     if(Object.values(errObj).length){
-  //         res.send( { code : 419, message : 'All fields are required', errObj });
-  //         return;
-  //     }
-
-  //     handleController(Controller.editSupplier, req, res, editObj)
-  // });
-
   routes.post(
     "/get-specific-supplier-details/:id",
     checkAuthorization,
     authenticationNAuthorization,
     (req, res) => handleController(Controller.supplierProfileDetails, req, res)
   );
-
-  // routes.post('/profile-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supplierProfileDetails, req, res));
-
-  // routes.post('/buyer-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.buyerDetails, req, res));
-
-  // routes.post('/change-password', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.changePassword, req, res));
 
   routes.post(
     "/orders-summary-details",
@@ -108,10 +62,6 @@ module.exports = () => {
     (req, res) =>
       handleController(Controller.supplierOrderSupplierCountry, req, res)
   );
-
-  // routes.post('/support-list', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supportList, req, res));
-
-  // routes.post('/support-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.supportDetails, req, res));
 
   routes.post(
     "/get-notification-list",
@@ -134,8 +84,6 @@ module.exports = () => {
     authenticationNAuthorization,
     (req, res) => handleController(Controller.updateStatus, req, res)
   );
-
-  // routes.post('/medicine-request-list', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Controller.medicinRequestList, req, res));
 
   routes.post(
     "/get-invoice-count",

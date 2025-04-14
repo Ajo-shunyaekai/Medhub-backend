@@ -11,7 +11,10 @@ const {
   sendErrorResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
-const { createInvoiceContent, updatePaymentStatusContent } = require("../utils/emailContents");
+const {
+  createInvoiceContent,
+  updatePaymentStatusContent,
+} = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
 
 const initializeInvoiceNumber = async () => {
@@ -178,11 +181,6 @@ module.exports = {
         (parseFloat(order.grand_total) - newTotalAmountPaid).toFixed(2)
       );
 
-      // const invoiceStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
-      // const invStatus = newPendingAmount === 0 ? 'completed' : invoice.status;
-      // const invoiceStatus = newPendingAmount === 0 ? 'completed' : 'paid';
-      // const invStatus     = newPendingAmount === 0 ? 'completed' : 'paid';
-
       const orderStatus =
         parseFloat(newTotalAmountPaid).toFixed(2) ===
         parseFloat(order.total_due_amount).toFixed(2)
@@ -248,7 +246,12 @@ module.exports = {
         supplier.contact_person_email,
         "ajo@shunyaekai.tech",
       ];
-      const emailContent = await updatePaymentStatusContent(supplier, invoice_id, order_id, amount_paid);
+      const emailContent = await updatePaymentStatusContent(
+        supplier,
+        invoice_id,
+        order_id,
+        amount_paid
+      );
       await sendEmail(recipientEmails, subject, emailContent);
 
       const response = {
@@ -261,214 +264,6 @@ module.exports = {
         message: "Payment Status Updated",
         result: response,
       });
-    } catch (error) {
-      handleCatchBlockError(req, res, error);
-    }
-  },
-
-  invoiceDetails: async (req, res, reqObj, callback) => {
-    try {
-      // const { order_id, invoice_id, supplier_id } = reqObj;
-      const invoice_id = req?.params?.id;
-
-      Invoice.aggregate([
-        {
-          $match: {
-            // supplier_id: supplier_id,
-            invoice_id: invoice_id,
-          },
-        },
-        {
-          $lookup: {
-            from: "suppliers",
-            localField: "supplier_id",
-            foreignField: "supplier_id",
-            as: "supplier",
-          },
-        },
-        {
-          $lookup: {
-            from: "enquiries",
-            localField: "enquiry_id",
-            foreignField: "enquiry_id",
-            as: "enquiry",
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            items: 1,
-            payment_terms: { $arrayElemAt: ["$enquiry.payment_terms", 0] },
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            bank_name: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            transaction_id: 1,
-            amount_paid: 1,
-            payment_date: 1,
-            mode_of_payment: 1,
-            created_at: 1,
-            supplier: { $arrayElemAt: ["$supplier", 0] },
-          },
-        },
-        {
-          $unwind: "$items",
-        },
-        {
-          $lookup: {
-            from: "medicines",
-            localField: "items.product_id",
-            foreignField: "product_id",
-            as: "medicine",
-          },
-        },
-        {
-          $addFields: {
-            "items.medicine_image": {
-              $arrayElemAt: ["$medicine.medicine_image", 0],
-            },
-            "items.strength": { $arrayElemAt: ["$medicine.strength", 0] },
-            "items.item_price": {
-              $toDouble: {
-                $arrayElemAt: [{ $split: ["$items.price", " "] }, 0],
-              },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id",
-            invoice_id: { $first: "$invoice_id" },
-            order_id: { $first: "$order_id" },
-            enquiry_id: { $first: "$enquiry_id" },
-            purchaseOrder_id: { $first: "$purchaseOrder_id" },
-            buyer_id: { $first: "$buyer_id" },
-            supplier_id: { $first: "$supplier_id" },
-            invoice_no: { $first: "$invoice_no" },
-            invoice_date: { $first: "$invoice_date" },
-            buyer_name: { $first: "$buyer_name" },
-            buyer_address: { $first: "$buyer_address" },
-            buyer_country: { $first: "$buyer_country" },
-            buyer_vat_reg_no: { $first: "$buyer_vat_reg_no" },
-            supplier_name: { $first: "$supplier_name" },
-            supplier_address: { $first: "$supplier_address" },
-            supplier_country: { $first: "$supplier_country" },
-            supplier_vat_reg_no: { $first: "$supplier_vat_reg_no" },
-            items: { $push: "$items" },
-            payment_terms: { $first: "$payment_terms" },
-            total_payable_amount: { $first: "$total_payable_amount" },
-            total_amount_paid: { $first: "$total_amount_paid" },
-            pending_amount: { $first: "$pending_amount" },
-            bank_name: { $first: "$bank_name" },
-            account_number: { $first: "$account_number" },
-            sort_code: { $first: "$sort_code" },
-            transaction_image: { $first: "$transaction_image" },
-            invoice_status: { $first: "$invoice_status" },
-            status: { $first: "$status" },
-            payment_status: { $first: "$payment_status" },
-            mode_of_payment: { $first: "$mode_of_payment" },
-            transaction_id: { $first: "$transaction_id" },
-            payment_date: { $first: "$payment_date" },
-            amount_paid: { $first: "$amount_paid" },
-            created_at: { $first: "$created_at" },
-            supplier: { $first: "$supplier" },
-            totalPrice: { $sum: "$items.item_price" },
-          },
-        },
-        {
-          $project: {
-            invoice_id: 1,
-            order_id: 1,
-            enquiry_id: 1,
-            purchaseOrder_id: 1,
-            buyer_id: 1,
-            supplier_id: 1,
-            invoice_no: 1,
-            invoice_date: 1,
-            buyer_name: 1,
-            buyer_address: 1,
-            buyer_country: 1,
-            buyer_vat_reg_no: 1,
-            buyer_registered_address: {
-              company_reg_address:
-                "$buyer.registeredAddress.company_reg_address",
-              locality: "$buyer.registeredAddress.locality",
-              land_mark: "$buyer.registeredAddress.land_mark",
-              city: "$buyer.registeredAddress.city",
-              state: "$buyer.registeredAddress.state",
-              country: "$buyer.registeredAddress.country",
-              pincode: "$buyer.registeredAddress.pincode",
-            },
-            supplier_name: 1,
-            supplier_address: 1,
-            supplier_country: 1,
-            supplier_vat_reg_no: 1,
-            supplier_registered_address: {
-              company_reg_address:
-                "$supplier.registeredAddress.company_reg_address",
-              locality: "$supplier.registeredAddress.locality",
-              land_mark: "$supplier.registeredAddress.land_mark",
-              city: "$supplier.registeredAddress.city",
-              state: "$supplier.registeredAddress.state",
-              country: "$supplier.registeredAddress.country",
-              pincode: "$supplier.registeredAddress.pincode",
-            },
-            items: 1,
-            payment_terms: 1,
-            total_payable_amount: 1,
-            total_amount_paid: 1,
-            pending_amount: 1,
-            bank_name: 1,
-            account_number: 1,
-            sort_code: 1,
-            transaction_image: 1,
-            invoice_status: 1,
-            status: 1,
-            payment_status: 1,
-            mode_of_payment: 1,
-            transaction_id: 1,
-            amount_paid: 1,
-            payment_date: 1,
-            created_at: 1,
-            totalPrice: 1,
-            "supplier.supplier_image": 1,
-            "supplier.supplier_name": 1,
-            "supplier.supplier_address": 1,
-            "supplier.supplier_type": 1,
-          },
-        },
-      ])
-        .then((data) => {
-          callback({ code: 200, message: "Invoice Details", result: data[0] });
-        })
-        .catch((err) => {
-          callback({
-            code: 400,
-            message: "Error while fetching details",
-            result: err,
-          });
-        });
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }

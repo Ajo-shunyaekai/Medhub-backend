@@ -1,19 +1,19 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const notificationSchema = new Schema({
   notification_id: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   event: {
     type: String,
-    required: true
+    required: true,
   },
   event_type: {
     type: String,
-    required: true
+    required: true,
   },
   from: {
     type: String,
@@ -29,16 +29,15 @@ const notificationSchema = new Schema({
   },
   to_id: {
     type: String,
-    // required: true,
   },
   event_id: {
     type: String,
     required: true,
   },
-  connected_id : {
+  connected_id: {
     type: String,
   },
-  link_id : {
+  link_id: {
     type: String,
   },
   message: {
@@ -48,17 +47,17 @@ const notificationSchema = new Schema({
   cancel_reason: {
     type: String,
   },
-  status : {
-    type: Number
+  status: {
+    type: Number,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.model("Notification", notificationSchema);

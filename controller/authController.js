@@ -114,9 +114,6 @@ const registerUser = async (req, res) => {
       if (!req.files["buyer_image"] || req.files["buyer_image"].length === 0) {
         return sendErrorResponse(res, 415, "Company Logo is required.");
       }
-      // if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
-      //   return sendErrorResponse(res, 415, "Company tax image is required.");
-      // }
       if (
         !req.files["license_image"] ||
         req.files["license_image"].length === 0
@@ -127,16 +124,6 @@ const registerUser = async (req, res) => {
           "Company license image is required."
         );
       }
-      // if (
-      //   !req.files["certificate_image"] ||
-      //   req.files["certificate_image"].length === 0
-      // ) {
-      //   return sendErrorResponse(
-      //     res,
-      //     415,
-      //     "Company certificate image is required."
-      //   );
-      // }
       if (
         req?.body?.buyer_type == "Medical Practitioner" &&
         (!req.files["medical_practitioner_image"] ||
@@ -188,9 +175,6 @@ const registerUser = async (req, res) => {
         license_image: req.files["license_image"].map((file) =>
           path.basename(file.path)
         ),
-        // tax_image: req.files["tax_image"]?.map((file) =>
-        //   path.basename(file.path)
-        // ),
         certificate_image: req.files["certificate_image"]?.map((file) =>
           path.basename(file.path)
         ),
@@ -224,9 +208,6 @@ const registerUser = async (req, res) => {
       ) {
         return sendErrorResponse(res, 415, "Supplier Logo is required.");
       }
-      // if (!req.files["tax_image"] || req.files["tax_image"].length === 0) {
-      //   return sendErrorResponse(res, 415, "Supplier tax image is required.");
-      // }
       if (
         !req.files["license_image"] ||
         req.files["license_image"].length === 0
@@ -238,16 +219,6 @@ const registerUser = async (req, res) => {
         );
       }
 
-      // if (
-      //   !req.files["certificate_image"] ||
-      //   req.files["certificate_image"].length === 0
-      // ) {
-      //   return sendErrorResponse(
-      //     res,
-      //     415,
-      //     "Supplier Certificate image is required."
-      //   );
-      // }
       if (
         req?.body?.supplier_type == "Medical Practitioner" &&
         (!req.files["medical_practitioner_image"] ||
@@ -577,24 +548,16 @@ const registerUser = async (req, res) => {
         buyer,
         usertype
       );
-      
-      //start -> for using ejs template
+
       const templateName = "thankYou";
       const context = {};
-      //end -> for using ejs template
 
-      // await sendEmail(
-      //   confirmationEmailRecipients,
-      //   confirmationSubject,
-      //   confirmationContent,
-      // );
       await sendTemplateEmail(
         confirmationEmailRecipients,
         confirmationSubject,
         templateName,
         context
       );
-
 
       return sendSuccessResponse(
         res,
@@ -659,15 +622,9 @@ const registerUser = async (req, res) => {
         supplier,
         usertype
       );
-      //start -> for using ejs template
+
       const templateName = "thankYou";
       const context = {};
-      //end -> for using ejs template
-      // await sendEmail(
-      //   confirmationEmailRecipients,
-      //   confirmationSubject,
-      //   confirmationContent
-      // );
 
       await sendTemplateEmail(
         confirmationEmailRecipients,
@@ -690,19 +647,19 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password, usertype } = req.body;
- 
+
     if (!usertype) {
       return sendErrorResponse(res, 400, "Cannot Identify User.");
     }
- 
+
     if (!email) {
       return sendErrorResponse(res, 400, "Email isrequired.");
     }
- 
+
     if (!password) {
       return sendErrorResponse(res, 400, "Password isrequired.");
     }
- 
+
     // Find the user based on user type
     const user =
       usertype === "Buyer"
@@ -714,7 +671,7 @@ const loginUser = async (req, res) => {
         : usertype === "Logistics"
         ? await LogisticsPartner.findOne({ email })
         : null;
- 
+
     if (!user) {
       return sendErrorResponse(
         res,
@@ -722,20 +679,20 @@ const loginUser = async (req, res) => {
         "User not found. Please enter registered email."
       );
     }
- 
+
     // Check if the password matches
     // const isPasswordValid = await bcrypt.compare(password, user?.password);
     const isPasswordValid = await user?.isPasswordCorrect(password);
- 
+
     if (!isPasswordValid) {
       return sendErrorResponse(res, 401, "Incorrect Password.");
     }
- 
+
     const { accessToken, refreshToken } = await generateAccessAndRefeshToken(
       user?._id,
       usertype
     );
- 
+
     // Fetch user details excluding sensitive information
     let loggedinUser =
       usertype === "Buyer"
@@ -755,7 +712,7 @@ const loginUser = async (req, res) => {
             .select("-password -createdAt -updatedAt -__v")
             .lean()
         : null;
- 
+
     if (usertype === "Buyer") {
       // Count documents in the List collection for the buyer
       const listCount = await List.countDocuments({
@@ -763,7 +720,7 @@ const loginUser = async (req, res) => {
       });
       loggedinUser.list_count = listCount;
     }
- 
+
     const Model =
       usertype === "Buyer"
         ? Buyer
@@ -774,15 +731,15 @@ const loginUser = async (req, res) => {
         : usertype === "Logistics"
         ? LogisticsPartner
         : null;
- 
+
     if (Model) {
       await updateLoginInfo(Model, user._id);
     }
- 
+
     res
       .cookie("accessToken", accessToken, cookiesOptions)
       .cookie("refreshToken", refreshToken, cookiesOptions);
- 
+
     return sendSuccessResponse(res, 200, `${usertype} Login Successful.`, {
       ...loggedinUser,
       accessToken,
@@ -1543,7 +1500,6 @@ const updateProfileAndSendEditRequest = async (req, res) => {
     const sendProfileEditRequest = async (user, userType, address) => {
       const perId = "PER-" + Math.random().toString(16).slice(2, 10);
       const ProfileEdit =
-        // userType === "Buyer" ? BuyerProfileEdit : SupplierProfileEdit;
         ProfileEditRequest;
       const profileReq = new ProfileEdit({
         perId,

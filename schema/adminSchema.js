@@ -26,11 +26,11 @@ const adminSchema = new Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     updatedAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     otp: {
       type: Number,
@@ -40,7 +40,7 @@ const adminSchema = new Schema(
       default: Date.now,
     },
     last_login: {
-      type: Date
+      type: Date,
     },
     login_history: [
       {
@@ -52,7 +52,7 @@ const adminSchema = new Schema(
     ],
     refreshToken: {
       type: String,
-    },   
+    },
   },
   { timestamps: true }
 );
@@ -78,7 +78,11 @@ adminSchema.methods.generateAccessToken = async function () {
       user_id: this.admin_id,
     },
     process.env.JWT_ACCESS_TOKEN_SECRET,
-    { expiresIn: Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2)}
+    {
+      expiresIn:
+        Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) *
+        Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2),
+    }
   );
 };
 

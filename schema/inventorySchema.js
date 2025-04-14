@@ -16,7 +16,6 @@ const inventorrySchema = new Schema(
     sku: {
       type: String,
       trim: true,
-      // required: [true, "Validation Error: SKU is required"],
     },
     stock: {
       type: String,
@@ -24,10 +23,6 @@ const inventorrySchema = new Schema(
       required: [true, "Validation Error: Stock is required"],
       enum: ["In-stock", "Out of Stock", "On-demand"],
     },
-    // stockQuantity: {
-    //   type: Number,
-    //   required: [true, "Validation Error: Stock Quantity is required"],
-    // },
     countries: [
       {
         type: String,
@@ -37,7 +32,6 @@ const inventorrySchema = new Schema(
     date: {
       type: String,
       trim: true,
-      // required: [true, "Validation Error: Date of Manufacture is required"],
     },
     stockedInDetails: [
       {
@@ -48,17 +42,19 @@ const inventorrySchema = new Schema(
     ],
     inventoryList: [
       {
-        // quantity: {
-        //   type: String,
-        //   required: [true, "Validation Error: inventoryList quantity is required"],
-        // },
         quantityFrom: {
           type: String,
-          required: [true, "Validation Error: inventoryList quantity from is required"],
+          required: [
+            true,
+            "Validation Error: inventoryList quantity from is required",
+          ],
         },
         quantityTo: {
           type: String,
-          required: [true, "Validation Error: inventoryList quantity to is required"],
+          required: [
+            true,
+            "Validation Error: inventoryList quantity to is required",
+          ],
         },
         price: {
           type: Number,
@@ -66,7 +62,10 @@ const inventorrySchema = new Schema(
         },
         deliveryTime: {
           type: String,
-          required: [true, "Validation Error: inventoryList deliveryTime is required"],
+          required: [
+            true,
+            "Validation Error: inventoryList deliveryTime is required",
+          ],
         },
       },
     ],

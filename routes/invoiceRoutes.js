@@ -55,8 +55,6 @@ module.exports = () => {
     }
   );
 
-  // routes.post('/invoice-details', checkAuthorization, authenticationNAuthorization, (req, res) => handleController(Invoice.invoiceDetails, req, res));
-
   routes.post(
     "/get-specific-invoice-details/:id",
     checkAuthorization,

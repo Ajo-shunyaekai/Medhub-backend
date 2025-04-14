@@ -10,7 +10,10 @@ const connect = require("./utils/dbConnection");
 const initializeSocket = require("./utils/socketHandler");
 // const ffmpeg = require('fluent-ffmpeg');
 const logErrorToFile = require("./logs/errorLogs");
-const { sendErrorResponse, handleCatchBlockError } = require("./utils/commonResonse");
+const {
+  sendErrorResponse,
+  handleCatchBlockError,
+} = require("./utils/commonResonse");
 const { rateLimiter } = require("./middleware/expressRateLimiter");
 const { corsOptions } = require("./config/corsOptions");
 // require('./schedulers/tasks');

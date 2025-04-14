@@ -15,63 +15,48 @@ const subscriptionSchema = new Schema(
     subscriptionDetails: {
       sessionId: {
         type: String,
-        // required: true,
       },
       customerId: {
         type: String,
-        // required: true,
       },
       subscriptionId: {
         type: String,
-        // required: true,
       },
       productId: {
         type: String,
-        // required: true,
       },
       planId: {
         type: String,
-        // required: true,
       },
       paymentIntentTd: {
         type: String,
-        // required: true,
       },
       paymentMethodId: {
         type: String,
-        // required: true,
       },
       invoiceId: {
         type: String,
-        // required: true,
       },
       invoiceNumber: {
         type: String,
-        // required: true,
       },
       subscriptionStartDate: {
         type: String,
-        // required: true,
       },
       subscriptionEndDate: {
         type: String,
-        // required: true,
       },
       currency: {
         type: String,
-        // required: true,
       },
       amount: {
         type: String,
-        // required: true,
       },
       name: {
         type: String,
-        // required: true,
       },
       months: {
         type: Number,
-        // required: true,
       },
     },
   },

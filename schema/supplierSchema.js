@@ -30,12 +30,10 @@ const supplierSchema = new Schema(
     },
     supplier_address: {
       type: String,
-      // required: true,
       trim: true,
     },
     supplier_email: {
       type: String,
-      // required: true,
       //       unique: true,
       trim: true,
     },
@@ -59,11 +57,6 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
-    // tax_no: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
     registration_no: {
       type: String,
       required: true,
@@ -88,7 +81,6 @@ const supplierSchema = new Schema(
     ],
     sales_person_name: {
       type: String,
-      // required: true,
       trim: true,
     },
     contact_person_name: {
@@ -123,7 +115,6 @@ const supplierSchema = new Schema(
     },
     bank_details: {
       type: String,
-      // required: true,
       trim: true,
     },
     supplier_image: [
@@ -169,7 +160,6 @@ const supplierSchema = new Schema(
     ],
     payment_terms: {
       type: String,
-      // required: true,
       trim: true,
     },
     tags: {
@@ -318,7 +308,11 @@ supplierSchema.methods.generateAccessToken = async function () {
       user_id: this.supplier_id,
     },
     process.env.JWT_ACCESS_TOKEN_SECRET,
-    { expiresIn: Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2)}
+    {
+      expiresIn:
+        Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) *
+        Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2),
+    }
   );
 };
 

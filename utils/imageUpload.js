@@ -6,7 +6,6 @@ const createMulterMiddleware = (uploadConfig) => {
       const { usertype } = req.headers;
 
       if (!usertype) {
-        
         return cb(new Error("Need User Type"));
       }
 
@@ -14,18 +13,9 @@ const createMulterMiddleware = (uploadConfig) => {
         (config) => config.fieldName === file.fieldname
       );
 
-      let uploadPath = fieldConfig ? fieldConfig.uploadPath : './uploads/default';
-
-    //   if (fieldConfig) {
-    //     uploadPath =
-    //       usertype === "Buyer"
-    //         ? fieldConfig.buyerPath
-    //         : usertype === "Supplier"
-    //         ? fieldConfig.supplierPath
-    //         : 
-    //         uploadPath;
-    //   }
-    
+      let uploadPath = fieldConfig
+        ? fieldConfig.uploadPath
+        : "./uploads/default";
 
       cb(null, uploadPath);
     },
@@ -46,7 +36,9 @@ const createMulterMiddleware = (uploadConfig) => {
     upload.fields(fields)(req, res, (err) => {
       if (err) {
         console.error("Multer Error:", err);
-        return res.status(500).json({ error: "File upload error", details: err.message });
+        return res
+          .status(500)
+          .json({ error: "File upload error", details: err.message });
       }
       next();
     });
