@@ -412,89 +412,6 @@ module.exports = {
   },
 
   getBuyerCSVList: async (req, res) => {
-
-    // try {
-    //   const { pageNo, pageSize, filterKey, filterValue } = req?.body;
-
-    //   let filterCondition = {};
-    //   if (filterKey === "pending") {
-    //     filterCondition = { account_status: 0 };
-    //   } else if (filterKey === "accepted") {
-    //     filterCondition = { account_status: 1 };
-    //   } else if (filterKey === "rejected") {
-    //     filterCondition = { account_status: 2 };
-    //   }
-
-    //   let dateFilter = {};
-    //   const combinedFilter = { ...filterCondition, ...dateFilter };
-
-    //   const data = await Buyer.find(combinedFilter).sort({ createdAt: -1 });
-
-    //   // Convert Mongoose document to plain object and flatten
-    //   const flattenedData = data.map((item) =>
-    //     flattenData(
-    //       item.toObject(),
-    //       [
-    //         "_id",
-    //         "__v",
-    //         "supplier_image",
-    //         "buyer_image",
-    //         "license_image",
-    //         "tax_image",
-    //         "certificate_image",
-    //         "profile_status",
-    //         "updatedAt",
-    //         "token",
-    //         "password",
-    //       ],
-    //       [],
-    //       "buyer_list"
-    //     )
-    //   ); // `toObject()` removes internal Mongoose metadata
-
-    //   // Define desired column order
-    //   const fields = [
-    //     'Buyer Id',
-    //     'Buyer Name',
-    //     'Buyer Type',
-    //     'Buyer Email',
-    //     'Buyer Country Code',
-    //     'Buyer Mobile',
-    //     'Contact Person Name',
-    //     'Designation',
-    //     'Contact Person Email',
-    //     'Contact Person Country Code',
-    //     'Contact Person Mobile No',
-    //     'Sales Person Name',
-    //     'Description',
-    //     'License No',
-    //     'License Expiry Date',
-    //     'Registration No',
-    //     'Vat Reg No',
-    //     'Country Of Origin',
-    //     'Country Of Operation',
-    //     'Interested In',
-    //     'Tags',
-    //     'Account Created At',
-    //     'Last Login',
-    //     'Login Frequency',
-    //     'Account Status'
-    //   ];
-
-    //   // Convert the flattened data to CSV
-    //   const csv = parse(flattenedData, {fields});
-
-    //   // Set headers for file download
-    //   res.setHeader("Content-Type", "text/csv");
-    //   res.setHeader("Content-Disposition", "attachment; filename=users.csv");
-
-    //   res.status(200).send(csv);
-    // } catch (error) {
-    //   handleCatchBlockError(req, res, error);
-    // }
-
-
-
     try {
       const { pageNo, pageSize, filterKey, filterValue } = req?.body;
   
@@ -523,19 +440,10 @@ module.exports = {
   
       // Map subscriptions by userId
       const subscriptionMap = {};
-      // subscriptions.forEach(sub => {
-      //   subscriptionMap[sub.userId.toString()] = sub?.subscriptionDetails?.name || '';
-      // });
 
       subscriptions.forEach(sub => {
         subscriptionMap[sub.userId.toString()] = sub.subscriptionDetails || null;
       });
-  
-      // Add subscription name into buyer object
-      // const enrichedBuyers = buyers.map(buyer => ({
-      //   ...buyer,
-      //   subscription_name: subscriptionMap[buyer._id.toString()] || 'N/A'
-      // }));
 
       const enrichedBuyers = buyers.map(buyer => {
         const subDetails = subscriptionMap[buyer._id.toString()];
@@ -583,7 +491,7 @@ module.exports = {
         'Payment Status',
         'Subscription Name',
         'Promotion Name',
-        'Renewal date',
+        'Renewal Date',
         // 'Buyer Email',
         // 'Buyer Country Code',
         // 'Buyer Mobile',
