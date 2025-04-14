@@ -67,6 +67,192 @@ module.exports = {
           $match: {
             supplier_id: supplier_id,
             // created_at: { $gte: today }  // Match only today's data
+     }
+    },
+
+    editSupplier : async (req, res, reqObj, callback) => {
+      try {
+       const {
+          supplier_id, supplier_name, description, supplier_address, 
+          supplier_email, supplier_mobile, supplier_country_code, contact_person_name,
+          contact_person_mobile_no, contact_person_country_code, contact_person_email, designation,
+          country_of_origin, country_of_operation, license_no, tax_no, payment_terms, tags, 
+          estimated_delivery_time, supplier_image, tax_image, license_image
+        } = reqObj
+
+      const updateObj = {
+        supplier_id, 
+        supplier_name, 
+        description, 
+        supplier_address, 
+        supplier_email, 
+        supplier_mobile, 
+        supplier_country_code, 
+        contact_person_name,
+        contact_person_mobile_no, 
+        contact_person_country_code, 
+        contact_person_email, 
+        designation,
+        country_of_origin, 
+        country_of_operation, 
+        license_no, 
+        tax_no, 
+        payment_terms, 
+        tags, 
+        estimated_delivery_time, 
+        supplier_image, 
+        tax_image, 
+        license_image,
+        edit_status: 0
+      };
+
+      const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+  
+        if (!supplier) {
+            return callback({ code: 404, message: 'Supplier Not Found' });
+        }
+
+        if(supplier.profile_status === 0) {
+          return callback({code: 202, message: 'Edit request already exists for the supplier'})
+        }
+
+
+      Object.keys(updateObj).forEach(key => updateObj[key] === undefined && delete updateObj[key]);
+
+      const supplierEdit = new SupplierEdit(updateObj)
+
+      supplierEdit.save().then((data) => {
+        Supplier.findOneAndUpdate({supplier_id : supplier_id},
+          {
+            $set: {
+              profile_status: 0
+            }
+          }).then((result) => {
+            callback({ code: 200, message: 'Profile edit request send successfully', result: data});
+          })
+          .catch((err) => {
+            callback({ code: 400, message: 'Error while sending profile update request', result: err});
+          })
+      })
+    //   const updatedSupplier = await Supplier.findOneAndUpdate(
+    //     { supplier_id: supplier_id },
+    //     { $set: updateObj },
+    //     { new: true }
+    //   );  
+
+    // if (!updatedSupplier) {
+    //   return callback({ code: 404, message: 'Supplier not found' });
+    // }
+
+    // callback({ code: 200, message: 'Supplier updated successfully', result: updatedSupplier });
+
+
+      // callback({ code: 200, message: "Filter values", result: [result] });
+      }catch (error) {
+      handleCatchBlockError(req, res, error);
+     }
+    },
+
+    supplierProfileDetails : async(req, res, reqObj, callback) => {
+      try {
+        const fields = {
+          token : 0,
+          password : 0
+        }
+        Supplier.findOne({supplier_id: req?.params?.id}).select(fields) 
+        .then((data) => {
+          const loginFrequency = getLoginFrequencyLast90Days(data.login_history);
+          const resultData = {
+            ...data.toObject(),
+            loginFrequencyLast90Days: loginFrequency,
+          };
+          callback({code: 200, message : 'Supplier details fetched successfully', result:resultData})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message : 'Error in fetching supplier details'})
+      });
+      }catch (error) {
+      handleCatchBlockError(req, res, error);
+      }
+    },
+
+    buyerDetails : async (req, res, reqObj, callback) => {
+      try {
+        // const fields = [
+        //   'supplier_id', 'supplier_name', 'supplier_image', 'supplier_email',
+        //   'supplier_country_code', 'supplier_mobile', 'supplier_address', 
+        //   'description', 'license_no', 'country_of_origin', 'contact_person_name', 
+        //   'contact_person_mobile_no', 'contact_person_country_code', 'contact_person_email', 
+        //   'designation', 'tags', 'payment_terms', 'estimated_delivery_time'
+        // ];
+
+        Buyer.findOne({buyer_id: reqObj.buyer_id})
+        // .select(fields.join(' ')) 
+        .select()
+        .then((data) => {
+          callback({code: 200, message : 'Buyer details fetched successfully', result:data})
+      }).catch((error) => {
+          console.error('Error:', error);
+          callback({code: 400, message : 'Error in fetching Buyer details'})
+      });
+      }catch (error) {
+      handleCatchBlockError(req, res, error);
+      }
+    },
+
+    changePassword : async (req, res, reqObj, callback) => {
+      try {
+        const { supplier_id, password } = reqObj
+        const supplier = await Supplier.findOne({supplier_id : supplier_id})
+
+        if(!supplier) {
+          return callback({code: 404, message: "Supplier doesn't exists"});
+        }
+        let newPassword
+        const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
+        bcrypt.genSalt(saltRounds).then((salt) => {
+          return bcrypt.hash(password, salt)
+        })
+        .then((hashedPassword) => {
+          newPassword = hashedPassword
+          Supplier.findOneAndUpdate(
+            { supplier_id: supplier_id },
+
+            { $set: {password : newPassword} },
+            { new: true }
+          ).then(() => {
+            callback({code: 200, message: "Password updated Successfully"})
+          }) 
+          .catch((err) => {
+            callback({code: 400 , message: "Error while updating password "})
+          })
+        })
+        .catch((err) => {
+          callback({code: 401 , message: "Error while updating password "})
+        })
+
+        // Supplier.findOneAndUpdate({supplier_id : supplier_id},{$set: {password :}})
+      } catch (error) {
+      handleCatchBlockError(req, res, error);
+      }
+    },
+    
+
+    supplierDashboardOrderDetails: async (req, res, reqObj, callback) => {
+      try {
+        const { supplier_id } = reqObj;
+    
+        // Get today's date at midnight
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+    
+        // Aggregation for Orders
+        const ordersAggregation = [
+          {
+            $match: {
+              supplier_id: supplier_id,
+              // created_at: { $gte: today }  // Match only today's data
+            }
           },
         },
         {

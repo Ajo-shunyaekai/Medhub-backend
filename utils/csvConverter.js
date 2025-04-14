@@ -29,8 +29,12 @@ const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
         const loginFrequency = getLoginFrequencyLast90Days(obj[key]);
         result["Login Frequency"] = loginFrequency;
         continue; // skip further processing of login_history
-      } else if (key === "createdAt") {
-        result["Account Created At"] = formatDateTime(obj[key]);
+      } else if (key === 'createdAt') {
+        result["Account Creation Date"] = formatDateTime(obj[key]);
+      } else if (key === 'subscription_name') {
+        result['Payment Plan'] = obj[key];
+      } else if(key === 'renewal_date') {
+        result['Renewal Date'] = obj[key];
       }
 
       newKey = newKey?.replaceAll("_", " ");
