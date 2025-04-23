@@ -2,27 +2,27 @@ require("dotenv").config();
 const multer = require("multer");
 const mime = require("mime-types"); // Import mime-types to resolve file extensions
 const { sendErrorResponse } = require("../../utils/commonResonse");
-
+ 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // const { usertype } = req.body;
-
+ 
     let usertype;
     if (req?.body?.usertype) {
       req?.body?.usertype?.toLowerCase() == "supplier"
         ? (usertype = "Supplier")
-        : usertype == "Buyer";
+        : (usertype = "Buyer");
     } else if (req?.params?.userType) {
       req?.params?.userType?.toLowerCase() == "supplier"
         ? (usertype = "Supplier")
-        : usertype == "Buyer";
+        : (usertype = "Buyer");
     }
     // Define the default upload path based on user type and fieldname
     let uploadPath =
       usertype === "Buyer"
         ? "./uploads/buyer/buyer_images"
         : usertype === "Supplier" && "./uploads/supplier/supplierImage_files";
-
+ 
     // Adjust upload path based on the specific file type
     if (file.fieldname === "tax_image" || file.fieldname === "tax_imageNew") {
       uploadPath =
@@ -55,7 +55,7 @@ const storage = multer.diskStorage({
           : usertype === "Supplier" &&
             "./uploads/supplier/medical_practitioner_image";
     }
-
+ 
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
@@ -69,9 +69,9 @@ const storage = multer.diskStorage({
     ); // Use a timestamp for unique filenames
   },
 });
-
+ 
 const upload = multer({ storage: storage });
-
+ 
 const authUpload = (req, res, next) => {
   upload.fields([
     { name: "buyer_image", maxCount: 1 },
@@ -100,5 +100,5 @@ const authUpload = (req, res, next) => {
     next();
   });
 };
-
+ 
 module.exports = { authUpload };
