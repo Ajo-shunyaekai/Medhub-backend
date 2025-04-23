@@ -1,12 +1,12 @@
 const express = require("express");
 var routes = express.Router();
 const Controller = require("../controller/Admin");
-const MedicineController = require("../controller/Medicine");
 const { handleResponse, handleController } = require("../utils/utilities");
 const {
   checkAuthorization,
   authenticationNAuthorization,
 } = require("../middleware/Authorization");
+const { authUpload } = require("../middleware/multer/authMulter");
 
 module.exports = () => {
   routes.post(
@@ -127,13 +127,6 @@ module.exports = () => {
   );
 
   routes.post(
-    "/get-medicine-list",
-    checkAuthorization,
-    authenticationNAuthorization,
-    (req, res) => handleController(Controller.allMedicineList, req, res)
-  );
-
-  routes.post(
     "/get-support-list",
     checkAuthorization,
     authenticationNAuthorization,
@@ -223,6 +216,14 @@ module.exports = () => {
     checkAuthorization,
     authenticationNAuthorization,
     Controller.updateProfileRequest
+  );
+
+  routes.post(
+    "/edit-profile-details/:userType/:id",
+    checkAuthorization,
+    authenticationNAuthorization,
+    authUpload,
+    Controller.editProfileDetails
   );
 
   return routes;

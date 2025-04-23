@@ -24,102 +24,28 @@ const {
   verifyEmailAndResendOTP,
   updateProfileAndSendEditRequest,
   logoutUser,
+  getOtherinUserDetails,
 } = require(`../controller/authController`);
-const { sendErrorResponse } = require("../utils/commonResonse");
+const { validateUserInput } = require("../middleware/validations/editProfile");
 const {
-  validateUserInput,
   handleValidationErrors,
-} = require("../middleware/validations/editProfile");
+} = require("../middleware/validations/validationErrorHandler");
+const { authUpload } = require("../middleware/multer/authMulter");
+const { authValidationRules } = require("../middleware/validations/auth/auth");
+const {
+  addUserFileMiddleware,
+} = require("../middleware/validations/auth/fileUploads");
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const { usertype } = req.body;
-
-    // Define the default upload path based on user type and fieldname
-    let uploadPath =
-      usertype === "Buyer"
-        ? "./uploads/buyer/buyer_images"
-        : usertype === "Supplier" && "./uploads/supplier/supplierImage_files";
-
-    // Adjust upload path based on the specific file type
-    if (file.fieldname === "tax_image" || file.fieldname === "new_tax_image") {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/tax_images"
-          : usertype === "Supplier" && "./uploads/supplier/tax_image";
-    } else if (
-      file.fieldname === "license_image" ||
-      file.fieldname === "new_license_image"
-    ) {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/license_images"
-          : usertype === "Supplier" && "./uploads/supplier/license_image";
-    } else if (
-      file.fieldname === "certificate_image" ||
-      file.fieldname === "new_certificate_image"
-    ) {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/certificate_images"
-          : usertype === "Supplier" && "./uploads/supplier/certificate_image";
-    } else if (
-      file.fieldname === "medical_practitioner_image" ||
-      file.fieldname === "new_medical_practitioner_image"
-    ) {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/medical_practitioner_images"
-          : usertype === "Supplier" &&
-            "./uploads/supplier/medical_practitioner_image";
-    }
-
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    // Resolve the file extension using mime-types
-    const ext = mime.extension(file.mimetype) || "bin"; // Default to 'bin' for unknown MIME types
-    cb(
-      null,
-      `${file.fieldname?.replaceAll("New", "")}-${file.originalname
-        ?.replaceAll(" ", "")
-        ?.replaceAll("." + ext, "")}-${Date.now()}.${ext}`
-    ); // Use a timestamp for unique filenames
-  },
-});
-
-const upload = multer({ storage: storage });
-
-const cpUpload = (req, res, next) => {
-  upload.fields([
-    { name: "buyer_image", maxCount: 1 },
-    { name: "license_image", maxCount: 4 },
-    { name: "tax_image", maxCount: 4 },
-    { name: "certificate_image", maxCount: 4 },
-    { name: "supplier_image", maxCount: 1 },
-    { name: "license_image", maxCount: 4 },
-    { name: "tax_image", maxCount: 4 },
-    { name: "certificate_image", maxCount: 4 },
-    { name: "medical_practitioner_image", maxCount: 4 },
-    { name: "new_buyer_image", maxCount: 1 },
-    { name: "new_license_image", maxCount: 4 },
-    { name: "new_tax_image", maxCount: 4 },
-    { name: "new_certificate_image", maxCount: 4 },
-    { name: "new_supplier_image", maxCount: 1 },
-    { name: "new_license_image", maxCount: 4 },
-    { name: "new_tax_image", maxCount: 4 },
-    { name: "new_certificate_image", maxCount: 4 },
-    { name: "new_medical_practitioner_image", maxCount: 4 },
-  ])(req, res, (err) => {
-    if (err) {
-      console.error("Multer Error:", err);
-      return sendErrorResponse(res, 500, "File upload error", err);
-    }
-    next();
-  });
-};
-
-router.post(`/register`, checkAuthorization, cpUpload, registerUser);
+// router.post(`/register`, checkAuthorization, authUpload, registerUser);
+router.post(
+  `/register`,
+  checkAuthorization,
+  authValidationRules,
+  handleValidationErrors,
+  addUserFileMiddleware,
+  authUpload,
+  registerUser
+);
 
 router.post(`/login`, loginUser);
 router.post(`/logout`, authenticationNAuthorization, logoutUser);
@@ -142,5 +68,6 @@ router.post(
 );
 
 router.post(`/:id`, getLoggedinUserProfileDetails);
+router.post(`/other-user/:userType/:id`, getOtherinUserDetails);
 
 module.exports = router;

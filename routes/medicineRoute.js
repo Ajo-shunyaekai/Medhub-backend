@@ -8,20 +8,7 @@ const {
   checkAuthorization,
   authenticationNAuthorization,
 } = require("../middleware/Authorization");
-const createMulterMiddleware = require("../utils/imageUpload");
-
-const medicineUploadMiddleware = createMulterMiddleware([
-  {
-    fieldName: "product_image",
-    uploadPath: "./uploads/medicine/product_files",
-    maxCount: 4,
-  },
-  {
-    fieldName: "invoice_image",
-    uploadPath: "./uploads/medicine/invoice_image",
-    maxCount: 1,
-  },
-]);
+const { medicineUpload } = require("../middleware/multer/medicineMulter");
 
 module.exports = () => {
   routes.post("/get-medicine-by-name", checkAuthorization, (req, res) =>
@@ -32,7 +19,7 @@ module.exports = () => {
     "/add-medicine",
     checkAuthorization,
     authenticationNAuthorization,
-    medicineUploadMiddleware,
+    medicineUpload,
     (req, res) => {
       if (
         !req.files["product_image"] ||
@@ -107,7 +94,7 @@ module.exports = () => {
     "/edit-medicine",
     checkAuthorization,
     authenticationNAuthorization,
-    medicineUploadMiddleware,
+    medicineUpload,
     (req, res) => {
       let allProductImages = [];
       let allInvoiceImages = [];

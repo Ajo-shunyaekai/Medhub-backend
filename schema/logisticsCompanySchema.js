@@ -103,11 +103,7 @@ logisticsPartnerSchema.methods.generateAccessToken = async function () {
       user_id: this.partner_id,
     },
     process.env.JWT_ACCESS_TOKEN_SECRET,
-    {
-      expiresIn:
-        Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) *
-        Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2),
-    }
+    { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY }
   );
 };
 

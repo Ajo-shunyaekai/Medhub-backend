@@ -9,15 +9,7 @@ const {
   checkAuthorization,
   authenticationNAuthorization,
 } = require("../middleware/Authorization");
-const createMulterMiddleware = require("../utils/imageUpload");
-
-const imageUploadMiddleware = createMulterMiddleware([
-  {
-    fieldName: "transaction_image",
-    uploadPath: "./uploads/buyer/order/invoice_images",
-    maxCount: 4,
-  },
-]);
+const { invoiceUpload } = require("../middleware/multer/invoiceMulter");
 
 module.exports = () => {
   routes.post(
@@ -31,7 +23,7 @@ module.exports = () => {
     "/update-payment-status",
     checkAuthorization,
     authenticationNAuthorization,
-    imageUploadMiddleware,
+    invoiceUpload,
     async (req, res) => {
       if (
         !req.files["transaction_image"] ||

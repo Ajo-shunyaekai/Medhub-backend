@@ -79,11 +79,6 @@ const buyerSchema = new Schema(
       unique: true,
       required: [true, "Validation Error : contact_person_email is required"],
     },
-    activity_code: {
-      type: String,
-      required: [true, "Validation Error : activity_code is required"],
-      trim: true,
-    },
     contact_person_mobile: {
       type: String,
       trim: true,
@@ -127,12 +122,10 @@ const buyerSchema = new Schema(
     license_no: {
       type: String,
       trim: true,
-      // required: [true, "Validation Error : license_no is required"],
     },
     license_expiry_date: {
       type: String,
       trim: true,
-      // required: [true, "Validation Error : license_expiry_date is required"],
     },
     // tax_no: {
     //   type: String,
@@ -306,7 +299,7 @@ buyerSchema.methods.generateAccessToken = async function () {
       user_id: this.buyer_id,
     },
     process.env.JWT_ACCESS_TOKEN_SECRET,
-    { expiresIn: Number(process.env.JWT_ACCESS_TOKEN_EXPIRY) * Number(process.env.JWT_ACCESS_TOKEN_EXPIRY2)}
+    { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY }
   );
 };
 
