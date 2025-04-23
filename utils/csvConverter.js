@@ -31,6 +31,8 @@ const flattenData = (obj, excArr = [], incArr = [], list_type, prefix = "") => {
         continue; // skip further processing of login_history
       } else if (key === 'createdAt') {
         result["Account Creation Date"] = formatDateTime(obj[key]);
+      } else if (key === 'account_accepted_date') {
+        result["Account Approved Date"] = obj[key];
       } else if (key === 'subscription_name') {
         result['Payment Plan'] = obj[key];
       } else if(key === 'renewal_date') {

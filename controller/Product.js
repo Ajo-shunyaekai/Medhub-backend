@@ -251,7 +251,8 @@ module.exports = {
 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
-      const totalProducts = (await products?.length) || 0;
+      // const totalProducts = (await products?.length) || 0;
+      const totalProducts = await Product.countDocuments(totalProductsQuery)
       const totalPages = Math.ceil(totalProducts / pageSize);
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
