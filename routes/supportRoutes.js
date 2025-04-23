@@ -8,27 +8,14 @@ const {
   checkAuthorization,
   authenticationNAuthorization,
 } = require("../middleware/Authorization");
-const createMulterMiddleware = require("../utils/imageUpload");
-
-const imageUploadMiddleware = createMulterMiddleware([
-  {
-    fieldName: "complaint_image",
-    uploadPath: "./uploads/buyer/order/complaint_images",
-    maxCount: 10,
-  },
-  {
-    fieldName: "feedback_image",
-    uploadPath: "./uploads/buyer/order/feedback_images",
-    maxCount: 10,
-  },
-]);
+const { supportUpload } = require("../middleware/multer/supportMulter");
 
 module.exports = () => {
   routes.post(
     "/submit-feedback",
     checkAuthorization,
     authenticationNAuthorization,
-    imageUploadMiddleware,
+    supportUpload,
     (req, res) => {
       if (
         !req.files["feedback_image"] ||
@@ -57,7 +44,7 @@ module.exports = () => {
     "/submit-complaint",
     checkAuthorization,
     authenticationNAuthorization,
-    imageUploadMiddleware,
+    supportUpload,
     (req, res) => {
       if (
         !req.files["complaint_image"] ||

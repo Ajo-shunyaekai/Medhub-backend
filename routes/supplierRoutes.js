@@ -10,30 +10,6 @@ const {
   checkAuthorization,
   authenticationNAuthorization,
 } = require("../middleware/Authorization");
-const createMulterMiddleware = require("../utils/imageUpload");
-
-const supplierUploadMiddleware = createMulterMiddleware([
-  {
-    fieldName: "supplier_image",
-    uploadPath: "./uploads/supplier/supplierImage_files",
-    maxCount: 1,
-  },
-  {
-    fieldName: "tax_image",
-    uploadPath: "./uploads/supplier/tax_image",
-    maxCount: 4,
-  },
-  {
-    fieldName: "license_image",
-    uploadPath: "./uploads/supplier/license_image",
-    maxCount: 4,
-  },
-  {
-    fieldName: "certificate_image",
-    uploadPath: "./uploads/supplier/certificate_image",
-    maxCount: 4,
-  },
-]);
 
 module.exports = () => {
   routes.post("/get-filter-values", checkAuthorization, (req, res) =>

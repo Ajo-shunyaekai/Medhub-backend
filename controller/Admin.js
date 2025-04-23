@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const moment = require("moment");
 const generator = require("generate-password");
-const { addMonths, format } = require('date-fns'); // Use this for adding 2 months
+const { addMonths, format } = require("date-fns"); // Use this for adding 2 months
 const Admin = require("../schema/adminSchema");
 const Order = require("../schema/orderSchema");
 const Supplier = require("../schema/supplierSchema");
@@ -17,7 +17,7 @@ const Enquiry = require("../schema/enquiryListSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const Invoices = require("../schema/invoiceSchema");
 const ProfileEditRequest = require("../schema/profileEditRequestSchema");
-const Subscription = require("../schema/subscriptionSchema")
+const Subscription = require("../schema/subscriptionSchema");
 const {
   Medicine,
   SecondaryMarketMedicine,
@@ -88,34 +88,42 @@ module.exports = {
       let dateFilter = {};
       const combinedFilter = { ...filterCondition, ...dateFilter };
 
-      const suppliers = await Supplier.find(combinedFilter).sort({ createdAt: -1 });
+      const suppliers = await Supplier.find(combinedFilter).sort({
+        createdAt: -1,
+      });
 
-      const supplierIds = suppliers.map(buyer => buyer._id.toString());
+      const supplierIds = suppliers.map((buyer) => buyer._id.toString());
 
       // Fetch subscription data related to buyers
       const subscriptions = await Subscription.find({
         userId: { $in: supplierIds },
-        userSchemaReference: "Supplier"
+        userSchemaReference: "Supplier",
       }).lean();
 
-       // Map subscriptions by userId
-       const subscriptionMap = {};
-       subscriptions.forEach(sub => {
-        subscriptionMap[sub.userId.toString()] = sub.subscriptionDetails || null;
+      // Map subscriptions by userId
+      const subscriptionMap = {};
+      subscriptions.forEach((sub) => {
+        subscriptionMap[sub.userId.toString()] =
+          sub.subscriptionDetails || null;
       });
 
-      const enrichedSuppliers = suppliers?.map(supplier => {
+      const enrichedSuppliers = suppliers?.map((supplier) => {
         const subDetails = subscriptionMap[supplier._id.toString()];
         const hasSubscription = !!subDetails;
-  
+
         return {
           ...supplier,
-          subscription_name: hasSubscription ? subDetails.name || 'N/A' : 'N/A',
-          payment_status: hasSubscription ? 'Paid' : 'Pending',
-          promotion_name: hasSubscription ? subDetails.promotionName || 'N/A' : 'N/A',
+          subscription_name: hasSubscription ? subDetails.name || "N/A" : "N/A",
+          payment_status: hasSubscription ? "Paid" : "Pending",
+          promotion_name: hasSubscription
+            ? subDetails.promotionName || "N/A"
+            : "N/A",
           renewal_date: hasSubscription
-            ? subDetails.subscriptionEndDate || 'N/A'
-            : format(addMonths(new Date(supplier.createdAt), 2), 'MMMM dd, yyyy')
+            ? subDetails.subscriptionEndDate || "N/A"
+            : format(
+                addMonths(new Date(supplier.createdAt), 2),
+                "MMMM dd, yyyy"
+              ),
         };
       });
 
@@ -144,24 +152,24 @@ module.exports = {
 
       // Define desired column order
       const fields = [
-        'Supplier Id',
-        'Supplier Name',
-        'Supplier Type',
-        'Sales Person Name',
-        'License Expiry Date',
-        'Country Of Origin',
-        'Country Of Operation',
-        'Categories',
-        'Tags',
-        'Account Creation Date',
-        'Last Login',
-        'Login Frequency',
-        'Account Status',
-        'Payment Status',
-        'Subscription Name',
-        'Promotion Name',
-        'Renewal date',
-         // 'Supplier Email',
+        "Supplier Id",
+        "Supplier Name",
+        "Supplier Type",
+        "Sales Person Name",
+        "License Expiry Date",
+        "Country Of Origin",
+        "Country Of Operation",
+        "Categories",
+        "Tags",
+        "Account Creation Date",
+        "Last Login",
+        "Login Frequency",
+        "Account Status",
+        "Payment Status",
+        "Subscription Name",
+        "Promotion Name",
+        "Renewal date",
+        // 'Supplier Email',
         // 'Supplier Country Code',
         // 'Supplier Mobile',
         // 'Contact Person Name',
@@ -191,7 +199,7 @@ module.exports = {
   getBuyerCSVList: async (req, res) => {
     try {
       const { pageNo, pageSize, filterKey, filterValue } = req?.body;
-  
+
       let filterCondition = {};
       if (filterKey === "pending") {
         filterCondition = { account_status: 0 };
@@ -200,75 +208,89 @@ module.exports = {
       } else if (filterKey === "rejected") {
         filterCondition = { account_status: 2 };
       }
-  
+
       const combinedFilter = { ...filterCondition };
-  
+
       // Fetch buyers
-      const buyers = await Buyer.find(combinedFilter).sort({ createdAt: -1 }).lean();
-  
+      const buyers = await Buyer.find(combinedFilter)
+        .sort({ createdAt: -1 })
+        .lean();
+
       // Get all buyer _ids to fetch related subscriptions
-      const buyerIds = buyers.map(buyer => buyer._id.toString());
-  
+      const buyerIds = buyers.map((buyer) => buyer._id.toString());
+
       // Fetch subscription data related to buyers
       const subscriptions = await Subscription.find({
         userId: { $in: buyerIds },
-        userSchemaReference: "Buyer"
+        userSchemaReference: "Buyer",
       }).lean();
-  
+
       // Map subscriptions by userId
       const subscriptionMap = {};
 
-      subscriptions.forEach(sub => {
-        subscriptionMap[sub.userId.toString()] = sub.subscriptionDetails || null;
+      subscriptions.forEach((sub) => {
+        subscriptionMap[sub.userId.toString()] =
+          sub.subscriptionDetails || null;
       });
 
-      const enrichedBuyers = buyers.map(buyer => {
+      const enrichedBuyers = buyers.map((buyer) => {
         const subDetails = subscriptionMap[buyer._id.toString()];
         const hasSubscription = !!subDetails;
-  
+
         return {
           ...buyer,
-          subscription_name: hasSubscription ? subDetails.name || 'N/A' : 'N/A',
-          payment_status: hasSubscription ? 'Paid' : 'Pending',
-          promotion_name: hasSubscription ? subDetails.promotionName || 'N/A' : 'N/A',
+          subscription_name: hasSubscription ? subDetails.name || "N/A" : "N/A",
+          payment_status: hasSubscription ? "Paid" : "Pending",
+          promotion_name: hasSubscription
+            ? subDetails.promotionName || "N/A"
+            : "N/A",
           renewal_date: hasSubscription
-            ? subDetails.subscriptionEndDate || 'N/A'
-            : format(addMonths(new Date(buyer.createdAt), 2), 'MMMM dd, yyyy')
+            ? subDetails.subscriptionEndDate || "N/A"
+            : format(addMonths(new Date(buyer.createdAt), 2), "MMMM dd, yyyy"),
         };
       });
-  
+
       // Flatten buyer data for CSV
-      const flattenedData = enrichedBuyers.map(item =>
+      const flattenedData = enrichedBuyers.map((item) =>
         flattenData(
           item,
           [
-            "_id", "__v", "supplier_image", "buyer_image", "license_image", "tax_image", "certificate_image",
-            "profile_status", "updatedAt", "token", "password"
+            "_id",
+            "__v",
+            "supplier_image",
+            "buyer_image",
+            "license_image",
+            "tax_image",
+            "certificate_image",
+            "profile_status",
+            "updatedAt",
+            "token",
+            "password",
           ],
           [],
           "buyer_list"
         )
       );
-  
+
       // Fields for CSV
       const fields = [
-        'Buyer Id',
-        'Buyer Name',
-        'Buyer Type',
-        'Sales Person Name',
-        'License Expiry Date',
-        'Country Of Origin',
-        'Country Of Operation',
-        'Interested In',
-        'Tags',
-        'Account Creation Date',
-        'Last Login',
-        'Login Frequency',
-        'Account Status',
-        'Payment Status',
-        'Subscription Name',
-        'Promotion Name',
-        'Renewal Date',
+        "Buyer Id",
+        "Buyer Name",
+        "Buyer Type",
+        "Sales Person Name",
+        "License Expiry Date",
+        "Country Of Origin",
+        "Country Of Operation",
+        "Interested In",
+        "Tags",
+        "Account Creation Date",
+        "Last Login",
+        "Login Frequency",
+        "Account Status",
+        "Payment Status",
+        "Subscription Name",
+        "Promotion Name",
+        "Renewal Date",
         // 'Buyer Email',
         // 'Buyer Country Code',
         // 'Buyer Mobile',
@@ -279,18 +301,17 @@ module.exports = {
         // 'Contact Person Mobile No',
         // 'Description',
         // 'License No',
-         // 'Registration No',
+        // 'Registration No',
         // 'Vat Reg No',
       ];
-  
+
       // Convert to CSV
       const csv = parse(flattenedData, { fields });
-  
+
       // Set headers and send file
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", "attachment; filename=buyers.csv");
       res.status(200).send(csv);
-  
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
@@ -4652,6 +4673,35 @@ module.exports = {
         "Profile request updated.",
         updatedUserReq
       );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  editProfileDetails: async (req, res) => {
+    console.log("function called");
+    try {
+      const { id, userType } = req?.params;
+      if (!id) {
+        return sendErrorResponse(res, 400, "Need User Id.");
+      }
+      if (!userType) {
+        return sendErrorResponse(res, 400, "Need User Type.");
+      }
+      const Model =
+        userType?.toLowerCase() === "buyer"
+          ? Buyer
+          : userType?.toLowerCase() === "admin"
+          ? Admin
+          : userType?.toLowerCase() === "supplier"
+          ? Supplier
+          : userType?.toLowerCase() === "logistics"
+          ? LogisticsPartner
+          : null;
+      const user = await Model.findById(id);
+      if (!user) {
+        return sendErrorResponse(res, 400, "No User Found.");
+      }
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }

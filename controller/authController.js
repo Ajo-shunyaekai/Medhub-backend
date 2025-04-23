@@ -15,16 +15,6 @@ const path = require("path");
 const { sendEmail, sendTemplateEmail } = require("../utils/emailService");
 const { getTodayFormattedDate } = require("../utils/utilities");
 const {
-  Medicine,
-  SecondaryMarketMedicine,
-  NewMedicine,
-} = require("../schema/medicineSchema");
-const {
-  EditMedicine,
-  NewMedicineEdit,
-  SecondaryMarketMedicineEdit,
-} = require("../schema/medicineEditRequestSchema");
-const {
   supplierRegistrationContent,
   buyerRegistrationContent,
   otpForResetPasswordContent,
@@ -110,32 +100,6 @@ const registerUser = async (req, res) => {
     }
 
     if (usertype === "Buyer") {
-      // Validate the required files for "Buyer" type
-      if (!req.files["buyer_image"] || req.files["buyer_image"].length === 0) {
-        return sendErrorResponse(res, 415, "Company Logo is required.");
-      }
-      if (
-        !req.files["license_image"] ||
-        req.files["license_image"].length === 0
-      ) {
-        return sendErrorResponse(
-          res,
-          415,
-          "Company license image is required."
-        );
-      }
-      if (
-        req?.body?.buyer_type == "Medical Practitioner" &&
-        (!req.files["medical_practitioner_image"] ||
-          req.files["medical_practitioner_image"].length === 0)
-      ) {
-        return sendErrorResponse(
-          res,
-          415,
-          "Medical Practitioner Certificate image is required."
-        );
-      }
-
       // Extract and format the mobile and country code
       const buyerCountryCode = buyer_mobile.split(" ")[0];
       const buyer_mobile_number = buyer_mobile.split(" ").slice(1).join(" ");
@@ -202,35 +166,6 @@ const registerUser = async (req, res) => {
         return sendErrorResponse(res, 419, "All fields are required.", errObj);
       }
     } else if (usertype === "Supplier") {
-      if (
-        !req.files["supplier_image"] ||
-        req.files["supplier_image"].length === 0
-      ) {
-        return sendErrorResponse(res, 415, "Supplier Logo is required.");
-      }
-      if (
-        !req.files["license_image"] ||
-        req.files["license_image"].length === 0
-      ) {
-        return sendErrorResponse(
-          res,
-          415,
-          "Supplier license image is required."
-        );
-      }
-
-      if (
-        req?.body?.supplier_type == "Medical Practitioner" &&
-        (!req.files["medical_practitioner_image"] ||
-          req.files["medical_practitioner_image"].length === 0)
-      ) {
-        return sendErrorResponse(
-          res,
-          415,
-          "Medical Practitioner Certificate image is required."
-        );
-      }
-
       const supplierCountryCode = req.body.supplier_mobile_no.split(" ")[0];
       const supplier_mobile_number = req.body.supplier_mobile_no
         .split(" ")
@@ -362,6 +297,7 @@ const registerUser = async (req, res) => {
       user_name: req.body?.name,
       email: req.body?.email,
       password: req.body?.password,
+      token: new Date(),
     });
 
     const newSupplier = new Supplier({
@@ -433,6 +369,7 @@ const registerUser = async (req, res) => {
           };
         })
         ?.filter((ele) => ele?.file || ele?.date),
+      token: new Date(),
     });
 
     const newBuyer = new Buyer({
@@ -1499,8 +1436,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
 
     const sendProfileEditRequest = async (user, userType, address) => {
       const perId = "PER-" + Math.random().toString(16).slice(2, 10);
-      const ProfileEdit =
-        ProfileEditRequest;
+      const ProfileEdit = ProfileEditRequest;
       const profileReq = new ProfileEdit({
         perId,
         registeredAddress: address,
@@ -1664,6 +1600,39 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const getOtherinUserDetails = async (req, res) => {
+  try {
+    const { id, userType } = req?.params;
+
+    const user =
+      userType?.toLowerCase() == "buyer"
+        ? await Buyer.findById(id)?.select(
+            "-password -refreshToken -token -createdAt -updatedAt -__v"
+          )
+        : userType?.toLowerCase() == "admin"
+        ? await Admin.findById(id)?.select(
+            "-password -refreshToken -token -createdAt -updatedAt -__v"
+          )
+        : userType?.toLowerCase() == "supplier"
+        ? await Supplier.findById(id)?.select(
+            "-password -refreshToken -token -createdAt -updatedAt -__v"
+          )
+        : usertype?.toLowerCase() == "logistics"
+        ? await LogisticsPartner.findById(id)?.select(
+            "-password -refreshToken -token -createdAt -updatedAt -__v"
+          )
+        : null;
+
+    if (!user) {
+      return sendErrorResponse(res, 400, "No user Found");
+    }
+
+    return sendSuccessResponse(res, 200, "User Found.", user);
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 module.exports = {
   generateAccessAndRefeshToken,
   registerUser,
@@ -1676,4 +1645,5 @@ module.exports = {
   updatePassword,
   updateProfileAndSendEditRequest,
   logoutUser,
+  getOtherinUserDetails
 };
