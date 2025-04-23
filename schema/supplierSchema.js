@@ -49,12 +49,12 @@ const supplierSchema = new Schema(
     },
     license_no: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     license_expiry_date: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     registration_no: {

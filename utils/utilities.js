@@ -138,11 +138,11 @@ module.exports = {
           message: "Yearly Purchase value Field is required",
         },
         { field: "interested_in", message: "Interested in Field is required" },
-        { field: "license_no", message: "License no Field is required" },
-        {
-          field: "license_expiry_date",
-          message: "License Expiry Date Field is required",
-        },
+        // { field: "license_no", message: "License no Field is required" },
+        // {
+        //   field: "license_expiry_date",
+        //   message: "License Expiry Date Field is required",
+        // },
         // { field: 'tax_no', message: 'Tax no Field is required' },
         {
           field: "registration_no",
@@ -187,7 +187,7 @@ module.exports = {
           field: "country_of_operation",
           message: "Country of operation Field is required",
         },
-        { field: "license_no", message: "License no Field is required" },
+        // { field: "license_no", message: "License no Field is required" },
         // { field: 'tax_no', message: 'Tax no Field is required' },
         {
           field: "registration_no",
@@ -202,7 +202,7 @@ module.exports = {
         { field: "password", message: "Password Field is required" },
         { field: "mobile_no", message: "Mobile Field is required" },
         { field: "business_type", message: "Business Type Field is required" },
-        { field: "license_no", message: "License No Field is required" },
+        // { field: "license_no", message: "License No Field is required" },
       ],
       supplierRegister: [
         { field: "supplier_type", message: "Company type field is required" },
@@ -217,11 +217,11 @@ module.exports = {
           message: "Supplier mobile Field is required",
         },
         { field: "description", message: "Description Field is required" },
-        { field: "license_no", message: "License no Field is required" },
-        {
-          field: "license_expiry_date",
-          message: "License Expiry Date Field is required",
-        },
+        // { field: "license_no", message: "License no Field is required" },
+        // {
+        //   field: "license_expiry_date",
+        //   message: "License Expiry Date Field is required",
+        // },
         // { field: 'tax_no', message: 'Tax no Field is required' },
         {
           field: "categories",
