@@ -40,6 +40,7 @@ const {
 const logErrorToFile = require("../logs/errorLogs");
 const { generateProfileEditRequestEmail } = require("../utils/emailContents");
 const { sendEmail, sendTemplateEmail } = require("../utils/emailService");
+const { getFilePathsEdit } = require("../helper");
 
 const generatePassword = () => {
   const password = generator.generate({
@@ -152,25 +153,25 @@ module.exports = {
 
       // Define desired column order
       const fields = [
-        'Supplier Id',
-        'Supplier Name',
-        'Supplier Type',
-        'Sales Person Name',
+        "Supplier Id",
+        "Supplier Name",
+        "Supplier Type",
+        "Sales Person Name",
         // 'License Expiry Date',
-        'Country Of Origin',
-        'Country Of Operation',
-        'Categories',
-        'Tags',
-        'Account Creation Date',
-        'Account Approved Date',
-        'Last Login',
-        'Login Frequency',
-        'Account Status',
+        "Country Of Origin",
+        "Country Of Operation",
+        "Categories",
+        "Tags",
+        "Account Creation Date",
+        "Account Approved Date",
+        "Last Login",
+        "Login Frequency",
+        "Account Status",
         // 'Payment Status',
         // 'Subscription Name',
         // 'Promotion Name',
         // 'Renewal date',
-         // 'Supplier Email',
+        // 'Supplier Email',
         // 'Supplier Country Code',
         // 'Supplier Mobile',
         // 'Contact Person Name',
@@ -275,20 +276,20 @@ module.exports = {
 
       // Fields for CSV
       const fields = [
-        'Buyer Id',
-        'Buyer Name',
-        'Buyer Type',
-        'Sales Person Name',
+        "Buyer Id",
+        "Buyer Name",
+        "Buyer Type",
+        "Sales Person Name",
         // 'License Expiry Date',
-        'Country Of Origin',
-        'Country Of Operation',
-        'Interested In',
-        'Tags',
-        'Account Creation Date',
-        'Account Approved Date',
-        'Last Login',
-        'Login Frequency',
-        'Account Status',
+        "Country Of Origin",
+        "Country Of Operation",
+        "Interested In",
+        "Tags",
+        "Account Creation Date",
+        "Account Approved Date",
+        "Last Login",
+        "Login Frequency",
+        "Account Status",
         // 'Payment Status',
         // 'Subscription Name',
         // 'Promotion Name',
@@ -4592,11 +4593,11 @@ module.exports = {
               buyer_address: updatedUserReq?.registeredAddress
                 ?.company_reg_address?.isChanged
                 ? updatedUserReq?.registeredAddress?.company_reg_address?.value
-                : userToUpdate?.["registeredAddress"]?.[field],
+                : userToUpdate?.["registeredAddress"]?.["company_reg_address"],
               supplier_address: updatedUserReq?.registeredAddress
                 ?.company_reg_address?.isChanged
                 ? updatedUserReq?.registeredAddress?.company_reg_address?.value
-                : userToUpdate?.["registeredAddress"]?.[field],
+                : userToUpdate?.["registeredAddress"]?.["company_reg_address"],
               registeredAddress: updatedRegisteredAddress,
             },
           },
@@ -4681,7 +4682,6 @@ module.exports = {
   },
 
   editProfileDetails: async (req, res) => {
-    console.log("function called");
     try {
       const { id, userType } = req?.params;
       if (!id) {
@@ -4700,10 +4700,129 @@ module.exports = {
           : userType?.toLowerCase() === "logistics"
           ? LogisticsPartner
           : null;
-      const user = await Model.findById(id);
-      if (!user) {
+      const existingUser = await Model.findById(id);
+      if (!existingUser) {
         return sendErrorResponse(res, 400, "No User Found.");
       }
+
+      const buyer_imageFiles = await getFilePathsEdit(req, res, [
+        "buyer_image",
+      ]);
+      const supplier_imageFiles = await getFilePathsEdit(req, res, [
+        "supplier_image",
+      ]);
+      const certificate_imageFiles = await getFilePathsEdit(req, res, [
+        "certificate_image",
+      ]);
+      const license_imageFiles = await getFilePathsEdit(req, res, [
+        "license_image",
+      ]);
+      const medical_practitioner_imageFiles = await getFilePathsEdit(req, res, [
+        "medical_practitioner_image",
+      ]);
+
+      let certificateFileNDateParsed;
+
+      try {
+        // Check if certificateFileNDate exists and is an array before applying filter
+        if (Array.isArray(req?.body?.certificateFileNDate)) {
+          certificateFileNDateParsed = req.body.certificateFileNDate.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else if (typeof req?.body?.certificateFileNDate === "string") {
+          // If it's a string, try to parse it as JSON and filter
+          certificateFileNDateParsed = JSON.parse(
+            req.body?.certificateFileNDate
+          )?.filter((value) => value !== "[object Object]");
+        } else {
+          // Handle case where certificateFileNDate is neither an array nor a string
+          throw new Error("Invalid certificateFileNDate format.");
+        }
+      } catch (error) {
+        console.error("Error while parsing certificateFileNDate:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(
+          res,
+          400,
+          "Invalid certificateFileNDate format."
+        );
+      }
+
+      const updatedUserDetails = {
+        ...existingUser.toObject(), // Use the existing product data
+        ...req?.body, // Overwrite with new data from request body
+        ...(buyer_imageFiles || []),
+        ...(supplier_imageFiles || []),
+        ...(certificate_imageFiles || []),
+        certificate_image: certificate_imageFiles.certificate_image || [],
+        certificateFileNDate:
+          certificateFileNDateParsed?.length > 0
+            ? (Array?.isArray(certificateFileNDateParsed)
+                ? certificateFileNDateParsed
+                : JSON.parse(certificateFileNDateParsed)
+              )
+                ?.map((ele, index) => {
+                  return {
+                    file:
+                      typeof ele?.file !== "string"
+                        ? certificate_imageFiles?.certificate_image?.find(
+                            (filename) => {
+                              const path = ele?.file?.path;
+
+                              // Ensure path is defined and log the file path
+                              if (!path) {
+                                return false; // If there's no path, skip this entry
+                              }
+
+                              const ext = path.split(".").pop(); // Get the file extension
+                              const sanitizedPath = path
+                                .replaceAll("./", "")
+                                .replaceAll(" ", "")
+                                .replaceAll(`.${ext}`, "");
+
+                              // Match file by sanitized name
+                              return filename?.includes(sanitizedPath);
+                            }
+                          )
+                        : ele?.file ||
+                          certificate_imageFiles?.certificate_image?.[index] ||
+                          "",
+
+                    date: ele?.date || "", // Log the date being used (if any)
+                  };
+                })
+                ?.filter((ele) => ele?.file || ele?.date)
+            : certificateFileNDateParsed,
+        ...(license_imageFiles || []),
+        medical_certificate:
+          medical_practitioner_imageFiles?.medical_practitioner_image || [],
+        registeredAddress: {
+          ...existingUser?.registeredAddress,
+          ...req?.body,
+        },
+      };
+      const updatedUser = await Model.findByIdAndUpdate(
+        id,
+        updatedUserDetails,
+        {
+          new: true,
+        }
+      );
+
+      if (!updatedUser) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Error while updating profile details."
+        );
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Profile updated successfully",
+        updatedUser
+      );
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }

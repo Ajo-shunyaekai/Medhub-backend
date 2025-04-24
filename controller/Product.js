@@ -23,6 +23,7 @@ const {
   getCategoryName,
   additionalCheckFieldName,
 } = require("../utils/bulkUploadProduct");
+const { getFilePathsEdit, getFilePathsAdd } = require("../helper");
 
 module.exports = {
   getAllProducts: async (req, res) => {
@@ -252,7 +253,7 @@ module.exports = {
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
       // const totalProducts = (await products?.length) || 0;
-      const totalProducts = await Product.countDocuments(totalProductsQuery)
+      const totalProducts = await Product.countDocuments(totalProductsQuery);
       const totalPages = Math.ceil(totalProducts / pageSize);
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
@@ -343,35 +344,6 @@ module.exports = {
 
   addProduct: async (req, res) => {
     try {
-      // Helper function to retrieve file paths
-      async function getFilePaths(fields = []) {
-        const filePaths = {};
-
-        // Make sure fields is an array and req.files is an object
-        if (!Array.isArray(fields)) {
-          console.error(
-            "Expected fields to be an array, but received:",
-            fields
-          );
-          return filePaths; // Return an empty filePaths object
-        }
-
-        // Iterate over the fields array
-        for (const field of fields) {
-          if (req?.files?.[field] && req?.files?.[field]?.length > 0) {
-            const validPaths = req?.files?.[field]
-              .map((file) => file.filename) // Map to file paths
-              .filter((path) => path && path.trim() !== ""); // Filter out empty strings
-
-            filePaths[field] = validPaths.length > 0 ? validPaths : []; // Use valid paths or empty array
-          } else {
-            filePaths[field] = []; // Assign empty array if no files are present
-          }
-        }
-
-        return filePaths;
-      }
-
       const { category, market = "new" } = req?.body;
 
       // Define file fields for each category
@@ -412,20 +384,28 @@ module.exports = {
       }
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
-      const generalFiles = await getFilePaths(["image"]);
+      const generalFiles = await getFilePathsAdd(req, res, ["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
       const inventoryFiles = [...req?.body?.countries];
-      const complianceFiles = await getFilePaths(["complianceFile"]);
-      const additionalFiles = await getFilePaths(["guidelinesFile"]);
-      const secondaryMarketFiles = await getFilePaths(["purchaseInvoiceFile"]);
-      const healthNSafetyFiles = await getFilePaths([
+      const complianceFiles = await getFilePathsAdd(req, res, [
+        "complianceFile",
+      ]);
+      const additionalFiles = await getFilePathsAdd(req, res, [
+        "guidelinesFile",
+      ]);
+      const secondaryMarketFiles = await getFilePathsAdd(req, res, [
+        "purchaseInvoiceFile",
+      ]);
+      const healthNSafetyFiles = await getFilePathsAdd(req, res, [
         "safetyDatasheet",
         "healthHazardRating",
         "environmentalImpact",
       ]);
 
       // Retrieve file paths for the selected category only
-      const categoryFiles = await getFilePaths(
+      const categoryFiles = await getFilePathsAdd(
+        req,
+        res,
         req?.files,
         fileFields[category] || []
       );
@@ -606,40 +586,6 @@ module.exports = {
         return sendErrorResponse(res, 404, "Inventory not found.");
       }
 
-      // Helper function to retrieve file paths
-      async function getFilePaths(fields) {
-        const filePaths = {};
-
-        for (const field of fields) {
-          // Step 1: Retrieve the old file names (without "New") from the existing product
-          const oldFieldName = field.replace("New", ""); // Remove 'New' to match the old field name
-          const oldFiles = Array.isArray(req?.body?.[oldFieldName])
-            ? req?.body?.[oldFieldName]
-            : [req?.body?.[oldFieldName]] || []; // Default to an empty array if no old files exist
-
-          // Step 2: Get the new file names (with 'New' suffix) from the current upload
-          const newFiles =
-            req?.files?.[field + "New"]?.map((file) => file?.filename) || [];
-
-          // Step 3: Combine old and new files (remove duplicates)
-          const combinedFiles = [...oldFiles, ...newFiles]
-            ?.map((filename) => filename?.replaceAll("New", ""))
-            ?.filter((filename, index, self) => {
-              // Make sure filenames are strings and not arrays or broken down into characters
-              return (
-                typeof filename === "string" &&
-                filename &&
-                self.indexOf(filename) === index
-              );
-            });
-
-          // Step 4: Store the combined file paths for each field
-          filePaths[field] = combinedFiles;
-        }
-
-        return filePaths;
-      }
-
       // Define file fields for each category (same as addProduct)
       const fileFields = {
         MedicalEquipmentAndDevices: [
@@ -678,20 +624,30 @@ module.exports = {
       }
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
-      const generalFiles = await getFilePaths(["image"]);
+      const generalFiles = await getFilePathsEdit(req, res, ["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
       const inventoryFiles = [...req?.body?.countries];
-      const complianceFiles = await getFilePaths(["complianceFile"]);
-      const additionalFiles = await getFilePaths(["guidelinesFile"]);
-      const secondaryMarketFiles = await getFilePaths(["purchaseInvoiceFile"]);
-      const healthNSafetyFiles = await getFilePaths([
+      const complianceFiles = await getFilePathsEdit(req, res, [
+        "complianceFile",
+      ]);
+      const additionalFiles = await getFilePathsEdit(req, res, [
+        "guidelinesFile",
+      ]);
+      const secondaryMarketFiles = await getFilePathsEdit(req, res, [
+        "purchaseInvoiceFile",
+      ]);
+      const healthNSafetyFiles = await getFilePathsEdit(req, res, [
         "safetyDatasheet",
         "healthHazardRating",
         "environmentalImpact",
       ]);
 
       // Retrieve file paths for the selected category only
-      const categoryFiles = await getFilePaths(fileFields[category]);
+      const categoryFiles = await getFilePathsEdit(
+        req,
+        res,
+        fileFields[category]
+      );
       let cNCFileNDateParsed;
 
       try {

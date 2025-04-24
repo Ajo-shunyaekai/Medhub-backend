@@ -11,11 +11,11 @@ const storage = multer.diskStorage({
     if (req?.body?.usertype) {
       req?.body?.usertype?.toLowerCase() == "supplier"
         ? (usertype = "Supplier")
-        : usertype == "Buyer";
+        : (usertype = "Buyer");
     } else if (req?.params?.userType) {
       req?.params?.userType?.toLowerCase() == "supplier"
         ? (usertype = "Supplier")
-        : usertype == "Buyer";
+        : (usertype = "Buyer");
     }
     // Define the default upload path based on user type and fieldname
     let uploadPath =
