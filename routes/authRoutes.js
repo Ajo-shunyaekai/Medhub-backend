@@ -37,13 +37,22 @@ const {
 } = require("../middleware/validations/auth/fileUploads");
 
 // router.post(`/register`, checkAuthorization, authUpload, registerUser);
+// router.post(
+//   `/register`,
+//   checkAuthorization,
+//   authValidationRules,
+//   handleValidationErrors,
+//   addUserFileMiddleware,
+//   authUpload,
+//   registerUser
+// );
 router.post(
   `/register`,
   checkAuthorization,
   authValidationRules,
   handleValidationErrors,
   addUserFileMiddleware,
-  authUpload,
+  // authUpload,
   registerUser
 );
 

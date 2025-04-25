@@ -30,6 +30,7 @@ const {
 } = require("../utils/commonResonse");
 const logErrorToFile = require("../logs/errorLogs");
 const { updateLoginInfo } = require("../utils/userUtils");
+const { uploadMultipleFiles } = require("../helper/aws-s3");
 
 const generateAccessAndRefeshToken = async (userId, usertype) => {
   try {
@@ -133,19 +134,31 @@ const registerUser = async (req, res) => {
         buyer_country_code: buyerCountryCode,
         activity_code,
         bank_details,
-        buyer_image: req.files["buyer_image"].map((file) =>
-          path.basename(file.path)
+        // buyer_image: req?.files?.["buyer_image"]?.map((file) =>
+        //   path.basename(file.path)
+        // ),
+        // license_image: req?.files?.["license_image"]?.map((file) =>
+        //   path.basename(file.path)
+        // ),
+        // certificate_image: req?.files?.["certificate_image"]?.map((file) =>
+        //   path.basename(file.path)
+        // ),
+        // medical_certificate:
+        //   req?.files?.["medical_practitioner_image"]?.map((file) =>
+        //     path.basename(file.path)
+        //   ) || [],
+        buyer_image: await uploadMultipleFiles(
+          req?.files?.["buyer_image"] || []
         ),
-        license_image: req.files["license_image"].map((file) =>
-          path.basename(file.path)
+        license_image: await uploadMultipleFiles(
+          req?.files?.["license_image"] || []
         ),
-        certificate_image: req.files["certificate_image"]?.map((file) =>
-          path.basename(file.path)
+        certificate_image: await uploadMultipleFiles(
+          req?.files?.["certificate_image"] || []
         ),
-        medical_certificate:
-          req?.files?.["medical_practitioner_image"]?.map((file) =>
-            path.basename(file.path)
-          ) || [],
+        medical_certificate: await uploadMultipleFiles(
+          req?.files?.["medical_practitioner_image"] || []
+        ),
         registeredAddress: {
           full_name: contact_person_name || "",
           mobile_number: person_mob_no || "",
@@ -184,22 +197,36 @@ const registerUser = async (req, res) => {
         supplier_country_code: supplierCountryCode,
         contact_person_mobile_no: person_mob_no,
         contact_person_country_code: personCountryCode,
-        supplier_image: req.files["supplier_image"].map((file) =>
-          path.basename(file.path)
+        // supplier_image: req?.files?.["supplier_image"]?.map((file) =>
+        //   path.basename(file.path)
+        // ),
+        // license_image: req?.files?.["license_image"]?.map((file) =>
+        //   path.basename(file.path)
+        // ),
+        // tax_image:
+        //   req?.files?.["tax_image"]?.map((file) => path.basename(file.path)) ||
+        //   [],
+        // certificate_image:
+        //   req?.files?.["certificate_image"]?.map((file) =>
+        //     path.basename(file.path)
+        //   ) || [],
+        // medical_certificate:
+        //   req?.files?.["medical_practitioner_image"]?.map((file) =>
+        //     path.basename(file.path)
+        //   ) || [],
+        supplier_image: await uploadMultipleFiles(
+          req?.files?.["supplier_image"] || []
         ),
-        license_image: req.files["license_image"].map((file) =>
-          path.basename(file.path)
+        license_image: await uploadMultipleFiles(
+          req?.files?.["license_image"] || []
         ),
-        tax_image:
-          req.files["tax_image"]?.map((file) => path.basename(file.path)) || [],
-        certificate_image:
-          req.files["certificate_image"]?.map((file) =>
-            path.basename(file.path)
-          ) || [],
-        medical_certificate:
-          req?.files?.["medical_practitioner_image"]?.map((file) =>
-            path.basename(file.path)
-          ) || [],
+        tax_image: await uploadMultipleFiles(req?.files?.["tax_image"] || []),
+        certificate_image: await uploadMultipleFiles(
+          req?.files?.["certificate_image"] || []
+        ),
+        medical_certificate: await uploadMultipleFiles(
+          req?.files?.["medical_practitioner_image"] || []
+        ),
         registeredAddress: {
           full_name: contact_person_email || "",
           mobile_number: person_mob_no || "",
@@ -1645,5 +1672,5 @@ module.exports = {
   updatePassword,
   updateProfileAndSendEditRequest,
   logoutUser,
-  getOtherinUserDetails
+  getOtherinUserDetails,
 };
