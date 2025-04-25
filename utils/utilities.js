@@ -45,7 +45,7 @@ module.exports = {
         { field: "total_quantity", message: "Quantity is required" },
         { field: "gmp_approvals", message: "GMP Approval is required" },
         { field: "shipping_time", message: "Shipping Time is required" },
-        { field: "tags", message: "Tags are required" },
+        // { field: "tags", message: "Tags are required" },
         { field: "available_for", message: "Available For is required" },
         { field: "country_of_origin", message: "Available For is required" },
         { field: "description", message: "Description is required" },
@@ -83,7 +83,7 @@ module.exports = {
         { field: "product_category", message: "Product Category is required" },
         { field: "gmp_approvals", message: "GMP Approval is required" },
         { field: "shipping_time", message: "Shipping Time is required" },
-        { field: "tags", message: "Tags are required" },
+        // { field: "tags", message: "Tags are required" },
         { field: "available_for", message: "Available For is required" },
         { field: "country_of_origin", message: "Available For is required" },
         { field: "description", message: "Description is required" },
@@ -262,7 +262,7 @@ module.exports = {
           field: "contact_person_country_code",
           message: "Contact person country code  Field is required",
         },
-        { field: "tags", message: "Tags are required" },
+        // { field: "tags", message: "Tags are required" },
         // { field: 'estimated_delivery_time', message: 'Estimated Delivery Time is required' }
       ],
       cancelOrder: [

@@ -14,7 +14,7 @@ const supplierSchema = new Schema(
     },
     supplier_type: {
       type: String,
-      enum: ["Manufacturer", "Distributor", "Medical Practitioner"],
+      enum: ["Manufacturer", "Distributor", "Medical Practitioner", "Service Provider"],
       required: true,
       trim: true,
     },
@@ -161,7 +161,7 @@ const supplierSchema = new Schema(
     },
     tags: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     categories: [
