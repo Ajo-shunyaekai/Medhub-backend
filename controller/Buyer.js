@@ -1044,7 +1044,7 @@ module.exports = {
             !est_delivery_days ||
             !target_price
           ) {
-            throw new Error("Missing required item fieldssss");
+            throw new Error("Missing required item fields");
           }
           acc[supplier_id].items.push({
             item_id,

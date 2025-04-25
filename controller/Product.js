@@ -1460,13 +1460,20 @@ module.exports = {
       // Remove the CSV file after processing
       fs.unlinkSync(filePath);
 
-      return sendSuccessResponse(res, 200, "Success", {
-        headings: previewHeadings || [],
-        entriesWithErrors: entriesWithErrors || [],
-        entriesWithErrorsCount: entriesWithErrors?.length || 0,
-        entriesWithoutErrors: entriesWithoutErrors || [],
-        entriesWithoutErrorsCount: entriesWithoutErrors?.length || 0,
-      });
+      return sendSuccessResponse(
+        res,
+        200,
+        `${entriesWithoutErrors?.length} ${
+          entriesWithoutErrors?.length == 1 ? "product" : "products"
+        } imported successfully.`,
+        {
+          headings: previewHeadings || [],
+          entriesWithErrors: entriesWithErrors || [],
+          entriesWithErrorsCount: entriesWithErrors?.length || 0,
+          entriesWithoutErrors: entriesWithoutErrors || [],
+          entriesWithoutErrorsCount: entriesWithoutErrors?.length || 0,
+        }
+      );
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
