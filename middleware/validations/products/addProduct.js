@@ -153,8 +153,7 @@ const categorySpecificValidationRules = [
             "Monitoring Devices",
             "Mobility Aids",
             "Respiratory Care",
-            "Elderly Care Products",
-            "Care Products"
+            "Care Products",
           ])
           .withMessage("Sub Category is invalid."),
         body("specification")
@@ -476,7 +475,6 @@ const categorySpecificValidationRules = [
             "Mobility Aids",
             "Respiratory Care",
             "Patient Monitoring Devices",
-            "Elderly Care Products",
             "Care Products",
           ])
           .withMessage("Sub Category is invalid."),
