@@ -25,6 +25,7 @@ module.exports = () => {
     authenticationNAuthorization,
     invoiceUpload,
     async (req, res) => {
+      const { uploadedFiles } = req;
       if (
         !req.files["transaction_image"] ||
         req.files["transaction_image"].length === 0
@@ -39,9 +40,10 @@ module.exports = () => {
 
       let obj = {
         ...req.body,
-        transaction_image: req.files["transaction_image"].map((file) =>
-          path.basename(file.path)
-        ),
+        // transaction_image: req.files["transaction_image"].map((file) =>
+        //   path.basename(file.path)
+        // ),
+        transaction_image: uploadedFiles?.transaction_image,
       };
       handleController(Invoice.updatePaymentStatus, req, res, obj);
     }

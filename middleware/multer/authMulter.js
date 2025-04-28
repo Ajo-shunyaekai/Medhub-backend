@@ -1,77 +1,79 @@
 require("dotenv").config();
 const multer = require("multer");
-const mime = require("mime-types"); // Import mime-types to resolve file extensions
+const path = require("path");
+const fs = require("fs");
+const mime = require("mime-types");
 const { sendErrorResponse } = require("../../utils/commonResonse");
- 
+const { uploadMultipleFiles } = require("../../helper/aws-s3");
+
+const getUploadPath = (req, file) => {
+  let usertype;
+  if (req?.body?.usertype) {
+    req?.body?.usertype?.toLowerCase() === "supplier"
+      ? (usertype = "Supplier")
+      : (usertype = "Buyer");
+  } else if (req?.params?.userType) {
+    req?.params?.userType?.toLowerCase() === "supplier"
+      ? (usertype = "Supplier")
+      : (usertype = "Buyer");
+  }
+
+  let uploadPath =
+    usertype === "Buyer"
+      ? "./uploads/buyer/buyer_images"
+      : usertype === "Supplier" && "./uploads/supplier/supplierImage_files";
+
+  if (file.fieldname === "tax_image" || file.fieldname === "tax_imageNew") {
+    uploadPath =
+      usertype === "Buyer"
+        ? "./uploads/buyer/tax_images"
+        : usertype === "Supplier" && "./uploads/supplier/tax_image";
+  } else if (
+    file.fieldname === "license_image" ||
+    file.fieldname === "license_imageNew"
+  ) {
+    uploadPath =
+      usertype === "Buyer"
+        ? "./uploads/buyer/license_images"
+        : usertype === "Supplier" && "./uploads/supplier/license_image";
+  } else if (
+    file.fieldname === "certificate_image" ||
+    file.fieldname === "certificate_imageNew"
+  ) {
+    uploadPath =
+      usertype === "Buyer"
+        ? "./uploads/buyer/certificate_images"
+        : usertype === "Supplier" && "./uploads/supplier/certificate_image";
+  }
+  return uploadPath;
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // const { usertype } = req.body;
- 
-    let usertype;
-    if (req?.body?.usertype) {
-      req?.body?.usertype?.toLowerCase() == "supplier"
-        ? (usertype = "Supplier")
-        : (usertype = "Buyer");
-    } else if (req?.params?.userType) {
-      req?.params?.userType?.toLowerCase() == "supplier"
-        ? (usertype = "Supplier")
-        : (usertype = "Buyer");
-    }
-    // Define the default upload path based on user type and fieldname
-    let uploadPath =
-      usertype === "Buyer"
-        ? "./uploads/buyer/buyer_images"
-        : usertype === "Supplier" && "./uploads/supplier/supplierImage_files";
- 
-    // Adjust upload path based on the specific file type
-    if (file.fieldname === "tax_image" || file.fieldname === "tax_imageNew") {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/tax_images"
-          : usertype === "Supplier" && "./uploads/supplier/tax_image";
-    } else if (
-      file.fieldname === "license_image" ||
-      file.fieldname === "license_imageNew"
-    ) {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/license_images"
-          : usertype === "Supplier" && "./uploads/supplier/license_image";
-    } else if (
-      file.fieldname === "certificate_image" ||
-      file.fieldname === "certificate_imageNew"
-    ) {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/certificate_images"
-          : usertype === "Supplier" && "./uploads/supplier/certificate_image";
-    } else if (
-      file.fieldname === "medical_practitioner_image" ||
-      file.fieldname === "medical_practitioner_imageNew"
-    ) {
-      uploadPath =
-        usertype === "Buyer"
-          ? "./uploads/buyer/medical_practitioner_images"
-          : usertype === "Supplier" &&
-            "./uploads/supplier/medical_practitioner_image";
-    }
- 
+    const uploadPath = getUploadPath(req, file);
     cb(null, uploadPath);
   },
+
   filename: (req, file, cb) => {
-    // Resolve the file extension using mime-types
-    const ext = mime.extension(file.mimetype) || "bin"; // Default to 'bin' for unknown MIME types
-    cb(
-      null,
-      `${file.fieldname?.replaceAll("New", "")}-${file.originalname
-        ?.replaceAll(" ", "")
-        ?.replaceAll("." + ext, "")}-${Date.now()}.${ext}`
-    ); // Use a timestamp for unique filenames
+    const ext = mime.extension(file.mimetype) || "bin";
+    const newFileName = `${file.fieldname?.replaceAll(
+      "New",
+      ""
+    )}-${file.originalname
+      ?.replaceAll(" ", "")
+      ?.replaceAll("." + ext, "")}-${Date.now()}.${ext}`;
+
+    if (!req.uploadedFiles) {
+      req.uploadedFiles = [];
+    }
+    req.uploadedFiles.push(newFileName);
+
+    cb(null, newFileName);
   },
 });
- 
+
 const upload = multer({ storage: storage });
- 
+
 const authUpload = (req, res, next) => {
   upload.fields([
     { name: "buyer_image", maxCount: 1 },
@@ -79,26 +81,99 @@ const authUpload = (req, res, next) => {
     { name: "tax_image", maxCount: 4 },
     { name: "certificate_image", maxCount: 4 },
     { name: "supplier_image", maxCount: 1 },
-    { name: "license_image", maxCount: 4 },
-    { name: "tax_image", maxCount: 4 },
-    { name: "certificate_image", maxCount: 4 },
     { name: "medical_practitioner_image", maxCount: 4 },
     { name: "buyer_imageNew", maxCount: 1 },
     { name: "license_imageNew", maxCount: 4 },
     { name: "tax_imageNew", maxCount: 4 },
     { name: "certificate_imageNew", maxCount: 4 },
     { name: "supplier_imageNew", maxCount: 1 },
-    { name: "license_imageNew", maxCount: 4 },
-    { name: "tax_imageNew", maxCount: 4 },
-    { name: "certificate_imageNew", maxCount: 4 },
     { name: "medical_practitioner_imageNew", maxCount: 4 },
-  ])(req, res, (err) => {
+  ])(req, res, async (err) => {
     if (err) {
       console.error("Multer Error:", err);
       return sendErrorResponse(res, 500, "File upload error", err);
     }
-    next();
+
+    let uploadedFiles = {};
+
+    const getUploadedFilesPath = async () => {
+      uploadedFiles["buyer_image"] = await uploadMultipleFiles(
+        req?.files?.["buyer_image"] || []
+      );
+      uploadedFiles["supplier_image"] = await uploadMultipleFiles(
+        req?.files?.["supplier_image"] || []
+      );
+      uploadedFiles["license_image"] = await uploadMultipleFiles(
+        req?.files?.["license_image"] || []
+      );
+      uploadedFiles["certificate_image"] = await uploadMultipleFiles(
+        req?.files?.["certificate_image"] || []
+      );
+      uploadedFiles["medical_certificate"] = await uploadMultipleFiles(
+        req?.files?.["medical_practitioner_image"] || []
+      );
+      uploadedFiles["buyer_imageNew"] = await uploadMultipleFiles(
+        req?.files?.["buyer_imageNew"] || []
+      );
+      uploadedFiles["supplier_imageNew"] = await uploadMultipleFiles(
+        req?.files?.["supplier_imageNew"] || []
+      );
+      uploadedFiles["license_imageNew"] = await uploadMultipleFiles(
+        req?.files?.["license_imageNew"] || []
+      );
+      uploadedFiles["certificate_imageNew"] = await uploadMultipleFiles(
+        req?.files?.["certificate_imageNew"] || []
+      );
+      uploadedFiles["medical_certificateNew"] = await uploadMultipleFiles(
+        req?.files?.["medical_practitioner_imageNew"] || []
+      );
+
+      // Function to remove the files from the local file system
+      const removeLocalFiles = (files) => {
+        files.forEach((file) => {
+          const uploadPath = getUploadPath(req, file);
+
+          // Resolve the absolute file path
+          const filePath = path.resolve(uploadPath, file.filename);
+
+          // Check if the file exists before trying to delete it
+          if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(
+                  `\n\n\n\nFailed to delete file ${filePath}:`,
+                  err
+                );
+              } else {
+              }
+            });
+          } else {
+            console.error(`File not found: ${filePath}`);
+          }
+        });
+      };
+
+      // Remove uploaded files from local storage
+      removeLocalFiles([
+        ...(req?.files?.["buyer_image"] || []),
+        ...(req?.files?.["supplier_image"] || []),
+        ...(req?.files?.["license_image"] || []),
+        ...(req?.files?.["certificate_image"] || []),
+        ...(req?.files?.["medical_practitioner_image"] || []),
+        ...(req?.files?.["buyer_imageNew"] || []),
+        ...(req?.files?.["supplier_imageNew"] || []),
+        ...(req?.files?.["license_imageNew"] || []),
+        ...(req?.files?.["certificate_imageNew"] || []),
+        ...(req?.files?.["medical_practitioner_imageNew"] || []),
+      ]);
+
+      req.uploadedFiles = uploadedFiles;
+      next();
+    };
+
+    // Call the function to handle the uploaded files
+    await getUploadedFilesPath();
   });
 };
- 
+
 module.exports = { authUpload };

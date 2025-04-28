@@ -1,4 +1,10 @@
+require("dotenv").config();
 const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const mime = require("mime-types");
+// const { sendErrorResponse } = require("../../utils/commonResonse");
+const { uploadMultipleFiles } = require("../helper/aws-s3");
 
 const createMulterMiddleware = (uploadConfig) => {
   const storage = multer.diskStorage({
@@ -33,14 +39,70 @@ const createMulterMiddleware = (uploadConfig) => {
       maxCount: config.maxCount || 1,
     }));
 
-    upload.fields(fields)(req, res, (err) => {
+    upload.fields(fields)(req, res, async (err) => {
       if (err) {
         console.error("Multer Error:", err);
         return res
           .status(500)
           .json({ error: "File upload error", details: err.message });
       }
-      next();
+
+      let uploadedFiles = {};
+
+      const getUploadedFilesPath = async () => {
+        if (req?.files?.["transaction_image"]) {
+          uploadedFiles["transaction_image"] = await uploadMultipleFiles(
+            req?.files?.["transaction_image"] || []
+          );
+        }
+        if (req?.files?.["complaint_image"]) {
+          uploadedFiles["complaint_image"] = await uploadMultipleFiles(
+            req?.files?.["complaint_image"] || []
+          );
+        }
+        if (req?.files?.["feedback_image"]) {
+          uploadedFiles["feedback_image"] = await uploadMultipleFiles(
+            req?.files?.["feedback_image"] || []
+          );
+        }
+
+        // Function to remove the files from the local file system
+        const removeLocalFiles = (files) => {
+          files.forEach((file) => {
+            // Resolve the absolute file path
+            // const filePath = path.resolve(uploadPath, file.filename);
+            const filePath = path.resolve(file?.destination, file.filename);
+
+            // Check if the file exists before trying to delete it
+            if (fs.existsSync(filePath)) {
+              fs.unlink(filePath, (err) => {
+                if (err) {
+                  console.error(
+                    `\n\n\n\nFailed to delete file ${filePath}:`,
+                    err
+                  );
+                } else {
+                }
+              });
+            } else {
+              console.error(`File not found: ${filePath}`);
+            }
+          });
+        };
+
+        // Remove uploaded files from local storage
+        removeLocalFiles([
+          ...(req?.files?.["transaction_image"] || []),
+          ...(req?.files?.["complaint_image"] || []),
+          ...(req?.files?.["feedback_image"] || []),
+        ]);
+
+        req.uploadedFiles = uploadedFiles;
+        next();
+      };
+
+      // Call the function to handle the uploaded files
+      await getUploadedFilesPath();
     });
   };
 };

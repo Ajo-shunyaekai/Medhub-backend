@@ -16,7 +16,6 @@ const {
 } = require("./utils/commonResonse");
 const { rateLimiter } = require("./middleware/expressRateLimiter");
 const { corsOptions } = require("./config/corsOptions");
-const fileUpload = require("express-fileupload");
 // require('./schedulers/tasks');
 
 // db-connection
@@ -33,13 +32,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-// Enable files upload
-app.use(
-  fileUpload({
-    useTempFiles: false,
-    limits: { fileSize: 50 * 1024 * 1024 }, // optional: 50MB max file size
-  })
-);
 
 // Path for the uploads folder
 app.use("/uploads", express.static("uploads"));

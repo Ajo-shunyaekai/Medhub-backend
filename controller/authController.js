@@ -61,6 +61,7 @@ const registerUser = async (req, res) => {
   try {
     // const { accesstoken, usertype } = req.headers;
     const { usertype } = req.body;
+    const { uploadedFiles } = req;
 
     // Use req.body directly instead of stringifying it
     const {
@@ -134,31 +135,10 @@ const registerUser = async (req, res) => {
         buyer_country_code: buyerCountryCode,
         activity_code,
         bank_details,
-        // buyer_image: req?.files?.["buyer_image"]?.map((file) =>
-        //   path.basename(file.path)
-        // ),
-        // license_image: req?.files?.["license_image"]?.map((file) =>
-        //   path.basename(file.path)
-        // ),
-        // certificate_image: req?.files?.["certificate_image"]?.map((file) =>
-        //   path.basename(file.path)
-        // ),
-        // medical_certificate:
-        //   req?.files?.["medical_practitioner_image"]?.map((file) =>
-        //     path.basename(file.path)
-        //   ) || [],
-        buyer_image: await uploadMultipleFiles(
-          req?.files?.["buyer_image"] || []
-        ),
-        license_image: await uploadMultipleFiles(
-          req?.files?.["license_image"] || []
-        ),
-        certificate_image: await uploadMultipleFiles(
-          req?.files?.["certificate_image"] || []
-        ),
-        medical_certificate: await uploadMultipleFiles(
-          req?.files?.["medical_practitioner_image"] || []
-        ),
+        buyer_image: uploadedFiles?.buyer_image,
+        license_image: uploadedFiles?.license_image,
+        certificate_image: uploadedFiles?.certificate_image,
+        medical_certificate: uploadedFiles?.medical_certificate,
         registeredAddress: {
           full_name: contact_person_name || "",
           mobile_number: person_mob_no || "",
@@ -197,36 +177,11 @@ const registerUser = async (req, res) => {
         supplier_country_code: supplierCountryCode,
         contact_person_mobile_no: person_mob_no,
         contact_person_country_code: personCountryCode,
-        // supplier_image: req?.files?.["supplier_image"]?.map((file) =>
-        //   path.basename(file.path)
-        // ),
-        // license_image: req?.files?.["license_image"]?.map((file) =>
-        //   path.basename(file.path)
-        // ),
-        // tax_image:
-        //   req?.files?.["tax_image"]?.map((file) => path.basename(file.path)) ||
-        //   [],
-        // certificate_image:
-        //   req?.files?.["certificate_image"]?.map((file) =>
-        //     path.basename(file.path)
-        //   ) || [],
-        // medical_certificate:
-        //   req?.files?.["medical_practitioner_image"]?.map((file) =>
-        //     path.basename(file.path)
-        //   ) || [],
-        supplier_image: await uploadMultipleFiles(
-          req?.files?.["supplier_image"] || []
-        ),
-        license_image: await uploadMultipleFiles(
-          req?.files?.["license_image"] || []
-        ),
-        tax_image: await uploadMultipleFiles(req?.files?.["tax_image"] || []),
-        certificate_image: await uploadMultipleFiles(
-          req?.files?.["certificate_image"] || []
-        ),
-        medical_certificate: await uploadMultipleFiles(
-          req?.files?.["medical_practitioner_image"] || []
-        ),
+        supplier_image: uploadedFiles?.supplier_image,
+        license_image: uploadedFiles?.license_image,
+        tax_image: uploadedFiles?.tax_image,
+        certificate_image: uploadedFiles?.certificate_image,
+        medical_certificate: uploadedFiles?.medical_certificate,
         registeredAddress: {
           full_name: contact_person_email || "",
           mobile_number: person_mob_no || "",

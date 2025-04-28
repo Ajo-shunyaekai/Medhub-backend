@@ -40,11 +40,12 @@ module.exports = {
   supportSubmission: async (req, res, reqObj, callback) => {
     try {
       const supportId = "SPT-" + Math.random().toString(16).slice(2, 10);
+      const { uploadedFiles } = req;
 
       const imageField =
         reqObj.support_type === "feedback"
-          ? reqObj.feedback_image
-          : reqObj.complaint_image;
+          ? uploadedFiles?.feedback_image
+          : uploadedFiles?.complaint_image;
       const uploadDir =
         reqObj.support_type === "feedback"
           ? "feedback_images"

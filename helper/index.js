@@ -10,10 +10,15 @@ async function getFilePathsAdd(req, res, fields = []) {
 
   // Iterate over the fields array
   for (const field of fields) {
-    if (req?.files?.[field] && req?.files?.[field]?.length > 0) {
-      const validPaths = req?.files?.[field]
-        .map((file) => file.filename) // Map to file paths
-        .filter((path) => path && path.trim() !== ""); // Filter out empty strings
+    if (
+      req?.uploadedFiles?.[field] &&
+      req?.uploadedFiles?.[field]?.length > 0
+    ) {
+      const validPaths =
+        req?.uploadedFiles?.[field]
+          // ?.map((file) => file.filename) // Map to file paths
+          ?.map((file) => file) // Map to file paths
+          ?.filter((path) => path && path.trim() !== "") || []; // Filter out empty strings
 
       filePaths[field] = validPaths.length > 0 ? validPaths : []; // Use valid paths or empty array
     } else {
@@ -37,7 +42,10 @@ async function getFilePathsEdit(req, res, fields = []) {
 
     // Step 2: Get the new file names (with 'New' suffix) from the current upload
     const newFiles =
-      req?.files?.[field + "New"]?.map((file) => file?.filename) || [];
+      // req?.files?.[field + "New"]?.map((file) => file?.filename) || [];
+      req?.uploadedFiles?.[field + "New"]
+        ?.map((file) => file)
+        ?.filter((path) => path && path.trim() !== "") || [];
 
     // Step 3: Combine old and new files (remove duplicates)
     const combinedFiles = [...oldFiles, ...newFiles]
