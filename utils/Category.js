@@ -257,7 +257,7 @@ const categoriesData = [
           ?.concat(["Other"]),
       },
       {
-        name: "Elderly Care Products",
+        name: "Care Products",
         anotherCategories: [
           "Walkers and Rollators",
           "Canes and Quad Canes",
@@ -1618,7 +1618,7 @@ const categoriesData = [
           ?.concat(["Other"]),
       },
       {
-        name: "Elderly Care Products",
+        name: "Care Products",
         anotherCategories: [
           "Adjustable Beds",
           "Bedside Commodes",

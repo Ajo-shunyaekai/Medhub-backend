@@ -75,10 +75,8 @@ const editGeneralValidationRules = [
   body("model")
     .notEmpty()
     .withMessage("Part/Model Number is required.")
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Part/Model Number must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    .matches(/^[a-zA-Z0-9\s\-\/]+$/)
+    .withMessage("Part/Model Number can only contain letters, numbers, spaces, hyphens (-), and slashes (/)."),
 
   body("form")
     .notEmpty()
@@ -155,7 +153,7 @@ const editCategorySpecificValidationRules = [
             "Monitoring Devices",
             "Mobility Aids",
             "Respiratory Care",
-            "Elderly Care Products",
+            "Care Products",
           ])
           .withMessage("Sub Category is invalid."),
         body("specification")
@@ -477,7 +475,7 @@ const editCategorySpecificValidationRules = [
             "Mobility Aids",
             "Respiratory Care",
             "Patient Monitoring Devices",
-            "Elderly Care Products",
+            "Care Products",
           ])
           .withMessage("Sub Category is invalid."),
 

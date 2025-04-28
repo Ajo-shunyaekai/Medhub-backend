@@ -268,7 +268,7 @@ const productSchema = new Schema(
           "Monitoring Devices",
           "Mobility Aids",
           "Respiratory Care",
-          "Elderly Care Products",
+          "Care Products",
         ],
         validate: {
           validator: function (v) {
@@ -1325,7 +1325,7 @@ const productSchema = new Schema(
           "Mobility Aids",
           "Respiratory Care",
           "Patient Monitoring Devices",
-          "Elderly Care Products",
+          "Care Products",
         ],
         validate: {
           validator: function (v) {
