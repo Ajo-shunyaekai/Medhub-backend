@@ -57,15 +57,15 @@ const adminSchema = new Schema(
   { timestamps: true }
 );
 
-adminSchema?.pre("save", async function (next) {
-  if (!this.isModified("password")) return next(); // if password is NOT modified, skip hashing
+// adminSchema?.pre("save", async function (next) {
+//   if (!this.isModified("password")) return next(); // if password is NOT modified, skip hashing
 
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(process.env.BCRYPT_SALT_ROUNDS)
-  );
-  next();
-});
+//   this.password = await bcrypt.hash(
+//     this.password,
+//     Number(process.env.BCRYPT_SALT_ROUNDS)
+//   );
+//   next();
+// });
 
 adminSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
