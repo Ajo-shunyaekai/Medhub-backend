@@ -279,15 +279,15 @@ const supplierSchema = new Schema(
   { timestamps: true }
 );
 
-supplierSchema?.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+// supplierSchema?.pre("save", async function (next) {
+//   if (!this.isModified("password")) return next();
 
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(process.env.BCRYPT_SALT_ROUNDS)
-  );
-  next();
-});
+//   this.password = await bcrypt.hash(
+//     this.password,
+//     Number(process.env.BCRYPT_SALT_ROUNDS)
+//   );
+//   next();
+// });
 
 supplierSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
