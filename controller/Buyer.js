@@ -23,6 +23,7 @@ const {
   sendErrorResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
+const { getLoginFrequencyLast90Days } = require("../utils/userUtils");
 
 module.exports = {
   buyerProfileDetails : async(req, res, reqObj, callback) => {
@@ -34,7 +35,12 @@ module.exports = {
       }
       Buyer.findOne({buyer_id: req?.params?.id}).select(fields)  
       .then((data) => {
-        callback({code: 200, message : 'Buyer details fetched successfully', result:data})
+         const loginFrequency = getLoginFrequencyLast90Days(data.login_history);
+        const resultData = {
+          ...data.toObject(),
+          loginFrequencyLast90Days: loginFrequency,
+        };
+        callback({code: 200, message : 'Buyer details fetched successfully',  result: resultData,})
     }).catch((error) => {
         console.error('Error:', error);
         callback({code: 400, message : 'Error in fetching buyer details'})

@@ -1053,7 +1053,7 @@ module.exports = {
       Supplier.findOne({ supplier_id: req?.params?.id })
         .select(fields)
         .then((data) => {
-          const loginFrequency = getLoginFrequencyLast90Days(data.loginHistory);
+          const loginFrequency = getLoginFrequencyLast90Days(data.login_history);
           const resultData = {
             ...data.toObject(),
             loginFrequencyLast90Days: loginFrequency,
