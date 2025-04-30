@@ -4332,6 +4332,9 @@ module.exports = {
             preserveNullAndEmptyArrays: true, // In case there are no matching details
           },
         },
+        {
+          $sort: { createdAt: -1 } // <-- Sort by createdAt descending
+        },
         // Project necessary fields including name from supplier or buyer
         {
           $project: {
