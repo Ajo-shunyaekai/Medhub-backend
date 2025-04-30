@@ -622,7 +622,7 @@ const loginUser = async (req, res) => {
     const isPasswordValid = await user?.isPasswordCorrect(password);
 
     if (!isPasswordValid) {
-      return sendErrorResponse(res, 401, "Incorrect Password.");
+      return sendErrorResponse(res, 400, "Incorrect Password.");
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefeshToken(
