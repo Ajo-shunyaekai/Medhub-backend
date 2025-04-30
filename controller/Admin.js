@@ -322,10 +322,10 @@ module.exports = {
 
   getRegReqList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, limit, filterValue } = reqObj;
+      const { pageNo, limit, filterValue, pageSize } = reqObj;
 
       const page_no = pageNo || 1; // Default to page 1 if no page number is provided
-      const page_size = limit || 5; // Default limit to 5 if not provided
+      const page_size = limit || pageSize || 5; // Default limit to 5 if not provided
       const offSet = (page_no - 1) * page_size;
 
       const fields = {
