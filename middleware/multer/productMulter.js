@@ -111,7 +111,6 @@ const addProductUpload = (req, res, next) => {
         );
       }
       if (req?.files?.["complianceFile"]) {
-        console.log("\n\n\n\n req?.files?.complianceFile",req?.files?.["complianceFile"])
         uploadedFiles["complianceFile"] = await uploadMultipleFiles(
           req?.files?.["complianceFile"] || []
         );

@@ -66,7 +66,23 @@ async function getFilePathsEdit(req, res, fields = []) {
   return filePaths;
 }
 
+function extractLast13WithExtension(filename) {
+  // Split the filename at the period to separate the extension
+  const parts = filename.split(".");
+  const extension = parts[parts.length - 1]; // Get the file extension
+
+  // Remove the extension and get the last 13 characters before the extension
+  const baseFilename = parts.slice(0, parts.length - 1).join(".");
+  const last13Chars = baseFilename.slice(-13); // Get last 13 characters
+
+  // Return the last 13 characters and the extension
+
+  console.log("\n\n\n\n\n\nlast13Chars . extension ", last13Chars + "." + extension)
+  return last13Chars + "." + extension;
+}
+
 module.exports = {
   getFilePathsAdd,
   getFilePathsEdit,
+  extractLast13WithExtension,
 };

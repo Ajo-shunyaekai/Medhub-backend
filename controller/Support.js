@@ -27,6 +27,7 @@ const {
   createOrderContent,
   bookLogisticsContent,
 } = require("../utils/emailContents");
+const { extractLast13WithExtension } = require("../helper");
 
 const initializeInvoiceNumber = async () => {
   const count = await Invoice.countDocuments();
@@ -86,28 +87,39 @@ module.exports = {
           ${
             imageField?.length > 0
               ? `<p><strong>Attached Image(s):</strong><br/> ${imageField
-                  .map((img) => `<div>${img}</div>`)
+                  .map(
+                    (img) =>
+                      `<div>${
+                        img?.startsWith("http")
+                          ? extractLast13WithExtension(img)
+                          : img
+                      }</div>`
+                  )
                   .join("")}</p>`
               : ""
           }
           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
         </div>
       `;
-      const recipientEmail = ["ajo@shunyaekai.tech"];
+      const recipientEmail = [process.env.ADMIN_EMAIL || "ajo@shunyaekai.tech"];
 
       const attachments =
         imageField?.length > 0
           ? imageField.map((filename) => ({
-              filename,
-              path: path.join(
-                __dirname,
-                "..",
-                "uploads",
-                "buyer",
-                "order",
-                uploadDir,
-                filename
-              ),
+              filename: filename?.startsWith("http")
+                ? extractLast13WithExtension(filename)
+                : filename,
+              path: filename.startsWith("http")
+                ? filename
+                : path.join(
+                    __dirname,
+                    "..",
+                    "uploads",
+                    "buyer",
+                    "order",
+                    uploadDir,
+                    filename
+                  ),
             }))
           : [];
 
