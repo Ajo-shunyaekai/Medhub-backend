@@ -26,30 +26,38 @@ const {
 const { getLoginFrequencyLast90Days } = require("../utils/userUtils");
 
 module.exports = {
-  buyerProfileDetails : async(req, res, reqObj, callback) => {
+  buyerProfileDetails: async (req, res, reqObj, callback) => {
     try {
       // Buyer.findOne({buyer_id: reqObj.buyer_id}).select('buyer_id buyer_name email mobile country_code company_name')
       const fields = {
-        token    : 0,
-        password : 0
-      }
-      Buyer.findOne({buyer_id: req?.params?.id}).select(fields)  
-      .then((data) => {
-         const loginFrequency = getLoginFrequencyLast90Days(data.login_history);
-        const resultData = {
-          ...data.toObject(),
-          loginFrequencyLast90Days: loginFrequency,
-        };
-        callback({code: 200, message : 'Buyer details fetched successfully',  result: resultData,})
-    }).catch((error) => {
-        console.error('Error:', error);
-        callback({code: 400, message : 'Error in fetching buyer details'})
-    });
-    }catch (error) {
+        token: 0,
+        password: 0,
+      };
+      Buyer.findOne({ buyer_id: req?.params?.id })
+        .select(fields)
+        .then((data) => {
+          const loginFrequency = getLoginFrequencyLast90Days(
+            data.login_history
+          );
+          const resultData = {
+            ...data.toObject(),
+            loginFrequencyLast90Days: loginFrequency,
+          };
+          callback({
+            code: 200,
+            message: "Buyer details fetched successfully",
+            result: resultData,
+          });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          callback({ code: 400, message: "Error in fetching buyer details" });
+        });
+    } catch (error) {
       handleCatchBlockError(req, res, error);
     }
   },
-  
+
   mySupplierList: async (req, res, reqObj, callback) => {
     try {
       const { supplier_id, buyer_id, status, pageNo, pageSize } = reqObj;
@@ -723,6 +731,7 @@ module.exports = {
           product_id: reqObj.product_id,
           quantity: reqObj.quantity,
           unit_price: reqObj.unit_price,
+          unit_tax: reqObj.unit_tax,
           est_delivery_days: reqObj.est_delivery_time,
           quantity_required: reqObj.quantity_required,
           target_price: reqObj.target_price,
@@ -1392,7 +1401,7 @@ module.exports = {
   updateStatus: async (req, res, reqObj, callback) => {
     try {
       const { notification_id, status = 1, buyer_id, usertype } = reqObj;
-      
+
       const updateNotifications = await Notification.updateMany(
         { to_id: buyer_id, to: usertype },
         {

@@ -27,8 +27,8 @@ module.exports = () => {
     async (req, res) => {
       const { uploadedFiles } = req;
       if (
-        !req.files["transaction_image"] ||
-        req.files["transaction_image"].length === 0
+        !uploadedFiles["transaction_image"] ||
+        uploadedFiles["transaction_image"].length === 0
       ) {
         res.send({
           code: 415,
