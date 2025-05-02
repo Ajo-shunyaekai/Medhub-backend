@@ -723,6 +723,7 @@ module.exports = {
           product_id: reqObj.product_id,
           quantity: reqObj.quantity,
           unit_price: reqObj.unit_price,
+          unit_tax: reqObj.unit_tax,
           est_delivery_days: reqObj.est_delivery_time,
           quantity_required: reqObj.quantity_required,
           target_price: reqObj.target_price,
