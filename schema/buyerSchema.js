@@ -274,6 +274,9 @@ const buyerSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    websiteAddress: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
