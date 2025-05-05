@@ -91,7 +91,7 @@ const registerUser = async (req, res) => {
       pincode,
       activity_code,
       bank_details,
-      websiteAddress,
+      website_address,
     } = req.body;
 
     let regObj = {};
@@ -134,7 +134,7 @@ const registerUser = async (req, res) => {
         buyer_country_code: buyerCountryCode,
         activity_code,
         bank_details,
-        websiteAddress,
+        website_address,
         buyer_image: req.files["buyer_image"].map((file) =>
           path.basename(file.path)
         ),
@@ -372,7 +372,7 @@ const registerUser = async (req, res) => {
         })
         ?.filter((ele) => ele?.file || ele?.date),
       token: new Date(),
-      websiteAddress: regObj.websiteAddress,
+      websiteAddress: regObj.website_address,
     });
 
     const newBuyer = new Buyer({
@@ -437,7 +437,7 @@ const registerUser = async (req, res) => {
           };
         })
         ?.filter((ele) => ele?.file || ele?.date),
-      websiteAddress: regObj.websiteAddress,
+      websiteAddress: regObj.website_address,
     });
 
     // Hash password
