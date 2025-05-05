@@ -1016,6 +1016,7 @@ const categoriesData = [
           "Vitamin C",
           "Vitamin D",
           "Vitamin B Complex",
+          "Vitamin B12",
           "Calcium Supplements",
           "Magnesium Supplements",
           "Omega-3 & Fish Oil",
