@@ -157,7 +157,8 @@ module.exports = {
         "Supplier Name",
         "Supplier Type",
         "Sales Person Name",
-        // 'License Expiry Date',
+        'Contact Person Name',
+        'Contact Person Email',
         "Country Of Origin",
         "Country Of Operation",
         "Categories",
@@ -183,6 +184,7 @@ module.exports = {
         // 'License No',
         // 'Registration No',
         // 'Vat Reg No',
+        // 'License Expiry Date',
       ];
 
       // Convert the flattened data to CSV
@@ -280,7 +282,8 @@ module.exports = {
         "Buyer Name",
         "Buyer Type",
         "Sales Person Name",
-        // 'License Expiry Date',
+        'Contact Person Name',
+        'Contact Person Email',
         "Country Of Origin",
         "Country Of Operation",
         "Interested In",
@@ -298,7 +301,7 @@ module.exports = {
         // 'Buyer Country Code',
         // 'Buyer Mobile',
         // 'Contact Person Name',
-        // 'Designation',
+        // // 'Designation',
         // 'Contact Person Email',
         // 'Contact Person Country Code',
         // 'Contact Person Mobile No',
@@ -306,6 +309,7 @@ module.exports = {
         // 'License No',
         // 'Registration No',
         // 'Vat Reg No',
+        // 'License Expiry Date',
       ];
 
       // Convert to CSV
