@@ -62,10 +62,10 @@ const inventorrySchema = new Schema(
         },
         deliveryTime: {
           type: String,
-          required: [
-            true,
-            "Validation Error: inventoryList deliveryTime is required",
-          ],
+          // required: [
+          //   true,
+          //   "Validation Error: inventoryList deliveryTime is required",
+          // ],
         },
       },
     ],
