@@ -24,6 +24,7 @@ const {
   additionalCheckFieldName,
 } = require("../utils/bulkUploadProduct");
 const { getFilePathsEdit, getFilePathsAdd } = require("../helper");
+const { validateAnotherCategory } = require("../utils/Category");
 
 module.exports = {
   getAllProducts: async (req, res) => {
@@ -1417,32 +1418,49 @@ module.exports = {
         return updatedObject;
       });
 
-      const previewResponse = updatedResult?.map((elem, index) => {
-        const elemCat = elem?.category;
+      const previewResponse = updatedResult
+        ?.map((elem, index) => {
+          const elemCat = elem?.category;
 
-        // Loop through each key in the object
-        for (const key in elem) {
-          if (elem.hasOwnProperty(key)) {
-            const fieldName = getFieldName(
-              key,
-              additionalCheckFieldName(elemCat, key)
-            );
+          // Loop through each key in the object
+          for (const key in elem) {
+            if (elem.hasOwnProperty(key)) {
+              const fieldName = getFieldName(
+                key,
+                additionalCheckFieldName(elemCat, key)
+              );
 
-            elem[key] = {
-              value: elem[key],
-              fieldName: fieldName,
-              error:
-                validateFields(
-                  fieldName?.includes("*"),
-                  elem[key],
-                  fieldName,
-                  typeof elem[key]
-                ) || undefined,
-            };
+              elem[key] = {
+                value: elem[key],
+                fieldName: fieldName,
+                error:
+                  validateFields(
+                    fieldName?.includes("*"),
+                    elem[key],
+                    fieldName,
+                    typeof elem[key]
+                  ) || undefined,
+              };
+            }
           }
-        }
-        return elem;
-      });
+          return elem;
+        })
+        ?.map((ele) => {
+          return {
+            ...ele,
+            anotherCategory: {
+              ...ele?.anotherCategory,
+              error:
+                validateAnotherCategory(
+                  ele?.category?.value,
+                  ele?.subCategory?.value,
+                  ele?.anotherCategory?.value
+                ) == true
+                  ? true
+                  : undefined,
+            },
+          };
+        });
 
       const previewHeadings = Object?.values(previewResponse?.[0])?.map(
         (field) => field?.fieldName

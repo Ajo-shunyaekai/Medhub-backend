@@ -302,7 +302,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["composition"] =
         result?.["Composition/Ingredients*"]?.toString()?.trim() || "";
       updatedObject["additivesNSweeteners"] =
-        result?.["Additives & Sweeteners*"]?.toString()?.trim() || "";
+        result?.["Additives & Sweeteners"]?.toString()?.trim() || "";
       updatedObject["vegan"] = result?.["Vegan"] === "true" || false;
       updatedObject["expiry"] =
         result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
@@ -1045,7 +1045,7 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "additivesNSweeteners":
-      fieldName = "Additives & Sweeteners*";
+      fieldName = "Additives & Sweeteners";
       break;
 
     case "vegan":

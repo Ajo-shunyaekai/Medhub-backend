@@ -1891,8 +1891,36 @@ const createCategory = (schema, name, subCategories) => ({
   })),
 });
 
+const validateAnotherCategory = (
+  productCategory,
+  subCategory,
+  anotherCategory
+) => {
+  const categoryData = categoriesData.find(
+    (category) => category.name === productCategory
+  );
+
+  if (!categoryData) {
+    return true;
+  }
+
+  const subCategoryData = categoryData?.subCategories?.find(
+    (ele) => ele?.name == subCategory
+  );
+
+  if (!subCategoryData) {
+    return true;
+  }
+
+  if (subCategoryData.anotherCategories.includes(anotherCategory)) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
 const categoryArrays = categoriesData.map((category) =>
   createCategory(category.schema, category.name, category.subCategories)
 );
 
-module.exports = categoryArrays;
+module.exports = { categoryArrays, validateAnotherCategory };
