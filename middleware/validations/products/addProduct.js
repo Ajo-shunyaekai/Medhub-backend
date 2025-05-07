@@ -58,11 +58,11 @@ const generalValidationRules = [
 
   body("manufacturer")
     .notEmpty()
-    .withMessage("Manufacturer is required.")
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    .withMessage("Manufacturer is required."),
+    // .matches(/^[a-zA-Z0-9\s]+$/)
+    // .withMessage(
+    //   "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
+    // ),
 
   body("aboutManufacturer")
     .notEmpty()
