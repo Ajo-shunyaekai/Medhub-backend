@@ -1670,12 +1670,12 @@ const productSchema = new Schema(
       additivesNSweeteners: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-          },
-          message: "Validation Error: Additives & Sweeteners is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Additives & Sweeteners is required.",
+        // },
       },
       dairyFree: {
         type: String,
