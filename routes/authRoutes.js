@@ -36,7 +36,6 @@ const {
   addUserFileMiddleware,
 } = require("../middleware/validations/auth/fileUploads");
 
-// router.post(`/register`, checkAuthorization, authUpload, registerUser);
 router.post(
   `/register`,
   checkAuthorization,

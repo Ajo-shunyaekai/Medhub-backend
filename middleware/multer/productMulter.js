@@ -2,6 +2,9 @@ const multer = require("multer");
 const mime = require("mime-types"); // Import mime-types to resolve file extensions
 const { sendErrorResponse } = require("../../utils/commonResonse");
 const logErrorToFile = require("../../logs/errorLogs");
+const { uploadMultipleFiles } = require("../../helper/aws-s3");
+const path = require("path");
+const fs = require("fs");
 
 // Define allowed file types for specific fields
 const allowedFileTypes = [
@@ -89,7 +92,7 @@ const addProductUpload = (req, res, next) => {
     { name: "healthClaimsFile", maxCount: 4 },
     { name: "interoperabilityFile", maxCount: 4 },
     { name: "purchaseInvoiceFile", maxCount: 4 },
-  ])(req, res, (err) => {
+  ])(req, res, async (err) => {
     if (err) {
       console.error("Multer Error:", err); // Log the error to console for debugging
       logErrorToFile(err, req); // Log the error to a file for persistence
@@ -98,7 +101,125 @@ const addProductUpload = (req, res, next) => {
       }
       return sendErrorResponse(res, 500, "File upload error", err); // Send a general error response for other cases
     }
-    next(); // Continue to the next middleware or route handler
+
+    let uploadedFiles = {};
+
+    const getUploadedFilesPath = async () => {
+      if (req?.files?.["image"]) {
+        uploadedFiles["image"] = await uploadMultipleFiles(
+          req?.files?.["image"] || []
+        );
+      }
+      if (req?.files?.["complianceFile"]) {
+        uploadedFiles["complianceFile"] = await uploadMultipleFiles(
+          req?.files?.["complianceFile"] || []
+        );
+      }
+      if (req?.files?.["guidelinesFile"]) {
+        uploadedFiles["guidelinesFile"] = await uploadMultipleFiles(
+          req?.files?.["guidelinesFile"] || []
+        );
+      }
+      if (req?.files?.["safetyDatasheet"]) {
+        uploadedFiles["safetyDatasheet"] = await uploadMultipleFiles(
+          req?.files?.["safetyDatasheet"] || []
+        );
+      }
+      if (req?.files?.["healthHazardRating"]) {
+        uploadedFiles["healthHazardRating"] = await uploadMultipleFiles(
+          req?.files?.["healthHazardRating"] || []
+        );
+      }
+      if (req?.files?.["environmentalImpact"]) {
+        uploadedFiles["environmentalImpact"] = await uploadMultipleFiles(
+          req?.files?.["environmentalImpact"] || []
+        );
+      }
+      if (req?.files?.["specificationFile"]) {
+        uploadedFiles["specificationFile"] = await uploadMultipleFiles(
+          req?.files?.["specificationFile"] || []
+        );
+      }
+      if (req?.files?.["performanceTestingReportFile"]) {
+        uploadedFiles["performanceTestingReportFile"] =
+          await uploadMultipleFiles(
+            req?.files?.["performanceTestingReportFile"] || []
+          );
+      }
+      if (req?.files?.["dermatologistTestedFile"]) {
+        uploadedFiles["dermatologistTestedFile"] = await uploadMultipleFiles(
+          req?.files?.["dermatologistTestedFile"] || []
+        );
+      }
+      if (req?.files?.["pediatricianRecommendedFile"]) {
+        uploadedFiles["pediatricianRecommendedFile"] =
+          await uploadMultipleFiles(
+            req?.files?.["pediatricianRecommendedFile"] || []
+          );
+      }
+      if (req?.files?.["healthClaimsFile"]) {
+        uploadedFiles["healthClaimsFile"] = await uploadMultipleFiles(
+          req?.files?.["healthClaimsFile"] || []
+        );
+      }
+      if (req?.files?.["interoperabilityFile"]) {
+        uploadedFiles["interoperabilityFile"] = await uploadMultipleFiles(
+          req?.files?.["interoperabilityFile"] || []
+        );
+      }
+      if (req?.files?.["purchaseInvoiceFile"]) {
+        uploadedFiles["purchaseInvoiceFile"] = await uploadMultipleFiles(
+          req?.files?.["purchaseInvoiceFile"] || []
+        );
+      }
+
+      // Function to remove the files from the local file system
+      const removeLocalFiles = (files) => {
+        files.forEach((file) => {
+          // Resolve the absolute file path
+          // const filePath = path.resolve(uploadPath, file.filename);
+          const filePath = path.resolve(file?.destination, file.filename);
+
+          // Check if the file exists before trying to delete it
+          if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(
+                  `\n\n\n\nFailed to delete file ${filePath}:`,
+                  err
+                );
+              } else {
+              }
+            });
+          } else {
+            console.error(`File not found: ${filePath}`);
+          }
+        });
+      };
+
+      // Remove uploaded files from local storage
+      removeLocalFiles([
+        ...(req?.files?.["image"] || []),
+        ...(req?.files?.["complianceFile"] || []),
+        ...(req?.files?.["guidelinesFile"] || []),
+        ...(req?.files?.["safetyDatasheet"] || []),
+        ...(req?.files?.["healthHazardRating"] || []),
+        ...(req?.files?.["environmentalImpact"] || []),
+        ...(req?.files?.["specificationFile"] || []),
+        ...(req?.files?.["performanceTestingReportFile"] || []),
+        ...(req?.files?.["dermatologistTestedFile"] || []),
+        ...(req?.files?.["pediatricianRecommendedFile"] || []),
+        ...(req?.files?.["healthClaimsFile"] || []),
+        ...(req?.files?.["interoperabilityFile"] || []),
+        ...(req?.files?.["purchaseInvoiceFile"] || []),
+      ]);
+
+      req.uploadedFiles = uploadedFiles;
+      next();
+    };
+
+    // Call the function to handle the uploaded files
+    await getUploadedFilesPath();
   });
 };
 
@@ -147,13 +268,131 @@ const editProductUpload = (req, res, next) => {
       name: "purchaseInvoiceFileNew",
       maxCount: getMaxCount("purchaseInvoiceFile"),
     },
-  ])(req, res, (err) => {
+  ])(req, res, async (err) => {
     if (err) {
       console.error("Multer Error:", err); // Log the error to console for debugging
       logErrorToFile(err, req); // Log the error to a file for persistence
       return sendErrorResponse(res, 500, "File upload error", err); // Send an error response back
     }
-    next(); // Continue to the next middleware or route handler
+
+    let uploadedFiles = {};
+
+    const getUploadedFilesPath = async () => {
+      if (req?.files?.["imageNew"]) {
+        uploadedFiles["imageNew"] = await uploadMultipleFiles(
+          req?.files?.["imageNew"] || []
+        );
+      }
+      if (req?.files?.["complianceFileNew"]) {
+        uploadedFiles["complianceFileNew"] = await uploadMultipleFiles(
+          req?.files?.["complianceFileNew"] || []
+        );
+      }
+      if (req?.files?.["guidelinesFileNew"]) {
+        uploadedFiles["guidelinesFileNew"] = await uploadMultipleFiles(
+          req?.files?.["guidelinesFileNew"] || []
+        );
+      }
+      if (req?.files?.["safetyDatasheetNew"]) {
+        uploadedFiles["safetyDatasheetNew"] = await uploadMultipleFiles(
+          req?.files?.["safetyDatasheetNew"] || []
+        );
+      }
+      if (req?.files?.["healthHazardRatingNew"]) {
+        uploadedFiles["healthHazardRatingNew"] = await uploadMultipleFiles(
+          req?.files?.["healthHazardRatingNew"] || []
+        );
+      }
+      if (req?.files?.["environmentalImpactNew"]) {
+        uploadedFiles["environmentalImpactNew"] = await uploadMultipleFiles(
+          req?.files?.["environmentalImpactNew"] || []
+        );
+      }
+      if (req?.files?.["specificationFileNew"]) {
+        uploadedFiles["specificationFileNew"] = await uploadMultipleFiles(
+          req?.files?.["specificationFileNew"] || []
+        );
+      }
+      if (req?.files?.["performanceTestingReportFileNew"]) {
+        uploadedFiles["performanceTestingReportFileNew"] =
+          await uploadMultipleFiles(
+            req?.files?.["performanceTestingReportFileNew"] || []
+          );
+      }
+      if (req?.files?.["dermatologistTestedFileNew"]) {
+        uploadedFiles["dermatologistTestedFileNew"] = await uploadMultipleFiles(
+          req?.files?.["dermatologistTestedFileNew"] || []
+        );
+      }
+      if (req?.files?.["pediatricianRecommendedFileNew"]) {
+        uploadedFiles["pediatricianRecommendedFileNew"] =
+          await uploadMultipleFiles(
+            req?.files?.["pediatricianRecommendedFileNew"] || []
+          );
+      }
+      if (req?.files?.["healthClaimsFileNew"]) {
+        uploadedFiles["healthClaimsFileNew"] = await uploadMultipleFiles(
+          req?.files?.["healthClaimsFileNew"] || []
+        );
+      }
+      if (req?.files?.["interoperabilityFileNew"]) {
+        uploadedFiles["interoperabilityFileNew"] = await uploadMultipleFiles(
+          req?.files?.["interoperabilityFileNew"] || []
+        );
+      }
+      if (req?.files?.["purchaseInvoiceFileNew"]) {
+        uploadedFiles["purchaseInvoiceFileNew"] = await uploadMultipleFiles(
+          req?.files?.["purchaseInvoiceFileNew"] || []
+        );
+      }
+
+      // Function to remove the files from the local file system
+      const removeLocalFiles = (files) => {
+        files.forEach((file) => {
+          // Resolve the absolute file path
+          // const filePath = path.resolve(uploadPath, file.filename);
+          const filePath = path.resolve(file?.destination, file.filename);
+
+          // Check if the file exists before trying to delete it
+          if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(
+                  `\n\n\n\nFailed to delete file ${filePath}:`,
+                  err
+                );
+              } else {
+              }
+            });
+          } else {
+            console.error(`File not found: ${filePath}`);
+          }
+        });
+      };
+
+      // Remove uploaded files from local storage
+      removeLocalFiles([
+        ...(req?.files?.["imageNew"] || []),
+        ...(req?.files?.["complianceFileNew"] || []),
+        ...(req?.files?.["guidelinesFileNew"] || []),
+        ...(req?.files?.["safetyDatasheetNew"] || []),
+        ...(req?.files?.["healthHazardRatingNew"] || []),
+        ...(req?.files?.["environmentalImpactNew"] || []),
+        ...(req?.files?.["specificationFileNew"] || []),
+        ...(req?.files?.["performanceTestingReportFileNew"] || []),
+        ...(req?.files?.["dermatologistTestedFileNew"] || []),
+        ...(req?.files?.["pediatricianRecommendedFileNew"] || []),
+        ...(req?.files?.["healthClaimsFileNew"] || []),
+        ...(req?.files?.["interoperabilityFileNew"] || []),
+        ...(req?.files?.["purchaseInvoiceFileNew"] || []),
+      ]);
+
+      req.uploadedFiles = uploadedFiles;
+      next();
+    };
+
+    // Call the function to handle the uploaded files
+    await getUploadedFilesPath();
   });
 };
 
