@@ -588,7 +588,7 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "deliveryTime":
-      fieldName = "Est. Delivery Time*";
+      fieldName = "Est. Delivery Time";
       break;
 
     case "file":
