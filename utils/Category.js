@@ -115,50 +115,50 @@ const categoriesData = [
           ?.sort()
           ?.concat(["Other"]),
       },
-      {
-        name: "Monitoring Devices",
-        anotherCategories: [
-          "Scalpels",
-          "Bone Saws",
-          "Rongeurs",
-          "Curettes",
-          "Needle Holders",
-          "Forceps (e.g., Thumb forceps, Tissue forceps, Allis forceps)",
-          "Towel Clamps",
-          "Hemostatic Clamps (e.g., Kelly, Mosquito, Crile clamps)",
-          "Vascular Clamps",
-          "Bulldog",
-          "Surgical Sutures",
-          "Surgical Staplers",
-          "Ligating",
-          "Endoscopes",
-          "Laryngoscopes",
-          "Otoscopes",
-          "Proctoscopes",
-          "Bone Chisels",
-          "Bone Files",
-          "Orthopedic Screws and Plates",
-          "Intramedullary Nails",
-          "Brain Retractors",
-          "Craniotomes",
-          "Penfield Dissectors",
-          "Uterine Dilators",
-          "Curettes (e.g., Sims Curette)",
-          "Tenaculum",
-          "Rib Spreaders",
-          "Aortic Punches",
-          "Vascular Clamps",
-          "Skin Graft Knives",
-          "Liposuction Cannulas",
-          "Delicate Scissors and Forceps",
-          "Surgical Trays",
-          "Suction Tubes (e.g., Yankauer, Poole suction tips)",
-          "Sponges and Sponge Forceps",
-          "Services",
-        ]
-          ?.sort()
-          ?.concat(["Other"]),
-      },
+      // {
+      //   name: "Monitoring Devices",
+      //   anotherCategories: [
+      //     "Scalpels",
+      //     "Bone Saws",
+      //     "Rongeurs",
+      //     "Curettes",
+      //     "Needle Holders",
+      //     "Forceps (e.g., Thumb forceps, Tissue forceps, Allis forceps)",
+      //     "Towel Clamps",
+      //     "Hemostatic Clamps (e.g., Kelly, Mosquito, Crile clamps)",
+      //     "Vascular Clamps",
+      //     "Bulldog",
+      //     "Surgical Sutures",
+      //     "Surgical Staplers",
+      //     "Ligating",
+      //     "Endoscopes",
+      //     "Laryngoscopes",
+      //     "Otoscopes",
+      //     "Proctoscopes",
+      //     "Bone Chisels",
+      //     "Bone Files",
+      //     "Orthopedic Screws and Plates",
+      //     "Intramedullary Nails",
+      //     "Brain Retractors",
+      //     "Craniotomes",
+      //     "Penfield Dissectors",
+      //     "Uterine Dilators",
+      //     "Curettes (e.g., Sims Curette)",
+      //     "Tenaculum",
+      //     "Rib Spreaders",
+      //     "Aortic Punches",
+      //     "Vascular Clamps",
+      //     "Skin Graft Knives",
+      //     "Liposuction Cannulas",
+      //     "Delicate Scissors and Forceps",
+      //     "Surgical Trays",
+      //     "Suction Tubes (e.g., Yankauer, Poole suction tips)",
+      //     "Sponges and Sponge Forceps",
+      //     "Services",
+      //   ]
+      //     ?.sort()
+      //     ?.concat(["Other"]),
+      // },
       {
         name: "Mobility Aids",
         anotherCategories: [
@@ -310,6 +310,7 @@ const categoriesData = [
           "Large-Button Cell Phones",
           "Video Calling Devices (e.g., simplified tablets)",
           "Voice-Activated Assistants (e.g., Alexa, Google Home)",
+          "Waste Disposal",
           "Services",
         ]
           ?.sort()
@@ -1322,48 +1323,48 @@ const categoriesData = [
           ?.sort()
           ?.concat(["Other"]),
       },
-      {
-        name: "First Aid Kits",
-        anotherCategories: [
-          "Basic First Aid Kits",
-          "Trauma First Aid Kits",
-          "Travel First Aid Kits",
-          "Workplace First Aid Kits",
-          "Burn Care Kits",
-          "Emergency Medical",
-          "Services",
-        ]
-          ?.sort()
-          ?.concat(["Other"]),
-      },
-      {
-        name: "Emergency Medical Equipment",
-        anotherCategories: [
-          "Defibrillators",
-          "Ventilators",
-          "Suction Machines",
-          "Emergency Resuscitation Kits",
-          "Transport Ventilators",
-          "Oxygen Supply Kits",
-          "Services",
-        ]
-          ?.sort()
-          ?.concat(["Other"]),
-      },
-      {
-        name: "Trauma Care Products",
-        anotherCategories: [
-          "Trauma Bandages",
-          "Hemostatic Dressings",
-          "Cervical Collars",
-          "Splints & Braces",
-          "Trauma Stretchers",
-          "Emergency Wound Care Kits",
-          "Services",
-        ]
-          ?.sort()
-          ?.concat(["Other"]),
-      },
+      // {
+      //   name: "First Aid Kits",
+      //   anotherCategories: [
+      //     "Basic First Aid Kits",
+      //     "Trauma First Aid Kits",
+      //     "Travel First Aid Kits",
+      //     "Workplace First Aid Kits",
+      //     "Burn Care Kits",
+      //     "Emergency Medical",
+      //     "Services",
+      //   ]
+      //     ?.sort()
+      //     ?.concat(["Other"]),
+      // },
+      // {
+      //   name: "Emergency Medical Equipment",
+      //   anotherCategories: [
+      //     "Defibrillators",
+      //     "Ventilators",
+      //     "Suction Machines",
+      //     "Emergency Resuscitation Kits",
+      //     "Transport Ventilators",
+      //     "Oxygen Supply Kits",
+      //     "Services",
+      //   ]
+      //     ?.sort()
+      //     ?.concat(["Other"]),
+      // },
+      // {
+      //   name: "Trauma Care Products",
+      //   anotherCategories: [
+      //     "Trauma Bandages",
+      //     "Hemostatic Dressings",
+      //     "Cervical Collars",
+      //     "Splints & Braces",
+      //     "Trauma Stretchers",
+      //     "Emergency Wound Care Kits",
+      //     "Services",
+      //   ]
+      //     ?.sort()
+      //     ?.concat(["Other"]),
+      // },
     ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
   //   -------------------------------------   Orthopedic Supplies  -------------------------------------
@@ -1628,6 +1629,7 @@ const categoriesData = [
           "Bathing Aids",
           "Incontinence Products",
           "Pressure Relief Cushions",
+          "Waste Disposal",
           "Services",
         ]
           ?.sort()
