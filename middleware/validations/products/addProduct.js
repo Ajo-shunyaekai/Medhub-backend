@@ -56,9 +56,9 @@ const generalValidationRules = [
     .notEmpty()
     .withMessage("Product Description is required."),
 
-  body("manufacturer")
-    .notEmpty()
-    .withMessage("Manufacturer is required."),
+  // body("manufacturer")
+  //   .notEmpty()
+  //   .withMessage("Manufacturer is required."),
     // .matches(/^[a-zA-Z0-9\s]+$/)
     // .withMessage(
     //   "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
@@ -68,9 +68,9 @@ const generalValidationRules = [
     .notEmpty()
     .withMessage("Short Description is required."),
 
-  body("countryOfOrigin")
-    .notEmpty()
-    .withMessage("Country of origin is required."),
+  // body("countryOfOrigin")
+  //   .notEmpty()
+  //   .withMessage("Country of origin is required."),
 
   body("model")
     .notEmpty()
@@ -78,13 +78,13 @@ const generalValidationRules = [
     .matches(/^[a-zA-Z0-9\s\-\/]+$/)
     .withMessage("Part/Model Number can only contain letters, numbers, spaces, hyphens (-), and slashes (/)."),
 
-  body("form")
-    .notEmpty()
-    .withMessage("Type/Form is required.")
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Type/Form must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+  // body("form")
+  //   .notEmpty()
+  //   .withMessage("Type/Form is required.")
+  //   .matches(/^[a-zA-Z0-9\s]+$/)
+  //   .withMessage(
+  //     "Type/Form must be alphanumeric (letters, numbers, and spaces only)."
+  //   ),
 
   body("quantity")
     .notEmpty()
@@ -92,13 +92,13 @@ const generalValidationRules = [
     .isInt({ gt: 0 })
     .withMessage("Product Quantity must be a positive integer."),
 
-  body("weight")
-    .notEmpty()
-    .withMessage("Product Weight is required.")
-    .isFloat({ gt: 0 })
-    .withMessage("Product Weight must be a positive number."),
+  // body("weight")
+  //   .notEmpty()
+  //   .withMessage("Product Weight is required.")
+  //   .isFloat({ gt: 0 })
+  //   .withMessage("Product Weight must be a positive number."),
 
-  body("unit").notEmpty().withMessage("Product Weight Unit is required."),
+  // body("unit").notEmpty().withMessage("Product Weight Unit is required."),
   body("unit_tax").notEmpty().withMessage("Tax Percentage is required."),
   body("stock")
     .notEmpty()
@@ -203,14 +203,14 @@ const categorySpecificValidationRules = [
           .withMessage(
             "Drug Class must be alphanumeric (letters and numbers only)."
           ),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
       ];
     }
     if (value === "SkinHairCosmeticSupplies") {
@@ -259,14 +259,14 @@ const categorySpecificValidationRules = [
           .withMessage("Drug Class is required.")
           .trim(),
         body("controlledSubstance").optional().trim(),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
         body("dermatologistTested")
           .notEmpty()
           .withMessage("Dermatologist Tested is required.")
@@ -326,14 +326,14 @@ const categorySpecificValidationRules = [
           .notEmpty()
           .withMessage("Drug Class is required.")
           .trim(),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
       ];
     }
     if (value === "MedicalConsumablesAndDisposables") {
@@ -350,14 +350,14 @@ const categorySpecificValidationRules = [
             "Syringes, IV Sets & Catheters",
           ])
           .withMessage("Sub Category is invalid."),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
       ];
     }
 
@@ -399,14 +399,14 @@ const categorySpecificValidationRules = [
             "Trauma Care Products",
           ])
           .withMessage("Sub Category is invalid."),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
       ];
     }
     if (value === "OrthopedicSupplies") {
@@ -440,14 +440,14 @@ const categorySpecificValidationRules = [
             "Dental Consumables",
           ])
           .withMessage("Sub Category is invalid."),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
       ];
     }
     if (value === "EyeCareSupplies") {
@@ -479,14 +479,14 @@ const categorySpecificValidationRules = [
           ])
           .withMessage("Sub Category is invalid."),
 
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
       ];
     }
     if (value === "AlternativeMedicines") {
@@ -497,14 +497,14 @@ const categorySpecificValidationRules = [
           .withMessage("Sub Category is required.")
           .isIn(["Homeopathy", "Ayurvedic"])
           .withMessage("Sub Category is invalid."),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
         body("composition")
           .notEmpty()
           .withMessage("Composition/Ingredients is required."),
@@ -522,14 +522,14 @@ const categorySpecificValidationRules = [
             "Trauma Care Products",
           ])
           .withMessage("Sub Category is invalid."),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
         body("composition").notEmpty().withMessage("Composition is required."),
         body("productLongevity")
           .notEmpty()
@@ -548,14 +548,14 @@ const categorySpecificValidationRules = [
         body("composition")
           .notEmpty()
           .withMessage("Composition/Ingredients is required."),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
       ];
     }
     if (value === "NutritionAndDietaryProducts") {
@@ -577,14 +577,14 @@ const categorySpecificValidationRules = [
           .notEmpty()
           .withMessage("Amino Acid Profile is required."),
         body("fatContent").notEmpty().withMessage("Fat Content is required."),
-        body("expiry")
-          .notEmpty()
-          .withMessage("Shelf Life/Expiry is required.")
-          .trim()
-          .matches(/^[a-zA-Z0-9\s]+$/)
-          .withMessage(
-            "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
-          ),
+        // body("expiry")
+        //   .notEmpty()
+        //   .withMessage("Shelf Life/Expiry is required.")
+        //   .trim()
+        //   .matches(/^[a-zA-Z0-9\s]+$/)
+        //   .withMessage(
+        //     "Shelf Life/Expiry must be alphanumeric (letters and numbers only)."
+        //   ),
         body("healthBenefit")
           .notEmpty()
           .withMessage("Health Benefit is required."),

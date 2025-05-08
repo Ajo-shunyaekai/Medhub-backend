@@ -17,7 +17,7 @@ const productSchema = new Schema(
       manufacturer: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Manufacturer is required."],
+        // required: [true, "Validation Error: Manufacturer is required."],
       },
       aboutManufacturer: {
         type: String,
@@ -27,7 +27,7 @@ const productSchema = new Schema(
       countryOfOrigin: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Country of origin is required."],
+        // required: [true, "Validation Error: Country of origin is required."],
       },
       upc: {
         type: String,
@@ -51,7 +51,7 @@ const productSchema = new Schema(
       form: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Type/Form is required."],
+        // required: [true, "Validation Error: Type/Form is required."],
       },
       quantity: {
         type: Number,
@@ -75,12 +75,12 @@ const productSchema = new Schema(
       },
       weight: {
         type: Number,
-        required: [true, "Validation Error: Product Weight is required."],
+        // required: [true, "Validation Error: Product Weight is required."],
       },
       unit: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Product Weight Unit is required."],
+        // required: [true, "Validation Error: Product Weight Unit is required."],
       },
       unit_tax: {
         type: Number,
@@ -424,12 +424,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "Pharmaceuticals" ? !!v : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "Pharmaceuticals" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
       sideEffectsAndWarnings: {
         type: String,
@@ -561,12 +561,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
       sideEffectsAndWarnings: {
         type: String,
@@ -736,12 +736,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "VitalHealthAndWellness" ? !!v : true;
-          },
-          message: "Vlidation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "VitalHealthAndWellness" ? !!v : true;
+        //   },
+        //   message: "Vlidation Error: Shelf Life/Expiry is required.",
+        // },
       },
       sideEffectsAndWarnings: {
         type: String,
@@ -808,14 +808,14 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "MedicalConsumablesAndDisposables"
-              ? !!v
-              : true;
-          },
-          message: "Vlidation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "MedicalConsumablesAndDisposables"
+        //       ? !!v
+        //       : true;
+        //   },
+        //   message: "Vlidation Error: Shelf Life/Expiry is required.",
+        // },
       },
       texture: {
         type: Boolean,
@@ -1096,12 +1096,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HospitalAndClinicSupplies" ? !!v : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HospitalAndClinicSupplies" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
       texture: {
         type: Boolean,
@@ -1249,12 +1249,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "DentalProducts" ? !!v : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "DentalProducts" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
     },
     EyeCareSupplies: {
@@ -1391,12 +1391,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HomeHealthcareProducts" ? !!v : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HomeHealthcareProducts" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
     },
     AlternativeMedicines: {
@@ -1442,12 +1442,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "AlternativeMedicines" ? !!v : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "AlternativeMedicines" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
     },
     EmergencyAndFirstAidSupplies: {
@@ -1476,14 +1476,14 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "EmergencyAndFirstAidSupplies"
-              ? !!v
-              : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "EmergencyAndFirstAidSupplies"
+        //       ? !!v
+        //       : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
       composition: {
         type: String,
@@ -1564,14 +1564,14 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "DisinfectionAndHygieneSupplies"
-              ? !!v
-              : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "DisinfectionAndHygieneSupplies"
+        //       ? !!v
+        //       : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
       fragrance: {
         type: String,
@@ -1632,12 +1632,12 @@ const productSchema = new Schema(
       expiry: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-          },
-          message: "Validation Error: Shelf Life/Expiry is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Shelf Life/Expiry is required.",
+        // },
       },
       vegan: {
         type: Boolean,
