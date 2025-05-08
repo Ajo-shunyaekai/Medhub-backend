@@ -226,22 +226,21 @@ module.exports = {
         });
       }
 
-      if (deliveryTime?.min && deliveryTime?.max) {
-        pipeline.push({
-          $match: {
-            priceQuantityDetails: {
-              $elemMatch: {
-                deliveryTime: {
-                  $gte: parseInt(deliveryTime?.min, 10),
-                  $lte: parseInt(deliveryTime?.max, 10),
-                },
-              },
-            },
-          },
-        });
-      }
+      // if (deliveryTime?.min && deliveryTime?.max) {
+      //   pipeline.push({
+      //     $match: {
+      //       priceQuantityDetails: {
+      //         $elemMatch: {
+      //           deliveryTime: {
+      //             $gte: parseInt(deliveryTime?.min, 10),
+      //             $lte: parseInt(deliveryTime?.max, 10),
+      //           },
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
 
-      // const totalProducts = await Product.countDocuments(totalProductsQuery);
 
       pipeline.push({
         $sort: { createdAt: -1 },
@@ -1031,20 +1030,20 @@ module.exports = {
         });
       }
 
-      if (deliveryTime?.min && deliveryTime?.max) {
-        pipeline.push({
-          $match: {
-            priceQuantityDetails: {
-              $elemMatch: {
-                deliveryTime: {
-                  $gte: parseInt(deliveryTime?.min, 10),
-                  $lte: parseInt(deliveryTime?.max, 10),
-                },
-              },
-            },
-          },
-        });
-      }
+      // if (deliveryTime?.min && deliveryTime?.max) {
+      //   pipeline.push({
+      //     $match: {
+      //       priceQuantityDetails: {
+      //         $elemMatch: {
+      //           deliveryTime: {
+      //             $gte: parseInt(deliveryTime?.min, 10),
+      //             $lte: parseInt(deliveryTime?.max, 10),
+      //           },
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
 
       pipeline.push({
         $sort: { createdAt: -1 },
@@ -1256,20 +1255,20 @@ module.exports = {
         });
       }
 
-      if (deliveryTime?.min && deliveryTime?.max) {
-        pipeline.push({
-          $match: {
-            priceQuantityDetails: {
-              $elemMatch: {
-                deliveryTime: {
-                  $gte: parseInt(deliveryTime?.min, 10),
-                  $lte: parseInt(deliveryTime?.max, 10),
-                },
-              },
-            },
-          },
-        });
-      }
+      // if (deliveryTime?.min && deliveryTime?.max) {
+      //   pipeline.push({
+      //     $match: {
+      //       priceQuantityDetails: {
+      //         $elemMatch: {
+      //           deliveryTime: {
+      //             $gte: parseInt(deliveryTime?.min, 10),
+      //             $lte: parseInt(deliveryTime?.max, 10),
+      //           },
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
 
       pipeline.push({
         $sort: { createdAt: -1 },
@@ -1380,7 +1379,8 @@ module.exports = {
           quantity2: Number(result?.["Quantity From*"]) || 0,
           quantity3: Number(result?.["Quantity To*"]) || 0,
           price: Number(result?.["Cost Per Product*"]) || 0,
-          deliveryTime: Number(result?.["Est. Delivery Time"]) || 0,
+          deliveryTime:
+            result?.["Est. Delivery Time"]?.toString()?.trim() || "",
           file:
             result?.["Regulatory Compliance"]
               ?.split(",")
