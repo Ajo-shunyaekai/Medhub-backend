@@ -1380,7 +1380,7 @@ module.exports = {
           quantity2: Number(result?.["Quantity From*"]) || 0,
           quantity3: Number(result?.["Quantity To*"]) || 0,
           price: Number(result?.["Cost Per Product*"]) || 0,
-          deliveryTime: Number(result?.["Est. Delivery Time*"]) || 0,
+          deliveryTime: Number(result?.["Est. Delivery Time"]) || 0,
           file:
             result?.["Regulatory Compliance"]
               ?.split(",")
