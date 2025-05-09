@@ -1338,15 +1338,15 @@ module.exports = {
           aboutManufacturer:
             result?.["Short Description*"]?.toString()?.trim() || "",
           brand: result?.["Brand Name"]?.toString()?.trim() || "",
-          form: result?.["Product Type/Form*"]?.toString()?.trim() || "",
+          form: result?.["Product Type/Form"]?.toString()?.trim() || "",
           quantity: Number(result?.["Product Total Quantity*"]) || 0 || 0,
           volumn: result?.["Product Volume"]?.toString()?.trim() || "",
           volumeUnit: result?.["Product Volume Unit"]?.toString()?.trim() || "",
           dimension: result?.["Product Dimension"]?.toString()?.trim() || "",
           dimensionUnit:
             result?.["Product Dimension Unit"]?.toString()?.trim() || "",
-          weight: Number(result?.["Product Weight*"]) || 0,
-          unit: result?.["Product Weight Units*"]?.toString()?.trim() || "",
+          weight: Number(result?.["Product Weight"]) || 0,
+          unit: result?.["Product Weight Units"]?.toString()?.trim() || "",
           unit_tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
           packageType:
             result?.["Product Packaging Type"]?.toString()?.trim() || "",
@@ -1354,9 +1354,9 @@ module.exports = {
             result?.["Product Packaging Material"]?.toString()?.trim() || "",
           storage: result?.["Storage Conditions"]?.toString()?.trim() || "",
           manufacturer:
-            result?.["Manufacturer Name*"]?.toString()?.trim() || "",
+            result?.["Manufacturer Name"]?.toString()?.trim() || "",
           countryOfOrigin:
-            result?.["Manufacturer Contry of Origin*"]?.toString()?.trim() ||
+            result?.["Manufacturer Country of Origin"]?.toString()?.trim() ||
             "",
           image:
             result?.["Product Image"]

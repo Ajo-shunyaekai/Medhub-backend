@@ -16,7 +16,7 @@ const handleProductCategorySwitch = (result) => {
           ?.map((ele) => ele?.toString()?.trim()) || [];
       updatedObject["purpose"] = result?.["Purpose"]?.toString()?.trim() || "";
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
 
     case "Dental Products":
@@ -28,7 +28,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["targetCondition"] =
         result?.["Target Condition"]?.toString()?.trim() || "";
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       updatedObject["usageRate"] =
         result?.["Usage Rate"]?.toString()?.trim() || "";
       updatedObject["maintenanceNotes"] =
@@ -82,7 +82,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["fragrance"] =
         result?.["Fragrance"]?.toString()?.trim() || "";
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
 
     case "Emergency and First Aid Supplies":
@@ -95,7 +95,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["foldability"] =
         result?.["Foldability*"]?.toString()?.trim() || "";
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
 
     case "Eye Care Supplies":
@@ -149,7 +149,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["powdered"] = result?.["Powdered"] === "true" || false;
       updatedObject["texture"] = result?.["Texture"] === "true" || false;
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       updatedObject["sterilized"] = result?.["Sterilized"] === "true" || false;
       updatedObject["adhesiveness"] =
         result?.["Adhesiveness"]?.toString()?.trim() || "";
@@ -191,7 +191,7 @@ const handleProductCategorySwitch = (result) => {
           ?.split(",")
           ?.map((ele) => ele?.toString()?.trim()) || [];
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
 
     case "Laboratory Supplies":
@@ -244,7 +244,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["powdered"] = result?.["Powdered"] === "true" || false;
       updatedObject["texture"] = result?.["Texture"] === "true" || false;
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       updatedObject["allergens"] =
         result?.["Allergens"]?.toString()?.trim() || "";
       updatedObject["sterilized"] = result?.["Sterilized"] === "true" || false;
@@ -305,7 +305,7 @@ const handleProductCategorySwitch = (result) => {
         result?.["Additives & Sweeteners"]?.toString()?.trim() || "";
       updatedObject["vegan"] = result?.["Vegan"] === "true" || false;
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
 
     case "Orthopedic Supplies":
@@ -351,7 +351,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["controlledSubstance"] =
         result?.["Controlled Substance"] === "true" || false;
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       updatedObject["sideEffectsAndWarnings"] =
         result?.["Side Effects and Warnings"]?.toString()?.trim() || "";
       updatedObject["allergens"] =
@@ -413,7 +413,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["allergens"] =
         result?.["Allergens"]?.toString()?.trim() || "";
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
 
     case "Vital Health and Wellness":
@@ -433,7 +433,7 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["controlledSubstance"] =
         result?.["Controlled Substance"] === "true" || false;
       updatedObject["expiry"] =
-        result?.["Shelf Life/Expiry*"]?.toString()?.trim() || "";
+        result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       updatedObject["sideEffectsAndWarnings"] =
         result?.["Side Effects and Warnings"]?.toString()?.trim() || "";
       updatedObject["allergens"] =
@@ -488,7 +488,7 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "form":
-      fieldName = "Product Type/Form*";
+      fieldName = "Product Type/Form";
       break;
 
     case "quantity":
@@ -512,11 +512,11 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "weight":
-      fieldName = "Product Weight*";
+      fieldName = "Product Weight";
       break;
 
     case "unit":
-      fieldName = "Product Weight Units*";
+      fieldName = "Product Weight Units";
       break;
 
     case "unit_tax":
@@ -536,11 +536,11 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "manufacturer":
-      fieldName = "Manufacturer Name*";
+      fieldName = "Manufacturer Name";
       break;
 
     case "countryOfOrigin":
-      fieldName = "Manufacturer Contry of Origin*";
+      fieldName = "Manufacturer Country of Origin";
       break;
 
     case "image":
@@ -640,7 +640,7 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "expiry":
-      fieldName = additionalCheck ? "Shelf Life/Expiry*" : "Shelf Life/Expiry";
+      fieldName = additionalCheck ? "Shelf Life/Expiry" : "Shelf Life/Expiry";
       break;
 
     // case "DentalProducts":
