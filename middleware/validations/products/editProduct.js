@@ -4,11 +4,11 @@ const { body } = require("express-validator");
 const editGeneralValidationRules = [
   body("name")
     .notEmpty()
-    .withMessage("Product Name is required.")
-    .matches(/^[a-zA-Z0-9\s]+$/)
-    .withMessage(
-      "Product Name must be alphanumeric (letters, numbers, and spaces only)."
-    ),
+    .withMessage("Product Name is required."),
+    // .matches(/^[a-zA-Z0-9\s]+$/)
+    // .withMessage(
+    //   "Product Name must be alphanumeric (letters, numbers, and spaces only)."
+    // ),
 
   body("market")
     .notEmpty()
