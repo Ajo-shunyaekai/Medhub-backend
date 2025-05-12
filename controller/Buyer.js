@@ -1051,23 +1051,25 @@ module.exports = {
             target_price,
             item_id,
           } = detail;
+          const deliveryDays =
+            est_delivery_days?.trim() || "TBC - based on quantity";
           if (
             !product_id ||
-            !unit_price ||
-            !unit_tax ||
-            !quantity_required ||
-            !est_delivery_days ||
+            unit_price === undefined ||
+            unit_tax === undefined ||
+            quantity_required === undefined ||
             !target_price
           ) {
             throw new Error("Missing required item fields");
           }
+
           acc[supplier_id].items.push({
             item_id,
             product_id,
             unit_price,
             unit_tax,
             quantity_required,
-            est_delivery_days,
+            est_delivery_days: deliveryDays,
             target_price,
             counter_price: detail.counter_price || undefined,
             status: detail.status || "pending",
