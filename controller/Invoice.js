@@ -182,13 +182,13 @@ module.exports = {
       );
 
       const orderStatus =
-        parseFloat(newTotalAmountPaid).toFixed(2) ===
-        parseFloat(order.total_due_amount).toFixed(2)
+        parseFloat(Number(newTotalAmountPaid)).toFixed(2) >=
+        parseFloat(Number(order.total_due_amount)).toFixed(2)
           ? "completed"
           : order.order_status;
       const newOrderStatus =
-        parseFloat(newTotalAmountPaid).toFixed(2) ===
-        parseFloat(order.total_due_amount).toFixed(2)
+        parseFloat(Number(newTotalAmountPaid)).toFixed(2) >=
+        parseFloat(Number(order.total_due_amount)).toFixed(2)
           ? "Completed"
           : order.status;
       // return false
@@ -268,7 +268,7 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-  
+
   invoiceDetails: async (req, res, reqObj, callback) => {
     try {
       // const { order_id, invoice_id, supplier_id } = reqObj;
