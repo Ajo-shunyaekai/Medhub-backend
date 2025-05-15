@@ -114,6 +114,7 @@ module.exports = {
           //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
           const updatedOrderHistory = await addStageToOrderHistory(
             req,
+            res,
             updatedEnquiry?._id,
             "Order Created",
             new Date(),
@@ -421,6 +422,7 @@ module.exports = {
       //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
       const updatedOrderHistory = await addStageToOrderHistory(
         req,
+        res,
         updatedOrder?._id,
         "Delivery Details Submitted",
         new Date(),
@@ -653,6 +655,7 @@ module.exports = {
 
       const updatedOrderHistory = await addStageToOrderHistory(
         req,
+        res,
         updatedOrder?._id,
         "Pick up Details Submitted",
         new Date(),
@@ -1172,7 +1175,7 @@ module.exports = {
     try {
       const { usertype, buyer_id, supplier_id, admin_id } = req?.headers;
       const { pageNo, pageSize, filterKey, filterValue } = req?.query;
-      
+
       const offset = (parseInt(pageNo) - 1) * parseInt(pageSize);
 
       const adjustedFilterKey =

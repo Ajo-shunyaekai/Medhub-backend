@@ -1,17 +1,11 @@
 const mongoose = require("mongoose");
-const Admin = require("../schema/adminSchema");
-const Address = require("../schema/addressSchema");
 const Enquiry = require("../schema/enquiryListSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
 const Order = require("../schema/orderSchema");
 const PurchaseOrder = require("../schema/purchaseOrderSchema");
 const OrderHistory = require("../schema/orderHistorySchema");
-const logErrorToFile = require("../logs/errorLogs");
-const {
-  sendErrorResponse,
-  handleCatchBlockError,
-} = require("../utils/commonResonse");
+const { handleCatchBlockError } = require("../utils/commonResonse");
 
 const getOrderHistory = async (req, res) => {
   try {
@@ -47,7 +41,7 @@ const getOrderHistory = async (req, res) => {
           case "Enquiry":
             schemaNameToSearchFrom = await Enquiry;
             break;
-          case "Purchase Order":
+          case "PurchaseOrder":
             schemaNameToSearchFrom = await PurchaseOrder;
             break;
           case "Order":
@@ -83,6 +77,7 @@ const getOrderHistory = async (req, res) => {
 
 const addStageToOrderHistory = async (
   req,
+  res,
   id,
   stageName,
   stageDate,
@@ -96,8 +91,12 @@ const addStageToOrderHistory = async (
         filterKey = "enquiryId";
         break;
 
+      case "PurchaseOrder":
+        filterKey = "enquiryId";
+        break;
+
       case "Order":
-        filterKey = stageName == "Order Created" ? "enquiryId" : "orderId";
+        filterKey = stageName === "Order Created" ? "enquiryId" : "orderId";
         break;
 
       default:
@@ -117,40 +116,40 @@ const addStageToOrderHistory = async (
       referenceType: stageReferenceType,
     };
 
-    const additionalStageDetails = {
-      name: "Logistics Request Sent",
-      date: new Date(stageDate.getTime() + 2 * 60 * 1000),
-      referenceId: stageReference,
-      referenceType: stageReferenceType,
-    };
-
     let updateFields = {};
 
-    // If the stage is 'Pick up Details Submitted', add both stages
+    // Handle "Pick up Details Submitted" case with an additional stage
     if (stageName === "Pick up Details Submitted") {
       const additionalStageDetails = {
         name: "Logistics Request Sent",
-        date: new Date(stageDate.getTime() + 2 * 60 * 1000),
+        date: new Date(stageDate.getTime() + 2 * 60 * 1000), // +2 minutes
         referenceId: stageReference,
         referenceType: stageReferenceType,
       };
 
-      updateFields = {
-        $push: {
-          stages: {
-            $each: [stageDetails, additionalStageDetails],
-          },
+      updateFields.$push = {
+        stages: {
+          $each: [stageDetails, additionalStageDetails],
         },
       };
     } else {
-      updateFields = {
-        $push: { stages: stageDetails },
+      updateFields.$push = {
+        stages: stageDetails,
       };
     }
 
-    // If stageReferenceType is "Order" and stageName is "Order Created", set the orderId field as well
-    if (stageReferenceType == "Order" && stageName === "Order Created") {
-      updateFields.$set = { orderId: stageReference };
+    // ✅ Ensure we preserve existing fields when adding $set fields
+    updateFields.$set = updateFields.$set || {};
+
+    if (
+      stageReferenceType === "PurchaseOrder" &&
+      stageName === "Purchase Order Created"
+    ) {
+      updateFields.$set.purchaseOrderId = stageReference;
+    }
+
+    if (stageReferenceType === "Order" && stageName === "Order Created") {
+      updateFields.$set.orderId = stageReference;
     }
 
     const updatedOrderHistory = await OrderHistory?.findByIdAndUpdate(
@@ -171,7 +170,11 @@ const addStageToOrderHistory = async (
       orderHistory: updatedOrderHistory,
     };
   } catch (error) {
-    handleCatchBlockError(req, res, error);
+    return {
+      message: "Internal error in addStageToOrderHistory",
+      result: {},
+      error,
+    };
   }
 };
 

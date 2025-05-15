@@ -8,6 +8,10 @@ const orderHistorySchema = new Schema(
       ref: "Enquiry",
       required: [true, "Enquiry Id is required"],
     },
+    purchaseOrderId: {
+      type: Schema.Types.ObjectId,
+      ref: "PurchaseOrder",
+    },
     orderId: {
       type: Schema.Types.ObjectId,
       ref: "Order",
@@ -15,6 +19,10 @@ const orderHistorySchema = new Schema(
     logisticId: {
       type: Schema.Types.ObjectId,
       ref: "Logistics",
+    },
+    logisticPartnerId: {
+      type: Schema.Types.ObjectId,
+      ref: "LogisticsPartner",
     },
     buyerId: {
       type: Schema.Types.ObjectId,

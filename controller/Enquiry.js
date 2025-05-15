@@ -335,11 +335,12 @@ module.exports = {
       const emailContent = await submitQuotationContent(buyer, enquiry_id);
       await sendEmail(recipientEmails, subject, emailContent);
       //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-      // const updatedOrderHistory = await addStageToOrderHistory(req, updatedEnquiry?._id, 'Quotation Submitted', new Date(), updatedEnquiry?._id, 'Enquiry')
+      // const updatedOrderHistory = await addStageToOrderHistory(req, res, updatedEnquiry?._id, 'Quotation Submitted', new Date(), updatedEnquiry?._id, 'Enquiry')
 
       // Add stage to order history
       const updatedOrderHistory = await addStageToOrderHistory(
         req,
+        res,
         updatedEnquiry._id,
         "Quotation Submitted",
         new Date(),
@@ -391,16 +392,6 @@ module.exports = {
           result: null,
         });
       }
-
-      //   (id, stageName, stageDescription, stageDate, stageReference, stageReferenceType)
-      const updatedOrderHistory = await addStageToOrderHistory(
-        req,
-        updatedEnquiry?._id,
-        "Purchase Order Created",
-        new Date(),
-        updatedEnquiry?._id,
-        "Enquiry"
-      );
 
       callback({
         code: 200,
