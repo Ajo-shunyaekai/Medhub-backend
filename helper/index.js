@@ -76,8 +76,6 @@ function extractLast13WithExtension(filename) {
   const last13Chars = baseFilename.slice(-13); // Get last 13 characters
 
   // Return the last 13 characters and the extension
-
-  console.log("\n\n\n\n\n\nlast13Chars . extension ", last13Chars + "." + extension)
   return last13Chars + "." + extension;
 }
 
