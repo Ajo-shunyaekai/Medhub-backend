@@ -10,6 +10,7 @@ const {
   sendErrorResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
+const { sendSupplierReminderEmailContent } = require("../utils/emailContents");
 
 const generatePassword = () => {
   const password = generator.generate({
@@ -303,10 +304,72 @@ const updateLogisticsRequest = async (req, res) => {
   }
 };
 
+const remindLogisticsToProceedOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Fetch the order
+    const order = await Order?.findById(id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    // Fetch the logistics
+    const logistics = await Logistics?.findOne({
+      orderId: order?._id,
+    });
+
+    if (!logistics) {
+      return res.status(404).json({ message: "Logistics not found." });
+    }
+
+    // Fetch the logistics partner
+    const logisticsPartner = await Logistics?.findById(
+      `677fc2b90f5f86a8b5352f89`
+    );
+
+    if (!logisticsPartner) {
+      return res.status(404).json({ message: "Logistics Partner not found." });
+    }
+
+    // Extract the logisticsPartner's email
+    // const logisticsPartnerEmail = logisticsPartner?.email;
+    const logisticsPartnerEmail = "Shivani@shunyaekai.tech";
+
+    if (!logisticsPartnerEmail) {
+      return res
+        .status(400)
+        .json({ message: "Supplier's contact email is missing." });
+    }
+
+    // Email subject and context (EJS template context data)
+    const subject = `Reminder: Please proceed with the order ${order?.order_id}`;
+    const emailContent = sendSupplierReminderEmailContent(
+      order?.order_id,
+      order?.created_at,
+      logisticsPartner?.company_name
+    );
+
+    // Send the email
+    await sendEmail(logisticsPartnerEmail, subject, emailContent);
+
+    // Respond to the request
+    return sendSuccessResponse(
+      res,
+      200,
+      `Reminder email sent to the supplier successfully.`
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 module.exports = {
   addLogisticsPartner,
   getLogisticsDashboardData,
   getLogisticsList,
   getLogisticsDetails,
   updateLogisticsRequest,
+  remindLogisticsToProceedOrder,
 };

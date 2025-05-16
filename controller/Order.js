@@ -22,10 +22,12 @@ const logErrorToFile = require("../logs/errorLogs");
 const {
   sendErrorResponse,
   handleCatchBlockError,
+  sendSuccessResponse,
 } = require("../utils/commonResonse");
 const {
   createOrderContent,
   bookLogisticsContent,
+  sendSupplierReminderEmailContent,
 } = require("../utils/emailContents");
 
 const initializeInvoiceNumber = async () => {
@@ -2473,6 +2475,58 @@ module.exports = {
         message: "Details Fetched successfully",
         result: data[0],
       });
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  remindSupplierToProceedOrder: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Fetch the order
+      const order = await Order?.findById(id);
+
+      if (!order) {
+        return res.status(404).json({ message: "Order not found." });
+      }
+
+      // Fetch the supplier
+      const supplier = await Supplier?.findOne({
+        supplier_id: order?.supplier_id,
+      });
+
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found." });
+      }
+
+      // Extract the supplier's email
+      // const supplierEmail = supplier?.contact_person_email;
+      const supplierEmail = "Shivani@shunyaekai.tech";
+
+      if (!supplierEmail) {
+        return res
+          .status(400)
+          .json({ message: "Supplier's contact email is missing." });
+      }
+
+      // Email subject and context (EJS template context data)
+      const subject = `Reminder: Please proceed with the order ${order?.order_id}`;
+      const emailContent = sendSupplierReminderEmailContent(
+        order?.order_id,
+        order?.created_at,
+        supplier?.supplier_name
+      );
+
+      // Send the email
+      await sendEmail(supplierEmail, subject, emailContent);
+
+      // Respond to the request
+      return sendSuccessResponse(
+        res,
+        200,
+        `Reminder email sent to the supplier successfully.`
+      );
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
