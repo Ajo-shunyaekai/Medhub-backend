@@ -13,7 +13,9 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["healthClaimsFile"] =
         result?.["Health Claims File"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       updatedObject["purpose"] = result?.["Purpose"]?.toString()?.trim() || "";
       updatedObject["expiry"] =
         result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
@@ -67,7 +69,9 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["performanceTestingReportFile"] =
         result?.["Performance Testing Report File"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       break;
 
     case "Disinfection and Hygiene Supplies":
@@ -189,7 +193,9 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["performanceTestingReportFile"] =
         result?.["Performance Testing Report File"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       updatedObject["expiry"] =
         result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
@@ -204,7 +210,9 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["hazardClassification"] =
         result?.["Hazard Classification"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       updatedObject["shape"] = result?.["Shape"]?.toString()?.trim() || "";
       updatedObject["coating"] = result?.["Coating"]?.toString()?.trim() || "";
       updatedObject["purpose"] = result?.["Purpose"]?.toString()?.trim() || "";
@@ -235,7 +243,9 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["filtrationType"] =
         result?.["Filtration Type"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       updatedObject["purpose"] = result?.["Purpose"]?.toString()?.trim() || "";
       updatedObject["chemicalResistance"] =
         result?.["Chemical Resistance"]?.toString()?.trim() || "";
@@ -276,13 +286,17 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["performanceTestingReportFile"] =
         result?.["Performance Testing Report File"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       updatedObject["specification"] =
         result?.["Specification*"]?.toString()?.trim() || "";
       updatedObject["specificationFile"] =
         result?.["Specification File"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       break;
 
     case "Nutrition and Dietary Products":
@@ -401,13 +415,18 @@ const handleProductCategorySwitch = (result) => {
       updatedObject["dermatologistTestedFile"] =
         result?.["Dermatologist Tested File"]
           ?.split(",")
-          ?.map((ele) => ele?.toString()?.trim()) || [];
+          ?.map((ele) => ele?.toString()?.trim())
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       (updatedObject["pediatricianRecommended"] =
         result?.["Pediatrician Recommended*"]?.toString()?.trim() || ""),
-        (updatedObject["pediatricianRecommendedFile"] =
-          result?.["Pediatrician Recommended File"]
-            ?.split(",")
-            ?.map((ele) => ele?.toString()?.trim()) || []);
+        (updatedObject["pediatricianRecommendedFile"] = result?.[
+          "Pediatrician Recommended File"
+        ]
+          ?.split(",")
+          ?.map((ele) => ele?.toString()?.trim()))
+          ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+          ?.filter((ele) => ele) || [];
       updatedObject["sideEffectsAndWarnings"] =
         result?.["Side Effects and Warnings"]?.toString()?.trim() || "";
       updatedObject["allergens"] =
