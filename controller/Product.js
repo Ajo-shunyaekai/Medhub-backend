@@ -1360,9 +1360,7 @@ module.exports = {
           image:
             result?.["Product Image"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim())
-              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
-              ?.filter((ele) => ele) || [], // array
+              ?.map((ele) => ele?.toString()?.trim()) || [], // array
           description:
             result?.["Product Description*"]?.toString()?.trim() || "",
           date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
