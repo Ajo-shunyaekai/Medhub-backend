@@ -21,30 +21,6 @@ const transporter = nodemailer.createTransport({
  * @param {string} body - HTML content of the email.
  * @returns {Promise<void>} Resolves on successful email sending, rejects on error.
  */
-// const sendEmail = async (recipients, subject, templateName, context) => {
-//   try {
-//     //ejs template path
-//     const templatePath = path.join(__dirname, "./emailTemplates", `${templateName}.ejs`);
-
-//     const emailContent = await ejs.renderFile(templatePath, context, {
-//       root: path.join(__dirname, "../emailTemplates"),
-//     });
-
-//     const mailOptions = {
-//       // from : process.env.SMTP_USER_ID,
-//       from: `Medhub Global<${process.env.SMTP_USER_ID}>`,
-//       to   : Array.isArray(recipients) ? recipients.join(",") : recipients,
-//       subject,
-//       // html: body,
-//       html: emailContent
-//     };
-
-//     await transporter.sendMail(mailOptions);
-//   } catch (error) {
-//     console.error(`Error sending email to ${recipients}:`, error);
-//     throw error; // Re-throw error for further handling if needed.
-//   }
-// };
 
 const sendTemplateEmail = async (
   recipients,

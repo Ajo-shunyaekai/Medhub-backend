@@ -73,5 +73,12 @@ module.exports = () => {
     (req, res) => handleController(Order.orderSalesFilterList, req, res)
   );
 
+  routes.post(
+    "/remind-supplier/:id",
+    checkAuthorization,
+    authenticationNAuthorization,
+    (req, res) => handleController(Order.remindSupplierToProceedOrder, req, res)
+  );
+
   return routes;
 };

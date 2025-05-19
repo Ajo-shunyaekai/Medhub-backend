@@ -372,6 +372,48 @@ const sendEmailConfirmationContent = (
         `;
 };
 
+const sendSupplierReminderEmailContent = (orderId, orderDate, supplierName) => {
+  const orderLink = `http://localhost:3000/supplier/active-orders-details/${orderId}`;
+
+  return `
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+        <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+          <tr>
+            <td>
+              <h2 style="text-align: center; color: #333;">Reminder: Please Proceed with the Order</h2>
+              <p style="color: #555; font-size: 16px;">Dear <strong>${supplierName}</strong>,</p>
+              <p style="color: #555; font-size: 16px;">This is a friendly reminder to kindly proceed with the order <strong>#${orderId}</strong> placed on <strong>${orderDate}</strong>.</p>
+
+              <h3 style="color: #333;">Order Details:</h3>
+              <ul style="color: #555; font-size: 16px;">
+                <li><strong>Order ID:</strong> ${orderId}</li>
+                <li><strong>Order Date:</strong> ${orderDate}</li>
+              </ul>
+
+              <p style="color: #555; font-size: 16px;">You can view and manage this order directly by clicking the link below:</p>
+              <p style="color: #555; font-size: 16px;">
+                <a href="${orderLink}" style="color: #0066cc; text-decoration: none; font-weight: bold;">View Order #${orderId}</a>
+              </p>
+
+              <p style="color: #555; font-size: 16px;">If you have any questions or need further clarification, please do not hesitate to reach out to us.</p>
+
+              <p style="color: #555; font-size: 16px;">We appreciate your timely attention to this matter.</p>
+
+              <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+            </td>
+          </tr>
+        </table>
+
+        <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
+          <p>&copy; 2025 Medhub Global. All rights reserved.</p>
+          <p>If you did not place this order, please ignore this email.</p>
+        </footer>
+      </body>
+    </html>
+  `;
+};
+
 const adminMailOptionsContent = (
   userFound,
   name,
@@ -436,4 +478,5 @@ module.exports = {
   bookLogisticsContent,
   sendEmailConfirmationContent,
   adminMailOptionsContent,
+  sendSupplierReminderEmailContent,
 };
