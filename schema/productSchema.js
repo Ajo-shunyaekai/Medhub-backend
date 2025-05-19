@@ -222,6 +222,7 @@ const productSchema = new Schema(
       purchaseInvoiceFile: [
         {
           type: String,
+          trim: true,
           validate: {
             validator: function (v) {
               return this.market === "secondary" ? !!v : true;
