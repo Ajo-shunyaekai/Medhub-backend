@@ -1353,8 +1353,7 @@ module.exports = {
           packageMaterial:
             result?.["Product Packaging Material"]?.toString()?.trim() || "",
           storage: result?.["Storage Conditions"]?.toString()?.trim() || "",
-          manufacturer:
-            result?.["Manufacturer Name"]?.toString()?.trim() || "",
+          manufacturer: result?.["Manufacturer Name"]?.toString()?.trim() || "",
           countryOfOrigin:
             result?.["Manufacturer Country of Origin"]?.toString()?.trim() ||
             "",
@@ -1362,6 +1361,7 @@ module.exports = {
             result?.["Product Image"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
               ?.filter((ele) => ele) || [], // array
           description:
             result?.["Product Description*"]?.toString()?.trim() || "",
@@ -1371,7 +1371,9 @@ module.exports = {
           countries:
             result?.["Stocked in Countries*"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [],
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
           country:
             result?.["Country where Stock Trades"]?.toString()?.trim() || "",
           quantity1: Number(result?.["Stock Quantity"]) || 0 || 0,
@@ -1384,27 +1386,34 @@ module.exports = {
             result?.["Regulatory Compliance"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
               ?.filter((ele) => ele) || [], // array
           date3: result?.["Date of Expiry"]?.toString()?.trim() || "",
           safetyDatasheet:
             result?.["Safety Datasheet"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
               ?.filter((ele) => ele) || [], // array
           healthHazardRating:
             result?.["Health Hazard Rating"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
               ?.filter((ele) => ele) || [], // array
           environmentalImpact:
             result?.["Environmental Impact"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [], //aray
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
           warranty: result?.["Warranty"]?.toString()?.trim() || "",
           guidelinesFile:
             result?.["User Guidelines"]
               ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [], //aray
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
           other: result?.["Other Information"]?.toString()?.trim() || "",
         };
 
@@ -1548,7 +1557,17 @@ module.exports = {
               file: extracted?.file?.[0] || "",
               date: extracted?.date3 || "",
             },
-          ],
+          ]
+            ?.filter(
+              (ele) =>
+                ele?.file != "" ||
+                ele?.file != undefined ||
+                ele?.file != null ||
+                ele?.date != "" ||
+                ele?.date != undefined ||
+                ele?.date != null
+            )
+            ?.filter((ele) => ele?.file || ele?.date),
           additional: extracted,
           market: "new",
           isDeleted: false,
