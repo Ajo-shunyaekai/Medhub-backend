@@ -2521,6 +2521,26 @@ module.exports = {
       // Send the email
       await sendEmail(supplierEmail, subject, emailContent);
 
+      const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
+      const newNotification = new Notification({
+        notification_id: notificationId,
+        event_type: "Request to Proceed Order",
+        event: "remindSupplierToProceedOrder",
+        from: "buyer",
+        to: "supplier",
+        from_id: order?.buyer_id,
+        to_id: order?.supplier_id,
+        event_id: order?.order_id,
+        message: `Proceed Order! Please proceed with the order ${order?.order_id}`,
+        status: 0,
+      });
+
+      const savedNotification = await newNotification.save();
+
+      if (!savedNotification) {
+        return res.status(400).json({ message: "Error saving notification." });
+      }
+
       // Respond to the request
       return sendSuccessResponse(
         res,

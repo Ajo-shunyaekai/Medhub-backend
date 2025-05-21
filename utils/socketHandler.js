@@ -37,6 +37,7 @@ function initializeSocket(server) {
         emit: "editMedicineRequestUpdated",
       },
       { event: "updateProfileEditRequest", emit: "editProfileRequestUpdated" },
+      { event: "remindSupplierToProceedOrder", emit: "remindSupplier" },
     ];
 
     notificationEvents.forEach(({ event, emit }) => {
