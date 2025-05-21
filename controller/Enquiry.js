@@ -14,7 +14,7 @@ const {
   sendErrorResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
-const { submitQuotationContent } = require("../utils/emailContents");
+const { submitQuotationContent,cancelEnquiryContent } = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
 
 module.exports = {
