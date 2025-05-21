@@ -35,7 +35,12 @@ const inventorrySchema = new Schema(
     },
     stockedInDetails: [
       {
-        country: { type: String },
+        country: { type: String ,
+          required: [
+            true,
+            "Validation Error: stockTradeIn Country is required",
+          ],
+        },
         quantity: { type: Number },
         // type: { type: String },
       },

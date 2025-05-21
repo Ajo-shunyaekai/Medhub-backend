@@ -566,7 +566,448 @@ module.exports = {
     }
   },
 
+  addProduct2: async (req, res) => {
+    try {
+      const { category, market = "new" } = req?.body;
+
+      // Define file fields for each category
+      const fileFields = {
+        MedicalEquipmentAndDevices: [
+          "specificationFile",
+          "performanceTestingReportFile",
+        ],
+        Pharmaceuticals: [], // Added Pharmaceuticals category with relevant fields
+        SkinHairCosmeticSupplies: [
+          "dermatologistTestedFile",
+          "pediatricianRecommendedFile",
+        ],
+        VitalHealthAndWellness: [],
+        MedicalConsumablesAndDisposables: [],
+        LaboratorySupplies: [],
+        DiagnosticAndMonitoringDevices: [
+          "specificationFile",
+          "performanceTestingReportFile",
+        ],
+        HospitalAndClinicSupplies: [],
+        OrthopedicSupplies: [],
+        DentalProducts: [],
+        EyeCareSupplies: [],
+        HomeHealthcareProducts:
+          ["performanceTestingReportFile"]?.toString()?.trim() || "",
+        AlternativeMedicines: ["healthClaimsFile"]?.toString()?.trim() || "",
+        EmergencyAndFirstAidSupplies: [],
+        DisinfectionAndHygieneSupplies: [],
+        NutritionAndDietaryProducts: [],
+        HealthcareITSolutions:
+          ["interoperabilityFile"]?.toString()?.trim() || "",
+      };
+
+      // Check if the category exists in the fileFields object
+      if (!fileFields[category]) {
+        return sendErrorResponse(res, 400, "Invalid category specified.");
+      }
+
+      // Retrieve file paths for general, inventory, compliance, and additional fields
+      const generalFiles = await getFilePathsAdd(req, res, ["image"]);
+      // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      const inventoryFiles = [...req?.body?.countries];
+      const complianceFiles = await getFilePathsAdd(req, res, [
+        "complianceFile",
+      ]);
+      const additionalFiles = await getFilePathsAdd(req, res, [
+        "guidelinesFile",
+      ]);
+      const secondaryMarketFiles = await getFilePathsAdd(req, res, [
+        "purchaseInvoiceFile",
+      ]);
+      const healthNSafetyFiles = await getFilePathsAdd(req, res, [
+        "safetyDatasheet",
+        "healthHazardRating",
+        "environmentalImpact",
+      ]);
+
+      // Retrieve file paths for the selected category only
+      const categoryFiles = await getFilePathsAdd(
+        req,
+        res,
+        req?.files,
+        fileFields[category] || []
+      );
+
+      if (category === "AlternativeMedicines") {
+        categoryFiles.healthClaimsFile = req.files?.healthClaimsFile
+          ? req.files.healthClaimsFile.map((file) => file.filename)
+          : [];
+      }
+      if (category === "HealthcareITSolutions") {
+        categoryFiles.interoperabilityFile = req.files?.interoperabilityFile
+          ? req.files.interoperabilityFile.map((file) => file.filename)
+          : [];
+      }
+      if (category === "HomeHealthcareProducts") {
+        categoryFiles.performanceTestingReportFile = req.files
+          ?.performanceTestingReportFile
+          ? req.files.performanceTestingReportFile.map((file) => file.filename)
+          : [];
+      }
+
+      let newProductData = {};
+      newProductData[category] = {
+        ...req?.body,
+        ...(categoryFiles || {}),
+      };
+
+      const inventoryUUId = uuidv4();
+      const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+
+      let cNCFileNDateParsed;
+
+      if (typeof req?.body?.cNCFileNDate == "string") {
+        try {
+          // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
+          //   (value) => value != "[object Object]"
+          // );
+          if (Array.isArray(req?.body?.cNCFileNDate)) {
+            cNCFileNDateParsed = req.body.cNCFileNDate.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else if (typeof req?.body?.cNCFileNDate === "string") {
+            // If it's a string, try to parse it as JSON and filter
+            cNCFileNDateParsed = JSON.parse(req.body?.cNCFileNDate)?.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else {
+            // Handle case where cNCFileNDate is neither an array nor a string
+            throw new Error("Invalid cNCFileNDate format.");
+          }
+        } catch (error) {
+          handleCatchBlockError(req, res, error);
+        }
+      } else {
+        cNCFileNDateParsed = JSON.parse(
+          req.body?.cNCFileNDate?.filter((value) => value != "[object Object]")
+        );
+      }
+
+      // Create new product with all necessary fields
+      newProductData = {
+        ...req?.body,
+        product_id,
+        general: {
+          ...req?.body,
+          ...(generalFiles || []),
+        },
+        inventory: inventoryUUId,
+        complianceFile: complianceFiles.complianceFile,
+        cNCFileNDate: cNCFileNDateParsed
+          ?.map((ele, index) => {
+            return {
+              file:
+                typeof ele?.file !== "string"
+                  ? complianceFiles?.complianceFile?.find((filename) => {
+                      const path = ele?.file?.path;
+
+                      // Ensure path is defined and log the file path
+                      if (!path) {
+                        return false; // If there's no path, skip this entry
+                      }
+
+                      const ext = path.split(".").pop(); // Get the file extension
+
+                      const sanitizedPath = path
+                        .replaceAll("./", "")
+                        .replaceAll(" ", "")
+                        .replaceAll(`.${ext}`, "");
+
+                      // Match file by sanitized name
+                      return filename?.includes(sanitizedPath);
+                    })
+                  : ele?.file || complianceFiles?.complianceFile?.[index] || "",
+
+              date: ele?.date || "", // Log the date being used (if any)
+            };
+          })
+          ?.filter((ele) => ele?.file || ele?.date),
+        additional: {
+          ...req?.body,
+          ...(additionalFiles || []),
+        },
+        healthNSafety: {
+          ...(healthNSafetyFiles || []),
+        },
+        [category]: {
+          ...req?.body,
+          ...(categoryFiles || []),
+        }, // Only include the selected category
+        market,
+        idDeleted: false,
+      };
+
+      if (market == "secondary") {
+        newProductData["secondaryMarketDetails"] = {
+          ...req?.body,
+          ...(secondaryMarketFiles || []),
+        };
+      }
+
+      // Create the new product
+      const newProduct = await Product.create(newProductData);
+
+      if (!newProduct) {
+        return sendErrorResponse(res, 400, "Failed to create new product.");
+      }
+
+      const newInventoryDetails = {
+        uuid: inventoryUUId,
+        productId: newProduct?.product_id,
+        ...req?.body,
+        stockedInDetails: JSON.parse(
+          req?.body?.stockedInDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
+        inventoryList: JSON.parse(
+          req?.body?.productPricingDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
+        ...(inventoryFiles || []),
+      };
+
+      const newInventory = await Inventory.create(newInventoryDetails);
+
+      if (!newInventory) {
+        return sendErrorResponse(res, 400, "Failed to create new Inventory.");
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Product Added Succesfully",
+        newProduct
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
   editProduct: async (req, res) => {
+    try {
+      const { category, market = "new" } = req?.body;
+      const { productId } = req?.params;
+
+      // Check if the product exists
+      const existingProduct = await Product.findById(productId);
+      if (!existingProduct) {
+        return sendErrorResponse(res, 404, "Product not found.");
+      }
+
+      // Check if the inventory exists
+      const InventoryFound = await Inventory.findOne({
+        uuid: existingProduct?.inventory,
+      });
+      if (!InventoryFound) {
+        return sendErrorResponse(res, 404, "Inventory not found.");
+      }
+
+      // Define file fields for each category (same as addProduct)
+      const fileFields = {
+        MedicalEquipmentAndDevices: [
+          "specificationFile",
+          "performanceTestingReportFile",
+        ],
+        Pharmaceuticals: [],
+        SkinHairCosmeticSupplies: [
+          "dermatologistTestedFile",
+          "pediatricianRecommendedFile",
+        ],
+        VitalHealthAndWellness: [],
+        MedicalConsumablesAndDisposables: [],
+        LaboratorySupplies: [],
+        DiagnosticAndMonitoringDevices: [
+          "specificationFile",
+          "performanceTestingReportFile",
+        ],
+        HospitalAndClinicSupplies: [],
+        OrthopedicSupplies: [],
+        DentalProducts: [],
+        EyeCareSupplies: [],
+        HomeHealthcareProducts:
+          ["performanceTestingReportFile"]?.toString()?.trim() || "",
+        AlternativeMedicines: ["healthClaimsFile"]?.toString()?.trim() || "",
+        EmergencyAndFirstAidSupplies: [],
+        DisinfectionAndHygieneSupplies: [],
+        NutritionAndDietaryProducts: [],
+        HealthcareITSolutions:
+          ["interoperabilityFile"]?.toString()?.trim() || "",
+      };
+
+      // Check if the category exists in the fileFields object
+      if (!fileFields[category]) {
+        return sendErrorResponse(res, 400, "Invalid category specified.");
+      }
+
+      // Retrieve file paths for general, inventory, compliance, and additional fields
+      const generalFiles = await getFilePathsEdit(req, res, ["image"]);
+      // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      const inventoryFiles = [...req?.body?.countries];
+      const complianceFiles = await getFilePathsEdit(req, res, [
+        "complianceFile",
+      ]);
+      const additionalFiles = await getFilePathsEdit(req, res, [
+        "guidelinesFile",
+      ]);
+      const secondaryMarketFiles = await getFilePathsEdit(req, res, [
+        "purchaseInvoiceFile",
+      ]);
+      const healthNSafetyFiles = await getFilePathsEdit(req, res, [
+        "safetyDatasheet",
+        "healthHazardRating",
+        "environmentalImpact",
+      ]);
+
+      // Retrieve file paths for the selected category only
+      const categoryFiles = await getFilePathsEdit(
+        req,
+        res,
+        fileFields[category]
+      );
+      let cNCFileNDateParsed;
+
+      try {
+        // Check if cNCFileNDate exists and is an array before applying filter
+        if (Array.isArray(req?.body?.cNCFileNDate)) {
+          cNCFileNDateParsed = req.body.cNCFileNDate.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else if (typeof req?.body?.cNCFileNDate === "string") {
+          // If it's a string, try to parse it as JSON and filter
+          cNCFileNDateParsed = JSON.parse(req.body?.cNCFileNDate)?.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else {
+          // Handle case where cNCFileNDate is neither an array nor a string
+          throw new Error("Invalid cNCFileNDate format.");
+        }
+      } catch (error) {
+        console.error("Error while parsing cNCFileNDate:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 400, "Invalid cNCFileNDate format.");
+      }
+
+      // Update existing product data
+      const updatedProductData = {
+        ...existingProduct._doc, // Use the existing product data
+        ...req?.body, // Overwrite with new data from request body
+        general: {
+          ...req?.body,
+          ...(generalFiles || []),
+        },
+
+        complianceFile: complianceFiles.complianceFile || [],
+        cNCFileNDate:
+          cNCFileNDateParsed?.length > 0
+            ? JSON.parse(cNCFileNDateParsed)
+                ?.map((ele, index) => {
+                  return {
+                    file:
+                      typeof ele?.file !== "string"
+                        ? complianceFiles?.complianceFile?.find((filename) => {
+                            const path = ele?.file?.path;
+
+                            // Ensure path is defined and log the file path
+                            if (!path) {
+                              return false; // If there's no path, skip this entry
+                            }
+
+                            const ext = path.split(".").pop(); // Get the file extension
+                            const sanitizedPath = path
+                              .replaceAll("./", "")
+                              .replaceAll(" ", "")
+                              .replaceAll(`.${ext}`, "");
+
+                            // Match file by sanitized name
+                            return filename?.includes(sanitizedPath);
+                          })
+                        : ele?.file ||
+                          complianceFiles?.complianceFile?.[index] ||
+                          "",
+
+                    date: ele?.date || "", // Log the date being used (if any)
+                  };
+                })
+                ?.filter((ele) => ele?.file || ele?.date)
+            : cNCFileNDateParsed,
+        additional: {
+          ...req?.body,
+          ...(additionalFiles || []),
+        },
+        healthNSafety: {
+          ...req?.body,
+          ...(healthNSafetyFiles || []),
+        },
+        [category]: {
+          ...req?.body,
+          ...(categoryFiles || []),
+        }, // Update category-specific fields
+      };
+
+      if (market == "secondary") {
+        updatedProductData["secondaryMarketDetails"] = {
+          ...req?.body,
+          ...(secondaryMarketFiles || []),
+        };
+      }
+
+      // Update the product in the database
+      const updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        updatedProductData,
+        { new: true }
+      );
+
+      if (!updatedProduct) {
+        return sendErrorResponse(res, 400, "Failed to update the product.");
+      }
+
+      const updatedInventoryData = {
+        ...req?.body,
+        stockedInDetails: JSON.parse(
+          req?.body?.stockedInDetails?.filter(
+            (value) => value != "[object Object]"
+          ) || []
+        ),
+        inventoryList: JSON.parse(
+          req?.body?.productPricingDetails?.filter(
+            (value) => value != "[object Object]"
+          ) || []
+        ),
+        ...(inventoryFiles || []),
+      };
+
+      // Update the inventory in the database
+      const updatedInventory = await Inventory.findOneAndUpdate(
+        { uuid: existingProduct?.inventory },
+        updatedInventoryData,
+        { new: true }
+      );
+
+      if (!updatedInventory) {
+        return sendErrorResponse(res, 400, "Failed to update the inventory.");
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Product updated successfully",
+        updatedProduct
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  editProduct2: async (req, res) => {
     try {
       const { category, market = "new" } = req?.body;
       const { productId } = req?.params;
@@ -1503,7 +1944,312 @@ module.exports = {
     }
   },
 
+  previewBulkUpload2: async (req, res) => {
+    try {
+      const { supplier_id } = req?.body;
+      const filePath = req.file.path;
+
+      // Utility function to parse CSV
+      const parseCSV = (filePath) => {
+        return new Promise((resolve, reject) => {
+          const results = [];
+          fs.createReadStream(filePath)
+            .pipe(csv())
+            .on("data", (data) => results.push(data))
+            .on("end", () => resolve(results))
+            .on("error", (err) => reject(err));
+        });
+      };
+
+      // Parse the CSV file
+      const results = await parseCSV(filePath);
+
+      // Check if the product exists
+      const existingSupplier = await Supplier.findById(supplier_id);
+      if (!existingSupplier) {
+        return sendErrorResponse(res, 404, "Supplier not found.");
+      }
+
+      const updatedResult = results?.map((result) => {
+        let updatedObject = {
+          // _id: productId ? productId : undefined, // Add _id if Product Id* exists
+          model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
+          name: result?.["Product Name*"]?.toString()?.trim() || "",
+          category: result?.["Product Category*"]?.toString()?.trim() || "",
+          subCategory:
+            result?.["Product Sub Category*"]?.toString()?.trim() || "",
+          upc:
+            result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
+          aboutManufacturer:
+            result?.["Short Description*"]?.toString()?.trim() || "",
+          brand: result?.["Brand Name"]?.toString()?.trim() || "",
+          form: result?.["Product Type/Form"]?.toString()?.trim() || "",
+          quantity: Number(result?.["Product Total Quantity*"]) || 0 || 0,
+          volumn: result?.["Product Volume"]?.toString()?.trim() || "",
+          volumeUnit: result?.["Product Volume Unit"]?.toString()?.trim() || "",
+          dimension: result?.["Product Dimension"]?.toString()?.trim() || "",
+          dimensionUnit:
+            result?.["Product Dimension Unit"]?.toString()?.trim() || "",
+          weight: Number(result?.["Product Weight"]) || 0,
+          unit: result?.["Product Weight Units"]?.toString()?.trim() || "",
+          unit_tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
+          packageType:
+            result?.["Product Packaging Type"]?.toString()?.trim() || "",
+          packageMaterial:
+            result?.["Product Packaging Material"]?.toString()?.trim() || "",
+          storage: result?.["Storage Conditions"]?.toString()?.trim() || "",
+          manufacturer: result?.["Manufacturer Name"]?.toString()?.trim() || "",
+          countryOfOrigin:
+            result?.["Manufacturer Country of Origin"]?.toString()?.trim() ||
+            "",
+          image:
+            result?.["Product Image"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          description:
+            result?.["Product Description*"]?.toString()?.trim() || "",
+          date: result?.["Date of Manufacture"]?.toString()?.trim() || "",
+          sku: result?.["SKU"]?.toString()?.trim() || "",
+          stock: result?.["Stock*"]?.toString()?.trim() || "",
+          countries:
+            result?.["Stocked in Countries*"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
+          country:
+            result?.["Country where Stock Trades"]?.toString()?.trim() || "",
+          quantity1: Number(result?.["Stock Quantity"]) || 0 || 0,
+          quantity2: Number(result?.["Quantity From*"]) || 0,
+          quantity3: Number(result?.["Quantity To*"]) || 0,
+          price: Number(result?.["Cost Per Product*"]) || 0,
+          deliveryTime:
+            result?.["Est. Delivery Time"]?.toString()?.trim() || "",
+          file:
+            result?.["Regulatory Compliance"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
+          date3: result?.["Date of Expiry"]?.toString()?.trim() || "",
+          safetyDatasheet:
+            result?.["Safety Datasheet"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
+          healthHazardRating:
+            result?.["Health Hazard Rating"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
+          environmentalImpact:
+            result?.["Environmental Impact"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
+          warranty: result?.["Warranty"]?.toString()?.trim() || "",
+          guidelinesFile:
+            result?.["User Guidelines"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [], // array
+          other: result?.["Other Information"]?.toString()?.trim() || "",
+        };
+
+        // Call the helper function to handle category-specific updates
+        updatedObject = {
+          ...updatedObject,
+          ...handleProductCategorySwitch(result),
+        };
+
+        return updatedObject;
+      });
+
+      const previewResponse = updatedResult
+        ?.map((elem, index) => {
+          const elemCat = elem?.category;
+
+          // Loop through each key in the object
+          for (const key in elem) {
+            if (elem.hasOwnProperty(key)) {
+              const fieldName = getFieldName(
+                key,
+                additionalCheckFieldName(elemCat, key)
+              );
+
+              elem[key] = {
+                value: elem[key],
+                fieldName: fieldName,
+                error:
+                  validateFields(
+                    fieldName?.includes("*"),
+                    elem[key],
+                    fieldName,
+                    typeof elem[key]
+                  ) || undefined,
+              };
+            }
+          }
+          return elem;
+        })
+        ?.map((ele) => {
+          return {
+            ...ele,
+            anotherCategory: {
+              ...ele?.anotherCategory,
+              error:
+                validateAnotherCategory(
+                  ele?.category?.value,
+                  ele?.subCategory?.value,
+                  ele?.anotherCategory?.value
+                ) == true
+                  ? true
+                  : undefined,
+            },
+          };
+        });
+
+      const previewHeadings = Object?.values(previewResponse?.[0])?.map(
+        (field) => field?.fieldName
+      );
+
+      const entriesWithErrors = previewResponse?.filter((item) =>
+        Object.values(item).some((field) => field.error)
+      );
+
+      // Filter out elements without errors
+      const entriesWithoutErrors = previewResponse?.filter(
+        (item) => !Object.values(item).some((field) => field.error)
+      );
+
+      // Remove the CSV file after processing
+      fs.unlinkSync(filePath);
+
+      return sendSuccessResponse(
+        res,
+        200,
+        `${entriesWithoutErrors?.length} ${
+          entriesWithoutErrors?.length == 1 ? "product" : "products"
+        } imported successfully.`,
+        {
+          headings: previewHeadings || [],
+          entriesWithErrors: entriesWithErrors || [],
+          entriesWithErrorsCount: entriesWithErrors?.length || 0,
+          entriesWithoutErrors: entriesWithoutErrors || [],
+          entriesWithoutErrorsCount: entriesWithoutErrors?.length || 0,
+        }
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
   bulkUpload: async (req, res) => {
+    try {
+      const { products } = req?.body;
+      // Extract the value of each key
+      const inventoryArray = [];
+      const extractedValues = products?.map((item) => {
+        const inventoryUUId = uuidv4();
+        const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+        const extracted = {};
+
+        const inventoryObj = {
+          uuid: inventoryUUId,
+          productId: product_id,
+          sku: item?.sku?.value,
+          stock: item?.stock?.value,
+          countries: item?.countries?.value,
+          date: item?.date?.value,
+          stockedInDetails: [
+            {
+              country: item?.country?.value,
+              quantity: item?.quantity1?.value,
+            },
+          ],
+          inventoryList: [
+            {
+              quantityFrom: item?.quantity2?.value,
+              quantityTo: item?.quantity3?.value,
+              price: item?.price?.value,
+              deliveryTime: item?.deliveryTime?.value,
+            },
+          ],
+          isDeleted: false,
+        };
+        inventoryArray?.push(inventoryObj);
+        // const category_name = item?.category?.value;
+        for (const [key, field] of Object.entries(item)) {
+          if (key == "category") {
+            extracted[key] = getCategoryName(field?.value);
+          } else {
+            extracted[key] = field.value; // Extract the value
+          }
+        }
+        delete extracted?._id;
+        return {
+          ...extracted,
+          general: extracted,
+          complianceFile: [extracted?.file?.[0] || ""],
+          cNCFileNDate: [
+            {
+              file: extracted?.file?.[0] || "",
+              date: extracted?.date3 || "",
+            },
+          ]
+            ?.filter(
+              (ele) =>
+                ele?.file != "" ||
+                ele?.file != undefined ||
+                ele?.file != null ||
+                ele?.date != "" ||
+                ele?.date != undefined ||
+                ele?.date != null
+            )
+            ?.filter((ele) => ele?.file || ele?.date),
+          additional: extracted,
+          market: "new",
+          isDeleted: false,
+          bulkUpload: true,
+          healthNSafety: extracted,
+          inventory: inventoryUUId,
+          product_id,
+          [extracted?.category]: { ...extracted },
+        };
+      });
+
+      // Insert multiple records into MongoDB
+      const entries = await Product.insertMany(extractedValues);
+
+      if (!entries || entries?.length == 0) {
+        return sendErrorResponse(res, 400, "Failed to add bulk products.");
+      }
+
+      if (inventoryArray?.length > 0) {
+        const inventories = await Inventory.insertMany(inventoryArray);
+
+        if (!inventories || inventories?.length == 0) {
+          return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
+        }
+      }
+      return sendSuccessResponse(
+        res,
+        200,
+        ` ${entries.length} ${
+          entries?.length == 1 ? "product" : "products"
+        } have been uploaded successfully.`,
+        entries
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+  
+  bulkUpload2: async (req, res) => {
     try {
       const { products } = req?.body;
       // Extract the value of each key
