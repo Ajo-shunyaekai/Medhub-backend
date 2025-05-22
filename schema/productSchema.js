@@ -1644,84 +1644,84 @@ const productSchema = new Schema(
       license: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HealthcareITSolutions" ? !!v : true;
-          },
-          message: "Validation Error: License is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HealthcareITSolutions" ? !!v : true;
+        //   },
+        //   message: "Validation Error: License is required.",
+        // },
       },
       scalabilityInfo: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HealthcareITSolutions" ? !!v : true;
-          },
-          message: "Validation Error: Scalability Info is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HealthcareITSolutions" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Scalability Info is required.",
+        // },
       },
       addOns: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HealthcareITSolutions" ? !!v : true;
-          },
-          message: "Validation Error: Add-Ons is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HealthcareITSolutions" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Add-Ons is required.",
+        // },
       },
       interoperability: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HealthcareITSolutions" ? !!v : true;
-          },
-          message: "Validation Error: Interoperability is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HealthcareITSolutions" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Interoperability is required.",
+        // },
       },
       interoperabilityFile: [
         {
           type: String,
           trim: true,
-          validate: {
-            validator: function (v) {
-              return this.category === "HealthcareITSolutions" ? !!v : true;
-            },
-            message: "Validation Error: Interoperability File is required.",
-          },
+          // validate: {
+          //   validator: function (v) {
+          //     return this.category === "HealthcareITSolutions" ? !!v : true;
+          //   },
+          //   message: "Validation Error: Interoperability File is required.",
+          // },
         },
       ],
       userAccess: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HealthcareITSolutions" ? !!v : true;
-          },
-          message: "Validation Error: User Access is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HealthcareITSolutions" ? !!v : true;
+        //   },
+        //   message: "Validation Error: User Access is required.",
+        // },
       },
       keyFeatures: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HealthcareITSolutions" ? !!v : true;
-          },
-          message: "Validation Error: Key Features is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HealthcareITSolutions" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Key Features is required.",
+        // },
       },
       coreFunctionalities: {
         type: String,
         trim: true,
-        validate: {
-          validator: function (v) {
-            return this.category === "HealthcareITSolutions" ? !!v : true;
-          },
-          message: "Validation Error: Core Functionalities is required.",
-        },
+        // validate: {
+        //   validator: function (v) {
+        //     return this.category === "HealthcareITSolutions" ? !!v : true;
+        //   },
+        //   message: "Validation Error: Core Functionalities is required.",
+        // },
       },
     },
   },
