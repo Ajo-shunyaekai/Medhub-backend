@@ -11,15 +11,17 @@ const {
 const Supplier = require("../schema/supplierSchema");
 const Inventory = require("../schema/inventorySchema");
 const Buyer = require("../schema/buyerSchema");
-const Product = require("../schema/productSchema");
+const Product = require("../schema/productSchema2");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
 const { parse } = require("json2csv");
 
 const {
   getFieldName,
+  getFieldName2,
   validateFields,
   handleProductCategorySwitch,
+  handleProductCategorySwitch2,
   getCategoryName,
   additionalCheckFieldName,
 } = require("../utils/bulkUploadProduct");
@@ -2018,7 +2020,7 @@ module.exports = {
               ?.filter((ele) => ele != "" || ele != undefined || ele != null)
               ?.filter((ele) => ele) || [], // array
           country:
-            result?.["Country where Stock Trades"]?.toString()?.trim() || "",
+            result?.["Country where Stock Trades*"]?.toString()?.trim() || "",
           quantity1: Number(result?.["Stock Quantity"]) || 0 || 0,
           quantity2: Number(result?.["Quantity From*"]) || 0,
           quantity3: Number(result?.["Quantity To*"]) || 0,
@@ -2063,7 +2065,7 @@ module.exports = {
         // Call the helper function to handle category-specific updates
         updatedObject = {
           ...updatedObject,
-          ...handleProductCategorySwitch(result),
+          ...handleProductCategorySwitch2(result),
         };
 
         return updatedObject;
@@ -2076,7 +2078,7 @@ module.exports = {
           // Loop through each key in the object
           for (const key in elem) {
             if (elem.hasOwnProperty(key)) {
-              const fieldName = getFieldName(
+              const fieldName = getFieldName2(
                 key,
                 additionalCheckFieldName(elemCat, key)
               );
@@ -2380,6 +2382,56 @@ module.exports = {
           if (key === "_id") continue;
 
           extracted[getFieldName(key, additionalCheckFieldName(elemCat, key))] =
+            String(value); // Assign the mapped field name and the value
+        }
+
+        return extracted;
+      });
+
+      // Convert the flattened data to CSV
+      const csv = parse(extractedValues);
+
+      // Set headers for file download
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=product.csv");
+
+      // Send the CSV file as a response
+      res.status(200).send(csv);
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  csvDownload2: async (req, res) => {
+    try {
+      const { products } = req?.body;
+
+      // Extract the value of each key and dynamically set the field names
+      const extractedValues = products?.map((item) => {
+        const elemCat = item?.category;
+        const extracted = {};
+
+        for (const [key, field] of Object.entries(item)) {
+          let value = field.value; // Get the field value
+
+          // If the value is an array, join it as a string
+          if (Array.isArray(value)) {
+            value = value.join(", ");
+          }
+
+          // If the value is a number and it's 0, replace it with an empty string
+          if (
+            !isNaN(Number(value)) &&
+            typeof value === "number" &&
+            value === 0
+          ) {
+            value = "";
+          }
+
+          // Remove the "_id" field if present
+          if (key === "_id") continue;
+
+          extracted[getFieldName2(key, additionalCheckFieldName(elemCat, key))] =
             String(value); // Assign the mapped field name and the value
         }
 

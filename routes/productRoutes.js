@@ -13,13 +13,18 @@ const {
   getAllProducts,
   getProductDetails,
   addProduct,
+  addProduct2,
   editProduct,
+  editProduct2,
   deleteProduct,
   bulkUpload,
+  bulkUpload2,
   productSuppliers,
   otherProducts,
   previewBulkUpload,
+  previewBulkUpload2,
   csvDownload,
+  csvDownload2,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -41,14 +46,16 @@ router.post(
   `/bulk-upload`,
   checkAuthorization,
   authenticationNAuthorization,
-  bulkUpload
+  // bulkUpload
+  bulkUpload2
 );
 
 router.post(
   `/csv-download`,
   checkAuthorization,
   authenticationNAuthorization,
-  csvDownload
+  // csvDownload
+  csvDownload2
 );
 
 router.post(
@@ -56,7 +63,8 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   CSVupload.single("csvfile"),
-  previewBulkUpload
+  // previewBulkUpload
+  previewBulkUpload2
 );
 
 router.post(
@@ -68,7 +76,8 @@ router.post(
   generalValidationRules,
   handleValidationErrors,
   addProductFileMiddleware,
-  addProduct
+  // addProduct
+  addProduct2
 );
 
 router.post(
@@ -80,7 +89,8 @@ router.post(
   editGeneralValidationRules,
   handleValidationErrors,
   editProductFileMiddleware,
-  editProduct
+  // editProduct
+  editProduct2
 );
 
 router.post(
