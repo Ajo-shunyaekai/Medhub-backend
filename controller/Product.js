@@ -11,7 +11,7 @@ const {
 const Supplier = require("../schema/supplierSchema");
 const Inventory = require("../schema/inventorySchema");
 const Buyer = require("../schema/buyerSchema");
-const Product = require("../schema/productSchema");
+const Product = require("../schema/productSchema2");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
 const { parse } = require("json2csv");
