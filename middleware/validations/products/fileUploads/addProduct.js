@@ -57,17 +57,17 @@ const addProductFileMiddleware = (req, res, next) => {
     }
 
     // Check conditions for the "HealthcareITSolutions" category
-    if (category == "HealthcareITSolutions") {
-      // Check if the interoperabilityFile is uploaded
-      if (!req?.files?.interoperabilityFile) {
-        const err = new Error(
-          "Interoperability file is required for Healthcare IT Solutions"
-        );
-        return handleCatchBlockError(req, res, err);
-        logErrorToFile(err, req); // Log the error to a file for persistence
-        return sendErrorResponse(res, 400, err.message, err); // Send an error response back
-      }
-    }
+    // if (category == "HealthcareITSolutions") {
+    //   // Check if the interoperabilityFile is uploaded
+    //   if (!req?.files?.interoperabilityFile) {
+    //     const err = new Error(
+    //       "Interoperability file is required for Healthcare IT Solutions"
+    //     );
+    //     return handleCatchBlockError(req, res, err);
+    //     logErrorToFile(err, req); // Log the error to a file for persistence
+    //     return sendErrorResponse(res, 400, err.message, err); // Send an error response back
+    //   }
+    // }
 
     // If all validations pass, proceed to the next middleware or route handler
     next();

@@ -751,20 +751,20 @@ const categorySpecificValidationRules = [
             "IoT-Enabled Medical Devices",
           ])
           .withMessage("Sub Category is invalid."),
-        body("license").notEmpty().withMessage("License is required."),
-        body("scalabilityInfo")
-          .notEmpty()
-          .withMessage("Scalability Info is required."),
-        body("addOns").notEmpty().withMessage("Add-Ons is required."),
-        body("interoperability")
-          .notEmpty()
-          .withMessage("Interoperability is required."),
+        // body("license").notEmpty().withMessage("License is required."),
+        // body("scalabilityInfo")
+        //   .notEmpty()
+        //   .withMessage("Scalability Info is required."),
+        // body("addOns").notEmpty().withMessage("Add-Ons is required."),
+        // body("interoperability")
+        //   .notEmpty()
+        //   .withMessage("Interoperability is required."),
 
-        body("userAccess").notEmpty().withMessage("User Access is required."),
-        body("keyFeatures").notEmpty().withMessage("Key Features is required."),
-        body("coreFunctionalities")
-          .notEmpty()
-          .withMessage("Core Functionalities is required."),
+        // body("userAccess").notEmpty().withMessage("User Access is required."),
+        // body("keyFeatures").notEmpty().withMessage("Key Features is required."),
+        // body("coreFunctionalities")
+        //   .notEmpty()
+        //   .withMessage("Core Functionalities is required."),
       ];
     }
 
@@ -1249,20 +1249,20 @@ const categorySpecificValidationRules2 = [
             "IoT-Enabled Medical Devices",
           ])
           .withMessage("Sub Category is invalid."),
-        body("license").notEmpty().withMessage("License is required."),
-        body("scalabilityInfo")
-          .notEmpty()
-          .withMessage("Scalability Info is required."),
-        body("addOns").notEmpty().withMessage("Add-Ons is required."),
-        body("interoperability")
-          .notEmpty()
-          .withMessage("Interoperability is required."),
+        // body("license").notEmpty().withMessage("License is required."),
+        // body("scalabilityInfo")
+        //   .notEmpty()
+        //   .withMessage("Scalability Info is required."),
+        // body("addOns").notEmpty().withMessage("Add-Ons is required."),
+        // body("interoperability")
+        //   .notEmpty()
+        //   .withMessage("Interoperability is required."),
 
-        body("userAccess").notEmpty().withMessage("User Access is required."),
-        body("keyFeatures").notEmpty().withMessage("Key Features is required."),
-        body("coreFunctionalities")
-          .notEmpty()
-          .withMessage("Core Functionalities is required."),
+        // body("userAccess").notEmpty().withMessage("User Access is required."),
+        // body("keyFeatures").notEmpty().withMessage("Key Features is required."),
+        // body("coreFunctionalities")
+        //   .notEmpty()
+        //   .withMessage("Core Functionalities is required."),
       ];
     }
 
