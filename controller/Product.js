@@ -2020,7 +2020,7 @@ module.exports = {
               ?.filter((ele) => ele != "" || ele != undefined || ele != null)
               ?.filter((ele) => ele) || [], // array
           country:
-            result?.["Country where Stock Trades"]?.toString()?.trim() || "",
+            result?.["Country where Stock Trades*"]?.toString()?.trim() || "",
           quantity1: Number(result?.["Stock Quantity"]) || 0 || 0,
           quantity2: Number(result?.["Quantity From*"]) || 0,
           quantity3: Number(result?.["Quantity To*"]) || 0,
