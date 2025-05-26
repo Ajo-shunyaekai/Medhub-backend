@@ -1899,14 +1899,15 @@ module.exports = {
             ...ele,
             anotherCategory: {
               ...ele?.anotherCategory,
-              error:
-                validateAnotherCategory(
-                  ele?.category?.value,
-                  ele?.subCategory?.value,
-                  ele?.anotherCategory?.value
-                ) == true
+              error: ele?.anotherCategory?.value
+                ? validateAnotherCategory(
+                    ele?.category?.value,
+                    ele?.subCategory?.value,
+                    ele?.anotherCategory?.value
+                  ) === true
                   ? true
-                  : undefined,
+                  : undefined
+                : undefined,
             },
           };
         });
@@ -2103,14 +2104,15 @@ module.exports = {
             ...ele,
             anotherCategory: {
               ...ele?.anotherCategory,
-              error:
-                validateAnotherCategory(
-                  ele?.category?.value,
-                  ele?.subCategory?.value,
-                  ele?.anotherCategory?.value
-                ) == true
+              error: ele?.anotherCategory?.value
+                ? validateAnotherCategory(
+                    ele?.category?.value,
+                    ele?.subCategory?.value,
+                    ele?.anotherCategory?.value
+                  ) === true
                   ? true
-                  : undefined,
+                  : undefined
+                : undefined,
             },
           };
         });
@@ -2250,7 +2252,7 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-  
+
   bulkUpload2: async (req, res) => {
     try {
       const { products } = req?.body;
@@ -2431,8 +2433,9 @@ module.exports = {
           // Remove the "_id" field if present
           if (key === "_id") continue;
 
-          extracted[getFieldName2(key, additionalCheckFieldName(elemCat, key))] =
-            String(value); // Assign the mapped field name and the value
+          extracted[
+            getFieldName2(key, additionalCheckFieldName(elemCat, key))
+          ] = String(value); // Assign the mapped field name and the value
         }
 
         return extracted;

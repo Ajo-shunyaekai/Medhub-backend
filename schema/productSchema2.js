@@ -565,7 +565,7 @@ const productSchema = new Schema(
       },
       dermatologistTested: {
         type: String,
-        enum: ["Yes", "No"],
+        enum: ["Yes", "No", ""],
         // validate: {
         //   validator: function (v) {
         //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
@@ -581,7 +581,7 @@ const productSchema = new Schema(
       ],
       pediatricianRecommended: {
         type: String,
-        enum: ["Yes", "No"],
+        enum: ["Yes", "No", ""],
         // validate: {
         //   validator: function (v) {
         //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
@@ -1600,7 +1600,7 @@ const productSchema = new Schema(
       dairyFree: {
         type: String,
         trim: true,
-        enum: ["Yes", "No"],
+        enum: ["Yes", "No", ""],
         trim: true,
         // validate: {
         //   validator: function (v) {
