@@ -569,7 +569,7 @@ const handleProductCategorySwitch2 = (result) => {
       updatedObject["productLongevity"] =
         result?.["Product Longevity"]?.toString()?.trim() || "";
       updatedObject["foldability"] =
-        result?.["Foldability*"]?.toString()?.trim() || "";
+        result?.["Foldability"]?.toString()?.trim() || "";
       updatedObject["expiry"] =
         result?.["Shelf Life/Expiry"]?.toString()?.trim() || "";
       break;
@@ -2017,7 +2017,7 @@ const getFieldName2 = (key, additionalCheck) => {
       break;
 
     case "foldability":
-      fieldName = "Foldability*";
+      fieldName = "Foldability";
       break;
 
     // case "EyeCareSupplies":
