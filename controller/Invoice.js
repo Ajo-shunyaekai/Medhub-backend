@@ -298,6 +298,15 @@ module.exports = {
           },
         },
         {
+          // New lookup for the buyer
+          $lookup: {
+            from: "buyers", // The buyers collection
+            localField: "buyer_id", // Assuming buyer_id is linked
+            foreignField: "buyer_id",
+            as: "buyer",
+          },
+        },
+        {
           $project: {
             invoice_id: 1,
             order_id: 1,
@@ -333,6 +342,7 @@ module.exports = {
             mode_of_payment: 1,
             created_at: 1,
             supplier: { $arrayElemAt: ["$supplier", 0] },
+            buyer: { $arrayElemAt: ["$buyer", 0] },
           },
         },
         {
@@ -396,6 +406,7 @@ module.exports = {
             amount_paid: { $first: "$amount_paid" },
             created_at: { $first: "$created_at" },
             supplier: { $first: "$supplier" },
+            buyer: { $first: "$buyer" },
             totalPrice: { $sum: "$items.item_price" },
           },
         },
