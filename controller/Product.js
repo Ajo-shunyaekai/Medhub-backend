@@ -12,6 +12,7 @@ const Supplier = require("../schema/supplierSchema");
 const Inventory = require("../schema/inventorySchema");
 const Buyer = require("../schema/buyerSchema");
 const Product = require("../schema/productSchema2");
+const CsvFile = require("../schema/csvFilesSchema");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
 const { parse } = require("json2csv");
@@ -2450,6 +2451,123 @@ module.exports = {
 
       // Send the CSV file as a response
       res.status(200).send(csv);
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  uploadCsvSheet: async (req, res) => {
+    try {
+      const { usertype } = req.headers;
+      const { id, category } = req.params;
+
+      if (!usertype) return sendErrorResponse(res, 400, "Need User type.");
+      if (!id) return sendErrorResponse(res, 400, "Need User Id.");
+      if (!category)
+        return sendErrorResponse(res, 400, "Need Product Category.");
+
+      // Get uploaded CSV files (should be an array of file URLs)
+      const csvFilesFromAWS = await getFilePathsAdd(req, res, ["csvFile"]);
+      if (!csvFilesFromAWS || !csvFilesFromAWS.length) {
+        return sendErrorResponse(res, 400, "No files uploaded.");
+      }
+
+      const existingDoc = await CsvFile.findOne({ userId: id });
+
+      if (existingDoc) {
+        // Append a new object to the category's array
+        const updateQuery = {
+          $push: {
+            [category]: {
+              file: csvFilesFromAWS?.[0], // <- Must match schema: array of strings
+              status: "Pending",
+            },
+          },
+        };
+
+        const updatedDoc = await CsvFile.findOneAndUpdate(
+          { userId: id },
+          updateQuery,
+          { new: true }
+        );
+
+        return sendSuccessResponse(
+          res,
+          200,
+          "CSV File uploaded successfully",
+          updatedDoc
+        );
+      } else {
+        // Create a new document with one entry under the selected category
+        const newCsvFile = await CsvFile.create({
+          userId: id,
+          isMainTemplate: usertype === "Supplier" ? false : true,
+          [category]: [
+            {
+              file: csvFilesFromAWS,
+              status: "Pending",
+            },
+          ],
+        });
+
+        return sendSuccessResponse(
+          res,
+          200,
+          "CSV File uploaded successfully",
+          newCsvFile
+        );
+      }
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  getSupplierCsvFiles: async (req, res) => {
+    try {
+      const { id } = req?.params;
+      if (!id) {
+        return sendErrorResponse(res, 400, "Need User Id.");
+      }
+
+      const csvFile = await CsvFile.findOne({ userId: id });
+
+      if (!csvFile) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Need CSV File uploaded by this Supplier."
+        );
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Profile updated successfully",
+        csvFile
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  getCsvTemplateFiles: async (req, res) => {
+    try {
+      const csvFile = await CsvFile.findOne({ isMainTemplate: true });
+
+      if (!csvFile) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Need CSV File uploaded by this Supplier."
+        );
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Profile updated successfully",
+        csvFile
+      );
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }

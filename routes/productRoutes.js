@@ -25,6 +25,9 @@ const {
   previewBulkUpload2,
   csvDownload,
   csvDownload2,
+  uploadCsvSheet,
+  getCsvTemplateFiles,
+  getSupplierCsvFiles,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -39,6 +42,7 @@ const {
 } = require("../middleware/validations/validationErrorHandler");
 const editProductFileMiddleware = require("../middleware/validations/products/fileUploads/editProduct");
 const addProductFileMiddleware = require("../middleware/validations/products/fileUploads/addProduct");
+const { bulkProductCSVUpload } = require("../middleware/multer/bulkUpload");
 
 router.post(`/`, checkAuthorization, getAllProducts); // according to the market, user
 
@@ -112,6 +116,30 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   otherProducts
+);
+
+router.post(
+  "/upload-csv-sheet/:category/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  uploadCsvSheet
+);
+
+router.post(
+  "/get-supplier-csv-files/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  getSupplierCsvFiles
+);
+
+router.post(
+  "/get-csv-template-files",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  getCsvTemplateFiles
 );
 
 router.post(`/:id`, checkAuthorization, getProductDetails);
