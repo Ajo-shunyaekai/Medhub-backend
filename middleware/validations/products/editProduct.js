@@ -2,13 +2,11 @@ const { body } = require("express-validator");
 
 // General validation for product details
 const editGeneralValidationRules = [
-  body("name")
-    .notEmpty()
-    .withMessage("Product Name is required."),
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "Product Name must be alphanumeric (letters, numbers, and spaces only)."
-    // ),
+  body("name").notEmpty().withMessage("Product Name is required."),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "Product Name must be alphanumeric (letters, numbers, and spaces only)."
+  // ),
 
   body("market")
     .notEmpty()
@@ -59,10 +57,10 @@ const editGeneralValidationRules = [
   // body("manufacturer")
   //   .notEmpty()
   //   .withMessage("Manufacturer is required."),
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
-    // ),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
+  // ),
 
   body("aboutManufacturer")
     .notEmpty()
@@ -76,7 +74,9 @@ const editGeneralValidationRules = [
     .notEmpty()
     .withMessage("Part/Model Number is required.")
     .matches(/^[a-zA-Z0-9\s\-\/]+$/)
-    .withMessage("Part/Model Number can only contain letters, numbers, spaces, hyphens (-), and slashes (/)."),
+    .withMessage(
+      "Part/Model Number can only contain letters, numbers, spaces, hyphens (-), and slashes (/)."
+    ),
 
   // body("form")
   //   .notEmpty()
@@ -139,13 +139,11 @@ const editGeneralValidationRules = [
 
 // General validation for product details
 const editGeneralValidationRules2 = [
-  body("name")
-    .notEmpty()
-    .withMessage("Product Name is required."),
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "Product Name must be alphanumeric (letters, numbers, and spaces only)."
-    // ),
+  body("name").notEmpty().withMessage("Product Name is required."),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "Product Name must be alphanumeric (letters, numbers, and spaces only)."
+  // ),
 
   body("market")
     .notEmpty()
@@ -196,10 +194,10 @@ const editGeneralValidationRules2 = [
   // body("manufacturer")
   //   .notEmpty()
   //   .withMessage("Manufacturer is required."),
-    // .matches(/^[a-zA-Z0-9\s]+$/)
-    // .withMessage(
-    //   "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
-    // ),
+  // .matches(/^[a-zA-Z0-9\s]+$/)
+  // .withMessage(
+  //   "Manufacturer must be alphanumeric (letters, numbers, and spaces only)."
+  // ),
 
   body("aboutManufacturer")
     .notEmpty()
@@ -213,7 +211,9 @@ const editGeneralValidationRules2 = [
     .notEmpty()
     .withMessage("Part/Model Number is required.")
     .matches(/^[a-zA-Z0-9\s\-\/]+$/)
-    .withMessage("Part/Model Number can only contain letters, numbers, spaces, hyphens (-), and slashes (/)."),
+    .withMessage(
+      "Part/Model Number can only contain letters, numbers, spaces, hyphens (-), and slashes (/)."
+    ),
 
   // body("form")
   //   .notEmpty()
@@ -291,6 +291,8 @@ const editCategorySpecificValidationRules = [
             "Mobility Aids",
             "Respiratory Care",
             "Care Products",
+            "Blood Pressure Monitor",
+            "Anaesthetic Equipment",
           ])
           .withMessage("Sub Category is invalid."),
         body("specification")
@@ -485,6 +487,13 @@ const editCategorySpecificValidationRules = [
             "Sterilization Products",
             "Surgical Sutures & Adhesives",
             "Syringes, IV Sets & Catheters",
+            "PFT Mouthpiece",
+            "ECG Electrode",
+            "ECG Consumables",
+            "Ultrasound Consumables",
+            "CTG Paper",
+            "Infusion Pressure Bag",
+            "Connecting Cable",
           ])
           .withMessage("Sub Category is invalid."),
         // body("expiry")
@@ -789,6 +798,8 @@ const editCategorySpecificValidationRules2 = [
             "Mobility Aids",
             "Respiratory Care",
             "Care Products",
+            "Blood Pressure Monitor",
+            "Anaesthetic Equipment",
           ])
           .withMessage("Sub Category is invalid."),
         body("specification")
@@ -983,6 +994,13 @@ const editCategorySpecificValidationRules2 = [
             "Sterilization Products",
             "Surgical Sutures & Adhesives",
             "Syringes, IV Sets & Catheters",
+            "PFT Mouthpiece",
+            "ECG Electrode",
+            "ECG Consumables",
+            "Ultrasound Consumables",
+            "CTG Paper",
+            "Infusion Pressure Bag",
+            "Connecting Cable",
           ])
           .withMessage("Sub Category is invalid."),
         // body("expiry")
