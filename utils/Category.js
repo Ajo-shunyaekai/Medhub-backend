@@ -110,55 +110,13 @@ const categoriesData = [
           "CCTV Systems",
           "Alarm Monitoring Systems",
           "Access Control Monitors",
+          "Reusable SPO2 Sensor",
+          "Disposable SPO2 Sensor",
           "Services",
         ]
           ?.sort()
           ?.concat(["Other"]),
       },
-      // {
-      //   name: "Monitoring Devices",
-      //   anotherCategories: [
-      //     "Scalpels",
-      //     "Bone Saws",
-      //     "Rongeurs",
-      //     "Curettes",
-      //     "Needle Holders",
-      //     "Forceps (e.g., Thumb forceps, Tissue forceps, Allis forceps)",
-      //     "Towel Clamps",
-      //     "Hemostatic Clamps (e.g., Kelly, Mosquito, Crile clamps)",
-      //     "Vascular Clamps",
-      //     "Bulldog",
-      //     "Surgical Sutures",
-      //     "Surgical Staplers",
-      //     "Ligating",
-      //     "Endoscopes",
-      //     "Laryngoscopes",
-      //     "Otoscopes",
-      //     "Proctoscopes",
-      //     "Bone Chisels",
-      //     "Bone Files",
-      //     "Orthopedic Screws and Plates",
-      //     "Intramedullary Nails",
-      //     "Brain Retractors",
-      //     "Craniotomes",
-      //     "Penfield Dissectors",
-      //     "Uterine Dilators",
-      //     "Curettes (e.g., Sims Curette)",
-      //     "Tenaculum",
-      //     "Rib Spreaders",
-      //     "Aortic Punches",
-      //     "Vascular Clamps",
-      //     "Skin Graft Knives",
-      //     "Liposuction Cannulas",
-      //     "Delicate Scissors and Forceps",
-      //     "Surgical Trays",
-      //     "Suction Tubes (e.g., Yankauer, Poole suction tips)",
-      //     "Sponges and Sponge Forceps",
-      //     "Services",
-      //   ]
-      //     ?.sort()
-      //     ?.concat(["Other"]),
-      // },
       {
         name: "Mobility Aids",
         anotherCategories: [
@@ -213,6 +171,9 @@ const categoriesData = [
       {
         name: "Respiratory Care",
         anotherCategories: [
+          "Manual Resuscitator Bag",
+          "Table Top Nebulizer",
+          "Compressor Nebulizer",
           "Portable Oxygen Concentrators",
           "Stationary Oxygen Concentrators",
           "Oxygen Cylinders",
@@ -311,6 +272,28 @@ const categoriesData = [
           "Video Calling Devices (e.g., simplified tablets)",
           "Voice-Activated Assistants (e.g., Alexa, Google Home)",
           "Waste Disposal",
+          "Services",
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
+      {
+        name: "Blood Pressure Monitor",
+        anotherCategories: [
+          "Upper Arm BP Monitor",
+          "Digital BP Monitor",
+          "Services",
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
+      {
+        name: "Anaesthetic Equipment",
+        anotherCategories: [
+          "Prone Head Positioner",
+          "Soda Lime Glass",
+          "Stubby Laryngoscope Handle",
+          "Limbo Ventilator Circuit",
           "Services",
         ]
           ?.sort()
@@ -1050,6 +1033,61 @@ const categoriesData = [
     schema: "MedicalConsumablesAndDisposables",
     name: "Medical Consumables and Disposables",
     subCategories: [
+      {
+        name: "ECG Electrode",
+        anotherCategories: [
+          "Disposable ECG Electrode",
+          "Limb Clamp Electrode",
+          "Chest Electrode",
+          "Single Lead ECG Cable",
+          "3 Lead ECG Cable",
+          "5 Lead ECG Cable",
+          "10 Lead ECG Cable",
+          "ECG Connecting Cable",
+          "ECG Monitoring Cable",
+          "Services",
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
+      {
+        name: "ECG Consumables",
+        anotherCategories: ["ECG Gel", "Services"]?.sort()?.concat(["Other"]),
+      },
+      {
+        name: "Ultrasound Consumables",
+        anotherCategories: [
+          "Ultrasound Paper Roll",
+          "Ultrasound Gel",
+          "Services",
+        ]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
+      {
+        name: "CTG Paper",
+        anotherCategories: ["CTG Paper Roll", "Services"]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
+      {
+        name: "Infusion Pressure Bag",
+        anotherCategories: ["Infusion Pressure Bag", "Services"]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
+      {
+        name: "Connecting Cable",
+        anotherCategories: ["TMT Patient Cable", "Services"]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
+      {
+        name: "PFT Mouthpiece",
+        anotherCategories: ["Disposable Mouthpiece", "Services"]
+          ?.sort()
+          ?.concat(["Other"]),
+      },
       {
         name: "Bandages, Gauze, & Wound Dressings",
         anotherCategories: [
