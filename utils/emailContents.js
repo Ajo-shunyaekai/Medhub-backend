@@ -460,6 +460,138 @@ const adminMailOptionsContent = (
       `;
 };
 
+const enquiryMailToBuyerContent = (
+  buyer,
+  supplier,
+  products,
+  enquiryNumber,
+  logo
+) => {
+  return `
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+        <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+          <tr>
+            <td>
+              <p style="color: #555; font-size: 16px;">Dear <strong>${buyer}</strong>,</p>
+              <p style="color: #555; font-size: 16px;">Congratulations!! Your Medhub Global enquiry has been sent to ${supplier}, Enquiry Number ${enquiryNumber}</p>
+
+              <h3 style="color: #333;">Enquiry Details:</h3>
+              <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr style="background-color: #f2f2f2;">
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product Image</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product ID</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product Name</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Quantity Required</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Listed Price</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Target Price</th>
+                </tr>
+                ${products
+                  .map(
+                    (product) => `
+                  <tr>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">
+                      <img src="${product.image}" alt="Product Image" style="width: 60px; height: 60px;">
+                    </td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.product_id}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.product_name}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.quantity_required}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.unit_price}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.target_price}</td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </table>
+
+              <h3 style="color: #333; margin-top: 20px;">Next Steps:</h3>
+              <p style="color: #555; font-size: 16px;">Once reviewed, the supplier will update the status. This will trigger an email notification for you to log back into Medhub Global to hopefully convert your enquiry into a Purchase order.</p>
+
+              <p style="color: #555; font-size: 16px;">Contact our Customer Support team if you need any help:  <a href="mailto:connect@medhub.global" style="color: #0066cc;">connect@medhub.global</a>.</p>
+
+              <p style="color: #555; font-size: 16px;">Thanking you again for your support!</p>
+
+              <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+              <img src="${logo}" alt="Medhub Global Logo" style="width: 60px; height: 60px;">
+            </td>
+          </tr>
+        </table>
+
+        <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
+          <p>&copy; 2025 Medhub Global. All rights reserved.</p>
+        </footer>
+      </body>
+    </html>
+  `;
+};
+
+const enquiryMailToSupplierContent = (
+  buyer,
+  supplier,
+  products,
+  enquiryNumber,
+  logo
+) => {
+  return `
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+        <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+          <tr>
+            <td>
+              <p style="color: #555; font-size: 16px;">Dear <strong>${supplier}</strong>,</p>
+              <p style="color: #555; font-size: 16px;">Congratulations!! You have received a Medhub Global enquiry from ${buyer}, Enquiry Number ${enquiryNumber}</p>
+
+              <h3 style="color: #333;">Enquiry Details:</h3>
+              <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr style="background-color: #f2f2f2;">
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product Image</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product ID</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product Name</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Quantity Required</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Listed Price</th>
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Target Price</th>
+                </tr>
+                ${products
+                  .map(
+                    (product) => `
+                  <tr>
+                    <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">
+                      <img src="${product.image}" alt="Product Image" style="width: 60px; height: 60px;">
+                    </td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.product_id}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.product_name}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.quantity_required}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.unit_price}</td>
+                    <td style="padding: 8px; text-align: left; border: 1px solid #ddd;">${product.target_price}</td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </table>
+
+              <h3 style="color: #333; margin-top: 20px;">Next Steps:</h3>
+              <p style="color: #555; font-size: 16px;">Please log into Medhub Global to process the Enquiry (Accept, Reject or modify)</p>
+
+              <p style="color: #555; font-size: 16px;"><a href="https://medhub.global/supplier/login" style="color: #0066cc;">https://medhub.global/supplier/login</a>.</p>
+
+              <p style="color: #555; font-size: 16px;">Contact our Customer Support team if you need any help:  <a href="mailto:connect@medhub.global" style="color: #0066cc;">connect@medhub.global</a>.</p>
+
+              <p style="color: #555; font-size: 16px;">Thanking you again for your support!</p>
+
+              <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+              <img src="${logo}" alt="Medhub Global Logo" style="width: 60px; height: 60px;">
+            </td>
+          </tr>
+        </table>
+
+        <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
+          <p>&copy; 2025 Medhub Global. All rights reserved.</p>
+        </footer>
+      </body>
+    </html>
+  `;
+};
+
 module.exports = {
   contactUsContent,
   buyerRegistrationContent,
@@ -479,4 +611,6 @@ module.exports = {
   sendEmailConfirmationContent,
   adminMailOptionsContent,
   sendSupplierReminderEmailContent,
+  enquiryMailToBuyerContent,
+  enquiryMailToSupplierContent,
 };

@@ -226,5 +226,9 @@ module.exports = () => {
     Controller.editProfileDetails
   );
 
+  // routes.post("/update-admin-password",
+  //   Controller.updatePassword
+  // )
+
   return routes;
 };
