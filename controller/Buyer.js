@@ -1163,60 +1163,6 @@ module.exports = {
         };
       });
 
-      await Notification.insertMany(notifications);
-
-      // await Promise.all(
-      //   enquiries?.map(async (enq) => {
-      //     const supplier = await Supplier.findOne({
-      //       supplier_id: enq?.supplier_id,
-      //     });
-      //     const products = await Product.find();
-      //     const subject = `Medhub Global Enquiry: ${buyer.buyer_name}, Enquiry Number ${enq?.enquiry_id}`;
-      //     const subject2 = `Medhub Global Enquiry: ${supplier.supplier_name}, Enquiry Number ${enq?.enquiry_id}`;
-      //     const updatedEmailItems = enq?.items?.map((item) => {
-      //       const product = products.find(
-      //         (pdt) => pdt?.product_id == item?.product_id
-      //       );
-      //       const imageName = product?.general?.image?.[0];
-
-      //       let imageUrl = "";
-      //       if (imageName) {
-      //         if (imageName.startsWith("http")) {
-      //           imageUrl = imageName; // already full URL
-      //         } else {
-      //           imageUrl = `${process.env.SERVER_URL}/uploads/products/${imageName}`;
-      //         }
-      //       }
-
-      //       return {
-      //         ...item,
-      //         product_name: product?.general?.name,
-      //         image: imageUrl,
-      //       };
-      //     });
-      //     console.log("\n\n\n\n updatedEmailItems", updatedEmailItems);
-      //     // Send emails to suppliers
-      //     const body = enquiryMailToSupplierContent(
-      //       buyer.buyer_name,
-      //       supplier?.contact_person_name,
-      //       updatedEmailItems,
-      //       enquiryId
-      //     );
-      //     const recipientEmails = [supplier?.contact_person_email];
-      //     await sendEmail(recipientEmails, subject, body);
-
-      //     // Send emails to buyer
-      //     const body2 = enquiryMailToBuyerContent(
-      //       buyer.buyer_name,
-      //       supplier?.contact_person_name,
-      //       updatedEmailItems,
-      //       enquiryId
-      //     );
-      //     const recipientEmails2 = [buyer?.contact_person_email];
-      //     await sendEmail(recipientEmails2, subject2, body2);
-      //   })
-      // );
-
       await Promise.all(
         enquiries?.map(async (enq) => {
           const supplier = await Supplier.findOne({
@@ -1257,15 +1203,12 @@ module.exports = {
             };
           });
 
-          console.log("\n\n\n\n updatedEmailItems", updatedEmailItems);
-
           // Send email to supplier
           const bodySupplier = enquiryMailToSupplierContent(
             buyer_name,
             contact_person_name,
             updatedEmailItems,
-            enquiryId,
-            `${process.env.SERVER_URL}/uploads/emailer_images/medhublogo.jpg`|| ""
+            enquiryId
           );
           await sendEmail(
             [contact_person_email],
@@ -1278,8 +1221,7 @@ module.exports = {
             buyer_name,
             contact_person_name,
             updatedEmailItems,
-            enquiryId,
-            `${process.env.SERVER_URL}/uploads/emailer_images/medhublogo.jpg`|| ""
+            enquiryId
           );
           await sendEmail(
             [buyer?.contact_person_email],

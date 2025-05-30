@@ -36,7 +36,7 @@ const buyerRegistrationContent = (buyer) => {
             <li>Registration Date: ${getTodayFormattedDate()}</li>
             </ul>
             <p>Please review the registration details and take any necessary actions to verify and approve the new account.</p>
-
+ 
             <p>Best regards,<br/>Medhub Global Team</p>
         `;
 };
@@ -216,15 +216,15 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
                 <p>Dear <strong>${name}</strong>,</p>
                 <p>We hope this message finds you well.</p>
                 <p>This email is to inform you about the status of your profile edit request submitted.</p>
-
+ 
                 <p class="status">Action Taken: <strong>${status}</strong></p>
-
+ 
                 <h2>Details:</h2>
                 <ul>
                     <li><strong>Company Type:</strong> ${userType}</li>
                     <li><strong>Status:</strong> ${status}</li>
                 </ul>
-
+ 
                 ${
                   status == "Approved"
                     ? `<p>
@@ -234,9 +234,9 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
                     Unfortunately, your profile edit request has been rejected. If you would like to know more about the reasons for this decision or if you would like to submit a revised request, please contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
                 </p>`
                 }
-
+ 
                 <p>Thank you for your understanding and for being a valued member of our community!</p>
-
+ 
                 <div class="footer">
                     <p>Best regards,</p>
                     <p>Medhub Global Team</p>
@@ -249,7 +249,7 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
 
 const createInvoiceContent = (buyer, reqObj) => {
   return `Dear ${buyer.contact_person_name},<br /><br />
-
+ 
                       We are pleased to inform you that the invoice for your order <strong>${reqObj.orderId}</strong> has been successfully generated.<br /><br />
                       
                       <strong>Total Payable Amount:</strong> ${reqObj.totalPayableAmount} USD<br /><br />
@@ -269,15 +269,15 @@ const updatePaymentStatusContent = (
   amount_paid
 ) => {
   return `Dear ${supplier.supplier_name},<br /><br />
-
+ 
                       We are pleased to inform you that the payment for <strong>Invoice ${invoice_id}</strong> associated with <strong>Order ${order_id}</strong> has been successfully completed.<br /><br />
-
+ 
                       <strong>Total Amount Paid:</strong> ${amount_paid} USD<br /><br />
-
+ 
                       If you require any further assistance, please do not hesitate to contact us.<br /><br />
-
+ 
                       <p>For support, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-
+ 
                       Best regards,<br />
                       <strong>Medhub Global Team</strong>`;
 };
@@ -321,7 +321,7 @@ const bookLogisticsContent = (supplier, buyer, order_id) => {
   Logistics Drop Details have been successfully submitted by <strong>${buyer.contact_person_name}</strong> for <strong>Order ID: ${order_id}</strong>.<br /><br />
   
   Please review the details and proceed accordingly.<br /><br />
-
+ 
   Thanks & Regards, <br />
   <strong>MedHub Global Team</strong>`;
 };
@@ -384,27 +384,27 @@ const sendSupplierReminderEmailContent = (orderId, orderDate, supplierName) => {
               <h2 style="text-align: center; color: #333;">Reminder: Please Proceed with the Order</h2>
               <p style="color: #555; font-size: 16px;">Dear <strong>${supplierName}</strong>,</p>
               <p style="color: #555; font-size: 16px;">This is a friendly reminder to kindly proceed with the order <strong>#${orderId}</strong> placed on <strong>${orderDate}</strong>.</p>
-
+ 
               <h3 style="color: #333;">Order Details:</h3>
               <ul style="color: #555; font-size: 16px;">
                 <li><strong>Order ID:</strong> ${orderId}</li>
                 <li><strong>Order Date:</strong> ${orderDate}</li>
               </ul>
-
+ 
               <p style="color: #555; font-size: 16px;">You can view and manage this order directly by clicking the link below:</p>
               <p style="color: #555; font-size: 16px;">
                 <a href="${orderLink}" style="color: #0066cc; text-decoration: none; font-weight: bold;">View Order #${orderId}</a>
               </p>
-
+ 
               <p style="color: #555; font-size: 16px;">If you have any questions or need further clarification, please do not hesitate to reach out to us.</p>
-
+ 
               <p style="color: #555; font-size: 16px;">We appreciate your timely attention to this matter.</p>
-
+ 
               <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
             </td>
           </tr>
         </table>
-
+ 
         <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
           <p>&copy; 2025 Medhub Global. All rights reserved.</p>
           <p>If you did not place this order, please ignore this email.</p>
@@ -433,7 +433,7 @@ const adminMailOptionsContent = (
                   <p style="color: #555; font-size: 16px;">A new subscription has been successfully created for the user <strong>${
                     userFound?.contact_person_name
                   }</strong>.</p>
-
+ 
                   <h3 style="color: #333;">Subscription Details:</h3>
                   <ul style="color: #555; font-size: 16px;">
                     <li><strong>Subscription Plan:</strong> ${name}</li>
@@ -443,13 +443,13 @@ const adminMailOptionsContent = (
                       usertype?.toLowerCase() == "buyer" ? "Buyer" : "Supplier"
                     }</li>
                   </ul>
-
+ 
                   <h3 style="color: #333;">Payment Details:</h3>
                   <ul style="color: #555; font-size: 16px;">
                     <li><strong>Amount Paid:</strong> $ ${amount}</li>
                     <li><strong>Payment Date:</strong> ${subscriptionStartDate}</li>
                   </ul>
-
+ 
                   <p style="color: #555; font-size: 16px;">If you need more details, please check the subscription records in the system.</p>
                   <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
                 </td>
@@ -465,18 +465,17 @@ const enquiryMailToBuyerContent = (
   supplier,
   products,
   enquiryNumber,
-  logo
 ) => {
   return `
     <html>
-      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
-        <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9;">
+        <table style="width: 100%; background-color: #ffffff; border-radius: 8px;">
           <tr>
             <td>
-              <p style="color: #555; font-size: 16px;">Dear <strong>${buyer}</strong>,</p>
-              <p style="color: #555; font-size: 16px;">Congratulations!! Your Medhub Global enquiry has been sent to ${supplier}, Enquiry Number ${enquiryNumber}</p>
-
-              <h3 style="color: #333;">Enquiry Details:</h3>
+              <p style="color: #212121; font-size: 16px;">Dear <strong>${buyer}</strong>,</p>
+              <p style="color: #212121; font-size: 16px;">Congratulations!! Your Medhub Global enquiry has been sent to ${supplier}, Enquiry Number ${enquiryNumber}</p>
+ 
+              <h3 style="color: #212121;">Enquiry Details:</h3>
               <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <tr style="background-color: #f2f2f2;">
                   <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product Image</th>
@@ -503,20 +502,20 @@ const enquiryMailToBuyerContent = (
                   )
                   .join("")}
               </table>
-
-              <h3 style="color: #333; margin-top: 20px;">Next Steps:</h3>
-              <p style="color: #555; font-size: 16px;">Once reviewed, the supplier will update the status. This will trigger an email notification for you to log back into Medhub Global to hopefully convert your enquiry into a Purchase order.</p>
-
-              <p style="color: #555; font-size: 16px;">Contact our Customer Support team if you need any help:  <a href="mailto:connect@medhub.global" style="color: #0066cc;">connect@medhub.global</a>.</p>
-
-              <p style="color: #555; font-size: 16px;">Thanking you again for your support!</p>
-
-              <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
-              <img src="${logo}" alt="Medhub Global Logo" style="width: 60px; height: 60px;">
+ 
+              <h3 style="color: #212121; margin-top: 20px;">Next Steps:</h3>
+              <p style="color: #212121; font-size: 16px;">Once reviewed, the supplier will update the status. This will trigger an email notification for you to log back into Medhub Global to hopefully convert your enquiry into a Purchase order.</p>
+ 
+              <p style="color: #212121; font-size: 16px;">Contact our Customer Support team if you need any help:  <a href="mailto:connect@medhub.global" style="color: #282f86;">connect@medhub.global</a>.</p>
+ 
+              <p style="color: #212121; font-size: 16px;">Thanking you again for your support!</p>
+ 
+              <p style="color: #212121; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+              <img src="https://medhubglobal.s3.ap-south-1.amazonaws.com/testing/1747649977234-image-medhublogo.jpg-1747649977210.jpeg" alt="Medhub Global Logo" style="width: 60px; height: 60px;">
             </td>
           </tr>
         </table>
-
+ 
         <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
           <p>&copy; 2025 Medhub Global. All rights reserved.</p>
         </footer>
@@ -530,18 +529,17 @@ const enquiryMailToSupplierContent = (
   supplier,
   products,
   enquiryNumber,
-  logo
 ) => {
   return `
     <html>
-      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
-        <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9;">
+        <table style="width: 100%; background-color: #ffffff; border-radius: 8px;">
           <tr>
             <td>
-              <p style="color: #555; font-size: 16px;">Dear <strong>${supplier}</strong>,</p>
-              <p style="color: #555; font-size: 16px;">Congratulations!! You have received a Medhub Global enquiry from ${buyer}, Enquiry Number ${enquiryNumber}</p>
-
-              <h3 style="color: #333;">Enquiry Details:</h3>
+              <p style="color: #212121; font-size: 16px;">Dear <strong>${supplier}</strong>,</p>
+              <p style="color: #212121; font-size: 16px;">Congratulations!! You have received a Medhub Global enquiry from ${buyer}, Enquiry Number ${enquiryNumber}</p>
+ 
+              <h3 style="color: #212121;">Enquiry Details:</h3>
               <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <tr style="background-color: #f2f2f2;">
                   <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product Image</th>
@@ -568,22 +566,22 @@ const enquiryMailToSupplierContent = (
                   )
                   .join("")}
               </table>
-
-              <h3 style="color: #333; margin-top: 20px;">Next Steps:</h3>
-              <p style="color: #555; font-size: 16px;">Please log into Medhub Global to process the Enquiry (Accept, Reject or modify)</p>
-
-              <p style="color: #555; font-size: 16px;"><a href="https://medhub.global/supplier/login" style="color: #0066cc;">https://medhub.global/supplier/login</a>.</p>
-
-              <p style="color: #555; font-size: 16px;">Contact our Customer Support team if you need any help:  <a href="mailto:connect@medhub.global" style="color: #0066cc;">connect@medhub.global</a>.</p>
-
-              <p style="color: #555; font-size: 16px;">Thanking you again for your support!</p>
-
-              <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
-              <img src="${logo}" alt="Medhub Global Logo" style="width: 60px; height: 60px;">
+ 
+              <h3 style="color: #212121; margin-top: 20px;">Next Steps:</h3>
+              <p style="color: #212121; font-size: 16px;">Please log into Medhub Global to process the Enquiry (Accept, Reject or modify)</p>
+ 
+              <p style="color: #212121; font-size: 16px;"><a href="https://medhub.global/supplier/login" style="color: #282f86;">https://medhub.global/supplier/login</a>.</p>
+ 
+              <p style="color: #212121; font-size: 16px;">Contact our Customer Support team if you need any help:  <a href="mailto:connect@medhub.global" style="color: #282f86;">connect@medhub.global</a>.</p>
+ 
+              <p style="color: #212121; font-size: 16px;">Thanking you again for your support!</p>
+ 
+              <p style="color: #212121; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+              <img src="https://medhubglobal.s3.ap-south-1.amazonaws.com/testing/1747649977234-image-medhublogo.jpg-1747649977210.jpeg" alt="Medhub Global Logo" style="width: 60px; height: 60px;">
             </td>
           </tr>
         </table>
-
+ 
         <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
           <p>&copy; 2025 Medhub Global. All rights reserved.</p>
         </footer>
