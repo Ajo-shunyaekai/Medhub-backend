@@ -24,6 +24,10 @@ const {
   handleCatchBlockError,
 } = require("../utils/commonResonse");
 const { getLoginFrequencyLast90Days } = require("../utils/userUtils");
+const {
+  enquiryMailToBuyerContent,
+  enquiryMailToSupplierContent,
+} = require("../utils/emailContents");
 
 module.exports = {
   buyerProfileDetails: async (req, res, reqObj, callback) => {
@@ -1083,7 +1087,7 @@ module.exports = {
         Object.keys(groupedItems).map(async (supplier_id) => {
           const supplierDetails = await Supplier.findOne({ supplier_id });
           return {
-            enquiry_id: enquiryId,
+            enquiry_id: "INQ-" + Math.random().toString(16).slice(2, 10),
             buyer_id,
             buyerId: buyer?._id,
             supplierId: supplierDetails?._id,
@@ -1154,49 +1158,76 @@ module.exports = {
           from_id: buyer_id,
           to_id: enquiry.supplier_id,
           event_id: enquiry.enquiry_id,
-          message: `Inquiry Alert! You’ve received an inquiry about ${enquiryId}`,
+          message: `Inquiry Alert! You’ve received an inquiry about ${enquiry.enquiry_id}`,
           status: 0,
         };
       });
 
-      await Notification.insertMany(notifications);
-
-      // Send emails to suppliers
       await Promise.all(
-        Object.keys(groupedItems).map(async (supplier_id) => {
-          const supplier = await Supplier.findOne({ supplier_id: supplier_id });
+        enquiries?.map(async (enq) => {
+          const supplier = await Supplier.findOne({
+            supplier_id: enq?.supplier_id,
+          });
+          const products = await Product.find();
+
           const {
+            buyer_name,
+            contact_person_name,
+            contact_person_email,
             supplier_name,
-            supplier_email,
-            supplier_contact_email,
-            items,
-          } = groupedItems[supplier_id];
-          if (supplier?.contact_person_email) {
-            const itemsList = items
-              .map((item) => `Medicine ID: ${item.product_id}`)
-              .join("<br />");
-            const subject = `New Product Inquiry Received from ${buyer.buyer_name}`;
-            const body = `Dear ${supplier?.contact_person_name},<br /><br />
+          } = {
+            buyer_name: buyer.buyer_name,
+            contact_person_name: supplier?.contact_person_name,
+            contact_person_email: supplier?.contact_person_email,
+            supplier_name: supplier?.supplier_name,
+          };
 
-                                We are pleased to inform you that you have received a new product inquiry from <strong>${buyer.contact_person_name}</strong> through our platform.<br /><br />
+          const subjectSupplier = `Medhub Global Enquiry: ${buyer_name}, Enquiry Number ${enq?.enquiry_id}`;
+          const subjectBuyer = `Medhub Global Enquiry: ${supplier_name}, Enquiry Number ${enq?.enquiry_id}`;
 
-                                <strong>Inquiry Details:</strong><br />
-                                Buyer’s Company Name: ${buyer.buyer_name}<br />
-                                Contact Person: ${buyer.contact_person_name}<br />
-                                Contact Email: ${buyer.contact_person_email}<br />
-                                Contact Information: ${buyer.contact_person_country_code} ${buyer.contact_person_mobile} <br /><br />
+          const updatedEmailItems = enq?.items?.map((item) => {
+            const product = products.find(
+              (pdt) => pdt?.product_id == item?.product_id
+            );
+            const imageName = product?.general?.image?.[0];
+            const imageUrl = imageName
+              ? imageName.startsWith("http")
+                ? imageName
+                : `${process.env.SERVER_URL}/uploads/products/${imageName}`
+              : "";
 
-                                You can view and respond to this inquiry by logging into your account on our platform. Please take the time to review the buyer's request and provide your response at your earliest convenience.<br /><br />
+            return {
+              ...item,
+              product_name: product?.general?.name,
+              image: imageUrl,
+            };
+          });
 
-                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                                 <p>Best regards,<br/>Medhub Global Team</p>
-                        `;
+          // Send email to supplier
+          const bodySupplier = enquiryMailToSupplierContent(
+            buyer_name,
+            contact_person_name,
+            updatedEmailItems,
+            enquiryId
+          );
+          await sendEmail(
+            [contact_person_email],
+            subjectSupplier,
+            bodySupplier
+          );
 
-            // await sendMailFunc(supplier_email, subject, body);
-            const recipientEmails = [supplier?.contact_person_email]; // Add more emails if needed
-            // await sendMailFunc(recipientEmails.join(','), subject, body);
-            await sendEmail(recipientEmails, subject, body);
-          }
+          // Send email to buyer
+          const bodyBuyer = enquiryMailToBuyerContent(
+            buyer_name,
+            contact_person_name,
+            updatedEmailItems,
+            enquiryId
+          );
+          await sendEmail(
+            [buyer?.contact_person_email],
+            subjectBuyer,
+            bodyBuyer
+          );
         })
       );
 

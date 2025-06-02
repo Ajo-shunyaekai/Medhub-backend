@@ -270,6 +270,8 @@ const productSchema = new Schema(
           "Mobility Aids",
           "Respiratory Care",
           "Care Products",
+          "Blood Pressure Monitor",
+          "Anaesthetic Equipment",
         ],
         validate: {
           validator: function (v) {
@@ -757,6 +759,13 @@ const productSchema = new Schema(
           "Sterilization Products",
           "Surgical Sutures & Adhesives",
           "Syringes, IV Sets & Catheters",
+          "PFT Mouthpiece",
+          "ECG Electrode",
+          "ECG Consumables",
+          "Ultrasound Consumables",
+          "CTG Paper",
+          "Infusion Pressure Bag",
+          "Connecting Cable",
         ],
         validate: {
           validator: function (v) {

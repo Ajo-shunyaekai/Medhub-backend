@@ -14,7 +14,17 @@ const buyerSchema = new Schema(
     },
     buyer_type: {
       type: String,
-      enum: ["End User", "Distributor", "Medical Practitioner"],
+      enum: [
+        "End User",
+        "Distributor",
+        "Medical Practitioner",
+        "Care home",
+        "Dentist",
+        "Hospital",
+        "Physio Therapist",
+        "Sport Facility",
+        "Other",
+      ],
       trim: true,
       required: [true, "Validation Error : buyer_type is required"],
     },

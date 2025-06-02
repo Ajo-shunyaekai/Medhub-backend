@@ -157,8 +157,8 @@ module.exports = {
         "Supplier Name",
         "Supplier Type",
         "Sales Person Name",
-        'Contact Person Name',
-        'Contact Person Email',
+        "Contact Person Name",
+        "Contact Person Email",
         "Country Of Origin",
         "Country Of Operation",
         "Categories",
@@ -282,8 +282,8 @@ module.exports = {
         "Buyer Name",
         "Buyer Type",
         "Sales Person Name",
-        'Contact Person Name',
-        'Contact Person Email',
+        "Contact Person Name",
+        "Contact Person Email",
         "Country Of Origin",
         "Country Of Operation",
         "Interested In",
@@ -4337,7 +4337,7 @@ module.exports = {
           },
         },
         {
-          $sort: { createdAt: -1 } // <-- Sort by createdAt descending
+          $sort: { createdAt: -1 }, // <-- Sort by createdAt descending
         },
         // Project necessary fields including name from supplier or buyer
         {
@@ -4829,6 +4829,54 @@ module.exports = {
         200,
         "Profile updated successfully",
         updatedUser
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  updatePassword: async (req, res) => {
+    try {
+      const { password } = req?.body;
+
+      // Fetch the admin (await async operation)
+      const admin = await Admin.find({});
+
+      if (!admin || !admin.length) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Error while fetching admin's details."
+        );
+      }
+
+      // Hash the new password
+      const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Update the password (fixed typo from passowrd to password)
+      const updatedAdmin = await Admin.findOneAndUpdate(
+        { _id: admin[0]._id }, // Fixed the optional chaining here
+        {
+          $set: { password: hashedPassword }, // Corrected typo here
+        },
+        { new: true }
+      );
+
+      if (!updatedAdmin) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Error while updating admin's password."
+        );
+      }
+
+      // Success response after password update
+      return sendSuccessResponse(
+        res,
+        200,
+        "Password updated successfully.",
+        updatedAdmin
       );
     } catch (error) {
       handleCatchBlockError(req, res, error);
