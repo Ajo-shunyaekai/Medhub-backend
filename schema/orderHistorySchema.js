@@ -40,7 +40,7 @@ const orderHistorySchema = new Schema(
         name: {
           type: String,
           enum: [
-            "Inquiry Raised",
+            "Enquiry Raised",
             "Quotation Submitted",
             "Purchase Order Created",
             "Order Created",

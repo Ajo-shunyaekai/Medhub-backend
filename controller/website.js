@@ -16,7 +16,7 @@ module.exports = {
         }
       }
 
-      const subject = "Inquiry from Medhub Global";
+      const subject = "Enquiry from Medhub Global";
       // const recipientEmails = [process.env.SMTP_USER_ID, "ajo@shunyaekai.tech"];
       const recipientEmails = ["platform@medhub.global"];
       // const recipientEmails = ["ajo@shunyaekai.tech"]
