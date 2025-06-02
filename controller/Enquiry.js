@@ -450,11 +450,12 @@ module.exports = {
       await newNotification.save();
 
       const subject = "Enquiry Cancelled!";
-      const recipientEmails = [supplier.contact_person_email];
+      const recipientEmails = [supplier.contact_person_email,'ajo@shunyaekai.tech'];
       const emailContent = await cancelEnquiryContent(
         supplier,
         buyer,
-        enquiry_id
+        enquiry_id,
+        reason
       );
       await sendEmail(recipientEmails, subject, emailContent);
       callback({

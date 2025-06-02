@@ -291,13 +291,16 @@ const submitQuotationContent = (buyer, enquiry_id) => {
                                 Medhub Global Team`;
 };
 
-const cancelEnquiryContent = (supplier, buyer, enquiry_id) => {
+const cancelEnquiryContent = (supplier, buyer, enquiry_id, reason) => {
   return `Hello ${supplier.contact_person_name}, <br />
-                                Enquiry request has been cancelled by ${buyer.contact_person_name} for <strong>${enquiry_id}</strong>.<br />
-                                <br /><br />
-                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                                Thanks & Regards <br />
-                                Medhub Global Team`;
+          The enquiry request with ID <strong>${enquiry_id}</strong> has been cancelled by ${buyer.contact_person_name}.<br />
+          <br />
+          <strong>Reason for cancellation:</strong> ${reason}<br />
+          <br />
+          If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.<br />
+          <br />
+          Thanks & Regards,<br />
+          Medhub Global Team`;
 };
 
 const createOrderContent = (buyer, itemsTable) => {
