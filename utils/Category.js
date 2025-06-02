@@ -1423,6 +1423,17 @@ const categoriesData = [
           "Shoulder Braces",
           "Hand & Finger Supports",
           "Neck Braces",
+          "Wrist and Arm Braces",
+          "Pelvic",
+          "Abdominal",
+          "Pelvic",
+          "Traction Kits",
+          "Silicon Products",
+          "Allied Products",
+          "Neck Braces",
+          "Compression Stocking",
+          "UM ECO range",
+          "Pediatric Range",
           "Services",
         ]
           ?.sort()
