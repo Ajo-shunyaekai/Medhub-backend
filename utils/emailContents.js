@@ -5,7 +5,7 @@ const contactUsContent = (obj) => {
             <html>
                 <body>
                     <p>Hi Admin,</p>
-                    <p>We have received an inquiry. Below are the details:</p>
+                    <p>We have received an enquiry. Below are the details:</p>
                      <p><strong>Company Name:</strong> ${obj.companyname}</p>
                     <p><strong>Email:</strong> ${obj.email}</p>
                     <p><strong>Name:</strong> ${obj.username}</p>
@@ -228,7 +228,7 @@ const generateProfileEditRequestEmail = (userDetails, requestDetails) => {
                 ${
                   status == "Approved"
                     ? `<p>
-                    We are pleased to inform you that your profile edit request has been approved. Your changes have been successfully updated. If you have any further modifications or inquiries, please feel free to reach out at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
+                    We are pleased to inform you that your profile edit request has been approved. Your changes have been successfully updated. If you have any further modifications or enquiries, please feel free to reach out at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
                 </p>`
                     : `<p>
                     Unfortunately, your profile edit request has been rejected. If you would like to know more about the reasons for this decision or if you would like to submit a revised request, please contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a> .
@@ -291,13 +291,16 @@ const submitQuotationContent = (buyer, enquiry_id) => {
                                 Medhub Global Team`;
 };
 
-const cancelEnquiryContent = (supplier, buyer, enquiry_id) => {
+const cancelEnquiryContent = (supplier, buyer, enquiry_id, reason) => {
   return `Hello ${supplier.contact_person_name}, <br />
-                                Inquiry request has been cancelled by ${buyer.contact_person_name} for <strong>${enquiry_id}</strong>.<br />
-                                <br /><br />
-                                <p>If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
-                                Thanks & Regards <br />
-                                Medhub Global Team`;
+          The enquiry request with ID <strong>${enquiry_id}</strong> has been cancelled by ${buyer.contact_person_name}.<br />
+          <br />
+          <strong>Reason for cancellation:</strong> ${reason}<br />
+          <br />
+          If you need further assistance, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.<br />
+          <br />
+          Thanks & Regards,<br />
+          Medhub Global Team`;
 };
 
 const createOrderContent = (buyer, itemsTable) => {
@@ -310,7 +313,7 @@ const createOrderContent = (buyer, itemsTable) => {
  
                 <p>Your order is now being processed, and we will keep you informed about its progress. If you have any questions or require further assistance, please do not hesitate to contact us.</p>
  
-                <p>For any inquiries, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                <p>For any enquiries, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
  
                 <p>Best regards,<br/><strong>Medhub Global Team</strong></p>
                 `;

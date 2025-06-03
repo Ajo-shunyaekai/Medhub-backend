@@ -45,6 +45,8 @@ module.exports = {
         // price,
       } = req?.query;
 
+      const { countries } = req?.body;
+
       const formatToPascalCase = (str) => {
         return str
           .trim()
@@ -149,6 +151,15 @@ module.exports = {
         },
       });
 
+      // Add a filter to match products that have "countries" in their inventory countries (array)
+      if (countries && Array.isArray(countries) && countries.length > 0) {
+        pipeline.push({
+          $match: {
+            "inventoryDetails.countries": { $in: countries }, // Check if countries are in the countries array
+          },
+        });
+      }
+
       // Aggregating price and quantity by inventory UUID and inventoryList
       pipeline.push({
         $group: {
@@ -218,7 +229,6 @@ module.exports = {
           $match: {
             priceQuantityDetails: {
               $elemMatch: {
-                // price: { $lte: parseInt(price, 10) },
                 price: {
                   $gte: parseInt(price?.min, 10),
                   $lte: parseInt(price?.max, 10),
@@ -254,8 +264,8 @@ module.exports = {
 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
-      // const totalProducts = (await products?.length) || 0;
-      const totalProducts = await Product.countDocuments(totalProductsQuery);
+      // const totalProducts = await Product.countDocuments(totalProductsQuery);
+      const totalProducts = products?.length || 0;
       const totalPages = Math.ceil(totalProducts / pageSize);
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {

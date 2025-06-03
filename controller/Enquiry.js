@@ -443,23 +443,24 @@ module.exports = {
         from_id: buyer_id,
         to_id: supplier_id,
         event_id: enquiry_id,
-        message: `Inquiry Request Cancelled! Inquiry request has been cancelled for ${enquiry_id}`,
+        message: `Enquiry Request Cancelled! Enquiry request has been cancelled for ${enquiry_id}`,
         cancel_reason: reason,
         status: 0,
       });
       await newNotification.save();
 
-      const subject = "Inquiry Cancelled!";
-      const recipientEmails = [supplier.contact_person_email];
+      const subject = "Enquiry Cancelled!";
+      const recipientEmails = [supplier.contact_person_email,'ajo@shunyaekai.tech'];
       const emailContent = await cancelEnquiryContent(
         supplier,
         buyer,
-        enquiry_id
+        enquiry_id,
+        reason
       );
       await sendEmail(recipientEmails, subject, emailContent);
       callback({
         code: 200,
-        message: "Inquiry Cancelled Successfully",
+        message: "Enquiry Cancelled Successfully",
         result: updatedEnquiry,
       });
     } catch (error) {

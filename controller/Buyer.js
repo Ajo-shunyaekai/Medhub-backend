@@ -1008,7 +1008,7 @@ module.exports = {
       }
       const buyer = await Buyer.findOne({ buyer_id: reqObj.buyer_id });
 
-      let enquiryId = "INQ-" + Math.random().toString(16).slice(2, 10);
+      let enquiryId = "ENQ-" + Math.random().toString(16).slice(2, 10);
 
       // Grouping items by supplier_id and including supplier details
       const groupedItems = await items.reduce(async (accPromise, item) => {
@@ -1087,7 +1087,7 @@ module.exports = {
         Object.keys(groupedItems).map(async (supplier_id) => {
           const supplierDetails = await Supplier.findOne({ supplier_id });
           return {
-            enquiry_id: "INQ-" + Math.random().toString(16).slice(2, 10),
+            enquiry_id: "ENQ-" + Math.random().toString(16).slice(2, 10),
             buyer_id,
             buyerId: buyer?._id,
             supplierId: supplierDetails?._id,
@@ -1107,7 +1107,7 @@ module.exports = {
             supplierId: enquiry?.supplierId,
             stages: [
               {
-                name: "Inquiry Raised",
+                name: "Enquiry Raised",
                 date: new Date(),
                 referenceId: enquiry?._id,
                 referenceType: "Enquiry",
@@ -1158,7 +1158,7 @@ module.exports = {
           from_id: buyer_id,
           to_id: enquiry.supplier_id,
           event_id: enquiry.enquiry_id,
-          message: `Inquiry Alert! You’ve received an inquiry about ${enquiry.enquiry_id}`,
+          message: `Enquiry Alert! You’ve received an enquiry about ${enquiry.enquiry_id}`,
           status: 0,
         };
       });
