@@ -1107,7 +1107,7 @@ module.exports = {
             supplierId: enquiry?.supplierId,
             stages: [
               {
-                name: "Inquiry Raised",
+                name: "Enquiry Raised",
                 date: new Date(),
                 referenceId: enquiry?._id,
                 referenceType: "Enquiry",
