@@ -1055,7 +1055,7 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "countries":
-      fieldName = "Stocked in Countries*";
+      fieldName = "Stocked in Countries";
       break;
 
     case "country":
@@ -1843,7 +1843,7 @@ const getFieldName2 = (key, additionalCheck) => {
       break;
 
     case "countries":
-      fieldName = "Stocked in Countries*";
+      fieldName = "Stocked in Countries";
       break;
 
     case "country":
