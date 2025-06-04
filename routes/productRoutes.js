@@ -28,6 +28,8 @@ const {
   uploadCsvSheet,
   getCsvTemplateFiles,
   getSupplierCsvFiles,
+  updateSupplierCsvFile,
+  deleteAdminCsvTemplateFile,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -140,6 +142,22 @@ router.post(
   authenticationNAuthorization,
   bulkProductCSVUpload,
   getCsvTemplateFiles
+);
+
+router.post(
+  "/update-supplier-csv-file/:userId/:category/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  updateSupplierCsvFile
+);
+
+router.post(
+  "/delete-csv-file/:userId/:category/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  deleteAdminCsvTemplateFile
 );
 
 router.post(`/:id`, checkAuthorization, getProductDetails);
