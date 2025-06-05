@@ -43,9 +43,9 @@ module.exports = {
         // quantity,
         // price,
       } = req?.query;
-
+ 
       const { countries } = req?.body;
-
+ 
       const formatToPascalCase = (str) => {
         return str
           .trim()
@@ -53,21 +53,21 @@ module.exports = {
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
           .join(""); // Join words without spaces
       };
-
+ 
       // Format category, subCategory, and level3Category
       const formattedCategory = formatToPascalCase(category);
       const formattedSubCategory = formatToPascalCase(subCategory);
       const formattedLevel3Category = formatToPascalCase(level3Category);
-
+ 
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-
+ 
       const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
-
+ 
       // Create the aggregation pipeline
       let pipeline = [];
-
+ 
       const totalProductsQuery = {
         isDeleted: false, // Only products that are not deleted
         ...(supplier_id && {
@@ -102,11 +102,11 @@ module.exports = {
             },
           }),
       };
-
+ 
       pipeline.push({
         $match: totalProductsQuery,
       });
-
+ 
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
@@ -116,7 +116,7 @@ module.exports = {
           as: "userDetails",
         },
       });
-
+ 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
@@ -126,7 +126,7 @@ module.exports = {
           as: "inventoryDetails",
         },
       });
-
+ 
       // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
       pipeline.push({
         $unwind: {
@@ -134,14 +134,14 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
         },
       });
-
+ 
       pipeline.push({
         $unwind: {
           path: "$inventoryDetails",
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Unwind the inventoryList so that each inventory item can be processed individually
       pipeline.push({
         $unwind: {
@@ -149,16 +149,25 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
-
+ 
       // Add a filter to match products that have "countries" in their inventory countries (array)
       if (countries && Array.isArray(countries) && countries.length > 0) {
         pipeline.push({
           $match: {
-            "inventoryDetails.countries": { $in: countries }, // Check if countries are in the countries array
+            "inventoryDetails.countries": { $in: countries },
           },
         });
+ 
+        // Unwind the inventoryList so that each inventory item can be processed individually
+        pipeline.push({
+          $unwind: {
+            path: "$inventoryDetails.countries",
+            preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+          },
+        });
+ 
       }
-
+ 
       // Aggregating price and quantity by inventory UUID and inventoryList
       pipeline.push({
         $group: {
@@ -222,7 +231,7 @@ module.exports = {
           __v: { $first: "$__v" },
         },
       });
-
+ 
       if (price?.min && price?.max) {
         pipeline.push({
           $match: {
@@ -237,7 +246,7 @@ module.exports = {
           },
         });
       }
-
+ 
       // if (deliveryTime?.min && deliveryTime?.max) {
       //   pipeline.push({
       //     $match: {
@@ -252,21 +261,21 @@ module.exports = {
       //     },
       //   });
       // }
-
+ 
       pipeline.push({
         $sort: { createdAt: -1 },
       });
-
+ 
       // pagination
       pipeline.push({ $skip: offset });
       pipeline.push({ $limit: pageSize });
-
+ 
       // Execute the aggregation
       const products = await Product.aggregate(pipeline);
-      // const totalProducts = await Product.countDocuments(totalProductsQuery);
-      const totalProducts = products?.length || 0;
+      const totalProducts = await Product.countDocuments(totalProductsQuery);
+      // const totalProducts = products?.length || 0;
       const totalPages = Math.ceil(totalProducts / pageSize);
-
+ 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
         products,
         totalItems: totalProducts,

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+ 
 const productSchema = new Schema(
   {
     general: {
@@ -270,6 +270,8 @@ const productSchema = new Schema(
           "Mobility Aids",
           "Respiratory Care",
           "Care Products",
+          "Blood Pressure Monitor",
+          "Anaesthetic Equipment",
         ],
         validate: {
           validator: function (v) {
@@ -754,6 +756,13 @@ const productSchema = new Schema(
           "Sterilization Products",
           "Surgical Sutures & Adhesives",
           "Syringes, IV Sets & Catheters",
+          "PFT Mouthpiece",
+          "ECG Electrode",
+          "ECG Consumables",
+          "Ultrasound Consumables",
+          "CTG Paper",
+          "Infusion Pressure Bag",
+          "Connecting Cable",
         ],
         validate: {
           validator: function (v) {
@@ -1094,7 +1103,7 @@ const productSchema = new Schema(
       subCategory: {
         type: String,
         trim: true,
-        enum: [
+        enum:  [
           "Orthopedic Braces & Supports",
           "Splints & Casting Materials",
           "Prosthetics",
@@ -1718,5 +1727,5 @@ const productSchema = new Schema(
   },
   { timestamps: true }
 );
-
+ 
 module.exports = mongoose.model("Product", productSchema);
