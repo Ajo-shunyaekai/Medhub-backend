@@ -2054,7 +2054,7 @@ module.exports = {
           sku: result?.["SKU"]?.toString()?.trim() || "",
           stock: result?.["Stock*"]?.toString()?.trim() || "",
           countries:
-            result?.["Stocked in Countries*"]
+            result?.["Stocked in Countries"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
               ?.filter((ele) => ele != "" || ele != undefined || ele != null)
@@ -2259,7 +2259,7 @@ module.exports = {
           sku: result?.["SKU"]?.toString()?.trim() || "",
           stock: result?.["Stock*"]?.toString()?.trim() || "",
           countries:
-            result?.["Stocked in Countries*"]
+            result?.["Stocked in Countries"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
               ?.filter((ele) => ele != "" || ele != undefined || ele != null)
