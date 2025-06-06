@@ -272,6 +272,16 @@ const productSchema = new Schema(
           "Care Products",
           "Blood Pressure Monitor",
           "Anaesthetic Equipment",
+          "ECG Machines",
+          "Insufflation Devices",
+          "Anaesthetic Equipment",
+          "Neonatal Care",
+          "Infusion Devices",
+          "Operation Theater Lights",
+          "Sterilizers",
+          "OT Tables",
+          "Endoscopy",
+          "Ultrasonic Devices",
         ],
         validate: {
           validator: function (v) {
