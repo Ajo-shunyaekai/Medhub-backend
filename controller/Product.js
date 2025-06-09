@@ -3065,7 +3065,9 @@ module.exports = {
           product_id: product?.product_id,
           supplier_name: product?.supplierDetails?.supplier_name,
           supplier_id: product?.supplierDetails?.supplier_id,
-          market: product?.market,
+          market:
+            product?.market?.charAt(0).toUpperCase() +
+            product?.market?.slice(1),
           // ...product?.secondaryMarketDetails,
         }))
         ?.filter((item) => {
@@ -3083,11 +3085,15 @@ module.exports = {
           );
         });
 
-      if (modifiedProductsResult?.length == 0)
+      if (
+        modifiedProductsResult?.length == 0 ||
+        !modifiedProductsResult?.length
+      )
         return sendSuccessResponse(
           res,
           200,
           "No Quality reports of supplier products",
+          {}
         );
 
       if (downloadCsv) {
