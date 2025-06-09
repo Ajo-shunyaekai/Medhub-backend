@@ -291,6 +291,72 @@ const submitQuotationContent = (buyer, enquiry_id) => {
                                 Medhub Global Team`;
 };
 
+const acceptRejectQuotationBuyerContent = (supplier, buyer, enquiry_id, msg) => {
+  if (msg === 'Accepted') {
+    return `Hello ${buyer.contact_person_name}, <br /><br />
+
+            You have successfully <strong>ACCEPTED</strong> the quotation for enquiry ID <strong>${enquiry_id}</strong> from ${supplier.contact_person_name}.<br /><br />
+
+            Please proceed to create the Purchase Order (PO) within the next <strong>24 hours</strong> to confirm the agreed pricing and quantity. <br />
+            Note: If the PO is not created within this timeframe, the enquiry will be <strong>automatically cancelled</strong> as prices and availability are subject to change.<br /><br />
+
+            For any assistance, feel free to reach out to us at 
+            <a href="mailto:connect@medhub.global">connect@medhub.global</a>.<br /><br />
+
+            Best Regards,<br />
+            Medhub Global Team`;
+  }
+
+  if (msg === 'Rejected') {
+    return `Hello ${buyer.contact_person_name}, <br /><br />
+
+            You have <strong>REJECTED</strong> the quotation for enquiry ID <strong>${enquiry_id}</strong> from ${supplier.contact_person_name}.<br /><br />
+
+            Thank you for reviewing the quotation. This enquiry has now been marked as closed.<br /><br />
+
+            If you need any help or would like to explore more options, please contact us at 
+            <a href="mailto:connect@medhub.global">connect@medhub.global</a>.<br /><br />
+
+            Warm Regards,<br />
+            Medhub Global Team`;
+  }
+
+  return '';
+};
+
+const acceptRejectQuotationSupplierContent = (supplier, buyer, enquiry_id, msg) => {
+  if (msg === 'Accepted') {
+    return `Hello ${supplier.contact_person_name}, <br /><br />
+
+            Your quotation for enquiry ID <strong>${enquiry_id}</strong> has been <strong>ACCEPTED</strong> by ${buyer.contact_person_name}.<br /><br />
+
+            The buyer is expected to create a Purchase Order (PO) within the next <strong>24 hours</strong>. You will be notified once the PO is created.<br /><br />
+
+            For any queries or support, feel free to contact us at 
+            <a href="mailto:connect@medhub.global">connect@medhub.global</a>.<br /><br />
+
+            Best Regards,<br />
+            Medhub Global Team`;
+  }
+
+  if (msg === 'Rejected') {
+    return `Hello ${supplier.contact_person_name}, <br /><br />
+
+            Unfortunately, your quotation for enquiry ID <strong>${enquiry_id}</strong> has been <strong>REJECTED</strong> by ${buyer.contact_person_name}.<br /><br />
+
+            This enquiry has now been marked as closed.<br /><br />
+
+            We appreciate your response. If you wish to explore more business opportunities, please reach out to us at 
+            <a href="mailto:connect@medhub.global">connect@medhub.global</a>.<br /><br />
+
+            Warm Regards,<br />
+            Medhub Global Team`;
+  }
+
+  return '';
+};
+
+
 const cancelEnquiryContent = (supplier, buyer, enquiry_id, reason) => {
   return `Hello ${supplier.contact_person_name}, <br />
           The enquiry request with ID <strong>${enquiry_id}</strong> has been cancelled by ${buyer.contact_person_name}.<br />
@@ -606,6 +672,8 @@ module.exports = {
   createInvoiceContent,
   updatePaymentStatusContent,
   submitQuotationContent,
+  acceptRejectQuotationBuyerContent,
+  acceptRejectQuotationSupplierContent,
   cancelEnquiryContent,
   createOrderContent,
   bookLogisticsContent,

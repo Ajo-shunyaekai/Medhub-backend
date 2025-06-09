@@ -1055,7 +1055,7 @@ const getFieldName = (key, additionalCheck) => {
       break;
 
     case "countries":
-      fieldName = "Stocked in Countries*";
+      fieldName = "Stocked in Countries";
       break;
 
     case "country":
@@ -1843,7 +1843,7 @@ const getFieldName2 = (key, additionalCheck) => {
       break;
 
     case "countries":
-      fieldName = "Stocked in Countries*";
+      fieldName = "Stocked in Countries";
       break;
 
     case "country":
@@ -2644,6 +2644,85 @@ const getCategoryName = (value) => {
   return catName;
 };
 
+const getCategoryNameForHeading = (value) => {
+  let catName;
+
+  switch (value?.trim()) {
+    case "AlternativeMedicines":
+      catName = "Alternative Medicines";
+      break;
+
+    case "DentalProducts":
+      catName = "Dental Products";
+      break;
+
+    case "DiagnosticAndMonitoringDevices":
+      catName = "Diagnostic and Monitoring Devices";
+      break;
+
+    case "DisinfectionAndHygieneSupplies":
+      catName = "Disinfection and Hygiene Supplies";
+      break;
+
+    case "EmergencyAndFirstAidSupplies":
+      catName = "Emergency and First Aid Supplies";
+      break;
+
+    case "EyeCareSupplies":
+      catName = "Eye Care Supplies";
+      break;
+
+    case "HealthcareITSolutions":
+      catName = "Healthcare IT Solutions";
+      break;
+
+    case "HospitalAndClinicSupplies":
+      catName = "Hospital and Clinic Supplies";
+      break;
+
+    case "HomeHealthcareProducts":
+      catName = "Home Healthcare Products";
+      break;
+
+    case "LaboratorySupplies":
+      catName = "Laboratory Supplies";
+      break;
+
+    case "MedicalConsumablesAndDisposables":
+      catName = "Medical Consumables and Disposables";
+      break;
+
+    case "MedicalEquipmentAndDevices":
+      catName = "Medical Equipment and Devices";
+      break;
+
+    case "NutritionAndDietaryProducts":
+      catName = "Nutrition and Dietary Products";
+      break;
+
+    case "OrthopedicSupplies":
+      catName = "Orthopedic Supplies";
+      break;
+
+    case "Pharmaceuticals":
+      catName = "Pharmaceuticals";
+      break;
+
+    case "SkinHairCosmeticSupplies":
+      catName = "Skin, Hair and Cosmetic Supplies";
+      break;
+
+    case "VitalHealthAndWellness":
+      catName = "Vital Health and Wellness";
+      break;
+
+    default:
+      break;
+  }
+
+  return catName;
+};
+
 const additionalCheckFieldName = (elemCat, key) => {
   // Check if the key is a direct property of the object
   if (
@@ -2703,5 +2782,6 @@ module.exports = {
   getFieldName2,
   validateFields,
   getCategoryName,
+  getCategoryNameForHeading,
   additionalCheckFieldName,
 };

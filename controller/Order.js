@@ -1051,7 +1051,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",
@@ -1113,7 +1113,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",
@@ -1293,7 +1293,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",
@@ -1401,7 +1401,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",
@@ -1503,7 +1503,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",
@@ -1649,7 +1649,7 @@ module.exports = {
         },
         {
           $lookup: {
-            from: "medicines",
+            from: "products",
             localField: "items.product_id",
             foreignField: "product_id",
             as: "medicine",
@@ -1875,7 +1875,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",
@@ -2119,7 +2119,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",
@@ -2362,7 +2362,7 @@ module.exports = {
           },
           {
             $lookup: {
-              from: "medicines",
+              from: "products",
               localField: "items.product_id",
               foreignField: "product_id",
               as: "medicine",

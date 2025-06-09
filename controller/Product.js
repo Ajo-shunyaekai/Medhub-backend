@@ -25,11 +25,263 @@ const {
   handleProductCategorySwitch2,
   getCategoryName,
   additionalCheckFieldName,
+  getCategoryNameForHeading,
 } = require("../utils/bulkUploadProduct");
 const { getFilePathsEdit, getFilePathsAdd } = require("../helper");
 const { validateAnotherCategory } = require("../utils/Category");
+const { flattenData } = require("../utils/csvConverter");
 
 module.exports = {
+  // getAllProducts: async (req, res) => {
+  //   try {
+  //     const {
+  //       supplier_id,
+  //       market,
+  //       page_no = 1,
+  //       page_size = 5,
+  //       search_key = "",
+  //       category = "",
+  //       subCategory = "",
+  //       level3Category = "",
+  //       // quantity,
+  //       // price,
+  //     } = req?.query;
+
+  //     const { countries } = req?.body;
+
+  //     const formatToPascalCase = (str) => {
+  //       return str
+  //         .trim()
+  //         .split(/\s+/) // Split by spaces
+  //         .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+  //         .join(""); // Join words without spaces
+  //     };
+
+  //     // Format category, subCategory, and level3Category
+  //     const formattedCategory = formatToPascalCase(category);
+  //     const formattedSubCategory = formatToPascalCase(subCategory);
+  //     const formattedLevel3Category = formatToPascalCase(level3Category);
+
+  //     const pageNo = parseInt(page_no) || 1;
+  //     const pageSize = parseInt(page_size) || 10;
+  //     const offset = (pageNo - 1) * pageSize;
+
+  //     const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
+
+  //     // Create the aggregation pipeline
+  //     let pipeline = [];
+
+  //     const totalProductsQuery = {
+  //       isDeleted: false, // Only products that are not deleted
+  //       ...(supplier_id && {
+  //         supplier_id: new mongoose.Types.ObjectId(supplier_id),
+  //       }),
+  //       ...(market && { market: market }),
+  //       ...(formattedCategory && {
+  //         category: { $regex: formattedCategory, $options: "i" },
+  //       }),
+  //       ...(subCategory && {
+  //         [`${formattedCategory}.subCategory`]: {
+  //           $regex: subCategory,
+  //           $options: "i",
+  //         },
+  //       }),
+  //       ...(level3Category && {
+  //         [`${formattedCategory}.anotherCategory`]: {
+  //           $regex: level3Category,
+  //           $options: "i",
+  //         },
+  //       }),
+  //       ...(search_key && {
+  //         "general.name": { $regex: search_key, $options: "i" },
+  //       }),
+  //       ...(quantity?.min &&
+  //         quantity?.max &&
+  //         !isNaN(quantity?.min) &&
+  //         !isNaN(quantity?.max) && {
+  //           "general.quantity": {
+  //             $gte: parseInt(quantity?.min, 10),
+  //             $lte: parseInt(quantity?.max, 10),
+  //           },
+  //         }),
+  //     };
+
+  //     pipeline.push({
+  //       $match: totalProductsQuery,
+  //     });
+
+  //     // Lookup Supplier (userDetails) based on supplier_id in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "suppliers", // Ensure the collection name matches
+  //         localField: "supplier_id", // Reference to supplier_id in the Product schema
+  //         foreignField: "_id", // Reference to supplier_id in the Supplier schema
+  //         as: "userDetails",
+  //       },
+  //     });
+
+  //     // Lookup Inventory based on the inventory field in Product
+  //     pipeline.push({
+  //       $lookup: {
+  //         from: "inventories", // Ensure the collection name matches
+  //         localField: "inventory", // Reference to the inventory field in Product
+  //         foreignField: "uuid", // Reference to uuid in Inventory schema
+  //         as: "inventoryDetails",
+  //       },
+  //     });
+
+  //     // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$userDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched user details
+  //       },
+  //     });
+
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$inventoryDetails",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+  //       },
+  //     });
+
+  //     // Unwind the inventoryList so that each inventory item can be processed individually
+  //     pipeline.push({
+  //       $unwind: {
+  //         path: "$inventoryDetails.inventoryList",
+  //         preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
+  //       },
+  //     });
+
+  //     // Add a filter to match products that have "countries" in their inventory countries (array)
+  //     if (countries && Array.isArray(countries) && countries.length > 0) {
+  //       pipeline.push({
+  //         $match: {
+  //           "inventoryDetails.countries": { $in: countries }, // Check if countries are in the countries array
+  //         },
+  //       });
+  //     }
+
+  //     // Aggregating price and quantity by inventory UUID and inventoryList
+  //     pipeline.push({
+  //       $group: {
+  //         _id: "$_id", // Group by product id
+  //         general: { $first: "$general" },
+  //         inventory: { $first: "$inventory" },
+  //         complianceFile: { $first: "$complianceFile" },
+  //         cNCFileNDate: {
+  //           $first: "$cNCFileNDate",
+  //         },
+  //         storage: { $first: "$storage" },
+  //         additional: { $first: "$additional" },
+  //         guidelinesFile: { $first: "$guidelinesFile" },
+  //         healthNSafety: { $first: "$healthNSafety" },
+  //         category: { $first: "$category" },
+  //         product_id: { $first: "$product_id" },
+  //         supplier_id: { $first: "$supplier_id" },
+  //         market: { $first: "$market" },
+  //         secondaryMarketDetails: { $first: "$secondaryMarketDetails" },
+  //         isDeleted: { $first: "$isDeleted" },
+  //         bulkUpload: { $first: "$bulkUpload" },
+  //         userDetails: { $first: "$userDetails" },
+  //         inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+  //         MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+  //         Pharmaceuticals: { $first: "$Pharmaceuticals" },
+  //         SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+  //         VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+  //         MedicalConsumablesAndDisposables: {
+  //           $first: "$MedicalConsumablesAndDisposables",
+  //         },
+  //         LaboratorySupplies: { $first: "$LaboratorySupplies" },
+  //         DiagnosticAndMonitoringDevices: {
+  //           $first: "$DiagnosticAndMonitoringDevices",
+  //         },
+  //         HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+  //         OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+  //         DentalProducts: { $first: "$DentalProducts" },
+  //         EyeCareSupplies: { $first: "$EyeCareSupplies" },
+  //         HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+  //         AlternativeMedicines: { $first: "$AlternativeMedicines" },
+  //         EmergencyAndFirstAidSupplies: {
+  //           $first: "$EmergencyAndFirstAidSupplies",
+  //         },
+  //         DisinfectionAndHygieneSupplies: {
+  //           $first: "$DisinfectionAndHygieneSupplies",
+  //         },
+  //         NutritionAndDietaryProducts: {
+  //           $first: "$NutritionAndDietaryProducts",
+  //         },
+  //         HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
+  //         priceQuantityDetails: {
+  //           // Aggregate price and quantity from the inventoryList
+  //           $push: {
+  //             price: "$inventoryDetails.inventoryList.price",
+  //             quantity: "$inventoryDetails.inventoryList.quantity",
+  //             deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
+  //           },
+  //         },
+  //         createdAt: { $first: "$createdAt" },
+  //         updatedAt: { $first: "$updatedAt" },
+  //         __v: { $first: "$__v" },
+  //       },
+  //     });
+
+  //     if (price?.min && price?.max) {
+  //       pipeline.push({
+  //         $match: {
+  //           priceQuantityDetails: {
+  //             $elemMatch: {
+  //               price: {
+  //                 $gte: parseInt(price?.min, 10),
+  //                 $lte: parseInt(price?.max, 10),
+  //               },
+  //             },
+  //           },
+  //         },
+  //       });
+  //     }
+
+  //     // if (deliveryTime?.min && deliveryTime?.max) {
+  //     //   pipeline.push({
+  //     //     $match: {
+  //     //       priceQuantityDetails: {
+  //     //         $elemMatch: {
+  //     //           deliveryTime: {
+  //     //             $gte: parseInt(deliveryTime?.min, 10),
+  //     //             $lte: parseInt(deliveryTime?.max, 10),
+  //     //           },
+  //     //         },
+  //     //       },
+  //     //     },
+  //     //   });
+  //     // }
+
+  //     pipeline.push({
+  //       $sort: { createdAt: -1 },
+  //     });
+
+  //     // pagination
+  //     pipeline.push({ $skip: offset });
+  //     pipeline.push({ $limit: pageSize });
+
+  //     // Execute the aggregation
+  //     const products = await Product.aggregate(pipeline);
+  //     // const totalProducts = await Product.countDocuments(totalProductsQuery);
+  //     const totalProducts = products?.length || 0;
+  //     const totalPages = Math.ceil(totalProducts / pageSize);
+
+  //     return sendSuccessResponse(res, 200, "Success Fetching Products", {
+  //       products,
+  //       totalItems: totalProducts,
+  //       currentPage: pageNo,
+  //       itemsPerPage: pageSize,
+  //       totalPages,
+  //     });
+  //   } catch (error) {
+  //     handleCatchBlockError(req, res, error);
+  //   }
+  // },
+
   getAllProducts: async (req, res) => {
     try {
       const {
@@ -41,21 +293,23 @@ module.exports = {
         category = "",
         subCategory = "",
         level3Category = "",
-        // quantity,
-        // price,
       } = req?.query;
 
-      const { countries } = req?.body;
+      const {
+        countries,
+        price = {},
+        quantity = {},
+        deliveryTime = {},
+      } = req?.body;
 
       const formatToPascalCase = (str) => {
         return str
           .trim()
-          .split(/\s+/) // Split by spaces
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-          .join(""); // Join words without spaces
+          .split(/\s+/)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join("");
       };
 
-      // Format category, subCategory, and level3Category
       const formattedCategory = formatToPascalCase(category);
       const formattedSubCategory = formatToPascalCase(subCategory);
       const formattedLevel3Category = formatToPascalCase(level3Category);
@@ -64,13 +318,10 @@ module.exports = {
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
 
-      const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
-
-      // Create the aggregation pipeline
       let pipeline = [];
 
       const totalProductsQuery = {
-        isDeleted: false, // Only products that are not deleted
+        isDeleted: false,
         ...(supplier_id && {
           supplier_id: new mongoose.Types.ObjectId(supplier_id),
         }),
@@ -104,72 +355,69 @@ module.exports = {
           }),
       };
 
-      pipeline.push({
-        $match: totalProductsQuery,
-      });
+      pipeline.push({ $match: totalProductsQuery });
 
-      // Lookup Supplier (userDetails) based on supplier_id in Product
-      pipeline.push({
-        $lookup: {
-          from: "suppliers", // Ensure the collection name matches
-          localField: "supplier_id", // Reference to supplier_id in the Product schema
-          foreignField: "_id", // Reference to supplier_id in the Supplier schema
-          as: "userDetails",
+      pipeline.push(
+        {
+          $lookup: {
+            from: "suppliers",
+            localField: "supplier_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
         },
-      });
-
-      // Lookup Inventory based on the inventory field in Product
-      pipeline.push({
-        $lookup: {
-          from: "inventories", // Ensure the collection name matches
-          localField: "inventory", // Reference to the inventory field in Product
-          foreignField: "uuid", // Reference to uuid in Inventory schema
-          as: "inventoryDetails",
+        {
+          $lookup: {
+            from: "inventories",
+            localField: "inventory",
+            foreignField: "uuid",
+            as: "inventoryDetails",
+          },
         },
-      });
-
-      // Optionally unwind the results if you expect only one result for userDetails and inventoryDetails
-      pipeline.push({
-        $unwind: {
-          path: "$userDetails",
-          preserveNullAndEmptyArrays: true, // Keep products without matched user details
+        {
+          $unwind: {
+            path: "$userDetails",
+            preserveNullAndEmptyArrays: true,
+          },
         },
-      });
+        {
+          $unwind: {
+            path: "$inventoryDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        }
+      );
 
-      pipeline.push({
-        $unwind: {
-          path: "$inventoryDetails",
-          preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
-        },
-      });
+      const applyInventoryListFilters =
+        (countries && countries.length > 0) ||
+        (price?.min && price?.max) ||
+        (quantity?.min && quantity?.max) ||
+        (deliveryTime?.min && deliveryTime?.max);
 
-      // Unwind the inventoryList so that each inventory item can be processed individually
-      pipeline.push({
-        $unwind: {
-          path: "$inventoryDetails.inventoryList",
-          preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
-        },
-      });
-
-      // Add a filter to match products that have "countries" in their inventory countries (array)
-      if (countries && Array.isArray(countries) && countries.length > 0) {
+      if (applyInventoryListFilters) {
         pipeline.push({
-          $match: {
-            "inventoryDetails.countries": { $in: countries }, // Check if countries are in the countries array
+          $unwind: {
+            path: "$inventoryDetails.inventoryList",
+            preserveNullAndEmptyArrays: true,
           },
         });
       }
 
-      // Aggregating price and quantity by inventory UUID and inventoryList
+      if (countries && Array.isArray(countries) && countries.length > 0) {
+        pipeline.push({
+          $match: {
+            "inventoryDetails.countries": { $in: countries },
+          },
+        });
+      }
+
       pipeline.push({
         $group: {
-          _id: "$_id", // Group by product id
+          _id: "$_id",
           general: { $first: "$general" },
           inventory: { $first: "$inventory" },
           complianceFile: { $first: "$complianceFile" },
-          cNCFileNDate: {
-            $first: "$cNCFileNDate",
-          },
+          cNCFileNDate: { $first: "$cNCFileNDate" },
           storage: { $first: "$storage" },
           additional: { $first: "$additional" },
           guidelinesFile: { $first: "$guidelinesFile" },
@@ -182,7 +430,7 @@ module.exports = {
           isDeleted: { $first: "$isDeleted" },
           bulkUpload: { $first: "$bulkUpload" },
           userDetails: { $first: "$userDetails" },
-          inventoryDetails: { $push: "$inventoryDetails" }, // Group all inventory details
+          inventoryDetails: { $push: "$inventoryDetails" },
           MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
           Pharmaceuticals: { $first: "$Pharmaceuticals" },
           SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
@@ -210,17 +458,16 @@ module.exports = {
             $first: "$NutritionAndDietaryProducts",
           },
           HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          __v: { $first: "$__v" },
           priceQuantityDetails: {
-            // Aggregate price and quantity from the inventoryList
             $push: {
               price: "$inventoryDetails.inventoryList.price",
               quantity: "$inventoryDetails.inventoryList.quantity",
               deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
             },
           },
-          createdAt: { $first: "$createdAt" },
-          updatedAt: { $first: "$updatedAt" },
-          __v: { $first: "$__v" },
         },
       });
 
@@ -239,6 +486,7 @@ module.exports = {
         });
       }
 
+      // Uncomment if you want deliveryTime filtering
       // if (deliveryTime?.min && deliveryTime?.max) {
       //   pipeline.push({
       //     $match: {
@@ -254,18 +502,18 @@ module.exports = {
       //   });
       // }
 
-      pipeline.push({
-        $sort: { createdAt: -1 },
-      });
+      pipeline.push({ $sort: { createdAt: -1 } });
 
-      // pagination
+      // Clone pipeline for total count calculation
+      const countPipeline = [...pipeline];
+      countPipeline.push({ $count: "total" });
+      const countResult = await Product.aggregate(countPipeline);
+      const totalProducts = countResult[0]?.total || 0;
+      // Add pagination
       pipeline.push({ $skip: offset });
       pipeline.push({ $limit: pageSize });
 
-      // Execute the aggregation
       const products = await Product.aggregate(pipeline);
-      // const totalProducts = await Product.countDocuments(totalProductsQuery);
-      const totalProducts = products?.length || 0;
       const totalPages = Math.ceil(totalProducts / pageSize);
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
@@ -1821,7 +2069,7 @@ module.exports = {
           sku: result?.["SKU"]?.toString()?.trim() || "",
           stock: result?.["Stock*"]?.toString()?.trim() || "",
           countries:
-            result?.["Stocked in Countries*"]
+            result?.["Stocked in Countries"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
               ?.filter((ele) => ele != "" || ele != undefined || ele != null)
@@ -2026,7 +2274,7 @@ module.exports = {
           sku: result?.["SKU"]?.toString()?.trim() || "",
           stock: result?.["Stock*"]?.toString()?.trim() || "",
           countries:
-            result?.["Stocked in Countries*"]
+            result?.["Stocked in Countries"]
               ?.split(",")
               ?.map((ele) => ele?.toString()?.trim())
               ?.filter((ele) => ele != "" || ele != undefined || ele != null)
@@ -2682,6 +2930,251 @@ module.exports = {
         "File deleted successfully",
         updatedCsvFile
       );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  getAllProductQualityReports: async (req, res) => {
+    try {
+      const {
+        supplier_name,
+        supplier_id,
+        category = "AlternativeMedicines",
+        subCategory = "Homeopathy",
+        downloadCsv = false,
+        searchKey,
+      } = req?.body;
+
+      // If supplier_name is provided, override supplier_id with supplier._id
+      if (supplier_name) {
+        const supplier = await Supplier.findOne({ supplier_name });
+        if (supplier?._id) {
+          totalProductsQuery = {
+            ...totalProductsQuery,
+            supplier_id: supplier._id,
+          };
+        }
+      }
+
+      // If searchKey is provided, check for supplier
+      if (searchKey) {
+        const supplier2 = await Supplier.findOne({ supplier_name: searchKey });
+        if (supplier2?._id) {
+          totalProductsQuery = {
+            ...totalProductsQuery,
+            supplier_id: supplier2._id,
+          };
+        }
+        const supplier3 = await Supplier.findOne({ supplier_id: searchKey });
+        if (supplier3?._id) {
+          totalProductsQuery = {
+            ...totalProductsQuery,
+            supplier_id: supplier3._id,
+          };
+        }
+      }
+      const formatToPascalCase = (str) => {
+        return str
+          .trim()
+          .split(/\s+/)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join("");
+      };
+
+      const formattedCategory = formatToPascalCase(category);
+      const formattedSubCategory = formatToPascalCase(subCategory);
+
+      const pageNo = parseInt(req?.query?.pageNo) || 1;
+      const pageSize = parseInt(req?.query?.pageSize) || 20;
+      const offset = (pageNo - 1) * pageSize;
+
+      // Build query with spread operator
+      let totalProductsQuery = {
+        isDeleted: false,
+        ...(supplier_id && {
+          supplier_id: new mongoose.Types.ObjectId(supplier_id),
+        }),
+        ...(formattedCategory && {
+          category: { $regex: formattedCategory, $options: "i" },
+        }),
+        ...(subCategory && {
+          [`${formattedCategory}.subCategory`]: {
+            $regex: subCategory,
+            $options: "i",
+          },
+        }),
+        ...(searchKey && {
+          "general.name": { $regex: searchKey, $options: "i" },
+        }),
+        ...(searchKey && {
+          "general.model": { $regex: searchKey, $options: "i" },
+        }),
+        ...(searchKey && {
+          product_id: { $regex: searchKey, $options: "i" },
+        }),
+        ...(searchKey && {
+          category: { $regex: searchKey, $options: "i" },
+        }),
+      };
+
+      let pipeline = [];
+
+      // Match stage
+      pipeline.push({ $match: totalProductsQuery });
+
+      // Lookup supplier details
+      pipeline.push({
+        $lookup: {
+          from: "suppliers",
+          localField: "supplier_id",
+          foreignField: "_id",
+          as: "supplierDetails",
+        },
+      });
+
+      // Unwind supplierDetails
+      pipeline.push({
+        $unwind: {
+          path: "$supplierDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      });
+
+      // Execute aggregation
+      pipeline.push({ $sort: { createdAt: -1 } });
+
+      // Clone pipeline for total count calculation
+      const countPipeline = [...pipeline];
+      countPipeline.push({ $count: "total" });
+      const countResult = await Product.aggregate(countPipeline);
+      const totalProducts = countResult[0]?.total || 0;
+      // Add pagination
+      pipeline.push({ $skip: offset });
+      pipeline.push({ $limit: pageSize });
+      pipeline.push({ $skip: offset });
+      pipeline.push({ $limit: pageSize });
+      const products = await Product.aggregate(pipeline);
+      const totalPages = Math.ceil(totalProducts / pageSize);
+
+      const modifiedProductsResult = products
+        ?.map((product) => ({
+          ...product?.general,
+          category: getCategoryNameForHeading(product?.category),
+          subCategory: product[product?.category]?.subCategory, // Dynamically access the subCategory
+          product_id: product?.product_id,
+          supplier_name: product?.supplierDetails?.supplier_name,
+          supplier_id: product?.supplierDetails?.supplier_id,
+          market: product?.market,
+          // ...product?.secondaryMarketDetails,
+        }))
+        ?.filter((item) => {
+          return (
+            !item?.name ||
+            !item?.aboutManufacturer ||
+            !item?.model ||
+            !item?.image?.length ||
+            !item?.category ||
+            !item?.subCategory ||
+            !item?.product_id ||
+            !item?.supplier_name ||
+            !item?.supplier_id ||
+            !item?.market
+          );
+        });
+
+      if (modifiedProductsResult?.length == 0)
+        return sendSuccessResponse(
+          res,
+          200,
+          "No Quality reports of supplier products",
+        );
+
+      if (downloadCsv) {
+        // Convert Mongoose document to plain object and flatten
+        const flattenedData = modifiedProductsResult?.map((item) =>
+          flattenData(
+            item,
+            [
+              "_id",
+              "__v",
+              "description",
+              "manufacturer",
+              "countryOfOrigin",
+              "upc",
+              "brand",
+              "form",
+              "quantity",
+              "volumn",
+              "volumeUnit",
+              "dimension",
+              "dimensionUnit",
+              "weight",
+              "unit",
+              "unit_tax",
+              "packageType",
+              "packageMaterial",
+              "packageMaterialIfOther",
+              "inventory",
+            ],
+            [
+              "supplier_id",
+              "supplier_name",
+              "product_id",
+              "name",
+              "market",
+              "category",
+              "subCategory",
+              "model",
+              "image",
+              "aboutManufacturer",
+            ],
+            "product_quality_report_list"
+          )
+        ); // `toObject()` removes internal Mongoose metadata
+
+        // // Convert the flattened data to CSV
+        // const csv = parse(flattenedData);
+
+        const fieldMapping = {
+          "Supplier Id": "Supplier Id",
+          "Supplier Name": "Supplier Name",
+          "Product Id": "Product Id",
+          Model: "Product Model",
+          Name: "Product Name",
+          AboutManufacturer: "Short Description",
+          Image: "Product Image",
+          Category: "Product Category",
+          SubCategory: "Product Sub Category",
+          Market: "Market",
+        };
+
+        // Convert the flattened data to CSV
+        const csv = parse(flattenedData, {
+          fields: Object.entries(fieldMapping).map(([value, label]) => ({
+            label,
+            value,
+          })),
+        });
+
+        // Set headers for file download
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=users.csv");
+
+        res.status(200).send(csv);
+      } else
+        return sendSuccessResponse(
+          res,
+          200,
+          "Success fetching supplier products",
+          {
+            products: modifiedProductsResult,
+            totalItems: totalProducts,
+            currentPage: parseInt(pageNo),
+            itemsPerPage: parseInt(pageSize),
+            totalPages,
+          }
+        );
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }

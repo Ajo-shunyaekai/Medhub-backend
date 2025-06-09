@@ -14,7 +14,8 @@ const {
   sendErrorResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
-const { submitQuotationContent,cancelEnquiryContent } = require("../utils/emailContents");
+const { submitQuotationContent,acceptRejectQuotationBuyerContent, 
+  acceptRejectQuotationSupplierContent, cancelEnquiryContent } = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
 
 module.exports = {
@@ -392,6 +393,41 @@ module.exports = {
           result: null,
         });
       }
+
+      const supplier = await Supplier.findOne({ supplier_id: updatedEnquiry?.supplier_id });
+      const buyer = await Buyer.findOne({ buyer_id: updatedEnquiry?.buyer_id });
+
+      const subjectMap = {
+        Accepted: "Enquiry Quotation Accepted",
+        Rejected: "Enquiry Quotation Rejected",
+      };
+      
+      if (msg === 'Accepted' || msg === 'Rejected') {
+        const subject = subjectMap[msg];
+      
+        const buyerContent = await acceptRejectQuotationBuyerContent(
+          supplier,
+          buyer,
+          enquiry_id,
+          msg
+        );
+        const supplierContent = await acceptRejectQuotationSupplierContent(
+          supplier,
+          buyer,
+          enquiry_id,
+          msg
+        );
+      
+        const buyerRecipients = [buyer.contact_person_email, 'ajo@shunyaekai.tech'];
+        const supplierRecipients = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
+      
+        await Promise.all([
+          sendEmail(buyerRecipients, subject, buyerContent),
+          sendEmail(supplierRecipients, subject, supplierContent)
+        ]);
+      }
+      
+      
 
       callback({
         code: 200,

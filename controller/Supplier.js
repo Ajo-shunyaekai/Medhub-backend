@@ -869,7 +869,7 @@ module.exports = {
       } else if (usertype == "Buyer") {
         data = await Supplier.find(query)
           .select(
-            "supplier_id supplier_name supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time, license_expiry_date tax_no"
+            "supplier_id supplier_name supplier_type supplier_image supplier_country_code supplier_mobile supplier_address description license_no country_of_origin country_of_operation contact_person_name contact_person_mobile_no contact_person_country_code contact_person_email designation tags payment_terms estimated_delivery_time, license_expiry_date tax_no"
           )
           .sort({ createdAt: -1 })
           .skip(offset)

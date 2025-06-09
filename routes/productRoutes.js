@@ -30,6 +30,7 @@ const {
   getSupplierCsvFiles,
   updateSupplierCsvFile,
   deleteAdminCsvTemplateFile,
+  getAllProductQualityReports,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -158,6 +159,13 @@ router.post(
   authenticationNAuthorization,
   bulkProductCSVUpload,
   deleteAdminCsvTemplateFile
+);
+
+router.post(
+  `/get-all-qr-products/`,
+  checkAuthorization,
+  authenticationNAuthorization,
+  getAllProductQualityReports
 );
 
 router.post(`/:id`, checkAuthorization, getProductDetails);
