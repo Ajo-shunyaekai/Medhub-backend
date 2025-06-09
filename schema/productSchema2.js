@@ -298,12 +298,6 @@ const productSchema = new Schema(
       specification: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "MedicalEquipmentAndDevices" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Specification is required.",
-        // },
       },
       specificationFile: [
         {
@@ -368,32 +362,14 @@ const productSchema = new Schema(
       genericName: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "Pharmaceuticals" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Generic Name is required.",
-        // },
       },
       strength: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "Pharmaceuticals" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Strength is required.",
-        // },
       },
       composition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "Pharmaceuticals" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Composition/Ingredients is required.",
-        // },
       },
       formulation: {
         type: String,
@@ -406,22 +382,10 @@ const productSchema = new Schema(
       drugAdministrationRoute: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "Pharmaceuticals" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Drug Administration Route is required.",
-        // },
       },
       drugClass: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "Pharmaceuticals" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Drug Class is required.",
-        // },
       },
       controlledSubstance: {
         type: Boolean,
@@ -497,62 +461,26 @@ const productSchema = new Schema(
       strength: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Strength is required.",
-        // },
       },
       composition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Composition/Ingredients is required.",
-        // },
       },
       purpose: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Purpose is required.",
-        // },
       },
       targetCondition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Target Condition is required.",
-        // },
       },
       drugAdministrationRoute: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Drug Administration Route is required.",
-        // },
       },
       drugClass: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Drug Class is required.",
-        // },
       },
       controlledSubstance: {
         type: Boolean,
@@ -578,12 +506,6 @@ const productSchema = new Schema(
       dermatologistTested: {
         type: String,
         enum: ["Yes", "No", ""],
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Dermatologist Tested is required.",
-        // },
       },
       dermatologistTestedFile: [
         {
@@ -594,12 +516,6 @@ const productSchema = new Schema(
       pediatricianRecommended: {
         type: String,
         enum: ["Yes", "No", ""],
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "SkinHairCosmeticSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Pediatrician Recommended is required.",
-        // },
       },
       pediatricianRecommendedFile: [
         {
@@ -658,42 +574,18 @@ const productSchema = new Schema(
       healthBenefit: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "VitalHealthAndWellness" ? !!v : true;
-        //   },
-        //   message: "Vlidation Error: Health Benefit is required.",
-        // },
       },
       genericName: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "VitalHealthAndWellness" ? !!v : true;
-        //   },
-        //   message: "Vlidation Error: Generic Name is required.",
-        // },
       },
       strength: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "VitalHealthAndWellness" ? !!v : true;
-        //   },
-        //   message: "Vlidation Error: Strength is required.",
-        // },
       },
       composition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "VitalHealthAndWellness" ? !!v : true;
-        //   },
-        //   message: "Vlidation Error: Composition/Ingredients is required.",
-        // },
       },
       formulation: {
         type: String,
@@ -706,22 +598,10 @@ const productSchema = new Schema(
       drugAdministrationRoute: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "VitalHealthAndWellness" ? !!v : true;
-        //   },
-        //   message: "Vlidation Error: Drug Administration Route is required.",
-        // },
       },
       drugClass: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "VitalHealthAndWellness" ? !!v : true;
-        //   },
-        //   message: "Vlidation Error: Drug Class is required.",
-        // },
       },
       controlledSubstance: {
         type: Boolean,
@@ -961,40 +841,16 @@ const productSchema = new Schema(
       specification: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "DiagnosticAndMonitoringDevices"
-        //       ? !!v
-        //       : true;
-        //   },
-        //   message: "Vlidation Error: Specification is required.",
-        // },
       },
       specificationFile: [
         {
           type: String,
           trim: true,
-          // validate: {
-          //   validator: function (v) {
-          //     return this.category === "DiagnosticAndMonitoringDevices"
-          //       ? !!v
-          //       : true;
-          //   },
-          //   message: "Vlidation Error: Specification File is required.",
-          // },
         },
       ],
       diagnosticFunctions: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "DiagnosticAndMonitoringDevices"
-        //       ? !!v
-        //       : true;
-        //   },
-        //   message: "Vlidation Error: Diagnostic Functions is required.",
-        // },
       },
       measurementRange: {
         type: String,
@@ -1158,12 +1014,6 @@ const productSchema = new Schema(
       targetCondition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "OrthopedicSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Target Condition is required.",
-        // },
       },
       coating: {
         type: String,
@@ -1172,12 +1022,6 @@ const productSchema = new Schema(
       strength: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "OrthopedicSupplies" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Strength is required.",
-        // },
       },
       moistureResistance: {
         type: String,
@@ -1391,12 +1235,6 @@ const productSchema = new Schema(
       composition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "AlternativeMedicines" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Composition/Ingredients is required.",
-        // },
       },
       purpose: {
         type: String,
@@ -1447,38 +1285,14 @@ const productSchema = new Schema(
       composition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "EmergencyAndFirstAidSupplies"
-        //       ? !!v
-        //       : true;
-        //   },
-        //   message: "Validation Error: Composition/Ingredients is required.",
-        // },
       },
       productLongevity: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "EmergencyAndFirstAidSupplies"
-        //       ? !!v
-        //       : true;
-        //   },
-        //   message: "Validation Error: Product Longevity  is required.",
-        // },
       },
       foldability: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "EmergencyAndFirstAidSupplies"
-        //       ? !!v
-        //       : true;
-        //   },
-        //   message: "Validation Error: Foldability  is required.",
-        // },
       },
     },
     DisinfectionAndHygieneSupplies: {
@@ -1486,15 +1300,6 @@ const productSchema = new Schema(
         type: String,
         trim: true,
         enum: ["Hand Sanitizers", "Air Purifiers", "Cleaning Agents"],
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "DisinfectionAndHygieneSupplies"
-        //       ? !!v
-        //       : true;
-        //   },
-        //   message:
-        //     "Sub Category is required for Disinfection And Hygiene Supplies.",
-        // },
       },
       anotherCategory: {
         type: String,
@@ -1503,14 +1308,6 @@ const productSchema = new Schema(
       composition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "DisinfectionAndHygieneSupplies"
-        //       ? !!v
-        //       : true;
-        //   },
-        //   message: "Validation Error: Composition/Ingredients is required.",
-        // },
       },
       concentration: {
         type: String,
@@ -1553,32 +1350,14 @@ const productSchema = new Schema(
       flavorOptions: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Flavor Options is required.",
-        // },
       },
       aminoAcidProfile: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Amino Acid Profile is required.",
-        // },
       },
       fatContent: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Fat Content is required.",
-        // },
       },
       expiry: {
         type: String,
@@ -1595,22 +1374,10 @@ const productSchema = new Schema(
       healthBenefit: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Health Benefit is required.",
-        // },
       },
       composition: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Composition/Ingredients is required.",
-        // },
       },
       additivesNSweeteners: {
         type: String,
@@ -1621,12 +1388,6 @@ const productSchema = new Schema(
         trim: true,
         enum: ["Yes", "No", ""],
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "NutritionAndDietaryProducts" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Dairy Free is required.",
-        // },
       },
     },
     HealthcareITSolutions: {
@@ -1639,13 +1400,13 @@ const productSchema = new Schema(
           "Medical Billing Software",
           "IoT-Enabled Medical Devices",
         ],
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message:
-        //     "Validation Error: Sub Category is required for Healthcare IT Solutions.",
-        // },
+        validate: {
+          validator: function (v) {
+            return this.category === "HealthcareITSolutions" ? !!v : true;
+          },
+          message:
+            "Validation Error: Sub Category is required for Healthcare IT Solutions.",
+        },
       },
       anotherCategory: {
         type: String,
@@ -1654,84 +1415,36 @@ const productSchema = new Schema(
       license: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message: "Validation Error: License is required.",
-        // },
       },
       scalabilityInfo: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Scalability Info is required.",
-        // },
       },
       addOns: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Add-Ons is required.",
-        // },
       },
       interoperability: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Interoperability is required.",
-        // },
       },
       interoperabilityFile: [
         {
           type: String,
           trim: true,
-          // validate: {
-          //   validator: function (v) {
-          //     return this.category === "HealthcareITSolutions" ? !!v : true;
-          //   },
-          //   message: "Validation Error: Interoperability File is required.",
-          // },
         },
       ],
       userAccess: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message: "Validation Error: User Access is required.",
-        // },
       },
       keyFeatures: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Key Features is required.",
-        // },
       },
       coreFunctionalities: {
         type: String,
         trim: true,
-        // validate: {
-        //   validator: function (v) {
-        //     return this.category === "HealthcareITSolutions" ? !!v : true;
-        //   },
-        //   message: "Validation Error: Core Functionalities is required.",
-        // },
       },
     },
   },

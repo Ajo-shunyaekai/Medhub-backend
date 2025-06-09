@@ -25,6 +25,7 @@ const {
   previewBulkUpload2,
   csvDownload,
   csvDownload2,
+  getAllProductQualityReports,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -112,6 +113,13 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   otherProducts
+);
+
+router.post(
+  `/get-all-qr-products/`,
+  checkAuthorization,
+  authenticationNAuthorization,
+  getAllProductQualityReports
 );
 
 router.post(`/:id`, checkAuthorization, getProductDetails);
