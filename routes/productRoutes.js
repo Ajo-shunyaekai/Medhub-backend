@@ -25,6 +25,11 @@ const {
   previewBulkUpload2,
   csvDownload,
   csvDownload2,
+  uploadCsvSheet,
+  getCsvTemplateFiles,
+  getSupplierCsvFiles,
+  updateSupplierCsvFile,
+  deleteAdminCsvTemplateFile,
   getAllProductQualityReports,
 } = require("../controller/Product");
 const {
@@ -40,6 +45,7 @@ const {
 } = require("../middleware/validations/validationErrorHandler");
 const editProductFileMiddleware = require("../middleware/validations/products/fileUploads/editProduct");
 const addProductFileMiddleware = require("../middleware/validations/products/fileUploads/addProduct");
+const { bulkProductCSVUpload } = require("../middleware/multer/bulkUpload");
 
 router.post(`/`, checkAuthorization, getAllProducts); // according to the market, user
 
@@ -113,6 +119,46 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   otherProducts
+);
+
+router.post(
+  "/upload-csv-sheet/:category/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  uploadCsvSheet
+);
+
+router.post(
+  "/get-supplier-csv-files/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  getSupplierCsvFiles
+);
+
+router.post(
+  "/get-csv-template-files",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  getCsvTemplateFiles
+);
+
+router.post(
+  "/update-supplier-csv-file/:userId/:category/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  updateSupplierCsvFile
+);
+
+router.post(
+  "/delete-csv-file/:userId/:category/:id",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bulkProductCSVUpload,
+  deleteAdminCsvTemplateFile
 );
 
 router.post(

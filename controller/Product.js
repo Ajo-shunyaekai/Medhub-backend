@@ -12,6 +12,7 @@ const Supplier = require("../schema/supplierSchema");
 const Inventory = require("../schema/inventorySchema");
 const Buyer = require("../schema/buyerSchema");
 const Product = require("../schema/productSchema2");
+const CsvFile = require("../schema/csvFilesSchema");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
 const { parse } = require("json2csv");
@@ -2708,6 +2709,227 @@ module.exports = {
 
       // Send the CSV file as a response
       res.status(200).send(csv);
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  uploadCsvSheet: async (req, res) => {
+    try {
+      const { usertype } = req.headers;
+      const { id, category } = req.params;
+
+      if (!usertype) return sendErrorResponse(res, 400, "Need User type.");
+      if (!id) return sendErrorResponse(res, 400, "Need User Id.");
+      if (!category)
+        return sendErrorResponse(res, 400, "Need Product Category.");
+
+      // Get uploaded CSV files (should be an array of file URLs)
+      const csvFilesFromAWS = await getFilePathsAdd(req, res, ["csvFile"]);
+      if (!csvFilesFromAWS || !csvFilesFromAWS.length) {
+        return sendErrorResponse(res, 400, "No files uploaded.");
+      }
+
+      const existingDoc = await CsvFile.findOne({ userId: id });
+
+      if (existingDoc) {
+        // Append a new object to the category's array
+        const updateQuery = {
+          $push: {
+            [category]: {
+              file: csvFilesFromAWS?.[0], // <- Must match schema: array of strings
+              status: "Pending",
+            },
+          },
+        };
+
+        const updatedDoc = await CsvFile.findOneAndUpdate(
+          { userId: id },
+          updateQuery,
+          { new: true }
+        );
+
+        return sendSuccessResponse(
+          res,
+          200,
+          "CSV File uploaded successfully",
+          updatedDoc
+        );
+      } else {
+        // Create a new document with one entry under the selected category
+        const newCsvFile = await CsvFile.create({
+          userId: id,
+          isMainTemplate: usertype === "Supplier" ? false : true,
+          [category]: [
+            {
+              file: csvFilesFromAWS,
+              status: "Pending",
+            },
+          ],
+        });
+
+        return sendSuccessResponse(
+          res,
+          200,
+          "CSV File uploaded successfully",
+          newCsvFile
+        );
+      }
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  getSupplierCsvFiles: async (req, res) => {
+    try {
+      const { id } = req?.params;
+      if (!id) {
+        return sendErrorResponse(res, 400, "Need User Id.");
+      }
+
+      const csvFile = await CsvFile.findOne({ userId: id });
+
+      if (!csvFile) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Need CSV File uploaded by this Supplier."
+        );
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Profile updated successfully",
+        csvFile
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  getCsvTemplateFiles: async (req, res) => {
+    try {
+      const csvFile = await CsvFile.findOne({ isMainTemplate: true });
+
+      if (!csvFile) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Need CSV File uploaded by this Supplier."
+        );
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Profile updated successfully",
+        csvFile
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  updateSupplierCsvFile: async (req, res) => {
+    try {
+      const { userId, category, id } = req?.params;
+      const { status } = req?.body;
+
+      // Find the CSV file for the given user
+      const csvFile = await CsvFile.findOne({ userId });
+
+      if (!csvFile) {
+        return sendErrorResponse(
+          res,
+          400,
+          "No CSV File uploaded by this Supplier."
+        );
+      }
+
+      // Find the file within the category array by its _id
+      const fileToUpdate = csvFile[category]?.find(
+        (file) => file?._id.toString() === id
+      );
+
+      if (!fileToUpdate) {
+        return sendErrorResponse(res, 400, "File not found.");
+      }
+
+      // Update the status of the file
+      fileToUpdate.status = status;
+
+      // Update the category array with the modified file
+      const updatedCsvFile = await CsvFile.findOneAndUpdate(
+        { userId },
+        {
+          $set: {
+            [`${category}.$[elem].status`]: status, // Update the status of the specific file
+          },
+        },
+        {
+          arrayFilters: [{ "elem._id": id }], // Use array filters to target the file by _id
+          new: true, // Return the updated document
+        }
+      );
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Profile updated successfully",
+        updatedCsvFile
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  deleteAdminCsvTemplateFile: async (req, res) => {
+    try {
+      const { userId, category, id } = req?.params;
+
+      // Find the CSV file for the given user
+      const csvFile = await CsvFile.findOne({ userId });
+
+      if (!csvFile) {
+        return sendErrorResponse(
+          res,
+          400,
+          "No CSV File uploaded by this Supplier."
+        );
+      }
+
+      // Ensure the category exists
+      if (!csvFile[category]) {
+        return sendErrorResponse(
+          res,
+          400,
+          `Category ${category} not found in the CSV file.`
+        );
+      }
+
+      // Remove the file from the specified category
+      const updatedCsvFile = await CsvFile.findOneAndUpdate(
+        { userId },
+        {
+          $pull: {
+            [category]: { _id: id }, // Remove the file with the matching _id in the category
+          },
+        },
+        { new: true } // Return the updated document
+      );
+
+      // Check if the update was successful (the array might be empty after removal)
+      if (!updatedCsvFile) {
+        return sendErrorResponse(res, 400, "Failed to remove the file.");
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "File deleted successfully",
+        updatedCsvFile
+      );
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
