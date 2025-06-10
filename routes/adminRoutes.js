@@ -230,5 +230,7 @@ module.exports = () => {
   //   Controller.updatePassword
   // )
 
+  // routes.post("/add-new-admin", Controller.addNewAdmin);
+
   return routes;
 };

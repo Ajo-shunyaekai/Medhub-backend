@@ -4882,4 +4882,33 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
+
+  addNewAdmin: async (req, res) => {
+    try {
+      const { user_name, email, password } = req?.body;
+
+      // Hash the new password
+      const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const newAdmin = new Admin({
+        admin_id: "ADM-" + Math.random().toString(16).slice(2, 10),
+        user_name,
+        email,
+        password: hashedPassword,
+      });
+      const admin = await newAdmin.save();
+
+      if (!admin) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Error While Submitting Admin Registration Request"
+        );
+      }
+      return sendSuccessResponse(res, 200, `Admin Created Successfully.`);
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
 };

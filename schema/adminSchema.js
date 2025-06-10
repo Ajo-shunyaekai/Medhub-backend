@@ -11,6 +11,10 @@ const adminSchema = new Schema(
       required: true,
       unique: true,
     },
+    superAdmin: {
+      type: Boolean,
+      default: false,
+    },
     user_name: {
       type: String,
       required: true,
@@ -23,14 +27,6 @@ const adminSchema = new Schema(
     password: {
       type: String,
       required: true,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
     },
     otp: {
       type: Number,
@@ -52,6 +48,66 @@ const adminSchema = new Schema(
     ],
     refreshToken: {
       type: String,
+    },
+    accessControl: {
+      buyer: {
+        requests: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        tansaction: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        enquiry: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        order: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        invoice: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        support: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+      },
+      supplier: {
+        requests: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        tansaction: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        enquiry: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        order: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        invoice: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+        support: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+      },
+      products: {
+        product: {
+          view: { type: Boolean, default: true, immutable: true },
+          edit: { type: Boolean, default: false },
+        },
+      },
     },
   },
   { timestamps: true }
