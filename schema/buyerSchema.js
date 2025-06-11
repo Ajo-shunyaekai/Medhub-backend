@@ -287,6 +287,12 @@ const buyerSchema = new Schema(
     websiteAddress: {
       type: String,
     },
+    yrFounded: {
+      type: Number,
+    },
+    annualTurnover: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );
