@@ -2791,6 +2791,24 @@ module.exports = {
         },
       });
 
+      // // Lookup inventory details
+      // pipeline.push({
+      //   $lookup: {
+      //     from: "inventories",
+      //     localField: "inventory",
+      //     foreignField: "uuid",
+      //     as: "inventoryDetails",
+      //   },
+      // });
+
+      // // Unwind inventoryDetails
+      // pipeline.push({
+      //   $unwind: {
+      //     path: "$inventoryDetails",
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // });
+
       // Execute aggregation
       pipeline.push({ $sort: { createdAt: -1 } });
 
@@ -2810,6 +2828,7 @@ module.exports = {
       const modifiedProductsResult = products
         ?.map((product) => ({
           ...product?.general,
+          // ...product?.inventoryDetails,
           category: getCategoryNameForHeading(product?.category),
           subCategory: product[product?.category]?.subCategory, // Dynamically access the subCategory
           product_id: product?.product_id,
@@ -2823,6 +2842,8 @@ module.exports = {
         ?.filter((item) => {
           return (
             !item?.name ||
+            !item?.description ||
+            item?.description?.length < 100 ||
             !item?.aboutManufacturer ||
             !item?.model ||
             !item?.image?.length ||
