@@ -94,6 +94,8 @@ const registerUser = async (req, res) => {
       activity_code,
       bank_details,
       website_address,
+      annualTurnover,
+      yrFounded,
     } = req.body;
 
     let regObj = {};
@@ -137,6 +139,8 @@ const registerUser = async (req, res) => {
         activity_code,
         bank_details,
         website_address,
+        annualTurnover,
+        yrFounded,
         buyer_image: uploadedFiles?.buyer_image,
         license_image: uploadedFiles?.license_image,
         certificate_image: uploadedFiles?.certificate_image,
@@ -355,6 +359,8 @@ const registerUser = async (req, res) => {
         ?.filter((ele) => ele?.file || ele?.date),
       token: new Date(),
       websiteAddress: regObj.website_address,
+      annualTurnover: Number(regObj.annualTurnover || 0),
+      yrFounded: Number(regObj.yrFounded || 0),
     });
 
     const newBuyer = new Buyer({
@@ -420,6 +426,8 @@ const registerUser = async (req, res) => {
         })
         ?.filter((ele) => ele?.file || ele?.date),
       websiteAddress: regObj.website_address,
+      annualTurnover: Number(regObj.annualTurnover || 0),
+      yrFounded: Number(regObj.yrFounded || 0),
     });
 
     // Hash password
