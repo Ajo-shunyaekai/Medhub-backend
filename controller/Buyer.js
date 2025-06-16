@@ -1204,29 +1204,77 @@ module.exports = {
           });
 
           // Send email to supplier
-          const bodySupplier = enquiryMailToSupplierContent(
-            buyer_name,
-            contact_person_name,
-            updatedEmailItems,
-            enquiryId
-          );
-          await sendEmail(
-            [contact_person_email],
-            subjectSupplier,
-            bodySupplier
+          const supplierSubject = `Medhub Global Enquiry: ${buyer?.buyer_name}, Enquiry Number ${enq?.enquiry_id}`;
+          const supplierRecipientEmails = [
+            supplier.contact_person_email,
+            "ajo@shunyaekai.tech",
+          ];
+          const supplierTemplateName = "supplierEnquiryNotification";
+          const supplierContext = {
+            user_id: buyer?.buyer_id,
+            company_name: buyer?.buyer_name,
+            contact_person_name: buyer?.contact_person_name,
+            contact_person_email: buyer.contact_person_email,
+            supplierCompanyName: supplier?.supplier_name,
+            buyerName: buyer?.buyer_name,
+            enquiryNumber: enq?.enquiry_id,
+            products: updatedEmailItems
+          };
+
+          // const bodySupplier = enquiryMailToSupplierContent(
+          //   buyer_name,
+          //   contact_person_name,
+          //   updatedEmailItems,
+          //   enquiryId
+          // );
+          // await sendEmail(
+          //   [contact_person_email],
+          //   subjectSupplier,
+          //   bodySupplier
+          // );
+          await sendTemplateEmail(
+            supplierRecipientEmails.join(","),
+            supplierSubject,
+            supplierTemplateName,
+            supplierContext
           );
 
           // Send email to buyer
-          const bodyBuyer = enquiryMailToBuyerContent(
-            buyer_name,
-            contact_person_name,
-            updatedEmailItems,
-            enquiryId
-          );
-          await sendEmail(
-            [buyer?.contact_person_email],
-            subjectBuyer,
-            bodyBuyer
+          // const bodyBuyer = enquiryMailToBuyerContent(
+          //   buyer_name,
+          //   contact_person_name,
+          //   updatedEmailItems,
+          //   enquiryId
+          // );
+          // await sendEmail(
+          //   [buyer?.contact_person_email],
+          //   subjectBuyer,
+          //   bodyBuyer
+          // );
+
+          const buyerSubject = `Medhub Global Enquiry: ${supplier?.supplier_name}, Enquiry Number ${enq?.enquiry_id}`;
+          const buyerRecipientEmails = [
+            buyer.contact_person_email,
+            "ajo@shunyaekai.tech",
+          ];
+          const buyerTemplateName = "buyerEnquiryConfirmation";
+          const buyerContext = {
+            user_id: supplier?.supplier_id,
+            company_name: supplier?.supplier_name,
+            contact_person_name: buyer?.contact_person_name,
+            contact_person_email: buyer.contact_person_email,
+            supplierCompanyName: supplier?.supplier_name,
+            buyerCompanyName: buyer?.buyer_name,
+            buyerName: buyer?.buyer_name,
+            enquiryNumber: enq?.enquiry_id,
+            products: updatedEmailItems
+          };
+
+          await sendTemplateEmail(
+            buyerRecipientEmails.join(","),
+            buyerSubject,
+            buyerTemplateName,
+            buyerContext
           );
         })
       );
