@@ -57,7 +57,7 @@ const generateAccessAndRefeshToken = async (userId, usertype) => {
   }
 };
 
-const registerUser = async (req, res) => {
+const registerUserOld = async (req, res) => {
   try {
     // const { accesstoken, usertype } = req.headers;
     const { usertype } = req.body;
@@ -570,6 +570,276 @@ const registerUser = async (req, res) => {
         `Supplier Registration Request Submitted Successfully.`
       );
     }
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+const registerUser = async (req, res) => {
+  try {
+    const { usertype } = req.body;
+
+    if (!usertype) {
+      return sendErrorResponse(res, 400, "Need User Type.");
+    }
+
+    // Extract and format the mobile and country code
+    const userCountryCode =
+      req.body.buyer_mobile?.split(" ")[0] ||
+      req.body.supplier_mobile_no?.split(" ")[0];
+
+    const userMobNo =
+      req.body.buyer_mobile?.split(" ")?.slice(1).join(" ") ||
+      req.body.supplier_mobile_no?.split(" ")?.slice(1).join(" ");
+
+    const personMobNo =
+      req.body.contact_person_mobile?.split(" ")?.slice(1).join(" ") ||
+      req.body.contact_person_mobile_no?.split(" ")?.slice(1).join(" ");
+
+    const personCountryCode =
+      req.body.contact_person_mobile?.split(" ")[0] ||
+      req.body.contact_person_mobile_no?.split(" ")[0];
+
+    const { uploadedFiles } = req;
+
+    let regObj = {
+      ...req.body,
+      contact_person_mobile: personMobNo,
+      contact_person_mobile_no: personMobNo,
+      buyer_mobile: userMobNo,
+      supplier_mobile: userMobNo,
+      buyer_country_code: userCountryCode,
+      supplier_country_code: userCountryCode,
+      buyer_image: uploadedFiles?.buyer_image,
+      supplier_image: uploadedFiles?.supplier_image,
+      contact_person_country_code: personCountryCode,
+      license_image: uploadedFiles?.license_image,
+      certificate_image: uploadedFiles?.certificate_image,
+      medical_certificate: uploadedFiles?.medical_certificate,
+      medical_practitioner_image: uploadedFiles?.medical_practitioner_image,
+      registeredAddress: {
+        full_name: req.body.contact_person_name || "",
+        mobile_number: personMobNo || "",
+        country_code: personCountryCode || "",
+        company_reg_address:
+          req.body.buyer_address || req.body.supplier_address || "",
+        locality: req.body.locality || "",
+        land_mark: req.body.land_mark || "",
+        city: req.body.city || "",
+        state: req.body.state || "",
+        country: req.body.country || "",
+        pincode: req.body.pincode || "",
+      },
+    };
+
+    // Validate required fields based on user type
+    const validationType =
+      usertype === "Buyer"
+        ? "buyerRegister"
+        : usertype === "Supplier"
+        ? "supplierRegister"
+        : null;
+
+    if (validationType) {
+      const errObj = validation(regObj, validationType);
+      if (Object.values(errObj).length) {
+        return sendErrorResponse(res, 419, "All fields are required.", errObj);
+      }
+    }
+
+    // Check if email already exists
+    const emailExists =
+      usertype === "Buyer"
+        ? await Buyer.findOne({
+            contact_person_email: regObj?.contact_person_email,
+          })
+        : usertype === "Admin"
+        ? await Admin.findOne({ email: req.body?.email })
+        : usertype === "Supplier"
+        ? await Supplier.findOne({
+            contact_person_email: req.body?.contact_person_email,
+          })
+        : null;
+
+    if (emailExists) {
+      return sendErrorResponse(res, 409, "Email already exists");
+    }
+
+    let certificateFileNDateParsed = [];
+    // Parse certificateFileNDate if present
+    try {
+      if (typeof req?.body?.certificateFileNDate == "string") {
+        try {
+          if (Array.isArray(req?.body?.certificateFileNDate)) {
+            certificateFileNDateParsed = req.body.certificateFileNDate.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else if (typeof req?.body?.certificateFileNDate === "string") {
+            certificateFileNDateParsed = JSON.parse(
+              req.body?.certificateFileNDate
+            )?.filter((value) => value !== "[object Object]");
+          } else {
+            throw new Error("Invalid certificateFileNDate format.");
+          }
+        } catch (error) {
+          handleCatchBlockError(req, res, error);
+        }
+      } else {
+        certificateFileNDateParsed = JSON.parse(
+          req.body?.certificateFileNDate?.filter(
+            (value) => value != "[object Object]"
+          )
+        );
+      }
+    } catch (error) {
+      return sendErrorResponse(
+        res,
+        400,
+        "Invalid certificateFileNDate format."
+      );
+    }
+
+    // Generate unique IDs
+    const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
+    const userId =
+      (usertype === "Buyer"
+        ? "BYR-"
+        : usertype === "Admin"
+        ? "ADM-"
+        : usertype === "Supplier"
+        ? "SUP-"
+        : "") + Math.random().toString(16).slice(2, 10);
+
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
+
+    // Prepare common user data
+    const newUserData = {
+      supplier_id: userId,
+      buyer_id: userId,
+      ...regObj,
+      account_status: 0,
+      profile_status: 0,
+      certificateFileNDate: certificateFileNDateParsed
+        ?.map((ele, index) => {
+          return {
+            file:
+              typeof ele?.file !== "string"
+                ? regObj?.certificate_image?.find((filename) => {
+                    const path = ele?.file?.path;
+                    if (!path) {
+                      return false;
+                    }
+                    const ext = path.split(".").pop();
+                    const sanitizedPath = path
+                      .replaceAll("./", "")
+                      .replaceAll(" ", "")
+                      .replaceAll(`.${ext}`, "");
+                    return filename?.includes(sanitizedPath);
+                  })
+                : ele?.file || regObj?.certificate_image?.[index] || "",
+
+            date: ele?.date || "",
+          };
+        })
+        ?.filter((ele) => ele?.file || ele?.date),
+      token: new Date(),
+      websiteAddress: regObj.website_address,
+      annualTurnover: Number(regObj.annualTurnover || 0),
+      yrFounded: Number(regObj.yrFounded || 0),
+    };
+
+    // Handle Buyer or Supplier
+    if (usertype === "Buyer" || usertype === "Supplier") {
+      const newUser =
+        usertype === "Buyer"
+          ? new Buyer(newUserData)
+          : new Supplier(newUserData);
+
+      const user = await newUser.save();
+      if (!user) {
+        return sendErrorResponse(
+          res,
+          400,
+          `Error While Submitting ${usertype} Registration Request`
+        );
+      }
+
+      // Create Notification
+      const newNotification = new Notification({
+        notification_id: notificationId,
+        event_type: "New Registration Request",
+        event:
+          usertype === "Buyer" ? "buyerregistration" : "supplierregistration",
+        from: usertype.toLowerCase(),
+        to: "admin",
+        from_id: userId,
+        event_id: userId,
+        message: `New ${usertype} Registration Request`,
+        status: 0,
+      });
+
+      await newNotification.save();
+
+      const adminEmail = "platform@medhub.global";
+      const subject = `New Registration Alert: ${usertype} Account Created`;
+
+      const emailContent = await (usertype === "Buyer"
+        ? buyerRegistrationContent(user)
+        : supplierRegistrationContent(user));
+
+      await sendEmail([adminEmail], subject, emailContent);
+
+      const confirmationSubject = "Thank You for Registering on Medhub Global!";
+      const confirmationContent = await userRegistrationConfirmationContent(
+        user,
+        usertype
+      );
+
+      await sendTemplateEmail(
+        [user.contact_person_email],
+        confirmationSubject,
+        "thankYou",
+        {}
+      );
+
+      return sendSuccessResponse(
+        res,
+        200,
+        `${usertype} Registration Request Submitted Successfully.`
+      );
+    }
+
+    // Handle Admin registration
+    if (usertype === "Admin") {
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+      const newAdmin = new Admin({
+        admin_id: userId,
+        user_name: req.body?.name,
+        email: req.body?.email,
+        password: hashedPassword,
+        token: new Date(),
+      });
+
+      const admin = await newAdmin.save();
+
+      if (!admin) {
+        return sendErrorResponse(
+          res,
+          400,
+          "Error While Submitting Admin Registration Request"
+        );
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Admin Registration Request Successfully."
+      );
+    }
+
+    return sendErrorResponse(res, 400, "Unsupported user type.");
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
