@@ -621,7 +621,9 @@ module.exports = {
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePathsAdd(req, res, ["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
-      const inventoryFiles = [...req?.body?.countries];
+      const inventoryFiles = Array.isArray(req?.body?.countries)
+        ? [...req?.body?.countries]
+        : req?.body?.countries || [];;
       const complianceFiles = await getFilePathsAdd(req, res, [
         "complianceFile",
       ]);
