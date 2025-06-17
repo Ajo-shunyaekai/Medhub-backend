@@ -154,9 +154,23 @@ module.exports = {
       }
 
       if (countries && Array.isArray(countries) && countries.length > 0) {
+        // pipeline.push({
+        //   $match: {
+        //     "inventoryDetails.countries": { $in: countries },
+        //   },
+        // });
+
+        pipeline.push({
+          $unwind: {
+            path: "$inventoryDetails.stockedInDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        });
+      
+        // Match countries inside stockedInDetails
         pipeline.push({
           $match: {
-            "inventoryDetails.countries": { $in: countries },
+            "inventoryDetails.stockedInDetails.country": { $in: countries },
           },
         });
       }
