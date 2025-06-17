@@ -396,7 +396,9 @@ module.exports = {
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePathsAdd(req, res, ["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
-      const inventoryFiles = [...req?.body?.countries];
+      const inventoryFiles = Array.isArray(req?.body?.countries)
+        ? [...req?.body?.countries]
+        : req?.body?.countries || [];
       const complianceFiles = await getFilePathsAdd(req, res, [
         "complianceFile",
       ]);
@@ -623,7 +625,7 @@ module.exports = {
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
       const inventoryFiles = Array.isArray(req?.body?.countries)
         ? [...req?.body?.countries]
-        : req?.body?.countries || [];;
+        : req?.body?.countries || [];
       const complianceFiles = await getFilePathsAdd(req, res, [
         "complianceFile",
       ]);
@@ -863,7 +865,9 @@ module.exports = {
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePathsEdit(req, res, ["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
-      const inventoryFiles = [...req?.body?.countries];
+      const inventoryFiles = Array.isArray(req?.body?.countries)
+        ? [...req?.body?.countries]
+        : req?.body?.countries || [];
       const complianceFiles = await getFilePathsEdit(req, res, [
         "complianceFile",
       ]);
@@ -1079,7 +1083,9 @@ module.exports = {
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles = await getFilePathsEdit(req, res, ["image"]);
       // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
-      const inventoryFiles = [...req?.body?.countries];
+      const inventoryFiles = Array.isArray(req?.body?.countries)
+        ? [...req?.body?.countries]
+        : req?.body?.countries || [];
       const complianceFiles = await getFilePathsEdit(req, res, [
         "complianceFile",
       ]);
