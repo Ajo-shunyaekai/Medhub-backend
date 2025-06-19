@@ -1313,14 +1313,41 @@ module.exports = {
         page_size = 5,
         search_key = "",
         category,
-        // quantity,
-        // price,
+        quantity,
+        price,
+        stocked_in
       } = req?.query;
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
 
-      const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
+      // const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
+
+      let quantityFilter = {};
+      if (quantity && typeof quantity === 'string') {
+        const [minStr, maxStr] = quantity.split('-').map(s => s.trim());
+        const min = parseInt(minStr, 10);
+        const max = parseInt(maxStr, 10);
+        if (!isNaN(min) && !isNaN(max)) {
+          quantityFilter = {
+            "general.quantity": {
+              $gte: min,
+              $lte: max,
+            },
+          };
+        } else if (!isNaN(min) && maxStr?.toLowerCase()?.includes('greater')) {
+          quantityFilter = {
+            "general.quantity": {
+              $gte: min,
+            },
+          };
+        }
+      }
+
+      let countries = [];
+      if (stocked_in && typeof stocked_in === "string") {
+        countries = stocked_in.split(",").map((c) => c.trim());
+      }
 
       const foundProduct = await Product?.findById(id);
       if (!foundProduct) {
@@ -1355,6 +1382,8 @@ module.exports = {
 
       let pipeline = [];
 
+      
+
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
@@ -1365,16 +1394,17 @@ module.exports = {
         ...(market && { market: foundProduct?.market }),
         ...(category && { category: foundProduct?.category }),
         ...searchFilter,
-        ...(quantity?.min &&
-          quantity?.max &&
-          !isNaN(quantity?.min) &&
-          !isNaN(quantity?.max) && {
-            // "general.quantity": { $lte: parseInt(quantity, 10) },
-            "general.quantity": {
-              $gte: parseInt(quantity?.min, 10),
-              $lte: parseInt(quantity?.max, 10),
-            },
-          }),
+        // ...(quantity?.min &&
+        //   quantity?.max &&
+        //   !isNaN(quantity?.min) &&
+        //   !isNaN(quantity?.max) && {
+        //     // "general.quantity": { $lte: parseInt(quantity, 10) },
+        //     "general.quantity": {
+        //       $gte: parseInt(quantity?.min, 10),
+        //       $lte: parseInt(quantity?.max, 10),
+        //     },
+        //   }),
+        ...quantityFilter,
       };
 
       pipeline?.push({
@@ -1422,6 +1452,21 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched inventory details
         },
       });
+
+      if (countries.length > 0) {
+        pipeline.push({
+          $unwind: {
+            path: "$inventoryDetails.stockedInDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        });
+      
+        pipeline.push({
+          $match: {
+            "inventoryDetails.stockedInDetails.country": { $in: countries },
+          },
+        });
+      }
 
       // Aggregating price and quantity by inventory UUID and inventoryList
       pipeline.push({
