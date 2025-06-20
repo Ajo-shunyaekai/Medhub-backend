@@ -1348,44 +1348,44 @@ console.log(req?.query)
       //price filter
       let priceFilter = {};
 
-if (price && typeof price === 'string') {
-  const trimmedPrice = price.trim().toLowerCase();
+      if (price && typeof price === 'string') {
+      const trimmedPrice = price.trim().toLowerCase();
 
-  if (trimmedPrice.includes('-')) {
-    // Case: "10 - 20"
-    const [minStr, maxStr] = trimmedPrice.split('-').map(p => p.trim());
-    const min = parseFloat(minStr);
-    const max = parseFloat(maxStr);
-    if (!isNaN(min) && !isNaN(max)) {
-      priceFilter = {
-        "inventoryDetails.inventoryList.price": {
-          $gte: min,
-          $lte: max,
-        },
-      };
-    }
-  } else if (trimmedPrice.includes('greater than')) {
-    // Case: "greater than 40"
-    const min = parseFloat(trimmedPrice.replace('greater than', '').trim());
-    if (!isNaN(min)) {
-      priceFilter = {
-        "inventoryDetails.inventoryList.price": {
-          $gte: min,
-        },
-      };
-    }
-  } else if (trimmedPrice.includes('less than')) {
-    // Case: "less than 30"
-    const max = parseFloat(trimmedPrice.replace('less than', '').trim());
-    if (!isNaN(max)) {
-      priceFilter = {
-        "inventoryDetails.inventoryList.price": {
-          $lte: max,
-        },
-      };
-    }
-  }
-}
+      if (trimmedPrice.includes('-')) {
+        // Case: "10 - 20"
+        const [minStr, maxStr] = trimmedPrice.split('-').map(p => p.trim());
+        const min = parseFloat(minStr);
+        const max = parseFloat(maxStr);
+        if (!isNaN(min) && !isNaN(max)) {
+          priceFilter = {
+            "inventoryDetails.inventoryList.price": {
+              $gte: min,
+              $lte: max,
+            },
+          };
+        }
+      } else if (trimmedPrice.includes('greater than')) {
+        // Case: "greater than 40"
+        const min = parseFloat(trimmedPrice.replace('greater than', '').trim());
+        if (!isNaN(min)) {
+          priceFilter = {
+            "inventoryDetails.inventoryList.price": {
+              $gte: min,
+            },
+          };
+        }
+      } else if (trimmedPrice.includes('less than')) {
+        // Case: "less than 30"
+        const max = parseFloat(trimmedPrice.replace('less than', '').trim());
+        if (!isNaN(max)) {
+          priceFilter = {
+            "inventoryDetails.inventoryList.price": {
+              $lte: max,
+            },
+          };
+        }
+      }
+      }
 
 
 
