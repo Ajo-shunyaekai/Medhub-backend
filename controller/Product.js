@@ -1315,12 +1315,13 @@ module.exports = {
         category,
         quantity,
         price,
-        stocked_in
+        stocked_in,
+        stock_status
       } = req?.query;
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-
+console.log(req?.query)
       // const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
 
       let quantityFilter = {};
@@ -1344,10 +1345,55 @@ module.exports = {
         }
       }
 
-      let countries = [];
-      if (stocked_in && typeof stocked_in === "string") {
-        countries = stocked_in.split(",").map((c) => c.trim());
-      }
+      //price filter
+      let priceFilter = {};
+
+if (price && typeof price === 'string') {
+  const trimmedPrice = price.trim().toLowerCase();
+
+  if (trimmedPrice.includes('-')) {
+    // Case: "10 - 20"
+    const [minStr, maxStr] = trimmedPrice.split('-').map(p => p.trim());
+    const min = parseFloat(minStr);
+    const max = parseFloat(maxStr);
+    if (!isNaN(min) && !isNaN(max)) {
+      priceFilter = {
+        "inventoryDetails.inventoryList.price": {
+          $gte: min,
+          $lte: max,
+        },
+      };
+    }
+  } else if (trimmedPrice.includes('greater than')) {
+    // Case: "greater than 40"
+    const min = parseFloat(trimmedPrice.replace('greater than', '').trim());
+    if (!isNaN(min)) {
+      priceFilter = {
+        "inventoryDetails.inventoryList.price": {
+          $gte: min,
+        },
+      };
+    }
+  } else if (trimmedPrice.includes('less than')) {
+    // Case: "less than 30"
+    const max = parseFloat(trimmedPrice.replace('less than', '').trim());
+    if (!isNaN(max)) {
+      priceFilter = {
+        "inventoryDetails.inventoryList.price": {
+          $lte: max,
+        },
+      };
+    }
+  }
+}
+
+
+
+      //filter for countries where stock trade
+      // let countries = [];
+      // if (stocked_in && typeof stocked_in === "string") {
+      //   countries = stocked_in.split(",").map((c) => c.trim());
+      // }
 
       const foundProduct = await Product?.findById(id);
       if (!foundProduct) {
@@ -1453,17 +1499,36 @@ module.exports = {
         },
       });
 
-      if (countries.length > 0) {
+      //price filter
+      if (Object.keys(priceFilter).length > 0) {
         pipeline.push({
-          $unwind: {
-            path: "$inventoryDetails.stockedInDetails",
-            preserveNullAndEmptyArrays: true,
-          },
+          $match: priceFilter,
         });
+      }
       
+      
+      //filter for countries where stock trade
+      // if (countries.length > 0) {
+      //   pipeline.push({
+      //     $unwind: {
+      //       path: "$inventoryDetails.stockedInDetails",
+      //       preserveNullAndEmptyArrays: true,
+      //     },
+      //   });
+      
+      //   pipeline.push({
+      //     $match: {
+      //       "inventoryDetails.stockedInDetails.country": { $in: countries },
+      //     },
+      //   });
+      // }
+
+      //stock status filter
+      const stockStatuses = stock_status?.split(',').map(s => s.trim());
+      if (stockStatuses?.length > 0) {
         pipeline.push({
           $match: {
-            "inventoryDetails.stockedInDetails.country": { $in: countries },
+            "inventoryDetails.stock": { $in: stockStatuses },
           },
         });
       }
