@@ -11,6 +11,7 @@ const {
 } = require("../middleware/multer/productMulter");
 const {
   getAllProducts,
+  getAllProducts2,
   getProductDetails,
   addProduct,
   addProduct2,
@@ -47,7 +48,7 @@ const editProductFileMiddleware = require("../middleware/validations/products/fi
 const addProductFileMiddleware = require("../middleware/validations/products/fileUploads/addProduct");
 const { bulkProductCSVUpload } = require("../middleware/multer/bulkUpload");
 
-router.post(`/`, checkAuthorization, getAllProducts); // according to the market, user
+router.post(`/`, checkAuthorization, getAllProducts2); // according to the market, user
 
 router.post(
   `/bulk-upload`,
