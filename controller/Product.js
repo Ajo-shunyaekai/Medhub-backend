@@ -1663,31 +1663,33 @@ module.exports = {
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-console.log(req?.query)
       // const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
 
       let possibleName = search_value?.trim() || "";
-let possibleStrength = null;
-let possibleStrengthUnit = null;
+      let possibleStrength = null;
+      let possibleStrengthUnit = null;
 
-if (search_value) {
-  const searchText = search_value.trim().toLowerCase();
-  const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
-  const match = searchText.match(strengthUnitPattern);
+      let searchName = search_key?.trim() || "";
+      let searchStrength = null;
+      let searchStrengthUnit = null;
 
-  if (match) {
-    possibleStrength = parseInt(match[1], 10);
-    possibleStrengthUnit = match[2]?.toLowerCase() || null;
+        if (search_value) {
+          const searchText = search_value.trim().toLowerCase();
+          const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
+          const match = searchText.match(strengthUnitPattern);
 
-    // Clean name by removing the strength portion
-    possibleName = searchText
-      .replace(strengthUnitPattern, "")
-      .trim()
-      .replace(/\s+/g, " ");
-  }
-}
+          if (match) {
+            possibleStrength = parseInt(match[1], 10);
+            possibleStrengthUnit = match[2]?.toLowerCase() || null;
 
-
+            // Clean name by removing the strength portion
+            possibleName = searchText
+              .replace(strengthUnitPattern, "")
+              .trim()
+              .replace(/\s+/g, " ");
+          }
+        }
+        
       let quantityFilter = {};
       if (quantity && typeof quantity === 'string') {
         const [minStr, maxStr] = quantity.split('-').map(s => s.trim());
@@ -1751,8 +1753,6 @@ if (search_value) {
       }
       }
 
-
-
       //filter for countries where stock trade
       // let countries = [];
       // if (stocked_in && typeof stocked_in === "string") {
@@ -1777,6 +1777,22 @@ if (search_value) {
       if (search_key && search_key !== "null") {
         const decodedSearchKey = decodeURIComponent(search_key).trim(); // Decode the URL-encoded string
 
+        
+          const searchText = decodedSearchKey.trim().toLowerCase(); 
+          const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
+          const match = searchText.match(strengthUnitPattern);
+        
+          if (match) {
+            searchStrength = parseInt(match[1], 10);
+            searchStrengthUnit = match[2]?.toLowerCase() || null;
+        
+            // Clean name by removing the strength portion
+            searchName = searchText
+              .replace(strengthUnitPattern, "")
+              .trim()
+              .replace(/\s+/g, " ");
+          }
+
         searchFilter = {
           $or: [
             {
@@ -1784,16 +1800,22 @@ if (search_value) {
                 $regex: decodedSearchKey,
                 $options: "i",
               },
-            }, // Match supplier name
-            { "general.name": { $regex: decodedSearchKey, $options: "i" } }, // Match product name
+            },
+            {
+              $and: [
+                { "general.name": { $regex: `^${searchName}$`, $options: "i" } },
+                ...(searchStrength !== null ? [{ "general.strength": String(searchStrength) }] : []),
+                ...(searchStrengthUnit
+                  ? [{ "general.strengthUnit": { $regex: `^${searchStrengthUnit}$`, $options: "i" } }]
+                  : []),
+              ],
+            },
           ],
         };
-      }
+        
+        }
 
       let pipeline = [];
-
-      
-
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
@@ -1817,7 +1839,7 @@ if (search_value) {
         
         ...(market && { market: foundProduct?.market }),
         ...(category && { category: foundProduct?.category }),
-        ...searchFilter,
+        // ...searchFilter,
         // ...(quantity?.min &&
         //   quantity?.max &&
         //   !isNaN(quantity?.min) &&
@@ -1837,19 +1859,20 @@ if (search_value) {
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
-          from: "suppliers", // Ensure the collection name matches
-          localField: "supplier_id", // Reference to supplier_id in the Product schema
-          foreignField: "_id", // Reference to supplier_id in the Supplier schema
+          from: "suppliers", 
+          localField: "supplier_id", 
+          foreignField: "_id", 
           as: "userDetails",
         },
       });
+      
 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
-          from: "inventories", // Ensure the collection name matches
-          localField: "inventory", // Reference to the inventory field in Product
-          foreignField: "uuid", // Reference to uuid in Inventory schema
+          from: "inventories", 
+          localField: "inventory", 
+          foreignField: "uuid", 
           as: "inventoryDetails",
         },
       });
@@ -1861,6 +1884,12 @@ if (search_value) {
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
         },
       });
+
+      if (Object.keys(searchFilter).length > 0) {
+        pipeline.push({
+          $match: searchFilter,
+        });
+      }
 
       pipeline.push({
         $unwind: {
