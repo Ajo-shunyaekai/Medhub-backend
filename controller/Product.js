@@ -9,9 +9,8 @@ const {
   handleCatchBlockError,
 } = require("../utils/commonResonse");
 const Supplier = require("../schema/supplierSchema");
-const Inventory = require("../schema/inventorySchema");
-const Buyer = require("../schema/buyerSchema");
-const Product = require("../schema/productSchema2");
+const Inventory = require("../schema/inventorySchema3");
+const Product = require("../schema/productSchema3");
 const CsvFile = require("../schema/csvFilesSchema");
 const { default: mongoose } = require("mongoose");
 const csv = require("csv-parser");
@@ -166,7 +165,7 @@ module.exports = {
             preserveNullAndEmptyArrays: true,
           },
         });
-      
+
         // Match countries inside stockedInDetails
         pipeline.push({
           $match: {
@@ -820,6 +819,174 @@ module.exports = {
     }
   },
 
+  addProduct3: async (req, res) => {
+    try {
+      const { category, market = "new" } = req?.body;
+
+      // Retrieve file paths for general, inventory, compliance, and additional fields
+      const generalFiles1 = await getFilePathsAdd(req, res, ["imageFront"]);
+      const generalFiles2 = await getFilePathsAdd(req, res, ["imageBack"]);
+      const generalFiles3 = await getFilePathsAdd(req, res, ["imageSide"]);
+      const generalFiles4 = await getFilePathsAdd(req, res, ["imageClosure"]);
+      const catalogue = await getFilePathsAdd(req, res, ["catalogue"]);
+      const specification = await getFilePathsAdd(req, res, [
+        "specificationSheet",
+      ]);
+      // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      const inventoryFiles = Array.isArray(req?.body?.countries)
+        ? [...req?.body?.countries]
+        : req?.body?.countries || [];
+      const complianceFiles = await getFilePathsAdd(req, res, [
+        "complianceFile",
+      ]);
+      const additionalFiles = await getFilePathsAdd(req, res, [
+        "guidelinesFile",
+      ]);
+      const secondaryMarketFiles = await getFilePathsEdit(req, res, [
+        "purchaseInvoiceFile",
+      ]);
+
+      let newProductData = {};
+
+      const inventoryUUId = uuidv4();
+      const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+
+      let cNCFileNDateParsed;
+
+      if (typeof req?.body?.cNCFileNDate == "string") {
+        try {
+          // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
+          //   (value) => value != "[object Object]"
+          // );
+          if (Array.isArray(req?.body?.cNCFileNDate)) {
+            cNCFileNDateParsed = req.body.cNCFileNDate.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else if (typeof req?.body?.cNCFileNDate === "string") {
+            // If it's a string, try to parse it as JSON and filter
+            cNCFileNDateParsed = JSON.parse(req.body?.cNCFileNDate)?.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else {
+            // Handle case where cNCFileNDate is neither an array nor a string
+            throw new Error("Invalid cNCFileNDate format.");
+          }
+        } catch (error) {
+          handleCatchBlockError(req, res, error);
+        }
+      } else {
+        cNCFileNDateParsed = JSON.parse(
+          req.body?.cNCFileNDate?.filter((value) => value != "[object Object]")
+        );
+      }
+      // Create new product with all necessary fields
+      newProductData = {
+        ...req?.body,
+        product_id,
+        general: {
+          ...req?.body,
+          image: {
+            front: generalFiles1.imageFront || [],
+            back: generalFiles2.imageBack || [],
+            side: generalFiles3.imageSide || [],
+            closure: generalFiles4.imageClosure || [],
+          },
+        },
+        documents: {
+          catalogue: catalogue.catalogue || [],
+          specification: specification.specificationSheet || [],
+        },
+        inventory: inventoryUUId,
+        complianceFile: complianceFiles.complianceFile || [],
+        cNCFileNDate: cNCFileNDateParsed
+          ?.map((ele, index) => {
+            return {
+              file:
+                typeof ele?.file !== "string"
+                  ? complianceFiles?.complianceFile?.find((filename) => {
+                      const path = ele?.file?.path;
+
+                      // Ensure path is defined and log the file path
+                      if (!path) {
+                        return false; // If there's no path, skip this entry
+                      }
+
+                      const ext = path.split(".").pop(); // Get the file extension
+
+                      const sanitizedPath = path
+                        .replaceAll("./", "")
+                        .replaceAll(" ", "")
+                        .replaceAll(`.${ext}`, "");
+
+                      // Match file by sanitized name
+                      return filename?.includes(sanitizedPath);
+                    })
+                  : ele?.file || complianceFiles?.complianceFile?.[index] || "",
+
+              date: ele?.date || "", // Log the date being used (if any)
+            };
+          })
+          ?.filter((ele) => ele?.file || ele?.date),
+        additional: {
+          ...req?.body,
+          guidelinesFile: additionalFiles?.guidelinesFile || [],
+        },
+        market,
+        idDeleted: false,
+      };
+
+      if (market == "secondary") {
+        newProductData["secondaryMarketDetails"] = {
+          ...req?.body,
+          ...(secondaryMarketFiles || []),
+        };
+      }
+
+      // Create the new product
+      const newProduct = await Product.create(newProductData);
+
+      if (!newProduct) {
+        return sendErrorResponse(res, 400, "Failed to create new product.");
+      }
+      console.log(
+        "\n\n\n\n req?.body?.productPricingDetails",
+        req?.body?.productPricingDetails
+      );
+
+      const newInventoryDetails = {
+        uuid: inventoryUUId,
+        productId: newProduct?.product_id,
+        ...req?.body,
+        stockedInDetails: JSON.parse(
+          req?.body?.stockedInDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
+        inventoryList: JSON.parse(
+          req?.body?.productPricingDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        ),
+        ...(inventoryFiles || []),
+      };
+
+      const newInventory = await Inventory.create(newInventoryDetails);
+
+      if (!newInventory) {
+        return sendErrorResponse(res, 400, "Failed to create new Inventory.");
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Product Added Succesfully",
+        newProduct
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
   editProduct: async (req, res) => {
     try {
       const { category, market = "new" } = req?.body;
@@ -1256,6 +1423,183 @@ module.exports = {
     }
   },
 
+  editProduct3: async (req, res) => {
+    try {
+      const { category, market = "new" } = req?.body;
+      const { productId } = req?.params;
+
+      // Check if the product exists
+      const existingProduct = await Product.findById(productId);
+      if (!existingProduct) {
+        return sendErrorResponse(res, 404, "Product not found.");
+      }
+
+      // Check if the inventory exists
+      const InventoryFound = await Inventory.findOne({
+        uuid: existingProduct?.inventory,
+      });
+      if (!InventoryFound) {
+        return sendErrorResponse(res, 404, "Inventory not found.");
+      }
+
+      // Retrieve file paths for general, inventory, compliance, and additional fieldsfields
+      const generalFiles1 = await getFilePathsAdd(req, res, ["imageFront"]);
+      const generalFiles2 = await getFilePathsAdd(req, res, ["imageBack"]);
+      const generalFiles3 = await getFilePathsAdd(req, res, ["imageSide"]);
+      const generalFiles4 = await getFilePathsAdd(req, res, ["imageClosure"]);
+      const catalogue = await getFilePathsAdd(req, res, ["catalogue"]);
+      const specification = await getFilePathsAdd(req, res, [
+        "specificationSheet",
+      ]);
+      // const inventoryFiles = { countries: JSON.parse(req?.body?.countries) };
+      const inventoryFiles = Array.isArray(req?.body?.countries)
+        ? [...req?.body?.countries]
+        : req?.body?.countries || [];
+      const complianceFiles = await getFilePathsEdit(req, res, [
+        "complianceFile",
+      ]);
+      const additionalFiles = await getFilePathsAdd(req, res, [
+        "guidelinesFile",
+      ]);
+      const secondaryMarketFiles = await getFilePathsEdit(req, res, [
+        "purchaseInvoiceFile",
+      ]);
+
+      let cNCFileNDateParsed;
+
+      try {
+        // Check if cNCFileNDate exists and is an array before applying filter
+        if (Array.isArray(req?.body?.cNCFileNDate)) {
+          cNCFileNDateParsed = req.body.cNCFileNDate.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else if (typeof req?.body?.cNCFileNDate === "string") {
+          // If it's a string, try to parse it as JSON and filter
+          cNCFileNDateParsed = JSON.parse(req.body?.cNCFileNDate)?.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else {
+          // Handle case where cNCFileNDate is neither an array nor a string
+          throw new Error("Invalid cNCFileNDate format.");
+        }
+      } catch (error) {
+        console.error("Error while parsing cNCFileNDate:", error);
+        logErrorToFile(error, req);
+        return sendErrorResponse(res, 400, "Invalid cNCFileNDate format.");
+      }
+
+      // Update existing product data
+      const updatedProductData = {
+        ...existingProduct._doc, // Use the existing product data
+        ...req?.body, // Overwrite with new data from request body
+        general: {
+          ...req?.body,
+          image: {
+            front: generalFiles1.imageFront || [],
+            back: generalFiles2.imageBack || [],
+            side: generalFiles3.imageSide || [],
+            closure: generalFiles4.imageClosure || [],
+          },
+        },
+        documents: {
+          catalogue: catalogue.catalogue || [],
+          specification: specification.specificationSheet || [],
+        },
+        complianceFile: complianceFiles.complianceFile || [],
+        cNCFileNDate:
+          cNCFileNDateParsed?.length > 0
+            ? JSON.parse(cNCFileNDateParsed)
+                ?.map((ele, index) => {
+                  return {
+                    file:
+                      typeof ele?.file !== "string"
+                        ? complianceFiles?.complianceFile?.find((filename) => {
+                            const path = ele?.file?.path;
+
+                            // Ensure path is defined and log the file path
+                            if (!path) {
+                              return false; // If there's no path, skip this entry
+                            }
+
+                            const ext = path.split(".").pop(); // Get the file extension
+                            const sanitizedPath = path
+                              .replaceAll("./", "")
+                              .replaceAll(" ", "")
+                              .replaceAll(`.${ext}`, "");
+
+                            // Match file by sanitized name
+                            return filename?.includes(sanitizedPath);
+                          })
+                        : ele?.file ||
+                          complianceFiles?.complianceFile?.[index] ||
+                          "",
+
+                    date: ele?.date || "", // Log the date being used (if any)
+                  };
+                })
+                ?.filter((ele) => ele?.file || ele?.date)
+            : cNCFileNDateParsed,
+        additional: {
+          ...req?.body,
+          guidelinesFile: additionalFiles?.guidelinesFile || [],
+        },
+      };
+
+      if (market == "secondary") {
+        updatedProductData["secondaryMarketDetails"] = {
+          ...req?.body,
+          ...(secondaryMarketFiles || []),
+        };
+      }
+
+      // Update the product in the database
+      const updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        updatedProductData,
+        { new: true }
+      );
+
+      if (!updatedProduct) {
+        return sendErrorResponse(res, 400, "Failed to update the product.");
+      }
+
+      const updatedInventoryData = {
+        ...req?.body,
+        stockedInDetails: JSON.parse(
+          req?.body?.stockedInDetails?.filter(
+            (value) => value != "[object Object]"
+          ) || []
+        ),
+        inventoryList: JSON.parse(
+          req?.body?.productPricingDetails?.filter(
+            (value) => value != "[object Object]"
+          ) || []
+        ),
+        ...(inventoryFiles || []),
+      };
+
+      // Update the inventory in the database
+      const updatedInventory = await Inventory.findOneAndUpdate(
+        { uuid: existingProduct?.inventory },
+        updatedInventoryData,
+        { new: true }
+      );
+
+      if (!updatedInventory) {
+        return sendErrorResponse(res, 400, "Failed to update the inventory.");
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        "Product updated successfully",
+        updatedProduct
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
   deleteProduct: async (req, res) => {
     try {
       const { id } = req?.params;
@@ -1316,17 +1660,17 @@ module.exports = {
         quantity,
         price,
         stocked_in,
-        stock_status
+        stock_status,
       } = req?.query;
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-console.log(req?.query)
+      console.log(req?.query);
       // const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
 
       let quantityFilter = {};
-      if (quantity && typeof quantity === 'string') {
-        const [minStr, maxStr] = quantity.split('-').map(s => s.trim());
+      if (quantity && typeof quantity === "string") {
+        const [minStr, maxStr] = quantity.split("-").map((s) => s.trim());
         const min = parseInt(minStr, 10);
         const max = parseInt(maxStr, 10);
         if (!isNaN(min) && !isNaN(max)) {
@@ -1336,7 +1680,7 @@ console.log(req?.query)
               $lte: max,
             },
           };
-        } else if (!isNaN(min) && maxStr?.toLowerCase()?.includes('greater')) {
+        } else if (!isNaN(min) && maxStr?.toLowerCase()?.includes("greater")) {
           quantityFilter = {
             "general.quantity": {
               $gte: min,
@@ -1348,46 +1692,46 @@ console.log(req?.query)
       //price filter
       let priceFilter = {};
 
-      if (price && typeof price === 'string') {
-      const trimmedPrice = price.trim().toLowerCase();
+      if (price && typeof price === "string") {
+        const trimmedPrice = price.trim().toLowerCase();
 
-      if (trimmedPrice.includes('-')) {
-        // Case: "10 - 20"
-        const [minStr, maxStr] = trimmedPrice.split('-').map(p => p.trim());
-        const min = parseFloat(minStr);
-        const max = parseFloat(maxStr);
-        if (!isNaN(min) && !isNaN(max)) {
-          priceFilter = {
-            "inventoryDetails.inventoryList.price": {
-              $gte: min,
-              $lte: max,
-            },
-          };
-        }
-      } else if (trimmedPrice.includes('greater than')) {
-        // Case: "greater than 40"
-        const min = parseFloat(trimmedPrice.replace('greater than', '').trim());
-        if (!isNaN(min)) {
-          priceFilter = {
-            "inventoryDetails.inventoryList.price": {
-              $gte: min,
-            },
-          };
-        }
-      } else if (trimmedPrice.includes('less than')) {
-        // Case: "less than 30"
-        const max = parseFloat(trimmedPrice.replace('less than', '').trim());
-        if (!isNaN(max)) {
-          priceFilter = {
-            "inventoryDetails.inventoryList.price": {
-              $lte: max,
-            },
-          };
+        if (trimmedPrice.includes("-")) {
+          // Case: "10 - 20"
+          const [minStr, maxStr] = trimmedPrice.split("-").map((p) => p.trim());
+          const min = parseFloat(minStr);
+          const max = parseFloat(maxStr);
+          if (!isNaN(min) && !isNaN(max)) {
+            priceFilter = {
+              "inventoryDetails.inventoryList.price": {
+                $gte: min,
+                $lte: max,
+              },
+            };
+          }
+        } else if (trimmedPrice.includes("greater than")) {
+          // Case: "greater than 40"
+          const min = parseFloat(
+            trimmedPrice.replace("greater than", "").trim()
+          );
+          if (!isNaN(min)) {
+            priceFilter = {
+              "inventoryDetails.inventoryList.price": {
+                $gte: min,
+              },
+            };
+          }
+        } else if (trimmedPrice.includes("less than")) {
+          // Case: "less than 30"
+          const max = parseFloat(trimmedPrice.replace("less than", "").trim());
+          if (!isNaN(max)) {
+            priceFilter = {
+              "inventoryDetails.inventoryList.price": {
+                $lte: max,
+              },
+            };
+          }
         }
       }
-      }
-
-
 
       //filter for countries where stock trade
       // let countries = [];
@@ -1427,8 +1771,6 @@ console.log(req?.query)
       }
 
       let pipeline = [];
-
-      
 
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
@@ -1505,8 +1847,7 @@ console.log(req?.query)
           $match: priceFilter,
         });
       }
-      
-      
+
       //filter for countries where stock trade
       // if (countries.length > 0) {
       //   pipeline.push({
@@ -1515,7 +1856,7 @@ console.log(req?.query)
       //       preserveNullAndEmptyArrays: true,
       //     },
       //   });
-      
+
       //   pipeline.push({
       //     $match: {
       //       "inventoryDetails.stockedInDetails.country": { $in: countries },
@@ -1524,7 +1865,7 @@ console.log(req?.query)
       // }
 
       //stock status filter
-      const stockStatuses = stock_status?.split(',').map(s => s.trim());
+      const stockStatuses = stock_status?.split(",").map((s) => s.trim());
       if (stockStatuses?.length > 0) {
         pipeline.push({
           $match: {

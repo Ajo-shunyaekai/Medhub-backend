@@ -223,6 +223,115 @@ const addProductUpload = (req, res, next) => {
   });
 };
 
+const addProductUpload3 = (req, res, next) => {
+  upload.fields([
+    { name: "imageFront", maxCount: 1 },
+    { name: "imageBack", maxCount: 1 },
+    { name: "imageSide", maxCount: 1 },
+    { name: "imageClosure", maxCount: 1 },
+    { name: "guidelinesFile", maxCount: 4 },
+    { name: "complianceFile", maxCount: 4 },
+    { name: "catalogue", maxCount: 1 },
+    { name: "specificationSheet", maxCount: 1 },
+  ])(req, res, async (err) => {
+    if (err) {
+      console.error("Multer Error:", err); // Log the error to console for debugging
+      logErrorToFile(err, req); // Log the error to a file for persistence
+      if (err.message.includes("Invalid file format")) {
+        return sendErrorResponse(res, 400, err.message, err); // Respond with 400 for invalid file format
+      }
+      return sendErrorResponse(res, 500, "File upload error", err); // Send a general error response for other cases
+    }
+
+    let uploadedFiles = {};
+
+    const getUploadedFilesPath = async () => {
+      if (req?.files?.["imageFront"]) {
+        uploadedFiles["imageFront"] = await uploadMultipleFiles(
+          req?.files?.["imageFront"] || []
+        );
+      }
+      if (req?.files?.["imageBack"]) {
+        uploadedFiles["imageBack"] = await uploadMultipleFiles(
+          req?.files?.["imageBack"] || []
+        );
+      }
+      if (req?.files?.["imageSide"]) {
+        uploadedFiles["imageSide"] = await uploadMultipleFiles(
+          req?.files?.["imageSide"] || []
+        );
+      }
+      if (req?.files?.["imageClosure"]) {
+        uploadedFiles["imageClosure"] = await uploadMultipleFiles(
+          req?.files?.["imageClosure"] || []
+        );
+      }
+      if (req?.files?.["guidelinesFile"]) {
+        uploadedFiles["guidelinesFile"] = await uploadMultipleFiles(
+          req?.files?.["guidelinesFile"] || []
+        );
+      }
+      if (req?.files?.["complianceFile"]) {
+        uploadedFiles["complianceFile"] = await uploadMultipleFiles(
+          req?.files?.["complianceFile"] || []
+        );
+      }
+      if (req?.files?.["catalogue"]) {
+        uploadedFiles["catalogue"] = await uploadMultipleFiles(
+          req?.files?.["catalogue"] || []
+        );
+      }
+      if (req?.files?.["specificationSheet"]) {
+        uploadedFiles["specificationSheet"] = await uploadMultipleFiles(
+          req?.files?.["specificationSheet"] || []
+        );
+      }
+
+      // Function to remove the files from the local file system
+      const removeLocalFiles = (files) => {
+        files.forEach((file) => {
+          // Resolve the absolute file path
+          // const filePath = path.resolve(uploadPath, file.filename);
+          const filePath = path.resolve(file?.destination, file.filename);
+
+          // Check if the file exists before trying to delete it
+          if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(
+                  `\n\n\n\nFailed to delete file ${filePath}:`,
+                  err
+                );
+              } else {
+              }
+            });
+          } else {
+            console.error(`File not found: ${filePath}`);
+          }
+        });
+      };
+
+      // Remove uploaded files from local storage
+      removeLocalFiles([
+        ...(req?.files?.["imageFront"] || []),
+        ...(req?.files?.["imageBack"] || []),
+        ...(req?.files?.["imageSide"] || []),
+        ...(req?.files?.["imageClosure"] || []),
+        ...(req?.files?.["guidelinesFile"] || []),
+        ...(req?.files?.["complianceFile"] || []),
+        ...(req?.files?.["catalogue"] || []),
+        ...(req?.files?.["specificationSheet"] || []),
+      ]);
+
+      req.uploadedFiles = uploadedFiles;
+      next();
+    };
+
+    // Call the function to handle the uploaded files
+    await getUploadedFilesPath();
+  });
+};
+
 const editProductUpload = (req, res, next) => {
   const getMaxCount = (field) => {
     // Calculate the max count based on the files already uploaded for the field
@@ -396,7 +505,128 @@ const editProductUpload = (req, res, next) => {
   });
 };
 
+const editProductUpload3 = (req, res, next) => {
+  const getMaxCount = (field) => {
+    // Calculate the max count based on the files already uploaded for the field
+    const fieldFiles = req?.body?.[field] || []; // Safely handle undefined fields
+    return 4 - (Array.isArray(fieldFiles) ? fieldFiles.length : 0); // Ensure length works even for single file objects
+  };
+
+  uploadEdit.fields([
+    { name: "imageFrontNew", maxCount: 1 },
+    { name: "imageBackNew", maxCount: 1 },
+    { name: "imageSideew", maxCount: 1 },
+    { name: "imageClosureNew", maxCount: 1 },
+    { name: "guidelinesFileNew", maxCount: getMaxCount("guidelinesFile") },
+    { name: "complianceFileNew", maxCount: getMaxCount("complianceFile") },
+    { name: "catalogueNew", maxCount: getMaxCount("catalogue") },
+    {
+      name: "specificationSheetNew",
+      maxCount: getMaxCount("specificationSheet"),
+    },
+  ])(req, res, async (err) => {
+    if (err) {
+      console.error("Multer Error:", err); // Log the error to console for debugging
+      logErrorToFile(err, req); // Log the error to a file for persistence
+      return sendErrorResponse(res, 500, "File upload error", err); // Send an error response back
+    }
+
+    let uploadedFiles = {};
+
+    const getUploadedFilesPath = async () => {
+      if (req?.files?.["imageFrontNew"]) {
+        uploadedFiles["imageFrontNew"] = await uploadMultipleFiles(
+          req?.files?.["imageFrontNew"] || []
+        );
+      }
+      if (req?.files?.["imageBackNew"]) {
+        uploadedFiles["imageBackNew"] = await uploadMultipleFiles(
+          req?.files?.["imageBackNew"] || []
+        );
+      }
+      if (req?.files?.["imageSideNew"]) {
+        uploadedFiles["imageSideNew"] = await uploadMultipleFiles(
+          req?.files?.["imageSideNew"] || []
+        );
+      }
+      if (req?.files?.["imageClosureNew"]) {
+        uploadedFiles["imageClosureNew"] = await uploadMultipleFiles(
+          req?.files?.["imageClosureNew"] || []
+        );
+      }
+      if (req?.files?.["guidelinesFileNew"]) {
+        uploadedFiles["guidelinesFileNew"] = await uploadMultipleFiles(
+          req?.files?.["guidelinesFileNew"] || []
+        );
+      }
+      if (req?.files?.["complianceFileNew"]) {
+        uploadedFiles["complianceFileNew"] = await uploadMultipleFiles(
+          req?.files?.["complianceFileNew"] || []
+        );
+      }
+      if (req?.files?.["catalogueNew"]) {
+        uploadedFiles["catalogueNew"] = await uploadMultipleFiles(
+          req?.files?.["catalogueNew"] || []
+        );
+      }
+      if (req?.files?.["specificationSheetNew"]) {
+        uploadedFiles["specificationSheetNew"] = await uploadMultipleFiles(
+          req?.files?.["specificationSheetNew"] || []
+        );
+      }
+
+      // Function to remove the files from the local file system
+      const removeLocalFiles = (files) => {
+        files.forEach((file) => {
+          // Resolve the absolute file path
+          // const filePath = path.resolve(uploadPath, file.filename);
+          const filePath = path.resolve(file?.destination, file.filename);
+
+          // Check if the file exists before trying to delete it
+          if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(
+                  `\n\n\n\nFailed to delete file ${filePath}:`,
+                  err
+                );
+              } else {
+              }
+            });
+          } else {
+            console.error(`File not found: ${filePath}`);
+          }
+        });
+      };
+
+      // Remove uploaded files from local storage
+      removeLocalFiles([
+        ...(req?.files?.["imageFrontNew"] || []),
+        ...(req?.files?.["imageBackNew"] || []),
+        ...(req?.files?.["imageSideNew"] || []),
+        ...(req?.files?.["imageClosureNew"] || []),
+        ...(req?.files?.["complianceFileNew"] || []),
+        ...(req?.files?.["guidelinesFileNew"] || []),
+        ...(req?.files?.["catalogueNew"] || []),
+        ...(req?.files?.["specificationSheetNew"] || []),
+      ]);
+
+      req.uploadedFiles = uploadedFiles;
+      next();
+    };
+
+    // Call the function to handle the uploaded files
+    await getUploadedFilesPath();
+  });
+};
+
 // Multer setup to handle CSV file uploads
 const CSVupload = multer({ dest: "uploads/products" });
 
-module.exports = { addProductUpload, editProductUpload, CSVupload };
+module.exports = {
+  addProductUpload,
+  editProductUpload,
+  addProductUpload3,
+  editProductUpload3,
+  CSVupload,
+};
