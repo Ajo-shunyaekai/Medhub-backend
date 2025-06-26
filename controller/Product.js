@@ -291,6 +291,347 @@ module.exports = {
     }
   },
 
+  getAllProducts2: async (req, res) => {
+    try {
+      const {
+        supplier_id,
+        market,
+        page_no = 1,
+        page_size = 5,
+        search_key = "",
+        category = "",
+        subCategory = "",
+        level3Category = "",
+      } = req?.query;
+      console.log(req?.query)
+  
+      const {
+        countries,
+        price = {},
+        quantity = {},
+        deliveryTime = {},
+      } = req?.body;
+  
+      const formatToPascalCase = (str) => {
+        return str
+          .trim()
+          .split(/\s+/)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join("");
+      };
+  
+      const formattedCategory = formatToPascalCase(category);
+      const formattedSubCategory = formatToPascalCase(subCategory);
+      const formattedLevel3Category = formatToPascalCase(level3Category);
+  
+      const pageNo = parseInt(page_no) || 1;
+      const pageSize = parseInt(page_size) || 10;
+      const offset = (pageNo - 1) * pageSize;
+  
+      // Extract tokens from search_key
+      let possibleName = search_key.trim();
+      let possibleStrength = null;
+      let possibleStrengthUnit = null;
+      let hasSpecificStrength = false;
+  
+      if (search_key) {
+        const searchText = search_key.trim().toLowerCase();
+        
+        // Handle both formats: "50 mg" and "50mg"
+        const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)\b/i;
+        const match = searchText.match(strengthUnitPattern);
+        
+        if (match) {
+          possibleStrength = parseInt(match[1], 10);
+          possibleStrengthUnit = match[2].toLowerCase();
+          hasSpecificStrength = true;
+          
+          // Remove the strength+unit pattern from the search text to get clean name
+          possibleName = searchText
+            .replace(strengthUnitPattern, '')
+            .trim()
+            .replace(/\s+/g, ' '); // Clean up extra spaces
+        }
+  
+        console.log('Original:', search_key, 'Parsed:', { possibleStrength, possibleStrengthUnit, possibleName, hasSpecificStrength });
+      }
+  
+      let pipeline = [];
+  
+      const totalProductsQuery = {
+        isDeleted: false,
+        ...(supplier_id && {
+          supplier_id: new mongoose.Types.ObjectId(supplier_id),
+        }),
+        ...(market && { market }),
+        ...(formattedCategory && {
+          category: { $regex: formattedCategory, $options: "i" },
+        }),
+        ...(subCategory && {
+          [`${formattedCategory}.subCategory`]: {
+            $regex: subCategory,
+            $options: "i",
+          },
+        }),
+        ...(level3Category && {
+          [`${formattedCategory}.anotherCategory`]: {
+            $regex: level3Category,
+            $options: "i",
+          },
+        }),
+        
+        // Updated search logic
+        ...(search_key && (
+          hasSpecificStrength
+            ? {
+                "general.name": { $regex: `^${possibleName.trim()}$`, $options: "i" },
+                "general.strength": String(possibleStrength),  // Your strength is string in DB
+                "general.strengthUnit": { $regex: `^${possibleStrengthUnit}$`, $options: "i" }
+              }
+            : {
+                "general.name": { $regex: search_key.trim(), $options: "i" }
+              }
+        )),
+        
+        
+        
+        ...(quantity?.min &&
+          quantity?.max &&
+          !isNaN(quantity?.min) &&
+          !isNaN(quantity?.max) && {
+            "general.quantity": {
+              $gte: parseInt(quantity?.min, 10),
+              $lte: parseInt(quantity?.max, 10),
+            },
+          }),
+      };
+  
+      pipeline.push({ $match: totalProductsQuery });
+  
+      pipeline.push(
+        {
+          $lookup: {
+            from: "suppliers",
+            localField: "supplier_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "inventories",
+            localField: "inventory",
+            foreignField: "uuid",
+            as: "inventoryDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$userDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$inventoryDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        }
+      );
+  
+      const applyInventoryListFilters =
+        (countries && countries.length > 0) ||
+        (price?.min && price?.max) ||
+        (quantity?.min && quantity?.max) ||
+        (deliveryTime?.min && deliveryTime?.max);
+  
+      if (applyInventoryListFilters) {
+        pipeline.push({
+          $unwind: {
+            path: "$inventoryDetails.inventoryList",
+            preserveNullAndEmptyArrays: true,
+          },
+        });
+      }
+  
+      if (countries && Array.isArray(countries) && countries.length > 0) {
+        pipeline.push({
+          $unwind: {
+            path: "$inventoryDetails.stockedInDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        });
+  
+        pipeline.push({
+          $match: {
+            "inventoryDetails.stockedInDetails.country": { $in: countries },
+          },
+        });
+      }
+  
+      pipeline.push({
+        $group: {
+          _id: "$_id",
+          general: { $first: "$general" },
+          inventory: { $first: "$inventory" },
+          complianceFile: { $first: "$complianceFile" },
+          cNCFileNDate: { $first: "$cNCFileNDate" },
+          storage: { $first: "$storage" },
+          additional: { $first: "$additional" },
+          guidelinesFile: { $first: "$guidelinesFile" },
+          healthNSafety: { $first: "$healthNSafety" },
+          category: { $first: "$category" },
+          product_id: { $first: "$product_id" },
+          supplier_id: { $first: "$supplier_id" },
+          market: { $first: "$market" },
+          secondaryMarketDetails: { $first: "$secondaryMarketDetails" },
+          isDeleted: { $first: "$isDeleted" },
+          bulkUpload: { $first: "$bulkUpload" },
+          userDetails: { $first: "$userDetails" },
+          inventoryDetails: { $push: "$inventoryDetails" },
+          MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+          Pharmaceuticals: { $first: "$Pharmaceuticals" },
+          SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+          VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+          MedicalConsumablesAndDisposables: {
+            $first: "$MedicalConsumablesAndDisposables",
+          },
+          LaboratorySupplies: { $first: "$LaboratorySupplies" },
+          DiagnosticAndMonitoringDevices: {
+            $first: "$DiagnosticAndMonitoringDevices",
+          },
+          HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+          OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+          DentalProducts: { $first: "$DentalProducts" },
+          EyeCareSupplies: { $first: "$EyeCareSupplies" },
+          HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+          AlternativeMedicines: { $first: "$AlternativeMedicines" },
+          EmergencyAndFirstAidSupplies: {
+            $first: "$EmergencyAndFirstAidSupplies",
+          },
+          DisinfectionAndHygieneSupplies: {
+            $first: "$DisinfectionAndHygieneSupplies",
+          },
+          NutritionAndDietaryProducts: {
+            $first: "$NutritionAndDietaryProducts",
+          },
+          HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          __v: { $first: "$__v" },
+          priceQuantityDetails: {
+            $push: {
+              price: "$inventoryDetails.inventoryList.price",
+              quantity: "$inventoryDetails.inventoryList.quantity",
+              deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
+            },
+          },
+        },
+      });
+  
+      // Apply price filtering before deduplication
+      if (price?.min && price?.max) {
+        pipeline.push({
+          $match: {
+            priceQuantityDetails: {
+              $elemMatch: {
+                price: {
+                  $gte: parseInt(price?.min, 10),
+                  $lte: parseInt(price?.max, 10),
+                },
+              },
+            },
+          },
+        });
+      }
+  
+      // Add priority scoring for better sorting
+      pipeline.push({
+        $addFields: {
+          searchPriority: {
+            $cond: {
+              if: { $eq: [{ $toLower: "$general.name" }, search_key.toLowerCase()] },
+              then: 1, // Exact name match gets highest priority
+              else: {
+                $cond: {
+                  if: {
+                    $and: [
+                      ...(hasSpecificStrength ? [
+                        { $eq: [{ $toLower: "$general.name" }, possibleName.toLowerCase()] },
+                        { $eq: ["$general.strength", possibleStrength] },
+                        { $eq: [{ $toLower: "$general.strengthUnit" }, possibleStrengthUnit] }
+                      ] : [
+                        { $eq: [{ $toLower: "$general.name" }, possibleName.toLowerCase()] }
+                      ])
+                    ]
+                  },
+                  then: 2, // Structured match gets second priority
+                  else: 3 // Partial match gets lowest priority
+                }
+              }
+            }
+          }
+        }
+      });
+  
+      // Sort by priority first, then by creation date
+      pipeline.push({ 
+        $sort: { 
+          searchPriority: 1, 
+          createdAt: -1 
+        } 
+      });
+  
+      // Deduplicate based on name + strength + strengthUnit (keep the first/best match)
+      pipeline.push({
+        $group: {
+          _id: {
+            name: { $toLower: "$general.name" },
+            strength: "$general.strength",
+            strengthUnit: { $toLower: "$general.strengthUnit" },
+          },
+          doc: { $first: "$$ROOT" },
+        },
+      });
+      
+      pipeline.push({
+        $replaceRoot: { newRoot: "$doc" },
+      });
+  
+      // Re-sort after deduplication
+      pipeline.push({ 
+        $sort: { 
+          searchPriority: 1, 
+          createdAt: -1 
+        } 
+      });
+  
+      // Count total before pagination
+      const countPipeline = [...pipeline];
+      countPipeline.push({ $count: "total" });
+      const countResult = await Product.aggregate(countPipeline);
+      const totalProducts = countResult[0]?.total || 0;
+  
+      // Apply pagination
+      pipeline.push({ $skip: offset });
+      pipeline.push({ $limit: pageSize });
+  
+      const products = await Product.aggregate(pipeline);
+      const totalPages = Math.ceil(totalProducts / pageSize);
+  
+      return sendSuccessResponse(res, 200, "Success Fetching Products", {
+        products,
+        totalItems: totalProducts,
+        currentPage: pageNo,
+        itemsPerPage: pageSize,
+        totalPages,
+      });
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+  
+
   getProductDetails: async (req, res) => {
     try {
       const { id } = req?.params;
@@ -1655,6 +1996,7 @@ module.exports = {
         market,
         page_no = 1,
         page_size = 5,
+        search_value,
         search_key = "",
         category,
         quantity,
@@ -1665,9 +2007,33 @@ module.exports = {
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-      console.log(req?.query);
       // const { price = {}, quantity = {}, deliveryTime = {} } = req?.body;
 
+      let possibleName = search_value?.trim() || "";
+      let possibleStrength = null;
+      let possibleStrengthUnit = null;
+
+      let searchName = search_key?.trim() || "";
+      let searchStrength = null;
+      let searchStrengthUnit = null;
+
+        if (search_value) {
+          const searchText = search_value.trim().toLowerCase();
+          const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
+          const match = searchText.match(strengthUnitPattern);
+
+          if (match) {
+            possibleStrength = parseInt(match[1], 10);
+            possibleStrengthUnit = match[2]?.toLowerCase() || null;
+
+            // Clean name by removing the strength portion
+            possibleName = searchText
+              .replace(strengthUnitPattern, "")
+              .trim()
+              .replace(/\s+/g, " ");
+          }
+        }
+        
       let quantityFilter = {};
       if (quantity && typeof quantity === "string") {
         const [minStr, maxStr] = quantity.split("-").map((s) => s.trim());
@@ -1757,6 +2123,22 @@ module.exports = {
       if (search_key && search_key !== "null") {
         const decodedSearchKey = decodeURIComponent(search_key).trim(); // Decode the URL-encoded string
 
+        
+          const searchText = decodedSearchKey.trim().toLowerCase(); 
+          const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
+          const match = searchText.match(strengthUnitPattern);
+        
+          if (match) {
+            searchStrength = parseInt(match[1], 10);
+            searchStrengthUnit = match[2]?.toLowerCase() || null;
+        
+            // Clean name by removing the strength portion
+            searchName = searchText
+              .replace(strengthUnitPattern, "")
+              .trim()
+              .replace(/\s+/g, " ");
+          }
+
         searchFilter = {
           $or: [
             {
@@ -1764,24 +2146,47 @@ module.exports = {
                 $regex: decodedSearchKey,
                 $options: "i",
               },
-            }, // Match supplier name
-            { "general.name": { $regex: decodedSearchKey, $options: "i" } }, // Match product name
+            },
+            {
+              $and: [
+                { "general.name": { $regex: `^${searchName}$`, $options: "i" } },
+                ...(searchStrength !== null ? [{ "general.strength": String(searchStrength) }] : []),
+                ...(searchStrengthUnit
+                  ? [{ "general.strengthUnit": { $regex: `^${searchStrengthUnit}$`, $options: "i" } }]
+                  : []),
+              ],
+            },
           ],
         };
-      }
+        
+        }
 
       let pipeline = [];
 
       // Add any additional steps like sorting or pagination
       const totalProductsQuery = {
         isDeleted: false,
-        "general.name": {
-          $regex: foundProduct?.general?.name,
-          $options: "i",
-        },
+        // "general.name": {
+        //   $regex: foundProduct?.general?.name,
+        //   $options: "i",
+        // },
+        ...(search_value
+          ? {
+              $and: [
+                { "general.name": { $regex: `^${possibleName}$`, $options: "i" } },
+                ...(possibleStrength !== null ? [{ "general.strength": String(possibleStrength) }] : []),
+                ...(possibleStrengthUnit
+                  ? [{ "general.strengthUnit": { $regex: `^${possibleStrengthUnit}$`, $options: "i" } }]
+                  : []),
+              ],
+            }
+          : {
+              "general.name": { $regex: foundProduct?.general?.name, $options: "i" },
+            }),
+        
         ...(market && { market: foundProduct?.market }),
         ...(category && { category: foundProduct?.category }),
-        ...searchFilter,
+        // ...searchFilter,
         // ...(quantity?.min &&
         //   quantity?.max &&
         //   !isNaN(quantity?.min) &&
@@ -1801,19 +2206,20 @@ module.exports = {
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
-          from: "suppliers", // Ensure the collection name matches
-          localField: "supplier_id", // Reference to supplier_id in the Product schema
-          foreignField: "_id", // Reference to supplier_id in the Supplier schema
+          from: "suppliers", 
+          localField: "supplier_id", 
+          foreignField: "_id", 
           as: "userDetails",
         },
       });
+      
 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
-          from: "inventories", // Ensure the collection name matches
-          localField: "inventory", // Reference to the inventory field in Product
-          foreignField: "uuid", // Reference to uuid in Inventory schema
+          from: "inventories", 
+          localField: "inventory", 
+          foreignField: "uuid", 
           as: "inventoryDetails",
         },
       });
@@ -1825,6 +2231,12 @@ module.exports = {
           preserveNullAndEmptyArrays: true, // Keep products without matched user details
         },
       });
+
+      if (Object.keys(searchFilter).length > 0) {
+        pipeline.push({
+          $match: searchFilter,
+        });
+      }
 
       pipeline.push({
         $unwind: {
@@ -2885,7 +3297,7 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-
+  
   csvDownload2: async (req, res) => {
     try {
       const { products } = req?.body;
