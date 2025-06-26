@@ -6,7 +6,9 @@ const {
 const router = express.Router();
 const {
   addProductUpload,
+  addProductUpload3,
   editProductUpload,
+  editProductUpload3,
   CSVupload,
 } = require("../middleware/multer/productMulter");
 const {
@@ -15,8 +17,10 @@ const {
   getProductDetails,
   addProduct,
   addProduct2,
+  addProduct3,
   editProduct,
   editProduct2,
+  editProduct3,
   deleteProduct,
   bulkUpload,
   bulkUpload2,
@@ -79,26 +83,28 @@ router.post(
   `/add`,
   checkAuthorization,
   authenticationNAuthorization,
-  addProductUpload,
+  addProductUpload3,
   categorySpecificValidationRules,
   generalValidationRules,
   handleValidationErrors,
   addProductFileMiddleware,
   // addProduct
-  addProduct2
+  // addProduct2
+  addProduct3
 );
 
 router.post(
   `/edit/:productId`,
   checkAuthorization,
   authenticationNAuthorization,
-  editProductUpload,
+  editProductUpload3,
   editCategorySpecificValidationRules,
   editGeneralValidationRules,
   handleValidationErrors,
   editProductFileMiddleware,
   // editProduct
-  editProduct2
+  // editProduct2
+  editProduct3
 );
 
 router.post(

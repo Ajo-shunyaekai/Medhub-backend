@@ -86,11 +86,11 @@ const editGeneralValidationRules = [
   //     "Type/Form must be alphanumeric (letters, numbers, and spaces only)."
   //   ),
 
-  body("quantity")
-    .notEmpty()
-    .withMessage("Product Quantity is required.")
-    .isInt({ gt: 0 })
-    .withMessage("Product Quantity must be a positive integer."),
+  // body("quantity")
+  //   .notEmpty()
+  //   .withMessage("Product Quantity is required.")
+  //   .isInt({ gt: 0 })
+  //   .withMessage("Product Quantity must be a positive integer."),
 
   // body("weight")
   //   .notEmpty()
@@ -101,13 +101,13 @@ const editGeneralValidationRules = [
   // body("unit").notEmpty().withMessage("Product Weight Unit is required."),
   body("unit_tax").notEmpty().withMessage("Tax Percentage is required."),
 
-  body("stock")
-    .notEmpty()
-    .withMessage("Product Stock is required.")
-    .isIn(["In-stock", "Out of Stock", "On-demand"])
-    .withMessage(
-      "Stock status must be 'In-stock', 'Out of Stock' or 'On-demand'"
-    ),
+  // body("stock")
+  //   .notEmpty()
+  //   .withMessage("Product Stock is required.")
+  //   .isIn(["In-stock", "Out of Stock", "On-demand"])
+  //   .withMessage(
+  //     "Stock status must be 'In-stock', 'Out of Stock' or 'On-demand'"
+  //   ),
 
   body("category")
     .notEmpty()
@@ -223,11 +223,11 @@ const editGeneralValidationRules2 = [
   //     "Type/Form must be alphanumeric (letters, numbers, and spaces only)."
   //   ),
 
-  body("quantity")
-    .notEmpty()
-    .withMessage("Product Quantity is required.")
-    .isInt({ gt: 0 })
-    .withMessage("Product Quantity must be a positive integer."),
+  // body("quantity")
+  //   .notEmpty()
+  //   .withMessage("Product Quantity is required.")
+  //   .isInt({ gt: 0 })
+  //   .withMessage("Product Quantity must be a positive integer."),
 
   // body("weight")
   //   .notEmpty()
@@ -238,13 +238,121 @@ const editGeneralValidationRules2 = [
   // body("unit").notEmpty().withMessage("Product Weight Unit is required."),
   body("unit_tax").notEmpty().withMessage("Tax Percentage is required."),
 
-  body("stock")
+  // body("stock")
+  //   .notEmpty()
+  //   .withMessage("Product Stock is required.")
+  //   .isIn(["In-stock", "Out of Stock", "On-demand"])
+  //   .withMessage(
+  //     "Stock status must be 'In-stock', 'Out of Stock' or 'On-demand'"
+  //   ),
+
+  body("category")
     .notEmpty()
-    .withMessage("Product Stock is required.")
-    .isIn(["In-stock", "Out of Stock", "On-demand"])
+    .withMessage("Product Category is required.")
+    .isIn([
+      "MedicalEquipmentAndDevices",
+      "Pharmaceuticals",
+      "SkinHairCosmeticSupplies",
+      "VitalHealthAndWellness",
+      "MedicalConsumablesAndDisposables",
+      "LaboratorySupplies",
+      "DiagnosticAndMonitoringDevices",
+      "HospitalAndClinicSupplies",
+      "OrthopedicSupplies",
+      "DentalProducts",
+      "EyeCareSupplies",
+      "HomeHealthcareProducts",
+      "AlternativeMedicines",
+      "EmergencyAndFirstAidSupplies",
+      "DisinfectionAndHygieneSupplies",
+      "NutritionAndDietaryProducts",
+      "HealthcareITSolutions",
+    ])
+    .withMessage("Product Category is invalid."),
+
+  // User schema references
+  body("supplier_id").notEmpty().withMessage("supplier_id is required."),
+];
+
+// General validation for product details
+const editGeneralValidationRules3 = [
+  body("name").notEmpty().withMessage("Product Name is required."),
+
+  body("market")
+    .notEmpty()
+    .withMessage("Product Market is required.")
+    .isIn(["new", "secondary"])
+    .withMessage("Product Market is invalid."),
+
+  body("purchasedOn")
+    .optional()
+    .custom((value, { req }) => {
+      // Only validate if  market is 'Secondary' and purchasedOn is provided
+      if (req.body.market === "secondary" && !value) {
+        throw new Error(
+          "Purchased On is required when the market is 'Secondary'."
+        );
+      }
+      return true;
+    }),
+
+  body("condition")
+    .optional()
+    .custom((value, { req }) => {
+      // Only validate if  market is 'Secondary' and condition is provided
+      if (req.body.market === "secondary" && !value) {
+        throw new Error(
+          "Condition is required when the market is 'Secondary'."
+        );
+      }
+      return true;
+    }),
+
+  body("minimumPurchaseUnit")
+    .optional()
+    .custom((value, { req }) => {
+      // Only validate if  market is 'Secondary' and minimumPurchaseUnit is provided
+      if (req.body.market === "secondary" && !value) {
+        throw new Error(
+          "Minimum Purchase Unit is required when the market is 'Secondary'."
+        );
+      }
+      return true;
+    }),
+
+  body("description")
+    .notEmpty()
+    .withMessage("Product Description is required."),
+
+  body("manufacturer")
+    .notEmpty()
+    .withMessage("Manufacturer is required."),
+
+  body("aboutManufacturer")
+    .notEmpty()
+    .withMessage("Short Description is required."),
+
+  body("countryOfOrigin")
+    .notEmpty()
+    .withMessage("Country of origin is required."),
+
+  body("model")
+    .notEmpty()
+    .withMessage("Part/Model Number is required.")
+    .matches(/^[a-zA-Z0-9\s\-\/]+$/)
     .withMessage(
-      "Stock status must be 'In-stock', 'Out of Stock' or 'On-demand'"
+      "Part/Model Number can only contain letters, numbers, spaces, hyphens (-), and slashes (/)."
     ),
+
+  body("unit_tax").notEmpty().withMessage("Tax Percentage is required."),
+
+  // body("stock")
+  //   .notEmpty()
+  //   .withMessage("Product Stock is required.")
+  //   .isIn(["In-stock", "Out of Stock", "On-demand"])
+  //   .withMessage(
+  //     "Stock status must be 'In-stock', 'Out of Stock' or 'On-demand'"
+  //   ),
 
   body("category")
     .notEmpty()
@@ -1288,9 +1396,273 @@ const editCategorySpecificValidationRules2 = [
   }),
 ];
 
+// Conditionally apply validation rules based on category
+const editCategorySpecificValidationRules3 = [
+  body("category").custom((value, { req }) => {
+    if (value === "MedicalEquipmentAndDevices") {
+      // Validation for MedicalEquipmentAndDevices Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Diagnostic Tools",
+            "Imaging Equipment",
+            "Surgical Instruments",
+            "Monitoring Devices",
+            "Mobility Aids",
+            "Respiratory Care",
+            "Care Products",
+            "Blood Pressure Monitor",
+            "Anaesthetic Equipment",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "Pharmaceuticals") {
+      // Validation for Pharmaceuticals Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Prescription Medications",
+            "Over-the-Counter Medications",
+            "Vaccines",
+            "Generic Drugs",
+            "Specialized Treatments",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "SkinHairCosmeticSupplies") {
+      // Validation for SkinHairCosmeticSupplies Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Skin Care",
+            "Hair Care",
+            "Personal Hygiene",
+            "Baby Care",
+            "Anti-aging Solutions",
+            "Skin Graft",
+            "Anti-Scar & Healing Ointments",
+            "Burn Care Solutions",
+            "Dermal Fillers & Injectables",
+            "Laser Treatment Devices",
+            "Chemical Peels",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "VitalHealthAndWellness") {
+      // Validation for VitalHealthAndWellness Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Fitness Monitors",
+            "Herbal & Alternative Medicines",
+            "Immune Boosters",
+            "Vitamins & Supplements",
+            "Weight Management",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "MedicalConsumablesAndDisposables") {
+      // Validation for MedicalConsumablesAndDisposables Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Bandages, Gauze, & Wound Dressings",
+            "Gloves, Masks, & Protective gear",
+            "Sterilization Products",
+            "Surgical Sutures & Adhesives",
+            "Syringes, IV Sets & Catheters",
+            "PFT Mouthpiece",
+            "ECG Electrode",
+            "ECG Consumables",
+            "Ultrasound Consumables",
+            "CTG Paper",
+            "Infusion Pressure Bag",
+            "Connecting Cable",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+
+    if (value === "DiagnosticAndMonitoringDevices") {
+      // Validation for DiagnosticAndMonitoringDevices Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Blood Glucose Monitors",
+            "Blood Pressure Monitors",
+            "Oxygen Concentrators",
+            "Wearable Health Devices",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "HospitalAndClinicSupplies") {
+      // Validation for HospitalAndClinicSupplies Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Patient Beds & Stretchers",
+            "Trolleys & Storage Units",
+            "Examination Tables",
+            "Medical Furniture",
+            "First Aid Kits",
+            "Emergency Medical Equipment",
+            "Trauma Care Products",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "OrthopedicSupplies") {
+      // Validation for OrthopedicSupplies Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Orthopedic Braces & Supports",
+            "Splints & Casting Materials",
+            "Prosthetics",
+            "Rehabilitation Equipment",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "DentalProducts") {
+      // Validation for DentalProducts Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Dental Instruments & tools",
+            "Orthodontic Supplies",
+            "Dental Chairs and Accessories",
+            "Dental Consumables",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "EyeCareSupplies") {
+      // Validation for EyeCareSupplies Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Contact Lenses and Solutions",
+            "Eyewear",
+            "Eyewear Lenses",
+            "Eye Drops and Ointments",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "HomeHealthcareProducts") {
+      // Validation for HomeHealthcareProducts Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Mobility Aids",
+            "Respiratory Care",
+            "Patient Monitoring Devices",
+            "Care Products",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "AlternativeMedicines") {
+      // Validation for AlternativeMedicines Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn(["Homeopathy", "Ayurvedic"])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "EmergencyAndFirstAidSupplies") {
+      // Validation for EmergencyAndFirstAidSupplies Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "First Aid Kits",
+            "Emergency Medical Equipment",
+            "Trauma Care Products",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "DisinfectionAndHygieneSupplies") {
+      // Validation for DisinfectionAndHygieneSupplies Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn(["Hand Sanitizers", "Air Purifiers", "Cleaning Agents"])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "NutritionAndDietaryProducts") {
+      // Validation for NutritionAndDietaryProducts Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Protein Powders and Shakes",
+            "Specialized Nutrition",
+            "Meal Replacement Solutions",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+    if (value === "HealthcareITSolutions") {
+      // Validation for HealthcareITSolutions Category
+      return [
+        body("subCategory")
+          .notEmpty()
+          .withMessage("Sub Category is required.")
+          .isIn([
+            "Healthcare Management Software",
+            "Telemedicine Platforms",
+            "Medical Billing Software",
+            "IoT-Enabled Medical Devices",
+          ])
+          .withMessage("Sub Category is invalid."),
+      ];
+    }
+
+    return true; // No validation required for other categories
+  }),
+];
+
 module.exports = {
   editGeneralValidationRules,
   editCategorySpecificValidationRules,
   editGeneralValidationRules2,
   editCategorySpecificValidationRules2,
+  editGeneralValidationRules3,
+  editCategorySpecificValidationRules3,
 };

@@ -1,32 +1,36 @@
 // Helper function to retrieve file paths
 async function getFilePathsAdd(req, res, fields = []) {
-  const filePaths = {};
-
-  // Make sure fields is an array and req.files is an object
-  if (!Array.isArray(fields)) {
-    console.error("Expected fields to be an array, but received:", fields);
-    return filePaths; // Return an empty filePaths object
-  }
-
-  // Iterate over the fields array
-  for (const field of fields) {
-    if (
-      req?.uploadedFiles?.[field] &&
-      req?.uploadedFiles?.[field]?.length > 0
-    ) {
-      const validPaths =
-        req?.uploadedFiles?.[field]
-          // ?.map((file) => file.filename) // Map to file paths
-          ?.map((file) => file) // Map to file paths
-          ?.filter((path) => path && path.trim() !== "") || []; // Filter out empty strings
-
-      filePaths[field] = validPaths.length > 0 ? validPaths : []; // Use valid paths or empty array
-    } else {
-      filePaths[field] = []; // Assign empty array if no files are present
+  try {
+    const filePaths = {};
+  
+    // Make sure fields is an array and req.files is an object
+    if (!Array.isArray(fields)) {
+      console.error("Expected fields to be an array, but received:", fields);
+      return filePaths; // Return an empty filePaths object
     }
+  
+    // Iterate over the fields array
+    for (const field of fields) {
+      if (
+        req?.uploadedFiles?.[field] &&
+        req?.uploadedFiles?.[field]?.length > 0
+      ) {
+        const validPaths =
+          req?.uploadedFiles?.[field]
+            // ?.map((file) => file.filename) // Map to file paths
+            ?.map((file) => file) // Map to file paths
+            ?.filter((path) => path && path.trim() !== "") || []; // Filter out empty strings
+  
+        filePaths[field] = validPaths.length > 0 ? validPaths : []; // Use valid paths or empty array
+      } else {
+        filePaths[field] = []; // Assign empty array if no files are present
+      }
+    }
+  
+    return filePaths;
+  } catch (error) {
+    console.log(error)
   }
-
-  return filePaths;
 }
 
 // Helper function to retrieve file paths
