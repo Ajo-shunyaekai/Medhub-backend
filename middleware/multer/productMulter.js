@@ -233,6 +233,7 @@ const addProductUpload3 = (req, res, next) => {
     { name: "complianceFile", maxCount: 4 },
     { name: "catalogue", maxCount: 1 },
     { name: "specificationSheet", maxCount: 1 },
+    { name: "purchaseInvoiceFile", maxCount: 4 },
   ])(req, res, async (err) => {
     if (err) {
       console.error("Multer Error:", err); // Log the error to console for debugging
@@ -284,6 +285,11 @@ const addProductUpload3 = (req, res, next) => {
       if (req?.files?.["specificationSheet"]) {
         uploadedFiles["specificationSheet"] = await uploadMultipleFiles(
           req?.files?.["specificationSheet"] || []
+        );
+      }
+      if (req?.files?.["purchaseInvoiceFile"]) {
+        uploadedFiles["purchaseInvoiceFile"] = await uploadMultipleFiles(
+          req?.files?.["purchaseInvoiceFile"] || []
         );
       }
 
@@ -520,6 +526,7 @@ const editProductUpload3 = (req, res, next) => {
     { name: "guidelinesFileNew", maxCount: getMaxCount("guidelinesFile") },
     { name: "complianceFileNew", maxCount: getMaxCount("complianceFile") },
     { name: "catalogueNew", maxCount: getMaxCount("catalogue") },
+    { name: "purchaseInvoiceFileNew", maxCount: getMaxCount("purchaseInvoiceFile") },
     {
       name: "specificationSheetNew",
       maxCount: getMaxCount("specificationSheet"),
@@ -574,6 +581,11 @@ const editProductUpload3 = (req, res, next) => {
           req?.files?.["specificationSheetNew"] || []
         );
       }
+      if (req?.files?.["purchaseInvoiceFileNew"]) {
+        uploadedFiles["purchaseInvoiceFileNew"] = await uploadMultipleFiles(
+          req?.files?.["purchaseInvoiceFileNew"] || []
+        );
+      }
 
       // Function to remove the files from the local file system
       const removeLocalFiles = (files) => {
@@ -609,6 +621,7 @@ const editProductUpload3 = (req, res, next) => {
         ...(req?.files?.["guidelinesFileNew"] || []),
         ...(req?.files?.["catalogueNew"] || []),
         ...(req?.files?.["specificationSheetNew"] || []),
+        ...(req?.files?.["purchaseInvoiceFileNew"] || []),
       ]);
 
       req.uploadedFiles = uploadedFiles;
