@@ -327,6 +327,7 @@ const addProductUpload3 = (req, res, next) => {
         ...(req?.files?.["complianceFile"] || []),
         ...(req?.files?.["catalogue"] || []),
         ...(req?.files?.["specificationSheet"] || []),
+        ...(req?.files?.["purchaseInvoiceFile"] || []),
       ]);
 
       req.uploadedFiles = uploadedFiles;
