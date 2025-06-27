@@ -13,6 +13,12 @@ const inventorrySchema = new Schema(
       type: String,
       required: [true, "Validation Error: productId is required"],
     },
+    countries: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     stockedInDetails: [
       {
         country: {

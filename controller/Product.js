@@ -303,15 +303,14 @@ module.exports = {
         subCategory = "",
         level3Category = "",
       } = req?.query;
-      console.log(req?.query)
-  
+
       const {
         countries,
         price = {},
         quantity = {},
         deliveryTime = {},
       } = req?.body;
-  
+
       const formatToPascalCase = (str) => {
         return str
           .trim()
@@ -319,45 +318,43 @@ module.exports = {
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join("");
       };
-  
+
       const formattedCategory = formatToPascalCase(category);
       const formattedSubCategory = formatToPascalCase(subCategory);
       const formattedLevel3Category = formatToPascalCase(level3Category);
-  
+
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
-  
+
       // Extract tokens from search_key
       let possibleName = search_key.trim();
       let possibleStrength = null;
       let possibleStrengthUnit = null;
       let hasSpecificStrength = false;
-  
+
       if (search_key) {
         const searchText = search_key.trim().toLowerCase();
-        
+
         // Handle both formats: "50 mg" and "50mg"
         const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)\b/i;
         const match = searchText.match(strengthUnitPattern);
-        
+
         if (match) {
           possibleStrength = parseInt(match[1], 10);
           possibleStrengthUnit = match[2].toLowerCase();
           hasSpecificStrength = true;
-          
+
           // Remove the strength+unit pattern from the search text to get clean name
           possibleName = searchText
-            .replace(strengthUnitPattern, '')
+            .replace(strengthUnitPattern, "")
             .trim()
-            .replace(/\s+/g, ' '); // Clean up extra spaces
+            .replace(/\s+/g, " "); // Clean up extra spaces
         }
-  
-        console.log('Original:', search_key, 'Parsed:', { possibleStrength, possibleStrengthUnit, possibleName, hasSpecificStrength });
       }
-  
+
       let pipeline = [];
-  
+
       const totalProductsQuery = {
         isDeleted: false,
         ...(supplier_id && {
@@ -379,22 +376,25 @@ module.exports = {
             $options: "i",
           },
         }),
-        
+
         // Updated search logic
-        ...(search_key && (
-          hasSpecificStrength
+        ...(search_key &&
+          (hasSpecificStrength
             ? {
-                "general.name": { $regex: `^${possibleName.trim()}$`, $options: "i" },
-                "general.strength": String(possibleStrength),  // Your strength is string in DB
-                "general.strengthUnit": { $regex: `^${possibleStrengthUnit}$`, $options: "i" }
+                "general.name": {
+                  $regex: `^${possibleName.trim()}$`,
+                  $options: "i",
+                },
+                "general.strength": String(possibleStrength), // Your strength is string in DB
+                "general.strengthUnit": {
+                  $regex: `^${possibleStrengthUnit}$`,
+                  $options: "i",
+                },
               }
             : {
-                "general.name": { $regex: search_key.trim(), $options: "i" }
-              }
-        )),
-        
-        
-        
+                "general.name": { $regex: search_key.trim(), $options: "i" },
+              })),
+
         ...(quantity?.min &&
           quantity?.max &&
           !isNaN(quantity?.min) &&
@@ -405,9 +405,9 @@ module.exports = {
             },
           }),
       };
-  
+
       pipeline.push({ $match: totalProductsQuery });
-  
+
       pipeline.push(
         {
           $lookup: {
@@ -438,13 +438,13 @@ module.exports = {
           },
         }
       );
-  
+
       const applyInventoryListFilters =
         (countries && countries.length > 0) ||
         (price?.min && price?.max) ||
         (quantity?.min && quantity?.max) ||
         (deliveryTime?.min && deliveryTime?.max);
-  
+
       if (applyInventoryListFilters) {
         pipeline.push({
           $unwind: {
@@ -453,7 +453,7 @@ module.exports = {
           },
         });
       }
-  
+
       if (countries && Array.isArray(countries) && countries.length > 0) {
         pipeline.push({
           $unwind: {
@@ -461,14 +461,14 @@ module.exports = {
             preserveNullAndEmptyArrays: true,
           },
         });
-  
+
         pipeline.push({
           $match: {
             "inventoryDetails.stockedInDetails.country": { $in: countries },
           },
         });
       }
-  
+
       pipeline.push({
         $group: {
           _id: "$_id",
@@ -528,7 +528,7 @@ module.exports = {
           },
         },
       });
-  
+
       // Apply price filtering before deduplication
       if (price?.min && price?.max) {
         pipeline.push({
@@ -544,44 +544,63 @@ module.exports = {
           },
         });
       }
-  
+
       // Add priority scoring for better sorting
       pipeline.push({
         $addFields: {
           searchPriority: {
             $cond: {
-              if: { $eq: [{ $toLower: "$general.name" }, search_key.toLowerCase()] },
+              if: {
+                $eq: [{ $toLower: "$general.name" }, search_key.toLowerCase()],
+              },
               then: 1, // Exact name match gets highest priority
               else: {
                 $cond: {
                   if: {
                     $and: [
-                      ...(hasSpecificStrength ? [
-                        { $eq: [{ $toLower: "$general.name" }, possibleName.toLowerCase()] },
-                        { $eq: ["$general.strength", possibleStrength] },
-                        { $eq: [{ $toLower: "$general.strengthUnit" }, possibleStrengthUnit] }
-                      ] : [
-                        { $eq: [{ $toLower: "$general.name" }, possibleName.toLowerCase()] }
-                      ])
-                    ]
+                      ...(hasSpecificStrength
+                        ? [
+                            {
+                              $eq: [
+                                { $toLower: "$general.name" },
+                                possibleName.toLowerCase(),
+                              ],
+                            },
+                            { $eq: ["$general.strength", possibleStrength] },
+                            {
+                              $eq: [
+                                { $toLower: "$general.strengthUnit" },
+                                possibleStrengthUnit,
+                              ],
+                            },
+                          ]
+                        : [
+                            {
+                              $eq: [
+                                { $toLower: "$general.name" },
+                                possibleName.toLowerCase(),
+                              ],
+                            },
+                          ]),
+                    ],
                   },
                   then: 2, // Structured match gets second priority
-                  else: 3 // Partial match gets lowest priority
-                }
-              }
-            }
-          }
-        }
+                  else: 3, // Partial match gets lowest priority
+                },
+              },
+            },
+          },
+        },
       });
-  
+
       // Sort by priority first, then by creation date
-      pipeline.push({ 
-        $sort: { 
-          searchPriority: 1, 
-          createdAt: -1 
-        } 
+      pipeline.push({
+        $sort: {
+          searchPriority: 1,
+          createdAt: -1,
+        },
       });
-  
+
       // Deduplicate based on name + strength + strengthUnit (keep the first/best match)
       pipeline.push({
         $group: {
@@ -593,32 +612,32 @@ module.exports = {
           doc: { $first: "$$ROOT" },
         },
       });
-      
+
       pipeline.push({
         $replaceRoot: { newRoot: "$doc" },
       });
-  
+
       // Re-sort after deduplication
-      pipeline.push({ 
-        $sort: { 
-          searchPriority: 1, 
-          createdAt: -1 
-        } 
+      pipeline.push({
+        $sort: {
+          searchPriority: 1,
+          createdAt: -1,
+        },
       });
-  
+
       // Count total before pagination
       const countPipeline = [...pipeline];
       countPipeline.push({ $count: "total" });
       const countResult = await Product.aggregate(countPipeline);
       const totalProducts = countResult[0]?.total || 0;
-  
+
       // Apply pagination
       pipeline.push({ $skip: offset });
       pipeline.push({ $limit: pageSize });
-  
+
       const products = await Product.aggregate(pipeline);
       const totalPages = Math.ceil(totalProducts / pageSize);
-  
+
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
         products,
         totalItems: totalProducts,
@@ -630,7 +649,6 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-  
 
   getProductDetails: async (req, res) => {
     try {
@@ -1183,7 +1201,7 @@ module.exports = {
       const additionalFiles = await getFilePathsAdd(req, res, [
         "guidelinesFile",
       ]);
-      const secondaryMarketFiles = await getFilePathsEdit(req, res, [
+      const secondaryMarketFiles = await getFilePathsAdd(req, res, [
         "purchaseInvoiceFile",
       ]);
 
@@ -1279,7 +1297,7 @@ module.exports = {
       if (market == "secondary") {
         newProductData["secondaryMarketDetails"] = {
           ...req?.body,
-          ...(secondaryMarketFiles || []),
+          purchaseInvoiceFile: secondaryMarketFiles?.purchaseInvoiceFile || [],
         };
       }
 
@@ -1289,10 +1307,6 @@ module.exports = {
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
-      console.log(
-        "\n\n\n\n req?.body?.productPricingDetails",
-        req?.body?.productPricingDetails
-      );
 
       const newInventoryDetails = {
         uuid: inventoryUUId,
@@ -2017,23 +2031,23 @@ module.exports = {
       let searchStrength = null;
       let searchStrengthUnit = null;
 
-        if (search_value) {
-          const searchText = search_value.trim().toLowerCase();
-          const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
-          const match = searchText.match(strengthUnitPattern);
+      if (search_value) {
+        const searchText = search_value.trim().toLowerCase();
+        const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
+        const match = searchText.match(strengthUnitPattern);
 
-          if (match) {
-            possibleStrength = parseInt(match[1], 10);
-            possibleStrengthUnit = match[2]?.toLowerCase() || null;
+        if (match) {
+          possibleStrength = parseInt(match[1], 10);
+          possibleStrengthUnit = match[2]?.toLowerCase() || null;
 
-            // Clean name by removing the strength portion
-            possibleName = searchText
-              .replace(strengthUnitPattern, "")
-              .trim()
-              .replace(/\s+/g, " ");
-          }
+          // Clean name by removing the strength portion
+          possibleName = searchText
+            .replace(strengthUnitPattern, "")
+            .trim()
+            .replace(/\s+/g, " ");
         }
-        
+      }
+
       let quantityFilter = {};
       if (quantity && typeof quantity === "string") {
         const [minStr, maxStr] = quantity.split("-").map((s) => s.trim());
@@ -2123,21 +2137,20 @@ module.exports = {
       if (search_key && search_key !== "null") {
         const decodedSearchKey = decodeURIComponent(search_key).trim(); // Decode the URL-encoded string
 
-        
-          const searchText = decodedSearchKey.trim().toLowerCase(); 
-          const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
-          const match = searchText.match(strengthUnitPattern);
-        
-          if (match) {
-            searchStrength = parseInt(match[1], 10);
-            searchStrengthUnit = match[2]?.toLowerCase() || null;
-        
-            // Clean name by removing the strength portion
-            searchName = searchText
-              .replace(strengthUnitPattern, "")
-              .trim()
-              .replace(/\s+/g, " ");
-          }
+        const searchText = decodedSearchKey.trim().toLowerCase();
+        const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)?\b/i;
+        const match = searchText.match(strengthUnitPattern);
+
+        if (match) {
+          searchStrength = parseInt(match[1], 10);
+          searchStrengthUnit = match[2]?.toLowerCase() || null;
+
+          // Clean name by removing the strength portion
+          searchName = searchText
+            .replace(strengthUnitPattern, "")
+            .trim()
+            .replace(/\s+/g, " ");
+        }
 
         searchFilter = {
           $or: [
@@ -2149,17 +2162,27 @@ module.exports = {
             },
             {
               $and: [
-                { "general.name": { $regex: `^${searchName}$`, $options: "i" } },
-                ...(searchStrength !== null ? [{ "general.strength": String(searchStrength) }] : []),
+                {
+                  "general.name": { $regex: `^${searchName}$`, $options: "i" },
+                },
+                ...(searchStrength !== null
+                  ? [{ "general.strength": String(searchStrength) }]
+                  : []),
                 ...(searchStrengthUnit
-                  ? [{ "general.strengthUnit": { $regex: `^${searchStrengthUnit}$`, $options: "i" } }]
+                  ? [
+                      {
+                        "general.strengthUnit": {
+                          $regex: `^${searchStrengthUnit}$`,
+                          $options: "i",
+                        },
+                      },
+                    ]
                   : []),
               ],
             },
           ],
         };
-        
-        }
+      }
 
       let pipeline = [];
 
@@ -2173,17 +2196,34 @@ module.exports = {
         ...(search_value
           ? {
               $and: [
-                { "general.name": { $regex: `^${possibleName}$`, $options: "i" } },
-                ...(possibleStrength !== null ? [{ "general.strength": String(possibleStrength) }] : []),
+                {
+                  "general.name": {
+                    $regex: `^${possibleName}$`,
+                    $options: "i",
+                  },
+                },
+                ...(possibleStrength !== null
+                  ? [{ "general.strength": String(possibleStrength) }]
+                  : []),
                 ...(possibleStrengthUnit
-                  ? [{ "general.strengthUnit": { $regex: `^${possibleStrengthUnit}$`, $options: "i" } }]
+                  ? [
+                      {
+                        "general.strengthUnit": {
+                          $regex: `^${possibleStrengthUnit}$`,
+                          $options: "i",
+                        },
+                      },
+                    ]
                   : []),
               ],
             }
           : {
-              "general.name": { $regex: foundProduct?.general?.name, $options: "i" },
+              "general.name": {
+                $regex: foundProduct?.general?.name,
+                $options: "i",
+              },
             }),
-        
+
         ...(market && { market: foundProduct?.market }),
         ...(category && { category: foundProduct?.category }),
         // ...searchFilter,
@@ -2206,20 +2246,19 @@ module.exports = {
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
-          from: "suppliers", 
-          localField: "supplier_id", 
-          foreignField: "_id", 
+          from: "suppliers",
+          localField: "supplier_id",
+          foreignField: "_id",
           as: "userDetails",
         },
       });
-      
 
       // Lookup Inventory based on the inventory field in Product
       pipeline.push({
         $lookup: {
-          from: "inventories", 
-          localField: "inventory", 
-          foreignField: "uuid", 
+          from: "inventories",
+          localField: "inventory",
+          foreignField: "uuid",
           as: "inventoryDetails",
         },
       });
@@ -3299,7 +3338,7 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-  
+
   csvDownload2: async (req, res) => {
     try {
       const { products } = req?.body;
