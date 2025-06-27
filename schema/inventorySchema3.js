@@ -45,10 +45,10 @@ const inventorrySchema = new Schema(
           type: Number,
           required: [true, "Validation Error: inventory list unit price is required"],
         },
-        totalPrice: {
-          type: Number,
-          required: [true, "Validation Error: inventory list total price is required"],
-        },
+        // totalPrice: {
+        //   type: Number,
+        //   required: [true, "Validation Error: inventory list total price is required"],
+        // },
         deliveryTime: {
           type: String,
         },

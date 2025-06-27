@@ -1182,6 +1182,25 @@ module.exports = {
     try {
       const { category, market = "new" } = req?.body;
 
+      let parsedStockedInDetails = [];
+
+try {
+  const validJsonString = req.body?.stockedInDetails?.find(
+    (value) => value.startsWith("[") && value.includes("country")
+  );
+
+  if (validJsonString) {
+    parsedStockedInDetails = JSON.parse(validJsonString);
+  }
+} catch (err) {
+  console.error("Failed to parse stockedInDetails:", err);
+}
+
+
+const totalQuantity = parsedStockedInDetails.reduce((sum, item) => {
+  return sum + (parseFloat(item.quantity) || 0);
+}, 0);
+
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles1 = await getFilePathsAdd(req, res, ["imageFront"]);
       const generalFiles2 = await getFilePathsAdd(req, res, ["imageBack"]);
@@ -1244,11 +1263,12 @@ module.exports = {
         product_id,
         general: {
           ...req?.body,
+          totalQuantity: totalQuantity,
           image: {
             front: generalFiles1.imageFront || [],
             back: generalFiles2.imageBack || [],
             side: generalFiles3.imageSide || [],
-            closure: generalFiles4.imageClosure || [],
+            closeup: generalFiles4.imageClosure || [],
           },
         },
         documents: {
@@ -1307,16 +1327,18 @@ module.exports = {
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
-
+console.log(req?.body?.stockedInDetails)
+// return false
       const newInventoryDetails = {
         uuid: inventoryUUId,
         productId: newProduct?.product_id,
         ...req?.body,
-        stockedInDetails: JSON.parse(
-          req?.body?.stockedInDetails?.filter(
-            (value) => value != "[object Object]"
-          )
-        ),
+        // stockedInDetails: JSON.parse(
+        //   req?.body?.stockedInDetails?.filter(
+        //     (value) => value != "[object Object]"
+        //   )
+        // ),
+        stockedInDetails: parsedStockedInDetails,
         inventoryList: JSON.parse(
           req?.body?.productPricingDetails?.filter(
             (value) => value != "[object Object]"
@@ -1853,7 +1875,7 @@ module.exports = {
             front: generalFiles1.imageFront || [],
             back: generalFiles2.imageBack || [],
             side: generalFiles3.imageSide || [],
-            closure: generalFiles4.imageClosure || [],
+            closeup: generalFiles4.imageClosure || [],
           },
         },
         documents: {

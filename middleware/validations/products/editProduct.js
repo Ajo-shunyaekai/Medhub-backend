@@ -308,17 +308,21 @@ const editGeneralValidationRules3 = [
       return true;
     }),
 
+  // body("minimumPurchaseUnit")
+  //   .optional()
+  //   .custom((value, { req }) => {
+  //     // Only validate if  market is 'Secondary' and minimumPurchaseUnit is provided
+  //     if (req.body.market === "secondary" && !value) {
+  //       throw new Error(
+  //         "Minimum Purchase Unit is required when the market is 'Secondary'."
+  //       );
+  //     }
+  //     return true;
+  //   }),
+
   body("minimumPurchaseUnit")
-    .optional()
-    .custom((value, { req }) => {
-      // Only validate if  market is 'Secondary' and minimumPurchaseUnit is provided
-      if (req.body.market === "secondary" && !value) {
-        throw new Error(
-          "Minimum Purchase Unit is required when the market is 'Secondary'."
-        );
-      }
-      return true;
-    }),
+    .notEmpty()
+    .withMessage("Mininum Order Quantity is required."),
 
   body("description")
     .notEmpty()

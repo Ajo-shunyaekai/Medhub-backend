@@ -27,6 +27,11 @@ const productSchema = new Schema(
         trim: true,
         required: [true, "Validation Error: Product Description is required."],
       },
+      minimumPurchaseUnit: {
+        type: String,
+        trim: true,
+        required: [true, "Validation Error: Minimum Order Quantity is required."],
+      },
       strength: {
         type: String,
         trim: true,
@@ -48,11 +53,15 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
+      totalQuantity: {
+        type: Number,
+        trim: true,
+      },
       image: {
         front: [{ type: String, trim: true }],
         back: [{ type: String, trim: true }],
         side: [{ type: String, trim: true }],
-        closure: [{ type: String, trim: true }],
+        closeup: [{ type: String, trim: true }],
       },
       brand: {
         type: String,
@@ -188,15 +197,16 @@ const productSchema = new Schema(
           message: "Validation Error: Condition is required.",
         },
       },
-      minimumPurchaseUnit: {
-        type: String,
-        validate: {
-          validator: function (v) {
-            return this.market === "secondary" ? !!v : true;
-          },
-          message: "Validation Error: Minimum Purchase Unit is required.",
-        },
-      },
+      // minimumPurchaseUnit: {
+      //   type: String,
+      //   validate: {
+      //     validator: function (v) {
+      //       return this.market === "secondary" ? !!v : true;
+      //     },
+      //     message: "Validation Error: Minimum Purchase Unit is required.",
+      //   },
+      // },
+     
     },
     isDeleted: {
       type: Boolean,
