@@ -53,7 +53,7 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
-      totalQuantity: {
+      quantity: {
         type: Number,
         trim: true,
       },

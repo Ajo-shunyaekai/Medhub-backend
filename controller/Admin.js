@@ -528,7 +528,6 @@ module.exports = {
         // Sending the email to multiple recipients
         const recipientEmails = [
           updateProfile.contact_person_email,
-          // "ajo@shunyaekai.tech",
         ];
 
         //start -> for using ejs template
@@ -864,7 +863,6 @@ module.exports = {
         // Sending the email to multiple recipients
         const recipientEmails = [
           updateStatus.contact_person_email,
-          // "ajo@shunyaekai.tech",
         ];
 
         //start -> for using ejs template

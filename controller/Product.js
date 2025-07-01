@@ -1197,7 +1197,7 @@ try {
 }
 
 
-const totalQuantity = parsedStockedInDetails.reduce((sum, item) => {
+const quantity = parsedStockedInDetails.reduce((sum, item) => {
   return sum + (parseFloat(item.quantity) || 0);
 }, 0);
 
@@ -1263,7 +1263,7 @@ const totalQuantity = parsedStockedInDetails.reduce((sum, item) => {
         product_id,
         general: {
           ...req?.body,
-          totalQuantity: totalQuantity,
+          quantity: quantity,
           image: {
             front: generalFiles1.imageFront || [],
             back: generalFiles2.imageBack || [],

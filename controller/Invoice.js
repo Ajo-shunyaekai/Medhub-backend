@@ -244,7 +244,6 @@ module.exports = {
       const subject = `Payment Confirmation for Invoice ${invoice_id} – Order ${order_id}`;
       const recipientEmails = [
         supplier.contact_person_email,
-        "ajo@shunyaekai.tech",
       ];
       const emailContent = await updatePaymentStatusContent(
         supplier,

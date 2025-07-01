@@ -418,8 +418,8 @@ module.exports = {
           msg
         );
       
-        const buyerRecipients = [buyer.contact_person_email, 'ajo@shunyaekai.tech'];
-        const supplierRecipients = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
+        const buyerRecipients = [buyer.contact_person_email];
+        const supplierRecipients = [supplier.contact_person_email];
       
         await Promise.all([
           sendEmail(buyerRecipients, subject, buyerContent),
@@ -486,7 +486,7 @@ module.exports = {
       await newNotification.save();
 
       const subject = "Enquiry Cancelled!";
-      const recipientEmails = [supplier.contact_person_email,'ajo@shunyaekai.tech'];
+      const recipientEmails = [supplier.contact_person_email];
       const emailContent = await cancelEnquiryContent(
         supplier,
         buyer,

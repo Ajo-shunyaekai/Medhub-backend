@@ -101,7 +101,7 @@ module.exports = {
           <p style="margin-top: 20px;">Best Regards,<br/>Medhub Global Team</p>
         </div>
       `;
-      const recipientEmail = [process.env.ADMIN_EMAIL || "ajo@shunyaekai.tech"];
+      const recipientEmail = [process.env.ADMIN_EMAIL];
 
       const attachments =
         imageField?.length > 0
