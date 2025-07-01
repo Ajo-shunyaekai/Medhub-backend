@@ -1184,22 +1184,21 @@ module.exports = {
 
       let parsedStockedInDetails = [];
 
-try {
-  const validJsonString = req.body?.stockedInDetails?.find(
-    (value) => value.startsWith("[") && value.includes("country")
-  );
+      try {
+        const validJsonString = req.body?.stockedInDetails?.find(
+          (value) => value.startsWith("[") && value.includes("country")
+        );
 
-  if (validJsonString) {
-    parsedStockedInDetails = JSON.parse(validJsonString);
-  }
-} catch (err) {
-  console.error("Failed to parse stockedInDetails:", err);
-}
+        if (validJsonString) {
+          parsedStockedInDetails = JSON.parse(validJsonString);
+        }
+      } catch (err) {
+        console.error("Failed to parse stockedInDetails:", err);
+      }
 
-
-const totalQuantity = parsedStockedInDetails.reduce((sum, item) => {
-  return sum + (parseFloat(item.quantity) || 0);
-}, 0);
+      const totalQuantity = parsedStockedInDetails.reduce((sum, item) => {
+        return sum + (parseFloat(item.quantity) || 0);
+      }, 0);
 
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles1 = await getFilePathsAdd(req, res, ["imageFront"]);
@@ -1327,8 +1326,7 @@ const totalQuantity = parsedStockedInDetails.reduce((sum, item) => {
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
-console.log(req?.body?.stockedInDetails)
-// return false
+      // return false
       const newInventoryDetails = {
         uuid: inventoryUUId,
         productId: newProduct?.product_id,

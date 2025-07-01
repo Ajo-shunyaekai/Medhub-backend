@@ -30,7 +30,10 @@ const productSchema = new Schema(
       minimumPurchaseUnit: {
         type: String,
         trim: true,
-        required: [true, "Validation Error: Minimum Order Quantity is required."],
+        required: [
+          true,
+          "Validation Error: Minimum Order Quantity is required.",
+        ],
       },
       strength: {
         type: String,
@@ -206,8 +209,41 @@ const productSchema = new Schema(
       //     message: "Validation Error: Minimum Purchase Unit is required.",
       //   },
       // },
-     
     },
+    categoryDetailsFile: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    categoryDetails: [
+      {
+        name: {
+          type: String,
+          trim: true,
+        },
+        fieldValue: {
+          type: String,
+          trim: true,
+        },
+        type: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
+    faqs: [
+      {
+        ques: {
+          type: String,
+          trim: true,
+        },
+        ans: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
     isDeleted: {
       type: Boolean,
       default: false,
