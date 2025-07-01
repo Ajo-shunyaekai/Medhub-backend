@@ -1207,7 +1207,6 @@ module.exports = {
           const supplierSubject = `Medhub Global Enquiry: ${buyer?.buyer_name}, Enquiry Number ${enq?.enquiry_id}`;
           const supplierRecipientEmails = [
             supplier.contact_person_email,
-            "ajo@shunyaekai.tech",
           ];
           const supplierTemplateName = "supplierEnquiryNotification";
           const supplierContext = {
@@ -1255,7 +1254,6 @@ module.exports = {
           const buyerSubject = `Medhub Global Enquiry: ${supplier?.supplier_name}, Enquiry Number ${enq?.enquiry_id}`;
           const buyerRecipientEmails = [
             buyer.contact_person_email,
-            "ajo@shunyaekai.tech",
           ];
           const buyerTemplateName = "buyerEnquiryConfirmation";
           const buyerContext = {
