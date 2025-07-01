@@ -277,6 +277,11 @@ const addProductUpload3 = (req, res, next) => {
           req?.files?.["complianceFile"] || []
         );
       }
+      if (req?.files?.["categoryDetailsFile"]) {
+        uploadedFiles["categoryDetailsFile"] = await uploadMultipleFiles(
+          req?.files?.["categoryDetailsFile"] || []
+        );
+      }
       if (req?.files?.["catalogue"]) {
         uploadedFiles["catalogue"] = await uploadMultipleFiles(
           req?.files?.["catalogue"] || []
@@ -325,6 +330,7 @@ const addProductUpload3 = (req, res, next) => {
         ...(req?.files?.["imageClosure"] || []),
         ...(req?.files?.["guidelinesFile"] || []),
         ...(req?.files?.["complianceFile"] || []),
+        ...(req?.files?.["categoryDetailsFile"] || []),
         ...(req?.files?.["catalogue"] || []),
         ...(req?.files?.["specificationSheet"] || []),
         ...(req?.files?.["purchaseInvoiceFile"] || []),
@@ -526,6 +532,7 @@ const editProductUpload3 = (req, res, next) => {
     { name: "imageClosureNew", maxCount: 1 },
     { name: "guidelinesFileNew", maxCount: getMaxCount("guidelinesFile") },
     { name: "complianceFileNew", maxCount: getMaxCount("complianceFile") },
+    { name: "categoryDetailsFileNew", maxCount: 8 },
     { name: "catalogueNew", maxCount: getMaxCount("catalogue") },
     { name: "purchaseInvoiceFileNew", maxCount: getMaxCount("purchaseInvoiceFile") },
     {
@@ -570,6 +577,11 @@ const editProductUpload3 = (req, res, next) => {
       if (req?.files?.["complianceFileNew"]) {
         uploadedFiles["complianceFileNew"] = await uploadMultipleFiles(
           req?.files?.["complianceFileNew"] || []
+        );
+      }
+      if (req?.files?.["categoryDetailsFileNew"]) {
+        uploadedFiles["categoryDetailsFileNew"] = await uploadMultipleFiles(
+          req?.files?.["categoryDetailsFileNew"] || []
         );
       }
       if (req?.files?.["catalogueNew"]) {
@@ -619,6 +631,7 @@ const editProductUpload3 = (req, res, next) => {
         ...(req?.files?.["imageSideNew"] || []),
         ...(req?.files?.["imageClosureNew"] || []),
         ...(req?.files?.["complianceFileNew"] || []),
+        ...(req?.files?.["categoryDetailsFileNew"] || []),
         ...(req?.files?.["guidelinesFileNew"] || []),
         ...(req?.files?.["catalogueNew"] || []),
         ...(req?.files?.["specificationSheetNew"] || []),
