@@ -23,6 +23,7 @@ const corsOptions = {
     "https://medhub.shunyaekai.com",
     "https://medhub.global",
     "https://checkout.stripe.com",
+    "http://192.168.1.43:3000"
   ],
   methods: "GET, POST, PUT, PATCH, DELETE",
   credentials: true,

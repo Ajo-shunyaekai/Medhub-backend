@@ -1189,7 +1189,8 @@ module.exports = {
             const product = products.find(
               (pdt) => pdt?.product_id == item?.product_id
             );
-            const imageName = product?.general?.image?.[0];
+            const firstimage = Object.keys(product?.general?.image || {})[0]
+            const imageName = product?.general?.image?.[0] || product?.general?.image?.[firstimage]?.[0];
             const imageUrl = imageName
               ? imageName.startsWith("http")
                 ? imageName

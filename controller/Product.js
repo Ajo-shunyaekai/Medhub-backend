@@ -2038,7 +2038,9 @@ module.exports = {
         price,
         stocked_in,
         stock_status,
+        countries
       } = req?.query;
+      console.log("req?.query",req?.query)
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -2139,6 +2141,13 @@ module.exports = {
       // if (stocked_in && typeof stocked_in === "string") {
       //   countries = stocked_in.split(",").map((c) => c.trim());
       // }
+
+      const countryList = countries
+  ? countries.split(",").map((c) => decodeURIComponent(c.trim()))
+  : [];
+
+  console.log(countryList)
+
 
       const foundProduct = await Product?.findById(id);
       if (!foundProduct) {
@@ -2320,21 +2329,23 @@ module.exports = {
         });
       }
 
-      //filter for countries where stock trade
-      // if (countries.length > 0) {
-      //   pipeline.push({
-      //     $unwind: {
-      //       path: "$inventoryDetails.stockedInDetails",
-      //       preserveNullAndEmptyArrays: true,
-      //     },
-      //   });
+      //filter for stocked in countries
+      if (countryList.length > 0) {
+      pipeline.push(
+        {
+          $unwind: {
+            path: "$inventoryDetails.stockedInDetails",
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $match: {
+            "inventoryDetails.stockedInDetails.country": { $in: countryList },
+          },
+        }
+      );
+    }
 
-      //   pipeline.push({
-      //     $match: {
-      //       "inventoryDetails.stockedInDetails.country": { $in: countries },
-      //     },
-      //   });
-      // }
 
       //stock status filter
       const stockStatuses = stock_status?.split(",").map((s) => s.trim());
@@ -2442,9 +2453,9 @@ module.exports = {
       //   });
       // }
 
-      pipeline.push({
-        $sort: { createdAt: -1 },
-      });
+      // pipeline.push({
+      //   $sort: { createdAt: -1 },
+      // });
 
       // pagination
       pipeline.push({ $skip: offset });
