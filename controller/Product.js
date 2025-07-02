@@ -1181,25 +1181,25 @@ module.exports = {
   addProduct3: async (req, res) => {
     try {
       const { category, market = "new" } = req?.body;
-
+ 
       let parsedStockedInDetails = [];
-
+ 
       try {
         const validJsonString = req.body?.stockedInDetails?.find(
           (value) => value.startsWith("[") && value.includes("country")
         );
-
+ 
         if (validJsonString) {
           parsedStockedInDetails = JSON.parse(validJsonString);
         }
       } catch (err) {
         console.error("Failed to parse stockedInDetails:", err);
       }
-
+ 
       const quantity = parsedStockedInDetails.reduce((sum, item) => {
         return sum + (parseFloat(item.quantity) || 0);
       }, 0);
-
+ 
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles1 = await getFilePathsAdd(req, res, ["imageFront"]);
       const generalFiles2 = await getFilePathsAdd(req, res, ["imageBack"]);
@@ -1225,14 +1225,14 @@ module.exports = {
       const secondaryMarketFiles = await getFilePathsAdd(req, res, [
         "purchaseInvoiceFile",
       ]);
-
+ 
       let newProductData = {};
-
+ 
       const inventoryUUId = uuidv4();
       const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
-
+ 
       let cNCFileNDateParsed;
-
+ 
       if (typeof req?.body?.cNCFileNDate == "string") {
         try {
           // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
@@ -1259,15 +1259,15 @@ module.exports = {
           req.body?.cNCFileNDate?.filter((value) => value != "[object Object]")
         );
       }
-
-      let categoryDetailsParsed;
-      if (typeof req?.body?.cNCFileNDate == "string") {
+ 
+      let categoryDetailsParsed = [];
+      if (typeof req?.body?.categoryDetails == "string") {
         try {
           // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
           //   (value) => value != "[object Object]"
           // );
           if (Array.isArray(req?.body?.categoryDetails)) {
-            categoryDetailsParsed = req.body.categoryDetails.filter(
+            categoryDetailsParsed = req?.body?.categoryDetails?.filter(
               (value) => value !== "[object Object]"
             );
           } else if (typeof req?.body?.categoryDetails === "string") {
@@ -1283,13 +1283,43 @@ module.exports = {
           handleCatchBlockError(req, res, error);
         }
       } else {
-        categoryDetailsParsed = JSON.parse(
-          req.body?.categoryDetails?.filter(
-            (value) => value != "[object Object]"
-          )
-        );
+        categoryDetailsParsed =
+          req.body?.categoryDetails?.length > 0
+            ? JSON.parse(
+                req.body?.categoryDetails?.filter(
+                  (value) => value != "[object Object]"
+                )
+              )
+            : [];
       }
-
+ 
+      let parsedFaqs = [];
+ 
+      try {
+        
+        if(req?.body?.faqs){
+          const rawFaqs = req.body?.faqs || [];
+  
+          if (Array.isArray(rawFaqs)) {
+            parsedFaqs = JSON.parse(
+              req?.body?.faqs?.filter((value) => value != "[object Object]")
+            );
+          } else if (typeof rawFaqs === "string" && rawFaqs.trim()) {
+            const temp = JSON.parse(rawFaqs);
+            if (Array.isArray(temp)) {
+              parsedFaqs = temp.filter((item) => item !== "[object Object]");
+            } else {
+              throw new Error("Parsed faqs is not an array.");
+            }
+          } else {
+            parsedFaqs = [];
+          }
+        }
+      } catch (err) {
+        console.error("Failed to parse faqs:", err);
+        return handleCatchBlockError(req, res, err);
+      }
+ 
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -1317,24 +1347,24 @@ module.exports = {
                 typeof ele?.file !== "string"
                   ? complianceFiles?.complianceFile?.find((filename) => {
                       const path = ele?.file?.path;
-
+ 
                       // Ensure path is defined and log the file path
                       if (!path) {
                         return false; // If there's no path, skip this entry
                       }
-
+ 
                       const ext = path.split(".").pop(); // Get the file extension
-
+ 
                       const sanitizedPath = path
                         .replaceAll("./", "")
                         .replaceAll(" ", "")
                         .replaceAll(`.${ext}`, "");
-
+ 
                       // Match file by sanitized name
                       return filename?.includes(sanitizedPath);
                     })
                   : ele?.file || complianceFiles?.complianceFile?.[index] || "",
-
+ 
               date: ele?.date || "", // Log the date being used (if any)
             };
           })
@@ -1349,19 +1379,19 @@ module.exports = {
                     ? categoryDetailsFiles?.categoryDetailsFile?.find(
                         (filename) => {
                           const path = ele?.fieldValue?.path;
-
+ 
                           // Ensure path is defined and log the file path
                           if (!path) {
                             return false; // If there's no path, skip this entry
                           }
-
+ 
                           const ext = path.split(".").pop(); // Get the file extension
-
+ 
                           const sanitizedPath = path
                             .replaceAll("./", "")
                             .replaceAll(" ", "")
                             .replaceAll(`.${ext}`, "");
-
+ 
                           // Match file by sanitized name
                           return filename?.includes(sanitizedPath);
                         }
@@ -1370,15 +1400,13 @@ module.exports = {
                       categoryDetailsFiles?.categoryDetailsFile?.[index] ||
                       ""
                   : ele?.fieldValue,
-
+ 
               name: ele?.name || "", // Log the name being used (if any)
               type: ele?.type || "", // Log the type being used (if any)
             };
           })
           ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type),
-        faqs: JSON.parse(
-          req?.body?.faqs?.filter((value) => value != "[object Object]")
-        ),
+        faqs: parsedFaqs,
         additional: {
           ...req?.body,
           guidelinesFile: additionalFiles?.guidelinesFile || [],
@@ -1386,17 +1414,17 @@ module.exports = {
         market,
         idDeleted: false,
       };
-
+ 
       if (market == "secondary") {
         newProductData["secondaryMarketDetails"] = {
           ...req?.body,
           purchaseInvoiceFile: secondaryMarketFiles?.purchaseInvoiceFile || [],
         };
       }
-
+ 
       // Create the new product
       const newProduct = await Product.create(newProductData);
-
+ 
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
@@ -1418,13 +1446,13 @@ module.exports = {
         ),
         ...(inventoryFiles || []),
       };
-
+ 
       const newInventory = await Inventory.create(newInventoryDetails);
-
+ 
       if (!newInventory) {
         return sendErrorResponse(res, 400, "Failed to create new Inventory.");
       }
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -2111,9 +2139,9 @@ module.exports = {
         price,
         stocked_in,
         stock_status,
-        countries,
+        countries
       } = req?.query;
-
+      
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -2216,9 +2244,8 @@ module.exports = {
       // }
 
       const countryList = countries
-        ? countries.split(",").map((c) => decodeURIComponent(c.trim()))
-        : [];
-
+  ? countries.split(",").map((c) => decodeURIComponent(c.trim()))
+  : [];
 
       const foundProduct = await Product?.findById(id);
       if (!foundProduct) {
@@ -2402,20 +2429,21 @@ module.exports = {
 
       //filter for stocked in countries
       if (countryList.length > 0) {
-        pipeline.push(
-          {
-            $unwind: {
-              path: "$inventoryDetails.stockedInDetails",
-              preserveNullAndEmptyArrays: false,
-            },
+      pipeline.push(
+        {
+          $unwind: {
+            path: "$inventoryDetails.stockedInDetails",
+            preserveNullAndEmptyArrays: false,
           },
-          {
-            $match: {
-              "inventoryDetails.stockedInDetails.country": { $in: countryList },
-            },
-          }
-        );
-      }
+        },
+        {
+          $match: {
+            "inventoryDetails.stockedInDetails.country": { $in: countryList },
+          },
+        }
+      );
+    }
+
 
       //stock status filter
       const stockStatuses = stock_status?.split(",").map((s) => s.trim());
