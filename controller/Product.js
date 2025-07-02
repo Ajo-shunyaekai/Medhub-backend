@@ -1196,7 +1196,6 @@ module.exports = {
         console.error("Failed to parse stockedInDetails:", err);
       }
 
-
       const quantity = parsedStockedInDetails.reduce((sum, item) => {
         return sum + (parseFloat(item.quantity) || 0);
       }, 0);
@@ -1216,6 +1215,9 @@ module.exports = {
         : req?.body?.countries || [];
       const complianceFiles = await getFilePathsAdd(req, res, [
         "complianceFile",
+      ]);
+      const categoryDetailsFiles = await getFilePathsAdd(req, res, [
+        "categoryDetailsFile",
       ]);
       const additionalFiles = await getFilePathsAdd(req, res, [
         "guidelinesFile",
@@ -1257,6 +1259,37 @@ module.exports = {
           req.body?.cNCFileNDate?.filter((value) => value != "[object Object]")
         );
       }
+
+      let categoryDetailsParsed;
+      if (typeof req?.body?.cNCFileNDate == "string") {
+        try {
+          // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
+          //   (value) => value != "[object Object]"
+          // );
+          if (Array.isArray(req?.body?.categoryDetails)) {
+            categoryDetailsParsed = req.body.categoryDetails.filter(
+              (value) => value !== "[object Object]"
+            );
+          } else if (typeof req?.body?.categoryDetails === "string") {
+            // If it's a string, try to parse it as JSON and filter
+            categoryDetailsParsed = JSON.parse(
+              req.body?.categoryDetails
+            )?.filter((value) => value !== "[object Object]");
+          } else {
+            // Handle case where categoryDetails is neither an array nor a string
+            throw new Error("Invalid categoryDetails format.");
+          }
+        } catch (error) {
+          handleCatchBlockError(req, res, error);
+        }
+      } else {
+        categoryDetailsParsed = JSON.parse(
+          req.body?.categoryDetails?.filter(
+            (value) => value != "[object Object]"
+          )
+        );
+      }
+
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -1306,6 +1339,46 @@ module.exports = {
             };
           })
           ?.filter((ele) => ele?.file || ele?.date),
+        categoryDetailsFile: categoryDetailsFiles.categoryDetailsFile || [],
+        categoryDetails: categoryDetailsParsed
+          ?.map((ele, index) => {
+            return {
+              fieldValue:
+                ele?.type == "file"
+                  ? typeof ele?.fieldValue !== "string"
+                    ? categoryDetailsFiles?.categoryDetailsFile?.find(
+                        (filename) => {
+                          const path = ele?.fieldValue?.path;
+
+                          // Ensure path is defined and log the file path
+                          if (!path) {
+                            return false; // If there's no path, skip this entry
+                          }
+
+                          const ext = path.split(".").pop(); // Get the file extension
+
+                          const sanitizedPath = path
+                            .replaceAll("./", "")
+                            .replaceAll(" ", "")
+                            .replaceAll(`.${ext}`, "");
+
+                          // Match file by sanitized name
+                          return filename?.includes(sanitizedPath);
+                        }
+                      )
+                    : ele?.fieldValue ||
+                      categoryDetailsFiles?.categoryDetailsFile?.[index] ||
+                      ""
+                  : ele?.fieldValue,
+
+              name: ele?.name || "", // Log the name being used (if any)
+              type: ele?.type || "", // Log the type being used (if any)
+            };
+          })
+          ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type),
+        faqs: JSON.parse(
+          req?.body?.faqs?.filter((value) => value != "[object Object]")
+        ),
         additional: {
           ...req?.body,
           guidelinesFile: additionalFiles?.guidelinesFile || [],
@@ -2038,9 +2111,9 @@ module.exports = {
         price,
         stocked_in,
         stock_status,
-        countries
+        countries,
       } = req?.query;
-      console.log("req?.query",req?.query)
+
       const pageNo = parseInt(page_no) || 1;
       const pageSize = parseInt(page_size) || 10;
       const offset = (pageNo - 1) * pageSize;
@@ -2143,10 +2216,8 @@ module.exports = {
       // }
 
       const countryList = countries
-  ? countries.split(",").map((c) => decodeURIComponent(c.trim()))
-  : [];
-
-  console.log(countryList)
+        ? countries.split(",").map((c) => decodeURIComponent(c.trim()))
+        : [];
 
 
       const foundProduct = await Product?.findById(id);
@@ -2331,21 +2402,20 @@ module.exports = {
 
       //filter for stocked in countries
       if (countryList.length > 0) {
-      pipeline.push(
-        {
-          $unwind: {
-            path: "$inventoryDetails.stockedInDetails",
-            preserveNullAndEmptyArrays: false,
+        pipeline.push(
+          {
+            $unwind: {
+              path: "$inventoryDetails.stockedInDetails",
+              preserveNullAndEmptyArrays: false,
+            },
           },
-        },
-        {
-          $match: {
-            "inventoryDetails.stockedInDetails.country": { $in: countryList },
-          },
-        }
-      );
-    }
-
+          {
+            $match: {
+              "inventoryDetails.stockedInDetails.country": { $in: countryList },
+            },
+          }
+        );
+      }
 
       //stock status filter
       const stockStatuses = stock_status?.split(",").map((s) => s.trim());

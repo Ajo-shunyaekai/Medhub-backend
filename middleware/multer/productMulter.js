@@ -231,6 +231,7 @@ const addProductUpload3 = (req, res, next) => {
     { name: "imageClosure", maxCount: 1 },
     { name: "guidelinesFile", maxCount: 4 },
     { name: "complianceFile", maxCount: 4 },
+    { name: "categoryDetailsFile", maxCount: 4 },
     { name: "catalogue", maxCount: 1 },
     { name: "specificationSheet", maxCount: 1 },
     { name: "purchaseInvoiceFile", maxCount: 4 },
