@@ -13,6 +13,10 @@ const productSchema = new Schema(
         type: String,
         trim: true,
       },
+      form: {
+        type: String,
+        trim: true,
+      },
       model: {
         type: String,
         trim: true,
