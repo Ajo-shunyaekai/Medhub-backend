@@ -529,7 +529,7 @@ const editProductUpload3 = (req, res, next) => {
   uploadEdit.fields([
     { name: "imageFrontNew", maxCount: 1 },
     { name: "imageBackNew", maxCount: 1 },
-    { name: "imageSideew", maxCount: 1 },
+    { name: "imageSideNew", maxCount: 1 },
     { name: "imageClosureNew", maxCount: 1 },
     { name: "guidelinesFileNew", maxCount: getMaxCount("guidelinesFile") },
     { name: "complianceFileNew", maxCount: getMaxCount("complianceFile") },
