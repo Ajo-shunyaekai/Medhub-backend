@@ -1319,6 +1319,70 @@ module.exports = {
         return handleCatchBlockError(req, res, err);
       }
 
+      const categoryDetailsUnordered = categoryDetailsParsed
+        ?.map((ele, index) => {
+          return {
+            fieldValue:
+              ele?.type == "file"
+                ? typeof ele?.fieldValue !== "string"
+                  ? categoryDetailsFiles?.categoryDetailsFile?.find(
+                      (filename) => {
+                        const path = ele?.fieldValue?.path;
+
+                        // Ensure path is defined and log the file path
+                        if (!path) {
+                          return false; // If there's no path, skip this entry
+                        }
+
+                        const ext = path.split(".").pop(); // Get the file extension
+
+                        const sanitizedPath = path
+                          .replaceAll("./", "")
+                          .replaceAll(" ", "")
+                          .replaceAll(`.${ext}`, "");
+
+                        // Match file by sanitized name
+                        return filename?.includes(sanitizedPath);
+                      }
+                    )
+                  : ele?.fieldValue ||
+                    categoryDetailsFiles?.categoryDetailsFile?.[index] ||
+                    ""
+                : ele?.fieldValue,
+
+            name: ele?.name || "", // Log the name being used (if any)
+            type: ele?.type || "", // Log the type being used (if any)
+          };
+        })
+        ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type);
+
+      const cdtyp1 =
+        categoryDetailsUnordered?.filter((section) => section?.type == "text") ||
+        [];
+      const cdtyp2 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "dropdown"
+        ) || [];
+      const cdtyp3 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "checkbox"
+        ) || [];
+      const cdtyp4 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "textarea"
+        ) || [];
+      const cdtyp5 =
+        categoryDetailsUnordered?.filter((section) => section?.type == "file") ||
+        [];
+
+      const categoryDetailsOrder = [
+        ...cdtyp1,
+        ...cdtyp2,
+        ...cdtyp3,
+        ...cdtyp4,
+        ...cdtyp5,
+      ];
+
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -1369,42 +1433,7 @@ module.exports = {
           })
           ?.filter((ele) => ele?.file || ele?.date),
         categoryDetailsFile: categoryDetailsFiles.categoryDetailsFile || [],
-        categoryDetails: categoryDetailsParsed
-          ?.map((ele, index) => {
-            return {
-              fieldValue:
-                ele?.type == "file"
-                  ? typeof ele?.fieldValue !== "string"
-                    ? categoryDetailsFiles?.categoryDetailsFile?.find(
-                        (filename) => {
-                          const path = ele?.fieldValue?.path;
-
-                          // Ensure path is defined and log the file path
-                          if (!path) {
-                            return false; // If there's no path, skip this entry
-                          }
-
-                          const ext = path.split(".").pop(); // Get the file extension
-
-                          const sanitizedPath = path
-                            .replaceAll("./", "")
-                            .replaceAll(" ", "")
-                            .replaceAll(`.${ext}`, "");
-
-                          // Match file by sanitized name
-                          return filename?.includes(sanitizedPath);
-                        }
-                      )
-                    : ele?.fieldValue ||
-                      categoryDetailsFiles?.categoryDetailsFile?.[index] ||
-                      ""
-                  : ele?.fieldValue,
-
-              name: ele?.name || "", // Log the name being used (if any)
-              type: ele?.type || "", // Log the type being used (if any)
-            };
-          })
-          ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type),
+        categoryDetails: categoryDetailsOrder,
         faqs: parsedFaqs,
         additional: {
           ...req?.body,
