@@ -52,17 +52,35 @@ const createMulterMiddleware = (uploadConfig) => {
       const getUploadedFilesPath = async () => {
         if (req?.files?.["transaction_image"]) {
           uploadedFiles["transaction_image"] = await uploadMultipleFiles(
-            req?.files?.["transaction_image"] || []
+            // req?.files?.["transaction_image"] || []
+            (req?.files?.["transaction_image"] || [])?.map((file) => ({
+              ...file,
+              path: file.path,
+              filename: file.filename,
+              contentType: file.mimetype,
+            }))
           );
         }
         if (req?.files?.["complaint_image"]) {
           uploadedFiles["complaint_image"] = await uploadMultipleFiles(
-            req?.files?.["complaint_image"] || []
+            // req?.files?.["complaint_image"] || []
+            (req?.files?.["complaint_image"] || [])?.map((file) => ({
+              ...file,
+              path: file.path,
+              filename: file.filename,
+              contentType: file.mimetype,
+            }))
           );
         }
         if (req?.files?.["feedback_image"]) {
           uploadedFiles["feedback_image"] = await uploadMultipleFiles(
-            req?.files?.["feedback_image"] || []
+            // req?.files?.["feedback_image"] || []
+            (req?.files?.["feedback_image"] || [])?.map((file) => ({
+              ...file,
+              path: file.path,
+              filename: file.filename,
+              contentType: file.mimetype,
+            }))
           );
         }
 

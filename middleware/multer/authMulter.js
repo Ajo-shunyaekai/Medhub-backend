@@ -98,34 +98,94 @@ const authUpload = (req, res, next) => {
 
     const getUploadedFilesPath = async () => {
       uploadedFiles["buyer_image"] = await uploadMultipleFiles(
-        req?.files?.["buyer_image"] || []
+        // req?.files?.["buyer_image"] || []
+        (req?.files?.["buyer_image"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["supplier_image"] = await uploadMultipleFiles(
-        req?.files?.["supplier_image"] || []
+        // req?.files?.["supplier_image"] || []
+        (req?.files?.["supplier_image"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["license_image"] = await uploadMultipleFiles(
-        req?.files?.["license_image"] || []
+        // req?.files?.["license_image"] || []
+        (req?.files?.["license_image"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["certificate_image"] = await uploadMultipleFiles(
-        req?.files?.["certificate_image"] || []
+        // req?.files?.["certificate_image"] || []
+        (req?.files?.["certificate_image"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["medical_certificate"] = await uploadMultipleFiles(
-        req?.files?.["medical_practitioner_image"] || []
+        // req?.files?.["medical_practitioner_image"] || []
+        (req?.files?.["medical_practitioner_image"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["buyer_imageNew"] = await uploadMultipleFiles(
-        req?.files?.["buyer_imageNew"] || []
+        // req?.files?.["buyer_imageNew"] || []
+        (req?.files?.["buyer_imageNew"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["supplier_imageNew"] = await uploadMultipleFiles(
-        req?.files?.["supplier_imageNew"] || []
+        // req?.files?.["supplier_imageNew"] || []
+        (req?.files?.["supplier_imageNew"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["license_imageNew"] = await uploadMultipleFiles(
-        req?.files?.["license_imageNew"] || []
+        // req?.files?.["license_imageNew"] || []
+        (req?.files?.["license_imageNew"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["certificate_imageNew"] = await uploadMultipleFiles(
-        req?.files?.["certificate_imageNew"] || []
+        // req?.files?.["certificate_imageNew"] || []
+        (req?.files?.["certificate_imageNew"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
       uploadedFiles["medical_certificateNew"] = await uploadMultipleFiles(
-        req?.files?.["medical_practitioner_imageNew"] || []
+        // req?.files?.["medical_practitioner_imageNew"] || []
+        (req?.files?.["medical_practitioner_imageNew"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
       );
 
       // Function to remove the files from the local file system
