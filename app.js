@@ -25,8 +25,11 @@ const { URL } = require("url");
 //proxy
 app.get("/pdf-proxy/*", async (req, res) => {
   const filename = decodeURIComponent(req.params[0]); // Get full path after /pdf-proxy/
+  console.log("Proxy hit for:", filename);
 
-  const s3Url = `https://medhubglobal.s3.ap-south-1.amazonaws.com/testing/${filename}`;
+  // const s3Url = `https://medhubglobal.s3.ap-south-1.amazonaws.com/testing/${filename}`;
+  const s3Url = `${process.env.S3_TESTING_URL}/${filename}`;
+  console.log(process.env.S3_TESTING_URL)
   const parsedUrl = new URL(s3Url);
 
   const protocol = parsedUrl.protocol === "https:" ? https : http;
