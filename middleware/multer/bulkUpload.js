@@ -65,7 +65,17 @@ const bulkProductCSVUpload = (req, res, next) => {
       // Upload files to S3
       const { usertype } = req.headers;
       const uploadedFiles = {
-        csvFile: await uploadMultipleFiles(req.files.csvFile, true, usertype),
+        csvFile: await uploadMultipleFiles(
+          // req.files.csvFile,
+          (req?.files?.csvFile || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          })),
+          true,
+          usertype
+        ),
       };
 
       // Remove local files

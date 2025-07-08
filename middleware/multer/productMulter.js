@@ -107,69 +107,151 @@ const addProductUpload = (req, res, next) => {
     const getUploadedFilesPath = async () => {
       if (req?.files?.["image"]) {
         uploadedFiles["image"] = await uploadMultipleFiles(
-          req?.files?.["image"] || []
+          // req?.files?.["image"] || []
+          (req?.files?.["image"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["complianceFile"]) {
         uploadedFiles["complianceFile"] = await uploadMultipleFiles(
-          req?.files?.["complianceFile"] || []
+          // req?.files?.["complianceFile"] || []
+          (req?.files?.["complianceFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["guidelinesFile"]) {
         uploadedFiles["guidelinesFile"] = await uploadMultipleFiles(
-          req?.files?.["guidelinesFile"] || []
+          // req?.files?.["guidelinesFile"] || []
+          (req?.files?.["guidelinesFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["safetyDatasheet"]) {
         uploadedFiles["safetyDatasheet"] = await uploadMultipleFiles(
-          req?.files?.["safetyDatasheet"] || []
+          // req?.files?.["safetyDatasheet"] || []
+          (req?.files?.["safetyDatasheet"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["healthHazardRating"]) {
         uploadedFiles["healthHazardRating"] = await uploadMultipleFiles(
-          req?.files?.["healthHazardRating"] || []
+          // req?.files?.["healthHazardRating"] || []
+          (req?.files?.["healthHazardRating"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["environmentalImpact"]) {
         uploadedFiles["environmentalImpact"] = await uploadMultipleFiles(
-          req?.files?.["environmentalImpact"] || []
+          // req?.files?.["environmentalImpact"] || []
+          (req?.files?.["environmentalImpact"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["specificationFile"]) {
         uploadedFiles["specificationFile"] = await uploadMultipleFiles(
-          req?.files?.["specificationFile"] || []
+          // req?.files?.["specificationFile"] || []
+          (req?.files?.["specificationFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["performanceTestingReportFile"]) {
         uploadedFiles["performanceTestingReportFile"] =
           await uploadMultipleFiles(
-            req?.files?.["performanceTestingReportFile"] || []
+            //   req?.files?.["performanceTestingReportFile"] || []
+            (req?.files?.["performanceTestingReportFile"] || [])?.map(
+              (file) => ({
+                ...file,
+                path: file.path,
+                filename: file.filename,
+                contentType: file.mimetype,
+              })
+            )
           );
       }
       if (req?.files?.["dermatologistTestedFile"]) {
         uploadedFiles["dermatologistTestedFile"] = await uploadMultipleFiles(
-          req?.files?.["dermatologistTestedFile"] || []
+          // req?.files?.["dermatologistTestedFile"] || []
+          (req?.files?.["dermatologistTestedFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["pediatricianRecommendedFile"]) {
         uploadedFiles["pediatricianRecommendedFile"] =
           await uploadMultipleFiles(
-            req?.files?.["pediatricianRecommendedFile"] || []
+            //   req?.files?.["pediatricianRecommendedFile"] || []
+            (req?.files?.["pediatricianRecommendedFile"] || [])?.map(
+              (file) => ({
+                ...file,
+                path: file.path,
+                filename: file.filename,
+                contentType: file.mimetype,
+              })
+            )
           );
       }
       if (req?.files?.["healthClaimsFile"]) {
         uploadedFiles["healthClaimsFile"] = await uploadMultipleFiles(
-          req?.files?.["healthClaimsFile"] || []
+          // req?.files?.["healthClaimsFile"] || []
+          (req?.files?.["healthClaimsFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["interoperabilityFile"]) {
         uploadedFiles["interoperabilityFile"] = await uploadMultipleFiles(
-          req?.files?.["interoperabilityFile"] || []
+          // req?.files?.["interoperabilityFile"] || []
+          (req?.files?.["interoperabilityFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["purchaseInvoiceFile"]) {
         uploadedFiles["purchaseInvoiceFile"] = await uploadMultipleFiles(
-          req?.files?.["purchaseInvoiceFile"] || []
+          // req?.files?.["purchaseInvoiceFile"] || []
+          (req?.files?.["purchaseInvoiceFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
 
@@ -250,52 +332,112 @@ const addProductUpload3 = (req, res, next) => {
     const getUploadedFilesPath = async () => {
       if (req?.files?.["imageFront"]) {
         uploadedFiles["imageFront"] = await uploadMultipleFiles(
-          req?.files?.["imageFront"] || []
+          // req?.files?.["imageFront"] || []
+          (req?.files?.["imageFront"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["imageBack"]) {
         uploadedFiles["imageBack"] = await uploadMultipleFiles(
-          req?.files?.["imageBack"] || []
+          // req?.files?.["imageBack"] || []
+          (req?.files?.["imageBack"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["imageSide"]) {
         uploadedFiles["imageSide"] = await uploadMultipleFiles(
-          req?.files?.["imageSide"] || []
+          // req?.files?.["imageSide"] || []
+          (req?.files?.["imageSide"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["imageClosure"]) {
         uploadedFiles["imageClosure"] = await uploadMultipleFiles(
-          req?.files?.["imageClosure"] || []
+          // req?.files?.["imageClosure"] || []
+          (req?.files?.["imageClosure"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["guidelinesFile"]) {
         uploadedFiles["guidelinesFile"] = await uploadMultipleFiles(
-          req?.files?.["guidelinesFile"] || []
+          // req?.files?.["guidelinesFile"] || []
+          (req?.files?.["guidelinesFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["complianceFile"]) {
         uploadedFiles["complianceFile"] = await uploadMultipleFiles(
-          req?.files?.["complianceFile"] || []
+          // req?.files?.["complianceFile"] || []
+          (req?.files?.["complianceFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["categoryDetailsFile"]) {
         uploadedFiles["categoryDetailsFile"] = await uploadMultipleFiles(
-          req?.files?.["categoryDetailsFile"] || []
+          // req?.files?.["categoryDetailsFile"] || []
+          (req?.files?.["categoryDetailsFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["catalogue"]) {
         uploadedFiles["catalogue"] = await uploadMultipleFiles(
-          req?.files?.["catalogue"] || []
+          // req?.files?.["catalogue"] || []
+          (req?.files?.["catalogue"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["specificationSheet"]) {
         uploadedFiles["specificationSheet"] = await uploadMultipleFiles(
-          req?.files?.["specificationSheet"] || []
+          // req?.files?.["specificationSheet"] || []
+          (req?.files?.["specificationSheet"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["purchaseInvoiceFile"]) {
         uploadedFiles["purchaseInvoiceFile"] = await uploadMultipleFiles(
-          req?.files?.["purchaseInvoiceFile"] || []
+          // req?.files?.["purchaseInvoiceFile"] || []
+          (req?.files?.["purchaseInvoiceFile"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
 
@@ -403,69 +545,151 @@ const editProductUpload = (req, res, next) => {
     const getUploadedFilesPath = async () => {
       if (req?.files?.["imageNew"]) {
         uploadedFiles["imageNew"] = await uploadMultipleFiles(
-          req?.files?.["imageNew"] || []
+          // req?.files?.["imageNew"] || []
+          (req?.files?.["imageNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["complianceFileNew"]) {
         uploadedFiles["complianceFileNew"] = await uploadMultipleFiles(
-          req?.files?.["complianceFileNew"] || []
+          // req?.files?.["complianceFileNew"] || []
+          (req?.files?.["complianceFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["guidelinesFileNew"]) {
         uploadedFiles["guidelinesFileNew"] = await uploadMultipleFiles(
-          req?.files?.["guidelinesFileNew"] || []
+          // req?.files?.["guidelinesFileNew"] || []
+          (req?.files?.["guidelinesFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["safetyDatasheetNew"]) {
         uploadedFiles["safetyDatasheetNew"] = await uploadMultipleFiles(
-          req?.files?.["safetyDatasheetNew"] || []
+          // req?.files?.["safetyDatasheetNew"] || []
+          (req?.files?.["safetyDatasheetNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["healthHazardRatingNew"]) {
         uploadedFiles["healthHazardRatingNew"] = await uploadMultipleFiles(
-          req?.files?.["healthHazardRatingNew"] || []
+          // req?.files?.["healthHazardRatingNew"] || []
+          (req?.files?.["healthHazardRatingNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["environmentalImpactNew"]) {
         uploadedFiles["environmentalImpactNew"] = await uploadMultipleFiles(
-          req?.files?.["environmentalImpactNew"] || []
+          // req?.files?.["environmentalImpactNew"] || []
+          (req?.files?.["environmentalImpactNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["specificationFileNew"]) {
         uploadedFiles["specificationFileNew"] = await uploadMultipleFiles(
-          req?.files?.["specificationFileNew"] || []
+          // req?.files?.["specificationFileNew"] || []
+          (req?.files?.["specificationFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["performanceTestingReportFileNew"]) {
         uploadedFiles["performanceTestingReportFileNew"] =
           await uploadMultipleFiles(
-            req?.files?.["performanceTestingReportFileNew"] || []
+            // req?.files?.["performanceTestingReportFileNew"] || []
+            (req?.files?.["performanceTestingReportFileNew"] || [])?.map(
+              (file) => ({
+                ...file,
+                path: file.path,
+                filename: file.filename,
+                contentType: file.mimetype,
+              })
+            )
           );
       }
       if (req?.files?.["dermatologistTestedFileNew"]) {
         uploadedFiles["dermatologistTestedFileNew"] = await uploadMultipleFiles(
-          req?.files?.["dermatologistTestedFileNew"] || []
+          // req?.files?.["dermatologistTestedFileNew"] || []
+          (req?.files?.["dermatologistTestedFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["pediatricianRecommendedFileNew"]) {
         uploadedFiles["pediatricianRecommendedFileNew"] =
           await uploadMultipleFiles(
-            req?.files?.["pediatricianRecommendedFileNew"] || []
+            // req?.files?.["pediatricianRecommendedFileNew"] || []
+            (req?.files?.["pediatricianRecommendedFileNew"] || [])?.map(
+              (file) => ({
+                ...file,
+                path: file.path,
+                filename: file.filename,
+                contentType: file.mimetype,
+              })
+            )
           );
       }
       if (req?.files?.["healthClaimsFileNew"]) {
         uploadedFiles["healthClaimsFileNew"] = await uploadMultipleFiles(
-          req?.files?.["healthClaimsFileNew"] || []
+          // req?.files?.["healthClaimsFileNew"] || []
+          (req?.files?.["healthClaimsFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["interoperabilityFileNew"]) {
         uploadedFiles["interoperabilityFileNew"] = await uploadMultipleFiles(
-          req?.files?.["interoperabilityFileNew"] || []
+          // req?.files?.["interoperabilityFileNew"] || []
+          (req?.files?.["interoperabilityFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["purchaseInvoiceFileNew"]) {
         uploadedFiles["purchaseInvoiceFileNew"] = await uploadMultipleFiles(
-          req?.files?.["purchaseInvoiceFileNew"] || []
+          // req?.files?.["purchaseInvoiceFileNew"] || []
+          (req?.files?.["purchaseInvoiceFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
 
@@ -552,52 +776,112 @@ const editProductUpload3 = (req, res, next) => {
     const getUploadedFilesPath = async () => {
       if (req?.files?.["imageFrontNew"]) {
         uploadedFiles["imageFrontNew"] = await uploadMultipleFiles(
-          req?.files?.["imageFrontNew"] || []
+          // req?.files?.["imageFrontNew"] || []
+          (req?.files?.["imageFrontNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["imageBackNew"]) {
         uploadedFiles["imageBackNew"] = await uploadMultipleFiles(
-          req?.files?.["imageBackNew"] || []
+          // req?.files?.["imageBackNew"] || []
+          (req?.files?.["imageBackNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["imageSideNew"]) {
         uploadedFiles["imageSideNew"] = await uploadMultipleFiles(
-          req?.files?.["imageSideNew"] || []
+          // req?.files?.["imageSideNew"] || []
+          (req?.files?.["imageSideNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["imageClosureNew"]) {
         uploadedFiles["imageClosureNew"] = await uploadMultipleFiles(
-          req?.files?.["imageClosureNew"] || []
+          // req?.files?.["imageClosureNew"] || []
+          (req?.files?.["imageClosureNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["guidelinesFileNew"]) {
         uploadedFiles["guidelinesFileNew"] = await uploadMultipleFiles(
-          req?.files?.["guidelinesFileNew"] || []
+          // req?.files?.["guidelinesFileNew"] || []
+          (req?.files?.["guidelinesFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["complianceFileNew"]) {
         uploadedFiles["complianceFileNew"] = await uploadMultipleFiles(
-          req?.files?.["complianceFileNew"] || []
+          // req?.files?.["complianceFileNew"] || []
+          (req?.files?.["complianceFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["categoryDetailsFileNew"]) {
         uploadedFiles["categoryDetailsFileNew"] = await uploadMultipleFiles(
-          req?.files?.["categoryDetailsFileNew"] || []
+          // req?.files?.["categoryDetailsFileNew"] || []
+          (req?.files?.["categoryDetailsFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["catalogueNew"]) {
         uploadedFiles["catalogueNew"] = await uploadMultipleFiles(
-          req?.files?.["catalogueNew"] || []
+          // req?.files?.["catalogueNew"] || []
+          (req?.files?.["catalogueNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["specificationSheetNew"]) {
         uploadedFiles["specificationSheetNew"] = await uploadMultipleFiles(
-          req?.files?.["specificationSheetNew"] || []
+          // req?.files?.["specificationSheetNew"] || []
+          (req?.files?.["specificationSheetNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
       if (req?.files?.["purchaseInvoiceFileNew"]) {
         uploadedFiles["purchaseInvoiceFileNew"] = await uploadMultipleFiles(
-          req?.files?.["purchaseInvoiceFileNew"] || []
+          // req?.files?.["purchaseInvoiceFileNew"] || []
+          (req?.files?.["purchaseInvoiceFileNew"] || [])?.map((file) => ({
+            ...file,
+            path: file.path,
+            filename: file.filename,
+            contentType: file.mimetype,
+          }))
         );
       }
 
