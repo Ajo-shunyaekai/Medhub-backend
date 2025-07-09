@@ -22,11 +22,10 @@ const https = require("https");
 const http = require("http");
 const { URL } = require("url");
 
-//proxy
+//s3 proxy
 app.get("/pdf-proxy/*", async (req, res) => {
-  const filename = decodeURIComponent(req.params[0]); // Get full path after /pdf-proxy/
+  const filename = decodeURIComponent(req.params[0]); 
 
-  // const s3Url = `https://medhubglobal.s3.ap-south-1.amazonaws.com/testing/${filename}`;
   const s3Url = `${process.env.S3_TESTING_URL}/${filename}`;
   const parsedUrl = new URL(s3Url);
 

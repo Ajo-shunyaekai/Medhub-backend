@@ -742,15 +742,6 @@ const categoriesData = [
         fieldValue: undefined,
       },
       {
-        name: "strength",
-        label: "Strength",
-        placeholder: "Enter Strength",
-        type: "text",
-        maxLimit: 20,
-        allowedType: "all",
-        fieldValue: undefined,
-      },
-      {
         name: "composition",
         label: "Composition/Ingredients",
         placeholder: "Enter Composition/Ingredients",
@@ -812,7 +803,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: otcOptions,
+        optionsDD: otcOptions,
       },
       {
         name: "expiry",
@@ -1249,15 +1240,6 @@ const categoriesData = [
         fieldValue: undefined,
       },
       {
-        name: "strength",
-        label: "Strength",
-        placeholder: "Enter Strength",
-        type: "text",
-        maxLimit: 20,
-        allowedType: "all",
-        fieldValue: undefined,
-      },
-      {
         name: "composition",
         label: "Composition/Ingredients",
         placeholder: "Enter Composition/Ingredients",
@@ -1319,7 +1301,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: otcOptions,
+        optionsDD: otcOptions,
       },
       {
         name: "expiry",
@@ -1356,7 +1338,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: yNOptions,
+        optionsDD: yNOptions,
       },
       {
         name: "dermatologistTestedFile",
@@ -1375,7 +1357,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: yNOptions,
+        optionsDD: yNOptions,
       },
       {
         name: "pediatricianRecommendedFile",
@@ -1536,15 +1518,6 @@ const categoriesData = [
         fieldValue: undefined,
       },
       {
-        name: "strength",
-        label: "Strength",
-        placeholder: "Enter Strength",
-        type: "text",
-        maxLimit: 20,
-        allowedType: "all",
-        fieldValue: undefined,
-      },
-      {
         name: "composition",
         label: "Composition/Ingredients",
         placeholder: "Enter Composition/Ingredients",
@@ -1606,7 +1579,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: otcOptions,
+        optionsDD: otcOptions,
       },
       {
         name: "expiry",
@@ -2632,15 +2605,6 @@ const categoriesData = [
         fieldValue: undefined,
       },
       {
-        name: "strength",
-        label: "Strength",
-        placeholder: "Enter Strength",
-        type: "text",
-        maxLimit: 20,
-        allowedType: "all",
-        fieldValue: undefined,
-      },
-      {
         name: "moistureResistance",
         label: "Moisture Resistance",
         placeholder: "Select Moisture Resistance",
@@ -2648,7 +2612,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: yNOptions,
+        optionsDD: yNOptions,
       },
     ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
@@ -2870,7 +2834,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: frameOptions,
+        optionsDD: frameOptions,
       },
       {
         name: "lens",
@@ -2880,7 +2844,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: lensOptions,
+        optionsDD: lensOptions,
       },
       {
         name: "lensMaterial",
@@ -2890,7 +2854,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: lensMaterialOptions,
+        optionsDD: lensMaterialOptions,
       },
       {
         name: "colorOptions",
@@ -3393,7 +3357,7 @@ const categoriesData = [
         maxLimit: undefined,
         allowedType: "all",
         fieldValue: undefined,
-        options: yNOptions,
+        optionsDD: yNOptions,
       },
     ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
   },
@@ -3482,7 +3446,7 @@ const categoriesData = [
       },
       {
         name: "interoperabilityFile",
-        label: "Iinteroperability File",
+        label: "Interoperability File",
         placeholder: "",
         type: "file",
         maxLimit: undefined,
