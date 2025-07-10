@@ -24,10 +24,12 @@ const {
   deleteProduct,
   bulkUpload,
   bulkUpload2,
+  bulkUpload3,
   productSuppliers,
   otherProducts,
   previewBulkUpload,
   previewBulkUpload2,
+  previewBulkUpload3,
   csvDownload,
   csvDownload2,
   uploadCsvSheet,
@@ -59,7 +61,8 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   // bulkUpload
-  bulkUpload2
+  // bulkUpload2
+  bulkUpload3
 );
 
 router.post(
@@ -76,7 +79,8 @@ router.post(
   authenticationNAuthorization,
   CSVupload.single("csvfile"),
   // previewBulkUpload
-  previewBulkUpload2
+  // previewBulkUpload2
+  previewBulkUpload3
 );
 
 router.post(

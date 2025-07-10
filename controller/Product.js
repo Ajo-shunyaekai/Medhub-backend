@@ -19,6 +19,7 @@ const { parse } = require("json2csv");
 const {
   getFieldName,
   getFieldName2,
+  getFieldName3,
   validateFields,
   handleProductCategorySwitch,
   handleProductCategorySwitch2,
@@ -3339,6 +3340,170 @@ module.exports = {
     }
   },
 
+  previewBulkUpload3: async (req, res) => {
+    try {
+      const { supplier_id } = req?.body;
+      const filePath = req.file.path;
+
+      // Utility function to parse CSV
+      const parseCSV = (filePath) => {
+        return new Promise((resolve, reject) => {
+          const results = [];
+          fs.createReadStream(filePath)
+            .pipe(csv())
+            .on("data", (data) => results.push(data))
+            .on("end", () => resolve(results))
+            .on("error", (err) => reject(err));
+        });
+      };
+
+      // Parse the CSV file
+      const results = await parseCSV(filePath);
+
+      // Check if the product exists
+      const existingSupplier = await Supplier.findById(supplier_id);
+      if (!existingSupplier) {
+        return sendErrorResponse(res, 404, "Supplier not found.");
+      }
+
+      const updatedResult = results?.map((result) => {
+        let updatedObject = {
+          // _id: productId ? productId : undefined, // Add _id if Product Id* exists
+          model: result?.["Part/Model Number*"]?.toString()?.trim() || "",
+          name: result?.["Product Name*"]?.toString()?.trim() || "",
+          category: result?.["Product Category*"]?.toString()?.trim() || "",
+          subCategory:
+            result?.["Product Sub Category*"]?.toString()?.trim() || "",
+          anotherCategory:
+            result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || "",
+          minimumPurchaseUnit: result?.["Minimum Order Quantity*"]?.toString()?.trim() || "",
+          strength: result?.["Strength"]?.toString()?.trim() || "",
+          strengthUnit: result?.["Strength Unit"]?.toString()?.trim() || "",
+          upc:
+            result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
+          
+          brand: result?.["Brand Name"]?.toString()?.trim() || "",
+          form: result?.["Product Type/Form"]?.toString()?.trim() || "",
+          unit_tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
+          storage: result?.["Storage Conditions"]?.toString()?.trim() || "",
+          tags: result?.["Tags*"]?.toString()?.trim() || "",
+          description:
+          result?.["Product Description*"]?.toString()?.trim() || "",
+          manufacturer: result?.["Manufacturer Name*"]?.toString()?.trim() || "",
+          countryOfOrigin:
+            result?.["Manufacturer Country of Origin*"]?.toString()?.trim() ||
+            "",
+          aboutManufacturer:
+            result?.["About Manufacturer*"]?.toString()?.trim() || "",
+          country:
+            result?.["Stocked In Country*"]?.toString()?.trim() || "",
+          quantity:
+            result?.["Stocked In Quantity*"]?.toString()?.trim() || "",
+          type:
+            result?.["Stocked In Type*"]?.toString()?.trim() || "",
+          quantityFrom:
+            result?.["Quantity From*"]?.toString()?.trim() || "",
+          quantityTo:
+            result?.["Quantity To*"]?.toString()?.trim() || "",
+          price:
+            result?.["Unit Price*"]?.toString()?.trim() || "",
+          deliveryTime:
+            result?.["Est. Shipping Time*"]?.toString()?.trim() || "",
+          image:
+            result?.["Product Image"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+        };
+
+        // Call the helper function to handle category-specific updates
+        updatedObject = {
+          ...updatedObject,
+          // ...handleProductCategorySwitch2(result),
+        };
+
+        return updatedObject;
+      });
+
+      const previewResponse = updatedResult
+        ?.map((elem, index) => {
+          const elemCat = elem?.category;
+
+          // Loop through each key in the object
+          for (const key in elem) {
+            if (elem.hasOwnProperty(key)) {
+              const fieldName = getFieldName3(
+                key,
+                additionalCheckFieldName(elemCat, key)
+              );
+
+              elem[key] = {
+                value: elem[key],
+                fieldName: fieldName,
+                error:
+                  validateFields(
+                    fieldName?.includes("*"),
+                    elem[key],
+                    fieldName,
+                    typeof elem[key]
+                  ) || undefined,
+              };
+            }
+          }
+          return elem;
+        })
+        ?.map((ele) => {
+          return {
+            ...ele,
+            anotherCategory: {
+              ...ele?.anotherCategory,
+              error: ele?.anotherCategory?.value
+                ? validateAnotherCategory(
+                    ele?.category?.value,
+                    ele?.subCategory?.value,
+                    ele?.anotherCategory?.value
+                  ) === true
+                  ? true
+                  : undefined
+                : undefined,
+            },
+          };
+        });
+
+      const previewHeadings = Object?.values(previewResponse?.[0])?.map(
+        (field) => field?.fieldName
+      );
+
+      const entriesWithErrors = previewResponse?.filter((item) =>
+        Object.values(item).some((field) => field.error)
+      );
+
+      // Filter out elements without errors
+      const entriesWithoutErrors = previewResponse?.filter(
+        (item) => !Object.values(item).some((field) => field.error)
+      );
+
+      // Remove the CSV file after processing
+      fs.unlinkSync(filePath);
+
+      return sendSuccessResponse(
+        res,
+        200,
+        `${entriesWithoutErrors?.length} ${
+          entriesWithoutErrors?.length == 1 ? "product" : "products"
+        } imported successfully.`,
+        {
+          headings: previewHeadings || [],
+          entriesWithErrors: entriesWithErrors || [],
+          entriesWithErrorsCount: entriesWithErrors?.length || 0,
+          entriesWithoutErrors: entriesWithoutErrors || [],
+          entriesWithoutErrorsCount: entriesWithoutErrors?.length || 0,
+        }
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
   bulkUpload: async (req, res) => {
     try {
       const { products } = req?.body;
@@ -3541,6 +3706,129 @@ module.exports = {
     }
   },
 
+  bulkUpload3: async (req, res) => {
+    try {
+      const { products } = req?.body;
+      // Extract the value of each key
+      const inventoryArray = [];
+      const extractedValues = products?.map((item) => {
+        const inventoryUUId = uuidv4();
+        const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
+        const extracted = {};
+
+        const inventoryObj = {
+          uuid: inventoryUUId,
+          productId: product_id,
+          sku: item?.sku?.value,
+          stock: item?.stock?.value,
+          countries: item?.countries?.value,
+          date: item?.date?.value,
+          stockedInDetails: [
+            {
+              country: item?.country?.value,
+              quantity: item?.quantity?.value,
+              type: item?.type?.value,
+            },
+          ],
+          inventoryList: [
+            {
+              quantityFrom: item?.quantityFrom?.value,
+              quantityTo: item?.quantityTo?.value,
+              price: item?.price?.value,
+              deliveryTime: item?.deliveryTime?.value,
+            },
+          ],
+          isDeleted: false,
+        };
+        inventoryArray?.push(inventoryObj);
+        // const category_name = item?.category?.value;
+        for (const [key, field] of Object.entries(item)) {
+          if (key == "category") {
+            extracted[key] = getCategoryName(field?.value);
+          } else {
+            extracted[key] = field.value; // Extract the value
+          }
+        }
+        delete extracted?._id;
+
+        //extract images
+        const image = {
+          front: [],
+          back: [],
+          side: [],
+          closeup: [],
+        };
+      
+        if (Array.isArray(item?.image?.value)) {
+          const files = item.image.value;
+          if (files[0]) image.front.push(files[0]);
+          if (files[1]) image.back.push(files[1]);
+          if (files[2]) image.side.push(files[2]);
+          if (files[3]) image.closeup.push(files[3]);
+        }
+
+        return {
+          ...extracted,
+          // general: extracted,
+          general: {
+            ...extracted,
+            image,
+          },
+          complianceFile: [extracted?.file?.[0] || ""],
+          cNCFileNDate: [
+            {
+              file: extracted?.file?.[0] || "",
+              date: extracted?.date3 || "",
+            },
+          ]
+            ?.filter(
+              (ele) =>
+                ele?.file != "" ||
+                ele?.file != undefined ||
+                ele?.file != null ||
+                ele?.date != "" ||
+                ele?.date != undefined ||
+                ele?.date != null
+            )
+            ?.filter((ele) => ele?.file || ele?.date),
+          additional: extracted,
+          market: "new",
+          isDeleted: false,
+          bulkUpload: true,
+          healthNSafety: extracted,
+          inventory: inventoryUUId,
+          product_id,
+          [extracted?.category]: { ...extracted },
+        };
+      });
+
+      // Insert multiple records into MongoDB
+      const entries = await Product.insertMany(extractedValues);
+
+      if (!entries || entries?.length == 0) {
+        return sendErrorResponse(res, 400, "Failed to add bulk products.");
+      }
+
+      if (inventoryArray?.length > 0) {
+        const inventories = await Inventory.insertMany(inventoryArray);
+
+        if (!inventories || inventories?.length == 0) {
+          return sendErrorResponse(res, 400, "Failed to add bulk inventories.");
+        }
+      }
+      return sendSuccessResponse(
+        res,
+        200,
+        ` ${entries.length} ${
+          entries?.length == 1 ? "product" : "products"
+        } have been uploaded successfully.`,
+        entries
+      );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
   csvDownload: async (req, res) => {
     try {
       const { products } = req?.body;
@@ -3622,6 +3910,57 @@ module.exports = {
 
           extracted[
             getFieldName2(key, additionalCheckFieldName(elemCat, key))
+          ] = String(value); // Assign the mapped field name and the value
+        }
+
+        return extracted;
+      });
+
+      // Convert the flattened data to CSV
+      const csv = parse(extractedValues);
+
+      // Set headers for file download
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=product.csv");
+
+      // Send the CSV file as a response
+      res.status(200).send(csv);
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  csvDownload3: async (req, res) => {
+    try {
+      const { products } = req?.body;
+
+      // Extract the value of each key and dynamically set the field names
+      const extractedValues = products?.map((item) => {
+        const elemCat = item?.category;
+        const extracted = {};
+
+        for (const [key, field] of Object.entries(item)) {
+          let value = field.value; // Get the field value
+
+          // If the value is an array, join it as a string
+          if (Array.isArray(value)) {
+            value = value.join(", ");
+          }
+
+          // If the value is a number and it's 0, replace it with an empty string
+          if (
+            !isNaN(Number(value)) &&
+            typeof value === "number" &&
+            value === 0
+          ) {
+            value = "";
+          }
+
+          // Remove the "_id" field if present
+          if (key === "_id") continue;
+
+          extracted[
+            getFieldName3(key, additionalCheckFieldName(elemCat, key))
           ] = String(value); // Assign the mapped field name and the value
         }
 
