@@ -282,6 +282,9 @@ const productSchema = new Schema(
           "OT Tables",
           "Endoscopy",
           "Ultrasonic Devices",
+          "Nerve Stimulator",
+          "Air Treatment",
+          "Waste Management"
         ],
         validate: {
           validator: function (v) {
