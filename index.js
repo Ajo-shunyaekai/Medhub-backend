@@ -56,6 +56,7 @@ module.exports = function (app) {
   app.use("/api/purchaseorder", require("./routes/purchaseOrderRoutes")());
   app.use("/api/invoice", require("./routes/invoiceRoutes")());
   app.use("/api/support", require("./routes/supportRoutes")());
+  app.use("/api/bid", require("./routes/bidRoutes"));
 
   // Catch-all for other routes
   app.get(["/*"], (req, res) => {
