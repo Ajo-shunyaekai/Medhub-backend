@@ -2575,6 +2575,10 @@ const getFieldName3 = (key, additionalCheck) => {
       fieldName = "Storage Conditions";
       break;
 
+    case "buyersPreferredFrom":
+      fieldName = "Buyers Preferred From*";
+      break;
+    
     case "tags":
       fieldName = "Tags*";
       break;

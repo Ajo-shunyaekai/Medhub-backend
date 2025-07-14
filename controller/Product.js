@@ -3388,6 +3388,17 @@ module.exports = {
           form: result?.["Product Type/Form"]?.toString()?.trim() || "",
           unit_tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
           storage: result?.["Storage Conditions"]?.toString()?.trim() || "",
+          // buyersPreferredFrom: result?.["Buyer Preferred From*"]?.toString()?.trim() || "",
+          // buyersPreferredFrom: result?.["Buyers Preferred From*"]
+          // ?.split(", ")
+          // ?.map((c) => c?.trim())
+          // ?.filter(Boolean) || [],
+          buyersPreferredFrom:
+            result?.["Buyers Preferred From*"]
+              ?.split(",")
+              ?.map((ele) => ele?.toString()?.trim())
+              ?.filter((ele) => ele != "" || ele != undefined || ele != null)
+              ?.filter((ele) => ele) || [],
           tags: result?.["Tags*"]?.toString()?.trim() || "",
           description:
           result?.["Product Description*"]?.toString()?.trim() || "",
@@ -3438,17 +3449,37 @@ module.exports = {
                 additionalCheckFieldName(elemCat, key)
               );
 
+              // elem[key] = {
+              //   value: elem[key],
+              //   fieldName: fieldName,
+              //   error:
+              //     validateFields(
+              //       fieldName?.includes("*"),
+              //       elem[key],
+              //       fieldName,
+              //       typeof elem[key]
+              //     ) || undefined,
+              // };
+
+              let rawValue = elem[key];
+
+              // If value is an array (like buyersPreferredFrom), convert to comma-separated string
+              if (Array.isArray(rawValue)) {
+                rawValue = rawValue.join(", ");
+              }
+
               elem[key] = {
-                value: elem[key],
+                value: rawValue,
                 fieldName: fieldName,
                 error:
                   validateFields(
                     fieldName?.includes("*"),
-                    elem[key],
+                    rawValue,
                     fieldName,
-                    typeof elem[key]
+                    typeof rawValue
                   ) || undefined,
               };
+
             }
           }
           return elem;
@@ -3470,7 +3501,6 @@ module.exports = {
             },
           };
         });
-
       const previewHeadings = Object?.values(previewResponse?.[0])?.map(
         (field) => field?.fieldName
       );
@@ -3747,6 +3777,12 @@ module.exports = {
         for (const [key, field] of Object.entries(item)) {
           if (key == "category") {
             extracted[key] = getCategoryName(field?.value);
+          } else if (key === "buyersPreferredFrom") {
+            extracted[key] = Array.isArray(field?.value)
+              ? field.value
+              : typeof field?.value === "string"
+              ? field.value.split(",").map((c) => c.trim()).filter(Boolean)
+              : [];
           } else {
             extracted[key] = field.value; // Extract the value
           }
