@@ -946,7 +946,7 @@ module.exports = {
       return sendSuccessResponse(
         res,
         200,
-        "Product Added Succesfully",
+        "Product Added Successfully",
         newProduct
       );
     } catch (error) {
@@ -1173,7 +1173,7 @@ module.exports = {
       return sendSuccessResponse(
         res,
         200,
-        "Product Added Succesfully",
+        "Product Added Successfully",
         newProduct
       );
     } catch (error) {
@@ -1487,7 +1487,7 @@ module.exports = {
       return sendSuccessResponse(
         res,
         200,
-        "Product Added Succesfully",
+        "Product Added Successfully",
         newProduct
       );
     } catch (error) {
