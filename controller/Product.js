@@ -3753,7 +3753,6 @@ module.exports = {
       // Extract the value of each key
       const inventoryArray = [];
       const extractedValues = products?.map((item) => {
-        console.log('item',item)
         // return false
         const inventoryUUId = uuidv4();
         const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
