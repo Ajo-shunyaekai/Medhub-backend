@@ -2627,9 +2627,22 @@ const getFieldName3 = (key, additionalCheck) => {
       fieldName = "Est. Shipping Time*";
       break;
 
-    case "image":
-      fieldName = "Product Image";
-      break;
+    // case "image":
+    //   fieldName = "Product Image";
+    //   break;
+
+  case "frontImage":
+    fieldName = "Product Front Image";
+    break;
+  case "sideImage":
+    fieldName = "Product Side Image";
+    break;
+  case "backImage":
+    fieldName = "Product Back Image";
+    break;
+  case "closeupImage":
+    fieldName = "Product Close up Image";
+    break;
 
     default:
       break;

@@ -3422,10 +3422,19 @@ module.exports = {
             result?.["Unit Price*"]?.toString()?.trim() || "",
           deliveryTime:
             result?.["Est. Shipping Time*"]?.toString()?.trim() || "",
-          image:
-            result?.["Product Image"]
-              ?.split(",")
-              ?.map((ele) => ele?.toString()?.trim()) || [], // array
+          // image:
+          //   result?.["Product Image"]
+          //     ?.split(",")
+          //     ?.map((ele) => ele?.toString()?.trim()) || [], // array
+
+          frontImage:
+            result?.["Product Front Image"]?.toString()?.trim() || "",
+            sideImage:
+            result?.["Product Side Image"]?.toString()?.trim() || "",
+            backImage:
+            result?.["Product Back Image"]?.toString()?.trim() || "",
+            closeupImage:
+            result?.["Product Close up Image"]?.toString()?.trim() || "",
         };
 
         // Call the helper function to handle category-specific updates
@@ -3744,6 +3753,8 @@ module.exports = {
       // Extract the value of each key
       const inventoryArray = [];
       const extractedValues = products?.map((item) => {
+        console.log('item',item)
+        // return false
         const inventoryUUId = uuidv4();
         const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
         const extracted = {};
@@ -3790,20 +3801,28 @@ module.exports = {
         delete extracted?._id;
 
         //extract images
-        const image = {
-          front: [],
-          back: [],
-          side: [],
-          closeup: [],
-        };
+        // const image = {
+        //   front: [],
+        //   back: [],
+        //   side: [],
+        //   closeup: [],
+        // };
       
-        if (Array.isArray(item?.image?.value)) {
-          const files = item.image.value;
-          if (files[0]) image.front.push(files[0]);
-          if (files[1]) image.back.push(files[1]);
-          if (files[2]) image.side.push(files[2]);
-          if (files[3]) image.closeup.push(files[3]);
-        }
+        // if (Array.isArray(item?.image?.value)) {
+        //   const files = item.image.value;
+        //   if (files[0]) image.front.push(files[0]);
+        //   if (files[1]) image.back.push(files[1]);
+        //   if (files[2]) image.side.push(files[2]);
+        //   if (files[3]) image.closeup.push(files[3]);
+        // }
+
+        const image = {
+          front: item?.frontImage?.value ? [item.frontImage.value] : [],
+          back: item?.backImage?.value ? [item.backImage.value] : [],
+          side: item?.sideImage?.value ? [item.sideImage.value] : [],
+          closeup: item?.closeupImage?.value ? [item.closeupImage.value] : [],
+        };
+        
 
         return {
           ...extracted,
