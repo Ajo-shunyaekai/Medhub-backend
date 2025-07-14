@@ -6,23 +6,44 @@ const bidSchema = new Schema(
     general: {
       startDate: {
         type: String,
+        trim: true,
         required: [true, "Validation Error: Bid Start Date is required."],
       },
       endDate: {
         type: String,
+        trim: true,
         required: [true, "Validation Error: Bid End Date is required."],
       },
       description: {
         type: String,
+        trim: true,
         required: [true, "Validation Error: Bid Description is required."],
       },
-      documents: [
+      bidDocs: [
         {
           type: String,
-          required: [
-            true,
-            "Validation Error: Requirement Documents is required.",
-          ],
+          trim: true,
+          required: [true, "Validation Error: bidDocs is required."],
+        },
+      ],
+      documents: [
+        {
+          name: {
+            type: String,
+            trim: true,
+            required: [
+              true,
+              "Validation Error: Requirement Document Name is required.",
+            ],
+          },
+          document: {
+            type: String,
+            trim: true,
+            required: [
+              true,
+              "Validation Error: Requirement Document is required.",
+            ],
+          },
         },
       ],
     },
@@ -30,41 +51,51 @@ const bidSchema = new Schema(
       {
         type: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: Bid Type is required."],
         },
         category: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: Category is required."],
         },
         subCategory: {
           type: String,
+          trim: true,
         },
         name: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: Name is required."],
         },
         description: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: Description is required."],
         },
         upc: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: UPC is required."],
         },
         brand: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: Brand Name is required."],
         },
         quantity: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: Quantity Required is required."],
         },
         targetPrice: {
           type: String,
+          trim: true,
           required: [true, "Validation Error: Target Price is required."],
         },
         country: {
           type: String,
+          trim: true,
           required: [
             true,
             "Validation Error: Country of Destination is required.",
@@ -72,6 +103,7 @@ const bidSchema = new Schema(
         },
         state: {
           type: String,
+          trim: true,
           required: [
             true,
             "Validation Error: State of Destination is required.",
@@ -79,17 +111,20 @@ const bidSchema = new Schema(
         },
         openFor: {
           type: String,
-          enum: ["Manufacturer", "Distriutor", "Service Providor", "All"],
+          trim: true,
+          enum: ["Manufacturer", "Distributor", "Service Providor"],
           required: [true, "Validation Error: Open for is required."],
         },
         fromCountries: [
           {
             type: String,
+            trim: true,
             required: [true, "Validation Error: From Countries is required."],
           },
         ],
         delivery: {
           type: String,
+          trim: true,
           required: [
             true,
             "Validation Error: Expected Delivery duration is required.",
@@ -99,16 +134,29 @@ const bidSchema = new Schema(
     ],
     status: {
       type: String,
-      enum: ["active", "completed", "cancelled"],
-      default: "active",
+      trim: true,
+      enum: ["Active", "Completed", "Cancelled"],
+      default: "Active",
     },
     userId: {
       type: String,
-      required: [true, "Validation Error: User Idis required."],
-      default: "active",
+      trim: true,
+      required: [true, "Validation Error: User Id is required."],
+      immutable: true,
+    },
+    totalBids: {
+      type: Number,
+      Default: 0,
+    },
+    userType: {
+      type: String,
+      trim: true,
+      required: [true, "Validation Error: User Type is required."],
+      immutable: true,
     },
     bid_id: {
       type: String,
+      trim: true,
       required: [true, "Validation Error: Bid Id is required."],
       immutable: true,
     },
