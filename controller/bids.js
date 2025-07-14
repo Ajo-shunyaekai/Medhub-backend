@@ -1,6 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const moment = require("moment");
+const { default: mongoose } = require("mongoose");
 const Admin = require("../schema/adminSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
@@ -89,7 +90,7 @@ const getAllBids = async (req, res) => {
     const bids = await Bid.aggregate(pipeline);   
   
     return sendSuccessResponse(res, 200, "Success Fetching Bids", {
-      products: bids,
+      bids: bids,
       totalItems: totalBids,
       currentPage: pageNo,
       itemsPerPage: pageSize,
