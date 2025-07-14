@@ -107,6 +107,11 @@ const bidSchema = new Schema(
       required: [true, "Validation Error: User Idis required."],
       default: "active",
     },
+    bid_id: {
+      type: String,
+      required: [true, "Validation Error: Bid Id is required."],
+      immutable: true,
+    },
     other: {},
   },
   { timestamps: true }
