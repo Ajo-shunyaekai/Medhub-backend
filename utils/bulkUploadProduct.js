@@ -2520,6 +2520,120 @@ const getFieldName2 = (key, additionalCheck) => {
   return fieldName;
 };
 
+const getFieldName3 = (key, additionalCheck) => {
+  let fieldName;
+  switch (key) {
+    case "model":
+      fieldName = "Part/Model Number*";
+      break;
+
+    case "name":
+      fieldName = "Product Name*";
+      break;
+
+    case "category":
+      fieldName = "Product Category*";
+      break;
+
+    case "subCategory":
+      fieldName = "Product Sub Category*";
+      break;
+
+    case "anotherCategory":
+      fieldName = "Product Sub Category (Level 3)";
+      break;
+
+    case "minimumPurchaseUnit":
+      fieldName = "Minimum Order Quantity*";
+      break;
+    
+    case "strength":
+      fieldName = "Strength";
+      break;
+    
+    case "strengthUnit":
+    fieldName = "Strength Unit";
+    break;
+
+    case "form":
+      fieldName = "Product Type/Form";
+      break;
+
+    case "upc":
+      fieldName = "UPC (Universal Product Code)";
+      break;
+
+    case "brand":
+      fieldName = "Brand Name";
+      break;
+
+    case "unit_tax":
+      fieldName = "Product Tax%*";
+      break;
+
+    case "storage":
+      fieldName = "Storage Conditions";
+      break;
+
+    case "tags":
+      fieldName = "Tags*";
+      break;
+
+    case "description":
+      fieldName = "Product Description*";
+      break;
+
+    case "manufacturer":
+      fieldName = "Manufacturer Name*";
+      break;
+
+    case "countryOfOrigin":
+      fieldName = "Manufacturer Country of Origin*";
+      break;
+
+    case "aboutManufacturer":
+      fieldName = "About Manufacturer*";
+      break;
+
+    case "country":
+      fieldName = "Stocked In Country*";
+      break;
+
+    case "quantity":
+      fieldName = "Stocked In Quantity*";
+      break;
+    
+    case "type":
+      fieldName = "Stocked In Type*";
+      break;
+
+    case "quantityFrom":
+      fieldName = "Quantity From*";
+      break;
+
+    case "quantityTo":
+      fieldName = "Quantity To*";
+      break;
+
+    case "price":
+      fieldName = "Unit Price*";
+      break;
+
+    case "deliveryTime":
+      fieldName = "Est. Shipping Time*";
+      break;
+
+    case "image":
+      fieldName = "Product Image";
+      break;
+
+    default:
+      break;
+    
+  }
+  return fieldName;
+};
+
 const validateFields = (checkValidation, value, fieldName, type) => {
   try {
     let errMsg;
@@ -2780,6 +2894,7 @@ module.exports = {
   handleProductCategorySwitch2,
   getFieldName,
   getFieldName2,
+  getFieldName3,
   validateFields,
   getCategoryName,
   getCategoryNameForHeading,

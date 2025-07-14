@@ -34,11 +34,25 @@ const inventorrySchema = new Schema(
     ],
     inventoryList: [
       {
-        quantity: {
+        // quantity: {
+        //   type: String,
+        //   required: [
+        //     true,
+        //     "Validation Error: inventory list quantity is required",
+        //   ],
+        // },
+        quantityFrom: {
           type: String,
           required: [
             true,
-            "Validation Error: inventory list quantity is required",
+            "Validation Error: inventoryList quantity from is required",
+          ],
+        },
+        quantityTo: {
+          type: String,
+          required: [
+            true,
+            "Validation Error: inventoryList quantity to is required",
           ],
         },
         price: {

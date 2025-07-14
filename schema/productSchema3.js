@@ -75,6 +75,13 @@ const productSchema = new Schema(
         trim: true,
       },
       tags: [{ type: String, trim: true }],
+      buyersPreferredFrom: [
+        { 
+          type: String, 
+          trim: true,
+          required: [true, "Validation Error: Buyers Preferred From is required."],
+        }
+      ],
     },
     documents: {
       catalogue: [{ type: String, trim: true }],
