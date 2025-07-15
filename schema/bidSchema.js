@@ -135,8 +135,8 @@ const bidSchema = new Schema(
     status: {
       type: String,
       trim: true,
-      enum: ["Active", "Completed", "Cancelled"],
-      default: "Active",
+      enum: ["active", "completed", "cancelled"],
+      default: "active",
     },
     userId: {
       type: String,
