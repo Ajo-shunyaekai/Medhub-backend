@@ -29,7 +29,7 @@ async function getFilePathsAdd(req, res, fields = []) {
   
     return filePaths;
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
 }
 

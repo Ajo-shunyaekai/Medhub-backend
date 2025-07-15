@@ -12,16 +12,11 @@ const {
   sendSuccessResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
-
+const { getFilePathsAdd } = require("../helper");
 
 const getAllBids = async (req, res) => {
   try {
-    const {
-      userId, 
-      status,
-      page_no = 1,
-      page_size = 5,
-    } = req.query;
+    const { userId, status, page_no = 1, page_size = 5 } = req.query;
 
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
@@ -78,17 +73,14 @@ const getAllBids = async (req, res) => {
       { $limit: pageSize },
     ];
 
-    const countPipeline = [
-      { $match: matchStage },
-      { $count: "total" },
-    ];
+    const countPipeline = [{ $match: matchStage }, { $count: "total" }];
 
     const countResult = await Bid.aggregate(countPipeline);
     const totalBids = countResult[0]?.total || 0;
     const totalPages = Math.ceil(totalBids / pageSize);
 
-    const bids = await Bid.aggregate(pipeline);   
-  
+    const bids = await Bid.aggregate(pipeline);
+
     return sendSuccessResponse(res, 200, "Success Fetching Bids", {
       bids: bids,
       totalItems: totalBids,
@@ -100,7 +92,6 @@ const getAllBids = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
 
 const getBidDetails = async (req, res) => {
   try {
@@ -148,16 +139,20 @@ const getBidDetails = async (req, res) => {
       return sendErrorResponse(res, 404, "Bid not found.");
     }
 
-    return sendSuccessResponse(res, 200, "Bid details fetched successfully.", bidDetails[0]);
-
+    return sendSuccessResponse(
+      res,
+      200,
+      "Bid details fetched successfully.",
+      bidDetails[0]
+    );
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
 
-
 const addBid = async (req, res) => {
   try {
+    let usertype;
     const schemaNameRef =
       usertype === "Buyer"
         ? Buyer
@@ -168,22 +163,85 @@ const addBid = async (req, res) => {
         : usertype === "Logistics"
         ? LogisticsPartner
         : null;
-    const user = await schemaNameRef?.findById(userId);
+    const user = await schemaNameRef?.findById(req?.body?.userId);
 
     const bid_id = "BID-" + Math.random().toString(16).slice(2, 10);
 
-    const documents = await getFilePathsAdd(req, res, ["documents"]);
+    // const documents = await getFilePathsAdd(req, res, ["documents"]);
+    const bidDocs = await getFilePathsAdd(req, res, ["bidDocs"]);
+
+    let documentsParsed = [];
+
+    if (typeof req?.body?.documents == "string") {
+      try {
+        // documentsParsed = JSON.parse(req.body.documents)?.filter(
+        //   (value) => value != "[object Object]"
+        // );
+        if (Array.isArray(req?.body?.documents)) {
+          documentsParsed = req.body.documents.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else if (typeof req?.body?.documents === "string") {
+          // If it's a string, try to parse it as JSON and filter
+          documentsParsed = JSON.parse(req.body?.documents)?.filter(
+            (value) => value !== "[object Object]"
+          );
+        } else {
+          // Handle case where documents is neither an array nor a string
+          throw new Error("Invalid documents format.");
+        }
+      } catch (error) {
+        handleCatchBlockError(req, res, error);
+      }
+    } else {
+      documentsParsed = JSON.parse(
+        req.body?.documents?.filter((value) => value != "[object Object]")
+      );
+    }
+
     const newBidDetails = {
       ...req?.body,
       bid_id,
       general: {
         ...req.body,
 
-        documents: documents.documents || [],
+        // documents: documents.documents || [],
+        bidDocs: bidDocs.bidDocs || [],
+        documents: documentsParsed
+          ?.map((ele, index) => {
+            return {
+              document:
+                typeof ele?.document !== "string"
+                  ? bidDocs?.bidDocs?.find((filename) => {
+                      const path = ele?.document?.path;
+
+                      // Ensure path is defined and log the file path
+                      if (!path) {
+                        return false; // If there's no path, skip this entry
+                      }
+
+                      const ext = path.split(".").pop(); // Get the file extension
+
+                      const sanitizedPath = path
+                        .replaceAll("./", "")
+                        .replaceAll(" ", "")
+                        .replaceAll(`.${ext}`, "");
+
+                      // Match file by sanitized name
+                      return filename?.includes(sanitizedPath);
+                    })
+                  : ele?.document || bidDocs?.bidDocs?.[index] || "",
+
+              name: ele?.name || "", // Log the name being used (if any)
+            };
+          })
+          ?.filter((ele) => ele?.document || ele?.name),
       },
-      other: {
-        ...req?.body,
-      },
+      additionalDetails: JSON.parse(
+        req?.body?.additionalDetails?.filter(
+          (value) => value != "[object Object]"
+        )
+      ),
     };
 
     const newBid = await Bid.create(newBidDetails);
