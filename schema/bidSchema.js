@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
-
+ 
 const bidSchema = new Schema(
   {
     general: {
@@ -8,6 +8,11 @@ const bidSchema = new Schema(
         type: String,
         trim: true,
         required: [true, "Validation Error: Bid Start Date is required."],
+      },
+      time: {
+        type: String,
+        trim: true,
+        required: [true, "Validation Error: Bid Start Time is required."],
       },
       endDate: {
         type: String,
@@ -164,6 +169,6 @@ const bidSchema = new Schema(
   },
   { timestamps: true }
 );
-
+ 
 // Exporting the models correctly
 module.exports = model("Bid", bidSchema);
