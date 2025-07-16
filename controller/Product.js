@@ -267,7 +267,7 @@ module.exports = {
       //   });
       // }
 
-      pipeline.push({ $sort: { createdAt: -1 } });
+      pipeline.push({ $sort: { createdAt: -1, _id: -1 } });
 
       // Clone pipeline for total count calculation
       const countPipeline = [...pipeline];
@@ -653,6 +653,7 @@ module.exports = {
         $sort: {
           searchPriority: 1,
           createdAt: -1,
+          _id: -1
         },
       });
 
