@@ -8,6 +8,7 @@ const {
   sendSuccessResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
+const Buyer = require("../schema/buyerSchema");
 const Supplier = require("../schema/supplierSchema");
 const Inventory = require("../schema/inventorySchema3");
 const Product = require("../schema/productSchema3");
@@ -295,6 +296,7 @@ module.exports = {
   getAllProducts2: async (req, res) => {
     try {
       const {
+        buyer_id,
         supplier_id,
         market,
         page_no = 1,
@@ -303,6 +305,7 @@ module.exports = {
         category = "",
         subCategory = "",
         level3Category = "",
+        showDuplicate = "true"
       } = req?.query;
 
       const {
@@ -352,6 +355,12 @@ module.exports = {
             .trim()
             .replace(/\s+/g, " "); // Clean up extra spaces
         }
+      }
+
+       let buyerCountries = [];
+      if (buyer_id) {
+        const buyer = await Buyer.findOne({ buyer_id: buyer_id }, { country_of_operation: 1 }).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation) ? buyer.country_of_operation : [];
       }
 
       let pipeline = [];
@@ -408,6 +417,21 @@ module.exports = {
       };
 
       pipeline.push({ $match: totalProductsQuery });
+
+      if (buyer_id && buyerCountries.length > 0) {
+        pipeline.push({
+          $match: {
+            $or: [
+              { "general.buyersPreferredFrom": { $exists: false } },
+              {
+                "general.buyersPreferredFrom": {
+                  $elemMatch: { $in: buyerCountries },
+                },
+              },
+            ],
+          },
+        });
+      }
 
       pipeline.push(
         {
@@ -604,21 +628,25 @@ module.exports = {
         },
       });
 
-      // Deduplicate based on name + strength + strengthUnit (keep the first/best match)
-      pipeline.push({
-        $group: {
-          _id: {
-            name: { $toLower: "$general.name" },
-            strength: "$general.strength",
-            strengthUnit: { $toLower: "$general.strengthUnit" },
-          },
-          doc: { $first: "$$ROOT" },
-        },
-      });
+      // Deduplicate based on name + strength + strengthUnit
+      const shouldDeduplicate = showDuplicate === "true";
 
-      pipeline.push({
-        $replaceRoot: { newRoot: "$doc" },
-      });
+      if (shouldDeduplicate) {
+        pipeline.push({
+          $group: {
+            _id: {
+              name: { $toLower: "$general.name" },
+              strength: "$general.strength",
+              strengthUnit: { $toLower: "$general.strengthUnit" },
+            },
+            doc: { $first: "$$ROOT" },
+          },
+        });
+
+        pipeline.push({
+          $replaceRoot: { newRoot: "$doc" },
+        });
+      }
 
       // Re-sort after deduplication
       pipeline.push({
@@ -1184,25 +1212,25 @@ module.exports = {
   addProduct3: async (req, res) => {
     try {
       const { category, market = "new" } = req?.body;
-
+ 
       let parsedStockedInDetails = [];
-
+ 
       try {
         const validJsonString = req.body?.stockedInDetails?.find(
           (value) => value.startsWith("[") && value.includes("country")
         );
-
+ 
         if (validJsonString) {
           parsedStockedInDetails = JSON.parse(validJsonString);
         }
       } catch (err) {
         console.error("Failed to parse stockedInDetails:", err);
       }
-
+ 
       const quantity = parsedStockedInDetails.reduce((sum, item) => {
         return sum + (parseFloat(item.quantity) || 0);
       }, 0);
-
+ 
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles1 = await getFilePathsAdd(req, res, ["imageFront"]);
       const generalFiles2 = await getFilePathsAdd(req, res, ["imageBack"]);
@@ -1228,14 +1256,14 @@ module.exports = {
       const secondaryMarketFiles = await getFilePathsAdd(req, res, [
         "purchaseInvoiceFile",
       ]);
-
+ 
       let newProductData = {};
-
+ 
       const inventoryUUId = uuidv4();
       const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
-
+ 
       let cNCFileNDateParsed;
-
+ 
       if (typeof req?.body?.cNCFileNDate == "string") {
         try {
           // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
@@ -1262,7 +1290,7 @@ module.exports = {
           req.body?.cNCFileNDate?.filter((value) => value != "[object Object]")
         );
       }
-
+ 
       let categoryDetailsParsed = [];
       if (typeof req?.body?.categoryDetails == "string") {
         try {
@@ -1295,13 +1323,13 @@ module.exports = {
               )
             : [];
       }
-
+ 
       let parsedFaqs = [];
-
+ 
       try {
         if (req?.body?.faqs) {
           const rawFaqs = req.body?.faqs || [];
-
+ 
           if (Array.isArray(rawFaqs)) {
             parsedFaqs = JSON.parse(
               req?.body?.faqs?.filter((value) => value != "[object Object]")
@@ -1321,7 +1349,7 @@ module.exports = {
         console.error("Failed to parse faqs:", err);
         return handleCatchBlockError(req, res, err);
       }
-
+ 
       const categoryDetailsUnordered = categoryDetailsParsed
         ?.map((ele, index) => {
           return {
@@ -1331,19 +1359,19 @@ module.exports = {
                   ? categoryDetailsFiles?.categoryDetailsFile?.find(
                       (filename) => {
                         const path = ele?.fieldValue?.path;
-
+ 
                         // Ensure path is defined and log the file path
                         if (!path) {
                           return false; // If there's no path, skip this entry
                         }
-
+ 
                         const ext = path.split(".").pop(); // Get the file extension
-
+ 
                         const sanitizedPath = path
                           .replaceAll("./", "")
                           .replaceAll(" ", "")
                           .replaceAll(`.${ext}`, "");
-
+ 
                         // Match file by sanitized name
                         return filename?.includes(sanitizedPath);
                       }
@@ -1352,16 +1380,17 @@ module.exports = {
                     categoryDetailsFiles?.categoryDetailsFile?.[index] ||
                     ""
                 : ele?.fieldValue,
-
+ 
             name: ele?.name || "", // Log the name being used (if any)
             type: ele?.type || "", // Log the type being used (if any)
           };
         })
         ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type);
-
+ 
       const cdtyp1 =
-        categoryDetailsUnordered?.filter((section) => section?.type == "text") ||
-        [];
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "text"
+        ) || [];
       const cdtyp2 =
         categoryDetailsUnordered?.filter(
           (section) => section?.type == "dropdown"
@@ -1370,14 +1399,15 @@ module.exports = {
         categoryDetailsUnordered?.filter(
           (section) => section?.type == "checkbox"
         ) || [];
-      const cdtyp4 =
+      const cdtyp5 =
         categoryDetailsUnordered?.filter(
           (section) => section?.type == "textarea"
         ) || [];
-      const cdtyp5 =
-        categoryDetailsUnordered?.filter((section) => section?.type == "file") ||
-        [];
-
+      const cdtyp4 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "file"
+        ) || [];
+ 
       const categoryDetailsOrder = [
         ...cdtyp1,
         ...cdtyp2,
@@ -1385,7 +1415,7 @@ module.exports = {
         ...cdtyp4,
         ...cdtyp5,
       ];
-
+ 
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -1413,24 +1443,24 @@ module.exports = {
                 typeof ele?.file !== "string"
                   ? complianceFiles?.complianceFile?.find((filename) => {
                       const path = ele?.file?.path;
-
+ 
                       // Ensure path is defined and log the file path
                       if (!path) {
                         return false; // If there's no path, skip this entry
                       }
-
+ 
                       const ext = path.split(".").pop(); // Get the file extension
-
+ 
                       const sanitizedPath = path
                         .replaceAll("./", "")
                         .replaceAll(" ", "")
                         .replaceAll(`.${ext}`, "");
-
+ 
                       // Match file by sanitized name
                       return filename?.includes(sanitizedPath);
                     })
                   : ele?.file || complianceFiles?.complianceFile?.[index] || "",
-
+ 
               date: ele?.date || "", // Log the date being used (if any)
             };
           })
@@ -1445,17 +1475,17 @@ module.exports = {
         market,
         idDeleted: false,
       };
-
+ 
       if (market == "secondary") {
         newProductData["secondaryMarketDetails"] = {
           ...req?.body,
           purchaseInvoiceFile: secondaryMarketFiles?.purchaseInvoiceFile || [],
         };
       }
-
+ 
       // Create the new product
       const newProduct = await Product.create(newProductData);
-
+ 
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
@@ -1477,13 +1507,13 @@ module.exports = {
         ),
         ...(inventoryFiles || []),
       };
-
+ 
       const newInventory = await Inventory.create(newInventoryDetails);
-
+ 
       if (!newInventory) {
         return sendErrorResponse(res, 400, "Failed to create new Inventory.");
       }
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -1935,13 +1965,13 @@ module.exports = {
     try {
       const { category, market = "new" } = req?.body;
       const { productId } = req?.params;
-
+ 
       // Check if the product exists
       const existingProduct = await Product.findById(productId);
       if (!existingProduct) {
         return sendErrorResponse(res, 404, "Product not found.");
       }
-
+ 
       // Check if the inventory exists
       const InventoryFound = await Inventory.findOne({
         uuid: existingProduct?.inventory,
@@ -1949,7 +1979,7 @@ module.exports = {
       if (!InventoryFound) {
         return sendErrorResponse(res, 404, "Inventory not found.");
       }
-
+ 
       // Retrieve file paths for general, inventory, compliance, and additional fieldsfields
       const generalFiles1 = await getFilePathsEdit(req, res, ["imageFront"]);
       const generalFiles2 = await getFilePathsEdit(req, res, ["imageBack"]);
@@ -1975,9 +2005,9 @@ module.exports = {
       const secondaryMarketFiles = await getFilePathsEdit(req, res, [
         "purchaseInvoiceFile",
       ]);
-
+ 
       let cNCFileNDateParsed;
-
+ 
       try {
         // Check if cNCFileNDate exists and is an array before applying filter
         if (Array.isArray(req?.body?.cNCFileNDate)) {
@@ -1998,9 +2028,9 @@ module.exports = {
         logErrorToFile(error, req);
         return sendErrorResponse(res, 400, "Invalid cNCFileNDate format.");
       }
-
+ 
       let categoryDetailsParsed;
-
+ 
       try {
         // Check if categoryDetails exists and is an array before applying filter
         if (Array.isArray(req?.body?.categoryDetails)) {
@@ -2021,13 +2051,13 @@ module.exports = {
         logErrorToFile(error, req);
         return sendErrorResponse(res, 400, "Invalid categoryDetails format.");
       }
-
+ 
       let parsedFaqs = [];
-
+ 
       try {
         if (req?.body?.faqs) {
           const rawFaqs = req.body?.faqs || [];
-
+ 
           if (Array.isArray(rawFaqs)) {
             parsedFaqs = JSON.parse(
               req?.body?.faqs?.filter((value) => value != "[object Object]")
@@ -2047,7 +2077,76 @@ module.exports = {
         console.error("Failed to parse faqs:", err);
         return handleCatchBlockError(req, res, err);
       }
-
+ 
+      const categoryDetailsUnordered =
+        categoryDetailsParsed?.length > 0
+          ? JSON.parse(categoryDetailsParsed)
+              ?.map((ele, index) => {
+                return {
+                  fieldValue:
+                    ele?.type == "file"
+                      ? typeof ele?.fieldValue !== "string"
+                        ? categoryDetailsFiles?.categoryDetailsFile?.find(
+                            (filename) => {
+                              const path = ele?.fieldValue?.path;
+ 
+                              // Ensure path is defined and log the file path
+                              if (!path) {
+                                return false; // If there's no path, skip this entry
+                              }
+ 
+                              const ext = path.split(".").pop(); // Get the file extension
+ 
+                              const sanitizedPath = path
+                                .replaceAll("./", "")
+                                .replaceAll(" ", "")
+                                .replaceAll(`.${ext}`, "");
+ 
+                              // Match file by sanitized name
+                              return filename?.includes(sanitizedPath);
+                            }
+                          )
+                        : ele?.fieldValue ||
+                          categoryDetailsFiles?.categoryDetailsFile?.[index] ||
+                          ""
+                      : ele?.fieldValue,
+ 
+                  name: ele?.name || "", // Log the name being used (if any)
+                  type: ele?.type || "", // Log the type being used (if any)
+                };
+              })
+              ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type)
+          : categoryDetailsParsed;
+ 
+      const cdtyp1 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "text"
+        ) || [];
+      const cdtyp2 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "dropdown"
+        ) || [];
+      const cdtyp3 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "checkbox"
+        ) || [];
+      const cdtyp5 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "textarea"
+        ) || [];
+      const cdtyp4 =
+        categoryDetailsUnordered?.filter(
+          (section) => section?.type == "file"
+        ) || [];
+ 
+      const categoryDetailsOrder = [
+        ...cdtyp1,
+        ...cdtyp2,
+        ...cdtyp3,
+        ...cdtyp4,
+        ...cdtyp5,
+      ];
+ 
       // Update existing product data
       const updatedProductData = {
         ...existingProduct._doc, // Use the existing product data
@@ -2066,47 +2165,7 @@ module.exports = {
           specification: specification.specificationSheet || [],
         },
         categoryDetailsFile: categoryDetailsFiles.categoryDetailsFile || [],
-        categoryDetails:
-          categoryDetailsParsed?.length > 0
-            ? JSON.parse(categoryDetailsParsed)
-                ?.map((ele, index) => {
-                  return {
-                    fieldValue:
-                      ele?.type == "file"
-                        ? typeof ele?.fieldValue !== "string"
-                          ? categoryDetailsFiles?.categoryDetailsFile?.find(
-                              (filename) => {
-                                const path = ele?.fieldValue?.path;
-
-                                // Ensure path is defined and log the file path
-                                if (!path) {
-                                  return false; // If there's no path, skip this entry
-                                }
-
-                                const ext = path.split(".").pop(); // Get the file extension
-
-                                const sanitizedPath = path
-                                  .replaceAll("./", "")
-                                  .replaceAll(" ", "")
-                                  .replaceAll(`.${ext}`, "");
-
-                                // Match file by sanitized name
-                                return filename?.includes(sanitizedPath);
-                              }
-                            )
-                          : ele?.fieldValue ||
-                            categoryDetailsFiles?.categoryDetailsFile?.[
-                              index
-                            ] ||
-                            ""
-                        : ele?.fieldValue,
-
-                    name: ele?.name || "", // Log the name being used (if any)
-                    type: ele?.type || "", // Log the type being used (if any)
-                  };
-                })
-                ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type)
-            : categoryDetailsParsed,
+        categoryDetails: categoryDetailsOrder,
         faqs: parsedFaqs,
         complianceFile: complianceFiles.complianceFile || [],
         cNCFileNDate:
@@ -2118,25 +2177,25 @@ module.exports = {
                       typeof ele?.file !== "string"
                         ? complianceFiles?.complianceFile?.find((filename) => {
                             const path = ele?.file?.path;
-
+ 
                             // Ensure path is defined and log the file path
                             if (!path) {
                               return false; // If there's no path, skip this entry
                             }
-
+ 
                             const ext = path.split(".").pop(); // Get the file extension
                             const sanitizedPath = path
                               .replaceAll("./", "")
                               .replaceAll(" ", "")
                               .replaceAll(`.${ext}`, "");
-
+ 
                             // Match file by sanitized name
                             return filename?.includes(sanitizedPath);
                           })
                         : ele?.file ||
                           complianceFiles?.complianceFile?.[index] ||
                           "",
-
+ 
                     date: ele?.date || "", // Log the date being used (if any)
                   };
                 })
@@ -2147,25 +2206,25 @@ module.exports = {
           guidelinesFile: additionalFiles?.guidelinesFile || [],
         },
       };
-
+ 
       if (market == "secondary") {
         updatedProductData["secondaryMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
       }
-
+ 
       // Update the product in the database
       const updatedProduct = await Product.findByIdAndUpdate(
         productId,
         updatedProductData,
         { new: true }
       );
-
+ 
       if (!updatedProduct) {
         return sendErrorResponse(res, 400, "Failed to update the product.");
       }
-
+ 
       const updatedInventoryData = {
         ...req?.body,
         stockedInDetails: JSON.parse(
@@ -2180,18 +2239,18 @@ module.exports = {
         ),
         ...(inventoryFiles || []),
       };
-
+ 
       // Update the inventory in the database
       const updatedInventory = await Inventory.findOneAndUpdate(
         { uuid: existingProduct?.inventory },
         updatedInventoryData,
         { new: true }
       );
-
+ 
       if (!updatedInventory) {
         return sendErrorResponse(res, 400, "Failed to update the inventory.");
       }
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -2255,6 +2314,7 @@ module.exports = {
     try {
       const { id } = req?.params;
       const {
+        buyer_id,
         market,
         page_no = 1,
         page_size = 5,
@@ -2368,6 +2428,12 @@ module.exports = {
       // if (stocked_in && typeof stocked_in === "string") {
       //   countries = stocked_in.split(",").map((c) => c.trim());
       // }
+
+      let buyerCountries = [];
+      if (buyer_id) {
+        const buyer = await Buyer.findOne({ buyer_id: buyer_id }, { country_of_operation: 1 }).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation) ? buyer.country_of_operation : [];
+      }
 
       const countryList = countries
         ? countries.split(",").map((c) => decodeURIComponent(c.trim()))
@@ -2497,6 +2563,21 @@ module.exports = {
       pipeline?.push({
         $match: totalProductsQuery,
       });
+
+      if (buyer_id && buyerCountries.length > 0) {
+        pipeline.push({
+          $match: {
+            $or: [
+              { "general.buyersPreferredFrom": { $exists: false } },
+              {
+                "general.buyersPreferredFrom": {
+                  $elemMatch: { $in: buyerCountries },
+                },
+              },
+            ],
+          },
+        });
+      }
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
@@ -2710,6 +2791,7 @@ module.exports = {
     try {
       const { id } = req?.params;
       const {
+        buyer_id,
         page_no = 1,
         page_size = 5,
         search_key = "",
@@ -2734,6 +2816,13 @@ module.exports = {
       });
       if (!inventoryFound) {
         return sendErrorResponse(res, 500, "Failed fetching Inventory");
+      }
+
+      //for buyers preferred from filter 
+      let buyerCountries = [];
+      if (buyer_id) {
+        const buyer = await Buyer.findOne({ buyer_id: buyer_id }, { country_of_operation: 1 }).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation) ? buyer.country_of_operation : [];
       }
 
       let pipeline = [];
@@ -2763,6 +2852,22 @@ module.exports = {
       pipeline?.push({
         $match: totalProductsQuery,
       });
+
+      //buyers preferred from filter
+      if (buyer_id && buyerCountries.length > 0) {
+        pipeline.push({
+          $match: {
+            $or: [
+              { "general.buyersPreferredFrom": { $exists: false } },
+              {
+                "general.buyersPreferredFrom": {
+                  $elemMatch: { $in: buyerCountries },
+                },
+              },
+            ],
+          },
+        });
+      }
       // Lookup Supplier (userDetails) based on supplier_id in Product
       pipeline.push({
         $lookup: {
