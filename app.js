@@ -26,7 +26,7 @@ const { URL } = require("url");
 app.get("/pdf-proxy/*", async (req, res) => {
   const filename = decodeURIComponent(req.params[0]); 
 
-  const s3Url = `${process.env.S3_TESTING_URL}/${filename}`;
+  const s3Url = `${process.env.S3_URL}/${filename}`;
   const parsedUrl = new URL(s3Url);
 
   const protocol = parsedUrl.protocol === "https:" ? https : http;
