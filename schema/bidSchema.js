@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
- 
+
 const bidSchema = new Schema(
   {
     general: {
@@ -54,6 +54,24 @@ const bidSchema = new Schema(
     },
     additionalDetails: [
       {
+        itemId: {
+          type: String,
+          trim: true,
+          required: [true, "Validation Error: Bid item id is required."],
+          immutable: true,
+        },
+        certificateName: {
+          type: String,
+          trim: true,
+        },
+        docReq: {
+          type: Boolean,
+          default: false,
+        },
+        totalBids: {
+          type: Number,
+          Default: 0, 
+        },
         type: {
           type: String,
           trim: true,
@@ -169,6 +187,6 @@ const bidSchema = new Schema(
   },
   { timestamps: true }
 );
- 
+
 // Exporting the models correctly
 module.exports = model("Bid", bidSchema);

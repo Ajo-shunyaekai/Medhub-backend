@@ -17,25 +17,25 @@ const { getFilePathsAdd } = require("../helper");
 const getAllBids = async (req, res) => {
   try {
     const { userId, status, page_no = 1, page_size = 5 } = req.query;
- 
+
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
     const offset = (pageNo - 1) * pageSize;
- 
+
     if (userId && !mongoose.isValidObjectId(userId)) {
       return sendErrorResponse(res, 400, "Invalid User ID format.", null);
     }
- 
+
     const matchStage = {};
- 
+
     if (userId) {
       matchStage.userId = userId;
     }
- 
+
     if (status) {
       matchStage.status = status;
     }
- 
+
     const pipeline = [
       {
         $match: matchStage,
@@ -74,15 +74,15 @@ const getAllBids = async (req, res) => {
       { $skip: offset },
       { $limit: pageSize },
     ];
- 
+
     const countPipeline = [{ $match: matchStage }, { $count: "total" }];
- 
+
     const countResult = await Bid.aggregate(countPipeline);
     const totalBids = countResult[0]?.total || 0;
     const totalPages = Math.ceil(totalBids / pageSize);
- 
+
     const bids = await Bid.aggregate(pipeline);
- 
+
     return sendSuccessResponse(res, 200, "Success Fetching Bids", {
       bids: bids,
       totalItems: totalBids,
@@ -240,9 +240,12 @@ const addBid = async (req, res) => {
           ?.filter((ele) => ele?.document || ele?.name),
       },
       additionalDetails: JSON.parse(
-        req?.body?.additionalDetails?.filter(
-          (value) => value != "[object Object]"
-        )
+        req?.body?.additionalDetails
+          ?.filter((value) => value != "[object Object]")
+          ?.map((ele) => ({
+            ...ele,
+            itemId: Math.random().toString(16).slice(2, 10),
+          }))
       ),
     };
 
