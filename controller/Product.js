@@ -3859,7 +3859,6 @@ module.exports = {
       // Extract the value of each key
       const inventoryArray = [];
       const extractedValues = products?.map((item) => {
-        // return false
         const inventoryUUId = uuidv4();
         const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
         const extracted = {};
@@ -3889,6 +3888,13 @@ module.exports = {
           isDeleted: false,
         };
         inventoryArray?.push(inventoryObj);
+
+        const image = {
+          front: item?.frontImage?.value ? [item.frontImage.value] : [],
+          back: item?.backImage?.value ? [item.backImage.value] : [],
+          side: item?.sideImage?.value ? [item.sideImage.value] : [],
+          closeup: item?.closeupImage?.value ? [item.closeupImage.value] : [],
+        };
         // const category_name = item?.category?.value;
         for (const [key, field] of Object.entries(item)) {
           if (key == "category") {
@@ -3920,14 +3926,6 @@ module.exports = {
         //   if (files[2]) image.side.push(files[2]);
         //   if (files[3]) image.closeup.push(files[3]);
         // }
-
-        const image = {
-          front: item?.frontImage?.value ? [item.frontImage.value] : [],
-          back: item?.backImage?.value ? [item.backImage.value] : [],
-          side: item?.sideImage?.value ? [item.sideImage.value] : [],
-          closeup: item?.closeupImage?.value ? [item.closeupImage.value] : [],
-        };
-        
 
         return {
           ...extracted,
