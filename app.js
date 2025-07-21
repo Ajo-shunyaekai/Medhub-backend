@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const connect = require("./utils/dbConnection");
 const initializeSocket = require("./utils/socketHandler");
+const { stripeWebhook } = require("./controller/Subscription2");
 // const ffmpeg = require('fluent-ffmpeg');
 const logErrorToFile = require("./logs/errorLogs");
 const {
@@ -24,7 +25,7 @@ const { URL } = require("url");
 
 //s3 proxy
 app.get("/pdf-proxy/*", async (req, res) => {
-  const filename = decodeURIComponent(req.params[0]); 
+  const filename = decodeURIComponent(req.params[0]);
 
   const s3Url = `${process.env.S3_URL}/${filename}`;
   const parsedUrl = new URL(s3Url);
@@ -33,13 +34,18 @@ app.get("/pdf-proxy/*", async (req, res) => {
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  protocol.get(s3Url, (s3Res) => {
-    res.setHeader("Content-Type", s3Res.headers["content-type"] || "application/pdf");
-    s3Res.pipe(res);
-  }).on("error", (err) => {
-    console.error("Proxy error:", err);
-    res.status(500).send("Error fetching PDF from S3.");
-  });
+  protocol
+    .get(s3Url, (s3Res) => {
+      res.setHeader(
+        "Content-Type",
+        s3Res.headers["content-type"] || "application/pdf"
+      );
+      s3Res.pipe(res);
+    })
+    .on("error", (err) => {
+      console.error("Proxy error:", err);
+      res.status(500).send("Error fetching PDF from S3.");
+    });
 });
 
 // db-connection
@@ -65,6 +71,12 @@ if (!fs.existsSync(uploadFolderPath)) {
 }
 
 // Import routes from index.js
+
+app.post(
+  "/api/stripe-webhook",
+  bodyParser.raw({ type: "application/json" }),
+  stripeWebhook
+);
 require("./index")(app);
 
 // Error-handling middleware
