@@ -8,7 +8,7 @@ function initializeSocket(server) {
 
   io.on("connection", (socket) => {
     // Registration handlers
-    ["register", "registerBuyer", "registerAdmin"].forEach((event) => {
+    ["register", "registerBuyer", "registerAdmin", "registerPartner"].forEach((event) => {
       socket.on(event, (userId) => {
         socket.join(userId);
       });
