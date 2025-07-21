@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const generator = require("generate-password");
 const Admin = require("../schema/adminSchema");
+const Logistics = require("../schema/logisticsSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
 const LogisticsPartner = require("../schema/logisticsCompanySchema");
@@ -31,7 +32,7 @@ const {
 const logErrorToFile = require("../logs/errorLogs");
 const { updateLoginInfo } = require("../utils/userUtils");
 const { uploadMultipleFiles } = require("../helper/aws-s3");
-
+ 
 const generateAccessAndRefeshToken = async (userId, usertype) => {
   try {
     const schemaNameRef =
@@ -47,22 +48,22 @@ const generateAccessAndRefeshToken = async (userId, usertype) => {
     const user = await schemaNameRef?.findById(userId);
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
-
+ 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
-
+ 
     return { accessToken, refreshToken };
   } catch (error) {
     // handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const registerUserOld = async (req, res) => {
   try {
     // const { accesstoken, usertype } = req.headers;
     const { usertype } = req.body;
     const { uploadedFiles } = req;
-
+ 
     // Use req.body directly instead of stringifying it
     const {
       buyer_mobile,
@@ -97,20 +98,20 @@ const registerUserOld = async (req, res) => {
       annualTurnover,
       yrFounded,
     } = req.body;
-
+ 
     let regObj = {};
-
+ 
     if (!usertype) {
       return sendErrorResponse(res, 400, "Need User Type.");
     }
-
+ 
     if (usertype === "Buyer") {
       // Extract and format the mobile and country code
       const buyerCountryCode = buyer_mobile.split(" ")[0];
       const buyer_mobile_number = buyer_mobile.split(" ").slice(1).join(" ");
       const person_mob_no = contact_person_mobile.split(" ").slice(1).join(" ");
       const personCountryCode = contact_person_mobile.split(" ")[0];
-
+ 
       regObj = {
         buyer_email,
         buyer_type,
@@ -158,7 +159,7 @@ const registerUserOld = async (req, res) => {
           pincode: pincode || "",
         },
       };
-
+ 
       // Validate registration fields using a custom validation function
       const errObj = validation(regObj, "buyerRegister");
       if (Object.values(errObj).length) {
@@ -175,7 +176,7 @@ const registerUserOld = async (req, res) => {
         .slice(1)
         .join(" ");
       const personCountryCode = req.body.contact_person_mobile.split(" ")[0];
-
+ 
       regObj = {
         ...req.body,
         activity_code,
@@ -201,14 +202,14 @@ const registerUserOld = async (req, res) => {
           pincode: pincode || "",
         },
       };
-
+ 
       const errObj = validation(regObj, "supplierRegister");
-
+ 
       if (Object.values(errObj).length) {
         return sendErrorResponse(res, 419, "All fields are required", errObj);
       }
     }
-
+ 
     // Check for email existence based on user type
     const emailExists =
       usertype === "Buyer"
@@ -224,11 +225,11 @@ const registerUserOld = async (req, res) => {
         : usertype === "Seller"
         ? await Seller.findOne({ email: req.body?.email })
         : null;
-
+ 
     if (emailExists) {
       return sendErrorResponse(res, 409, "Email already exists");
     }
-
+ 
     // Generate unique notification ID and user ID
     const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
     const userId = `${
@@ -242,14 +243,14 @@ const registerUserOld = async (req, res) => {
         ? "SLR-"
         : ""
     }${Math.random().toString(16).slice(2, 10)}`;
-
+ 
     // Create JWT token for the user
     let jwtSecretKey = process.env.APP_SECRET;
     let data = { time: Date(), email: req.body?.email };
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
-
+ 
     let certificateFileNDateParsed;
-
+ 
     if (typeof req?.body?.certificateFileNDate == "string") {
       try {
         // certificateFileNDateParsed = JSON.parse(req.body.certificateFileNDate)?.filter(
@@ -278,7 +279,7 @@ const registerUserOld = async (req, res) => {
         )
       );
     }
-
+ 
     // Create instances of Admin, Supplier, and Buyer models based on user type
     const newAdmin = new Admin({
       admin_id: userId,
@@ -287,7 +288,7 @@ const registerUserOld = async (req, res) => {
       password: req.body?.password,
       token: new Date(),
     });
-
+ 
     const newSupplier = new Supplier({
       supplier_id: userId,
       supplier_type: regObj.supplier_type,
@@ -335,24 +336,24 @@ const registerUserOld = async (req, res) => {
               typeof ele?.file !== "string"
                 ? regObj?.certificate_image?.find((filename) => {
                     const path = ele?.file?.path;
-
+ 
                     // Ensure path is defined and log the file path
                     if (!path) {
                       return false; // If there's no path, skip this entry
                     }
-
+ 
                     const ext = path.split(".").pop(); // Get the file extension
-
+ 
                     const sanitizedPath = path
                       ?.replaceAll("./", "")
                       ?.replaceAll(" ", "")
                       ?.replaceAll(`.${ext}`, "");
-
+ 
                     // Match file by sanitized name
                     return filename?.includes(sanitizedPath);
                   })
                 : ele?.file || regObj?.certificate_image?.[index] || "",
-
+ 
             date: ele?.date || "", // Log the date being used (if any)
           };
         })
@@ -362,7 +363,7 @@ const registerUserOld = async (req, res) => {
       annualTurnover: Number(regObj.annualTurnover || 0),
       yrFounded: Number(regObj.yrFounded || 0),
     });
-
+ 
     const newBuyer = new Buyer({
       buyer_id: userId,
       buyer_type: regObj?.buyer_type,
@@ -403,24 +404,24 @@ const registerUserOld = async (req, res) => {
               typeof ele?.file !== "string"
                 ? regObj?.certificate_image?.find((filename) => {
                     const path = ele?.file?.path;
-
+ 
                     // Ensure path is defined and log the file path
                     if (!path) {
                       return false; // If there's no path, skip this entry
                     }
-
+ 
                     const ext = path.split(".").pop(); // Get the file extension
-
+ 
                     const sanitizedPath = path
                       .replaceAll("./", "")
                       .replaceAll(" ", "")
                       .replaceAll(`.${ext}`, "");
-
+ 
                     // Match file by sanitized name
                     return filename?.includes(sanitizedPath);
                   })
                 : ele?.file || regObj?.certificate_image?.[index] || "",
-
+ 
             date: ele?.date || "", // Log the date being used (if any)
           };
         })
@@ -429,7 +430,7 @@ const registerUserOld = async (req, res) => {
       annualTurnover: Number(regObj.annualTurnover || 0),
       yrFounded: Number(regObj.yrFounded || 0),
     });
-
+ 
     // Hash password
     const hashedPassword = await bcrypt.genSalt(saltRounds);
     if (!hashedPassword) {
@@ -439,11 +440,11 @@ const registerUserOld = async (req, res) => {
         "Error in generating salt or hashing password"
       );
     }
-
+ 
     // If user type is "Buyer", save buyer details and send response
     if (usertype === "Buyer") {
       const buyer = await newBuyer.save();
-
+ 
       if (!buyer) {
         return sendErrorResponse(
           res,
@@ -451,7 +452,7 @@ const registerUserOld = async (req, res) => {
           "Error While Submitting Buyer Registration Request"
         );
       }
-
+ 
       const newNotification = new Notification({
         notification_id: notificationId,
         event_type: "New Registration Request",
@@ -463,40 +464,40 @@ const registerUserOld = async (req, res) => {
         message: "New Buyer Registration Request",
         status: 0,
       });
-
+ 
       const savedNotification = await newNotification.save();
       const adminEmail = "platform@medhub.global";
       const subject = "New Registration Alert: Buyer Account Created";
-
+ 
       const recipientEmails = [adminEmail];
       const emailContent = await buyerRegistrationContent(buyer);
       // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
       await sendEmail(recipientEmails, subject, emailContent);
-
+ 
       const confirmationEmailRecipients = [buyer.contact_person_email];
       const confirmationSubject = "Thank You for Registering on Medhub Global!";
       const confirmationContent = await userRegistrationConfirmationContent(
         buyer,
         usertype
       );
-
+ 
       const templateName = "thankYou";
       const context = {};
-
+ 
       await sendTemplateEmail(
         confirmationEmailRecipients,
         confirmationSubject,
         templateName,
         context
       );
-
+ 
       return sendSuccessResponse(
         res,
         200,
         `Buyer Registration Request Submitted Successfully.`
       );
     }
-
+ 
     // If user type is "Admin", save admin and return response
     else if (usertype === "Admin") {
       newAdmin.password = hashedPassword;
@@ -514,7 +515,7 @@ const registerUserOld = async (req, res) => {
         `Admin Registration Request Successfully.`
       );
     }
-
+ 
     // If user type is "Supplier", save supplier and send response
     else if (usertype === "Supplier") {
       const supplier = await newSupplier.save();
@@ -536,7 +537,7 @@ const registerUserOld = async (req, res) => {
         message: "New Supplier Registration Request",
         status: 0,
       });
-
+ 
       const savedNotification = await newNotification.save();
       const adminEmail = "platform@medhub.global";
       const subject = "New Registration Alert: Supplier Account Created";
@@ -544,26 +545,26 @@ const registerUserOld = async (req, res) => {
       const recipientEmails = [adminEmail];
       const emailContent = await supplierRegistrationContent(supplier);
       // await sendMailFunc(recipientEmails.join(","), subject, emailContent);
-
+ 
       await sendEmail(recipientEmails, subject, emailContent);
-
+ 
       const confirmationEmailRecipients = [supplier.contact_person_email];
       const confirmationSubject = "Thank You for Registering on Medhub Global!";
       const confirmationContent = await userRegistrationConfirmationContent(
         supplier,
         usertype
       );
-
+ 
       const templateName = "thankYou";
       const context = {};
-
+ 
       await sendTemplateEmail(
         confirmationEmailRecipients,
         confirmationSubject,
         templateName,
         context
       );
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -574,34 +575,34 @@ const registerUserOld = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const registerUser = async (req, res) => {
   try {
     const { usertype } = req.body;
-
+ 
     if (!usertype) {
       return sendErrorResponse(res, 400, "Need User Type.");
     }
-
+ 
     // Extract and format the mobile and country code
     const userCountryCode =
       req.body.buyer_mobile?.split(" ")[0] ||
       req.body.supplier_mobile_no?.split(" ")[0];
-
+ 
     const userMobNo =
       req.body.buyer_mobile?.split(" ")?.slice(1).join(" ") ||
       req.body.supplier_mobile_no?.split(" ")?.slice(1).join(" ");
-
+ 
     const personMobNo =
       req.body.contact_person_mobile?.split(" ")?.slice(1).join(" ") ||
       req.body.contact_person_mobile_no?.split(" ")?.slice(1).join(" ");
-
+ 
     const personCountryCode =
       req.body.contact_person_mobile?.split(" ")[0] ||
       req.body.contact_person_mobile_no?.split(" ")[0];
-
+ 
     const { uploadedFiles } = req;
-
+ 
     let regObj = {
       ...req.body,
       contact_person_mobile: personMobNo,
@@ -631,7 +632,7 @@ const registerUser = async (req, res) => {
         pincode: req.body.pincode || "",
       },
     };
-
+ 
     // Validate required fields based on user type
     const validationType =
       usertype === "Buyer"
@@ -639,14 +640,14 @@ const registerUser = async (req, res) => {
         : usertype === "Supplier"
         ? "supplierRegister"
         : null;
-
+ 
     if (validationType) {
       const errObj = validation(regObj, validationType);
       if (Object.values(errObj).length) {
         return sendErrorResponse(res, 419, "All fields are required.", errObj);
       }
     }
-
+ 
     // Check if email already exists
     const emailExists =
       usertype === "Buyer"
@@ -660,11 +661,11 @@ const registerUser = async (req, res) => {
             contact_person_email: req.body?.contact_person_email,
           })
         : null;
-
+ 
     if (emailExists) {
       return sendErrorResponse(res, 409, "Email already exists");
     }
-
+ 
     let certificateFileNDateParsed = [];
     // Parse certificateFileNDate if present
     try {
@@ -698,7 +699,7 @@ const registerUser = async (req, res) => {
         "Invalid certificateFileNDate format."
       );
     }
-
+ 
     // Generate unique IDs
     const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
     const userId =
@@ -709,9 +710,9 @@ const registerUser = async (req, res) => {
         : usertype === "Supplier"
         ? "SUP-"
         : "") + Math.random().toString(16).slice(2, 10);
-
+ 
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
-
+ 
     // Prepare common user data
     const newUserData = {
       supplier_id: userId,
@@ -737,7 +738,7 @@ const registerUser = async (req, res) => {
                     return filename?.includes(sanitizedPath);
                   })
                 : ele?.file || regObj?.certificate_image?.[index] || "",
-
+ 
             date: ele?.date || "",
           };
         })
@@ -747,14 +748,14 @@ const registerUser = async (req, res) => {
       annualTurnover: Number(regObj.annualTurnover || 0),
       yrFounded: Number(regObj.yrFounded || 0),
     };
-
+ 
     // Handle Buyer or Supplier
     if (usertype === "Buyer" || usertype === "Supplier") {
       const newUser =
         usertype === "Buyer"
           ? new Buyer(newUserData)
           : new Supplier(newUserData);
-
+ 
       const user = await newUser.save();
       if (!user) {
         return sendErrorResponse(
@@ -763,7 +764,7 @@ const registerUser = async (req, res) => {
           `Error While Submitting ${usertype} Registration Request`
         );
       }
-
+ 
       // Create Notification
       const newNotification = new Notification({
         notification_id: notificationId,
@@ -777,43 +778,43 @@ const registerUser = async (req, res) => {
         message: `New ${usertype} Registration Request`,
         status: 0,
       });
-
+ 
       await newNotification.save();
-
+ 
       const adminEmail = "platform@medhub.global";
       const subject = `New Registration Alert: ${usertype} Account Created`;
-
+ 
       const emailContent = await (usertype === "Buyer"
         ? buyerRegistrationContent(user)
         : supplierRegistrationContent(user));
-
+ 
       await sendEmail([adminEmail], subject, emailContent);
-
+ 
       const confirmationSubject = "Thank You for Registering on Medhub Global!";
       const confirmationContent = await userRegistrationConfirmationContent(
         user,
         usertype
       );
-
+ 
       await sendTemplateEmail(
         [user.contact_person_email],
         confirmationSubject,
         "thankYou",
         {}
       );
-
+ 
       return sendSuccessResponse(
         res,
         200,
         `${usertype} Registration Request Submitted Successfully.`
       );
     }
-
+ 
     // Handle Admin registration
     if (usertype === "Admin") {
       const salt = await bcrypt.genSalt(saltRounds);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
+ 
       const newAdmin = new Admin({
         admin_id: userId,
         user_name: req.body?.name,
@@ -821,9 +822,9 @@ const registerUser = async (req, res) => {
         password: hashedPassword,
         token: new Date(),
       });
-
+ 
       const admin = await newAdmin.save();
-
+ 
       if (!admin) {
         return sendErrorResponse(
           res,
@@ -831,36 +832,36 @@ const registerUser = async (req, res) => {
           "Error While Submitting Admin Registration Request"
         );
       }
-
+ 
       return sendSuccessResponse(
         res,
         200,
         "Admin Registration Request Successfully."
       );
     }
-
+ 
     return sendErrorResponse(res, 400, "Unsupported user type.");
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const loginUser = async (req, res) => {
   try {
     const { email, password, usertype } = req.body;
-
+ 
     if (!usertype) {
       return sendErrorResponse(res, 400, "Cannot Identify User.");
     }
-
+ 
     if (!email) {
       return sendErrorResponse(res, 400, "Email isrequired.");
     }
-
+ 
     if (!password) {
       return sendErrorResponse(res, 400, "Password isrequired.");
     }
-
+ 
     // Find the user based on user type
     const user =
       usertype === "Buyer"
@@ -872,7 +873,7 @@ const loginUser = async (req, res) => {
         : usertype === "Logistics"
         ? await LogisticsPartner.findOne({ email })
         : null;
-
+ 
     if (!user) {
       return sendErrorResponse(
         res,
@@ -880,20 +881,20 @@ const loginUser = async (req, res) => {
         "User not found. Please enter registered email."
       );
     }
-
+ 
     // Check if the password matches
     // const isPasswordValid = await bcrypt.compare(password, user?.password);
     const isPasswordValid = await user?.isPasswordCorrect(password);
-
+ 
     if (!isPasswordValid) {
       return sendErrorResponse(res, 400, "Incorrect Password.");
     }
-
+ 
     const { accessToken, refreshToken } = await generateAccessAndRefeshToken(
       user?._id,
       usertype
     );
-
+ 
     // Fetch user details excluding sensitive information
     let loggedinUser =
       usertype === "Buyer"
@@ -913,7 +914,7 @@ const loginUser = async (req, res) => {
             .select("-password -createdAt -updatedAt -__v")
             .lean()
         : null;
-
+ 
     if (usertype === "Buyer") {
       // Count documents in the List collection for the buyer
       const listCount = await List.countDocuments({
@@ -921,7 +922,7 @@ const loginUser = async (req, res) => {
       });
       loggedinUser.list_count = listCount;
     }
-
+ 
     const Model =
       usertype === "Buyer"
         ? Buyer
@@ -932,15 +933,15 @@ const loginUser = async (req, res) => {
         : usertype === "Logistics"
         ? LogisticsPartner
         : null;
-
+ 
     if (Model) {
       await updateLoginInfo(Model, user._id);
     }
-
+ 
     res
       .cookie("accessToken", accessToken, cookiesOptions)
       .cookie("refreshToken", refreshToken, cookiesOptions);
-
+ 
     return sendSuccessResponse(res, 200, `${usertype} Login Successful.`, {
       ...loggedinUser,
       accessToken,
@@ -950,12 +951,12 @@ const loginUser = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const getLoggedinUserProfileDetails = async (req, res) => {
   try {
     const { accesstoken, usertype } = req.headers;
     const { id } = req?.params;
-
+ 
     const user =
       usertype == "Buyer"
         ? await Buyer.findById(id)?.select(
@@ -974,27 +975,27 @@ const getLoggedinUserProfileDetails = async (req, res) => {
             "-password -refreshToken -token -createdAt -updatedAt -__v"
           )
         : null;
-
+ 
     if (!user) {
       return sendErrorResponse(res, 400, "No user Found");
     }
-
+ 
     return sendSuccessResponse(res, 200, "User Found.", user);
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const verifyEmail = async (req, res) => {
   try {
     const { email, usertype } = req?.body;
-
+ 
     if (!email) {
       return sendErrorResponse(res, 400, "Email is required.");
     }
-
+ 
     let user;
-
+ 
     // Find the user based on their type and email
     if (usertype === "Buyer") {
       user = await Buyer?.findOne({ contact_person_email: email });
@@ -1003,7 +1004,7 @@ const verifyEmail = async (req, res) => {
     } else if (usertype === "Admin") {
       user = await Admin?.findOne({ email: email });
     }
-
+ 
     // If the user is not found, return an error response
     if (!user) {
       return sendErrorResponse(
@@ -1012,7 +1013,7 @@ const verifyEmail = async (req, res) => {
         "Email not registered. Please provide a registered address."
       );
     }
-
+ 
     // If the user registration is yet not confirmed by the admin, return an error response
     if (user?.account_status != 1) {
       return sendErrorResponse(
@@ -1021,14 +1022,14 @@ const verifyEmail = async (req, res) => {
         "Registration Confirmation is still pending with the admin"
       );
     }
-
+ 
     // Generate a new OTP and its expiry time (10 minutes ahead)
     const otp = Math.random()?.toString()?.slice(2, 8);
     const currentDate = new Date();
     const tenMinutesAhead = new Date(currentDate.getTime() + 10 * 60 * 1000);
-
+ 
     let updatedUser;
-
+ 
     // Update the user with OTP and expiry based on their type
     if (usertype === "Buyer") {
       updatedUser = await Buyer?.findOneAndUpdate(
@@ -1067,7 +1068,7 @@ const verifyEmail = async (req, res) => {
         { new: true }
       );
     }
-
+ 
     // If the update fails, return an error
     if (!updatedUser) {
       return sendErrorResponse(
@@ -1076,12 +1077,12 @@ const verifyEmail = async (req, res) => {
         "Error verifying email and generating OTP."
       );
     }
-
+ 
     // Email settings and content
     // const adminEmail = "platform@medhub.global";
     const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
     const recipientEmails = [email].filter((email) => email);
-
+ 
     //start -> for using ejs template
     const templateName = "forgotPassword";
     const context = {
@@ -1089,30 +1090,30 @@ const verifyEmail = async (req, res) => {
       user_type: usertype,
     };
     //end -> for using ejs template
-
+ 
     // Prepare the email content
     const emailContent = await otpForResetPasswordContent(updatedUser, otp);
     // await sendEmail(recipientEmails, subject, emailContent);
-
+ 
     await sendTemplateEmail(recipientEmails, subject, templateName, context);
-
+ 
     // Success response
     return sendSuccessResponse(res, 200, "Mail sent to the registered email.");
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const verifyEmailAndResendOTP = async (req, res) => {
   try {
     const { email, usertype } = req?.body;
-
+ 
     if (!email) {
       return sendErrorResponse(res, 400, "Email is required.");
     }
-
+ 
     let user;
-
+ 
     // Find the user based on their type and email
     if (usertype === "Buyer") {
       user = await Buyer?.findOne({ contact_person_email: email });
@@ -1120,8 +1121,11 @@ const verifyEmailAndResendOTP = async (req, res) => {
       user = await Supplier?.findOne({ contact_person_email: email });
     } else if (usertype === "Admin") {
       user = await Admin?.findOne({ email: email });
+    
+    } else if (usertype === "Logistics") {
+      user = await Logistics?.findOne({ email: email });
     }
-
+ 
     // If the user is not found, return an error response
     if (!user) {
       return sendErrorResponse(
@@ -1130,7 +1134,7 @@ const verifyEmailAndResendOTP = async (req, res) => {
         "Email not registered. Please provide a registered address."
       );
     }
-
+ 
     // If the user registration is yet not confirmed by the admin, return an error response
     if (user?.account_status != 1) {
       return sendErrorResponse(
@@ -1139,17 +1143,17 @@ const verifyEmailAndResendOTP = async (req, res) => {
         "Registration Confirmation is still pending with the admin"
       );
     }
-
+ 
     // Check if the user has reached their OTP limit
     const currentDate = new Date();
-
+ 
     if (user?.otpCount >= 5) {
       // If the user has an otpLimitReachedAt timestamp, check if 2 hours have passed
       if (user?.otpLimitReachedAt) {
         const twoHoursLater = new Date(
           user.otpLimitReachedAt.getTime() + 2 * 60 * 60 * 1000
         );
-
+ 
         // If 2 hours haven't passed, deny the request
         if (currentDate < twoHoursLater) {
           return sendErrorResponse(
@@ -1174,13 +1178,13 @@ const verifyEmailAndResendOTP = async (req, res) => {
         );
       }
     }
-
+ 
     // Generate a new OTP and its expiry time (10 minutes ahead)
     const otp = Math.random()?.toString()?.slice(2, 8);
     const tenMinutesAhead = new Date(currentDate.getTime() + 10 * 60 * 1000);
-
+ 
     let updatedUser;
-
+ 
     // Update the user with OTP and expiry based on their type
     if (usertype === "Buyer") {
       updatedUser = await Buyer?.findOneAndUpdate(
@@ -1219,7 +1223,7 @@ const verifyEmailAndResendOTP = async (req, res) => {
         { new: true }
       );
     }
-
+ 
     // If the update fails, return an error
     if (!updatedUser) {
       return sendErrorResponse(
@@ -1228,7 +1232,7 @@ const verifyEmailAndResendOTP = async (req, res) => {
         "Error verifying email and generating OTP."
       );
     }
-
+ 
     // Email settings and content
     // const adminEmail = "platform@medhub.global";
     const subject = "Reset Your Password - One-Time Password (OTP) Enclosed";
@@ -1240,34 +1244,34 @@ const verifyEmailAndResendOTP = async (req, res) => {
       user_type: usertype,
     };
     //end -> for using ejs template
-
+ 
     // Prepare the email content
     const emailContent = await otpForResetPasswordContent(updatedUser, otp);
     // await sendEmail(recipientEmails, subject, emailContent);
-
+ 
     await sendTemplateEmail(recipientEmails, subject, templateName, context);
-
+ 
     // Success response
     return sendSuccessResponse(res, 200, "Mail sent to the registered email.");
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const verifyOTP = async (req, res) => {
   try {
     const { email, otp, usertype } = req?.body;
-
+ 
     if (!email) {
       return sendErrorResponse(res, 400, "Email is required.");
     }
-
+ 
     if (!otp) {
       return sendErrorResponse(res, 400, "OTP is required.");
     }
-
+ 
     let user;
-
+ 
     // Find the user based on their type and email
     if (usertype === "Buyer") {
       user = await Buyer?.findOne({ contact_person_email: email });
@@ -1276,7 +1280,7 @@ const verifyOTP = async (req, res) => {
     } else if (usertype === "Admin") {
       user = await Admin?.findOne({ email: email });
     }
-
+ 
     // If the user is not found, return an error response
     if (!user) {
       return sendErrorResponse(
@@ -1285,23 +1289,23 @@ const verifyOTP = async (req, res) => {
         "Email not registered. Please provide a registered address."
       );
     }
-
+ 
     // Check if OTP matches and if it's still valid (hasn't expired)
     const currentDate = new Date();
-
+ 
     if (user.otp !== Number.parseInt(otp)) {
       return sendErrorResponse(res, 400, "Invalid OTP");
     }
-
+ 
     // Ensure the OTP expiry is correctly handled by checking the time
     const otpExpiryDate = new Date(user.otpExpiry); // Convert to Date object
     if (otpExpiryDate < currentDate) {
       return sendErrorResponse(res, 400, "Expired OTP");
     }
-
+ 
     // OTP is valid, now proceed to remove otp and otpExpiry
     let updatedUser;
-
+ 
     // Update the user and unset the otp and otpExpiry fields
     if (usertype === "Buyer") {
       updatedUser = await Buyer?.findOneAndUpdate(
@@ -1328,33 +1332,33 @@ const verifyOTP = async (req, res) => {
         { new: true }
       );
     }
-
+ 
     // If the update fails, return an error
     if (!updatedUser) {
       return sendErrorResponse(res, 400, "Error unsetting OTP and OTP expiry.");
     }
-
+ 
     // Success response
     return sendSuccessResponse(res, 200, "OTP verified successfully.");
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const resetPassword = async (req, res) => {
   try {
     const { email, password, usertype } = req?.body;
-
+ 
     if (!email) {
       return sendErrorResponse(res, 400, "Email is required.");
     }
-
+ 
     if (!password) {
       return sendErrorResponse(res, 400, "Password is required.");
     }
-
+ 
     let user;
-
+ 
     // Find the user based on their type and email
     if (usertype === "Buyer") {
       user = await Buyer?.findOne({ contact_person_email: email });
@@ -1363,7 +1367,7 @@ const resetPassword = async (req, res) => {
     } else if (usertype === "Admin") {
       user = await Admin?.findOne({ email: email });
     }
-
+ 
     // If the user is not found, return an error response
     if (!user) {
       return sendErrorResponse(
@@ -1372,7 +1376,7 @@ const resetPassword = async (req, res) => {
         "Email not registered. Please provide a registered address."
       );
     }
-
+ 
     // Check if the new password matches the old password
     const isPasswordValid = await bcrypt.compare(password, user?.password);
     if (isPasswordValid) {
@@ -1382,13 +1386,13 @@ const resetPassword = async (req, res) => {
         "New password cannot be the same as old password."
       );
     }
-
+ 
     // Hash the new password
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+ 
     let updateProfile;
-
+ 
     // Update the password based on the user type
     if (usertype === "Buyer") {
       updateProfile = await Buyer?.findOneAndUpdate(
@@ -1409,12 +1413,12 @@ const resetPassword = async (req, res) => {
         { new: true }
       );
     }
-
+ 
     // If the update fails, return an error response
     if (!updateProfile) {
       return sendErrorResponse(res, 400, "Failed to update password.");
     }
-
+ 
     // Success response
     return sendSuccessResponse(
       res,
@@ -1425,23 +1429,23 @@ const resetPassword = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const updatePassword = async (req, res) => {
   try {
     const { id } = req?.params;
     const { usertype } = req?.headers;
     const { newPassword, oldPassword } = req?.body;
-
+ 
     if (!oldPassword) {
       return sendErrorResponse(res, 400, "Old Password is required.");
     }
-
+ 
     if (!newPassword) {
       return sendErrorResponse(res, 400, "New Password is required.");
     }
-
+ 
     let user;
-
+ 
     // Find the user based on their type and email
     if (usertype === "Buyer") {
       user = await Buyer?.findById(id);
@@ -1450,7 +1454,7 @@ const updatePassword = async (req, res) => {
     } else if (usertype === "Admin") {
       user = await Admin?.findById(id);
     }
-
+ 
     // If the user is not found, return an error response
     if (!user) {
       return sendErrorResponse(
@@ -1459,13 +1463,13 @@ const updatePassword = async (req, res) => {
         "Email not registered. Please provide a registered address."
       );
     }
-
+ 
     // Check if the provided old password matches the current password
     const isOldPwdMatch = await bcrypt.compare(oldPassword, user?.password);
     if (!isOldPwdMatch) {
       return sendErrorResponse(res, 400, "Old password is not correct.");
     }
-
+ 
     // Check if the new password matches the old password (to prevent reuse)
     const isNewPwdSameAsOld = await bcrypt.compare(newPassword, user?.password);
     if (isNewPwdSameAsOld) {
@@ -1475,13 +1479,13 @@ const updatePassword = async (req, res) => {
         "New password cannot be the same as old password."
       );
     }
-
+ 
     // Hash the new password
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
+ 
     let updateProfile;
-
+ 
     // Update the password based on the user type
     if (usertype === "Buyer") {
       updateProfile = await Buyer?.findOneAndUpdate(
@@ -1501,12 +1505,12 @@ const updatePassword = async (req, res) => {
         { new: true }
       );
     }
-
+ 
     // If the update fails, return an error response
     if (!updateProfile) {
       return sendErrorResponse(res, 400, "Failed to update password.");
     }
-
+ 
     // Success response
     return sendSuccessResponse(
       res,
@@ -1517,7 +1521,7 @@ const updatePassword = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const updateProfileAndSendEditRequest = async (req, res) => {
   try {
     const { id } = req?.params;
@@ -1532,7 +1536,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
       address = {},
     } = req?.body;
     const isPasswordUpdate = newPassword?.trim();
-
+ 
     // check whether user exists or not
     let user;
     if (usertype === "Buyer") {
@@ -1542,11 +1546,11 @@ const updateProfileAndSendEditRequest = async (req, res) => {
     } else if (usertype === "Admin") {
       user = await Admin?.findById(id);
     }
-
+ 
     if (!user) {
       return sendErrorResponse(res, 400, "Profile not found.");
     }
-
+ 
     // check whether we need to update personal details or not
     const userCountryCode = phone.split(" ")[0]?.replaceAll(" ", "");
     const userMobileNumber = phone
@@ -1554,7 +1558,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
       .slice(1)
       .join(" ")
       ?.replaceAll(" ", "");
-
+ 
     const changePersonalDetails =
       usertype === "Buyer"
         ? user?.contact_person_name !== name ||
@@ -1567,7 +1571,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           user?.contact_person_country_code !== userCountryCode ||
           user?.contact_person_mobile_no !== userMobileNumber ||
           isPasswordUpdate;
-
+ 
     const checkPasswords = async (
       oldPassword,
       newPassword,
@@ -1581,39 +1585,39 @@ const updateProfileAndSendEditRequest = async (req, res) => {
       if (!isOldPwdMatch) {
         return { valid: false, message: "Old password is not correct." };
       }
-
+ 
       if (oldPassword === newPassword) {
         return {
           valid: false,
           message: "New password cannot be the same as old password.",
         };
       }
-
+ 
       if (newPassword !== confirmPassword) {
         return {
           valid: false,
           message: "New password and confirm password must match.",
         };
       }
-
+ 
       // Add additional password strength checks here if necessary
       return { valid: true };
     };
-
+ 
     // check whether we need to update password or not
     const { valid, message } = isPasswordUpdate
       ? await checkPasswords(oldPassword, newPassword, confirmPassword, user)
       : { valid: true };
     if (!valid) return sendErrorResponse(res, 400, message);
-
+ 
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
     const hashedPassword = isPasswordUpdate
       ? await bcrypt.hash(newPassword?.trim(), saltRounds)
       : null;
-
+ 
     const checkAddressForChanges = async (dbObj, otherObj) => {
       let newObj = {};
-
+ 
       // Create newObj with isChanged comparison
       for (let key in otherObj) {
         if (dbObj.hasOwnProperty(key) && otherObj.hasOwnProperty(key)) {
@@ -1623,13 +1627,13 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           };
         }
       }
-
+ 
       // Check if any property has isChanged set to true
       let hasChanges = Object.values(newObj).some((prop) => prop.isChanged);
-
+ 
       return { newObj, hasChanges };
     };
-
+ 
     // check whether we need to update billing address or not
     const changedUpdatedddress = await checkAddressForChanges(
       user?.registeredAddress,
@@ -1639,7 +1643,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
       }
     );
     const sendRequestToAdmin = changedUpdatedddress.hasChanges;
-
+ 
     const updateProfileDetails = async (
       user,
       userType,
@@ -1655,7 +1659,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
         .slice(1)
         .join(" ")
         ?.replaceAll(" ", "");
-
+ 
       // Field mappings based on user type
       const fieldMap = {
         Buyer: {
@@ -1671,13 +1675,13 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           countryCodeField: "contact_person_country_code",
         },
       };
-
+ 
       const updateFields = fieldMap[userType];
-
+ 
       if (!updateFields) {
         throw new Error("Invalid user type.");
       }
-
+ 
       const updateProfile = await (userType === "Buyer"
         ? Buyer
         : Supplier
@@ -1694,10 +1698,10 @@ const updateProfileAndSendEditRequest = async (req, res) => {
         },
         { new: true }
       );
-
+ 
       return updateProfile;
     };
-
+ 
     const sendProfileEditRequest = async (user, userType, address) => {
       const perId = "PER-" + Math.random().toString(16).slice(2, 10);
       const ProfileEdit = ProfileEditRequest;
@@ -1708,7 +1712,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
         userSchemaReference: userType,
         // editReqStatus: "Pendinig",
       });
-
+ 
       const sentRequest = await profileReq.save();
       if (!sentRequest) {
         return sendErrorResponse(
@@ -1717,7 +1721,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           "Failed to send address update request to Admin."
         );
       }
-
+ 
       const updateProfile = await (userType === "Buyer"
         ? Buyer
         : Supplier
@@ -1737,10 +1741,10 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           "Failed to update request status in profile"
         );
       }
-
+ 
       return sentRequest;
     };
-
+ 
     if (!changePersonalDetails && !sendRequestToAdmin) {
       return sendSuccessResponse(
         res,
@@ -1749,7 +1753,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
         user
       );
     }
-
+ 
     if (changePersonalDetails && sendRequestToAdmin) {
       const updateProfile = await updateProfileDetails(
         user,
@@ -1763,7 +1767,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
       if (!updateProfile) {
         return sendErrorResponse(res, 400, "Failed to update profile details.");
       }
-
+ 
       const newProfileEditReq = await sendProfileEditRequest(user, usertype, {
         ...changedUpdatedddress.newObj,
         type: "Registered",
@@ -1776,7 +1780,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
           updateProfile
         );
       }
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -1784,7 +1788,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
         updateProfile
       );
     }
-
+ 
     if (changePersonalDetails && !sendRequestToAdmin) {
       const updateProfile = await updateProfileDetails(
         user,
@@ -1798,7 +1802,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
       if (!updateProfile) {
         return sendErrorResponse(res, 400, "Failed to update profile details.");
       }
-
+ 
       return sendSuccessResponse(
         res,
         200,
@@ -1806,7 +1810,7 @@ const updateProfileAndSendEditRequest = async (req, res) => {
         updateProfile
       );
     }
-
+ 
     if (!changePersonalDetails && sendRequestToAdmin) {
       const newProfileEditReq = await sendProfileEditRequest(user, usertype, {
         ...changedUpdatedddress.newObj,
@@ -1830,11 +1834,11 @@ const updateProfileAndSendEditRequest = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const logoutUser = async (req, res) => {
   try {
     const { usertype } = req.headers;
-
+ 
     const Model =
       usertype === "Buyer"
         ? Buyer
@@ -1845,7 +1849,7 @@ const logoutUser = async (req, res) => {
         : usertype === "Logistics"
         ? LogisticsPartner
         : null;
-
+ 
     const user = await Model?.findByIdAndUpdate(
       req?.userFromMiddleware?._id,
       {
@@ -1853,21 +1857,21 @@ const logoutUser = async (req, res) => {
       },
       { new: true }
     );
-
+ 
     res
       ?.clearCookie("accessToken", cookiesOptions)
       ?.clearCookie("refreshToken", cookiesOptions);
-
+ 
     return sendSuccessResponse(res, 200, "Logout Success");
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 const getOtherinUserDetails = async (req, res) => {
   try {
     const { id, userType } = req?.params;
-
+ 
     const user =
       userType?.toLowerCase() == "buyer"
         ? await Buyer.findById(id)?.select(
@@ -1886,17 +1890,17 @@ const getOtherinUserDetails = async (req, res) => {
             "-password -refreshToken -token -createdAt -updatedAt -__v"
           )
         : null;
-
+ 
     if (!user) {
       return sendErrorResponse(res, 400, "No user Found");
     }
-
+ 
     return sendSuccessResponse(res, 200, "User Found.", user);
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
-
+ 
 module.exports = {
   generateAccessAndRefeshToken,
   registerUser,

@@ -28,7 +28,7 @@ module.exports = () => {
     "/supplier-product-list",
     checkAuthorization,
     authenticationNAuthorization,
-    (req, res) => handleController(Controller.supplierProductList, req, res)
+    (req, res) => handleController(Controller.supplierProductList2, req, res)
   );
 
   routes.post(

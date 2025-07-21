@@ -310,6 +310,115 @@ module.exports = {
     }
   },
 
+  supplierProductList2: async (req, res, reqObj, callback) => {
+    try {
+      const { supplier_id, pageNo, pageSize, medicine_type, buyer_id } = reqObj;
+  
+      const page_no = pageNo || 1;
+      const page_size = pageSize || 2;
+      const offset = (page_no - 1) * page_size;
+  
+      const supplier = await Supplier.findOne({ supplier_id });
+  
+      let buyerCountries = [];
+      if (buyer_id) {
+        const buyer = await Buyer.findOne(
+          { buyer_id },
+          { country_of_operation: 1 }
+        ).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation)
+          ? buyer.country_of_operation
+          : [];
+      }
+  
+      const matchStage = {
+        $match: {
+          supplier_id: supplier._id,
+          market: medicine_type,
+          $or: [
+            { "general.buyersPreferredFrom": { $exists: false } },
+            {
+              "general.buyersPreferredFrom": {
+                $elemMatch: { $in: buyerCountries },
+              },
+            },
+          ],
+        },
+      };
+  
+      const pipeline = [
+        matchStage,
+        {
+          $lookup: {
+            from: "inventories",
+            localField: "inventory",
+            foreignField: "uuid",
+            as: "inventoryDetails",
+          },
+        },
+        {
+          $addFields: {
+            categoryObject: {
+              $getField: {
+                field: "$category",
+                input: "$$ROOT",
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            supplier_id: 1,
+            product_id: 1,
+            market: 1,
+            inventory: 1,
+            storage: 1,
+            category: 1,
+            isDeleted: 1,
+            bulkUpload: 1,
+            general: 1,
+            categoryObject: 1,
+            inventoryDetails: 1,
+          },
+        },
+        { $sort: { createdAt: -1, _id: -1 } },
+        { $skip: offset },
+        { $limit: page_size },
+      ];
+  
+      const data = await Product.aggregate(pipeline);
+  
+      const totalItems = await Product.countDocuments({
+        supplier_id: supplier._id,
+        market: medicine_type,
+        $or: [
+          { "general.buyersPreferredFrom": { $exists: false } },
+          {
+            "general.buyersPreferredFrom": {
+              $elemMatch: { $in: buyerCountries },
+            },
+          },
+        ],
+      });
+  
+      const totalPages = Math.ceil(totalItems / page_size);
+  
+      callback({
+        code: 200,
+        message: "Supplier product list fetched successfully",
+        result: {
+          data,
+          totalPages,
+          totalItems,
+        },
+      });
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+  
+
   buyerSupplierOrdersList: async (req, res, reqObj, callback) => {
     try {
       const { supplier_id, buyer_id, pageNo, pageSize, order_type } = reqObj;
