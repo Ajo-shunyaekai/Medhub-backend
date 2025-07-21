@@ -7,7 +7,7 @@ const {
 } = require("../utils/commonResonse");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
-
+ 
 const Buyer = require("../schema/buyerSchema");
 const Supplier = require("../schema/supplierSchema");
 const Subscription = require("../schema/subscriptionSchema");
@@ -16,25 +16,27 @@ const {
   adminMailOptionsContent,
 } = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
-
+ 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Your secret key from Stripe
-
+ 
 // Array of available subscription plans
 const plans = [
   {
     // plan_id: "price_1Qs1YUG7JtuXMMbfa6sW0JO9", //live
-    plan_id: "price_1Qs1ShG7JtuXMMbfLKxV6J7B", //test
+    // plan_id: "price_1Qs1ShG7JtuXMMbfLKxV6J7B", //test
+    plan_id: "price_1RmAOUG7JtuXMMbfSO5Zc7q7", //test
     plan_name: "Monthly Subscription",
     duration: "month",
   },
   {
     // plan_id: "price_1Qs1YQG7JtuXMMbfWUPZx4eu", //live
-    plan_id: "price_1Qs1UJG7JtuXMMbft0yInx6G", //test
+    // plan_id: "price_1Qs1UJG7JtuXMMbft0yInx6G", //test
+    plan_id: "price_1RmAKgG7JtuXMMbfPiiCFCZN", //test
     plan_name: "Yearly Subscription",
     duration: "year",
   },
 ];
-
+ 
 module.exports = {
   createSubscription: async (req, res) => {
     try {
@@ -42,17 +44,17 @@ module.exports = {
       const plan = plans?.find(
         (plan) => plan?.plan_name === plan_name && plan?.duration === duration
       );
-
+ 
       if (!plan) {
         return res?.status(400)?.json({ message: "Plan not found!!" });
       }
-
+ 
       // Check if customer exists by email
       const customers = await stripe.customers.list({
         email: email,
         limit: 1, // We only need to check for one customer
       });
-
+ 
       let customer;
       if (customers.data.length > 0) {
         // Customer exists, use the existing customer details
@@ -63,7 +65,7 @@ module.exports = {
           email: email,
         });
       }
-
+ 
       // Create the subscription session
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
@@ -88,7 +90,7 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-
+ 
   savePayment: async (req, res) => {
     try {
       const { session_id, userType, userId, email } = req?.body;
@@ -96,12 +98,12 @@ module.exports = {
       const subscription = await stripe.subscriptions.retrieve(
         session?.subscription
       );
-
+ 
       if (session.status == "complete") {
         // Convert timestamp to Date
         const startDate = new Date(subscription.current_period_start * 1000); // Multiply by 1000 to convert from seconds to milliseconds
         const endDate = new Date(subscription.current_period_end * 1000); // Multiply by 1000 to convert from seconds to milliseconds
-
+ 
         // Format the date in the desired format
         const formatDate = (date) => {
           return date.toLocaleDateString("en-US", {
@@ -110,34 +112,34 @@ module.exports = {
             day: "numeric",
           });
         };
-
+ 
         // Display the formatted dates
         const subscriptionStartDate = formatDate(startDate);
         const subscriptionEndDate = formatDate(endDate);
-
+ 
         // Retrieve the plan details directly from Stripe
         const plan = await stripe.prices.retrieve(subscription?.plan?.id);
-
+ 
         if (!plan) {
           return res?.status(400)?.json({ message: "Plan not found!!" });
         }
-
+ 
         // Retrieve the associated product details using the product ID from the plan
         const product = await stripe.products.retrieve(plan.product);
-
+ 
         if (!product) {
           return res.status(404).json({ message: "Product not found" });
         }
-
+ 
         // Retrieve the associated product details using the invoice ID from the plan
         const invoice = await stripe.invoices.retrieve(
           subscription?.latest_invoice
         );
-
+ 
         if (!invoice) {
           return res.status(404).json({ message: "Invoice not found" });
         }
-
+ 
         const subscriptionDetails = {
           sessionId: session?.id,
           customerId: subscription?.customer,
@@ -158,12 +160,12 @@ module.exports = {
           name: product?.name,
           months: subscription?.plan?.interval_count,
         };
-
+ 
         // Check if the subscription already exists based on the sessionId
         const SubscriptionExists = await Subscription.findOne({
           "subscriptionDetails.sessionId": session?.id,
         });
-
+ 
         if (SubscriptionExists) {
           // If subscription exists, return response with the existing subscription details
           return sendSuccessResponse(
@@ -173,17 +175,17 @@ module.exports = {
             SubscriptionExists
           );
         }
-
+ 
         // Create new subscription document
         const newSubscription = new Subscription({
           userId: userId, // Get userId from request body
           userSchemaReference: userType === "buyer" ? "Buyer" : "Supplier", // UserType determines schema reference
           subscriptionDetails: subscriptionDetails,
         });
-
+ 
         // Save the new subscription
         const newSubscriptionSaved = await newSubscription.save();
-
+ 
         if (!newSubscriptionSaved) {
           return sendErrorResponse(
             res,
@@ -191,7 +193,7 @@ module.exports = {
             "Failed Saving Subscription Details"
           );
         }
-
+ 
         // Check if user exists before updating
         const updatedUser = await (userType === "buyer"
           ? Buyer
@@ -211,7 +213,7 @@ module.exports = {
           },
           { new: true }
         );
-
+ 
         if (!updatedUser) {
           return sendErrorResponse(
             res,
@@ -219,7 +221,7 @@ module.exports = {
             "Failed Saving Subscription Details of the user"
           );
         }
-
+ 
         // Return the subscription details
         return sendSuccessResponse(
           res,
@@ -234,7 +236,7 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-
+ 
   sendEmailConfirmation: async (req, res) => {
     try {
       const { usertype } = req?.headers;
@@ -247,7 +249,7 @@ module.exports = {
         subscriptionEndDate,
         amount,
       } = req?.body;
-
+ 
       const userFound = await (usertype?.toLowerCase() == "buyer"
         ? Buyer
         : Supplier
@@ -266,7 +268,7 @@ module.exports = {
       const file = req.file || {};
       // Check if file is attached to the request
       if (!req.file) return sendErrorResponse(res, 500, "No file uploaded");
-
+ 
       // Assuming you're using Nodemailer to send the email
       const transporter = nodemailer.createTransport({
         service: "gmail",
@@ -275,9 +277,9 @@ module.exports = {
           pass: process.env.SMTP_USER_PASSWORD,
         },
       });
-
+ 
       const subject = "Subscription Confirmation";
-
+ 
       const emailContent = await sendEmailConfirmationContent(
         userFound,
         name,
@@ -296,7 +298,7 @@ module.exports = {
           },
         ]
       );
-
+ 
       // Delete the file after sending the email
       fs.unlink(file.path, (err) => {
         if (err) {
@@ -305,7 +307,7 @@ module.exports = {
           return sendErrorResponse(res, 500, "Error deleting file:", err);
         }
       });
-
+ 
       const subject2 = "New Subscription and Payment Confirmation";
       const emailContent2 = await adminMailOptionsContent(
         userFound,
@@ -321,7 +323,7 @@ module.exports = {
           path: file.path,
         },
       ]);
-
+ 
       const updaedUserForEmail = await (usertype?.toLowerCase() == "buyer"
         ? Buyer
         : Supplier
@@ -336,7 +338,7 @@ module.exports = {
       );
       if (!updaedUserForEmail)
         return sendErrorResponse(res, 500, "No user found");
-
+ 
       // Return the subscription details
       return sendSuccessResponse(
         res,
@@ -347,14 +349,14 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-
+ 
   getSubscriptionDetils: async (req, res) => {
     try {
       const { id } = req?.params;
       const subscriptionDetails = await Subscription.findById(id);
       if (!subscriptionDetails)
         return sendErrorResponse(res, 500, "No Subscription found");
-
+ 
       // Return the subscription details
       return sendSuccessResponse(
         res,
