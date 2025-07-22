@@ -25,27 +25,31 @@ const { URL } = require("url");
 
 //s3 proxy
 app.get("/pdf-proxy/*", async (req, res) => {
-  const filename = decodeURIComponent(req.params[0]);
+  try {
+    const filename = decodeURIComponent(req.params[0]);
+    console.log("/pdf-proxy/*");
+    const s3Url = `${process.env.S3_URL}/${filename}`;
+    const parsedUrl = new URL(s3Url);
 
-  const s3Url = `${process.env.S3_URL}/${filename}`;
-  const parsedUrl = new URL(s3Url);
+    const protocol = parsedUrl.protocol === "https:" ? https : http;
 
-  const protocol = parsedUrl.protocol === "https:" ? https : http;
+    res.setHeader("Access-Control-Allow-Origin", "*");
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
-
-  protocol
-    .get(s3Url, (s3Res) => {
-      res.setHeader(
-        "Content-Type",
-        s3Res.headers["content-type"] || "application/pdf"
-      );
-      s3Res.pipe(res);
-    })
-    .on("error", (err) => {
-      console.error("Proxy error:", err);
-      res.status(500).send("Error fetching PDF from S3.");
-    });
+    protocol
+      .get(s3Url, (s3Res) => {
+        res.setHeader(
+          "Content-Type",
+          s3Res.headers["content-type"] || "application/pdf"
+        );
+        s3Res.pipe(res);
+      })
+      .on("error", (err) => {
+        console.error("Proxy error:", err);
+        res.status(500).send("Error fetching PDF from S3.");
+      });
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
 });
 
 // db-connection
