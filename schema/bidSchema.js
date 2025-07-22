@@ -9,10 +9,15 @@ const bidSchema = new Schema(
         trim: true,
         required: [true, "Validation Error: Bid Start Date is required."],
       },
-      time: {
+      startTime: {
         type: String,
         trim: true,
         required: [true, "Validation Error: Bid Start Time is required."],
+      },
+      endTime: {
+        type: String,
+        trim: true,
+        required: [true, "Validation Error: Bid End Time is required."],
       },
       endDate: {
         type: String,
@@ -65,8 +70,9 @@ const bidSchema = new Schema(
           trim: true,
         },
         docReq: {
-          type: Boolean,
-          default: false,
+          type: String,
+          enum: ['Yes', 'No'],
+          default: 'No',
         },
         totalBids: {
           type: Number,
@@ -99,12 +105,12 @@ const bidSchema = new Schema(
         upc: {
           type: String,
           trim: true,
-          required: [true, "Validation Error: UPC is required."],
+          // required: [true, "Validation Error: UPC is required."],
         },
         brand: {
           type: String,
           trim: true,
-          required: [true, "Validation Error: Brand Name is required."],
+          // required: [true, "Validation Error: Brand Name is required."],
         },
         quantity: {
           type: String,
@@ -135,7 +141,7 @@ const bidSchema = new Schema(
         openFor: {
           type: String,
           trim: true,
-          enum: ["Manufacturer", "Distributor", "Service Providor"],
+          enum: ["Manufacturer", "Distributor", "Service Provider"],
           required: [true, "Validation Error: Open for is required."],
         },
         fromCountries: [

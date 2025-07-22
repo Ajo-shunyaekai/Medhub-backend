@@ -16,7 +16,7 @@ const { getFilePathsAdd } = require("../helper");
 
 const getAllBids = async (req, res) => {
   try {
-    const { userId, status, page_no = 1, page_size = 5 } = req.query;
+    const { userId, status, page_no = 1, page_size = 10 } = req.query;
 
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
@@ -201,6 +201,61 @@ const addBid = async (req, res) => {
       );
     }
 
+    let additionalDetailsArray = [];
+
+    try {
+      const { additionalDetails } = req.body;
+
+      // Case 1: If already an array of objects (not strings)
+      if (
+        Array.isArray(additionalDetails) &&
+        additionalDetails.every((item) => typeof item === "object")
+      ) {
+        additionalDetailsArray = additionalDetails.map((item) => ({
+          ...item,
+          itemId: Math.random().toString(16).slice(2, 10),
+        }));
+      }
+
+      // Case 2: If array of strings
+      else if (Array.isArray(additionalDetails)) {
+        const validJsonString = additionalDetails.find((entry) => {
+          try {
+            const parsed = JSON.parse(entry);
+            return Array.isArray(parsed);
+          } catch {
+            return false;
+          }
+        });
+
+        if (validJsonString) {
+          const parsed = JSON.parse(validJsonString);
+          additionalDetailsArray = parsed.map((item) => ({
+            ...item,
+            itemId: Math.random().toString(16).slice(2, 10),
+          }));
+        }
+      }
+
+      // Case 3: If it is a single valid JSON string
+      else if (typeof additionalDetails === "string") {
+        const parsed = JSON.parse(additionalDetails);
+        if (Array.isArray(parsed)) {
+          additionalDetailsArray = parsed.map((item) => ({
+            ...item,
+            itemId: Math.random().toString(16).slice(2, 10),
+          }));
+        }
+      }
+
+      // Case 4: Unexpected format
+      else {
+        console.warn("Unsupported format for additionalDetails:", additionalDetails);
+      }
+    } catch (err) {
+      return handleCatchBlockError(req, res, err);
+    }
+
     const newBidDetails = {
       ...req?.body,
       bid_id,
@@ -239,14 +294,15 @@ const addBid = async (req, res) => {
           })
           ?.filter((ele) => ele?.document || ele?.name),
       },
-      additionalDetails: JSON.parse(
-        req?.body?.additionalDetails
-          ?.filter((value) => value != "[object Object]")
-          ?.map((ele) => ({
-            ...ele,
-            itemId: Math.random().toString(16).slice(2, 10),
-          }))
-      ),
+      // additionalDetails: JSON.parse(
+      //   req?.body?.additionalDetails
+      //     ?.filter((value) => value != "[object Object]")
+      //     ?.map((ele) => ({
+      //       ...ele,
+      //       itemId: Math.random().toString(16).slice(2, 10),
+      //     }))
+      // ),
+      additionalDetails: additionalDetailsArray,
     };
 
     const newBid = await Bid.create(newBidDetails);
