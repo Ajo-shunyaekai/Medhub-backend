@@ -16,6 +16,7 @@ const {
   adminMailOptionsContent,
 } = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
+const { getFilePathsAdd } = require("../helper");
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Your secret key from Stripe
 
@@ -45,6 +46,10 @@ const createSubscription = async (req, res) => {
       email = "ajostripetest@yopmail.com",
       userType,
       userId,
+      name,
+      amount,
+      subscriptionStartDate,
+      invoiceNumber,
     } = req?.body;
 
     const plan = plans?.find(
@@ -54,7 +59,6 @@ const createSubscription = async (req, res) => {
     if (!plan) {
       return res?.status(400)?.json({ message: "Plan not found!!" });
     }
-    console.log("\n\n\n\njjjjjjjj", req?.body);
 
     // Check if customer exists by email
     const customers = await stripe.customers.list({
@@ -73,6 +77,30 @@ const createSubscription = async (req, res) => {
       });
     }
 
+    const invoiceFile = await getFilePathsAdd(req, res, ["invoice_pdf"]);
+
+    const user = await (userType == "supplier"
+      ? Supplier
+      : Buyer
+    )?.findOneAndUpdate(
+      {
+        contact_person_email: email,
+      },
+      {
+        $set: {
+          tempSubsInvoice: {
+            ...req?.body,
+            file: invoiceFile?.["invoice_pdf"]?.[0] || "",
+          },
+        },
+      },
+      { neew: true }
+    );
+
+    if (!user) {
+      return sendErrorResponse(res, 500, "Failed Finding user");
+    }
+
     // Create the subscription session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -83,9 +111,42 @@ const createSubscription = async (req, res) => {
           quantity: 1,
         },
       ],
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "any", // Force OTP for every transaction
+        },
+      },
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now as timestamp must be at least 30 minutes from Checkout Session creation
+      // payment_intent_data: {
+      //   setup_future_usage: "on_session", // Forces 3D Secure authentication   off_session
+      //   metadata: {
+      //     name,
+      //     amount,
+      //     subscriptionStartDate,
+      //     invoiceNumber,
+      //   },
+      //   description:
+      //     name +
+      //     " " +
+      //     amount +
+      //     " " +
+      //     subscriptionStartDate +
+      //     " " +
+      //     invoiceNumber +
+      //     ".",
+      //   // capture_method : 'manual',
+      // }, // You can not pass `payment_intent_data` in `subscription` mode.
       success_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/successful?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/failure`,
       customer: customer.id, // Use the existing or new customer
+      metadata: {
+        name,
+        amount,
+        subscriptionStartDate,
+        invoiceNumber,
+        userId,
+        userType,
+      },
     });
 
     if (!session) {
@@ -378,56 +439,6 @@ const getSubscriptionDetils = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-// const stripeWebhook = async (req, res) => {
-//   try {
-//     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-//     const sig = req.headers["stripe-signature"];
-//     let event;
-//     // console.log('body :', req.body);
-//     try {
-//       event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-//     } catch (err) {
-//       console.log("errmsg:", err.message);
-//       // res.status(400).send(`Webhook Error: ${err.message}`);
-//       handleCatchBlockError(req, res, err);
-//       return;
-//     }
-//     // Handle the event
-//     const bookingType = event.data.object.metadata?.booking_type;
-//     const bookingId = event.data.object.metadata?.booking_id;
-//     const userId = event.data.object.metadata?.user_id;
-//     const couponCode = event.data.object.metadata?.coupon_code;
-//     const sessionId = event.data.object.id;
-//     const paymentIntentId =
-//       event.data.object.payment_intent || event.data.object.id;
-
-//     switch (event.type) {
-//       case "checkout.session.completed":
-//         const userId = event.data.object.metadata?.user_id;
-//         const userType = event.data.object.metadata?.user_type;
-//         const planName = event.data.object.metadata?.plan_name;
-
-//         // Optional: log or use metadata
-//         console.log(`User ${userId} of type ${userType} purchased ${planName}`);
-
-//         // Then call your logic
-//         await BookingConfirm(
-//           bookingType,
-//           bookingId,
-//           paymentIntentId,
-//           couponCode
-//         );
-//         break;
-//       default:
-//         console.log(`Unhandled event type ${event.data.object}`);
-//     }
-//     // Return a 200 response to acknowledge receipt of the event
-//     return sendSuccessResponse(res, 200, "Subscription success!");
-//     return;
-//   } catch (error) {
-//     handleCatchBlockError(req, res, err);
-//   }
-// };
 const stripeWebhook = async (req, res) => {
   try {
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -445,46 +456,62 @@ const stripeWebhook = async (req, res) => {
     switch (event.type) {
       case "checkout.session.completed":
         try {
-          const session = event.data.object;
+          // const session = event.data.object;
+          const {
+            name,
+            amount,
+            subscriptionStartDate,
+            invoiceNumber,
+            userId,
+            userType,
+          } = session?.metadata;
 
-          const session_id = session.id;
-          const userId = session.metadata?.user_id;
-          const userType = session.metadata?.user_type;
-          const email =
-            session.customer_details?.email || session.metadata?.email;
-          const name = session.customer_details?.name || "User";
+          // const session_id = session.id;
+          // const userId = session.metadata?.user_id;
+          // const userType = session.metadata?.user_type;
+          // const email =
+          //   session.customer_details?.email || session.metadata?.email;
+          // const name = session.customer_details?.name || "User";
 
           // Call the savePayment function
-          await savePayment(
-            {
-              body: {
-                session_id,
-                userType,
-                userId,
-                email,
-              },
-            },
-            res
-          ); // Call directly with req-like object
+          // await savePayment(
+          //   {
+          //     body: {
+          //       session_id,
+          //       userType,
+          //       userId,
+          //       email,
+          //     },
+          //   },
+          //   res
+          // ); // Call directly with req-like object
 
-          // Call the sendEmailConfirmation function
-          await sendEmailConfirmation(
-            {
-              headers: { usertype: userType },
-              body: {
-                session_id,
-                userId,
-                email,
-                name,
-                subscriptionStartDate: "", // You can retrieve actual dates inside savePayment and pass back
-                subscriptionEndDate: "",
-                amount: "",
-              },
-              file: null, // If you're attaching invoice PDF later, pass it here
-            },
-            res
+          // // Call the sendEmailConfirmation function
+          // await sendEmailConfirmation(
+          //   {
+          //     headers: { usertype: userType },
+          //     body: {
+          //       session_id,
+          //       userId,
+          //       email,
+          //       name,
+          //       subscriptionStartDate: "", // You can retrieve actual dates inside savePayment and pass back
+          //       subscriptionEndDate: "",
+          //       amount: "",
+          //     },
+          //     file: null, // If you're attaching invoice PDF later, pass it here
+          //   },
+          //   res
+          // );
+          console.log(
+            "\n\n\n\n\nWebhook handled and actions completed.",
+            name,
+            amount,
+            subscriptionStartDate,
+            invoiceNumber,
+            userId,
+            userType
           );
-
           return res.status(200).send("Webhook handled and actions completed.");
         } catch (err) {
           console.error("Webhook internal logic error:", err);
@@ -495,7 +522,7 @@ const stripeWebhook = async (req, res) => {
         break;
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        console.error(`Unhandled event type ${event.type}`);
         return res.status(200).send("Event ignored");
     }
   } catch (error) {

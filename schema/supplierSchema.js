@@ -14,7 +14,12 @@ const supplierSchema = new Schema(
     },
     supplier_type: {
       type: String,
-      enum: ["Manufacturer", "Distributor", "Medical Practitioner", "Service Provider"],
+      enum: [
+        "Manufacturer",
+        "Distributor",
+        "Medical Practitioner",
+        "Service Provider",
+      ],
       required: true,
       trim: true,
     },
@@ -283,6 +288,23 @@ const supplierSchema = new Schema(
     },
     annualTurnover: {
       type: Number,
+    },
+    tempSubsInvoice: {
+      name: {
+        type: String,
+      },
+      amount: {
+        type: String,
+      },
+      subscriptionStartDate: {
+        type: String,
+      },
+      invoiceNumber: {
+        type: String,
+      },
+      file: {
+        type: String,
+      },
     },
   },
   { timestamps: true }

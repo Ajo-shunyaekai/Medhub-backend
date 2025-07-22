@@ -293,6 +293,23 @@ const buyerSchema = new Schema(
     annualTurnover: {
       type: Number,
     },
+    tempSubsInvoice: {
+      name: {
+        type: String,
+      },
+      amount: {
+        type: String,
+      },
+      subscriptionStartDate: {
+        type: String,
+      },
+      invoiceNumber: {
+        type: String,
+      },
+      file: {
+        type: String,
+      },
+    },
   },
   { timestamps: true }
 );
