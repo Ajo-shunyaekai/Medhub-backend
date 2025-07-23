@@ -9,7 +9,6 @@ const bodyParser = require("body-parser");
 const connect = require("./utils/dbConnection");
 const initializeSocket = require("./utils/socketHandler");
 const { stripeWebhook } = require("./controller/Subscription2");
-// const ffmpeg = require('fluent-ffmpeg');
 const logErrorToFile = require("./logs/errorLogs");
 const {
   sendErrorResponse,
@@ -17,24 +16,20 @@ const {
 } = require("./utils/commonResonse");
 const { rateLimiter } = require("./middleware/expressRateLimiter");
 const { corsOptions } = require("./config/corsOptions");
-// require('./schedulers/tasks');
-
 const https = require("https");
 const http = require("http");
 const { URL } = require("url");
-
-//s3 proxy
+ 
+//---------------------- PDF Proxy Handler ----------------------//
 app.get("/pdf-proxy/*", async (req, res) => {
   try {
     const filename = decodeURIComponent(req.params[0]);
-    console.log("/pdf-proxy/*");
     const s3Url = `${process.env.S3_URL}/${filename}`;
     const parsedUrl = new URL(s3Url);
-
     const protocol = parsedUrl.protocol === "https:" ? https : http;
-
+ 
     res.setHeader("Access-Control-Allow-Origin", "*");
-
+ 
     protocol
       .get(s3Url, (s3Res) => {
         res.setHeader(
@@ -51,50 +46,51 @@ app.get("/pdf-proxy/*", async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 });
-
-// db-connection
+ 
+//---------------------- DB Connection ----------------------//
 connect();
-
-// middlewares
+ 
+//---------------------- Static Folders ----------------------//
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "build")));
-app.use(cors(corsOptions));
-app.use(cookieParser());
-// app.use(rateLimiter)
-app.use(bodyParser.json({ limit: "500000mb" }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-
-// Path for the uploads folder
 app.use("/uploads", express.static("uploads"));
 const uploadFolderPath = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadFolderPath)) {
   fs.mkdirSync(uploadFolderPath);
 }
-
-// Import routes from index.js
-
+ 
+//---------------------- CORS & Cookie ----------------------//
+app.use(cors(corsOptions));
+app.use(cookieParser());
+ 
+//---------------------- Stripe Webhook (RAW BODY) ----------------------//
 app.post(
   "/api/stripe-webhook",
   bodyParser.raw({ type: "application/json" }),
   stripeWebhook
 );
+ 
+//---------------------- JSON Parsers (after webhook!) ----------------------//
+app.use(express.json({ limit: "500mb" }));
+app.use(express.urlencoded({ extended: false }));
+ 
+//---------------------- Main Routes ----------------------//
 require("./index")(app);
-
-// Error-handling middleware
+ 
+//---------------------- Global Error Handler ----------------------//
 app.use((err, req, res, next) => {
   handleCatchBlockError(req, res, err);
 });
-
+ 
 const ADMIN_ID = process.env.ADMIN_ID;
+ 
+//---------------------- Start Server ----------------------//
 const PORT = process.env.PORT || 2222;
-
-const server = app.listen(PORT, (req, res) => {
-  console.log(`server is running on http://localhost:${PORT}/`);
+const server = app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
-
+ 
+//---------------------- Initialize WebSocket ----------------------//
 initializeSocket(server);
-
+ 
 module.exports = app;

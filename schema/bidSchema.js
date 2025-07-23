@@ -29,6 +29,29 @@ const bidSchema = new Schema(
         trim: true,
         required: [true, "Validation Error: Bid Description is required."],
       },
+      fromCountries: [
+        {
+          type: String,
+          trim: true,
+          required: [true, "Validation Error: From Countries is required."],
+        },
+      ],
+      country: {
+        type: String,
+        trim: true,
+        required: [
+          true,
+          "Validation Error: Country of Destination is required.",
+        ],
+      },
+      state: {
+        type: String,
+        trim: true,
+        required: [
+          true,
+          "Validation Error: State of Destination is required.",
+        ],
+      },
       bidDocs: [
         {
           type: String,
@@ -122,35 +145,35 @@ const bidSchema = new Schema(
           trim: true,
           required: [true, "Validation Error: Target Price is required."],
         },
-        country: {
-          type: String,
-          trim: true,
-          required: [
-            true,
-            "Validation Error: Country of Destination is required.",
-          ],
-        },
-        state: {
-          type: String,
-          trim: true,
-          required: [
-            true,
-            "Validation Error: State of Destination is required.",
-          ],
-        },
+        // country: {
+        //   type: String,
+        //   trim: true,
+        //   required: [
+        //     true,
+        //     "Validation Error: Country of Destination is required.",
+        //   ],
+        // },
+        // state: {
+        //   type: String,
+        //   trim: true,
+        //   required: [
+        //     true,
+        //     "Validation Error: State of Destination is required.",
+        //   ],
+        // },
         openFor: {
           type: String,
           trim: true,
           enum: ["Manufacturer", "Distributor", "Service Provider"],
           required: [true, "Validation Error: Open for is required."],
         },
-        fromCountries: [
-          {
-            type: String,
-            trim: true,
-            required: [true, "Validation Error: From Countries is required."],
-          },
-        ],
+        // fromCountries: [
+        //   {
+        //     type: String,
+        //     trim: true,
+        //     required: [true, "Validation Error: From Countries is required."],
+        //   },
+        // ],
         delivery: {
           type: String,
           trim: true,
