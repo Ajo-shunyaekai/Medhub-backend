@@ -326,10 +326,10 @@ module.exports = {
 
   getRegReqList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, limit, filterValue, pageSize } = reqObj;
+      const { pageNo, limit, filterValue, pageSize, searchKey = '', status } = reqObj;
 
-      const page_no = pageNo || 1; // Default to page 1 if no page number is provided
-      const page_size = limit || pageSize || 5; // Default limit to 5 if not provided
+      const page_no = pageNo || 1; 
+      const page_size = limit || pageSize || 5; 
       const offSet = (page_no - 1) * page_size;
 
       const fields = {
@@ -337,7 +337,7 @@ module.exports = {
         password: 0,
       };
 
-      let dateFilter = {}; // Initialize date filter
+      let dateFilter = {}; 
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
@@ -374,13 +374,25 @@ module.exports = {
         dateFilter = {}; // No filtering, fetch all data
       }
 
-      Supplier.find({ account_status: 0, ...dateFilter })
+      const searchFilter = searchKey
+      ? {
+        supplier_name: { $regex: new RegExp(`^${searchKey}`, "i") },
+        }
+      : {};
+
+    const query = {
+      account_status: status,
+      ...dateFilter,
+      ...searchFilter,
+    };
+
+      Supplier.find(query)
         .select(fields)
-        .sort({ createdAt: -1 }) // Sorting by creation date, descending order
+        .sort({ createdAt: -1 }) 
         .skip(offSet)
         .limit(page_size)
         .then((data) => {
-          Supplier.countDocuments({ account_status: 0, ...dateFilter })
+          Supplier.countDocuments(query)
             .then((totalItems) => {
               const totalPages = Math.ceil(totalItems / page_size);
               const returnObj = {
@@ -617,7 +629,7 @@ module.exports = {
 
   getBuyerList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, pageSize, filterKey, filterValue } = reqObj;
+      const { pageNo, pageSize, filterKey, filterValue, searchKey = '' } = reqObj;
 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
@@ -675,8 +687,14 @@ module.exports = {
         dateFilter = {}; // No date filter
       }
 
+      const searchFilter = searchKey
+      ? {
+          buyer_name: { $regex: new RegExp(`^${searchKey}`, "i") },
+        }
+      : {};
+
       // Merge dateFilter with filterCondition to apply both filters
-      const combinedFilter = { ...filterCondition, ...dateFilter };
+      const combinedFilter = { ...filterCondition, ...dateFilter, ...searchFilter };
 
       const data = await Buyer.find(combinedFilter)
         .select(fields)
@@ -704,7 +722,7 @@ module.exports = {
 
   getBuyerRegReqList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, pageSize, filterValue } = reqObj;
+      const { pageNo, pageSize, filterValue, searchKey = '' } = reqObj;
 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
@@ -752,13 +770,25 @@ module.exports = {
         dateFilter = {};
       }
 
-      Buyer.find({ account_status: 0, ...dateFilter })
+      const searchFilter = searchKey
+      ? {
+          buyer_name: { $regex: new RegExp(`^${searchKey}`, "i") },
+        }
+      : {};
+
+      const query = {
+        account_status: 0,
+        ...dateFilter,
+        ...searchFilter,
+      };
+
+      Buyer.find(query)
         .select(fields)
         .sort({ createdAt: -1 })
         .skip(offSet)
         .limit(page_size)
         .then((data) => {
-          Buyer.countDocuments({ account_status: 0, ...dateFilter })
+          Buyer.countDocuments(query)
             .then((totalItems) => {
               const totalPages = Math.ceil(totalItems / page_size);
               const resultObj = {
