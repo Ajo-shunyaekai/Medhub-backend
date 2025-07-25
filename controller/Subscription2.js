@@ -17,6 +17,7 @@ const {
 } = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
 const { getFilePathsAdd } = require("../helper");
+const { default: mongoose } = require("mongoose");
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Your secret key from Stripe
 
@@ -60,100 +61,65 @@ const createSubscription = async (req, res) => {
       return res?.status(400)?.json({ message: "Plan not found!!" });
     }
 
-    // Check if customer exists by email
     const customers = await stripe.customers.list({
       email: email,
-      limit: 1, // We only need to check for one customer
+      limit: 1,
     });
 
     let customer;
     if (customers.data.length > 0) {
-      // Customer exists, use the existing customer details
       customer = customers.data[0];
     } else {
-      // Customer does not exist, create a new customer
-      customer = await stripe.customers.create({
-        email: email,
-      });
+      customer = await stripe.customers.create({ email: email });
     }
 
     const invoiceFile = await getFilePathsAdd(req, res, ["invoice_pdf"]);
 
-    const user = await (userType == "supplier"
+    const user = await (userType?.trim()?.toLowerCase() === "supplier"
       ? Supplier
       : Buyer
-    )?.findOneAndUpdate(
-      {
-        contact_person_email: email,
-      },
-      {
-        $set: {
-          tempSubsInvoice: {
-            ...req?.body,
-            file: invoiceFile?.["invoice_pdf"]?.[0] || "",
-          },
-        },
-      },
-      { neew: true }
-    );
+    )?.findOne({
+      contact_person_email: email,
+    });
 
     if (!user) {
       return sendErrorResponse(res, 500, "Failed Finding user");
     }
 
-    // Create the subscription session
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: plan?.plan_id,
-          quantity: 1,
-        },
-      ],
-      payment_method_options: {
-        card: {
-          request_three_d_secure: "any", // Force OTP for every transaction
-        },
-      },
-      expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now as timestamp must be at least 30 minutes from Checkout Session creation
-      // payment_intent_data: {
-      //   setup_future_usage: "on_session", // Forces 3D Secure authentication   off_session
-      //   metadata: {
-      //     name,
-      //     amount,
-      //     subscriptionStartDate,
-      //     invoiceNumber,
-      //   },
-      //   description:
-      //     name +
-      //     " " +
-      //     amount +
-      //     " " +
-      //     subscriptionStartDate +
-      //     " " +
-      //     invoiceNumber +
-      //     ".",
-      //   // capture_method : 'manual',
-      // }, // You can not pass `payment_intent_data` in `subscription` mode.
-      success_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/successful?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/failure`,
-      customer: customer.id, // Use the existing or new customer
-      metadata: {
-        name,
-        amount,
-        subscriptionStartDate,
-        invoiceNumber,
-        userId,
-        userType,
-      },
+    const subscription = await Subscription.create({
+      userId: user?._id,
+      email: user?.contact_person_email,
+      userType:
+        userType?.trim()?.toLowerCase() === "buyer" ? "Buyer" : "Supplier",
+      custom_invoice_pdf: invoiceFile?.["invoice_pdf"]?.[0] || "",
+      custom_subscription_id: "SBSC-" + Math.random().toString(16).slice(2, 10),
     });
 
-    if (!session) {
-      return res
-        ?.status(400)
-        ?.json({ message: "Error with payment integration!!" });
+    if (!subscription) {
+      return sendErrorResponse(res, 500, "Failed Creating Subscription");
     }
+
+    // Step 1: Create session
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      // discounts: [{ coupon: "bcmkVBK9" }],
+      payment_method_types: ["card"],
+      line_items: [{ price: plan?.plan_id, quantity: 1 }],
+      payment_method_options: {
+        card: { request_three_d_secure: "any" },
+      },
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+      // success_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/successful?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/successful`,
+      cancel_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/failure`,
+      customer: customer.id,
+      metadata: {
+        subscriptionId: String(subscription?._id),
+        userId: String(userId),
+        email: String(email),
+        userType: String(userType),
+      },
+    });
 
     return sendSuccessResponse(
       res,
@@ -165,262 +131,184 @@ const createSubscription = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-const savePayment = async (req, res) => {
+
+const savePaymentAndSendEmail = async (req, res, detailObj) => {
   try {
-    const { session_id, userType, userId, email } = req?.body;
+    const { session_id, userType, userId, email, subscriptionId } = detailObj;
+
+    if (!mongoose.Types.ObjectId.isValid(subscriptionId)) {
+      console.error("Invalid subscription ID");
+      return sendErrorResponse(res, 500, "Invalid subscription ID");
+    }
+
+    const subscriptionExists = await Subscription.findOne({
+      _id: new mongoose.Types.ObjectId(subscriptionId),
+    });
+
+    if (!subscriptionExists) {
+      console.error("No Subscription details found");
+      return sendErrorResponse(res, 500, "No Subscription details found");
+    }
+
     const session = await stripe.checkout.sessions.retrieve(session_id);
+
     const subscription = await stripe.subscriptions.retrieve(
       session?.subscription
     );
 
-    if (session.status == "complete") {
-      // Convert timestamp to Date
-      const startDate = new Date(subscription.current_period_start * 1000); // Multiply by 1000 to convert from seconds to milliseconds
-      const endDate = new Date(subscription.current_period_end * 1000); // Multiply by 1000 to convert from seconds to milliseconds
+    // Convert timestamp to Date
+    const startDate = new Date(subscription.current_period_start * 1000); // Multiply by 1000 to convert from seconds to milliseconds
+    const endDate = new Date(subscription.current_period_end * 1000); // Multiply by 1000 to convert from seconds to milliseconds
 
-      // Format the date in the desired format
-      const formatDate = (date) => {
-        return date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-      };
-
-      // Display the formatted dates
-      const subscriptionStartDate = formatDate(startDate);
-      const subscriptionEndDate = formatDate(endDate);
-
-      // Retrieve the plan details directly from Stripe
-      const plan = await stripe.prices.retrieve(subscription?.plan?.id);
-
-      if (!plan) {
-        return res?.status(400)?.json({ message: "Plan not found!!" });
-      }
-
-      // Retrieve the associated product details using the product ID from the plan
-      const product = await stripe.products.retrieve(plan.product);
-
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-
-      // Retrieve the associated product details using the invoice ID from the plan
-      const invoice = await stripe.invoices.retrieve(
-        subscription?.latest_invoice
-      );
-
-      if (!invoice) {
-        return res.status(404).json({ message: "Invoice not found" });
-      }
-
-      const subscriptionDetails = {
-        sessionId: session?.id,
-        customerId: subscription?.customer,
-        subscriptionId: subscription?.id,
-        productId: subscription?.plan?.product,
-        planId: subscription?.plan?.id,
-        paymentIntentId: invoice?.payment_intent,
-        paymentMethodId: subscription?.default_payment_method,
-        invoiceId: subscription?.latest_invoice,
-        invoiceNumber: invoice?.number,
-        subscriptionStartDate,
-        subscriptionEndDate,
-        currency: subscription?.currency,
-        amount:
-          (Number.parseInt(subscription?.plan?.amount || 0) / 100).toFixed(2) ||
-          0,
-        name: product?.name,
-        months: subscription?.plan?.interval_count,
-      };
-
-      // Check if the subscription already exists based on the sessionId
-      const SubscriptionExists = await Subscription.findOne({
-        "subscriptionDetails.sessionId": session?.id,
+    // Format the date in the desired format
+    const formatDate = (date) => {
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
+    };
 
-      if (SubscriptionExists) {
-        // If subscription exists, return response with the existing subscription details
-        return sendSuccessResponse(
-          res,
-          200,
-          "Payment and invoice already saved!",
-          SubscriptionExists
-        );
-      }
+    // Display the formatted dates
+    const subscriptionStartDate = formatDate(startDate);
+    const subscriptionEndDate = formatDate(endDate);
 
-      // Create new subscription document
-      const newSubscription = new Subscription({
-        userId: userId, // Get userId from req body
-        userSchemaReference: userType === "buyer" ? "Buyer" : "Supplier", // UserType determines schema reference
-        subscriptionDetails: subscriptionDetails,
-      });
+    // Retrieve the plan details directly from Stripe
+    const plan = await stripe.prices.retrieve(subscription?.plan?.id);
 
-      // Save the new subscription
-      const newSubscriptionSaved = await newSubscription.save();
-
-      if (!newSubscriptionSaved) {
-        return sendErrorResponse(
-          res,
-          500,
-          "Failed Saving Subscription Details"
-        );
-      }
-
-      // Check if user exists before updating
-      const updatedUser = await (userType === "buyer"
-        ? Buyer
-        : Supplier
-      )?.findByIdAndUpdate(
-        userId,
-        {
-          $set: {
-            currentSubscription: newSubscriptionSaved?._id,
-          },
-          // Push the new subscription ID to the subscriptionsHistory array
-          $push: {
-            subscriptionsHistory: {
-              subscriptionId: newSubscriptionSaved?._id,
-            },
-          },
-        },
-        { new: true }
-      );
-
-      if (!updatedUser) {
-        return sendErrorResponse(
-          res,
-          500,
-          "Failed Saving Subscription Details of the user"
-        );
-      }
-
-      // Return the subscription details
-      return sendSuccessResponse(
-        res,
-        200,
-        "Payment and invoice saved successfully!",
-        newSubscriptionSaved
-      );
-    } else {
-      return sendErrorResponse(res, 400, "Payment session not complete");
+    if (!plan) {
+      console.error({ message: "Plan not found!!" });
+      return sendErrorResponse(res, 500, "Plan not found!!");
     }
-  } catch (error) {
-    handleCatchBlockError(req, res, error);
-  }
-};
-const sendEmailConfirmation = async (req, res) => {
-  try {
-    const { usertype } = req?.headers;
-    const {
-      session_id,
-      userId,
-      email,
-      name,
-      subscriptionStartDate,
-      subscriptionEndDate,
-      amount,
-    } = req?.body;
 
-    const userFound = await (usertype?.toLowerCase() == "buyer"
-      ? Buyer
-      : Supplier
-    ).findByIdAndUpdate(userId, {
-      $set: {
-        subscriptionEmail: session_id,
-      },
-    });
-    if (userFound?.subscriptionEmail?.trim() == session_id?.trim()) {
-      return sendSuccessResponse(
-        res,
-        200,
-        "Invoice have already been sent to the email!"
-      );
+    // Retrieve the associated product details using the product ID from the plan
+    const product = await stripe.products.retrieve(plan.product);
+
+    if (!product) {
+      console.error("Product not found");
     }
-    const file = req.file || {};
-    // Check if file is attached to the req
-    if (!req.file) return sendErrorResponse(res, 500, "No file uploaded");
 
-    // Assuming you're using Nodemailer to send the email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.SMTP_USER_ID,
-        pass: process.env.SMTP_USER_PASSWORD,
-      },
-    });
-
-    const subject = "Subscription Confirmation";
-
-    const emailContent = await sendEmailConfirmationContent(
-      userFound,
-      name,
-      subscriptionStartDate,
-      subscriptionEndDate,
-      amount
-    );
-    await sendEmail(
-      email || "user1.stripe@yopmail.com",
-      subject,
-      emailContent,
-      [
-        {
-          filename: file.originalname,
-          path: file.path,
-        },
-      ]
+    // Retrieve the associated product details using the invoice ID from the plan
+    const invoice = await stripe.invoices.retrieve(
+      subscription?.latest_invoice
     );
 
-    // Delete the file after sending the email
-    fs.unlink(file.path, (err) => {
-      if (err) {
-        console.error("Error deleting file:", err);
-        logErrorToFile(err, req);
-        return sendErrorResponse(res, 500, "Error deleting file:", err);
-      }
-    });
+    if (!invoice) {
+      console.error("Invoice not found");
+      return sendErrorResponse(res, 500, "Invoice not found");
+    }
 
-    const subject2 = "New Subscription and Payment Confirmation";
-    const emailContent2 = await adminMailOptionsContent(
-      userFound,
-      name,
-      subscriptionStartDate,
-      subscriptionEndDate,
-      usertype,
-      amount
-    );
-    await sendEmail(process.env.ADMIN_EMAIL, subject2, emailContent2, [
-      {
-        filename: file.originalname,
-        path: file.path,
-      },
-    ]);
-
-    const updaedUserForEmail = await (usertype?.toLowerCase() == "buyer"
-      ? Buyer
-      : Supplier
-    ).findByIdAndUpdate(
-      userId,
+    const updatedSubscription = await Subscription.findByIdAndUpdate(
+      subscriptionExists,
       {
         $set: {
-          subscriptionEmail: session_id,
+          sessionId: session?.id,
+          subtotalAmount:
+            (Number.parseInt(session?.amount_subtotal || 0) / 100).toFixed(2) ||
+            0,
+          totalAmount:
+            (Number.parseInt(session?.amount_total || 0) / 100).toFixed(2) || 0,
+          currency: session?.currency,
+          customer: session?.customer,
+          subscriptionId: subscription?.id,
+          paymentMethodId: subscription?.default_payment_method,
+          subscriptionStartDate,
+          subscriptionEndDate,
+          planId: plan?.id,
+          productId: product?.id,
+          productName: product?.name,
+          invoiceNumber: invoice?.number,
+          invoiceId: invoice?.id,
+          invoicePdf: invoice?.invoice_pdf,
+          paymentIntentId: invoice?.payment_intent,
+          invoiceStatus: invoice?.status,
         },
       },
       { new: true }
     );
-    if (!updaedUserForEmail)
-      return sendErrorResponse(res, 500, "No user found");
 
-    // Return the subscription details
-    return sendSuccessResponse(
-      res,
-      200,
-      "Invoice have been sent to the email!"
+    if (!updatedSubscription) {
+      console.error("Failed updating subscription details");
+      return sendErrorResponse(
+        res,
+        500,
+        "Failed updating subscription details"
+      );
+    }
+
+    // Check if user exists before updating
+    const updatedUser = await (userType?.toLowerCase() === "buyer"
+      ? Buyer
+      : Supplier
+    )?.findOneAndUpdate(
+      { _id: updatedSubscription?.userId },
+      {
+        $set: {
+          currentSubscription: updatedSubscription?._id,
+        },
+        // Push the new subscription ID to the subscriptionsHistory array
+        $push: {
+          subscriptionsHistory: updatedSubscription?._id,
+        },
+      },
+      { new: true }
     );
+
+    if (!updatedUser) {
+      return sendErrorResponse(
+        res,
+        500,
+        "Failed Saving Subscription Details of the user"
+      );
+    }
+
+    const attachments = [
+      {
+        filename: `Custom_Invoice_${updatedSubscription?.invoiceNumber}.pdf`,
+        path: updatedSubscription?.custom_invoice_pdf,
+      },
+      {
+        filename: `Stripe_Invoice_${updatedSubscription?.invoiceNumber}.pdf`,
+        path: updatedSubscription?.invoicePdf,
+      },
+    ];
+
+    const subject = "Subscription Confirmation";
+    const emailContent = await sendEmailConfirmationContent(
+      updatedUser,
+      updatedSubscription?.productName,
+      subscriptionStartDate,
+      subscriptionEndDate,
+      updatedSubscription?.totalAmount
+    );
+    await sendEmail(
+      email || "ajostripetest@yopmail.com",
+      subject,
+      emailContent,
+      attachments
+    );
+
+    const subject2 = "New Subscription and Payment Confirmation";
+    const emailContent2 = await adminMailOptionsContent(
+      updatedUser,
+      updatedSubscription?.productName,
+      subscriptionStartDate,
+      subscriptionEndDate,
+      userType,
+      updatedSubscription?.totalAmount
+    );
+    await sendEmail(
+      process.env.ADMIN_EMAIL,
+      subject2,
+      emailContent2,
+      attachments
+    );
+
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
+
 const getSubscriptionDetils = async (req, res) => {
   try {
     const { id } = req?.params;
@@ -439,100 +327,87 @@ const getSubscriptionDetils = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
+
 const stripeWebhook = async (req, res) => {
   try {
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    const sig = req.headers["stripe-signature"];
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-    } catch (err) {
-      console.error("Webhook signature error:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+    const sig = req?.headers["stripe-signature"];
+    let event = req?.body;
+    if (endpointSecret) {
+      // Get the signature sent by Stripe
+      const signature = sig;
+      try {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          signature,
+          endpointSecret
+        );
+      } catch (err) {
+        console.error(
+          `⚠️  Webhook signature verification failed.`,
+          err.message
+        );
+        // return res.sendStatus(400);
+        return sendErrorResponse(
+          res,
+          400,
+          "Webhook signature verification failed"
+        );
+      }
     }
+    const session = event?.data?.object;
 
     // Handle the event
-    switch (event.type) {
+    switch (event?.type) {
+      case "invoice.updated":
+        break;
+      case "invoice.finalized":
+        break;
+      case "invoice.payment_action_required":
+        break;
+      case "customer.created":
+        break;
+      case "customer.updated":
+        break;
+      case "checkout.session.async_payment_failed":
+        break;
+      case "checkout.session.async_payment_succeeded":
+        break;
       case "checkout.session.completed":
-        try {
-          // const session = event.data.object;
-          const {
-            name,
-            amount,
-            subscriptionStartDate,
-            invoiceNumber,
-            userId,
-            userType,
-          } = session?.metadata;
-
-          // const session_id = session.id;
-          // const userId = session.metadata?.user_id;
-          // const userType = session.metadata?.user_type;
-          // const email =
-          //   session.customer_details?.email || session.metadata?.email;
-          // const name = session.customer_details?.name || "User";
-
-          // Call the savePayment function
-          // await savePayment(
-          //   {
-          //     body: {
-          //       session_id,
-          //       userType,
-          //       userId,
-          //       email,
-          //     },
-          //   },
-          //   res
-          // ); // Call directly with req-like object
-
-          // // Call the sendEmailConfirmation function
-          // await sendEmailConfirmation(
-          //   {
-          //     headers: { usertype: userType },
-          //     body: {
-          //       session_id,
-          //       userId,
-          //       email,
-          //       name,
-          //       subscriptionStartDate: "", // You can retrieve actual dates inside savePayment and pass back
-          //       subscriptionEndDate: "",
-          //       amount: "",
-          //     },
-          //     file: null, // If you're attaching invoice PDF later, pass it here
-          //   },
-          //   res
-          // );
-          console.log(
-            "\n\n\n\n\nWebhook handled and actions completed.",
-            name,
-            amount,
-            subscriptionStartDate,
-            invoiceNumber,
-            userId,
-            userType
-          );
-          return res.status(200).send("Webhook handled and actions completed.");
-        } catch (err) {
-          console.error("Webhook internal logic error:", err);
-          return res
-            .status(500)
-            .send("Internal server error during webhook handling.");
-        }
+        savePaymentAndSendEmail(req, res, {
+          ...session?.metadata,
+          session_id: session?.id,
+        });
+        break;
+      case "checkout.session.expired":
+        break;
+      case "payment_intent.succeeded":
+        break;
+      case "charge.succeeded":
+        break;
+      case "payment_method.attached":
+        break;
+      case "customer.subscription.created":
+        break;
+      case "customer.subscription.updated":
+        break;
+      case "invoice.paid":
+        break;
+      case "invoice.payment_succeeded":
         break;
 
       default:
-        console.error(`Unhandled event type ${event.type}`);
+        console.error(`\n Unhandled event type \n${event.type}`);
         return res.status(200).send("Event ignored");
     }
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
 };
+
 module.exports = {
   createSubscription,
-  savePayment,
-  sendEmailConfirmation,
+  savePaymentAndSendEmail,
   getSubscriptionDetils,
   stripeWebhook,
 };

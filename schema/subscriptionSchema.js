@@ -7,57 +7,67 @@ const subscriptionSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: [true, "Validation Error: userId is required"],
     },
-    userSchemaReference: {
+    userType: {
       type: String,
       enum: ["Supplier", "Buyer"],
-      required: [true, "Validation Error: userSchemaReference is required"],
+      required: [true, "Validation Error: userType is required"],
     },
-    subscriptionDetails: {
-      sessionId: {
-        type: String,
-      },
-      customerId: {
-        type: String,
-      },
-      subscriptionId: {
-        type: String,
-      },
-      productId: {
-        type: String,
-      },
-      planId: {
-        type: String,
-      },
-      paymentIntentTd: {
-        type: String,
-      },
-      paymentMethodId: {
-        type: String,
-      },
-      invoiceId: {
-        type: String,
-      },
-      invoiceNumber: {
-        type: String,
-      },
-      subscriptionStartDate: {
-        type: String,
-      },
-      subscriptionEndDate: {
-        type: String,
-      },
-      currency: {
-        type: String,
-      },
-      amount: {
-        type: String,
-      },
-      name: {
-        type: String,
-      },
-      months: {
-        type: Number,
-      },
+    custom_subscription_id: {
+      type: String,
+    },
+    custom_invoice_pdf: {
+      type: String,
+    },
+    sessionId: {
+      type: String,
+    },
+    subtotalAmount: {
+      type: Number,
+    },
+    totalAmount: {
+      type: Number,
+    },
+    currency: {
+      type: String,
+    },
+    customer: {
+      type: String,
+    },
+    subscriptionId: {
+      type: String,
+    },
+    paymentMethodId: {
+      type: String,
+    },
+    subscriptionStartDate: {
+      type: String,
+    },
+    subscriptionEndDate: {
+      type: String,
+    },
+    planId: {
+      type: String,
+    },
+    productId: {
+      type: String,
+    },
+    productName: {
+      type: String,
+    },
+    invoiceNumber: {
+      type: String,
+    },
+    invoiceId: {
+      type: String,
+    },
+    invoicePdf: {
+      type: String,
+    },
+    paymentIntentId: {
+      type: String,
+    },
+    invoiceStatus: {
+      type: String,
     },
   },
   { timestamps: true }

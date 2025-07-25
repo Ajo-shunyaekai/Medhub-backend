@@ -19,7 +19,6 @@ const { corsOptions } = require("./config/corsOptions");
 const https = require("https");
 const http = require("http");
 const { URL } = require("url");
- 
 //---------------------- PDF Proxy Handler ----------------------//
 app.get("/pdf-proxy/*", async (req, res) => {
   try {
@@ -46,10 +45,10 @@ app.get("/pdf-proxy/*", async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 });
- 
+
 //---------------------- DB Connection ----------------------//
 connect();
- 
+
 //---------------------- Static Folders ----------------------//
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "build")));
@@ -58,38 +57,36 @@ const uploadFolderPath = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadFolderPath)) {
   fs.mkdirSync(uploadFolderPath);
 }
- 
+
 //---------------------- CORS & Cookie ----------------------//
 app.use(cors(corsOptions));
 app.use(cookieParser());
- 
+
 //---------------------- Stripe Webhook (RAW BODY) ----------------------//
 app.post(
   "/api/stripe-webhook",
   bodyParser.raw({ type: "application/json" }),
   stripeWebhook
 );
- 
+
 //---------------------- JSON Parsers (after webhook!) ----------------------//
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ extended: false }));
- 
+
 //---------------------- Main Routes ----------------------//
 require("./index")(app);
- 
+
 //---------------------- Global Error Handler ----------------------//
 app.use((err, req, res, next) => {
   handleCatchBlockError(req, res, err);
 });
  
 const ADMIN_ID = process.env.ADMIN_ID;
- 
 //---------------------- Start Server ----------------------//
 const PORT = process.env.PORT || 2222;
 const server = app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
- 
 //---------------------- Initialize WebSocket ----------------------//
 initializeSocket(server);
  
