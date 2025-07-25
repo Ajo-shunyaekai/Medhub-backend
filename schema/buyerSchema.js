@@ -263,11 +263,9 @@ const buyerSchema = new Schema(
     },
     subscriptionsHistory: [
       {
-        subscriptionId: {
-          type: Schema.Types.ObjectId,
-          ref: "Subscription", // Referencing the Subscription model
-          required: true,
-        },
+        type: Schema.Types.ObjectId,
+        ref: "Subscription", // Referencing the Subscription model
+        required: true,
       },
     ],
     last_login: {
