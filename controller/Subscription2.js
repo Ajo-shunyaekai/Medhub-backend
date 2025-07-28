@@ -303,7 +303,6 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       emailContent2,
       attachments
     );
-
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
@@ -405,9 +404,17 @@ const stripeWebhook = async (req, res) => {
   }
 };
 
+const sendSubscriptionPaymentReqUrl = async (req, res) => {
+  try {
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 module.exports = {
   createSubscription,
   savePaymentAndSendEmail,
   getSubscriptionDetils,
   stripeWebhook,
+  sendSubscriptionPaymentReqUrl,
 };
