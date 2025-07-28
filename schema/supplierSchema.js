@@ -264,6 +264,10 @@ const supplierSchema = new Schema(
         required: true,
       },
     ],
+    showSubscriptionUrl: {
+      type: Boolean,
+      default: false,
+    },
     last_login: {
       type: Date,
     },

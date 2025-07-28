@@ -5,6 +5,8 @@ const {
   // savePayment,
   // sendEmailConfirmation,
   getSubscriptionDetils,
+  sendSubscriptionPaymentReqUrl,
+  addubscriptionPaymentReqUrl,
 } = require("../controller/Subscription2");
 const multer = require("multer");
 const path = require("path");
@@ -102,11 +104,11 @@ const subsIvoiceUpload = (req, res, next) => {
 // Route for creating subscription with invoice upload
 router.post("/create-subscription", subsIvoiceUpload, createSubscription);
 
-// Route for saving payment with file upload (if needed)
-// router.post("/save-payment", savePayment);
+// Route for requesting subscription payment
+router.post("/send-req/:userType/:id", sendSubscriptionPaymentReqUrl);
 
-// Send confirmation email (you can attach the S3 URL to the email)
-// router.post("/send-confimation-mail", sendEmailConfirmation);
+// Route for adding subscription payment url
+router.post("/add-subscription-payment-url/:userType/:userId", addubscriptionPaymentReqUrl);
 
 // Route to get subscription details
 router.post("/:id", getSubscriptionDetils);
