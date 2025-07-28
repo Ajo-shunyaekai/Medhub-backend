@@ -14,6 +14,7 @@ const Subscription = require("../schema/subscriptionSchema");
 const {
   sendEmailConfirmationContent,
   adminMailOptionsContent,
+  sendSubscriptionPaymentEmailContent,
 } = require("../utils/emailContents");
 const { sendEmail } = require("../utils/emailService");
 const { getFilePathsAdd } = require("../helper");
@@ -282,7 +283,11 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       updatedSubscription?.totalAmount
     );
     await sendEmail(
-      email || "ajostripetest@yopmail.com",
+      email ||
+        updatedUser?.contact_person_email || [
+          "ajo@shunyaekai.tech",
+          "Shivani@shunyaekai.tech",
+        ],
       subject,
       emailContent,
       attachments
@@ -406,6 +411,63 @@ const stripeWebhook = async (req, res) => {
 
 const sendSubscriptionPaymentReqUrl = async (req, res) => {
   try {
+    const { userType, userId } = req?.params();
+    const user = await (userType?.toLowerCase() === "buyer"
+      ? Buyer
+      : Supplier
+    )?.findOne({ _id: userId });
+
+    if (!user) {
+      return sendErrorResponse(res, 500, "USer Not Found!!");
+    }
+    const subject = "Subscription Payment Link";
+    const emailContent = await sendSubscriptionPaymentEmailContent(
+      user,
+      userId,
+      userType
+    );
+    await sendEmail(
+      user?.contact_person_email || [
+        "ajo@shunyaekai.tech",
+        "Shivani@shunyaekai.tech",
+      ],
+      subject,
+      emailContent
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+const addubscriptionPaymentReqUrl = async (req, res) => {
+  try {
+    const { userType, userId } = req?.params();
+    const user = await (userType?.toLowerCase() === "buyer"
+      ? Buyer
+      : Supplier
+    )?.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          showSubscriptionUrl: true,
+        },
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return sendErrorResponse(
+        res,
+        500,
+        "Failed Saving Subscription Payment url of the user"
+      );
+    }
+    // Return the subscription details
+    return sendSuccessResponse(
+      res,
+      200,
+      "Subscription ubscription Payment url of the user Saved!"
+    );
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
@@ -417,4 +479,5 @@ module.exports = {
   getSubscriptionDetils,
   stripeWebhook,
   sendSubscriptionPaymentReqUrl,
+  addubscriptionPaymentReqUrl,
 };

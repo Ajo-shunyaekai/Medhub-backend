@@ -441,6 +441,41 @@ const sendEmailConfirmationContent = (
         `;
 };
 
+const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
+  const paymentLink = `${process.env.CLIENT_URL}/subscription/${userId}/${userType?.toLowerCase()}/select-plan`;
+
+  return `
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+        <table style="width: 100%; background-color: #ffffff; border-radius: 8px; padding: 20px;">
+          <tr>
+            <td>
+              <h2 style="text-align: center; color: #333;">Subscription Payment Link</h2>
+              <p style="color: #555; font-size: 16px;">Dear <strong>${userFound?.contact_person_name}</strong>,</p>
+              <p style="color: #555; font-size: 16px;">We are excited to have you onboard! Please click the link below to complete your subscription payment:</p>
+
+              <h3 style="text-align: center; color: #333;">
+                <a href="${paymentLink}" style="font-size: 18px; color: #007BFF; text-decoration: none;">Complete Your Payment</a>
+              </h3>
+              
+              <p style="color: #555; font-size: 16px;">If you have any issues or questions, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+              
+              <p style="color: #555; font-size: 16px;">Thank you for choosing our services. We look forward to working with you!</p>
+              <p style="color: #555; font-size: 16px;">Best regards,<br>Medhub Global Team</p>
+            </td>
+          </tr>
+        </table>
+
+        <footer style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
+          <p>&copy; 2025 Medhub Global. All rights reserved.</p>
+          <p>If you did not request a subscription, please ignore this email.</p>
+        </footer>
+      </body>
+    </html>
+  `;
+};
+
+
 const sendSupplierReminderEmailContent = (orderId, orderDate, supplierName) => {
   const orderLink = `http://localhost:3000/supplier/active-orders-details/${orderId}`;
 
@@ -682,4 +717,5 @@ module.exports = {
   sendSupplierReminderEmailContent,
   enquiryMailToBuyerContent,
   enquiryMailToSupplierContent,
+  sendSubscriptionPaymentEmailContent
 };

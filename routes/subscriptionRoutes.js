@@ -6,6 +6,7 @@ const {
   // sendEmailConfirmation,
   getSubscriptionDetils,
   sendSubscriptionPaymentReqUrl,
+  addubscriptionPaymentReqUrl,
 } = require("../controller/Subscription2");
 const multer = require("multer");
 const path = require("path");
@@ -105,6 +106,9 @@ router.post("/create-subscription", subsIvoiceUpload, createSubscription);
 
 // Route for requesting subscription payment
 router.post("/send-req/:userType/:id", sendSubscriptionPaymentReqUrl);
+
+// Route for adding subscription payment url
+router.post("/add-subscription-payment-url/:userType/:userId", addubscriptionPaymentReqUrl);
 
 // Route to get subscription details
 router.post("/:id", getSubscriptionDetils);
