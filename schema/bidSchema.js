@@ -47,10 +47,7 @@ const bidSchema = new Schema(
       state: {
         type: String,
         trim: true,
-        required: [
-          true,
-          "Validation Error: State of Destination is required.",
-        ],
+        required: [true, "Validation Error: State of Destination is required."],
       },
       bidDocs: [
         {
@@ -94,12 +91,12 @@ const bidSchema = new Schema(
         },
         docReq: {
           type: String,
-          enum: ['Yes', 'No'],
-          default: 'No',
+          enum: ["Yes", "No"],
+          default: "No",
         },
         totalBids: {
           type: Number,
-          Default: 0, 
+          Default: 0,
         },
         type: {
           type: String,
@@ -128,12 +125,10 @@ const bidSchema = new Schema(
         upc: {
           type: String,
           trim: true,
-          // required: [true, "Validation Error: UPC is required."],
         },
         brand: {
           type: String,
           trim: true,
-          // required: [true, "Validation Error: Brand Name is required."],
         },
         quantity: {
           type: String,
@@ -145,35 +140,12 @@ const bidSchema = new Schema(
           trim: true,
           required: [true, "Validation Error: Target Price is required."],
         },
-        // country: {
-        //   type: String,
-        //   trim: true,
-        //   required: [
-        //     true,
-        //     "Validation Error: Country of Destination is required.",
-        //   ],
-        // },
-        // state: {
-        //   type: String,
-        //   trim: true,
-        //   required: [
-        //     true,
-        //     "Validation Error: State of Destination is required.",
-        //   ],
-        // },
         openFor: {
           type: String,
           trim: true,
           enum: ["Manufacturer", "Distributor", "Service Provider"],
           required: [true, "Validation Error: Open for is required."],
         },
-        // fromCountries: [
-        //   {
-        //     type: String,
-        //     trim: true,
-        //     required: [true, "Validation Error: From Countries is required."],
-        //   },
-        // ],
         delivery: {
           type: String,
           trim: true,
@@ -182,6 +154,30 @@ const bidSchema = new Schema(
             "Validation Error: Expected Delivery duration is required.",
           ],
         },
+        participants: [
+          {
+            id: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "Supplier",
+              required: [true, "Validation Error: Participant Id is required"],
+              immutable: true,
+            },
+            amount: {
+              type: Number,
+              required: [
+                true,
+                "Validation Error: Participant Proposed Amount is required",
+              ],
+            },
+            timeLine: {
+              type: Number,
+              required: [
+                true,
+                "Validation Error: Participant Proposed timeLine is required",
+              ],
+            },
+          },
+        ],
       },
     ],
     status: {

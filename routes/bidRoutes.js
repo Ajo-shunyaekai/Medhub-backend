@@ -9,6 +9,8 @@ const {
   getBidDetails,
   addBid,
   editBid,
+  updateBidParticipant,
+  bidProductDetails,
 } = require("../controller/bids");
 const { addBidUpload } = require("../middleware/multer/bidMulter");
 
@@ -31,6 +33,20 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   getBidDetails
+);
+
+router.post(
+  "/add-participant/:bidId/:itemId",
+  checkAuthorization,
+  authenticationNAuthorization,
+  updateBidParticipant
+);
+
+router.post(
+  "/get-bid-product/:bidId/:itemId",
+  checkAuthorization,
+  authenticationNAuthorization,
+  bidProductDetails
 );
 
 module.exports = router;
