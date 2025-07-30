@@ -97,7 +97,8 @@ const getAllBids = async (req, res) => {
 
 const getBidDetails = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req?.params;
+    const { type } = req?.query;
 
     if (!id || !mongoose.isValidObjectId(id)) {
       return sendErrorResponse(res, 400, "Invalid Bid ID format.", null);
@@ -141,11 +142,25 @@ const getBidDetails = async (req, res) => {
       return sendErrorResponse(res, 404, "Bid not found.");
     }
 
+    // Filter additionalDetails based on 'type' if provided
+    const filteredAdditionalDetails = type
+      ? bidDetails?.[0]?.additionalDetails?.filter(
+          (item) =>
+            item?.openFor?.toLowerCase()?.replace(/\s+/g, "") ===
+            type?.toLowerCase()?.replace(/\s+/g, "")
+        )
+      : bidDetails?.[0]?.additionalDetails;
+
+    const updatedBidDetails = {
+      ...bidDetails?.[0],
+      additionalDetails: filteredAdditionalDetails,
+    };
+
     return sendSuccessResponse(
       res,
       200,
       "Bid details fetched successfully.",
-      bidDetails[0]
+      updatedBidDetails
     );
   } catch (error) {
     handleCatchBlockError(req, res, error);
@@ -250,7 +265,10 @@ const addBid = async (req, res) => {
 
       // Case 4: Unexpected format
       else {
-        console.warn("Unsupported format for additionalDetails:", additionalDetails);
+        console.warn(
+          "Unsupported format for additionalDetails:",
+          additionalDetails
+        );
       }
     } catch (err) {
       return handleCatchBlockError(req, res, err);
@@ -324,9 +342,107 @@ const editBid = async (req, res) => {
   }
 };
 
+const bidProductDetails = async (req, res) => {
+  try {
+    const { bidId, itemId } = req?.params;
+    // Step 1: Find the bid
+    const bidDetails = await Bid.findOne({ _id: bidId });
+    if (!bidDetails) {
+      return sendErrorResponse(res, 400, "No Bid Found.");
+    }
+
+    // Step 2: Find the item to update within additionalDetails
+    const itemDetails = bidDetails.additionalDetails.find(
+      (item) => item.itemId === itemId
+    );
+
+    if (!itemDetails) {
+      return sendErrorResponse(res, 400, "No Item Found in Bid.");
+    }
+
+    const itemWithParticipantsDetails =
+      (await Promise.all(
+        itemDetails?.participants?.map(async (item) => {
+          // Step 3: Check if participant exists
+          const participantDetails = await Supplier?.findById(item?.id);
+          if (!participantDetails) {
+            return null;
+          }
+          return {
+            ...item,
+            participantDetails: participantDetails,
+          };
+        })
+      )) || [];
+
+    return sendSuccessResponse(
+      res,
+      200,
+      "Bid Item Details Fetched",
+      itemWithParticipantsDetails
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+const updateBidParticipant = async (req, res) => {
+  try {
+    const { bidId, itemId } = req?.params;
+    const { participantId, amount, timeLine } = req?.body;
+
+    // Step 1: Find the bid
+    const bidDetails = await Bid.findOne({ _id: bidId });
+    if (!bidDetails) {
+      return sendErrorResponse(res, 400, "No Bid Found.");
+    }
+
+    // Step 2: Find the item to update within additionalDetails
+    const itemToUpdate = bidDetails.additionalDetails.find(
+      (item) => item.itemId === itemId
+    );
+
+    if (!itemToUpdate) {
+      return sendErrorResponse(res, 400, "No Item Found in Bid.");
+    }
+
+    // Step 3: Check if participant already exists
+    const participantIndex = itemToUpdate.participants.findIndex(
+      (p) => String(p.id) === String(participantId)
+    );
+
+    if (participantIndex !== -1) {
+      // Step 4a: Participant exists, update
+      itemToUpdate.participants[participantIndex].amount = amount;
+      itemToUpdate.participants[participantIndex].timeLine = timeLine;
+    } else {
+      // Step 4b: Participant not found, add new
+      itemToUpdate.participants.push({
+        id: participantId,
+        amount,
+        timeLine,
+      });
+    }
+
+    // Step 5: Save updated bid document
+    await bidDetails.save();
+
+    return sendSuccessResponse(
+      res,
+      200,
+      participantIndex !== -1 ? "Participant updated." : "Participant added.",
+      bidDetails
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 module.exports = {
   getAllBids,
   getBidDetails,
   addBid,
   editBid,
+  bidProductDetails,
+  updateBidParticipant,
 };
