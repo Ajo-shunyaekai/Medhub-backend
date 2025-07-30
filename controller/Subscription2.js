@@ -40,6 +40,30 @@ const plans = [
   },
 ];
 
+// Array of available subscription coupons
+const discounts = [
+  {
+    name: "SAVET1-99",
+    id: "i7QVnDDB",
+  },
+  {
+    name: "SAVET2-198",
+    id: "tKcpuARp",
+  },
+  {
+    name: "SAVET3-297",
+    id: "RjZT9s9M",
+  },
+  {
+    name: "SAVET4-396",
+    id: "BLHeHGTq",
+  },
+  {
+    name: "SAVET6-594",
+    id: "xn2mnvi1",
+  },
+];
+
 const createSubscription = async (req, res) => {
   try {
     const {
@@ -48,11 +72,16 @@ const createSubscription = async (req, res) => {
       email = "ajostripetest@yopmail.com",
       userType,
       userId,
-      name,
-      amount,
-      subscriptionStartDate,
-      invoiceNumber,
+      discount,
     } = req?.body;
+
+    const foundDiscount = discounts?.find(
+      (ele) => ele?.name?.toLowerCase() == discount?.toLowerCase()
+    );
+
+    if (!foundDiscount) {
+      return res?.status(400)?.json({ message: "Coupon Code not found!!" });
+    }
 
     const plan = plans?.find(
       (plan) => plan?.plan_name === plan_name && plan?.duration === duration
@@ -101,7 +130,7 @@ const createSubscription = async (req, res) => {
     }
 
     // Step 1: Create session
-    const session = await stripe.checkout.sessions.create({
+    const sessionData = {
       mode: "subscription",
       // discounts: [{ coupon: "bcmkVBK9" }],
       payment_method_types: ["card"],
@@ -110,7 +139,6 @@ const createSubscription = async (req, res) => {
         card: { request_three_d_secure: "any" },
       },
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-      // success_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/successful?session_id={CHECKOUT_SESSION_ID}`,
       success_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/successful`,
       cancel_url: `${process.env.CLIENT_URL}/subscription/${userType}/${userId}/failure`,
       customer: customer.id,
@@ -120,7 +148,15 @@ const createSubscription = async (req, res) => {
         email: String(email),
         userType: String(userType),
       },
-    });
+    };
+
+    // ✅ If discount is found, include it
+    if (foundDiscount?.id) {
+      sessionData.discounts = [{ coupon: foundDiscount.id }];
+    }
+
+    // Step 1: Create session
+    const session = await stripe.checkout.sessions.create(sessionData);
 
     return sendSuccessResponse(
       res,
@@ -438,11 +474,7 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
       emailContent
     );
     // Return the subscription details
-    return sendSuccessResponse(
-      res,
-      200,
-      "Mail sent!"
-    );
+    return sendSuccessResponse(res, 200, "Mail sent!");
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
