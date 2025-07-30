@@ -411,11 +411,14 @@ const stripeWebhook = async (req, res) => {
 
 const sendSubscriptionPaymentReqUrl = async (req, res) => {
   try {
-    const { userType, userId } = req?.params();
+    const { userType, userId } = req?.params;
     const user = await (userType?.toLowerCase() === "buyer"
       ? Buyer
       : Supplier
-    )?.findOne({ _id: userId });
+    )?.findOne({
+      [userType?.toLowerCase() === "buyer" ? "buyer_id" : "supplier_id"]:
+        userId,
+    });
 
     if (!user) {
       return sendErrorResponse(res, 500, "USer Not Found!!");
@@ -423,7 +426,7 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
     const subject = "Subscription Payment Link";
     const emailContent = await sendSubscriptionPaymentEmailContent(
       user,
-      userId,
+      user?._id,
       userType
     );
     await sendEmail(
@@ -433,6 +436,12 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
       ],
       subject,
       emailContent
+    );
+    // Return the subscription details
+    return sendSuccessResponse(
+      res,
+      200,
+      "Mail sent!"
     );
   } catch (error) {
     handleCatchBlockError(req, res, error);

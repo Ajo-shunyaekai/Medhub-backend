@@ -105,7 +105,7 @@ const subsIvoiceUpload = (req, res, next) => {
 router.post("/create-subscription", subsIvoiceUpload, createSubscription);
 
 // Route for requesting subscription payment
-router.post("/send-req/:userType/:id", sendSubscriptionPaymentReqUrl);
+router.post("/send-pay-url/:userType/:userId", sendSubscriptionPaymentReqUrl);
 
 // Route for adding subscription payment url
 router.post("/add-subscription-payment-url/:userType/:userId", addubscriptionPaymentReqUrl);
