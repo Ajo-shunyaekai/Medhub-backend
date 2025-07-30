@@ -475,6 +475,22 @@ const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
   `;
 };
 
+const sendSubscriptionExpiryEmailContent = (userType, user, subscription, daysLeft ) => {
+  const paymentLink = `${process.env.CLIENT_URL}/subscription/${user._id}/${ut?.toLowerCase()}/select-plan`;
+   return `
+    <h3>Hello ${user.contact_person_name || "Supplier"},</h3>
+    <p>Your subscription (<strong>${subscription.productName}</strong>) is expiring in <strong>${daysLeft} day(s)</strong>.</p>
+    <p><strong>Subscription End Date:</strong> ${subscription.subscriptionEndDate}</p>
+    <p>Please renew to avoid service interruption.</p>
+    <h3 style="text-align: center; color: #333;">
+      <a href="${paymentLink}" style="font-size: 18px; color: #007BFF; text-decoration: none;">Renew Now</a>
+    </h3>
+    <br/><br/>
+    Regards,<br/>
+    MedHub Global Team
+  `;
+}
+
 
 const sendSupplierReminderEmailContent = (orderId, orderDate, supplierName) => {
   const orderLink = `http://localhost:3000/supplier/active-orders-details/${orderId}`;
@@ -517,6 +533,7 @@ const sendSupplierReminderEmailContent = (orderId, orderDate, supplierName) => {
     </html>
   `;
 };
+
 
 const adminMailOptionsContent = (
   userFound,
@@ -717,5 +734,6 @@ module.exports = {
   sendSupplierReminderEmailContent,
   enquiryMailToBuyerContent,
   enquiryMailToSupplierContent,
-  sendSubscriptionPaymentEmailContent
+  sendSubscriptionPaymentEmailContent,
+  sendSubscriptionExpiryEmailContent
 };

@@ -466,7 +466,8 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
       userType
     );
     await sendEmail(
-      user?.contact_person_email || [
+      user?.contact_person_email || 
+      [
         "ajo@shunyaekai.tech",
         "Shivani@shunyaekai.tech",
       ],

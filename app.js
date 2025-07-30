@@ -49,6 +49,9 @@ app.get("/pdf-proxy/*", async (req, res) => {
 //---------------------- DB Connection ----------------------//
 connect();
 
+//---------------------- Cron Jobs ----------------------//
+require("./schedulers/tasks");
+
 //---------------------- Static Folders ----------------------//
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "build")));
