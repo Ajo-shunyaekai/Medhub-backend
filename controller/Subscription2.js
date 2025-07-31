@@ -79,7 +79,7 @@ const createSubscription = async (req, res) => {
       (ele) => ele?.name?.toLowerCase() == discount?.toLowerCase()
     );
 
-    if (!foundDiscount) {
+    if (discount && !foundDiscount) {
       return res?.status(400)?.json({ message: "Coupon Code not found!!" });
     }
 
