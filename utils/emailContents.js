@@ -291,8 +291,13 @@ const submitQuotationContent = (buyer, enquiry_id) => {
                                 Medhub Global Team`;
 };
 
-const acceptRejectQuotationBuyerContent = (supplier, buyer, enquiry_id, msg) => {
-  if (msg === 'Accepted') {
+const acceptRejectQuotationBuyerContent = (
+  supplier,
+  buyer,
+  enquiry_id,
+  msg
+) => {
+  if (msg === "Accepted") {
     return `Hello ${buyer.contact_person_name}, <br /><br />
 
             You have successfully <strong>ACCEPTED</strong> the quotation for enquiry ID <strong>${enquiry_id}</strong> from ${supplier.contact_person_name}.<br /><br />
@@ -307,7 +312,7 @@ const acceptRejectQuotationBuyerContent = (supplier, buyer, enquiry_id, msg) => 
             Medhub Global Team`;
   }
 
-  if (msg === 'Rejected') {
+  if (msg === "Rejected") {
     return `Hello ${buyer.contact_person_name}, <br /><br />
 
             You have <strong>REJECTED</strong> the quotation for enquiry ID <strong>${enquiry_id}</strong> from ${supplier.contact_person_name}.<br /><br />
@@ -321,11 +326,16 @@ const acceptRejectQuotationBuyerContent = (supplier, buyer, enquiry_id, msg) => 
             Medhub Global Team`;
   }
 
-  return '';
+  return "";
 };
 
-const acceptRejectQuotationSupplierContent = (supplier, buyer, enquiry_id, msg) => {
-  if (msg === 'Accepted') {
+const acceptRejectQuotationSupplierContent = (
+  supplier,
+  buyer,
+  enquiry_id,
+  msg
+) => {
+  if (msg === "Accepted") {
     return `Hello ${supplier.contact_person_name}, <br /><br />
 
             Your quotation for enquiry ID <strong>${enquiry_id}</strong> has been <strong>ACCEPTED</strong> by ${buyer.contact_person_name}.<br /><br />
@@ -339,7 +349,7 @@ const acceptRejectQuotationSupplierContent = (supplier, buyer, enquiry_id, msg) 
             Medhub Global Team`;
   }
 
-  if (msg === 'Rejected') {
+  if (msg === "Rejected") {
     return `Hello ${supplier.contact_person_name}, <br /><br />
 
             Unfortunately, your quotation for enquiry ID <strong>${enquiry_id}</strong> has been <strong>REJECTED</strong> by ${buyer.contact_person_name}.<br /><br />
@@ -353,9 +363,8 @@ const acceptRejectQuotationSupplierContent = (supplier, buyer, enquiry_id, msg) 
             Medhub Global Team`;
   }
 
-  return '';
+  return "";
 };
-
 
 const cancelEnquiryContent = (supplier, buyer, enquiry_id, reason) => {
   return `Hello ${supplier.contact_person_name}, <br />
@@ -442,7 +451,9 @@ const sendEmailConfirmationContent = (
 };
 
 const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
-  const paymentLink = `${process.env.CLIENT_URL}/subscription/${userId}/${userType?.toLowerCase()}/select-plan`;
+  const paymentLink = `${
+    process.env.CLIENT_URL
+  }/subscription/${userId}/${userType?.toLowerCase()}/select-plan`;
 
   return `
     <html>
@@ -457,7 +468,12 @@ const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
               <h3 style="text-align: center; color: #333;">
                 <a href="${paymentLink}" style="font-size: 18px; color: #007BFF; text-decoration: none;">Complete Your Payment</a>
               </h3>
-              
+
+              <!-- Coupon Code Section -->
+              <p style="color: #555; font-size: 16px; font-weight: bold; text-align: center; margin-top: 20px;">
+                Use Coupon Code <span style="color: #28a745; font-size: 18px; font-weight: bold;">SAVET1-99</span> to get a special discount!
+              </p>
+
               <p style="color: #555; font-size: 16px;">If you have any issues or questions, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
               
               <p style="color: #555; font-size: 16px;">Thank you for choosing our services. We look forward to working with you!</p>
@@ -475,12 +491,23 @@ const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
   `;
 };
 
-const sendSubscriptionExpiryEmailContent = (userType, user, subscription, daysLeft ) => {
-  const paymentLink = `${process.env.CLIENT_URL}/subscription/${user._id}/${ut?.toLowerCase()}/select-plan`;
-   return `
+const sendSubscriptionExpiryEmailContent = (
+  userType,
+  user,
+  subscription,
+  daysLeft
+) => {
+  const paymentLink = `${process.env.CLIENT_URL}/subscription/${
+    user._id
+  }/${ut?.toLowerCase()}/select-plan`;
+  return `
     <h3>Hello ${user.contact_person_name || "Supplier"},</h3>
-    <p>Your subscription (<strong>${subscription.productName}</strong>) is expiring in <strong>${daysLeft} day(s)</strong>.</p>
-    <p><strong>Subscription End Date:</strong> ${subscription.subscriptionEndDate}</p>
+    <p>Your subscription (<strong>${
+      subscription.productName
+    }</strong>) is expiring in <strong>${daysLeft} day(s)</strong>.</p>
+    <p><strong>Subscription End Date:</strong> ${
+      subscription.subscriptionEndDate
+    }</p>
     <p>Please renew to avoid service interruption.</p>
     <h3 style="text-align: center; color: #333;">
       <a href="${paymentLink}" style="font-size: 18px; color: #007BFF; text-decoration: none;">Renew Now</a>
@@ -489,8 +516,7 @@ const sendSubscriptionExpiryEmailContent = (userType, user, subscription, daysLe
     Regards,<br/>
     MedHub Global Team
   `;
-}
-
+};
 
 const sendSupplierReminderEmailContent = (orderId, orderDate, supplierName) => {
   const orderLink = `http://localhost:3000/supplier/active-orders-details/${orderId}`;
@@ -533,7 +559,6 @@ const sendSupplierReminderEmailContent = (orderId, orderDate, supplierName) => {
     </html>
   `;
 };
-
 
 const adminMailOptionsContent = (
   userFound,
@@ -585,7 +610,7 @@ const enquiryMailToBuyerContent = (
   buyer,
   supplier,
   products,
-  enquiryNumber,
+  enquiryNumber
 ) => {
   return `
     <html>
@@ -649,7 +674,7 @@ const enquiryMailToSupplierContent = (
   buyer,
   supplier,
   products,
-  enquiryNumber,
+  enquiryNumber
 ) => {
   return `
     <html>
@@ -735,5 +760,5 @@ module.exports = {
   enquiryMailToBuyerContent,
   enquiryMailToSupplierContent,
   sendSubscriptionPaymentEmailContent,
-  sendSubscriptionExpiryEmailContent
+  sendSubscriptionExpiryEmailContent,
 };
