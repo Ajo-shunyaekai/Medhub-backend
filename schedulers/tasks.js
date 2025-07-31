@@ -1,116 +1,155 @@
-// const cron = require('node-cron');
-// const { Medicine } = require('../schema/medicineSchema');
-// const Supplier = require('../schema/supplierSchema');
-// const Buyer = require('../schema/buyerSchema')
-// const {sendEmail} = require("../utils/emailService");
-// const { lowInventoryContent, 
-//     licenseExpiryEmail } = require("../utils/emailContents");
-
-// // Helper function to format date to DD-MM-YYYY
-// function formatDateToDDMMYYYY(date) {
-//     const day = String(date.getDate()).padStart(2, '0');
-//     const month = String(date.getMonth() + 1).padStart(2, '0');
-//     const year = date.getFullYear();
-//     return `${day}-${month}-${year}`;
-// }
-
-// // low inventory email
-// async function sendLowInventoryEmail(supplierName, supplierEmail, medicineName, quantity) {
-//     const subject = 'Urgent: Low Inventory Warning';
-//     const recipientEmails = [supplierEmail];
-//     const emailContent = await lowInventoryContent(supplierName, supplierEmail, medicineName, quantity);
-
-//     try {
-//         await sendEmail(recipientEmails, subject, emailContent);
-//     } catch (err) {
-//         console.error('Error sending email:', err);
-//     }
-// }
-
-// // Cron job 1: Send low inventory emails every Monday at 10:00 AM
-// function scheduleLowInventoryCronJob() {
-//     cron.schedule('0 10 * * 1', async () => { // Runs every Monday at 10:00 AM
-//         try {
-//             const medicines = await Medicine.find({ total_quantity: { $lte: 500 }, status: 1 });
-
-//             for (const medicine of medicines) {
-//                 const supplier = await Supplier.findOne({ supplier_id: medicine.supplier_id });
-
-//                 if (supplier) {
-//                     await sendLowInventoryEmail(supplier.contact_person_name, supplier.contact_person_email, medicine.medicine_name, medicine.total_quantity);
-//                 }
-//             }
-//         } catch (err) {
-//             console.error('Error in low inventory cron job:', err);
-//         }
-//     });
-// }
-
-// function scheduleCertificateExpiryCronJob() {
-//     cron.schedule('*/10 * * * *', async () => { // Runs every day at 9:00 AM
-//         try {
-//             const today = new Date();
-//             today.setHours(0, 0, 0, 0);
-
-//             const expiryThresholds = [1, 2, 3].map(monthOffset => {
-//                 const date = new Date(today);
-//                 date.setMonth(date.getMonth() + monthOffset);
-//                 return date.getTime();
-//             });
-
-//             // Helper function to check certificates and send emails
-//             const checkAndNotify = async (entityList, entityType) => {
-//                 for (const entity of entityList) {
-//                     const certs = entity.certificateFileNDate;
-//                     if (!certs || !Array.isArray(certs)) continue;
-
-//                     for (const cert of certs) {
-//                         if (!cert.date) continue;
-
-//                         const certDate = new Date(cert.date);
-//                         certDate.setHours(0, 0, 0, 0);
-//                         const certTimestamp = certDate.getTime();
-
-//                         const matchIndex = expiryThresholds.indexOf(certTimestamp);
-//                         if (matchIndex !== -1) {
-//                             const monthsLeft = 3 - matchIndex;
-//                             const formattedDate = formatDateToDDMMYYYY(certDate);
-
-//                             const subject = `Reminder: Certificate Expiry in ${monthsLeft} Month(s)`;
-//                             const emailContent = await licenseExpiryEmail(
-//                                 entity.contact_person_name,
-//                                 cert.file, // You can also pass cert type if available
-//                                 formattedDate,
-//                                 entityType // Optional: pass type to email template if you want different templates
-//                             );
-//                             await sendEmail([entity.contact_person_email], subject, emailContent);
-//                             break; // avoid sending multiple emails for same person in one run
-//                         } else {
-//                         }
-//                     }
-//                 }
-//             };
-
-//             // Fetch and process both buyers and suppliers
-//             const buyers = await Buyer.find({});
-//             const suppliers = await Supplier.find({});
-
-//             await checkAndNotify(buyers, 'buyer');
-//             await checkAndNotify(suppliers, 'supplier');
-
-//         } catch (err) {
-//             console.error('Error in certificate expiry cron job:', err);
-//         }
-//     });
-// }
+const cron         = require('node-cron');
+const { Medicine } = require('../schema/medicineSchema');
+const Supplier     = require('../schema/supplierSchema');
+const Buyer        = require('../schema/buyerSchema')
+const {sendEmail}  = require("../utils/emailService");
+const Bid          = require('../schema/bidSchema')
+const Subscription = require('../schema/subscriptionSchema')
+const {sendSubscriptionExpiryEmailContent} = require("../utils/emailContents");
 
 
-// // Initialize all cron jobs
-// function initializeCronJobs() {
-//     scheduleLowInventoryCronJob(); 
-//     // licenseExpiryCronJob(); 
-//     scheduleCertificateExpiryCronJob(); 
-// }
+//bid expiry
+  const markExpiredBidsAsCompleted = async () => {
+  const now = new Date();
 
-// // function to initialize and start the cron jobs
-// initializeCronJobs();
+  try {
+    const activeBids = await Bid.find({ status: "active" });
+
+    let expiredCount = 0;
+
+    for (const bid of activeBids) {
+      const endDateStr = bid.general?.endDate;
+      const endTimeStr = bid.general?.endTime;
+
+      console.log("endDateStr:", endDateStr);
+      console.log("endTimeStr:", endTimeStr);
+
+      if (!endDateStr || !endTimeStr) {
+        continue;
+      }
+
+      // Parse the endDate and manually set the hours and minutes from the string "HH:mm"
+      const [endHour, endMinute] = endTimeStr.split(":").map(Number);
+      const endDateTime = new Date(endDateStr);
+
+      if (isNaN(endDateTime.getTime()) || isNaN(endHour) || isNaN(endMinute)) {
+        console.log(" Invalid date or time format");
+        continue;
+      }
+
+      endDateTime.setHours(endHour, endMinute, 0, 0);
+      console.log(" Parsed endDateTime:", endDateTime.toISOString());
+
+      if (endDateTime < now) {
+        const result = await Bid.updateOne(
+          { _id: bid._id },
+          { $set: { status: "completed" } }
+        );
+        console.log("Bid completed:", result.modifiedCount === 1);
+        expiredCount++;
+      } else {
+        console.log(" Bid not expired");
+      }
+    }
+  } catch (error) {
+    console.error(" Error", error);
+  }
+  };
+
+  const scheduleExpiredBidsCronJob = () => {
+    cron.schedule("*/2 * * * *", async () => {
+      await markExpiredBidsAsCompleted();
+    });
+  };
+//bid expiry
+
+
+//subscription expiry
+  const markExpiredSubscriptionsAsExpired = async () => {
+  const now = new Date();
+
+  try {
+    const allSubscriptions = await Subscription.find({});
+
+    let expiredCount = 0;
+
+    for (const sub of allSubscriptions) {
+      const subEndDateStr = sub.subscriptionEndDate;
+      if (!subEndDateStr) continue;
+
+      const subEndDate = new Date(subEndDateStr);
+      if (isNaN(subEndDate.getTime())) continue;
+
+      const diffInDays = Math.ceil((subEndDate - now) / (1000 * 60 * 60 * 24));
+
+      // Fetch user based on userType
+      let user = null;
+      const userType = sub.userType;
+      if (userType === "Supplier") {
+        user = await Supplier.findOne({ _id: sub.userId });
+      } else if (userType === "Buyer") {
+        user = await Buyer.findOne({ _id: sub.userId });
+      }
+
+      if (!user) continue;
+
+      // Choose reminder days based on productName
+      const reminderDays =
+        sub.productName === "Monthly Subscription"
+          ? [ 3, 1]
+          : [7, 3, 1];
+
+      const shouldSendReminder = reminderDays.includes(diffInDays);
+      const isExpired = subEndDate < now;
+
+      if (shouldSendReminder || isExpired) {
+        console.log("shouldSendReminder || isExpired", shouldSendReminder, isExpired);
+        const subject = "Subscription Payment Link";
+        const emailContent = await sendSubscriptionExpiryEmailContent(userType, user, sub, diffInDays);
+
+        await sendEmail(
+          [user.contact_person_email , "ajo@shunyaekai.tech"],
+          subject,
+          emailContent
+        );
+      }
+
+      // Remove currentSubscription if expired
+      if (isExpired) {
+        if (user.currentSubscription?.toString() === sub._id.toString()) {
+          const updateQuery = { $unset: { currentSubscription: "" } };
+
+          if (userType === "Supplier") {
+            await Supplier.updateOne({ _id: user._id }, updateQuery);
+          } else if (userType === "Buyer") {
+            await Buyer.updateOne({ _id: user._id }, updateQuery);
+          }
+
+          expiredCount++;
+          console.log(`Removed currentSubscription from ${userType} (${user._id})`);
+        }
+      }
+    }
+
+    console.log(`Removed currentSubscription from ${expiredCount} user(s).`);
+  } catch (error) {
+    console.error("Error in markExpiredSubscriptionsAsExpired:", error);
+  }
+  };
+ 
+
+  const scheduleExpiredSubscriptionsCronJob = () => { //runs every morning 8am
+    cron.schedule("0 8 * * *", async () => { 
+      await markExpiredSubscriptionsAsExpired();
+    });
+  };
+//subscription expiry
+  
+
+function initializeCronJobs() {
+scheduleExpiredBidsCronJob();
+scheduleExpiredSubscriptionsCronJob();
+}
+
+
+initializeCronJobs();

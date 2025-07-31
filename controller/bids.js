@@ -40,34 +40,34 @@ const getAllBids = async (req, res) => {
       {
         $match: matchStage,
       },
-      {
-        $lookup: {
-          from: "buyers",
-          let: { userIdStr: "$userId" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: [{ $toString: "$_id" }, "$$userIdStr"],
-                },
-              },
-            },
-            {
-              $project: {
-                token: 0,
-                password: 0,
-              },
-            },
-          ],
-          as: "buyerDetails",
-        },
-      },
-      {
-        $unwind: {
-          path: "$buyerDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: "buyers",
+      //     let: { userIdStr: "$userId" },
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           $expr: {
+      //             $eq: [{ $toString: "$_id" }, "$$userIdStr"],
+      //           },
+      //         },
+      //       },
+      //       {
+      //         $project: {
+      //           token: 0,
+      //           password: 0,
+      //         },
+      //       },
+      //     ],
+      //     as: "buyerDetails",
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: "$buyerDetails",
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
       {
         $sort: { createdAt: -1 },
       },
@@ -83,7 +83,7 @@ const getAllBids = async (req, res) => {
 
     const bids = await Bid.aggregate(pipeline);
 
-    return sendSuccessResponse(res, 200, "Success Fetching Bids", {
+    return sendSuccessResponse(res, 200, "Bids Fetched Successfully", {
       bids: bids,
       totalItems: totalBids,
       currentPage: pageNo,
@@ -94,6 +94,78 @@ const getAllBids = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
+
+const getAllBids1 = async (req, res) => {
+  try {
+    const {
+      userId,
+      country = 'India',
+      type = 'Distributor',
+      status,
+      page_no = 1,
+      page_size = 10,
+      userType = "Supplier",
+    } = req.query;
+    
+    const pageNo = parseInt(page_no);
+    const pageSize = parseInt(page_size);
+    const offset = (pageNo - 1) * pageSize;
+
+    if (userId && !mongoose.isValidObjectId(userId)) {
+      return sendErrorResponse(res, 400, "Invalid User ID format.", null);
+    }
+
+    const matchStage = {
+      ...(userId && { userId }),
+      ...(status && { status }),
+      ...(userType === 'Supplier' && { "general.fromCountries": country }), //filter only when userType = Supplier
+    };
+
+    const pipeline = [
+      { $match: matchStage },
+      { $sort: { createdAt: -1 } },
+    ];
+
+    const bids = await Bid.aggregate(pipeline);
+
+    let finalBids = bids;
+
+    if (userType === 'Supplier') {
+      console.log('userType', userType);
+      
+      const filteredBids = await Promise.all(
+        bids.map(async (bid) => {
+          const products = bid?.additionalDetails || [];
+
+          const matchedProducts = products.filter(ele => ele?.openFor === type);
+
+          if (matchedProducts.length > 0) {
+            bid.additionalDetails = matchedProducts;
+            return bid;
+          }
+          return null;
+        })
+      );
+
+      finalBids = filteredBids.filter(bid => bid !== null);
+    }
+
+    const totalBids = finalBids.length;
+    const paginatedBids = finalBids.slice(offset, offset + pageSize);
+    const totalPages = Math.ceil(totalBids / pageSize);
+
+    return sendSuccessResponse(res, 200, "Bids Fetched Successfully", {
+      bids: paginatedBids,
+      totalItems: totalBids,
+      currentPage: pageNo,
+      itemsPerPage: pageSize,
+      totalPages,
+    });
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 
 const getBidDetails = async (req, res) => {
   try {
@@ -440,6 +512,7 @@ const updateBidParticipant = async (req, res) => {
 
 module.exports = {
   getAllBids,
+  getAllBids1,
   getBidDetails,
   addBid,
   editBid,
