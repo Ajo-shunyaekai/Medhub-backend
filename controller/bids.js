@@ -392,7 +392,7 @@ const updateBidParticipant = async (req, res) => {
     const { participantId, amount, timeLine } = req?.body;
 
     // Step 1: Find the bid
-    const bidDetails = await Bid.findOne({ _id: bidId });
+    const bidDetails = await Bid.findById(bidId);
     if (!bidDetails) {
       return sendErrorResponse(res, 400, "No Bid Found.");
     }
