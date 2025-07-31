@@ -99,14 +99,14 @@ const getAllBids1 = async (req, res) => {
   try {
     const {
       userId,
-      country = 'India',
-      type = 'Distributor',
+      country,
+      type,
       status,
       page_no = 1,
       page_size = 10,
-      userType = "Supplier",
+      userType,
     } = req.query;
-    
+
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
     const offset = (pageNo - 1) * pageSize;
@@ -118,26 +118,25 @@ const getAllBids1 = async (req, res) => {
     const matchStage = {
       ...(userId && { userId }),
       ...(status && { status }),
-      ...(userType === 'Supplier' && { "general.fromCountries": country }), //filter only when userType = Supplier
+      ...(userType === "Supplier" && { "general.fromCountries": country }), //filter only when userType = Supplier
     };
 
-    const pipeline = [
-      { $match: matchStage },
-      { $sort: { createdAt: -1 } },
-    ];
+    const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
 
     const bids = await Bid.aggregate(pipeline);
 
     let finalBids = bids;
 
-    if (userType === 'Supplier') {
-      console.log('userType', userType);
-      
+    if (userType === "Supplier") {
+      console.log("userType", userType);
+
       const filteredBids = await Promise.all(
         bids.map(async (bid) => {
           const products = bid?.additionalDetails || [];
 
-          const matchedProducts = products.filter(ele => ele?.openFor === type);
+          const matchedProducts = products.filter(
+            (ele) => ele?.openFor === type
+          );
 
           if (matchedProducts.length > 0) {
             bid.additionalDetails = matchedProducts;
@@ -147,7 +146,7 @@ const getAllBids1 = async (req, res) => {
         })
       );
 
-      finalBids = filteredBids.filter(bid => bid !== null);
+      finalBids = filteredBids.filter((bid) => bid !== null);
     }
 
     const totalBids = finalBids.length;
@@ -165,7 +164,6 @@ const getAllBids1 = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
 
 const getBidDetails = async (req, res) => {
   try {
