@@ -104,8 +104,9 @@ const getAllBids1 = async (req, res) => {
       status,
       page_no = 1,
       page_size = 10,
-      userType,
+      userType = 'Supplier',
     } = req.query;
+    console.log('req.query',req.query)
 
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
@@ -118,7 +119,7 @@ const getAllBids1 = async (req, res) => {
     const matchStage = {
       ...(userId && { userId }),
       ...(status && { status }),
-      ...(userType === "Supplier" && { "general.fromCountries": country }), //filter only when userType = Supplier
+      ...(userType === "Supplier" && country && { "general.fromCountries": country }), //filter only when userType = Supplier
     };
 
     const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
@@ -132,11 +133,17 @@ const getAllBids1 = async (req, res) => {
         bids.map(async (bid) => {
           const products = bid?.additionalDetails || [];
 
-          const matchedProducts = products.filter(
-            (ele) =>
-              ele?.openFor?.toString()?.toLowerCase() ===
-              type?.toString()?.toLowerCase()
-          );
+          // const matchedProducts = products.filter(
+          //   (ele) =>
+          //     ele?.openFor?.toString()?.toLowerCase() ===
+          //     type?.toString()?.toLowerCase()
+          // );
+          const matchedProducts = products.filter((ele) => {
+            const openForValue = (ele?.openFor || "").toString().toLowerCase();
+            const typeValue = type.toString().toLowerCase();
+
+            return openForValue === typeValue;
+          });
 
           if (matchedProducts.length > 0) {
             bid.additionalDetails = matchedProducts;

@@ -499,7 +499,7 @@ const sendSubscriptionExpiryEmailContent = (
 ) => {
   const paymentLink = `${process.env.CLIENT_URL}/subscription/${
     user._id
-  }/${ut?.toLowerCase()}/select-plan`;
+  }/${userType?.toLowerCase()}/select-plan`;
   return `
     <h3>Hello ${user.contact_person_name || "Supplier"},</h3>
     <p>Your subscription (<strong>${

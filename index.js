@@ -57,6 +57,7 @@ module.exports = function (app) {
   app.use("/api/invoice", require("./routes/invoiceRoutes")());
   app.use("/api/support", require("./routes/supportRoutes")());
   app.use("/api/bid", require("./routes/bidRoutes"));
+  app.use("/api/cron", require("./routes/cronRoutes"));
 
   // Catch-all for other routes
   app.get(["/*"], (req, res) => {
