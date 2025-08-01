@@ -21,8 +21,8 @@ const {sendSubscriptionExpiryEmailContent} = require("../utils/emailContents");
       const endDateStr = bid.general?.endDate;
       const endTimeStr = bid.general?.endTime;
 
-      console.log("endDateStr:", endDateStr);
-      console.log("endTimeStr:", endTimeStr);
+      // console.log("endDateStr:", endDateStr);
+      // console.log("endTimeStr:", endTimeStr);
 
       if (!endDateStr || !endTimeStr) {
         continue;
@@ -33,22 +33,22 @@ const {sendSubscriptionExpiryEmailContent} = require("../utils/emailContents");
       const endDateTime = new Date(endDateStr);
 
       if (isNaN(endDateTime.getTime()) || isNaN(endHour) || isNaN(endMinute)) {
-        console.log(" Invalid date or time format");
+        // console.log(" Invalid date or time format");
         continue;
       }
 
       endDateTime.setHours(endHour, endMinute, 0, 0);
-      console.log(" Parsed endDateTime:", endDateTime.toISOString());
+      // console.log(" Parsed endDateTime:", endDateTime.toISOString());
 
       if (endDateTime < now) {
         const result = await Bid.updateOne(
           { _id: bid._id },
           { $set: { status: "completed" } }
         );
-        console.log("Bid completed:", result.modifiedCount === 1);
+        // console.log("Bid completed:", result.modifiedCount === 1);
         expiredCount++;
       } else {
-        console.log(" Bid not expired");
+        // console.log(" Bid not expired");
       }
     }
   } catch (error) {
@@ -57,7 +57,7 @@ const {sendSubscriptionExpiryEmailContent} = require("../utils/emailContents");
   };
 
   const scheduleExpiredBidsCronJob = () => {
-    cron.schedule("*/2 * * * *", async () => {
+    cron.schedule("*/10 * * * *", async () => {
       await markExpiredBidsAsCompleted();
     });
   };
@@ -103,7 +103,7 @@ const {sendSubscriptionExpiryEmailContent} = require("../utils/emailContents");
       const isExpired = subEndDate < now;
 
       if (shouldSendReminder || isExpired) {
-        console.log("shouldSendReminder || isExpired", shouldSendReminder, isExpired);
+        // console.log("shouldSendReminder || isExpired", shouldSendReminder, isExpired);
         const subject = "Subscription Payment Link";
         const emailContent = await sendSubscriptionExpiryEmailContent(userType, user, sub, diffInDays);
 
@@ -126,12 +126,12 @@ const {sendSubscriptionExpiryEmailContent} = require("../utils/emailContents");
           }
 
           expiredCount++;
-          console.log(`Removed currentSubscription from ${userType} (${user._id})`);
+          // console.log(`Removed currentSubscription from ${userType} (${user._id})`);
         }
       }
     }
 
-    console.log(`Removed currentSubscription from ${expiredCount} user(s).`);
+    // console.log(`Removed currentSubscription from ${expiredCount} user(s).`);
   } catch (error) {
     console.error("Error in markExpiredSubscriptionsAsExpired:", error);
   }

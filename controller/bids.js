@@ -128,14 +128,14 @@ const getAllBids1 = async (req, res) => {
     let finalBids = bids;
 
     if (userType === "Supplier") {
-      console.log("userType", userType);
-
       const filteredBids = await Promise.all(
         bids.map(async (bid) => {
           const products = bid?.additionalDetails || [];
 
           const matchedProducts = products.filter(
-            (ele) => ele?.openFor === type
+            (ele) =>
+              ele?.openFor?.toString()?.toLowerCase() ===
+              type?.toString()?.toLowerCase()
           );
 
           if (matchedProducts.length > 0) {
@@ -152,9 +152,23 @@ const getAllBids1 = async (req, res) => {
     const totalBids = finalBids.length;
     const paginatedBids = finalBids.slice(offset, offset + pageSize);
     const totalPages = Math.ceil(totalBids / pageSize);
+    const bidWithTotalCout = paginatedBids?.map((bid) => {
+      let biddersArr = [];
+      bid?.additionalDetails?.forEach((item) => {
+        item?.participants?.forEach((bidder) =>
+          biddersArr?.includes(bidder?.id?.toString())
+            ? null
+            : biddersArr?.push(bidder?.id?.toString())
+        );
+      });
+      return {
+        ...bid,
+        totalBidsCount: biddersArr?.length || 0,
+      };
+    });
 
     return sendSuccessResponse(res, 200, "Bids Fetched Successfully", {
-      bids: paginatedBids,
+      bids: bidWithTotalCout,
       totalItems: totalBids,
       currentPage: pageNo,
       itemsPerPage: pageSize,
@@ -221,9 +235,61 @@ const getBidDetails = async (req, res) => {
         )
       : bidDetails?.[0]?.additionalDetails;
 
+    let biddersArr = [];
     const updatedBidDetails = {
       ...bidDetails?.[0],
-      additionalDetails: filteredAdditionalDetails,
+      additionalDetails: await Promise.all(
+        (filteredAdditionalDetails || []).map(async (item) => {
+          // Process participants and await all promises inside
+          const updatedParticipants = await Promise.all(
+            (item?.participants || []).map(async (bidder) => {
+              // Step 3: Check if participant exists
+              const participantDetails = await Supplier?.findById(bidder?.id);
+              if (!participantDetails) {
+                return null;
+              }
+
+              // Check if bidder is already in biddersArr by bidder ID
+              const existingBidder = biddersArr.find(
+                (b) => b?.id === bidder?.id
+              );
+              if (!existingBidder) {
+                // If bidder is not in biddersArr, push the new bidder
+                biddersArr.push({
+                  ...bidder,
+                  totalBidsPCount: item?.participants?.length,
+                  participantName: participantDetails?.supplier_name,
+                  participantType: participantDetails?.supplier_type,
+                  participantCountry:
+                    participantDetails?.registeredAddress?.country,
+                  productBidded: item?.itemId,
+                });
+              }
+
+              return {
+                ...bidder,
+                totalBidsPCount: item?.participants?.length,
+                participantName: participantDetails?.supplier_name,
+                participantType: participantDetails?.supplier_type,
+                participantCountry:
+                  participantDetails?.registeredAddress?.country,
+                productBidded: item?.itemId,
+              };
+            })
+          );
+
+          // Filter out null results from invalid participants
+          const validParticipants = updatedParticipants.filter(
+            (participant) => participant !== null
+          );
+
+          return {
+            ...item,
+            totalBidsCount: biddersArr.length || 0,
+            participants: validParticipants, // Include valid participants
+          };
+        })
+      ),
     };
 
     return sendSuccessResponse(
@@ -412,7 +478,7 @@ const editBid = async (req, res) => {
   }
 };
 
-const bidProductDetails = async (req, res) => {
+const getBidProductDetails = async (req, res) => {
   try {
     const { bidId, itemId } = req?.params;
     // Step 1: Find the bid
@@ -429,6 +495,7 @@ const bidProductDetails = async (req, res) => {
     if (!itemDetails) {
       return sendErrorResponse(res, 400, "No Item Found in Bid.");
     }
+    const biddersArr = [];
 
     const itemWithParticipantsDetails =
       (await Promise.all(
@@ -438,9 +505,25 @@ const bidProductDetails = async (req, res) => {
           if (!participantDetails) {
             return null;
           }
+          // Check if bidder is already in biddersArr by bidder ID
+          const existingBidder = biddersArr.find((b) => b?.id === bidder?.id);
+          if (!existingBidder) {
+            // If bidder is not in biddersArr, push the new bidder
+            biddersArr.push({
+              ...bidder,
+              participantName: participantDetails?.supplier_name,
+              participantType: participantDetails?.supplier_type,
+              participantCountry:
+                participantDetails?.registeredAddress?.country,
+              productBidded: itemDetails?.itemId,
+            });
+          }
           return {
             ...item,
-            participantDetails: participantDetails,
+            participantName: participantDetails?.supplier_name,
+            participantType: participantDetails?.supplier_type,
+            participantCountry: participantDetails?.registeredAddress?.country,
+            productBidded: itemDetails?.itemId,
           };
         })
       )) || [];
@@ -514,6 +597,6 @@ module.exports = {
   getBidDetails,
   addBid,
   editBid,
-  bidProductDetails,
+  getBidProductDetails,
   updateBidParticipant,
 };
