@@ -29,7 +29,7 @@ const {
   getCategoryNameForHeading,
 } = require("../utils/bulkUploadProduct");
 const { getFilePathsEdit, getFilePathsAdd } = require("../helper");
-const { validateAnotherCategory } = require("../utils/Category");
+const { validateCategory, validateSubCategory, validateAnotherCategory } = require("../utils/Category");
 const { flattenData } = require("../utils/csvConverter");
 
 module.exports = {
@@ -3599,23 +3599,64 @@ module.exports = {
           }
           return elem;
         })
+        // ?.map((ele) => {
+        //   return {
+        //     ...ele,
+        //     anotherCategory: {
+        //       ...ele?.anotherCategory,
+        //       error: ele?.anotherCategory?.value
+        //         ? validateAnotherCategory(
+        //             ele?.category?.value,
+        //             ele?.subCategory?.value,
+        //             ele?.anotherCategory?.value
+        //           ) === true
+        //           ? true
+        //           : undefined
+        //         : undefined,
+        //     },
+        //   };
+        // });
         ?.map((ele) => {
-          return {
-            ...ele,
-            anotherCategory: {
-              ...ele?.anotherCategory,
-              error: ele?.anotherCategory?.value
-                ? validateAnotherCategory(
-                    ele?.category?.value,
-                    ele?.subCategory?.value,
-                    ele?.anotherCategory?.value
-                  ) === true
-                  ? true
-                  : undefined
-                : undefined,
-            },
-          };
-        });
+            return {
+              ...ele,
+              category: {
+                ...ele?.category,
+                error: ele?.category?.value
+                  ? !validateCategory(ele?.category?.value)
+                    ? true
+                    : undefined
+                  : undefined,
+              },
+              subCategory: {
+                ...ele?.subCategory,
+                error:
+                  ele?.category?.value && ele?.subCategory?.value
+                    ? !validateSubCategory(
+                        ele?.category?.value,
+                        ele?.subCategory?.value
+                      )
+                      ? true
+                      : undefined
+                    : undefined,
+              },
+              anotherCategory: {
+                ...ele?.anotherCategory,
+                error:
+                  ele?.category?.value &&
+                  ele?.subCategory?.value &&
+                  ele?.anotherCategory?.value
+                    ? validateAnotherCategory(
+                        ele?.category?.value,
+                        ele?.subCategory?.value,
+                        ele?.anotherCategory?.value
+                      )
+                      ? true
+                      : undefined
+                    : undefined,
+              },
+            };
+          });
+
       const previewHeadings = Object?.values(previewResponse?.[0])?.map(
         (field) => field?.fieldName
       );
