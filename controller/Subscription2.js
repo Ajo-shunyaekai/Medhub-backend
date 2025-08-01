@@ -399,46 +399,30 @@ const stripeWebhook = async (req, res) => {
 
     // Handle the event
     switch (event?.type) {
-      case "invoice.updated":
-        break;
-      case "invoice.finalized":
-        break;
-      case "invoice.payment_action_required":
-        break;
-      case "customer.created":
-        break;
-      case "customer.updated":
-        break;
       case "checkout.session.async_payment_failed":
-        break;
+        // Log the failed async payment
+        return sendSuccessResponse(res, 200, "Async payment failed");
+
       case "checkout.session.async_payment_succeeded":
-        break;
+        // Log the successful async payment
+        return sendSuccessResponse(res, 200, "Async payment succeeded");
+
       case "checkout.session.completed":
-        savePaymentAndSendEmail(req, res, {
+        // Process this event: save payment info and send email
+        await savePaymentAndSendEmail(req, res, {
           ...session?.metadata,
           session_id: session?.id,
         });
-        break;
+        return sendSuccessResponse(res, 200, "Checkout session completed");
+
       case "checkout.session.expired":
-        break;
-      case "payment_intent.succeeded":
-        break;
-      case "charge.succeeded":
-        break;
-      case "payment_method.attached":
-        break;
-      case "customer.subscription.created":
-        break;
-      case "customer.subscription.updated":
-        break;
-      case "invoice.paid":
-        break;
-      case "invoice.payment_succeeded":
-        break;
+        // Handle session expiration (you could notify the user or mark the session as expired)
+        return sendSuccessResponse(res, 200, "Checkout session expired");
 
       default:
-        console.error(`\n Unhandled event type \n${event.type}`);
-        return res.status(200).send("Event ignored");
+        // Log unknown events for debugging purposes
+        console.error(`⚠️ Unhandled event type: ${event.type}`);
+        return sendSuccessResponse(res, 200, "Event ignored");
     }
   } catch (error) {
     handleCatchBlockError(req, res, error);
@@ -466,8 +450,7 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
       userType
     );
     await sendEmail(
-      user?.contact_person_email || 
-      [
+      user?.contact_person_email || [
         "ajo@shunyaekai.tech",
         "Shivani@shunyaekai.tech",
       ],
