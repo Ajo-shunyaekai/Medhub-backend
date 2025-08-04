@@ -104,7 +104,8 @@ const getAllBids1 = async (req, res) => {
       status,
       page_no = 1,
       page_size = 10,
-      userType = 'Supplier',
+      userType,
+      participant,
     } = req.query;
     console.log('req.query',req.query)
 
@@ -133,15 +134,9 @@ const getAllBids1 = async (req, res) => {
         bids.map(async (bid) => {
           const products = bid?.additionalDetails || [];
 
-          // const matchedProducts = products.filter(
-          //   (ele) =>
-          //     ele?.openFor?.toString()?.toLowerCase() ===
-          //     type?.toString()?.toLowerCase()
-          // );
           const matchedProducts = products.filter((ele) => {
             const openForValue = (ele?.openFor || "").toString().toLowerCase();
             const typeValue = type.toString().toLowerCase();
-
             return openForValue === typeValue;
           });
 
@@ -153,6 +148,55 @@ const getAllBids1 = async (req, res) => {
         })
       );
 
+      finalBids = filteredBids.filter((bid) => bid !== null);
+    }
+
+    if (participant) {
+      const filteredBids = await Promise.all(
+        bids.map(async (bid) => {
+          const products = bid?.additionalDetails || [];
+
+          // If participant exists and isn't "not", filter bids with the participant
+          if (participant !== "not") {
+            // Check if participant is found in any product's participants
+            const isParticipatedMatch = products?.some((product) => {
+              const participants = product?.participants || [];
+
+              return participants.some(
+                (ele) => ele?.id?.toString() === participant?.toString()
+              );
+            });
+
+            // If participant is matched, include the bid
+            if (isParticipatedMatch) {
+              return bid;
+            }
+          } else {
+            // // In cases where there are no participants or no matching participant, include the bid
+            // if (!products?.participant || products?.participants?.length == 0) {
+            //   return bid;
+            // } else {
+              // Check if participant is found in any product's participants
+              const isParticipatedMatch = products?.every((product) => {
+                const participants = product?.participants || [];
+
+                return participants.every(
+                  (ele) => ele?.id?.toString() == participant?.toString()
+                );
+              });
+
+              // If the participant is matched, exclude the bid
+              if (isParticipatedMatch) {
+                return bid; // Exclude the bid
+              }
+            // }
+          }
+
+          return null;
+        })
+      );
+
+      // Filter out any null values to get the final bids
       finalBids = filteredBids.filter((bid) => bid !== null);
     }
 

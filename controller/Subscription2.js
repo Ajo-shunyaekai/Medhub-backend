@@ -432,6 +432,7 @@ const stripeWebhook = async (req, res) => {
 const sendSubscriptionPaymentReqUrl = async (req, res) => {
   try {
     const { userType, userId } = req?.params;
+    const { coupon } = req?.body;
     const user = await (userType?.toLowerCase() === "buyer"
       ? Buyer
       : Supplier
@@ -447,7 +448,8 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
     const emailContent = await sendSubscriptionPaymentEmailContent(
       user,
       user?._id,
-      userType
+      userType,
+      coupon
     );
     await sendEmail(
       user?.contact_person_email || [
