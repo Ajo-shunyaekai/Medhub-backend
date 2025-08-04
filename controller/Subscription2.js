@@ -401,11 +401,15 @@ const stripeWebhook = async (req, res) => {
     switch (event?.type) {
       case "checkout.session.async_payment_failed":
         // Log the failed async payment
-        return sendSuccessResponse(res, 200, "Async payment failed");
+        console.log(res, 200, "Async payment failed");
+        res.status(200).send({ message: "Async payment failed" });
+        break;
 
       case "checkout.session.async_payment_succeeded":
         // Log the successful async payment
-        return sendSuccessResponse(res, 200, "Async payment succeeded");
+        console.log(res, 200, "Async payment succeeded");
+        res.status(200).send({ message: "Async payment succeeded" });
+        break;
 
       case "checkout.session.completed":
         // Process this event: save payment info and send email
@@ -413,16 +417,21 @@ const stripeWebhook = async (req, res) => {
           ...session?.metadata,
           session_id: session?.id,
         });
-        return sendSuccessResponse(res, 200, "Checkout session completed");
+        res.status(200).send({ message: "Event ignored" });
+        break;
 
       case "checkout.session.expired":
         // Handle session expiration (you could notify the user or mark the session as expired)
-        return sendSuccessResponse(res, 200, "Checkout session expired");
+        console.log(res, 200, "Checkout session expired");
+        res.status(200).send({ message: "Checkout session expired" });
+        break;
 
       default:
         // Log unknown events for debugging purposes
         console.error(`⚠️ Unhandled event type: ${event.type}`);
-        return sendSuccessResponse(res, 200, "Event ignored");
+        console.log(res, 200, "Event ignored");
+        res.status(200).send({ message: "Event ignored" });
+        break;
     }
   } catch (error) {
     handleCatchBlockError(req, res, error);

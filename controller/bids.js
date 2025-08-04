@@ -107,7 +107,7 @@ const getAllBids1 = async (req, res) => {
       userType,
       participant,
     } = req.query;
-    console.log('req.query',req.query)
+    console.log("req.query", req.query);
 
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
@@ -120,7 +120,8 @@ const getAllBids1 = async (req, res) => {
     const matchStage = {
       ...(userId && { userId }),
       ...(status && { status }),
-      ...(userType === "Supplier" && country && { "general.fromCountries": country }), //filter only when userType = Supplier
+      ...(userType === "Supplier" &&
+        country && { "general.fromCountries": country }), //filter only when userType = Supplier
     };
 
     const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
@@ -176,19 +177,19 @@ const getAllBids1 = async (req, res) => {
             // if (!products?.participant || products?.participants?.length == 0) {
             //   return bid;
             // } else {
-              // Check if participant is found in any product's participants
-              const isParticipatedMatch = products?.every((product) => {
-                const participants = product?.participants || [];
+            // Check if participant is found in any product's participants
+            const isParticipatedMatch = products?.every((product) => {
+              const participants = product?.participants || [];
 
-                return participants.every(
-                  (ele) => ele?.id?.toString() == participant?.toString()
-                );
-              });
+              return participants.every(
+                (ele) => ele?.id?.toString() == participant?.toString()
+              );
+            });
 
-              // If the participant is matched, exclude the bid
-              if (isParticipatedMatch) {
-                return bid; // Exclude the bid
-              }
+            // If the participant is matched, exclude the bid
+            if (isParticipatedMatch) {
+              return bid; // Exclude the bid
+            }
             // }
           }
 
@@ -277,70 +278,61 @@ const getBidDetails = async (req, res) => {
       return sendErrorResponse(res, 404, "Bid not found.");
     }
 
-    // Filter additionalDetails based on 'type' if provided
     const filteredAdditionalDetails = type
-      ? bidDetails?.[0]?.additionalDetails?.filter(
+      ? bidDetails[0]?.additionalDetails?.filter(
           (item) =>
             item?.openFor?.toLowerCase()?.replace(/\s+/g, "") ===
             type?.toLowerCase()?.replace(/\s+/g, "")
         )
-      : bidDetails?.[0]?.additionalDetails;
+      : bidDetails[0]?.additionalDetails;
 
-    let biddersArr = [];
-    const updatedBidDetails = {
-      ...bidDetails?.[0],
-      additionalDetails: await Promise.all(
-        (filteredAdditionalDetails || []).map(async (item) => {
-          // Process participants and await all promises inside
-          const updatedParticipants = await Promise.all(
-            (item?.participants || []).map(async (bidder) => {
-              // Step 3: Check if participant exists
-              const participantDetails = await Supplier?.findById(bidder?.id);
-              if (!participantDetails) {
-                return null;
-              }
+    const updatedAdditionalDetails = await Promise.all(
+      (filteredAdditionalDetails || []).map(async (item) => {
+        const biddersArr = [];
 
-              // Check if bidder is already in biddersArr by bidder ID
-              const existingBidder = biddersArr.find(
-                (b) => b?.id === bidder?.id
-              );
-              if (!existingBidder) {
-                // If bidder is not in biddersArr, push the new bidder
-                biddersArr.push({
-                  ...bidder,
-                  totalBidsPCount: item?.participants?.length,
-                  participantName: participantDetails?.supplier_name,
-                  participantType: participantDetails?.supplier_type,
-                  participantCountry:
-                    participantDetails?.registeredAddress?.country,
-                  productBidded: item?.itemId,
-                });
-              }
+        const updatedParticipants = await Promise.all(
+          (item?.participants || []).map(async (bidder) => {
+            const participantDetails = await Supplier?.findById(bidder?.id);
+            if (!participantDetails) return null;
 
-              return {
+            const alreadyAdded = biddersArr.find((b) => b?.id === bidder?.id);
+
+            if (!alreadyAdded) {
+              biddersArr.push({
                 ...bidder,
-                totalBidsPCount: item?.participants?.length,
-                participantName: participantDetails?.supplier_name,
-                participantType: participantDetails?.supplier_type,
+                participantName: participantDetails.supplier_name,
+                participantType: participantDetails.supplier_type,
                 participantCountry:
                   participantDetails?.registeredAddress?.country,
                 productBidded: item?.itemId,
-              };
-            })
-          );
+              });
+            }
 
-          // Filter out null results from invalid participants
-          const validParticipants = updatedParticipants.filter(
-            (participant) => participant !== null
-          );
+            return {
+              ...bidder,
+              totalBidsPCount: item?.participants?.length,
+              participantName: participantDetails.supplier_name,
+              participantType: participantDetails.supplier_type,
+              participantCountry:
+                participantDetails?.registeredAddress?.country,
+              productBidded: item?.itemId,
+            };
+          })
+        );
 
-          return {
-            ...item,
-            totalBidsCount: biddersArr.length || 0,
-            participants: validParticipants, // Include valid participants
-          };
-        })
-      ),
+        const validParticipants = updatedParticipants.filter(Boolean);
+
+        return {
+          ...item,
+          totalBidsCount: biddersArr.length,
+          participants: validParticipants,
+        };
+      })
+    );
+
+    const updatedBidDetails = {
+      ...bidDetails[0],
+      additionalDetails: updatedAdditionalDetails,
     };
 
     return sendSuccessResponse(
