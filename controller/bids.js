@@ -107,6 +107,7 @@ const getAllBids1 = async (req, res) => {
       userType,
       participant,
     } = req.query;
+    console.log('req.query',req.query)
 
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
@@ -119,7 +120,7 @@ const getAllBids1 = async (req, res) => {
     const matchStage = {
       ...(userId && { userId }),
       ...(status && { status }),
-      ...(userType === "Supplier" && { "general.fromCountries": country }), //filter only when userType = Supplier
+      ...(userType === "Supplier" && country && { "general.fromCountries": country }), //filter only when userType = Supplier
     };
 
     const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];

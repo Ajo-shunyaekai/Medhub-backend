@@ -444,6 +444,11 @@ const categoriesData = [
         name: "Waste Management",
         anotherCategories: cleanCategories(["Waste Disposal Systems", "Services"]),
       },
+      {
+        name: "Medical Gas Supply Unit",
+        anotherCategories: cleanCategories(["Services"]),
+      },
+
     ]?.sort((a, b) => a?.name?.localeCompare(b?.name)),
     options: [
       {
@@ -3652,6 +3657,24 @@ const createCategory = (schema, name, subCategories) => ({
   })),
 });
 
+// Validate if product category exists
+const validateCategory = (productCategory) => {
+  return categoriesData.some((category) => category.name === productCategory);
+};
+
+// Validate if subcategory exists under a category
+const validateSubCategory = (productCategory, subCategory) => {
+  const categoryData = categoriesData.find(
+    (category) => category.name === productCategory
+  );
+
+  if (!categoryData) return false;
+
+  return categoryData.subCategories?.some(
+    (sub) => sub.name === subCategory
+  );
+};
+
 const validateAnotherCategory = (
   productCategory,
   subCategory,
@@ -3684,4 +3707,9 @@ const categoryArrays = categoriesData.map((category) =>
   createCategory(category.schema, category.name, category.subCategories)
 );
 
-module.exports = { categoryArrays, validateAnotherCategory };
+module.exports = { 
+  categoryArrays, 
+  validateCategory,
+  validateSubCategory,
+  validateAnotherCategory,
+ };
