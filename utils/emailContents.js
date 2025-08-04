@@ -450,7 +450,12 @@ const sendEmailConfirmationContent = (
         `;
 };
 
-const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
+const sendSubscriptionPaymentEmailContent = (
+  userFound,
+  userId,
+  userType,
+  coupon
+) => {
   const paymentLink = `${
     process.env.CLIENT_URL
   }/subscription/${userId}/${userType?.toLowerCase()}/select-plan`;
@@ -462,7 +467,9 @@ const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
           <tr>
             <td>
               <h2 style="text-align: center; color: #333;">Subscription Payment Link</h2>
-              <p style="color: #555; font-size: 16px;">Dear <strong>${userFound?.contact_person_name}</strong>,</p>
+              <p style="color: #555; font-size: 16px;">Dear <strong>${
+                userFound?.contact_person_name
+              }</strong>,</p>
               <p style="color: #555; font-size: 16px;">We are excited to have you onboard! Please click the link below to complete your subscription payment:</p>
 
               <h3 style="text-align: center; color: #333;">
@@ -470,9 +477,12 @@ const sendSubscriptionPaymentEmailContent = (userFound, userId, userType) => {
               </h3>
 
               <!-- Coupon Code Section -->
-              <p style="color: #555; font-size: 16px; font-weight: bold; text-align: center; margin-top: 20px;">
-                Use Coupon Code <span style="color: #28a745; font-size: 18px; font-weight: bold;">SAVET1-99</span> to get a special discount!
-              </p>
+              ${
+                coupon &&
+                `<p style="color: #555; font-size: 16px; font-weight: bold; text-align: center; margin-top: 20px;">
+                Use Coupon Code <span style="color: #28a745; font-size: 18px; font-weight: bold;">${coupon}</span> to get a special discount!
+              </p>`
+              }
 
               <p style="color: #555; font-size: 16px;">If you have any issues or questions, feel free to reach out to us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
               
