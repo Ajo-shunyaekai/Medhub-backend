@@ -44,6 +44,14 @@ const getUploadPath = (req, file) => {
       usertype === "Buyer"
         ? "./uploads/buyer/certificate_images"
         : usertype === "Supplier" && "./uploads/supplier/certificate_image";
+  } else if (
+    file.fieldname === "product_catalogue" ||
+    file.fieldname === "product_catalogueNew"
+  ) {
+    uploadPath =
+      usertype === "Buyer"
+        ? "./uploads/buyer/product_catalogues"
+        : usertype === "Supplier" && "./uploads/supplier/product_catalogue";
   }
   return uploadPath;
 };
@@ -80,12 +88,14 @@ const authUpload = (req, res, next) => {
     { name: "license_image", maxCount: 4 },
     { name: "tax_image", maxCount: 4 },
     { name: "certificate_image", maxCount: 4 },
+    { name: "product_catalogue", maxCount: 4 },
     { name: "supplier_image", maxCount: 1 },
     { name: "medical_practitioner_image", maxCount: 4 },
     { name: "buyer_imageNew", maxCount: 1 },
     { name: "license_imageNew", maxCount: 4 },
     { name: "tax_imageNew", maxCount: 4 },
     { name: "certificate_imageNew", maxCount: 4 },
+    { name: "product_catalogueNew", maxCount: 4 },
     { name: "supplier_imageNew", maxCount: 1 },
     { name: "medical_practitioner_imageNew", maxCount: 4 },
   ])(req, res, async (err) => {

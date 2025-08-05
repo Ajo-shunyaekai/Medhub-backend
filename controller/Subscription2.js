@@ -73,6 +73,7 @@ const createSubscription = async (req, res) => {
       userType,
       userId,
       discount,
+      invoiceDetails,
     } = req?.body;
 
     const foundDiscount = discounts?.find(
@@ -123,6 +124,9 @@ const createSubscription = async (req, res) => {
         userType?.trim()?.toLowerCase() === "buyer" ? "Buyer" : "Supplier",
       custom_invoice_pdf: invoiceFile?.["invoice_pdf"]?.[0] || "",
       custom_subscription_id: "SBSC-" + Math.random().toString(16).slice(2, 10),
+      invoiceDetails: {
+        ...invoiceDetails,
+      },
     });
 
     if (!subscription) {
@@ -401,13 +405,11 @@ const stripeWebhook = async (req, res) => {
     switch (event?.type) {
       case "checkout.session.async_payment_failed":
         // Log the failed async payment
-        console.log(res, 200, "Async payment failed");
         res.status(200).send({ message: "Async payment failed" });
         break;
 
       case "checkout.session.async_payment_succeeded":
         // Log the successful async payment
-        console.log(res, 200, "Async payment succeeded");
         res.status(200).send({ message: "Async payment succeeded" });
         break;
 
@@ -422,14 +424,12 @@ const stripeWebhook = async (req, res) => {
 
       case "checkout.session.expired":
         // Handle session expiration (you could notify the user or mark the session as expired)
-        console.log(res, 200, "Checkout session expired");
         res.status(200).send({ message: "Checkout session expired" });
         break;
 
       default:
         // Log unknown events for debugging purposes
         console.error(`⚠️ Unhandled event type: ${event.type}`);
-        console.log(res, 200, "Event ignored");
         res.status(200).send({ message: "Event ignored" });
         break;
     }

@@ -147,6 +147,13 @@ const supplierSchema = new Schema(
         trim: true,
       },
     ],
+    product_catalogue: [
+      {
+        type: String,
+        required: true,
+        trim: true,
+      },
+    ],
     certificateFileNDate: [
       {
         file: { type: String },
