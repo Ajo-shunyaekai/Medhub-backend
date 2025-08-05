@@ -69,6 +69,13 @@ const subscriptionSchema = new Schema(
     invoiceStatus: {
       type: String,
     },
+    invoiceDetails: {
+      num: { type: String },
+      subTotal: { type: String },
+      coupon: { type: String },
+      discount: { type: String },
+      total: { type: String },
+    },
   },
   { timestamps: true }
 );

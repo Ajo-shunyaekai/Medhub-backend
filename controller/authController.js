@@ -616,6 +616,7 @@ const registerUser = async (req, res) => {
       contact_person_country_code: personCountryCode,
       license_image: uploadedFiles?.license_image,
       certificate_image: uploadedFiles?.certificate_image,
+      product_catalogue: uploadedFiles?.product_catalogue,
       medical_certificate: uploadedFiles?.medical_certificate,
       medical_practitioner_image: uploadedFiles?.medical_practitioner_image,
       registeredAddress: {
