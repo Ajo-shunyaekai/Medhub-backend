@@ -324,7 +324,8 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
     );
     await sendEmail(
       email ||
-        updatedUser?.contact_person_email || [
+        // updatedUser?.contact_person_email || 
+        [
           "ajo@shunyaekai.tech",
           "Shivani@shunyaekai.tech",
         ],
@@ -343,7 +344,9 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       updatedSubscription?.totalAmount
     );
     await sendEmail(
-      process.env.ADMIN_EMAIL,
+      [
+        process.env.ADMIN_EMAIL
+      ],
       subject2,
       emailContent2,
       attachments
@@ -461,7 +464,8 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
       coupon
     );
     await sendEmail(
-      user?.contact_person_email || [
+      // user?.contact_person_email || 
+      [
         "ajo@shunyaekai.tech",
         "Shivani@shunyaekai.tech",
       ],

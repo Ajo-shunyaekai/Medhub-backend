@@ -364,7 +364,7 @@ module.exports = {
   acceptRejectQuotation: async (req, res, reqObj, callback) => {
     try {
       const { enquiry_id, item_id, buyer_id, new_status } = reqObj;
-
+     
       const itemId = ObjectId.isValid(item_id) ? new ObjectId(item_id) : null;
 
       const msg = new_status === "accepted" ? "Accepted" : "Rejected";
@@ -418,8 +418,8 @@ module.exports = {
           msg
         );
       
-        const buyerRecipients = [buyer.contact_person_email];
-        const supplierRecipients = [supplier.contact_person_email];
+        const buyerRecipients = [buyer.contact_person_email, 'ajo@shunyaekai.tech'];
+        const supplierRecipients = [supplier.contact_person_email,'ajo@shunyaekai.tech'];
       
         await Promise.all([
           sendEmail(buyerRecipients, subject, buyerContent),

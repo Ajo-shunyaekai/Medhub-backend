@@ -471,7 +471,7 @@ module.exports = {
 
   acceptRejectSupplierRegReq: async (req, res, reqObj, callback) => {
     try {
-      const { supplier_id, sales_person_name, action } = reqObj;
+      const { supplier_id, sales_person_name, sales_person_email, action } = reqObj;
 
       const supplier = await Supplier.findOne({ supplier_id: supplier_id });
 
@@ -495,6 +495,7 @@ module.exports = {
         account_status: newAccountStatus,
         profile_status: newProfileStatus,
         sales_person_name,
+        sales_person_email
       };
 
       if (action === "accept") {
@@ -824,7 +825,7 @@ module.exports = {
 
   acceptRejectBuyerRegReq: async (req, res, reqObj, callback) => {
     try {
-      const { buyer_id, sales_person_name = "", action } = reqObj;
+      const { buyer_id, sales_person_name = "", sales_person_email, action } = reqObj;
 
       const buyer = await Buyer.findOne({ buyer_id: buyer_id });
 
@@ -849,6 +850,7 @@ module.exports = {
         account_status: newAccountStatus,
         profile_status: newProfileStatus,
         sales_person_name,
+        sales_person_email
       };
 
       if (action === "accept") {
