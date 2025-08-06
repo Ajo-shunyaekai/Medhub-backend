@@ -176,6 +176,63 @@ const bidSchema = new Schema(
                 "Validation Error: Participant Proposed timeLine is required",
               ],
             },
+            tnc: {
+              type: String,
+              required: [
+                true,
+                "Validation Error: Participant Proposed terms and conditions is required",
+              ],
+            },
+            history: [
+              {
+                amount: {
+                  value: {
+                    type: Number,
+                    required: [
+                      true,
+                      "Validation Error: Participant Proposed Amount is required",
+                    ],
+                  },
+                  edited: {
+                    type: Boolean,
+                    default: false,
+                  },
+                },
+                timeLine: {
+                  value: {
+                    type: Number,
+                    required: [
+                      true,
+                      "Validation Error: Participant Proposed timeLine is required",
+                    ],
+                  },
+                  edited: {
+                    type: Boolean,
+                    default: false,
+                  },
+                },
+                tnc: {
+                  value: {
+                    type: String,
+                    required: [
+                      true,
+                      "Validation Error: Participant Proposed terms and conditions is required",
+                    ],
+                  },
+                  edited: {
+                    type: Boolean,
+                    default: false,
+                  },
+                },
+                date: {
+                  type: Date,
+                },
+                type: {
+                  type: String,
+                  enum: ["Bid Created", "Bid Updated"],
+                },
+              },
+            ],
           },
         ],
       },
