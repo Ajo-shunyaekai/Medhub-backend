@@ -365,6 +365,153 @@ const remindLogisticsToProceedOrder = async (req, res) => {
   }
 };
 
+const assignLogisticsPartner = async (req, res) => {
+  try {
+    const { id, partnerId } = req?.params;
+    const logistics = await Logistics.findById(id);
+    if (!logistics) return sendErrorResponse(res, 500, "No Logistics found");
+
+    const logisticsPartner = await LogisticsPartner.findById(partnerId);
+    if (!logisticsPartner)
+      return sendErrorResponse(res, 500, "No Logistics Partner found");
+
+    const updatedLogistics = await Logistics.findByIdAndUpdate(
+      logistics?._id,
+      {
+        $set: {
+          partnerId: logisticsPartner?._id,
+        },
+      },
+      { new: true }
+    );
+    if (!updatedLogistics)
+      return sendErrorResponse(
+        res,
+        500,
+        "Error in assigning Logistics Partner"
+      );
+
+    // Respond to the request
+    return sendSuccessResponse(
+      res,
+      200,
+      `Assigned Logistics Partner successfully.`
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+const updateLogisticsTrackingStatus = async (req, res) => {
+  try {
+    const { id, status } = req?.params;
+    const logistics = await Logistics.findById(id);
+    if (!logistics) return sendErrorResponse(res, 500, "No Logistics found");
+    const statusArr = [
+      "Ready for Dispatch", // 0
+      "Logistics Request Accepted -> Shipment Created", // 1
+      "Assigned to Logistics Partner", // 2
+      "Shipment Accepted", // 3
+      "Pick up Done", // 4
+      "Delayed", // 5
+      "Delivered", // 6
+      "Completed", // 7
+    ];
+
+    const updatedData = {};
+    if (Object.keys(req?.body)?.length > 0 && logistics?.handledBySupplier) {
+      const allowedFields = ["carrierName", "trackingUrl", "referenceNumber"];
+
+      allowedFields.forEach((field) => {
+        if (req.body[field] !== undefined) {
+          updatedData[field] = req.body[field];
+        }
+      });
+    } else {
+      const statusToUpdate = statusArr?.[Number(status)];
+      updatedData["logisticsTracking"] = [
+        ...(logistics?.logisticsTracking || []),
+        { status: statusToUpdate, date: new Date() },
+      ];
+      updatedData["logisticsTrackingStatus"] = statusToUpdate;
+
+      if (status == 6) {
+        const pod = await getFilePathsAdd(req, res, ["pod"]);
+
+        updatedData["pod"] = {
+          fileUrl: pod?.pod?.[0] || "",
+          uploadedAt: new Date(),
+        };
+
+        if (pod?.pod?.[0]) {
+          updatedData["logisticsTrackingStatus"] =
+            statusArr?.[Number(status) + 1];
+          updatedData["orderCompleted"] = true;
+          updatedData["logisticsTracking"] = [
+            ...updatedData["logisticsTracking"],
+            { status: statusArr?.[Number(status) + 1], date: new Date() },
+          ];
+        }
+      }
+    }
+
+    const updatedLogistics = await Logistics?.findByIdAndUpdate(
+      logistics?._id,
+      {
+        $set: updatedData,
+      },
+      { new: true }
+    );
+    if (!updatedLogistics)
+      return sendErrorResponse(res, 500, "Error in updating Logistics Status");
+
+    // Respond to the request
+    return sendSuccessResponse(
+      res,
+      200,
+      `Logistics Status Updated successfully.`,
+      updatedLogistics
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+const updateSupplierLogisticsChoice = async (req, res) => {
+  try {
+    const { id, handledBySupplier } = req?.params;
+
+    const logistics = await Logistics.findById(id);
+    if (!logistics) return sendErrorResponse(res, 500, "No Logistics Found");
+    const updatedLogistics = await Logistics?.findById(
+      logistics?._id,
+      {
+        $set: {
+          handledBySupplier:
+            handledBySupplier?.toLowerCase() == "yes" ? true : false,
+        },
+      },
+      { new: true }
+    );
+    if (!updatedLogistics)
+      return sendErrorResponse(
+        res,
+        500,
+        "Error in updating Logistics Partner Assistance"
+      );
+
+    // Respond to the request
+    return sendSuccessResponse(
+      res,
+      200,
+      `Logistics Partner Assistance Updated successfully.`,
+      updatedLogistics
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 module.exports = {
   addLogisticsPartner,
   getLogisticsDashboardData,
@@ -372,4 +519,7 @@ module.exports = {
   getLogisticsDetails,
   updateLogisticsRequest,
   remindLogisticsToProceedOrder,
+  assignLogisticsPartner,
+  updateLogisticsTrackingStatus,
+  updateSupplierLogisticsChoice,
 };

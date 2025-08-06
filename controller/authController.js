@@ -579,6 +579,7 @@ const registerUserOld = async (req, res) => {
 const registerUser = async (req, res) => {
   try {
     const { usertype } = req.body;
+    
  
     if (!usertype) {
       return sendErrorResponse(res, 400, "Need User Type.");
@@ -1886,7 +1887,7 @@ const getOtherinUserDetails = async (req, res) => {
         ? await Supplier.findById(id)?.select(
             "-password -refreshToken -token -createdAt -updatedAt -__v"
           )
-        : usertype?.toLowerCase() == "logistics"
+        : userType?.toLowerCase() == "logistics"
         ? await LogisticsPartner.findById(id)?.select(
             "-password -refreshToken -token -createdAt -updatedAt -__v"
           )

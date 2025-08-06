@@ -1,5 +1,15 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const enums = [
+  "Ready for Dispatch",
+  "Logistics Request Accepted -> Shipment Created",
+  "Assigned to Logistics Partner",
+  "Shipment Accepted",
+  "Pick up Done",
+  "Delayed",
+  "Delivered",
+  "Completed",
+];
 
 const logisticsSchema = new mongoose.Schema(
   {
@@ -10,12 +20,12 @@ const logisticsSchema = new mongoose.Schema(
     },
     enquiry_id: {
       type: String,
-      ref: "Enquiry",
+      // ref: "Enquiry",
       required: true,
     },
     purchaseOrder_id: {
       type: String,
-      ref: "purchaseorder",
+      // ref: "purchaseorder",
       required: true,
     },
     orderId: {
@@ -37,17 +47,45 @@ const logisticsSchema = new mongoose.Schema(
       type: String, // P - pending, A - accepted ,
       required: [true, "Validation Error : Status is required"],
     },
-    last_login: {
-      type: Date,
+    handledBySupplier: {
+      type: Boolean,
+      default: false,
     },
-    login_history: [
+    logisticsTracking: [
       {
+        status: {
+          type: String,
+          enum: enums,
+          required: [true, "Validation Error"],
+        },
         date: {
           type: Date,
           default: Date.now,
         },
       },
     ],
+    externalLogisticsInfo: {
+      carrierName: String,
+      trackingUrl: String,
+      referenceNumber: String,
+    },
+    logisticsTrackingStatus: {
+      type: String,
+      enum: enums,
+      required: [true, "Validation Error"],
+    },
+    pod: {
+      fileUrl: String,
+      uploadedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+    orderCompleted: { type: String, default: false },
+    partnerId: {
+      type: Schema.Types.ObjectId,
+      ref: "LogisticsPartner",
+    },
   },
   {
     timestamps: true,
