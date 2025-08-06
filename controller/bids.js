@@ -104,7 +104,7 @@ const getAllBids1 = async (req, res) => {
       status,
       page_no = 1,
       page_size = 10,
-      userType ,
+      userType,
       participant,
     } = req.query;
     console.log("req.query", req.query);
@@ -585,7 +585,7 @@ const getBidProductDetails = async (req, res) => {
 const updateBidParticipant = async (req, res) => {
   try {
     const { bidId, itemId } = req?.params;
-    const { participantId, amount, timeLine } = req?.body;
+    const { participantId, amount, timeLine, tnc } = req?.body;
 
     // Step 1: Find the bid
     const bidDetails = await Bid.findById(bidId);
@@ -608,15 +608,63 @@ const updateBidParticipant = async (req, res) => {
     );
 
     if (participantIndex !== -1) {
-      // Step 4a: Participant exists, update
-      itemToUpdate.participants[participantIndex].amount = amount;
-      itemToUpdate.participants[participantIndex].timeLine = timeLine;
+      // Step 4a: Participant exists, update and add history
+      const participant = itemToUpdate.participants[participantIndex];
+      const lastHistory =
+        participant?.history?.[participant.history.length - 1] || {};
+
+      const historyEntry = {
+        amount: {
+          value: amount,
+          edited: lastHistory?.amount?.value !== amount,
+        },
+        timeLine: {
+          value: timeLine,
+          edited: lastHistory?.timeLine?.value !== timeLine,
+        },
+        tnc: {
+          value: tnc,
+          edited: lastHistory?.tnc?.value !== tnc,
+        },
+        type: "Bid Updated",
+        date: new Date(),
+      };
+
+      // Ensure history array exists
+      participant.history = participant.history || [];
+
+      participant.amount = amount;
+      participant.timeLine = timeLine;
+      participant.tnc = tnc;
+      (lastHistory?.amount?.value !== amount ||
+        lastHistory?.timeLine?.value !== timeLine ||
+        lastHistory?.tnc?.value !== tnc) &&
+        participant.history.push(historyEntry);
     } else {
-      // Step 4b: Participant not found, add new
+      // Step 4b: Participant not found, add new with history
+      const historyEntry = {
+        amount: {
+          value: amount,
+          edited: false,
+        },
+        timeLine: {
+          value: timeLine,
+          edited: false,
+        },
+        tnc: {
+          value: tnc,
+          edited: false,
+        },
+        type: "Bid Created",
+        date: new Date(),
+      };
+
       itemToUpdate.participants.push({
         id: participantId,
         amount,
         timeLine,
+        tnc,
+        history: [historyEntry],
       });
     }
 
