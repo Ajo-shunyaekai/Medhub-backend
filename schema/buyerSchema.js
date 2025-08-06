@@ -73,6 +73,10 @@ const buyerSchema = new Schema(
       type: String,
       trim: true,
     },
+    sales_person_email: {
+      type: String,
+      trim: true,
+    },
     contact_person_name: {
       type: String,
       trim: true,

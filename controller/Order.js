@@ -258,7 +258,7 @@ module.exports = {
           // Sending the email to multiple recipients (supplier and buyer)
 
           const subject = `Order Confirmation from ${supplier.supplier_name}`;
-          const recipientEmails = [buyer.contact_person_email]; // Add more emails if needed
+          const recipientEmails = [buyer.contact_person_email, 'ajo@shunyaekai.tech']; // Add more emails if needed
           const emailContent = await createOrderContent(buyer, itemsTable);
           await sendEmail(recipientEmails, subject, emailContent);
           return callback({ code: 200, message: "Order Created Successfully" });

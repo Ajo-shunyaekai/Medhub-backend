@@ -104,7 +104,7 @@ const getAllBids1 = async (req, res) => {
       status,
       page_no = 1,
       page_size = 10,
-      userType,
+      userType ,
       participant,
     } = req.query;
     console.log("req.query", req.query);
@@ -136,8 +136,8 @@ const getAllBids1 = async (req, res) => {
           const products = bid?.additionalDetails || [];
 
           const matchedProducts = products.filter((ele) => {
-            const openForValue = (ele?.openFor || "").toString().toLowerCase();
-            const typeValue = type.toString().toLowerCase();
+            const openForValue = (ele?.openFor || "")?.toString().toLowerCase();
+            const typeValue = type?.toString().toLowerCase();
             return openForValue === typeValue;
           });
 
@@ -154,7 +154,7 @@ const getAllBids1 = async (req, res) => {
 
     if (participant) {
       const filteredBids = await Promise.all(
-        bids.map(async (bid) => {
+        finalBids?.map(async (bid) => {
           const products = bid?.additionalDetails || [];
 
           // If participant exists and isn't "not", filter bids with the participant
