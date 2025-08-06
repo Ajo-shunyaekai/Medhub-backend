@@ -57,7 +57,7 @@ const {sendSubscriptionExpiryEmailContent} = require("../utils/emailContents");
   };
 
   const scheduleExpiredBidsCronJob = () => {
-    cron.schedule("*/10 * * * *", async () => {
+    cron.schedule("*/2 * * * *", async () => {
       await markExpiredBidsAsCompleted();
     });
   };
