@@ -47,6 +47,7 @@ const orderHistorySchema = new Schema(
             "Delivery Details Submitted",
             "Pick up Details Submitted",
             "Logistics Request Sent",
+            "Use Own Logistics",
             "Order Initiated by Logistic Partner",
           ],
           required: true,

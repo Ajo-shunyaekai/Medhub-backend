@@ -456,9 +456,13 @@ const sendSubscriptionPaymentEmailContent = (
   userType,
   coupon
 ) => {
-  const paymentLink = `${
-    process.env.CLIENT_URL
-  }/subscription/${userId}/${userType?.toLowerCase()}/select-plan`;
+  const paymentLink = coupon
+    ? `${
+        process.env.CLIENT_URL
+      }/subscription/${userId}/${userType?.toLowerCase()}/select-plan?status=1`
+    : `${
+        process.env.CLIENT_URL
+      }/subscription/${userId}/${userType?.toLowerCase()}/select-plan`;
 
   return `
     <html>

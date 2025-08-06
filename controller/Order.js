@@ -484,9 +484,10 @@ module.exports = {
         mode_of_transport,
         address_type,
         extra_services,
-        bills_of_material,
-        packages,
-        pickup_slot,
+        bills_of_material = [],
+        packages = [],
+        pickup_slot = {},
+        handledBySupplier,
       } = reqObj;
 
       if (!mongoose.Types.ObjectId.isValid(supplier_id)) {
@@ -527,124 +528,126 @@ module.exports = {
       if (!buyer) {
         return callback({
           code: 404,
-          message: "BUyer not found",
+          message: "Buyer not found",
           result: null,
         });
       }
 
-      // Handle address
-      let userAddress = await UserAddress.findOne({ userId: supplier._id });
+      // Handle Address saving only if supplier isn't handling logistics
+      if (!handledBySupplier) {
+        let userAddress = await UserAddress.findOne({ userId: supplier._id });
 
-      if (address_type !== "Registered") {
-        // Check if this address already exists
-        const addressExists = userAddress?.addresses.some(
-          (addr) =>
-            addr.full_name === full_name &&
-            addr.mobile_number === mobile_number &&
-            addr.company_reg_address === company_reg_address &&
-            addr.locality === locality &&
-            addr.city === city &&
-            addr.country === country
-        );
+        if (address_type !== "Registered") {
+          // Check if this address already exists
+          const addressExists = userAddress?.addresses?.some(
+            (addr) =>
+              addr.full_name === full_name &&
+              addr.mobile_number === mobile_number &&
+              addr.company_reg_address === company_reg_address &&
+              addr.locality === locality &&
+              addr.city === city &&
+              addr.country === country
+          );
 
-        // Only add new address if it doesn't exist
-        if (!addressExists) {
-          const newAddress = {
-            full_name,
-            mobile_number,
-            company_reg_address,
-            locality,
-            land_mark,
-            city,
-            state,
-            country,
-            pincode,
-            address_type,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-
-          if (userAddress) {
-            // Add new address to existing addresses array
-            userAddress.addresses.push(newAddress);
-            userAddress.default = newAddress._id;
-            await userAddress.save();
-          } else {
-            // Create new UserAddress document
-            userAddress = new UserAddress({
-              userId: supplier_id,
-              addresses: [newAddress],
-              default: newAddress._id,
-            });
-            await userAddress.save();
-          }
-        }
-      }
-
-      // Construct Bill of Material
-      const billOfMaterial = {
-        products: bills_of_material.map((item) => ({
-          product_id: item.product_id,
-          product_name: item.product_name,
-          quantity: Number(item.quantity),
-          no_of_packages: Number(item.number_of_packages),
-        })),
-      };
-
-      // Construct Package Information
-      const packageInformation = {
-        total_no_of_packages: packages.length,
-        package_details: packages.map((pkg) => ({
-          weight: Number(pkg.weight),
-          dimensions: {
-            length: Number(pkg.dimensions.length),
-            width: Number(pkg.dimensions.width),
-            height: Number(pkg.dimensions.height),
-            volume: Number(pkg.volume),
-          },
-        })),
-      };
-
-      // Update order with supplier logistics data
-      const updatedOrder = await Order.findOneAndUpdate(
-        { order_id },
-        {
-          $set: {
-            supplier_logistics_data: {
+          // Only add new address if it doesn't exist
+          if (!addressExists) {
+            const newAddress = {
               full_name,
               mobile_number,
               company_reg_address,
               locality,
               land_mark,
-              state,
               city,
+              state,
               country,
               pincode,
               address_type,
-              mode_of_transport,
-              extra_services,
-              bill_of_material: billOfMaterial,
-              package_information: packageInformation,
-              pickup_date: pickup_slot.date,
-              pickup_time: pickup_slot.time_slot,
-            },
-            status: "Shipment Details Submitted",
-          },
-        },
-        { new: true }
-      );
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
 
-      if (!updatedOrder) {
-        return callback({
-          code: 404,
-          message: "Order not found",
-          result: null,
-        });
+            if (userAddress) {
+              // Add new address to existing addresses array
+              userAddress.addresses.push(newAddress);
+              userAddress.default = newAddress._id;
+              await userAddress.save();
+            } else {
+              // Create new UserAddress document
+              userAddress = new UserAddress({
+                userId: supplier_id,
+                addresses: [newAddress],
+                default: newAddress._id,
+              });
+              await userAddress.save();
+            }
+          }
+        }
+
+        // Construct bill_of_material and package_information
+        const billOfMaterial = {
+          products: bills_of_material.map((item) => ({
+            product_id: item.product_id,
+            product_name: item.product_name,
+            quantity: Number(item.quantity),
+            no_of_packages: Number(item.number_of_packages),
+          })),
+        };
+
+        // Construct Package Information
+        const packageInformation = {
+          total_no_of_packages: packages.length,
+          package_details: packages.map((pkg) => ({
+            weight: Number(pkg.weight),
+            dimensions: {
+              length: Number(pkg.dimensions?.length || 0),
+              width: Number(pkg.dimensions?.width || 0),
+              height: Number(pkg.dimensions?.height || 0),
+              volume: Number(pkg.volume || 0),
+            },
+          })),
+        };
+
+        // Build supplier logistics data safely
+        const updatedOrder = await Order.findOneAndUpdate(
+          { order_id },
+          {
+            $set: {
+              supplier_logistics_data: {
+                full_name,
+                mobile_number,
+                company_reg_address,
+                locality,
+                land_mark,
+                state,
+                city,
+                country,
+                pincode,
+                address_type,
+                mode_of_transport,
+                extra_services,
+                bill_of_material: billOfMaterial,
+                package_information: packageInformation,
+                pickup_date: pickup_slot.date,
+                pickup_time: pickup_slot.time_slot,
+              },
+              status: "Shipment Details Submitted",
+            },
+          },
+          { new: true }
+        );
+
+        if (!updatedOrder) {
+          return callback({
+            code: 500,
+            message: "Order not found",
+            result: null,
+          });
+        }
       }
 
       // Create Logistics Entry
       const logisticsId = "LGR-" + Math.random().toString(16).slice(2, 10);
-      const newLogisticsRequest = new Logistics({
+      const logisticsData = {
         logistics_id: logisticsId,
         enquiry_id: order.enquiry_id,
         purchaseOrder_id: order.purchaseOrder_id,
@@ -652,14 +655,18 @@ module.exports = {
         supplierId: supplier._id,
         buyerId: buyer._id,
         status: "pending",
-      });
+        ...(handledBySupplier && { handledBySupplier }),
+      };
+
+      const newLogisticsRequest = new Logistics(logisticsData);
       await newLogisticsRequest.save();
 
-      const updatedOrderHistory = await addStageToOrderHistory(
+      // Add order history stage
+      await addStageToOrderHistory(
         req,
         res,
-        updatedOrder?._id,
-        "Pick up Details Submitted",
+        order._id,
+        handledBySupplier ? "Use Own Logistics" : "Pick up Details Submitted",
         new Date(),
         newLogisticsRequest?._id,
         "Order"
@@ -668,7 +675,7 @@ module.exports = {
       return callback({
         code: 200,
         message: "Pickup details updated successfully",
-        result: updatedOrder,
+        result: handledBySupplier ? order : await Order.findOne({ order_id }),
       });
     } catch (error) {
       handleCatchBlockError(req, res, error);

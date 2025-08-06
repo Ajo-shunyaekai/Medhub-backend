@@ -143,6 +143,15 @@ const authUpload = (req, res, next) => {
           contentType: file.mimetype,
         }))
       );
+      uploadedFiles["product_catalogue"] = await uploadMultipleFiles(
+        // req?.files?.["product_catalogue"] || []
+        (req?.files?.["product_catalogue"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
+      );
       uploadedFiles["medical_certificate"] = await uploadMultipleFiles(
         // req?.files?.["medical_practitioner_image"] || []
         (req?.files?.["medical_practitioner_image"] || [])?.map((file) => ({
@@ -182,6 +191,15 @@ const authUpload = (req, res, next) => {
       uploadedFiles["certificate_imageNew"] = await uploadMultipleFiles(
         // req?.files?.["certificate_imageNew"] || []
         (req?.files?.["certificate_imageNew"] || [])?.map((file) => ({
+          ...file,
+          path: file.path,
+          filename: file.filename,
+          contentType: file.mimetype,
+        }))
+      );
+      uploadedFiles["product_catalogueNew"] = await uploadMultipleFiles(
+        // req?.files?.["product_catalogueNew"] || []
+        (req?.files?.["product_catalogueNew"] || [])?.map((file) => ({
           ...file,
           path: file.path,
           filename: file.filename,
@@ -229,11 +247,13 @@ const authUpload = (req, res, next) => {
         ...(req?.files?.["supplier_image"] || []),
         ...(req?.files?.["license_image"] || []),
         ...(req?.files?.["certificate_image"] || []),
+        ...(req?.files?.["product_catalogue"] || []),
         ...(req?.files?.["medical_practitioner_image"] || []),
         ...(req?.files?.["buyer_imageNew"] || []),
         ...(req?.files?.["supplier_imageNew"] || []),
         ...(req?.files?.["license_imageNew"] || []),
         ...(req?.files?.["certificate_imageNew"] || []),
+        ...(req?.files?.["product_catalogueNew"] || []),
         ...(req?.files?.["medical_practitioner_imageNew"] || []),
       ]);
 

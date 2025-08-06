@@ -119,9 +119,15 @@ const addStageToOrderHistory = async (
     let updateFields = {};
 
     // Handle "Pick up Details Submitted" case with an additional stage
-    if (stageName === "Pick up Details Submitted") {
+    if (
+      stageName === "Pick up Details Submitted" ||
+      stageName == "Use Own Logistics"
+    ) {
       const additionalStageDetails = {
-        name: "Logistics Request Sent",
+        name:
+          stageName == "Use Own Logistics"
+            ? "Use Own Logistics"
+            : "Logistics Request Sent",
         date: new Date(stageDate.getTime() + 2 * 60 * 1000), // +2 minutes
         referenceId: stageReference,
         referenceType: stageReferenceType,
