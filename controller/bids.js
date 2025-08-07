@@ -7,12 +7,15 @@ const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
 const LogisticsPartner = require("../schema/logisticsCompanySchema");
 const Bid = require("../schema/bidSchema");
+const Notification = require("../schema/notificationSchema");
 const {
   sendErrorResponse,
   sendSuccessResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
 const { getFilePathsAdd } = require("../helper");
+const { bidCreatedContent } = require("../utils/emailContents");
+const { sendEmail } = require("../utils/emailService");
 
 const getAllBids = async (req, res) => {
   try {
@@ -107,7 +110,6 @@ const getAllBids1 = async (req, res) => {
       userType,
       participant,
     } = req.query;
-    console.log("req.query", req.query);
 
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
@@ -359,7 +361,7 @@ const addBid = async (req, res) => {
         : usertype === "Logistics"
         ? LogisticsPartner
         : null;
-    const user = await schemaNameRef?.findById(req?.body?.userId);
+    const user = await Buyer?.findById(req?.body?.userId);
 
     const bid_id = "BID-" + Math.random().toString(16).slice(2, 10);
 
@@ -508,6 +510,40 @@ const addBid = async (req, res) => {
       return sendErrorResponse(res, 400, "Failed to create new Bid.");
     }
 
+      const openFor = additionalDetailsArray?.map((section) => section?.openFor).filter(Boolean) || [];
+      const matchingSuppliers = await Supplier.find({
+        supplier_type: { $in: openFor },
+        "registeredAddress.country": { $in: req.body.fromCountries },
+      });
+     
+      const notificationMessage = `Bid Created! A new bid has been created by ${user?.buyer_name}`;
+       matchingSuppliers.forEach(async (supplier) => {
+      const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
+      const newNotification = new Notification({
+        notification_id: notificationId,
+        event_type: "Bid created",
+        event: "bid",
+        from: "buyer",
+        to: "supplier",
+        from_id: user.buyer_id,
+        to_id: supplier.supplier_id,
+        event_id: newBid._id,
+        message: notificationMessage,
+        status: 0,
+      });
+      await newNotification.save();
+
+      //Send email
+      const subject = "Invitation to Participate in Bid";
+      const recipientEmails = [supplier.contact_person_email];
+      const emailContent = bidCreatedContent(user, supplier, newBid.bid_id); 
+
+      try {
+        await sendEmail(recipientEmails, subject, emailContent);
+      } catch (error) {
+        console.error(`Error sending email to ${supplier.supplier_email}:`, error);
+      }
+    });
     return sendSuccessResponse(res, 200, "Bid Created Successfully", newBid);
   } catch (error) {
     handleCatchBlockError(req, res, error);

@@ -509,7 +509,7 @@ module.exports = {
       const { supplier_id, pageNo, pageSize } = reqObj;
 
       const page_no = pageNo || 1;
-      const page_size = pageSize || 100;
+      const page_size = pageSize || 20;
       const offset = (page_no - 1) * page_size;
 
       Notification.aggregate([
@@ -565,8 +565,8 @@ module.exports = {
           },
         },
         { $sort: { createdAt: -1 } },
-        // { $skip  : offset },
-        // { $limit : page_size },
+        { $skip  : offset },
+        { $limit : page_size },
       ])
 
         .then(async (data) => {
@@ -606,7 +606,7 @@ module.exports = {
       const { supplier_id, pageNo, pageSize } = reqObj;
 
       const page_no = pageNo || 1;
-      const page_size = pageSize || 5;
+      const page_size = pageSize || 10;
       const offset = (page_no - 1) * page_size;
 
       Notification.aggregate([
@@ -656,13 +656,17 @@ module.exports = {
           $project: {
             "supplier.password": 0,
             "supplier.token": 0,
+            "supplier.loginHistory": 0,
+            "supplier.login_history": 0,
             "buyer.password": 0,
             "buyer.token": 0,
+            "buyer.login_history": 0,
+             "buyer.loginHistory": 0,
           },
         },
         { $sort: { createdAt: -1 } },
-        // { $skip  : offset },
-        // { $limit : page_size },
+        { $skip  : offset },
+        { $limit : page_size },
       ])
 
         .then(async (data) => {

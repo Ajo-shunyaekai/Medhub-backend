@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const { corsOptions } = require("../config/corsOptions");
+const Supplier = require("../schema/supplierSchema")
 
 function initializeSocket(server) {
   const io = new Server(server, {
@@ -12,6 +13,22 @@ function initializeSocket(server) {
       socket.on(event, (userId) => {
         socket.join(userId);
       });
+    });
+
+    socket.on("createBid", async (data) => {
+      const { buyerId, message, fromCountries, openFor } = data;
+      try {
+        const suppliers = await Supplier.find({
+          supplier_type: { $in: openFor },
+          "registeredAddress.country": { $in: fromCountries }, 
+        });
+
+        suppliers.forEach(supplier => {
+          io.to(supplier.supplier_id.toString()).emit("BidCreated", message);  
+        });
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
     });
 
     // Notification handlers
@@ -37,6 +54,7 @@ function initializeSocket(server) {
         emit: "editMedicineRequestUpdated",
       },
       { event: "updateProfileEditRequest", emit: "editProfileRequestUpdated" },
+      // { event: "createBid", emit: "BidCreated" },
     ];
 
     notificationEvents.forEach(({ event, emit }) => {
@@ -47,6 +65,8 @@ function initializeSocket(server) {
         if (targetId) {
           io.to(targetId).emit(emit, message);
         }
+        
+
       });
     });
 
