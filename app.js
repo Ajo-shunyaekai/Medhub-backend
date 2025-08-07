@@ -8,7 +8,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const connect = require("./utils/dbConnection");
 const initializeSocket = require("./utils/socketHandler");
-const { stripeWebhook } = require("./controller/Subscription2");
+const { stripeWebhook } = require("./controller/Subscription");
 const logErrorToFile = require("./logs/errorLogs");
 const {
   sendErrorResponse,
