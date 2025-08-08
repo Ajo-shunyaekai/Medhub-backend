@@ -247,11 +247,11 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       console.error("Invoice not found");
       return sendErrorResponse(res, 500, "Invoice not found");
     }
-    console.log("\n\n\ninvoice", invoice);
-    console.log("\n\n\nproduct", product);
-    console.log("\n\n\nplan", plan);
-    console.log("\n\n\nsubscription", subscription);
-    console.log("\n\n\nsession", session);
+    console.log("\n\n\ninvoice",invoice)
+    console.log("\n\n\nproduct",product)
+    console.log("\n\n\nplan",plan)
+    console.log("\n\n\nsubscription",subscription)
+    console.log("\n\n\nsession",session)
 
     const updatedSubscription = await Subscription.findByIdAndUpdate(
       subscriptionExists,

@@ -102,9 +102,9 @@ const authenticationNAuthorization = async (req, res, next) => {
               _id: user._id,
               refreshToken,
             });
-            if (user?.superAdmin && !userWithRefreshToken) {
-              return sendErrorResponse(res, 401, "Refresh token changed.");
-            }
+            // if (user?.superAdmin && !userWithRefreshToken) {
+            //   return sendErrorResponse(res, 401, "Refresh token changed.");
+            // }
           }
 
           // Refresh token valid → issue new access token

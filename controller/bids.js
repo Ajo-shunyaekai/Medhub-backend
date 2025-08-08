@@ -543,7 +543,7 @@ const addBid = async (req, res) => {
 
       //Send email
       const subject = "Invitation to Participate in Bid";
-      const recipientEmails = [supplier.contact_person_email];
+      const recipientEmails = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
       const emailContent = bidCreatedContent(user, supplier, newBid.bid_id); 
 
       try {
