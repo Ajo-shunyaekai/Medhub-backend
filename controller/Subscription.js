@@ -184,7 +184,7 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       subscriptionId,
       invoiceDetails,
     } = detailObj;
-    console.log("detailObj", detailObj);
+    // console.log("detailObj", detailObj);
 
     if (!mongoose.Types.ObjectId.isValid(subscriptionId)) {
       console.error("Invalid subscription ID");
@@ -247,6 +247,11 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       console.error("Invoice not found");
       return sendErrorResponse(res, 500, "Invoice not found");
     }
+    console.log("\n\n\ninvoice", invoice);
+    console.log("\n\n\nproduct", product);
+    console.log("\n\n\nplan", plan);
+    console.log("\n\n\nsubscription", subscription);
+    console.log("\n\n\nsession", session);
 
     const updatedSubscription = await Subscription.findByIdAndUpdate(
       subscriptionExists,
@@ -272,6 +277,11 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
           invoicePdf: invoice?.invoice_pdf,
           paymentIntentId: invoice?.payment_intent,
           invoiceStatus: invoice?.status,
+          discountCoupon: invoice?.discount?.coupon?.name,
+          discountAmountOff:
+            (
+              Number.parseInt(invoice?.discount?.coupon?.amount_off || 0) / 100
+            ).toFixed(2) || 0,
         },
       },
       { new: true }
@@ -329,7 +339,30 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       updatedSubscription?.productName,
       subscriptionStartDate,
       subscriptionEndDate,
-      updatedSubscription?.totalAmount
+      updatedSubscription?.totalAmount,
+      updatedSubscription?.discountCoupon,
+      updatedSubscription?.discountAmountOff
+    );
+    console.log(
+      "\n\n\n\n data for email",
+      updatedUser,
+      updatedSubscription?.productName,
+      subscriptionStartDate,
+      subscriptionEndDate,
+      updatedSubscription?.totalAmount,
+      updatedSubscription?.discountCoupon,
+      updatedSubscription?.discountAmountOff
+    );
+    console.log(
+      "\n\n\n\n data for email",
+      updatedUser,
+      updatedSubscription?.productName,
+      subscriptionStartDate,
+      subscriptionEndDate,
+      userType,
+      updatedSubscription?.totalAmount,
+      updatedSubscription?.discountCoupon,
+      updatedSubscription?.discountAmountOff
     );
     await sendEmail(
       email || ["ajo@shunyaekai.tech", "Shivani@shunyaekai.tech"], // updatedUser?.contact_person_email ||
@@ -345,7 +378,9 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       subscriptionStartDate,
       subscriptionEndDate,
       userType,
-      updatedSubscription?.totalAmount
+      updatedSubscription?.totalAmount,
+      updatedSubscription?.discountCoupon,
+      updatedSubscription?.discountAmountOff
     );
     await sendEmail(
       [process.env.ADMIN_EMAIL],
