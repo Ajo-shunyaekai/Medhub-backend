@@ -29,7 +29,11 @@ const {
   getCategoryNameForHeading,
 } = require("../utils/bulkUploadProduct");
 const { getFilePathsEdit, getFilePathsAdd } = require("../helper");
-const { validateCategory, validateSubCategory, validateAnotherCategory } = require("../utils/Category");
+const {
+  validateCategory,
+  validateSubCategory,
+  validateAnotherCategory,
+} = require("../utils/Category");
 const { flattenData } = require("../utils/csvConverter");
 
 module.exports = {
@@ -305,7 +309,7 @@ module.exports = {
         category = "",
         subCategory = "",
         level3Category = "",
-        showDuplicate = "true"
+        showDuplicate = "true",
       } = req?.query;
 
       const {
@@ -357,10 +361,15 @@ module.exports = {
         }
       }
 
-       let buyerCountries = [];
+      let buyerCountries = [];
       if (buyer_id) {
-        const buyer = await Buyer.findOne({ buyer_id: buyer_id }, { country_of_operation: 1 }).lean();
-        buyerCountries = Array.isArray(buyer?.country_of_operation) ? buyer.country_of_operation : [];
+        const buyer = await Buyer.findOne(
+          { buyer_id: buyer_id },
+          { country_of_operation: 1 }
+        ).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation)
+          ? buyer.country_of_operation
+          : [];
       }
 
       let pipeline = [];
@@ -653,7 +662,7 @@ module.exports = {
         $sort: {
           searchPriority: 1,
           createdAt: -1,
-          _id: -1
+          _id: -1,
         },
       });
 
@@ -676,6 +685,392 @@ module.exports = {
         currentPage: pageNo,
         itemsPerPage: pageSize,
         totalPages,
+      });
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  getAllProductsForDD: async (req, res) => {
+    try {
+      const {
+        buyer_id,
+        supplier_id,
+        search_key = "",
+        category = "",
+        subCategory = "",
+        level3Category = "",
+        showDuplicate = "false",
+      } = req?.query;
+
+      const {
+        countries,
+        price = {},
+        quantity = {},
+        deliveryTime = {},
+      } = req?.body;
+
+      const formatToPascalCase = (str) => {
+        return str
+          .trim()
+          .split(/\s+/)
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join("");
+      };
+
+      const formattedCategory = formatToPascalCase(category);
+
+      // Extract tokens from search_key
+      let possibleName = search_key.trim();
+      let possibleStrength = null;
+      let possibleStrengthUnit = null;
+      let hasSpecificStrength = false;
+
+      if (search_key) {
+        const searchText = search_key.trim().toLowerCase();
+
+        // Handle both formats: "50 mg" and "50mg"
+        const strengthUnitPattern = /(\d+)\s*(mg|ml|mcg|g)\b/i;
+        const match = searchText.match(strengthUnitPattern);
+
+        if (match) {
+          possibleStrength = parseInt(match[1], 10);
+          possibleStrengthUnit = match[2].toLowerCase();
+          hasSpecificStrength = true;
+
+          // Remove the strength+unit pattern from the search text to get clean name
+          possibleName = searchText
+            .replace(strengthUnitPattern, "")
+            .trim()
+            .replace(/\s+/g, " "); // Clean up extra spaces
+        }
+      }
+
+      let buyerCountries = [];
+      if (buyer_id) {
+        const buyer = await Buyer.findOne(
+          { buyer_id: buyer_id },
+          { country_of_operation: 1 }
+        ).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation)
+          ? buyer.country_of_operation
+          : [];
+      }
+
+      let pipeline = [];
+
+      const totalProductsQuery = {
+        isDeleted: false,
+        ...(supplier_id && {
+          supplier_id: new mongoose.Types.ObjectId(supplier_id),
+        }),
+        ...(formattedCategory && {
+          category: { $regex: formattedCategory, $options: "i" },
+        }),
+        ...(subCategory && {
+          [`${formattedCategory}.subCategory`]: {
+            $regex: subCategory,
+            $options: "i",
+          },
+        }),
+        ...(level3Category && {
+          [`${formattedCategory}.anotherCategory`]: {
+            $regex: level3Category,
+            $options: "i",
+          },
+        }),
+
+        // Updated search logic
+        ...(search_key &&
+          (hasSpecificStrength
+            ? {
+                "general.name": {
+                  $regex: `^${possibleName.trim()}$`,
+                  $options: "i",
+                },
+                "general.strength": String(possibleStrength), // Your strength is string in DB
+                "general.strengthUnit": {
+                  $regex: `^${possibleStrengthUnit}$`,
+                  $options: "i",
+                },
+              }
+            : {
+                "general.name": { $regex: search_key.trim(), $options: "i" },
+              })),
+
+        ...(quantity?.min &&
+          quantity?.max &&
+          !isNaN(quantity?.min) &&
+          !isNaN(quantity?.max) && {
+            "general.quantity": {
+              $gte: parseInt(quantity?.min, 10),
+              $lte: parseInt(quantity?.max, 10),
+            },
+          }),
+      };
+
+      pipeline.push({ $match: totalProductsQuery });
+
+      if (buyer_id && buyerCountries.length > 0) {
+        pipeline.push({
+          $match: {
+            $or: [
+              { "general.buyersPreferredFrom": { $exists: false } },
+              {
+                "general.buyersPreferredFrom": {
+                  $elemMatch: { $in: buyerCountries },
+                },
+              },
+            ],
+          },
+        });
+      }
+
+      pipeline.push(
+        {
+          $lookup: {
+            from: "suppliers",
+            localField: "supplier_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "inventories",
+            localField: "inventory",
+            foreignField: "uuid",
+            as: "inventoryDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$userDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$inventoryDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        }
+      );
+
+      const applyInventoryListFilters =
+        (countries && countries.length > 0) ||
+        (price?.min && price?.max) ||
+        (quantity?.min && quantity?.max) ||
+        (deliveryTime?.min && deliveryTime?.max);
+
+      if (applyInventoryListFilters) {
+        pipeline.push({
+          $unwind: {
+            path: "$inventoryDetails.inventoryList",
+            preserveNullAndEmptyArrays: true,
+          },
+        });
+      }
+
+      if (countries && Array.isArray(countries) && countries.length > 0) {
+        pipeline.push({
+          $unwind: {
+            path: "$inventoryDetails.stockedInDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        });
+
+        pipeline.push({
+          $match: {
+            "inventoryDetails.stockedInDetails.country": { $in: countries },
+          },
+        });
+      }
+
+      pipeline.push({
+        $group: {
+          _id: "$_id",
+          general: { $first: "$general" },
+          inventory: { $first: "$inventory" },
+          complianceFile: { $first: "$complianceFile" },
+          cNCFileNDate: { $first: "$cNCFileNDate" },
+          storage: { $first: "$storage" },
+          additional: { $first: "$additional" },
+          guidelinesFile: { $first: "$guidelinesFile" },
+          healthNSafety: { $first: "$healthNSafety" },
+          category: { $first: "$category" },
+          subCategory: { $first: "$subCategory" },
+          anotherCategory: { $first: "$anotherCategory" },
+          product_id: { $first: "$product_id" },
+          supplier_id: { $first: "$supplier_id" },
+          market: { $first: "$market" },
+          secondaryMarketDetails: { $first: "$secondaryMarketDetails" },
+          isDeleted: { $first: "$isDeleted" },
+          bulkUpload: { $first: "$bulkUpload" },
+          userDetails: { $first: "$userDetails" },
+          inventoryDetails: { $push: "$inventoryDetails" },
+          MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+          Pharmaceuticals: { $first: "$Pharmaceuticals" },
+          SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+          VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+          MedicalConsumablesAndDisposables: {
+            $first: "$MedicalConsumablesAndDisposables",
+          },
+          LaboratorySupplies: { $first: "$LaboratorySupplies" },
+          DiagnosticAndMonitoringDevices: {
+            $first: "$DiagnosticAndMonitoringDevices",
+          },
+          HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+          OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+          DentalProducts: { $first: "$DentalProducts" },
+          EyeCareSupplies: { $first: "$EyeCareSupplies" },
+          HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+          AlternativeMedicines: { $first: "$AlternativeMedicines" },
+          EmergencyAndFirstAidSupplies: {
+            $first: "$EmergencyAndFirstAidSupplies",
+          },
+          DisinfectionAndHygieneSupplies: {
+            $first: "$DisinfectionAndHygieneSupplies",
+          },
+          NutritionAndDietaryProducts: {
+            $first: "$NutritionAndDietaryProducts",
+          },
+          HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          __v: { $first: "$__v" },
+          priceQuantityDetails: {
+            $push: {
+              price: "$inventoryDetails.inventoryList.price",
+              quantity: "$inventoryDetails.inventoryList.quantity",
+              deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
+            },
+          },
+        },
+      });
+
+      // Apply price filtering before deduplication
+      if (price?.min && price?.max) {
+        pipeline.push({
+          $match: {
+            priceQuantityDetails: {
+              $elemMatch: {
+                price: {
+                  $gte: parseInt(price?.min, 10),
+                  $lte: parseInt(price?.max, 10),
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Add priority scoring for better sorting
+      pipeline.push({
+        $addFields: {
+          searchPriority: {
+            $cond: {
+              if: {
+                $eq: [{ $toLower: "$general.name" }, search_key.toLowerCase()],
+              },
+              then: 1, // Exact name match gets highest priority
+              else: {
+                $cond: {
+                  if: {
+                    $and: [
+                      ...(hasSpecificStrength
+                        ? [
+                            {
+                              $eq: [
+                                { $toLower: "$general.name" },
+                                possibleName.toLowerCase(),
+                              ],
+                            },
+                            { $eq: ["$general.strength", possibleStrength] },
+                            {
+                              $eq: [
+                                { $toLower: "$general.strengthUnit" },
+                                possibleStrengthUnit,
+                              ],
+                            },
+                          ]
+                        : [
+                            {
+                              $eq: [
+                                { $toLower: "$general.name" },
+                                possibleName.toLowerCase(),
+                              ],
+                            },
+                          ]),
+                    ],
+                  },
+                  then: 2, // Structured match gets second priority
+                  else: 3, // Partial match gets lowest priority
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Sort by priority first, then by creation date
+      pipeline.push({
+        $sort: {
+          searchPriority: 1,
+          createdAt: -1,
+        },
+      });
+
+      // Deduplicate based on name + strength + strengthUnit
+      const shouldDeduplicate = showDuplicate === "true";
+
+      if (shouldDeduplicate) {
+        pipeline.push({
+          $group: {
+            _id: {
+              name: { $toLower: "$general.name" },
+              strength: "$general.strength",
+              strengthUnit: { $toLower: "$general.strengthUnit" },
+            },
+            doc: { $first: "$$ROOT" },
+          },
+        });
+
+        pipeline.push({
+          $replaceRoot: { newRoot: "$doc" },
+        });
+      }
+
+      // Re-sort after deduplication
+      pipeline.push({
+        $sort: {
+          searchPriority: 1,
+          createdAt: -1,
+          _id: -1,
+        },
+      });
+
+      const products = await Product.aggregate(pipeline);
+
+      const nameMap = new Map();
+
+      products?.forEach((pdt) => {
+        const name = pdt?.general?.name?.trim();
+        if (name) {
+          const lower = name.toLowerCase();
+          if (!nameMap.has(lower)) {
+            nameMap.set(lower, name);
+          }
+        }
+      });
+
+      const finalProducts = Array.from(nameMap.values()).map((name) => ({
+        label: name?.charAt(0).toUpperCase() + name?.slice(1),
+        value: name?.charAt(0).toUpperCase() + name?.slice(1),
+      }))?.sort((a, b) => a?.label?.localeCompare(b?.label));
+
+      return sendSuccessResponse(res, 200, "Success Fetching Products", {
+        products: finalProducts,
       });
     } catch (error) {
       handleCatchBlockError(req, res, error);
@@ -1213,25 +1608,25 @@ module.exports = {
   addProduct3: async (req, res) => {
     try {
       const { category, market = "new" } = req?.body;
- 
+
       let parsedStockedInDetails = [];
- 
+
       try {
         const validJsonString = req.body?.stockedInDetails?.find(
           (value) => value.startsWith("[") && value.includes("country")
         );
- 
+
         if (validJsonString) {
           parsedStockedInDetails = JSON.parse(validJsonString);
         }
       } catch (err) {
         console.error("Failed to parse stockedInDetails:", err);
       }
- 
+
       const quantity = parsedStockedInDetails.reduce((sum, item) => {
         return sum + (parseFloat(item.quantity) || 0);
       }, 0);
- 
+
       // Retrieve file paths for general, inventory, compliance, and additional fields
       const generalFiles1 = await getFilePathsAdd(req, res, ["imageFront"]);
       const generalFiles2 = await getFilePathsAdd(req, res, ["imageBack"]);
@@ -1257,14 +1652,14 @@ module.exports = {
       const secondaryMarketFiles = await getFilePathsAdd(req, res, [
         "purchaseInvoiceFile",
       ]);
- 
+
       let newProductData = {};
- 
+
       const inventoryUUId = uuidv4();
       const product_id = "PRDT-" + Math.random().toString(16).slice(2, 10);
- 
+
       let cNCFileNDateParsed;
- 
+
       if (typeof req?.body?.cNCFileNDate == "string") {
         try {
           // cNCFileNDateParsed = JSON.parse(req.body.cNCFileNDate)?.filter(
@@ -1291,7 +1686,7 @@ module.exports = {
           req.body?.cNCFileNDate?.filter((value) => value != "[object Object]")
         );
       }
- 
+
       let categoryDetailsParsed = [];
       if (typeof req?.body?.categoryDetails == "string") {
         try {
@@ -1324,13 +1719,13 @@ module.exports = {
               )
             : [];
       }
- 
+
       let parsedFaqs = [];
- 
+
       try {
         if (req?.body?.faqs) {
           const rawFaqs = req.body?.faqs || [];
- 
+
           if (Array.isArray(rawFaqs)) {
             parsedFaqs = JSON.parse(
               req?.body?.faqs?.filter((value) => value != "[object Object]")
@@ -1350,7 +1745,7 @@ module.exports = {
         console.error("Failed to parse faqs:", err);
         return handleCatchBlockError(req, res, err);
       }
- 
+
       const categoryDetailsUnordered = categoryDetailsParsed
         ?.map((ele, index) => {
           return {
@@ -1360,19 +1755,19 @@ module.exports = {
                   ? categoryDetailsFiles?.categoryDetailsFile?.find(
                       (filename) => {
                         const path = ele?.fieldValue?.path;
- 
+
                         // Ensure path is defined and log the file path
                         if (!path) {
                           return false; // If there's no path, skip this entry
                         }
- 
+
                         const ext = path.split(".").pop(); // Get the file extension
- 
+
                         const sanitizedPath = path
                           .replaceAll("./", "")
                           .replaceAll(" ", "")
                           .replaceAll(`.${ext}`, "");
- 
+
                         // Match file by sanitized name
                         return filename?.includes(sanitizedPath);
                       }
@@ -1381,13 +1776,13 @@ module.exports = {
                     categoryDetailsFiles?.categoryDetailsFile?.[index] ||
                     ""
                 : ele?.fieldValue,
- 
+
             name: ele?.name || "", // Log the name being used (if any)
             type: ele?.type || "", // Log the type being used (if any)
           };
         })
         ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type);
- 
+
       const cdtyp1 =
         categoryDetailsUnordered?.filter(
           (section) => section?.type == "text"
@@ -1408,7 +1803,7 @@ module.exports = {
         categoryDetailsUnordered?.filter(
           (section) => section?.type == "file"
         ) || [];
- 
+
       const categoryDetailsOrder = [
         ...cdtyp1,
         ...cdtyp2,
@@ -1416,7 +1811,7 @@ module.exports = {
         ...cdtyp4,
         ...cdtyp5,
       ];
- 
+
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -1444,24 +1839,24 @@ module.exports = {
                 typeof ele?.file !== "string"
                   ? complianceFiles?.complianceFile?.find((filename) => {
                       const path = ele?.file?.path;
- 
+
                       // Ensure path is defined and log the file path
                       if (!path) {
                         return false; // If there's no path, skip this entry
                       }
- 
+
                       const ext = path.split(".").pop(); // Get the file extension
- 
+
                       const sanitizedPath = path
                         .replaceAll("./", "")
                         .replaceAll(" ", "")
                         .replaceAll(`.${ext}`, "");
- 
+
                       // Match file by sanitized name
                       return filename?.includes(sanitizedPath);
                     })
                   : ele?.file || complianceFiles?.complianceFile?.[index] || "",
- 
+
               date: ele?.date || "", // Log the date being used (if any)
             };
           })
@@ -1476,17 +1871,17 @@ module.exports = {
         market,
         idDeleted: false,
       };
- 
+
       if (market == "secondary") {
         newProductData["secondaryMarketDetails"] = {
           ...req?.body,
           purchaseInvoiceFile: secondaryMarketFiles?.purchaseInvoiceFile || [],
         };
       }
- 
+
       // Create the new product
       const newProduct = await Product.create(newProductData);
- 
+
       if (!newProduct) {
         return sendErrorResponse(res, 400, "Failed to create new product.");
       }
@@ -1508,13 +1903,13 @@ module.exports = {
         ),
         ...(inventoryFiles || []),
       };
- 
+
       const newInventory = await Inventory.create(newInventoryDetails);
- 
+
       if (!newInventory) {
         return sendErrorResponse(res, 400, "Failed to create new Inventory.");
       }
- 
+
       return sendSuccessResponse(
         res,
         200,
@@ -1966,13 +2361,13 @@ module.exports = {
     try {
       const { category, market = "new" } = req?.body;
       const { productId } = req?.params;
- 
+
       // Check if the product exists
       const existingProduct = await Product.findById(productId);
       if (!existingProduct) {
         return sendErrorResponse(res, 404, "Product not found.");
       }
- 
+
       // Check if the inventory exists
       const InventoryFound = await Inventory.findOne({
         uuid: existingProduct?.inventory,
@@ -1980,7 +2375,7 @@ module.exports = {
       if (!InventoryFound) {
         return sendErrorResponse(res, 404, "Inventory not found.");
       }
- 
+
       // Retrieve file paths for general, inventory, compliance, and additional fieldsfields
       const generalFiles1 = await getFilePathsEdit(req, res, ["imageFront"]);
       const generalFiles2 = await getFilePathsEdit(req, res, ["imageBack"]);
@@ -2006,9 +2401,9 @@ module.exports = {
       const secondaryMarketFiles = await getFilePathsEdit(req, res, [
         "purchaseInvoiceFile",
       ]);
- 
+
       let cNCFileNDateParsed;
- 
+
       try {
         // Check if cNCFileNDate exists and is an array before applying filter
         if (Array.isArray(req?.body?.cNCFileNDate)) {
@@ -2029,9 +2424,9 @@ module.exports = {
         logErrorToFile(error, req);
         return sendErrorResponse(res, 400, "Invalid cNCFileNDate format.");
       }
- 
+
       let categoryDetailsParsed;
- 
+
       try {
         // Check if categoryDetails exists and is an array before applying filter
         if (Array.isArray(req?.body?.categoryDetails)) {
@@ -2052,13 +2447,13 @@ module.exports = {
         logErrorToFile(error, req);
         return sendErrorResponse(res, 400, "Invalid categoryDetails format.");
       }
- 
+
       let parsedFaqs = [];
- 
+
       try {
         if (req?.body?.faqs) {
           const rawFaqs = req.body?.faqs || [];
- 
+
           if (Array.isArray(rawFaqs)) {
             parsedFaqs = JSON.parse(
               req?.body?.faqs?.filter((value) => value != "[object Object]")
@@ -2078,7 +2473,7 @@ module.exports = {
         console.error("Failed to parse faqs:", err);
         return handleCatchBlockError(req, res, err);
       }
- 
+
       const categoryDetailsUnordered =
         categoryDetailsParsed?.length > 0
           ? JSON.parse(categoryDetailsParsed)
@@ -2090,19 +2485,19 @@ module.exports = {
                         ? categoryDetailsFiles?.categoryDetailsFile?.find(
                             (filename) => {
                               const path = ele?.fieldValue?.path;
- 
+
                               // Ensure path is defined and log the file path
                               if (!path) {
                                 return false; // If there's no path, skip this entry
                               }
- 
+
                               const ext = path.split(".").pop(); // Get the file extension
- 
+
                               const sanitizedPath = path
                                 .replaceAll("./", "")
                                 .replaceAll(" ", "")
                                 .replaceAll(`.${ext}`, "");
- 
+
                               // Match file by sanitized name
                               return filename?.includes(sanitizedPath);
                             }
@@ -2111,14 +2506,14 @@ module.exports = {
                           categoryDetailsFiles?.categoryDetailsFile?.[index] ||
                           ""
                       : ele?.fieldValue,
- 
+
                   name: ele?.name || "", // Log the name being used (if any)
                   type: ele?.type || "", // Log the type being used (if any)
                 };
               })
               ?.filter((ele) => ele?.fieldValue || ele?.name || ele?.type)
           : categoryDetailsParsed;
- 
+
       const cdtyp1 =
         categoryDetailsUnordered?.filter(
           (section) => section?.type == "text"
@@ -2139,7 +2534,7 @@ module.exports = {
         categoryDetailsUnordered?.filter(
           (section) => section?.type == "file"
         ) || [];
- 
+
       const categoryDetailsOrder = [
         ...cdtyp1,
         ...cdtyp2,
@@ -2147,7 +2542,7 @@ module.exports = {
         ...cdtyp4,
         ...cdtyp5,
       ];
- 
+
       // Update existing product data
       const updatedProductData = {
         ...existingProduct._doc, // Use the existing product data
@@ -2178,25 +2573,25 @@ module.exports = {
                       typeof ele?.file !== "string"
                         ? complianceFiles?.complianceFile?.find((filename) => {
                             const path = ele?.file?.path;
- 
+
                             // Ensure path is defined and log the file path
                             if (!path) {
                               return false; // If there's no path, skip this entry
                             }
- 
+
                             const ext = path.split(".").pop(); // Get the file extension
                             const sanitizedPath = path
                               .replaceAll("./", "")
                               .replaceAll(" ", "")
                               .replaceAll(`.${ext}`, "");
- 
+
                             // Match file by sanitized name
                             return filename?.includes(sanitizedPath);
                           })
                         : ele?.file ||
                           complianceFiles?.complianceFile?.[index] ||
                           "",
- 
+
                     date: ele?.date || "", // Log the date being used (if any)
                   };
                 })
@@ -2207,25 +2602,25 @@ module.exports = {
           guidelinesFile: additionalFiles?.guidelinesFile || [],
         },
       };
- 
+
       if (market == "secondary") {
         updatedProductData["secondaryMarketDetails"] = {
           ...req?.body,
           ...(secondaryMarketFiles || []),
         };
       }
- 
+
       // Update the product in the database
       const updatedProduct = await Product.findByIdAndUpdate(
         productId,
         updatedProductData,
         { new: true }
       );
- 
+
       if (!updatedProduct) {
         return sendErrorResponse(res, 400, "Failed to update the product.");
       }
- 
+
       const updatedInventoryData = {
         ...req?.body,
         stockedInDetails: JSON.parse(
@@ -2240,18 +2635,18 @@ module.exports = {
         ),
         ...(inventoryFiles || []),
       };
- 
+
       // Update the inventory in the database
       const updatedInventory = await Inventory.findOneAndUpdate(
         { uuid: existingProduct?.inventory },
         updatedInventoryData,
         { new: true }
       );
- 
+
       if (!updatedInventory) {
         return sendErrorResponse(res, 400, "Failed to update the inventory.");
       }
- 
+
       return sendSuccessResponse(
         res,
         200,
@@ -2432,8 +2827,13 @@ module.exports = {
 
       let buyerCountries = [];
       if (buyer_id) {
-        const buyer = await Buyer.findOne({ buyer_id: buyer_id }, { country_of_operation: 1 }).lean();
-        buyerCountries = Array.isArray(buyer?.country_of_operation) ? buyer.country_of_operation : [];
+        const buyer = await Buyer.findOne(
+          { buyer_id: buyer_id },
+          { country_of_operation: 1 }
+        ).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation)
+          ? buyer.country_of_operation
+          : [];
       }
 
       const countryList = countries
@@ -2819,11 +3219,16 @@ module.exports = {
         return sendErrorResponse(res, 500, "Failed fetching Inventory");
       }
 
-      //for buyers preferred from filter 
+      //for buyers preferred from filter
       let buyerCountries = [];
       if (buyer_id) {
-        const buyer = await Buyer.findOne({ buyer_id: buyer_id }, { country_of_operation: 1 }).lean();
-        buyerCountries = Array.isArray(buyer?.country_of_operation) ? buyer.country_of_operation : [];
+        const buyer = await Buyer.findOne(
+          { buyer_id: buyer_id },
+          { country_of_operation: 1 }
+        ).lean();
+        buyerCountries = Array.isArray(buyer?.country_of_operation)
+          ? buyer.country_of_operation
+          : [];
       }
 
       let pipeline = [];
@@ -3483,13 +3888,15 @@ module.exports = {
           subCategory:
             result?.["Product Sub Category*"]?.toString()?.trim() || "",
           anotherCategory:
-            result?.["Product Sub Category (Level 3)"]?.toString()?.trim() || "",
-          minimumPurchaseUnit: result?.["Minimum Order Quantity*"]?.toString()?.trim() || "",
+            result?.["Product Sub Category (Level 3)"]?.toString()?.trim() ||
+            "",
+          minimumPurchaseUnit:
+            result?.["Minimum Order Quantity*"]?.toString()?.trim() || "",
           strength: result?.["Strength"]?.toString()?.trim() || "",
           strengthUnit: result?.["Strength Unit"]?.toString()?.trim() || "",
           upc:
             result?.["UPC (Universal Product Code)"]?.toString()?.trim() || "",
-          
+
           brand: result?.["Brand Name"]?.toString()?.trim() || "",
           form: result?.["Product Type/Form"]?.toString()?.trim() || "",
           unit_tax: result?.["Product Tax%*"]?.toString()?.trim() || "",
@@ -3507,25 +3914,20 @@ module.exports = {
               ?.filter((ele) => ele) || [],
           tags: result?.["Tags*"]?.toString()?.trim() || "",
           description:
-          result?.["Product Description*"]?.toString()?.trim() || "",
-          manufacturer: result?.["Manufacturer Name*"]?.toString()?.trim() || "",
+            result?.["Product Description*"]?.toString()?.trim() || "",
+          manufacturer:
+            result?.["Manufacturer Name*"]?.toString()?.trim() || "",
           countryOfOrigin:
             result?.["Manufacturer Country of Origin*"]?.toString()?.trim() ||
             "",
           aboutManufacturer:
             result?.["About Manufacturer*"]?.toString()?.trim() || "",
-          country:
-            result?.["Stocked In Country*"]?.toString()?.trim() || "",
-          quantity:
-            result?.["Stocked In Quantity*"]?.toString()?.trim() || "",
-          type:
-            result?.["Stocked In Type*"]?.toString()?.trim() || "",
-          quantityFrom:
-            result?.["Quantity From*"]?.toString()?.trim() || "",
-          quantityTo:
-            result?.["Quantity To*"]?.toString()?.trim() || "",
-          price:
-            result?.["Unit Price*"]?.toString()?.trim() || "",
+          country: result?.["Stocked In Country*"]?.toString()?.trim() || "",
+          quantity: result?.["Stocked In Quantity*"]?.toString()?.trim() || "",
+          type: result?.["Stocked In Type*"]?.toString()?.trim() || "",
+          quantityFrom: result?.["Quantity From*"]?.toString()?.trim() || "",
+          quantityTo: result?.["Quantity To*"]?.toString()?.trim() || "",
+          price: result?.["Unit Price*"]?.toString()?.trim() || "",
           deliveryTime:
             result?.["Est. Shipping Time*"]?.toString()?.trim() || "",
           // image:
@@ -3533,13 +3935,10 @@ module.exports = {
           //     ?.split(",")
           //     ?.map((ele) => ele?.toString()?.trim()) || [], // array
 
-          frontImage:
-            result?.["Product Front Image"]?.toString()?.trim() || "",
-            sideImage:
-            result?.["Product Side Image"]?.toString()?.trim() || "",
-            backImage:
-            result?.["Product Back Image"]?.toString()?.trim() || "",
-            closeupImage:
+          frontImage: result?.["Product Front Image"]?.toString()?.trim() || "",
+          sideImage: result?.["Product Side Image"]?.toString()?.trim() || "",
+          backImage: result?.["Product Back Image"]?.toString()?.trim() || "",
+          closeupImage:
             result?.["Product Close up Image"]?.toString()?.trim() || "",
         };
 
@@ -3594,7 +3993,6 @@ module.exports = {
                     typeof rawValue
                   ) || undefined,
               };
-
             }
           }
           return elem;
@@ -3617,45 +4015,45 @@ module.exports = {
         //   };
         // });
         ?.map((ele) => {
-            return {
-              ...ele,
-              category: {
-                ...ele?.category,
-                error: ele?.category?.value
-                  ? !validateCategory(ele?.category?.value)
+          return {
+            ...ele,
+            category: {
+              ...ele?.category,
+              error: ele?.category?.value
+                ? !validateCategory(ele?.category?.value)
+                  ? true
+                  : undefined
+                : undefined,
+            },
+            subCategory: {
+              ...ele?.subCategory,
+              error:
+                ele?.category?.value && ele?.subCategory?.value
+                  ? !validateSubCategory(
+                      ele?.category?.value,
+                      ele?.subCategory?.value
+                    )
                     ? true
                     : undefined
                   : undefined,
-              },
-              subCategory: {
-                ...ele?.subCategory,
-                error:
-                  ele?.category?.value && ele?.subCategory?.value
-                    ? !validateSubCategory(
-                        ele?.category?.value,
-                        ele?.subCategory?.value
-                      )
-                      ? true
-                      : undefined
-                    : undefined,
-              },
-              anotherCategory: {
-                ...ele?.anotherCategory,
-                error:
-                  ele?.category?.value &&
-                  ele?.subCategory?.value &&
-                  ele?.anotherCategory?.value
-                    ? validateAnotherCategory(
-                        ele?.category?.value,
-                        ele?.subCategory?.value,
-                        ele?.anotherCategory?.value
-                      )
-                      ? true
-                      : undefined
-                    : undefined,
-              },
-            };
-          });
+            },
+            anotherCategory: {
+              ...ele?.anotherCategory,
+              error:
+                ele?.category?.value &&
+                ele?.subCategory?.value &&
+                ele?.anotherCategory?.value
+                  ? validateAnotherCategory(
+                      ele?.category?.value,
+                      ele?.subCategory?.value,
+                      ele?.anotherCategory?.value
+                    )
+                    ? true
+                    : undefined
+                  : undefined,
+            },
+          };
+        });
 
       const previewHeadings = Object?.values(previewResponse?.[0])?.map(
         (field) => field?.fieldName
@@ -3944,7 +4342,10 @@ module.exports = {
             extracted[key] = Array.isArray(field?.value)
               ? field.value
               : typeof field?.value === "string"
-              ? field.value.split(",").map((c) => c.trim()).filter(Boolean)
+              ? field.value
+                  .split(",")
+                  .map((c) => c.trim())
+                  .filter(Boolean)
               : [];
           } else {
             extracted[key] = field.value; // Extract the value
@@ -3959,7 +4360,7 @@ module.exports = {
         //   side: [],
         //   closeup: [],
         // };
-      
+
         // if (Array.isArray(item?.image?.value)) {
         //   const files = item.image.value;
         //   if (files[0]) image.front.push(files[0]);
