@@ -107,7 +107,6 @@ const getAllBids1 = async (req, res) => {
       userType,
       participant,
     } = req.query;
-    console.log("req.query", req.query);
 
     const pageNo = parseInt(page_no);
     const pageSize = parseInt(page_size);
@@ -234,7 +233,7 @@ const getAllBids1 = async (req, res) => {
 const getBidDetails = async (req, res) => {
   try {
     const { id } = req?.params;
-    const { type } = req?.query;
+    const { type, openFor } = req?.query;
 
     if (!id || !mongoose.isValidObjectId(id)) {
       return sendErrorResponse(res, 400, "Invalid Bid ID format.", null);
@@ -330,9 +329,17 @@ const getBidDetails = async (req, res) => {
       })
     );
 
-    const updatedBidDetails = {
+    let updatedBidDetails = {
       ...bidDetails[0],
-      additionalDetails: updatedAdditionalDetails,
+      additionalDetails: openFor
+        ? updatedAdditionalDetails?.filter(
+            (item) =>
+              item?.openFor
+                ?.toString()
+                ?.toLowerCase()
+                ?.replaceAll(/\s+/g, "") == openFor
+          )
+        : updatedAdditionalDetails,
     };
 
     return sendSuccessResponse(
