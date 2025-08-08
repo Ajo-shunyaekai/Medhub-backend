@@ -69,6 +69,12 @@ const subscriptionSchema = new Schema(
     invoiceStatus: {
       type: String,
     },
+    discountCoupon: {
+      type: String,
+    },
+    discountAmountOff: {
+      type: String,
+    },
     invoiceDetails: {
       num: { type: String },
       subTotal: { type: String },

@@ -409,7 +409,9 @@ const sendEmailConfirmationContent = (
   name,
   subscriptionStartDate,
   subscriptionEndDate,
-  amount
+  amount,
+  discountCoupon,
+  discountAmountOff
 ) => {
   return `
           <html>
@@ -580,7 +582,9 @@ const adminMailOptionsContent = (
   subscriptionStartDate,
   subscriptionEndDate,
   usertype,
-  amount
+  amount,
+  discountCoupon,
+  discountAmountOff
 ) => {
   return `
         <html>
@@ -760,7 +764,6 @@ const bidCreatedContent = (user, supplier, bid_id) => {
                                 Thanks & Regards <br />
                                 Medhub Global Team`;
 };
-
 
 module.exports = {
   contactUsContent,
