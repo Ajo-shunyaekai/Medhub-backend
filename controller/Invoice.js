@@ -123,7 +123,7 @@ module.exports = {
             to_id: reqObj.buyerId,
             event_id: invoiceId,
             connected_id: reqObj.orderId,
-            message: `Invoice created for order ${reqObj.orderId}`,
+            message: `Invoice Created ! Invoice has been created for order ${reqObj.orderId}`,
             status: 0,
           });
           await newNotification.save();
@@ -236,7 +236,7 @@ module.exports = {
         to_id: supplier_id,
         event_id: invoice_id,
         connected_id: order_id,
-        message: `Payment completed for Invoice ${invoice_id} on Order ${order_id}.`,
+        message: `Payment Completed! Payment has been completed for invoice ${invoice_id} on order ${order_id}.`,
         status: 0,
       });
       await newNotification.save();

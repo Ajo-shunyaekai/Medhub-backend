@@ -750,6 +750,18 @@ const enquiryMailToSupplierContent = (
   `;
 };
 
+const bidCreatedContent = (user, supplier, bid_id) => {
+  return `Dear ${supplier.contact_person_name}, <br />
+                                A new bid <strong>${bid_id}</strong> has been created by  ${user.buyer_name} on Medhub Global.<br />
+                                You are invited to participate and submit your quotation for the products listed.<br />
+                                Please log in to your Medhub supplier account to view the bid details and respond accordingly.<br />
+                                <br /><br />
+                                <p>If you need any assistance, feel free to contact us at <a href="mailto:connect@medhub.global">connect@medhub.global</a>.</p>
+                                Thanks & Regards <br />
+                                Medhub Global Team`;
+};
+
+
 module.exports = {
   contactUsContent,
   buyerRegistrationContent,
@@ -775,4 +787,5 @@ module.exports = {
   enquiryMailToSupplierContent,
   sendSubscriptionPaymentEmailContent,
   sendSubscriptionExpiryEmailContent,
+  bidCreatedContent,
 };

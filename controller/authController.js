@@ -461,7 +461,7 @@ const registerUserOld = async (req, res) => {
         to: "admin",
         from_id: userId,
         event_id: userId,
-        message: "New Buyer Registration Request",
+        message: "Registration Alert: A New Buyer Registration Request has been received",
         status: 0,
       });
  
@@ -534,7 +534,7 @@ const registerUserOld = async (req, res) => {
         to: "admin",
         from_id: userId,
         event_id: userId,
-        message: "New Supplier Registration Request",
+        message: "Registration Alert: A New Supplier Registration Request has been received",
         status: 0,
       });
  

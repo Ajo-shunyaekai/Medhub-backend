@@ -208,7 +208,7 @@ module.exports = {
         to_id: supplier_id,
         event_id: enquiry_id,
         link_id: purchaseOrderId,
-        message: `Purchase order created for ${enquiry_id}`,
+        message: `PO Created! Purchase order created for ${enquiry_id}`,
         status: 0,
       });
       await newNotification.save();
