@@ -262,6 +262,13 @@ const getBidDetails = async (req, res) => {
               $project: {
                 token: 0,
                 password: 0,
+                loginHistory: 0,
+                login_history: 0,
+                lastLogin: 0,
+                last_login: 0,
+                certificateFileNDate: 0,
+                interested_in: 0,
+                certificate_image: 0
               },
             },
           ],
@@ -302,6 +309,7 @@ const getBidDetails = async (req, res) => {
             if (!alreadyAdded) {
               biddersArr.push({
                 ...bidder,
+                participantId: participantDetails.supplier_id,
                 participantName: participantDetails.supplier_name,
                 participantType: participantDetails.supplier_type,
                 participantCountry:
@@ -313,6 +321,7 @@ const getBidDetails = async (req, res) => {
             return {
               ...bidder,
               totalBidsPCount: item?.participants?.length,
+              participantId: participantDetails.supplier_id,
               participantName: participantDetails.supplier_name,
               participantType: participantDetails.supplier_type,
               participantCountry:
@@ -517,7 +526,6 @@ const addBid = async (req, res) => {
     if (!newBid) {
       return sendErrorResponse(res, 400, "Failed to create new Bid.");
     }
-
       const openFor = additionalDetailsArray?.map((section) => section?.openFor).filter(Boolean) || [];
       const matchingSuppliers = await Supplier.find({
         supplier_type: { $in: openFor },
@@ -542,7 +550,7 @@ const addBid = async (req, res) => {
       await newNotification.save();
 
       //Send email
-      const subject = "Invitation to Participate in Bid";
+      const subject = "Invitation to Participate in Medhub Global Bid  ";
       const recipientEmails = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
       const emailContent = bidCreatedContent(user, supplier, newBid.bid_id); 
 
@@ -552,6 +560,7 @@ const addBid = async (req, res) => {
         console.error(`Error sending email to ${supplier.supplier_email}:`, error);
       }
     });
+    
     return sendSuccessResponse(res, 200, "Bid Created Successfully", newBid);
   } catch (error) {
     handleCatchBlockError(req, res, error);
@@ -598,6 +607,7 @@ const getBidProductDetails = async (req, res) => {
             // If bidder is not in biddersArr, push the new bidder
             biddersArr.push({
               ...bidder,
+              participantId : participantDetails?.supplier_id,
               participantName: participantDetails?.supplier_name,
               participantType: participantDetails?.supplier_type,
               participantCountry:
@@ -607,6 +617,7 @@ const getBidProductDetails = async (req, res) => {
           }
           return {
             ...item,
+            participantId : participantDetails?.supplier_id,
             participantName: participantDetails?.supplier_name,
             participantType: participantDetails?.supplier_type,
             participantCountry: participantDetails?.registeredAddress?.country,
@@ -726,6 +737,68 @@ const updateBidParticipant = async (req, res) => {
   }
 };
 
+const getCurrentBidDetails = async (req, res) => {
+  try {
+    const { buyerId, supplierId } = req.params;
+    let { pageNo = 1, pageSize = 10 } = req.query;
+    const page_no = pageNo || 1; 
+    const page_size = pageSize || 5; 
+    const offSet = (page_no - 1) * page_size;
+
+    // Step 1: Find Buyer
+    const buyerDoc = await Buyer.findOne({ buyer_id: buyerId });
+    if (!buyerDoc) {
+      return sendErrorResponse(res, 400, "Buyer Not Found.");
+    }
+
+    // Step 2: Find Supplier
+    const supplierDoc = await Supplier.findOne({ supplier_id: supplierId });
+    if (!supplierDoc) {
+      return sendErrorResponse(res, 400, "Supplier Not Found.");
+    }
+
+    // Step 3: Get ALL bids where buyerId matches and supplier is in participants
+    const bidDocs = await Bid.find({
+      userId: buyerDoc._id,
+      status: 'active',
+      "additionalDetails.participants.id": supplierDoc._id
+    })
+    .sort({ createdAt: -1 })
+      .skip(offSet)
+      .limit(page_size);
+
+     const totalBids = await Bid.countDocuments({ 
+      userId: buyerDoc._id,
+      status: 'active',
+      "additionalDetails.participants.id": supplierDoc._id
+    });
+     const totalPages = Math.ceil(totalBids / page_size);
+
+    if (!bidDocs.length) {
+      return sendErrorResponse(res, 400, "No Bids Found for this Buyer & Supplier.");
+    }
+
+    // Step 4: Return as-is
+    return sendSuccessResponse(res, 200, "Matching Bids Fetched", {
+      bidDocs,
+      totalItems: totalBids,
+      currentPage: page_no,
+      itemsPerPage: page_size,
+      totalPages,
+    });
+  } catch (error) {
+    console.error("error", error);
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+
+
+
+
+
+
+
 module.exports = {
   getAllBids,
   getAllBids1,
@@ -734,4 +807,5 @@ module.exports = {
   editBid,
   getBidProductDetails,
   updateBidParticipant,
+  getCurrentBidDetails
 };

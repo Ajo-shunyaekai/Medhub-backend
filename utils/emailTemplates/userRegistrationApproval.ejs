@@ -66,9 +66,16 @@
                                     <a href="mailto:connect@medhub.global"
                                         style="color:#3D4EAF; font-weight: bold; text-decoration: none;">connect@medhub.global</a>.
                                 </p>
-                                <p style="margin: 10px 0;">Additionally, our team will connect with you shortly to
+                                <!-- <p style="margin: 10px 0;">Additionally, our team will connect with you shortly to
                                     assist with uploading your products or services to the marketplace.
-                                </p>
+                                </p> -->
+                                <% if (user_type === 'supplier') { %>
+                                    <p style="margin: 10px 0;">
+                                    Additionally, our team will connect with you shortly to
+                                    assist with uploading your products or services to the marketplace.
+                                    </p>
+                                <% } %>
+
                                 <p style="margin: 10px 0;">Thank you for joining Medhub Global. We look forward to a
                                     successful partnership!
                                 </p>

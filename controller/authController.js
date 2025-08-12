@@ -475,7 +475,7 @@ const registerUserOld = async (req, res) => {
       await sendEmail(recipientEmails, subject, emailContent);
  
       const confirmationEmailRecipients = [buyer.contact_person_email];
-      const confirmationSubject = "Thank You for Registering on Medhub Global!";
+      const confirmationSubject = "Thank You for Registering with Medhub Global";
       const confirmationContent = await userRegistrationConfirmationContent(
         buyer,
         usertype
@@ -549,7 +549,7 @@ const registerUserOld = async (req, res) => {
       await sendEmail(recipientEmails, subject, emailContent);
  
       const confirmationEmailRecipients = [supplier.contact_person_email];
-      const confirmationSubject = "Thank You for Registering on Medhub Global!";
+      const confirmationSubject = "Thank You for Registering with Medhub Global";
       const confirmationContent = await userRegistrationConfirmationContent(
         supplier,
         usertype
@@ -792,7 +792,7 @@ const registerUser = async (req, res) => {
  
       await sendEmail([adminEmail], subject, emailContent);
  
-      const confirmationSubject = "Thank You for Registering on Medhub Global!";
+      const confirmationSubject = "Thank You for Registering with Medhub Global";
       const confirmationContent = await userRegistrationConfirmationContent(
         user,
         usertype

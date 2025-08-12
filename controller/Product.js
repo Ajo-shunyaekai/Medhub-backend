@@ -1014,12 +1014,12 @@ module.exports = {
       });
 
       // Sort by priority first, then by creation date
-      pipeline.push({
-        $sort: {
-          searchPriority: 1,
-          createdAt: -1,
-        },
-      });
+      // pipeline.push({
+      //   $sort: {
+      //     searchPriority: 1,
+      //     createdAt: -1,
+      //   },
+      // });
 
       // Deduplicate based on name + strength + strengthUnit
       const shouldDeduplicate = showDuplicate === "true";
@@ -1041,6 +1041,25 @@ module.exports = {
         });
       }
 
+//       const shouldDeduplicate = showDuplicate === "false";
+
+//     if (shouldDeduplicate) {
+//       // Deduplicate by name+strength+unit
+//       pipeline.push({
+//         $group: {
+//           _id: {
+//             name: { $toLower: "$general.name" },
+//             // strength: "$general.strength",
+//             // strengthUnit: { $toLower: "$general.strengthUnit" },
+//           },
+//           doc: { $first: "$$ROOT" },
+//         },
+//       });
+//       pipeline.push({
+//         $replaceRoot: { newRoot: "$doc" },
+//       });
+//     }
+
       // Re-sort after deduplication
       pipeline.push({
         $sort: {
@@ -1052,6 +1071,23 @@ module.exports = {
 
       const products = await Product.aggregate(pipeline);
 
+      // const nameMap = new Map();
+
+      // products?.forEach((pdt) => {
+      //   const name = pdt?.general?.name?.trim();
+      //   if (name) {
+      //     const lower = name.toLowerCase();
+      //     if (!nameMap.has(lower)) {
+      //       nameMap.set(lower, name);
+      //     }
+      //   }
+      // });
+
+      // const finalProducts = Array.from(nameMap.values()).map((name) => ({
+      //   label: name?.charAt(0).toUpperCase() + name?.slice(1),
+      //   value: name?.charAt(0).toUpperCase() + name?.slice(1),
+      // }))?.sort((a, b) => a?.label?.localeCompare(b?.label));
+
       const nameMap = new Map();
 
       products?.forEach((pdt) => {
@@ -1059,15 +1095,45 @@ module.exports = {
         if (name) {
           const lower = name.toLowerCase();
           if (!nameMap.has(lower)) {
-            nameMap.set(lower, name);
+            nameMap.set(lower, { name, _id: pdt?._id });
           }
         }
       });
 
-      const finalProducts = Array.from(nameMap.values()).map((name) => ({
+      const finalProducts = Array.from(nameMap.values()).map(({ name, _id }) => ({
         label: name?.charAt(0).toUpperCase() + name?.slice(1),
-        value: name?.charAt(0).toUpperCase() + name?.slice(1),
-      }))?.sort((a, b) => a?.label?.localeCompare(b?.label));
+        value: _id, 
+      })).sort((a, b) => a?.label?.localeCompare(b?.label));
+
+// let finalProducts;
+
+// if (shouldDeduplicate) {
+//   // Deduplicate by name
+//   const nameMap = new Map();
+//   products?.forEach((pdt) => {
+//     const name = pdt?.general?.name?.trim();
+//     if (name) {
+//       const lower = name.toLowerCase();
+//       if (!nameMap.has(lower)) {
+//         nameMap.set(lower, { name, _id: pdt?._id });
+//       }
+//     }
+//   });
+//   finalProducts = Array.from(nameMap.values()).map(({ name, _id }) => ({
+//     label: name?.charAt(0).toUpperCase() + name?.slice(1),
+//     value: _id,
+//   }));
+// } else {
+//   // Keep all products
+//   finalProducts = products.map((pdt) => ({
+//     label: pdt?.general?.name?.charAt(0).toUpperCase() + pdt?.general?.name?.slice(1),
+//     value: pdt?._id,
+//   }));
+// }
+
+// // Sort alphabetically
+// finalProducts.sort((a, b) => a?.label?.localeCompare(b?.label));
+
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
         products: finalProducts,

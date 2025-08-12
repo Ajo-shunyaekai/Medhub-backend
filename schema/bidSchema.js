@@ -117,6 +117,12 @@ const bidSchema = new Schema(
           trim: true,
           required: [true, "Validation Error: Name is required."],
         },
+        productId:{
+          type: String,
+          trim: true,
+          // required: [true, "Validation Error: Product Id is required."],
+          immutable: true,
+       },
         description: {
           type: String,
           trim: true,
