@@ -1,6 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const moment = require("moment");
+const { DateTime } = require("luxon");
 const { default: mongoose } = require("mongoose");
 const Admin = require("../schema/adminSchema");
 const Supplier = require("../schema/supplierSchema");
@@ -109,6 +110,7 @@ const getAllBids1 = async (req, res) => {
       page_size = 10,
       userType,
       participant,
+      category
     } = req.query;
 
     const pageNo = parseInt(page_no);
@@ -119,13 +121,43 @@ const getAllBids1 = async (req, res) => {
       return sendErrorResponse(res, 400, "Invalid User ID format.", null);
     }
 
+    let categoryArray = [];
+    if (category) {
+      categoryArray = category.split(",").map((c) => c.trim());
+    }
+
     const matchStage = {
       ...(userId && { userId }),
       ...(status && { status }),
       ...(userType === "Supplier" &&
         country && { "general.fromCountries": country }), //filter only when userType = Supplier
+      ...(categoryArray.length > 0 && { 
+      additionalDetails: { 
+        $elemMatch: { category: { $in: categoryArray } }  //trading categories filter
+      } 
+     })
     };
 
+  if (userType === "Supplier") {
+      const now = new Date();
+
+      const allBids = await Bid.find(matchStage);
+
+      // Filter in JS instead of doing broken date parsing in Mongo
+      const filteredIds = allBids
+        .filter(bid => {
+          if (!bid.general?.startDate || !bid.general?.startTime) return false;
+          const startDate = new Date(bid.general.startDate);
+          const startDateTime = new Date(
+            `${startDate.toISOString().split('T')[0]}T${bid.general.startTime}:00+05:30`
+          );
+          return startDateTime <= now;
+        })
+        .map(bid => bid._id);
+
+      matchStage._id = { $in: filteredIds };
+    }
+  
     const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
 
     const bids = await Bid.aggregate(pipeline);
@@ -640,7 +672,7 @@ const getBidProductDetails = async (req, res) => {
 const updateBidParticipant = async (req, res) => {
   try {
     const { bidId, itemId } = req?.params;
-    const { participantId, amount, timeLine, tnc } = req?.body;
+    const { participantId, productName, productId, amount, timeLine, tnc } = req?.body;
 
     // Step 1: Find the bid
     const bidDetails = await Bid.findById(bidId);
@@ -669,6 +701,14 @@ const updateBidParticipant = async (req, res) => {
         participant?.history?.[participant.history.length - 1] || {};
 
       const historyEntry = {
+        // productId: {
+        //   value: productId,
+        //   edited: lastHistory?.productId?.value !== productId,
+        // },
+        // productName: {
+        //   value: productName,
+        //   edited: lastHistory?.productName?.value !== productName,
+        // },
         amount: {
           value: amount,
           edited: lastHistory?.amount?.value !== amount,
@@ -688,16 +728,28 @@ const updateBidParticipant = async (req, res) => {
       // Ensure history array exists
       participant.history = participant.history || [];
 
+      // participant.productId = productId;  
+      // participant.productName = productName;
       participant.amount = amount;
       participant.timeLine = timeLine;
       participant.tnc = tnc;
       (lastHistory?.amount?.value !== amount ||
         lastHistory?.timeLine?.value !== timeLine ||
+        // lastHistory?.productId?.value !== productId ||
+        // lastHistory?.productName?.value !== productName ||
         lastHistory?.tnc?.value !== tnc) &&
         participant.history.push(historyEntry);
     } else {
       // Step 4b: Participant not found, add new with history
       const historyEntry = {
+        // productId: {
+        //   value: productId,
+        //   edited: false,
+        // },
+        // productName: {
+        //   value: productName,
+        //   edited: false,
+        // },
         amount: {
           value: amount,
           edited: false,
@@ -716,6 +768,8 @@ const updateBidParticipant = async (req, res) => {
 
       itemToUpdate.participants.push({
         id: participantId,
+        // productId,    
+        // productName,
         amount,
         timeLine,
         tnc,

@@ -117,12 +117,6 @@ const bidSchema = new Schema(
           trim: true,
           required: [true, "Validation Error: Name is required."],
         },
-        productId:{
-          type: String,
-          trim: true,
-          // required: [true, "Validation Error: Product Id is required."],
-          immutable: true,
-       },
         description: {
           type: String,
           trim: true,
@@ -168,6 +162,20 @@ const bidSchema = new Schema(
               required: [true, "Validation Error: Participant Id is required"],
               immutable: true,
             },
+            productId: {
+              type: String,
+              required: [
+                true,
+                "Validation Error: Product Id is required",
+              ],
+            },
+            productName: {
+              type: String,
+              required: [
+                true,
+                "Validation Error: Product Name is required",
+              ],
+            },
             amount: {
               type: Number,
               required: [
@@ -191,6 +199,32 @@ const bidSchema = new Schema(
             },
             history: [
               {
+                //  productName: {
+                //   value: {
+                //     type: String,
+                //     required: [
+                //       true,
+                //       "Validation Error: Product Name is required",
+                //     ],
+                //   },
+                //   edited: {
+                //     type: Boolean,
+                //     default: false,
+                //   },
+                // },
+                // productId: {
+                //   value: {
+                //     type: String,
+                //     required: [
+                //       true,
+                //       "Validation Error: Product Id is required",
+                //     ],
+                //   },
+                //   edited: {
+                //     type: Boolean,
+                //     default: false,
+                //   },
+                // },
                 amount: {
                   value: {
                     type: Number,

@@ -1013,14 +1013,6 @@ module.exports = {
         },
       });
 
-      // Sort by priority first, then by creation date
-      // pipeline.push({
-      //   $sort: {
-      //     searchPriority: 1,
-      //     createdAt: -1,
-      //   },
-      // });
-
       // Deduplicate based on name + strength + strengthUnit
       const shouldDeduplicate = showDuplicate === "true";
 
@@ -1041,26 +1033,7 @@ module.exports = {
         });
       }
 
-//       const shouldDeduplicate = showDuplicate === "false";
-
-//     if (shouldDeduplicate) {
-//       // Deduplicate by name+strength+unit
-//       pipeline.push({
-//         $group: {
-//           _id: {
-//             name: { $toLower: "$general.name" },
-//             // strength: "$general.strength",
-//             // strengthUnit: { $toLower: "$general.strengthUnit" },
-//           },
-//           doc: { $first: "$$ROOT" },
-//         },
-//       });
-//       pipeline.push({
-//         $replaceRoot: { newRoot: "$doc" },
-//       });
-//     }
-
-      // Re-sort after deduplication
+      // sort after deduplication
       pipeline.push({
         $sort: {
           searchPriority: 1,
@@ -1073,6 +1046,41 @@ module.exports = {
 
       // const nameMap = new Map();
 
+      // let finalProducts;
+
+const nameMap = new Map();
+
+products?.forEach((pdt) => {
+  let name = pdt?.general?.name?.trim();
+  const strength = pdt?.general?.strength?.toString().trim();
+  let strengthUnit = pdt?.general?.strengthUnit?.trim();
+
+  // Remove parentheses from unit
+  if (strengthUnit) {
+    strengthUnit = strengthUnit.replace(/\s*\(.*?\)/, '').trim();
+  }
+
+  // Build display name
+  let displayName = name;
+  if (strength && !isNaN(strength)) {
+    displayName += ` ${strength}`;
+    if (strengthUnit) displayName += ` ${strengthUnit}`;
+  }
+
+  // Deduplicate based on lowercase name (only name for supplier_id, full display name otherwise)
+  const key = supplier_id ? name?.toLowerCase() : displayName?.toLowerCase();
+  if (displayName && !nameMap.has(key)) {
+    nameMap.set(key, {
+      label: displayName?.charAt(0).toUpperCase() + displayName?.slice(1),
+      value: supplier_id ? pdt?._id : displayName?.charAt(0).toUpperCase() + displayName?.slice(1),
+    });
+  }
+});
+
+const finalProducts = Array.from(nameMap.values())
+  .sort((a, b) => a?.label?.localeCompare(b?.label));
+
+
       // products?.forEach((pdt) => {
       //   const name = pdt?.general?.name?.trim();
       //   if (name) {
@@ -1083,56 +1091,51 @@ module.exports = {
       //   }
       // });
 
+      // products?.forEach((pdt) => {
+      //   let name = pdt?.general?.name?.trim();
+      //   const strength = pdt?.general?.strength?.toString().trim();
+      //   let strengthUnit = pdt?.general?.strengthUnit?.trim();
+
+      //   // Remove () data
+      //   if (strengthUnit) {
+      //     strengthUnit = strengthUnit.replace(/\s*\(.*?\)/, '').trim();
+      //   }
+
+      //   let displayName = name;
+      //   if (strength && !isNaN(strength)) {
+      //     displayName += ` ${strength}`;
+      //     if (strengthUnit) displayName += ` ${strengthUnit}`;
+      //   }
+
+      //   if (displayName) {
+      //     const lower = displayName.toLowerCase();
+      //     if (!nameMap.has(lower)) {
+      //       nameMap.set(lower, displayName);
+      //     }
+      //   }
+      // });
+
       // const finalProducts = Array.from(nameMap.values()).map((name) => ({
       //   label: name?.charAt(0).toUpperCase() + name?.slice(1),
       //   value: name?.charAt(0).toUpperCase() + name?.slice(1),
       // }))?.sort((a, b) => a?.label?.localeCompare(b?.label));
 
-      const nameMap = new Map();
+      // const nameMap = new Map();
 
-      products?.forEach((pdt) => {
-        const name = pdt?.general?.name?.trim();
-        if (name) {
-          const lower = name.toLowerCase();
-          if (!nameMap.has(lower)) {
-            nameMap.set(lower, { name, _id: pdt?._id });
-          }
-        }
-      });
+      // products?.forEach((pdt) => {
+      //   const name = pdt?.general?.name?.trim();
+      //   if (name) {
+      //     const lower = name.toLowerCase();
+      //     if (!nameMap.has(lower)) {
+      //       nameMap.set(lower, { name, _id: pdt?._id });
+      //     }
+      //   }
+      // });
 
-      const finalProducts = Array.from(nameMap.values()).map(({ name, _id }) => ({
-        label: name?.charAt(0).toUpperCase() + name?.slice(1),
-        value: _id, 
-      })).sort((a, b) => a?.label?.localeCompare(b?.label));
-
-// let finalProducts;
-
-// if (shouldDeduplicate) {
-//   // Deduplicate by name
-//   const nameMap = new Map();
-//   products?.forEach((pdt) => {
-//     const name = pdt?.general?.name?.trim();
-//     if (name) {
-//       const lower = name.toLowerCase();
-//       if (!nameMap.has(lower)) {
-//         nameMap.set(lower, { name, _id: pdt?._id });
-//       }
-//     }
-//   });
-//   finalProducts = Array.from(nameMap.values()).map(({ name, _id }) => ({
-//     label: name?.charAt(0).toUpperCase() + name?.slice(1),
-//     value: _id,
-//   }));
-// } else {
-//   // Keep all products
-//   finalProducts = products.map((pdt) => ({
-//     label: pdt?.general?.name?.charAt(0).toUpperCase() + pdt?.general?.name?.slice(1),
-//     value: pdt?._id,
-//   }));
-// }
-
-// // Sort alphabetically
-// finalProducts.sort((a, b) => a?.label?.localeCompare(b?.label));
+      // const finalProducts = Array.from(nameMap.values()).map(({ name, _id }) => ({
+      //   label: name?.charAt(0).toUpperCase() + name?.slice(1),
+      //   value: _id, 
+      // })).sort((a, b) => a?.label?.localeCompare(b?.label));
 
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
