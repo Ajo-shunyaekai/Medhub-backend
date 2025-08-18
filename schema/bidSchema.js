@@ -200,32 +200,32 @@ const bidSchema = new Schema(
             favourite: { type: Boolean, default: false },
             history: [
               {
-                //  productName: {
-                //   value: {
-                //     type: String,
-                //     required: [
-                //       true,
-                //       "Validation Error: Product Name is required",
-                //     ],
-                //   },
-                //   edited: {
-                //     type: Boolean,
-                //     default: false,
-                //   },
-                // },
-                // productId: {
-                //   value: {
-                //     type: String,
-                //     required: [
-                //       true,
-                //       "Validation Error: Product Id is required",
-                //     ],
-                //   },
-                //   edited: {
-                //     type: Boolean,
-                //     default: false,
-                //   },
-                // },
+                 productName: {
+                  value: {
+                    type: String,
+                    // required: [
+                    //   true,
+                    //   "Validation Error: Product Name is required",
+                    // ],
+                  },
+                  edited: {
+                    type: Boolean,
+                    default: false,
+                  },
+                },
+                productId: {
+                  value: {
+                    type: String,
+                    // required: [
+                    //   true,
+                    //   "Validation Error: Product Id is required",
+                    // ],
+                  },
+                  edited: {
+                    type: Boolean,
+                    default: false,
+                  },
+                },
                 amount: {
                   value: {
                     type: Number,

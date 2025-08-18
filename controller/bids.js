@@ -791,6 +791,135 @@ const updateBidParticipant = async (req, res) => {
   }
 };
 
+const updateBidParticipant2 = async (req, res) => {
+  try {
+    const { bidId, itemId } = req?.params;
+    const { participantId, productName, productId, amount, timeLine, tnc } = req?.body;
+
+    // Step 1: Find the bid
+    const bidDetails = await Bid.findById(bidId);
+    if (!bidDetails) {
+      return sendErrorResponse(res, 400, "No Bid Found.");
+    }
+
+    // Step 2: Find the item to update within additionalDetails
+    const itemToUpdate = bidDetails.additionalDetails.find(
+      (item) => item.itemId === itemId
+    );
+
+    if (!itemToUpdate) {
+      return sendErrorResponse(res, 400, "No Item Found in Bid.");
+    }
+
+    // Step 3: Check if participant already exists
+    const participantIndex = itemToUpdate.participants.findIndex(
+      (p) => String(p.id) === String(participantId)
+    );
+
+    if (participantIndex !== -1) {
+      // Step 4a: Participant exists, update and add history
+      const participant = itemToUpdate.participants[participantIndex];
+      const lastHistory =
+        participant?.history?.[participant.history.length - 1] || {};
+
+      const historyEntry = {
+        productId: {
+          value: productId,
+          edited: lastHistory?.productId?.value !== productId,
+        },
+        productName: {
+          value: productName,
+          edited: lastHistory?.productName?.value !== productName,
+        },
+        amount: {
+          value: amount,
+          edited: lastHistory?.amount?.value !== amount,
+        },
+        timeLine: {
+          value: timeLine,
+          edited: lastHistory?.timeLine?.value !== timeLine,
+        },
+        tnc: {
+          value: tnc,
+          edited: lastHistory?.tnc?.value !== tnc,
+        },
+        type: "Bid Updated",
+        date: new Date(),
+      };
+
+      // Ensure history array exists
+      participant.history = participant.history || [];
+
+      // Update participant
+      participant.productId = productId;
+      participant.productName = productName;
+      participant.amount = amount;
+      participant.timeLine = timeLine;
+      participant.tnc = tnc;
+
+      // Only push history if something actually changed
+      if (
+        lastHistory?.productId?.value !== productId ||
+        lastHistory?.productName?.value !== productName ||
+        lastHistory?.amount?.value !== amount ||
+        lastHistory?.timeLine?.value !== timeLine ||
+        lastHistory?.tnc?.value !== tnc
+      ) {
+        participant.history.push(historyEntry);
+      }
+    } else {
+      // Step 4b: Participant not found, add new with history
+      const historyEntry = {
+        productId: {
+          value: productId,
+          edited: false,
+        },
+        productName: {
+          value: productName,
+          edited: false,
+        },
+        amount: {
+          value: amount,
+          edited: false,
+        },
+        timeLine: {
+          value: timeLine,
+          edited: false,
+        },
+        tnc: {
+          value: tnc,
+          edited: false,
+        },
+        type: "Bid Created",
+        date: new Date(),
+      };
+
+      itemToUpdate.participants.push({
+        id: participantId,
+        productId,
+        productName,
+        amount,
+        timeLine,
+        tnc,
+        history: [historyEntry],
+      });
+    }
+
+    // Step 5: Save updated bid document
+    await bidDetails.save();
+
+    return sendSuccessResponse(
+      res,
+      200,
+      participantIndex !== -1 ? "Participant updated." : "Participant added.",
+      bidDetails
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+
 const getCurrentBidDetails = async (req, res) => {
   try {
     const { buyerId, supplierId } = req.params;
@@ -894,6 +1023,7 @@ module.exports = {
   editBid,
   getBidProductDetails,
   updateBidParticipant,
+  updateBidParticipant2,
   getCurrentBidDetails,
   addToFavourite
 };
