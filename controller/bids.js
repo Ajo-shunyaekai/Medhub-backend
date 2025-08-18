@@ -728,8 +728,8 @@ const updateBidParticipant = async (req, res) => {
       // Ensure history array exists
       participant.history = participant.history || [];
 
-      // participant.productId = productId;  
-      // participant.productName = productName;
+      participant.productId = productId;  
+      participant.productName = productName;
       participant.amount = amount;
       participant.timeLine = timeLine;
       participant.tnc = tnc;
@@ -768,8 +768,8 @@ const updateBidParticipant = async (req, res) => {
 
       itemToUpdate.participants.push({
         id: participantId,
-        // productId,    
-        // productName,
+        productId,    
+        productName,
         amount,
         timeLine,
         tnc,
@@ -846,10 +846,43 @@ const getCurrentBidDetails = async (req, res) => {
   }
 };
 
+const addToFavourite = async (req, res) => {
+  try {
+    const { bidId, itemId, participantId } = req.params;
+console.log('req.params',req.params)
+    const bidDetails = await Bid.findById(bidId);
+    if (!bidDetails) {
+      return sendErrorResponse(res, 404, "Bid not found");
+    }
 
+    const itemToUpdate = bidDetails.additionalDetails.find(
+      (item) => String(item.itemId) === String(itemId)
+    );
+    if (!itemToUpdate) {
+      return sendErrorResponse(res, 404, "Item not found in bid");
+    }
 
+    const participant = itemToUpdate.participants.find(
+      (p) => String(p.id) === String(participantId)
+    );
+    if (!participant) {
+      return sendErrorResponse(res, 404, "Participant not found");
+    }
 
+    participant.favourite = !participant.favourite;
 
+    await bidDetails.save();
+
+    return sendSuccessResponse(
+      res,
+      200,
+      participant.favourite ? "Added to favourites" : "Removed from favourites",
+      { participantId, favourite: participant.favourite }
+    );
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+}
 
 
 
@@ -861,5 +894,6 @@ module.exports = {
   editBid,
   getBidProductDetails,
   updateBidParticipant,
-  getCurrentBidDetails
+  getCurrentBidDetails,
+  addToFavourite
 };

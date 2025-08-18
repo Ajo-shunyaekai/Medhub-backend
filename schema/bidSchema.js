@@ -197,6 +197,7 @@ const bidSchema = new Schema(
                 "Validation Error: Participant Proposed terms and conditions is required",
               ],
             },
+            favourite: { type: Boolean, default: false },
             history: [
               {
                 //  productName: {
