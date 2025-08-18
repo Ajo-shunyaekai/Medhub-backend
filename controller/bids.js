@@ -849,14 +849,14 @@ const getCurrentBidDetails = async (req, res) => {
 const addToFavourite = async (req, res) => {
   try {
     const { bidId, itemId, participantId } = req.params;
-console.log('req.params',req.params)
+
     const bidDetails = await Bid.findById(bidId);
     if (!bidDetails) {
       return sendErrorResponse(res, 404, "Bid not found");
     }
 
     const itemToUpdate = bidDetails.additionalDetails.find(
-      (item) => String(item.itemId) === String(itemId)
+      (item) => String(item._id) === String(itemId)
     );
     if (!itemToUpdate) {
       return sendErrorResponse(res, 404, "Item not found in bid");
