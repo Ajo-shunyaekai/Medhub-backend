@@ -11,6 +11,7 @@ const {
   addBid,
   editBid,
   updateBidParticipant,
+  updateBidParticipant2,
   getBidProductDetails,
   getCurrentBidDetails,
   addToFavourite,
@@ -43,7 +44,8 @@ router.post(
   "/add-participant/:bidId/:itemId",
   checkAuthorization,
   authenticationNAuthorization,
-  updateBidParticipant
+  // updateBidParticipant
+  updateBidParticipant2
 );
 
 router.post(
