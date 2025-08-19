@@ -164,17 +164,11 @@ const bidSchema = new Schema(
             },
             productId: {
               type: String,
-              required: [
-                true,
-                "Validation Error: Product Id is required",
-              ],
+              required: [true, "Validation Error: Product Id is required"],
             },
             productName: {
               type: String,
-              required: [
-                true,
-                "Validation Error: Product Name is required",
-              ],
+              required: [true, "Validation Error: Product Name is required"],
             },
             amount: {
               type: Number,
@@ -276,6 +270,10 @@ const bidSchema = new Schema(
             ],
           },
         ],
+        quotRequested: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
     status: {

@@ -1048,38 +1048,42 @@ module.exports = {
 
       // let finalProducts;
 
-const nameMap = new Map();
+      const nameMap = new Map();
 
-products?.forEach((pdt) => {
-  let name = pdt?.general?.name?.trim();
-  const strength = pdt?.general?.strength?.toString().trim();
-  let strengthUnit = pdt?.general?.strengthUnit?.trim();
+      products?.forEach((pdt) => {
+        let name = pdt?.general?.name?.trim();
+        const strength = pdt?.general?.strength?.toString().trim();
+        let strengthUnit = pdt?.general?.strengthUnit?.trim();
 
-  // Remove parentheses from unit
-  if (strengthUnit) {
-    strengthUnit = strengthUnit.replace(/\s*\(.*?\)/, '').trim();
-  }
+        // Remove parentheses from unit
+        if (strengthUnit) {
+          strengthUnit = strengthUnit.replace(/\s*\(.*?\)/, "").trim();
+        }
 
-  // Build display name
-  let displayName = name;
-  if (strength && !isNaN(strength)) {
-    displayName += ` ${strength}`;
-    if (strengthUnit) displayName += ` ${strengthUnit}`;
-  }
+        // Build display name
+        let displayName = name;
+        if (strength && !isNaN(strength)) {
+          displayName += ` ${strength}`;
+          if (strengthUnit) displayName += ` ${strengthUnit}`;
+        }
 
-  // Deduplicate based on lowercase name (only name for supplier_id, full display name otherwise)
-  const key = supplier_id ? name?.toLowerCase() : displayName?.toLowerCase();
-  if (displayName && !nameMap.has(key)) {
-    nameMap.set(key, {
-      label: displayName?.charAt(0).toUpperCase() + displayName?.slice(1),
-      value: supplier_id ? pdt?._id : displayName?.charAt(0).toUpperCase() + displayName?.slice(1),
-    });
-  }
-});
+        // Deduplicate based on lowercase name (only name for supplier_id, full display name otherwise)
+        const key = supplier_id
+          ? name?.toLowerCase()
+          : displayName?.toLowerCase();
+        if (displayName && !nameMap.has(key)) {
+          nameMap.set(key, {
+            label: displayName?.charAt(0).toUpperCase() + displayName?.slice(1),
+            value: supplier_id
+              ? pdt?._id
+              : displayName?.charAt(0).toUpperCase() + displayName?.slice(1),
+          });
+        }
+      });
 
-const finalProducts = Array.from(nameMap.values())
-  .sort((a, b) => a?.label?.localeCompare(b?.label));
-
+      const finalProducts = Array.from(nameMap.values()).sort((a, b) =>
+        a?.label?.localeCompare(b?.label)
+      );
 
       // products?.forEach((pdt) => {
       //   const name = pdt?.general?.name?.trim();
@@ -1134,9 +1138,8 @@ const finalProducts = Array.from(nameMap.values())
 
       // const finalProducts = Array.from(nameMap.values()).map(({ name, _id }) => ({
       //   label: name?.charAt(0).toUpperCase() + name?.slice(1),
-      //   value: _id, 
+      //   value: _id,
       // })).sort((a, b) => a?.label?.localeCompare(b?.label));
-
 
       return sendSuccessResponse(res, 200, "Success Fetching Products", {
         products: finalProducts,
@@ -1889,10 +1892,18 @@ const finalProducts = Array.from(nameMap.values())
           ...req?.body,
           quantity: quantity,
           image: {
-            front: generalFiles1.imageFront || [],
-            back: generalFiles2.imageBack || [],
-            side: generalFiles3.imageSide || [],
-            closeup: generalFiles4.imageClosure || [],
+            front: req?.body?.image?.frontUrl
+              ? [req?.body?.image?.frontUrl]
+              : generalFiles1.imageFront || [],
+            back: req?.body?.image?.backUrl
+              ? [req?.body?.image?.backUrl]
+              : generalFiles2.imageBack || [],
+            side: req?.body?.image?.sideUrl
+              ? [req?.body?.image?.sideUrl]
+              : generalFiles3.imageSide || [],
+            closeup: req?.body?.image?.closeupUrl
+              ? [req?.body?.image?.closeupUrl]
+              : generalFiles4.imageClosure || [],
           },
         },
         documents: {

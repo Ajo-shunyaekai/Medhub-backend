@@ -6,6 +6,9 @@ const { default: mongoose } = require("mongoose");
 const Admin = require("../schema/adminSchema");
 const Supplier = require("../schema/supplierSchema");
 const Buyer = require("../schema/buyerSchema");
+const Product = require("../schema/productSchema3");
+const Enquiry = require("../schema/enquiryListSchema");
+const OrderHistory = require("../schema/orderHistorySchema");
 const LogisticsPartner = require("../schema/logisticsCompanySchema");
 const Bid = require("../schema/bidSchema");
 const Notification = require("../schema/notificationSchema");
@@ -16,7 +19,7 @@ const {
 } = require("../utils/commonResonse");
 const { getFilePathsAdd } = require("../helper");
 const { bidCreatedContent } = require("../utils/emailContents");
-const { sendEmail } = require("../utils/emailService");
+const { sendEmail, sendTemplateEmail } = require("../utils/emailService");
 
 const getAllBids = async (req, res) => {
   try {
@@ -110,7 +113,7 @@ const getAllBids1 = async (req, res) => {
       page_size = 10,
       userType,
       participant,
-      category
+      category,
     } = req.query;
 
     const pageNo = parseInt(page_no);
@@ -131,33 +134,35 @@ const getAllBids1 = async (req, res) => {
       ...(status && { status }),
       ...(userType === "Supplier" &&
         country && { "general.fromCountries": country }), //filter only when userType = Supplier
-      ...(categoryArray.length > 0 && { 
-      additionalDetails: { 
-        $elemMatch: { category: { $in: categoryArray } }  //trading categories filter
-      } 
-     })
+      ...(categoryArray.length > 0 && {
+        additionalDetails: {
+          $elemMatch: { category: { $in: categoryArray } }, //trading categories filter
+        },
+      }),
     };
 
-  if (userType === "Supplier") {
+    if (userType === "Supplier") {
       const now = new Date();
 
       const allBids = await Bid.find(matchStage);
 
       // Filter in JS instead of doing broken date parsing in Mongo
       const filteredIds = allBids
-        .filter(bid => {
+        .filter((bid) => {
           if (!bid.general?.startDate || !bid.general?.startTime) return false;
           const startDate = new Date(bid.general.startDate);
           const startDateTime = new Date(
-            `${startDate.toISOString().split('T')[0]}T${bid.general.startTime}:00+05:30`
+            `${startDate.toISOString().split("T")[0]}T${
+              bid.general.startTime
+            }:00+05:30`
           );
           return startDateTime <= now;
         })
-        .map(bid => bid._id);
+        .map((bid) => bid._id);
 
       matchStage._id = { $in: filteredIds };
     }
-  
+
     const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
 
     const bids = await Bid.aggregate(pipeline);
@@ -300,7 +305,7 @@ const getBidDetails = async (req, res) => {
                 last_login: 0,
                 certificateFileNDate: 0,
                 interested_in: 0,
-                certificate_image: 0
+                certificate_image: 0,
               },
             },
           ],
@@ -558,14 +563,17 @@ const addBid = async (req, res) => {
     if (!newBid) {
       return sendErrorResponse(res, 400, "Failed to create new Bid.");
     }
-      const openFor = additionalDetailsArray?.map((section) => section?.openFor).filter(Boolean) || [];
-      const matchingSuppliers = await Supplier.find({
-        supplier_type: { $in: openFor },
-        "registeredAddress.country": { $in: req.body.fromCountries },
-      });
-     
-      const notificationMessage = `Bid Created! A new bid has been created by ${user?.buyer_name}`;
-       matchingSuppliers.forEach(async (supplier) => {
+    const openFor =
+      additionalDetailsArray
+        ?.map((section) => section?.openFor)
+        .filter(Boolean) || [];
+    const matchingSuppliers = await Supplier.find({
+      supplier_type: { $in: openFor },
+      "registeredAddress.country": { $in: req.body.fromCountries },
+    });
+
+    const notificationMessage = `Bid Created! A new bid has been created by ${user?.buyer_name}`;
+    matchingSuppliers.forEach(async (supplier) => {
       const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
       const newNotification = new Notification({
         notification_id: notificationId,
@@ -583,16 +591,22 @@ const addBid = async (req, res) => {
 
       //Send email
       const subject = "Invitation to Participate in Medhub Global Bid  ";
-      const recipientEmails = [supplier.contact_person_email, 'ajo@shunyaekai.tech'];
-      const emailContent = bidCreatedContent(user, supplier, newBid.bid_id); 
+      const recipientEmails = [
+        supplier.contact_person_email,
+        "ajo@shunyaekai.tech",
+      ];
+      const emailContent = bidCreatedContent(user, supplier, newBid.bid_id);
 
       try {
         await sendEmail(recipientEmails, subject, emailContent);
       } catch (error) {
-        console.error(`Error sending email to ${supplier.supplier_email}:`, error);
+        console.error(
+          `Error sending email to ${supplier.supplier_email}:`,
+          error
+        );
       }
     });
-    
+
     return sendSuccessResponse(res, 200, "Bid Created Successfully", newBid);
   } catch (error) {
     handleCatchBlockError(req, res, error);
@@ -639,7 +653,7 @@ const getBidProductDetails = async (req, res) => {
             // If bidder is not in biddersArr, push the new bidder
             biddersArr.push({
               ...bidder,
-              participantId : participantDetails?.supplier_id,
+              participantId: participantDetails?.supplier_id,
               participantName: participantDetails?.supplier_name,
               participantType: participantDetails?.supplier_type,
               participantCountry:
@@ -649,7 +663,7 @@ const getBidProductDetails = async (req, res) => {
           }
           return {
             ...item,
-            participantId : participantDetails?.supplier_id,
+            participantId: participantDetails?.supplier_id,
             participantName: participantDetails?.supplier_name,
             participantType: participantDetails?.supplier_type,
             participantCountry: participantDetails?.registeredAddress?.country,
@@ -672,7 +686,8 @@ const getBidProductDetails = async (req, res) => {
 const updateBidParticipant = async (req, res) => {
   try {
     const { bidId, itemId } = req?.params;
-    const { participantId, productName, productId, amount, timeLine, tnc } = req?.body;
+    const { participantId, productName, productId, amount, timeLine, tnc } =
+      req?.body;
 
     // Step 1: Find the bid
     const bidDetails = await Bid.findById(bidId);
@@ -728,7 +743,7 @@ const updateBidParticipant = async (req, res) => {
       // Ensure history array exists
       participant.history = participant.history || [];
 
-      participant.productId = productId;  
+      participant.productId = productId;
       participant.productName = productName;
       participant.amount = amount;
       participant.timeLine = timeLine;
@@ -768,7 +783,7 @@ const updateBidParticipant = async (req, res) => {
 
       itemToUpdate.participants.push({
         id: participantId,
-        productId,    
+        productId,
         productName,
         amount,
         timeLine,
@@ -924,12 +939,12 @@ const getCurrentBidDetails = async (req, res) => {
   try {
     const { buyerId, supplierId } = req.params;
     let { pageNo = 1, pageSize = 10 } = req.query;
-    const page_no = pageNo || 1; 
-    const page_size = pageSize || 5; 
+    const page_no = pageNo || 1;
+    const page_size = pageSize || 5;
     const offSet = (page_no - 1) * page_size;
 
     // Step 1: Find Buyer
-    const buyerDoc = await Buyer.findOne({ buyer_id: buyerId });
+    const buyerDoc = await Buyer?.findOne({ buyer_id: buyerId });
     if (!buyerDoc) {
       return sendErrorResponse(res, 400, "Buyer Not Found.");
     }
@@ -943,22 +958,26 @@ const getCurrentBidDetails = async (req, res) => {
     // Step 3: Get ALL bids where buyerId matches and supplier is in participants
     const bidDocs = await Bid.find({
       userId: buyerDoc._id,
-      status: 'active',
-      "additionalDetails.participants.id": supplierDoc._id
+      status: "active",
+      "additionalDetails.participants.id": supplierDoc._id,
     })
-    .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 })
       .skip(offSet)
       .limit(page_size);
 
-     const totalBids = await Bid.countDocuments({ 
+    const totalBids = await Bid.countDocuments({
       userId: buyerDoc._id,
-      status: 'active',
-      "additionalDetails.participants.id": supplierDoc._id
+      status: "active",
+      "additionalDetails.participants.id": supplierDoc._id,
     });
-     const totalPages = Math.ceil(totalBids / page_size);
+    const totalPages = Math.ceil(totalBids / page_size);
 
     if (!bidDocs.length) {
-      return sendErrorResponse(res, 400, "No Bids Found for this Buyer & Supplier.");
+      return sendErrorResponse(
+        res,
+        400,
+        "No Bids Found for this Buyer & Supplier."
+      );
     }
 
     // Step 4: Return as-is
@@ -978,7 +997,6 @@ const getCurrentBidDetails = async (req, res) => {
 const addToFavourite = async (req, res) => {
   try {
     const { bidId, itemId, participantId } = req.params;
-
     const bidDetails = await Bid.findById(bidId);
     if (!bidDetails) {
       return sendErrorResponse(res, 404, "Bid not found");
@@ -1011,9 +1029,218 @@ const addToFavourite = async (req, res) => {
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }
-}
+};
 
+const sendEnquiry = async (req, res) => {
+  try {
+    const {
+      additionalDetailsId,
+      buyerId,
+      deliveryTime,
+      productId,
+      quantityRequired,
+      targetPrice,
+    } = req?.body;
+    const { bidId, itemId, participantId } = req?.params;
 
+    const buyer = await Buyer?.findOne({ _id: buyerId });
+    if (!buyer) return sendErrorResponse(res, 404, "Buyer not found");
+
+    const bid = await Bid.findOne({ _id: bidId });
+    if (!bid) return sendErrorResponse(res, 404, "Bid not found");
+
+    const product = await Product.findOne({ _id: productId });
+    // if (!product) return sendErrorResponse(res, 404, "Product not found");
+
+    const supplier = await Supplier.findOne({ _id: participantId });
+    if (!supplier) return sendErrorResponse(res, 404, "Supplier not found");
+
+    const enquiryObj = {
+      enquiry_id: "ENQ-" + Math.random().toString(16).slice(2, 10),
+      buyer_id: buyer?.buyer_id,
+      buyerId: buyer?._id,
+      supplier_id: supplier?.supplier_id,
+      supplierId: supplier?._id,
+      items: [
+        {
+          product_id: productId || null,
+          // unit_price:
+          unit_tax: product?.unit_tax,
+          quantity_required: quantityRequired,
+          est_delivery_days: deliveryTime,
+          target_price: targetPrice,
+          status: "pending",
+        },
+      ],
+      status: "pending",
+      enquiry_status: "pending",
+    };
+
+    const enquiry = await Enquiry.create(enquiryObj);
+    if (!enquiry) return sendErrorResponse(res, 404, "Error creating Enquiry");
+
+    const orderHistory = await OrderHistory.create({
+      enquiryId: enquiry?._id,
+      buyerId: enquiry?.buyerId,
+      supplierId: enquiry?.supplierId,
+      stages: [
+        {
+          name: "Enquiry Raised",
+          date: new Date(),
+          referenceId: enquiry?._id,
+          referenceType: "Enquiry",
+        },
+      ],
+    });
+    if (!orderHistory)
+      return sendErrorResponse(res, 404, "Error creating Order History");
+
+    // Send notifications to suppliers
+    const notifications = {
+      notification_id: "NOT-" + Math.random().toString(16).slice(2, 10),
+      event_type: "Enquiry request",
+      event: "enquiry",
+      from: "buyer",
+      to: "supplier",
+      from_id: enquiry?.buyer_id,
+      to_id: enquiry?.supplier_id,
+      event_id: enquiry.enquiry_id,
+      message: `Enquiry Alert! You’ve received an enquiry about ${enquiry.enquiry_id}`,
+      status: 0,
+    };
+
+    const notificationsDocs = await Notification.create(notifications);
+    if (!notificationsDocs)
+      return sendErrorResponse(res, 404, "Error creating Order History");
+
+    const products = await Product.find();
+    const {
+      buyer_name,
+      contact_person_name,
+      contact_person_email,
+      supplier_name,
+    } = {
+      buyer_name: buyer?.buyer_name,
+      contact_person_name: supplier?.contact_person_name,
+      contact_person_email: supplier?.contact_person_email,
+      supplier_name: supplier?.supplier_name,
+    };
+
+    const subjectSupplier = `Medhub Global Enquiry: ${buyer_name}, Enquiry Number ${enquiry?.enquiry_id}`;
+    const subjectBuyer = `Medhub Global Enquiry: ${supplier_name}, Enquiry Number ${enquiry?.enquiry_id}`;
+
+    const updatedEmailItems = enquiry?.items?.map((item) => {
+      const product = products.find(
+        (pdt) => pdt?.product_id == item?.product_id
+      );
+      const firstimage = Object.keys(product?.general?.image || {})[0];
+      const imageName = product
+        ? product?.general?.image?.[0] ||
+          product?.general?.image?.[firstimage]?.[0]
+        : "No Product";
+      const imageUrl = product
+        ? imageName
+          ? imageName.startsWith("http")
+            ? imageName
+            : `${process.env.SERVER_URL}/uploads/products/${imageName}`
+          : ""
+        : `${process.env.SERVER_URL}/uploads/products/productImage.png`;
+
+      return {
+        ...item,
+        product_name: product?.general?.name,
+        image: imageUrl,
+      };
+    });
+
+    // Send email to supplier
+    const supplierSubject = `Medhub Global Enquiry: ${buyer?.buyer_name}, Enquiry Number ${enquiry?.enquiry_id}`;
+    const supplierRecipientEmails = [supplier.contact_person_email];
+    const supplierTemplateName = "supplierEnquiryNotification";
+    const supplierContext = {
+      user_id: buyer?.buyer_id,
+      company_name: buyer?.buyer_name,
+      contact_person_name: buyer?.contact_person_name,
+      contact_person_email: buyer?.contact_person_email,
+      supplierCompanyName: supplier?.supplier_name,
+      buyerName: buyer?.buyer_name,
+      enquiryNumber: enquiry?.enquiry_id,
+      products: updatedEmailItems,
+    };
+
+    // const bodySupplier = enquiryMailToSupplierContent(
+    //   buyer_name,
+    //   contact_person_name,
+    //   updatedEmailItems,
+    //   enquiryId
+    // );
+    // await sendEmail(
+    //   [contact_person_email],
+    //   subjectSupplier,
+    //   bodySupplier
+    // );
+    await sendTemplateEmail(
+      supplierRecipientEmails.join(","),
+      supplierSubject,
+      supplierTemplateName,
+      supplierContext
+    );
+
+    // Send email to buyer
+    // const bodyBuyer = enquiryMailToBuyerContent(
+    //   buyer_name,
+    //   contact_person_name,
+    //   updatedEmailItems,
+    //   enquiryId
+    // );
+    // await sendEmail(
+    //   [buyer?.contact_person_email],
+    //   subjectBuyer,
+    //   bodyBuyer
+    // );
+
+    const buyerSubject = `Medhub Global Enquiry: ${supplier?.supplier_name}, Enquiry Number ${enquiry?.enquiry_id}`;
+    const buyerRecipientEmails = [buyer?.contact_person_email];
+    const buyerTemplateName = "buyerEnquiryConfirmation";
+    const buyerContext = {
+      user_id: supplier?.supplier_id,
+      company_name: supplier?.supplier_name,
+      contact_person_name: buyer?.contact_person_name,
+      contact_person_email: buyer?.contact_person_email,
+      supplierCompanyName: supplier?.supplier_name,
+      buyerCompanyName: buyer?.buyer_name,
+      buyerName: buyer?.buyer_name,
+      enquiryNumber: enquiry?.enquiry_id,
+      products: updatedEmailItems,
+    };
+
+    await sendTemplateEmail(
+      buyerRecipientEmails.join(","),
+      buyerSubject,
+      buyerTemplateName,
+      buyerContext
+    );
+
+    // ✅ Update quotRequested to true for this item
+    const updatedBid = await Bid.updateOne(
+      {
+        _id: bidId,
+        "additionalDetails._id": additionalDetailsId,
+      },
+      {
+        $set: {
+          "additionalDetails.$.quotRequested": true,
+        },
+      }
+    );
+    if (!updatedBid)
+      return sendErrorResponse(res, 404, "Error updating quotation request status in bid");
+
+    return sendSuccessResponse(res, 200, "Quotation Requested Successfully");
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
 
 module.exports = {
   getAllBids,
@@ -1025,5 +1252,6 @@ module.exports = {
   updateBidParticipant,
   updateBidParticipant2,
   getCurrentBidDetails,
-  addToFavourite
+  addToFavourite,
+  sendEnquiry,
 };
