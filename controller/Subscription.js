@@ -44,22 +44,27 @@ const plans = [
 const discounts = [
   {
     name: "SAVET1-99",
+    amount: 99,
     id: "i7QVnDDB",
   },
   {
     name: "SAVET2-198",
+    amount: 198,
     id: "tKcpuARp",
   },
   {
     name: "SAVET3-297",
+    amount: 297,
     id: "RjZT9s9M",
   },
   {
     name: "SAVET4-396",
+    amount: 396,
     id: "BLHeHGTq",
   },
   {
     name: "SAVET6-594",
+    amount: 594,
     id: "xn2mnvi1",
   },
 ];
@@ -184,7 +189,6 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       subscriptionId,
       invoiceDetails,
     } = detailObj;
-    // console.log("detailObj", detailObj);
 
     if (!mongoose.Types.ObjectId.isValid(subscriptionId)) {
       console.error("Invalid subscription ID");
@@ -247,11 +251,6 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       console.error("Invoice not found");
       return sendErrorResponse(res, 500, "Invoice not found");
     }
-    console.log("\n\n\ninvoice",invoice)
-    console.log("\n\n\nproduct",product)
-    console.log("\n\n\nplan",plan)
-    console.log("\n\n\nsubscription",subscription)
-    console.log("\n\n\nsession",session)
 
     const updatedSubscription = await Subscription.findByIdAndUpdate(
       subscriptionExists,
@@ -339,27 +338,6 @@ const savePaymentAndSendEmail = async (req, res, detailObj) => {
       updatedSubscription?.productName,
       subscriptionStartDate,
       subscriptionEndDate,
-      updatedSubscription?.totalAmount,
-      updatedSubscription?.discountCoupon,
-      updatedSubscription?.discountAmountOff
-    );
-    console.log(
-      "\n\n\n\n data for email",
-      updatedUser,
-      updatedSubscription?.productName,
-      subscriptionStartDate,
-      subscriptionEndDate,
-      updatedSubscription?.totalAmount,
-      updatedSubscription?.discountCoupon,
-      updatedSubscription?.discountAmountOff
-    );
-    console.log(
-      "\n\n\n\n data for email",
-      updatedUser,
-      updatedSubscription?.productName,
-      subscriptionStartDate,
-      subscriptionEndDate,
-      userType,
       updatedSubscription?.totalAmount,
       updatedSubscription?.discountCoupon,
       updatedSubscription?.discountAmountOff

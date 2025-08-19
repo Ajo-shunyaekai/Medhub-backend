@@ -313,13 +313,13 @@ module.exports = {
   supplierProductList2: async (req, res, reqObj, callback) => {
     try {
       const { supplier_id, pageNo, pageSize, medicine_type, buyer_id } = reqObj;
-  
+
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
       const offset = (page_no - 1) * page_size;
-  
+
       const supplier = await Supplier.findOne({ supplier_id });
-  
+
       let buyerCountries = [];
       if (buyer_id) {
         const buyer = await Buyer.findOne(
@@ -330,7 +330,7 @@ module.exports = {
           ? buyer.country_of_operation
           : [];
       }
-  
+
       const matchStage = {
         $match: {
           supplier_id: supplier._id,
@@ -345,7 +345,7 @@ module.exports = {
           ],
         },
       };
-  
+
       const pipeline = [
         matchStage,
         {
@@ -386,9 +386,9 @@ module.exports = {
         { $skip: offset },
         { $limit: page_size },
       ];
-  
+
       const data = await Product.aggregate(pipeline);
-  
+
       const totalItems = await Product.countDocuments({
         supplier_id: supplier._id,
         market: medicine_type,
@@ -401,9 +401,9 @@ module.exports = {
           },
         ],
       });
-  
+
       const totalPages = Math.ceil(totalItems / page_size);
-  
+
       callback({
         code: 200,
         message: "Supplier product list fetched successfully",
@@ -417,7 +417,6 @@ module.exports = {
       handleCatchBlockError(req, res, error);
     }
   },
-  
 
   buyerSupplierOrdersList: async (req, res, reqObj, callback) => {
     try {
@@ -1272,6 +1271,8 @@ module.exports = {
         };
       });
 
+      const notificationsDocs = await Notification.insertMany(notifications);
+
       await Promise.all(
         enquiries?.map(async (enq) => {
           const supplier = await Supplier.findOne({
@@ -1298,8 +1299,10 @@ module.exports = {
             const product = products.find(
               (pdt) => pdt?.product_id == item?.product_id
             );
-            const firstimage = Object.keys(product?.general?.image || {})[0]
-            const imageName = product?.general?.image?.[0] || product?.general?.image?.[firstimage]?.[0];
+            const firstimage = Object.keys(product?.general?.image || {})[0];
+            const imageName =
+              product?.general?.image?.[0] ||
+              product?.general?.image?.[firstimage]?.[0];
             const imageUrl = imageName
               ? imageName.startsWith("http")
                 ? imageName
@@ -1315,9 +1318,7 @@ module.exports = {
 
           // Send email to supplier
           const supplierSubject = `Medhub Global Enquiry: ${buyer?.buyer_name}, Enquiry Number ${enq?.enquiry_id}`;
-          const supplierRecipientEmails = [
-            supplier.contact_person_email,
-          ];
+          const supplierRecipientEmails = [supplier.contact_person_email];
           const supplierTemplateName = "supplierEnquiryNotification";
           const supplierContext = {
             user_id: buyer?.buyer_id,
@@ -1327,7 +1328,7 @@ module.exports = {
             supplierCompanyName: supplier?.supplier_name,
             buyerName: buyer?.buyer_name,
             enquiryNumber: enq?.enquiry_id,
-            products: updatedEmailItems
+            products: updatedEmailItems,
           };
 
           // const bodySupplier = enquiryMailToSupplierContent(
@@ -1362,9 +1363,7 @@ module.exports = {
           // );
 
           const buyerSubject = `Medhub Global Enquiry: ${supplier?.supplier_name}, Enquiry Number ${enq?.enquiry_id}`;
-          const buyerRecipientEmails = [
-            buyer.contact_person_email,
-          ];
+          const buyerRecipientEmails = [buyer.contact_person_email];
           const buyerTemplateName = "buyerEnquiryConfirmation";
           const buyerContext = {
             user_id: supplier?.supplier_id,
@@ -1375,7 +1374,7 @@ module.exports = {
             buyerCompanyName: buyer?.buyer_name,
             buyerName: buyer?.buyer_name,
             enquiryNumber: enq?.enquiry_id,
-            products: updatedEmailItems
+            products: updatedEmailItems,
           };
 
           await sendTemplateEmail(

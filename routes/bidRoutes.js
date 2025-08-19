@@ -13,7 +13,8 @@ const {
   updateBidParticipant,
   getBidProductDetails,
   getCurrentBidDetails,
-  addToFavourite
+  addToFavourite,
+  sendEnquiry
 } = require("../controller/bids");
 const { addBidUpload } = require("../middleware/multer/bidMulter");
 
@@ -64,6 +65,13 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   addToFavourite
+);
+
+router.post(
+  "/send-enquiry/:bidId/:itemId/:participantId",
+  checkAuthorization,
+  authenticationNAuthorization,
+  sendEnquiry
 );
 
 module.exports = router;

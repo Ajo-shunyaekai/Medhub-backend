@@ -28,6 +28,11 @@ const supplierSchema = new Schema(
       required: true,
       trim: true,
     },
+    productsIndicator: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     description: {
       type: String,
       required: true,
