@@ -1,7 +1,6 @@
 require("dotenv").config();
 const path = require("path");
 const moment = require("moment");
-const { DateTime } = require("luxon");
 const { default: mongoose } = require("mongoose");
 const Admin = require("../schema/adminSchema");
 const Supplier = require("../schema/supplierSchema");
@@ -20,6 +19,8 @@ const {
 const { getFilePathsAdd } = require("../helper");
 const { bidCreatedContent } = require("../utils/emailContents");
 const { sendEmail, sendTemplateEmail } = require("../utils/emailService");
+const ct = require("countries-and-timezones");
+const { DateTime } = require("luxon");
 
 const getAllBids = async (req, res) => {
   try {
@@ -142,27 +143,30 @@ const getAllBids1 = async (req, res) => {
     };
 
     if (userType === "Supplier") {
-      const now = new Date();
 
-      const allBids = await Bid.find(matchStage);
+    const now = new Date(); // UTC
 
-      // Filter in JS instead of doing broken date parsing in Mongo
-      const filteredIds = allBids
-        .filter((bid) => {
-          if (!bid.general?.startDate || !bid.general?.startTime) return false;
-          const startDate = new Date(bid.general.startDate);
-          const startDateTime = new Date(
-            `${startDate.toISOString().split("T")[0]}T${
-              bid.general.startTime
-            }:00+05:30`
-          );
-          return startDateTime <= now;
-        })
-        .map((bid) => bid._id);
+    const allBids = await Bid.find(matchStage);
 
-      matchStage._id = { $in: filteredIds };
+    const filteredIds = allBids
+      .filter(bid => {
+        if (!bid.general?.startDate || !bid.general?.startTime) return false;
+
+        // Build UTC date-time properly
+        const [hours, minutes] = bid.general.startTime.split(":").map(Number);
+        const startDateTime = new Date(bid.general.startDate);
+        startDateTime.setUTCHours(hours, minutes, 0, 0);
+
+        console.log("startDateTime (UTC)", startDateTime);
+
+        return startDateTime <= now;
+      })
+      .map(bid => bid._id);
+
+    matchStage._id = { $in: filteredIds };
     }
 
+  
     const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
 
     const bids = await Bid.aggregate(pipeline);
@@ -269,6 +273,178 @@ const getAllBids1 = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
+
+const getAllBids2 = async (req, res) => {
+  try {
+    const {
+      userId,
+      country,
+      type,
+      status,
+      page_no = 1,
+      page_size = 10,
+      userType,
+      participant,
+      category,
+    } = req.query;
+
+    const pageNo = parseInt(page_no);
+    const pageSize = parseInt(page_size);
+    const offset = (pageNo - 1) * pageSize;
+
+    if (userId && !mongoose.isValidObjectId(userId)) {
+      return sendErrorResponse(res, 400, "Invalid User ID format.", null);
+    }
+
+    let categoryArray = [];
+    if (category) {
+      categoryArray = category.split(",").map((c) => c.trim());
+    }
+
+    const matchStage = {
+      ...(userId && { userId }),
+      ...(status && { status }),
+      ...(userType === "Supplier" && country && { "general.fromCountries": country }),
+      ...(categoryArray.length > 0 && {
+        additionalDetails: {
+          $elemMatch: { category: { $in: categoryArray } },
+        },
+      }),
+    };
+
+    if (userType === "Supplier") {
+      const nowUtc = DateTime.utc();
+
+      const allBids = await Bid.find(matchStage);
+
+      const allCountries = Object.values(ct.getAllCountries());
+// console.log('allCountries',allCountries)
+      const filteredIds = allBids
+        .filter((bid) => {
+          if (!bid.general?.startDate || !bid.general?.startTime || !bid.general?.country) {
+            return false;
+          }
+
+          // Get country name from bid
+          const countryName = bid.general.country;
+          const countryInfo = allCountries.find(
+            (c) => c.name.toLowerCase() === countryName.toLowerCase()
+          );
+console.log('countryName',countryName)
+console.log('countryInfo',countryInfo)
+          if (!countryInfo || !countryInfo.timezones.length) return false;
+
+          const tz = countryInfo.timezones[0]; // pick first timezone
+console.log('tz',tz)
+          // Build DateTime with timezone
+          const startUtc = DateTime.fromJSDate(new Date(bid.general.startDate), { zone: tz })
+            .set({
+              hour: parseInt(bid.general.startTime.split(":")[0], 10),
+              minute: parseInt(bid.general.startTime.split(":")[1], 10),
+              second: 0,
+              millisecond: 0,
+            })
+            .toUTC();
+
+          console.log("Bid:", bid._id, "StartUtc:", startUtc.toISO(), "NowUtc:", nowUtc.toISO());
+
+          return startUtc <= nowUtc;
+        })
+        .map((bid) => bid._id);
+
+      matchStage._id = { $in: filteredIds };
+    }
+
+    const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
+
+    const bids = await Bid.aggregate(pipeline);
+
+    let finalBids = bids;
+
+    // --- Filter products for supplier ---
+    if (userType === "Supplier") {
+      const filteredBids = await Promise.all(
+        bids.map(async (bid) => {
+          const products = bid?.additionalDetails || [];
+
+          const matchedProducts = products.filter((ele) => {
+            const openForValue = (ele?.openFor || "")?.toString().toLowerCase();
+            const typeValue = type?.toString().toLowerCase();
+            return openForValue === typeValue;
+          });
+
+          if (matchedProducts.length > 0) {
+            bid.additionalDetails = matchedProducts;
+            return bid;
+          }
+          return null;
+        })
+      );
+
+      finalBids = filteredBids.filter((bid) => bid !== null);
+    }
+
+    // --- Participant filter ---
+    if (participant) {
+      const filteredBids = await Promise.all(
+        finalBids?.map(async (bid) => {
+          const products = bid?.additionalDetails || [];
+
+          if (participant !== "not") {
+            const isParticipatedMatch = products?.some((product) => {
+              const participants = product?.participants || [];
+              return participants.some((ele) => ele?.id?.toString() === participant?.toString());
+            });
+
+            if (isParticipatedMatch) return bid;
+          } else {
+            const isParticipatedMatch = products?.every((product) => {
+              const participants = product?.participants || [];
+              return participants.every((ele) => ele?.id?.toString() == participant?.toString());
+            });
+
+            if (isParticipatedMatch) return bid;
+          }
+
+          return null;
+        })
+      );
+
+      finalBids = filteredBids.filter((bid) => bid !== null);
+    }
+
+    // Pagination + total count
+    const totalBids = finalBids.length;
+    const paginatedBids = finalBids.slice(offset, offset + pageSize);
+    const totalPages = Math.ceil(totalBids / pageSize);
+
+    const bidWithTotalCount = paginatedBids?.map((bid) => {
+      let biddersArr = [];
+      bid?.additionalDetails?.forEach((item) => {
+        item?.participants?.forEach((bidder) =>
+          biddersArr?.includes(bidder?.id?.toString())
+            ? null
+            : biddersArr?.push(bidder?.id?.toString())
+        );
+      });
+      return {
+        ...bid,
+        totalBidsCount: biddersArr?.length || 0,
+      };
+    });
+
+    return sendSuccessResponse(res, 200, "Bids Fetched Successfully", {
+      bids: bidWithTotalCount,
+      totalItems: totalBids,
+      currentPage: pageNo,
+      itemsPerPage: pageSize,
+      totalPages,
+    });
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 
 const getBidDetails = async (req, res) => {
   try {
@@ -1245,6 +1421,7 @@ const sendEnquiry = async (req, res) => {
 module.exports = {
   getAllBids,
   getAllBids1,
+  getAllBids2,
   getBidDetails,
   addBid,
   editBid,
