@@ -157,8 +157,6 @@ const getAllBids1 = async (req, res) => {
         const startDateTime = new Date(bid.general.startDate);
         startDateTime.setUTCHours(hours, minutes, 0, 0);
 
-        console.log("startDateTime (UTC)", startDateTime);
-
         return startDateTime <= now;
       })
       .map(bid => bid._id);
@@ -318,7 +316,6 @@ const getAllBids2 = async (req, res) => {
       const allBids = await Bid.find(matchStage);
 
       const allCountries = Object.values(ct.getAllCountries());
-// console.log('allCountries',allCountries)
       const filteredIds = allBids
         .filter((bid) => {
           if (!bid.general?.startDate || !bid.general?.startTime || !bid.general?.country) {
@@ -330,12 +327,10 @@ const getAllBids2 = async (req, res) => {
           const countryInfo = allCountries.find(
             (c) => c.name.toLowerCase() === countryName.toLowerCase()
           );
-console.log('countryName',countryName)
-console.log('countryInfo',countryInfo)
+
           if (!countryInfo || !countryInfo.timezones.length) return false;
 
           const tz = countryInfo.timezones[0]; // pick first timezone
-console.log('tz',tz)
           // Build DateTime with timezone
           const startUtc = DateTime.fromJSDate(new Date(bid.general.startDate), { zone: tz })
             .set({
@@ -345,8 +340,6 @@ console.log('tz',tz)
               millisecond: 0,
             })
             .toUTC();
-
-          console.log("Bid:", bid._id, "StartUtc:", startUtc.toISO(), "NowUtc:", nowUtc.toISO());
 
           return startUtc <= nowUtc;
         })

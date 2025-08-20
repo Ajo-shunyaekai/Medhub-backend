@@ -22,7 +22,7 @@ module.exports = {
   getEnquiryDetails: async (req, res, reqObj, callback) => {
     try {
       const enquiry_id = req?.params?.id;
-console.log('enquiry_id',enquiry_id)
+
       Enquiry.aggregate([
         {
           $match: { enquiry_id: enquiry_id },

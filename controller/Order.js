@@ -678,7 +678,6 @@ module.exports = {
         result: handledBySupplier ? order : await Order.findOne({ order_id }),
       });
     } catch (error) {
-      console.log('error',error)
       handleCatchBlockError(req, res, error);
     }
   },
