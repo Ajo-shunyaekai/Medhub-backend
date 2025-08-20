@@ -1218,7 +1218,7 @@ const sendEnquiry = async (req, res) => {
       targetPrice,
     } = req?.body;
     const { bidId, itemId, participantId } = req?.params;
-
+console.log('req?.params',req?.params)
     const buyer = await Buyer?.findOne({ _id: buyerId });
     if (!buyer) return sendErrorResponse(res, 404, "Buyer not found");
 
@@ -1237,11 +1237,12 @@ const sendEnquiry = async (req, res) => {
       buyerId: buyer?._id,
       supplier_id: supplier?.supplier_id,
       supplierId: supplier?._id,
+      bidId: bidId,
       items: [
         {
-          product_id: productId || null,
+          product_id: product.product_id || null,
           // unit_price:
-          unit_tax: product?.unit_tax,
+          unit_tax: product?.general?.unit_tax,
           quantity_required: quantityRequired,
           est_delivery_days: deliveryTime,
           target_price: targetPrice,
@@ -1397,18 +1398,18 @@ const sendEnquiry = async (req, res) => {
       buyerContext
     );
 
-    // ✅ Update quotRequested to true for this item
+  
     const updatedBid = await Bid.updateOne(
-      {
-        _id: bidId,
-        "additionalDetails._id": additionalDetailsId,
-      },
-      {
-        $set: {
-          "additionalDetails.$.quotRequested": true,
-        },
-      }
-    );
+  {
+    _id: new mongoose.Types.ObjectId(bidId),
+    "additionalDetails._id": new mongoose.Types.ObjectId(itemId),
+  },
+  {
+    $set: {
+      "additionalDetails.$.quoteRequested": true,
+    },
+  }
+);
     if (!updatedBid)
       return sendErrorResponse(res, 404, "Error updating quotation request status in bid");
 

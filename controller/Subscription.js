@@ -74,7 +74,7 @@ const createSubscription = async (req, res) => {
     const {
       plan_name,
       duration,
-      email = "ajostripetest@yopmail.com",
+      email = "ajo@shunyaekai.tech",
       userType,
       userId,
       discount,

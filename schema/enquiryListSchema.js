@@ -8,7 +8,7 @@ const enquiryItemSchema = new Schema({
   },
   unit_price: {
     type: String,
-    required: true,
+    // required: true,
   },
   unit_tax: {
     type: Number,
@@ -52,7 +52,7 @@ const enquiryQuotationchema = new Schema(
     },
     unit_price: {
       type: String,
-      required: true,
+      // required: true,
     },
     unit_tax: {
       type: Number,
@@ -106,6 +106,10 @@ const enquirySchema = new Schema({
     type: String,
     ref: "Supplier",
     required: true,
+  },
+  bidId: {
+    type: Schema.Types.ObjectId,
+    ref: "Bid",
   },
   items: [enquiryItemSchema],
   quotation_items: [enquiryQuotationchema],

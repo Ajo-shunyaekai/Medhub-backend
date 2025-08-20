@@ -192,6 +192,11 @@ const bidSchema = new Schema(
               ],
             },
             favourite: { type: Boolean, default: false },
+            status: {
+              type: String,
+              enum: ["pending", "Quote Requested"], 
+              default: "pending" 
+            },
             history: [
               {
                  productName: {
@@ -270,7 +275,7 @@ const bidSchema = new Schema(
             ],
           },
         ],
-        quotRequested: {
+        quoteRequested: {
           type: Boolean,
           default: false,
         },
