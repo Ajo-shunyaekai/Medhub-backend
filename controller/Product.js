@@ -1883,7 +1883,7 @@ module.exports = {
         ...cdtyp4,
         ...cdtyp5,
       ];
-
+     
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -1892,17 +1892,17 @@ module.exports = {
           ...req?.body,
           quantity: quantity,
           image: {
-            front: req?.body?.image?.frontUrl
-              ? [req?.body?.image?.frontUrl]
+            front: req?.body?.frontUrl
+              ? [req?.body?.frontUrl]
               : generalFiles1.imageFront || [],
-            back: req?.body?.image?.backUrl
-              ? [req?.body?.image?.backUrl]
+            back: req?.body?.backUrl
+              ? [req?.body?.backUrl]
               : generalFiles2.imageBack || [],
-            side: req?.body?.image?.sideUrl
-              ? [req?.body?.image?.sideUrl]
+            side: req?.body?.sideUrl
+              ? [req?.body?.sideUrl]
               : generalFiles3.imageSide || [],
-            closeup: req?.body?.image?.closeupUrl
-              ? [req?.body?.image?.closeupUrl]
+            closeup: req?.body?.closeupUrl
+              ? [req?.body?.closeupUrl]
               : generalFiles4.imageClosure || [],
           },
         },

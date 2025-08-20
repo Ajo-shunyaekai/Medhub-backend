@@ -1211,7 +1211,7 @@ const sendEnquiry = async (req, res) => {
       targetPrice,
     } = req?.body;
     const { bidId, itemId, participantId } = req?.params;
-console.log('req?.params',req?.params)
+
     const buyer = await Buyer?.findOne({ _id: buyerId });
     if (!buyer) return sendErrorResponse(res, 404, "Buyer not found");
 
@@ -1392,17 +1392,37 @@ console.log('req?.params',req?.params)
     );
 
   
-    const updatedBid = await Bid.updateOne(
+//   const updatedBid = await Bid.updateOne(
+//   {
+//     _id: new mongoose.Types.ObjectId(bidId),
+//     "additionalDetails._id": new mongoose.Types.ObjectId(itemId),
+//   },
+//   {
+//     $set: {
+//       "additionalDetails.$.quoteRequested": true,
+//     },
+//   }
+// );
+
+const updatedBid = await Bid.updateOne(
   {
     _id: new mongoose.Types.ObjectId(bidId),
-    "additionalDetails._id": new mongoose.Types.ObjectId(itemId),
   },
   {
     $set: {
-      "additionalDetails.$.quoteRequested": true,
+      "additionalDetails.$[item].quoteRequested": true,
+      "additionalDetails.$[item].participants.$[participant].status": "Quote Requested",
     },
+  },
+  {
+    arrayFilters: [
+      { "item._id": new mongoose.Types.ObjectId(itemId) },
+      { "participant.id": new mongoose.Types.ObjectId(participantId) },
+    ],
   }
 );
+
+
     if (!updatedBid)
       return sendErrorResponse(res, 404, "Error updating quotation request status in bid");
 
