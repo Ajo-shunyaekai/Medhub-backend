@@ -20,7 +20,7 @@ const {
 } = require("../controller/bids");
 const { addBidUpload } = require("../middleware/multer/bidMulter");
 
-router.post("/", checkAuthorization, authenticationNAuthorization, getAllBids2);
+router.post("/", checkAuthorization, authenticationNAuthorization, getAllBids1);
 router.post(
   "/add",
   checkAuthorization,
