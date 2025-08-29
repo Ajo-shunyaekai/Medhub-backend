@@ -16,7 +16,7 @@ const {
   adminMailOptionsContent,
   sendSubscriptionPaymentEmailContent,
 } = require("../utils/emailContents");
-const { sendEmail } = require("../utils/emailService");
+const { sendEmail, sendTemplateEmail } = require("../utils/emailService");
 const { getFilePathsAdd } = require("../helper");
 const { default: mongoose } = require("mongoose");
 
@@ -478,12 +478,35 @@ const sendSubscriptionPaymentReqUrl = async (req, res) => {
       userType,
       coupon
     );
-    await sendEmail(
-      // user?.contact_person_email ||
-      ["ajo@shunyaekai.tech", "Shivani@shunyaekai.tech"],
+    const paymentLink = coupon
+      ? `${process.env.CLIENT_URL}/subscription/${
+          user?._id
+        }/${userType?.toLowerCase()}/select-plan?status=1`
+      : `${process.env.CLIENT_URL}/subscription/${
+          user?._id
+        }/${userType?.toLowerCase()}/select-plan`;
+    const recipientEmails = [
+      // user.contact_person_email,
+      // "ajo@shunyaekai.tech",
+      "shivani@shunyaekai.tech",
+    ];
+    const templateContext = {
+      userName: user?.contact_person_name,
+      paymentLink: paymentLink,
+      couponCode: coupon,
+    };
+    await sendTemplateEmail(
+      recipientEmails.join(","),
       subject,
-      emailContent
+      "subscriptionPayment",
+      templateContext
     );
+    // await sendEmail(
+    //   // user?.contact_person_email ||
+    //   ["ajo@shunyaekai.tech", "Shivani@shunyaekai.tech"],
+    //   subject,
+    //   emailContent
+    // );
     // Return the subscription details
     return sendSuccessResponse(res, 200, "Mail sent!");
   } catch (error) {

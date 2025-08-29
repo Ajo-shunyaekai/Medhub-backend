@@ -2629,11 +2629,25 @@ module.exports = {
         ...req?.body, // Overwrite with new data from request body
         general: {
           ...req?.body,
+          // image: {
+          //   front: generalFiles1.imageFront || [],
+          //   back: generalFiles2.imageBack || [],
+          //   side: generalFiles3.imageSide || [],
+          //   closeup: generalFiles4.imageClosure || [],
+          // },
           image: {
-            front: generalFiles1.imageFront || [],
-            back: generalFiles2.imageBack || [],
-            side: generalFiles3.imageSide || [],
-            closeup: generalFiles4.imageClosure || [],
+            front: req?.body?.frontUrl
+              ? [req?.body?.frontUrl]
+              : generalFiles1.imageFront || [],
+            back: req?.body?.backUrl
+              ? [req?.body?.backUrl]
+              : generalFiles2.imageBack || [],
+            side: req?.body?.sideUrl
+              ? [req?.body?.sideUrl]
+              : generalFiles3.imageSide || [],
+            closeup: req?.body?.closeupUrl
+              ? [req?.body?.closeupUrl]
+              : generalFiles4.imageClosure || [],
           },
         },
         documents: {

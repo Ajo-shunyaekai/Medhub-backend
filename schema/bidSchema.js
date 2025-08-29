@@ -194,12 +194,12 @@ const bidSchema = new Schema(
             favourite: { type: Boolean, default: false },
             status: {
               type: String,
-              enum: ["pending", "Quote Requested"], 
-              default: "pending" 
+              enum: ["pending", "Quote Requested"],
+              default: "pending",
             },
             history: [
               {
-                 productName: {
+                productName: {
                   value: {
                     type: String,
                     // required: [
@@ -276,8 +276,10 @@ const bidSchema = new Schema(
           },
         ],
         quoteRequested: {
-          type: Boolean,
-          default: false,
+          // type: Boolean,
+          // default: false,
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Supplier",
         },
       },
     ],
