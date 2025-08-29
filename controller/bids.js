@@ -103,7 +103,7 @@ const getAllBids = async (req, res) => {
   }
 };
 
-const getAllBids1 = async (req, res) => {
+const getAllBids1Old = async (req, res) => {
   try {
     const {
       userId,
@@ -143,28 +143,26 @@ const getAllBids1 = async (req, res) => {
     };
 
     if (userType === "Supplier") {
+      const now = new Date(); // UTC
 
-    const now = new Date(); // UTC
+      const allBids = await Bid.find(matchStage);
 
-    const allBids = await Bid.find(matchStage);
+      const filteredIds = allBids
+        .filter((bid) => {
+          if (!bid.general?.startDate || !bid.general?.startTime) return false;
 
-    const filteredIds = allBids
-      .filter(bid => {
-        if (!bid.general?.startDate || !bid.general?.startTime) return false;
+          // Build UTC date-time properly
+          const [hours, minutes] = bid.general.startTime.split(":").map(Number);
+          const startDateTime = new Date(bid.general.startDate);
+          startDateTime.setUTCHours(hours, minutes, 0, 0);
 
-        // Build UTC date-time properly
-        const [hours, minutes] = bid.general.startTime.split(":").map(Number);
-        const startDateTime = new Date(bid.general.startDate);
-        startDateTime.setUTCHours(hours, minutes, 0, 0);
+          return startDateTime <= now;
+        })
+        .map((bid) => bid._id);
 
-        return startDateTime <= now;
-      })
-      .map(bid => bid._id);
-
-    matchStage._id = { $in: filteredIds };
+      matchStage._id = { $in: filteredIds };
     }
 
-  
     const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
 
     const bids = await Bid.aggregate(pipeline);
@@ -272,6 +270,163 @@ const getAllBids1 = async (req, res) => {
   }
 };
 
+const getAllBids1 = async (req, res) => {
+  try {
+    const {
+      userId,
+      country,
+      type,
+      status,
+      page_no = 1,
+      page_size = 10,
+      userType,
+      participant,
+      category,
+    } = req.query;
+
+    const pageNo = parseInt(page_no);
+    const pageSize = parseInt(page_size);
+    const offset = (pageNo - 1) * pageSize;
+
+    if (userId && !mongoose.isValidObjectId(userId)) {
+      return sendErrorResponse(res, 400, "Invalid User ID format.", null);
+    }
+
+    let categoryArray = [];
+    if (category) {
+      categoryArray = category.split(",").map((c) => c.trim());
+    }
+
+    const matchStage = {
+      ...(userId && { userId }),
+      ...(status && { status }),
+      ...(userType === "Supplier" &&
+        country && { "general.fromCountries": country }),
+      ...(categoryArray.length > 0 && {
+        additionalDetails: {
+          $elemMatch: { category: { $in: categoryArray } },
+        },
+      }),
+    };
+
+    // Filter bids based on startDateTime for Supplier
+    if (userType === "Supplier") {
+      const now = new Date(); // current UTC time
+
+      const allBids = await Bid.find(matchStage);
+
+      const filteredIds = allBids
+        .filter((bid) => {
+          const startDateRaw = bid.general?.startDate;
+          if (!startDateRaw) return false;
+
+          // Date string already includes time and timezone, parse it directly
+          const startDateTime = new Date(startDateRaw);
+          return startDateTime <= now;
+        })
+        .map((bid) => bid._id);
+
+      matchStage._id = { $in: filteredIds };
+    }
+
+    const pipeline = [{ $match: matchStage }, { $sort: { createdAt: -1 } }];
+    const bids = await Bid.aggregate(pipeline);
+
+    let finalBids = bids;
+
+    // Filter based on openFor type
+    if (userType === "Supplier") {
+      const filteredBids = await Promise.all(
+        bids.map(async (bid) => {
+          const products = bid?.additionalDetails || [];
+
+          const matchedProducts = products.filter((ele) => {
+            const openForValue = (ele?.openFor || "")?.toString().toLowerCase();
+            const typeValue = type?.toString().toLowerCase();
+            return openForValue === typeValue;
+          });
+
+          if (matchedProducts.length > 0) {
+            bid.additionalDetails = matchedProducts;
+            return bid;
+          }
+          return null;
+        })
+      );
+
+      finalBids = filteredBids.filter((bid) => bid !== null);
+    }
+
+    // Participant-based filtering
+    if (participant) {
+      const filteredBids = await Promise.all(
+        finalBids?.map(async (bid) => {
+          const products = bid?.additionalDetails || [];
+
+          if (participant !== "not") {
+            const isParticipatedMatch = products?.some((product) => {
+              const participants = product?.participants || [];
+              return participants.some(
+                (ele) => ele?.id?.toString() === participant?.toString()
+              );
+            });
+
+            if (isParticipatedMatch) {
+              return bid;
+            }
+          } else {
+            const isParticipatedMatch = products?.every((product) => {
+              const participants = product?.participants || [];
+              return participants.every(
+                (ele) => ele?.id?.toString() == participant?.toString()
+              );
+            });
+
+            if (isParticipatedMatch) {
+              return bid;
+            }
+          }
+
+          return null;
+        })
+      );
+
+      finalBids = filteredBids.filter((bid) => bid !== null);
+    }
+
+    const totalBids = finalBids.length;
+    const paginatedBids = finalBids.slice(offset, offset + pageSize);
+    const totalPages = Math.ceil(totalBids / pageSize);
+
+    // Add totalBidsCount per bid
+    const bidWithTotalCount = paginatedBids?.map((bid) => {
+      let biddersArr = [];
+      bid?.additionalDetails?.forEach((item) => {
+        item?.participants?.forEach((bidder) => {
+          if (!biddersArr.includes(bidder?.id?.toString())) {
+            biddersArr.push(bidder?.id?.toString());
+          }
+        });
+      });
+
+      return {
+        ...bid,
+        totalBidsCount: biddersArr.length || 0,
+      };
+    });
+
+    return sendSuccessResponse(res, 200, "Bids Fetched Successfully", {
+      bids: bidWithTotalCount,
+      totalItems: totalBids,
+      currentPage: pageNo,
+      itemsPerPage: pageSize,
+      totalPages,
+    });
+  } catch (error) {
+    handleCatchBlockError(req, res, error);
+  }
+};
+
 const getAllBids2 = async (req, res) => {
   try {
     const {
@@ -302,7 +457,8 @@ const getAllBids2 = async (req, res) => {
     const matchStage = {
       ...(userId && { userId }),
       ...(status && { status }),
-      ...(userType === "Supplier" && country && { "general.fromCountries": country }),
+      ...(userType === "Supplier" &&
+        country && { "general.fromCountries": country }),
       ...(categoryArray.length > 0 && {
         additionalDetails: {
           $elemMatch: { category: { $in: categoryArray } },
@@ -318,7 +474,11 @@ const getAllBids2 = async (req, res) => {
       const allCountries = Object.values(ct.getAllCountries());
       const filteredIds = allBids
         .filter((bid) => {
-          if (!bid.general?.startDate || !bid.general?.startTime || !bid.general?.country) {
+          if (
+            !bid.general?.startDate ||
+            !bid.general?.startTime ||
+            !bid.general?.country
+          ) {
             return false;
           }
 
@@ -332,7 +492,10 @@ const getAllBids2 = async (req, res) => {
 
           const tz = countryInfo.timezones[0]; // pick first timezone
           // Build DateTime with timezone
-          const startUtc = DateTime.fromJSDate(new Date(bid.general.startDate), { zone: tz })
+          const startUtc = DateTime.fromJSDate(
+            new Date(bid.general.startDate),
+            { zone: tz }
+          )
             .set({
               hour: parseInt(bid.general.startTime.split(":")[0], 10),
               minute: parseInt(bid.general.startTime.split(":")[1], 10),
@@ -386,14 +549,18 @@ const getAllBids2 = async (req, res) => {
           if (participant !== "not") {
             const isParticipatedMatch = products?.some((product) => {
               const participants = product?.participants || [];
-              return participants.some((ele) => ele?.id?.toString() === participant?.toString());
+              return participants.some(
+                (ele) => ele?.id?.toString() === participant?.toString()
+              );
             });
 
             if (isParticipatedMatch) return bid;
           } else {
             const isParticipatedMatch = products?.every((product) => {
               const participants = product?.participants || [];
-              return participants.every((ele) => ele?.id?.toString() == participant?.toString());
+              return participants.every(
+                (ele) => ele?.id?.toString() == participant?.toString()
+              );
             });
 
             if (isParticipatedMatch) return bid;
@@ -437,7 +604,6 @@ const getAllBids2 = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
-
 
 const getBidDetails = async (req, res) => {
   try {
@@ -763,11 +929,25 @@ const addBid = async (req, res) => {
       const recipientEmails = [
         supplier.contact_person_email,
         "ajo@shunyaekai.tech",
+        "shivani@shunyaekai.tech",
       ];
+      const bidTemplateName = "bidInvitationEmail";
       const emailContent = bidCreatedContent(user, supplier, newBid.bid_id);
+      const templateContext = {
+        buyerName: user?.contact_person_name,
+        supplierName: supplier?.contact_person_name,
+        bidId: newBid?.bid_id,
+      };
 
       try {
-        await sendEmail(recipientEmails, subject, emailContent);
+        // await sendEmail(recipientEmails, subject, emailContent);
+
+        await sendTemplateEmail(
+          recipientEmails.join(","),
+          subject,
+          bidTemplateName,
+          templateContext
+        );
       } catch (error) {
         console.error(
           `Error sending email to ${supplier.supplier_email}:`,
@@ -978,7 +1158,8 @@ const updateBidParticipant = async (req, res) => {
 const updateBidParticipant2 = async (req, res) => {
   try {
     const { bidId, itemId } = req?.params;
-    const { participantId, productName, productId, amount, timeLine, tnc } = req?.body;
+    const { participantId, productName, productId, amount, timeLine, tnc } =
+      req?.body;
 
     // Step 1: Find the bid
     const bidDetails = await Bid.findById(bidId);
@@ -1103,17 +1284,16 @@ const updateBidParticipant2 = async (req, res) => {
   }
 };
 
-
 const getCurrentBidDetails = async (req, res) => {
   try {
     const { buyerId, supplierId } = req.params;
     let { pageNo = 1, pageSize = 10 } = req.query;
-    const page_no = pageNo || 1;
-    const page_size = pageSize || 5;
+    const page_no = Number(pageNo);
+    const page_size = Number(pageSize);
     const offSet = (page_no - 1) * page_size;
 
     // Step 1: Find Buyer
-    const buyerDoc = await Buyer?.findOne({ buyer_id: buyerId });
+    const buyerDoc = await Buyer.findOne({ buyer_id: buyerId });
     if (!buyerDoc) {
       return sendErrorResponse(res, 400, "Buyer Not Found.");
     }
@@ -1124,7 +1304,7 @@ const getCurrentBidDetails = async (req, res) => {
       return sendErrorResponse(res, 400, "Supplier Not Found.");
     }
 
-    // Step 3: Get ALL bids where buyerId matches and supplier is in participants
+    // Step 3: Fetch bids
     const bidDocs = await Bid.find({
       userId: buyerDoc._id,
       status: "active",
@@ -1132,7 +1312,8 @@ const getCurrentBidDetails = async (req, res) => {
     })
       .sort({ createdAt: -1 })
       .skip(offSet)
-      .limit(page_size);
+      .limit(page_size)
+      .lean(); // Use .lean() for performance and easier data manipulation
 
     const totalBids = await Bid.countDocuments({
       userId: buyerDoc._id,
@@ -1149,7 +1330,39 @@ const getCurrentBidDetails = async (req, res) => {
       );
     }
 
-    // Step 4: Return as-is
+    // Step 4: Extract all unique participant IDs
+    const participantIds = [];
+    for (const bid of bidDocs) {
+      for (const detail of bid.additionalDetails || []) {
+        for (const participant of detail.participants || []) {
+          if (
+            participant?.id &&
+            !participantIds.includes(participant.id.toString())
+          ) {
+            participantIds.push(participant.id.toString());
+          }
+        }
+      }
+    }
+
+    // Step 5: Fetch all relevant suppliers
+    const suppliers = await Supplier.find();
+
+    // Step 6: Inject participantName into each participant
+    for (const bid of bidDocs) {
+      for (const detail of bid.additionalDetails || []) {
+        for (const participant of detail.participants || []) {
+          const supplier = suppliers?.find(
+            (supplier) =>
+              supplier?._id?.toString() == participant?.id?.toString()
+          );
+          participant.participantName =
+            supplier?.supplier_name || "Unknown Supplier";
+        }
+      }
+    }
+
+    // Step 7: Return response
     return sendSuccessResponse(res, 200, "Matching Bids Fetched", {
       bidDocs,
       totalItems: totalBids,
@@ -1162,6 +1375,66 @@ const getCurrentBidDetails = async (req, res) => {
     handleCatchBlockError(req, res, error);
   }
 };
+
+// const getCurrentBidDetails = async (req, res) => {
+//   try {
+//     const { buyerId, supplierId } = req.params;
+//     let { pageNo = 1, pageSize = 10 } = req.query;
+//     const page_no = pageNo || 1;
+//     const page_size = pageSize || 5;
+//     const offSet = (page_no - 1) * page_size;
+
+//     // Step 1: Find Buyer
+//     const buyerDoc = await Buyer?.findOne({ buyer_id: buyerId });
+//     if (!buyerDoc) {
+//       return sendErrorResponse(res, 400, "Buyer Not Found.");
+//     }
+
+//     // Step 2: Find Supplier
+//     const supplierDoc = await Supplier.findOne({ supplier_id: supplierId });
+//     if (!supplierDoc) {
+//       return sendErrorResponse(res, 400, "Supplier Not Found.");
+//     }
+
+//     // Step 3: Get ALL bids where buyerId matches and supplier is in participants
+//     const bidDocs = await Bid.find({
+//       userId: buyerDoc._id,
+//       status: "active",
+//       "additionalDetails.participants.id": supplierDoc._id,
+//     })
+//       .sort({ createdAt: -1 })
+//       .skip(offSet)
+//       .limit(page_size);
+
+//     const totalBids = await Bid.countDocuments({
+//       userId: buyerDoc._id,
+//       status: "active",
+//       "additionalDetails.participants.id": supplierDoc._id,
+//     });
+//     const totalPages = Math.ceil(totalBids / page_size);
+
+//     if (!bidDocs.length) {
+//       return sendErrorResponse(
+//         res,
+//         400,
+//         "No Bids Found for this Buyer & Supplier."
+//       );
+//     }
+//     console.log("\n\nbidDocs",bidDocs)
+
+//     // Step 4: Return as-is
+//     return sendSuccessResponse(res, 200, "Matching Bids Fetched", {
+//       bidDocs,
+//       totalItems: totalBids,
+//       currentPage: page_no,
+//       itemsPerPage: page_size,
+//       totalPages,
+//     });
+//   } catch (error) {
+//     console.error("error", error);
+//     handleCatchBlockError(req, res, error);
+//   }
+// };
 
 const addToFavourite = async (req, res) => {
   try {
@@ -1338,36 +1611,12 @@ const sendEnquiry = async (req, res) => {
       products: updatedEmailItems,
     };
 
-    // const bodySupplier = enquiryMailToSupplierContent(
-    //   buyer_name,
-    //   contact_person_name,
-    //   updatedEmailItems,
-    //   enquiryId
-    // );
-    // await sendEmail(
-    //   [contact_person_email],
-    //   subjectSupplier,
-    //   bodySupplier
-    // );
     await sendTemplateEmail(
       supplierRecipientEmails.join(","),
       supplierSubject,
       supplierTemplateName,
       supplierContext
     );
-
-    // Send email to buyer
-    // const bodyBuyer = enquiryMailToBuyerContent(
-    //   buyer_name,
-    //   contact_person_name,
-    //   updatedEmailItems,
-    //   enquiryId
-    // );
-    // await sendEmail(
-    //   [buyer?.contact_person_email],
-    //   subjectBuyer,
-    //   bodyBuyer
-    // );
 
     const buyerSubject = `Medhub Global Enquiry: ${supplier?.supplier_name}, Enquiry Number ${enquiry?.enquiry_id}`;
     const buyerRecipientEmails = [buyer?.contact_person_email];
@@ -1391,42 +1640,65 @@ const sendEnquiry = async (req, res) => {
       buyerContext
     );
 
-  
-//   const updatedBid = await Bid.updateOne(
-//   {
-//     _id: new mongoose.Types.ObjectId(bidId),
-//     "additionalDetails._id": new mongoose.Types.ObjectId(itemId),
-//   },
-//   {
-//     $set: {
-//       "additionalDetails.$.quoteRequested": true,
-//     },
-//   }
-// );
-
-const updatedBid = await Bid.updateOne(
-  {
-    _id: new mongoose.Types.ObjectId(bidId),
-  },
-  {
-    $set: {
-      "additionalDetails.$[item].quoteRequested": true,
-      "additionalDetails.$[item].participants.$[participant].status": "Quote Requested",
-    },
-  },
-  {
-    arrayFilters: [
-      { "item._id": new mongoose.Types.ObjectId(itemId) },
-      { "participant.id": new mongoose.Types.ObjectId(participantId) },
-    ],
-  }
-);
-
+    // Step 1: Update the participant status
+    const updatedBid = await Bid.updateOne(
+      {
+        _id: new mongoose.Types.ObjectId(bidId),
+      },
+      {
+        $set: {
+          "additionalDetails.$[item].quoteRequested":
+            new mongoose.Types.ObjectId(participantId),
+          "additionalDetails.$[item].participants.$[participant].status":
+            "Quote Requested",
+        },
+      },
+      {
+        arrayFilters: [
+          { "item._id": new mongoose.Types.ObjectId(itemId) },
+          { "participant.id": new mongoose.Types.ObjectId(participantId) },
+        ],
+      }
+    );
 
     if (!updatedBid)
-      return sendErrorResponse(res, 404, "Error updating quotation request status in bid");
+      return sendErrorResponse(
+        res,
+        404,
+        "Error updating quotation request status in bid"
+      );
 
-    return sendSuccessResponse(res, 200, "Quotation Requested Successfully");
+    if (updatedBid.modifiedCount > 0) {
+      const fullBid = await Bid.findById(bidId);
+
+      const allQuoted = fullBid.additionalDetails.every((item) =>
+        item.participants.every((p) => p.status === "Quote Requested")
+      );
+
+      let finalUpdatedBid = null;
+
+      if (allQuoted) {
+        finalUpdatedBid = await Bid.updateOne(
+          { _id: bidId },
+          { $set: { status: "completed" } }
+        );
+
+        if (!finalUpdatedBid)
+          return sendErrorResponse(
+            res,
+            404,
+            "Error updating bid status to completed"
+          );
+      }
+
+      return sendSuccessResponse(res, 200, "Quotation Requested Successfully");
+    } else {
+      return sendErrorResponse(
+        res,
+        404,
+        "Error updating quotation request status in bid"
+      );
+    }
   } catch (error) {
     handleCatchBlockError(req, res, error);
   }

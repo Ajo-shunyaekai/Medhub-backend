@@ -339,6 +339,9 @@ const supplierSchema = new Schema(
 // });
 
 supplierSchema.methods.isPasswordCorrect = async function (password) {
+  if (!password || !this.password) {
+    throw new Error("Missing entered password or stored hashed password");
+  }
   return await bcrypt.compare(password, this.password);
 };
 
