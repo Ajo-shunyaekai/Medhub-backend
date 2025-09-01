@@ -2546,14 +2546,14 @@ const getFieldName3 = (key, additionalCheck) => {
     case "minimumPurchaseUnit":
       fieldName = "Minimum Order Quantity*";
       break;
-    
+
     case "strength":
       fieldName = "Strength";
       break;
-    
+
     case "strengthUnit":
-    fieldName = "Strength Unit";
-    break;
+      fieldName = "Strength Unit";
+      break;
 
     case "form":
       fieldName = "Product Type/Form";
@@ -2578,7 +2578,7 @@ const getFieldName3 = (key, additionalCheck) => {
     case "buyersPreferredFrom":
       fieldName = "Buyers Preferred From*";
       break;
-    
+
     case "tags":
       fieldName = "Tags*";
       break;
@@ -2606,7 +2606,7 @@ const getFieldName3 = (key, additionalCheck) => {
     case "quantity":
       fieldName = "Stocked In Quantity*";
       break;
-    
+
     case "type":
       fieldName = "Stocked In Type*";
       break;
@@ -2631,22 +2631,130 @@ const getFieldName3 = (key, additionalCheck) => {
     //   fieldName = "Product Image";
     //   break;
 
-  case "frontImage":
-    fieldName = "Product Front Image";
-    break;
-  case "sideImage":
-    fieldName = "Product Side Image";
-    break;
-  case "backImage":
-    fieldName = "Product Back Image";
-    break;
-  case "closeupImage":
-    fieldName = "Product Close up Image";
-    break;
+    case "frontImage":
+      fieldName = "Product Front Image";
+      break;
+    case "sideImage":
+      fieldName = "Product Side Image";
+      break;
+    case "backImage":
+      fieldName = "Product Back Image";
+      break;
+    case "closeupImage":
+      fieldName = "Product Close up Image";
+      break;
 
     default:
       break;
-    
+  }
+  return fieldName;
+};
+
+const getProductFieldName = (key) => {
+  let fieldName;
+  switch (key) {
+    case "name":
+      fieldName = "Product Name*";
+      break;
+
+    case "upc":
+      fieldName = "UPC (Universal Product Code)";
+      break;
+
+    case "form":
+      fieldName = "Product Type/Form";
+      break;
+
+    case "model":
+      fieldName = "Part/Model Number*";
+      break;
+
+    case "unit_tax":
+      fieldName = "Product Tax%*";
+      break;
+
+    case "description":
+      fieldName = "Product Description";
+      break;
+
+    case "minimumPurchaseUnit":
+      fieldName = "Minimum Order Quantity*";
+      break;
+
+    case "strength":
+      fieldName = "Strength";
+      break;
+
+    case "strengthUnit":
+      fieldName = "Strength Unit";
+      break;
+
+    case "manufacturer":
+      fieldName = "Manufacturer Name*";
+      break;
+
+    case "aboutManufacturer":
+      fieldName = "About Manufacturer*";
+      break;
+
+    case "countryOfOrigin":
+      fieldName = "Manufacturer Country of Origin*";
+      break;
+
+    case "brand":
+      fieldName = "Brand Name";
+      break;
+
+    case "tags":
+      fieldName = "Tags*";
+      break;
+
+    case "buyersPreferredFrom":
+      fieldName = "Buyers Preferred From*";
+      break;
+
+    case "storage":
+      fieldName = "Storage Conditions";
+      break;
+
+    case "category":
+      fieldName = "Product Category*";
+      break;
+
+    case "subCategory":
+      fieldName = "Product Sub Category*";
+      break;
+
+    case "anotherCategory":
+      fieldName = "Product Sub Category (Level 3)";
+      break;
+
+    case "product_id":
+      fieldName = "";
+      break;
+
+    case "market":
+      fieldName = "Product Market*";
+      break;
+
+    case "supplier_id":
+      fieldName = "";
+      break;
+
+    case "purchasedOn":
+      fieldName = "Purchased On*";
+      break;
+
+    case "countryAvailable":
+      fieldName = "Country Available In*";
+      break;
+
+    case "condition":
+      fieldName = "Condition*";
+      break;
+
+    default:
+      break;
   }
   return fieldName;
 };

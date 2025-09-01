@@ -1883,7 +1883,7 @@ module.exports = {
         ...cdtyp4,
         ...cdtyp5,
       ];
-     
+
       // Create new product with all necessary fields
       newProductData = {
         ...req?.body,
@@ -5167,6 +5167,62 @@ module.exports = {
             totalPages,
           }
         );
+    } catch (error) {
+      handleCatchBlockError(req, res, error);
+    }
+  },
+
+  getProductCSVListOfSupplier: async (req, res) => {
+    try {
+      const { supplierId } = req?.query;
+
+      const matchCondition = {};
+      if (supplierId) {
+        matchCondition["supplier_id"] = supplierId;
+      }
+
+      const products = await Product.find(matchCondition).lean();
+
+      const inclusiveArr = [
+        "name",
+        "upc",
+        "form",
+        "model",
+        "unit_tax",
+        "description",
+        "minimumPurchaseUnit",
+        "strength",
+        "strengthUnit",
+        "manufacturer",
+        "aboutManufacturer",
+        "countryOfOrigin",
+        "brand",
+        "tags",
+        "buyersPreferredFrom",
+        "storage",
+        "category",
+        "subCategory",
+        "anotherCategory",
+        "product_id",
+        "market",
+        "supplier_id",
+        "purchasedOn",
+        "countryAvailable",
+        "condition",
+      ];
+
+      // Flatten the data
+      const flattenedProducts = products.map((product) =>
+        flattenData(product, [], inclusiveArr, "order_list")
+      );
+
+      // Convert to CSV
+      const csv = parse(flattenedProducts);
+
+      // Set headers
+      res.header("Content-Type", "text/csv");
+      res.attachment("supplier_products.csv");
+      return res.send(csv);
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }
