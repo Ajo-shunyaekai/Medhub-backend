@@ -10,7 +10,7 @@ const {
   handleCatchBlockError,
 } = require("../utils/commonResonse");
 
-const markExpiredBidsAsCompleted = async (req, res) => {
+const markExpiredBidsAsCompletedOld = async (req, res) => {
 
   const now = new Date();
   try {
@@ -64,6 +64,80 @@ const markExpiredBidsAsCompleted = async (req, res) => {
         expiredCount++;
       } else {
         // console.log('Bid not yet expired');
+      }
+    }
+
+    return sendSuccessResponse(
+      res,
+      200,
+      "markExpiredBidsAsCompleted API successful",
+      { success: true, expiredCount }
+    );
+  } catch (error) {
+    console.error("Error in markExpiredBidsAsCompleted:", error);
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+const markExpiredBidsAsCompleted = async (req, res) => {
+
+  const now = new Date();
+  try {
+    const activeBids = await Bid.find({ status: "active" });
+    let expiredCount = 0;
+
+    for (const bid of activeBids) {
+      const endDateStr = bid.general?.endDate;
+      const endTimeStr = bid.general?.endTime || "23:59"; // Default to end of day if missing
+
+      console.log('endDateStr:', endDateStr);
+      console.log('endTimeStr:', endTimeStr);
+
+      if (!endDateStr) {
+        console.log(' Missing endDate', bid._id);
+        continue;
+      }
+
+      const [endHour, endMinute] = endTimeStr.split(":").map(Number);
+      const rawDate = new Date(endDateStr);
+
+      if (
+        isNaN(rawDate.getTime()) ||
+        isNaN(endHour) ||
+        isNaN(endMinute)
+      ) {
+        console.log('nvalid date or time, skipping bid:', bid._id);
+        continue;
+      }
+
+      const endDateTime = new Date(
+        rawDate.getFullYear(),
+        rawDate.getMonth(),
+        rawDate.getDate(),
+        endHour,
+        endMinute,
+        0,
+        0
+      );
+
+      console.log("Bid ID:", bid._id);
+      console.log("Constructed endDateTime:", endDateTime.toISOString());
+      console.log(" Current time (now):", now.toISOString());
+    const isExpired = endDateTime <= now;
+    
+    const allQuoteRequested = bid.additionalDetails.every(
+        (item) => item.quoteRequested && mongoose.Types.ObjectId.isValid(item.quoteRequested)
+      );
+
+      if (isExpired ||  allQuoteRequested) {
+        console.log('Bid expired — marking as completed');
+        await Bid.updateOne(
+          { _id: bid._id },
+          { $set: { status: "completed" } }
+        );
+        expiredCount++;
+      } else {
+        console.log('Bid not yet expired');
       }
     }
 
