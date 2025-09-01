@@ -27,6 +27,7 @@ const {
   deleteAdminCsvTemplateFile,
   getAllProductQualityReports,
   getAllProductsForDD,
+  getProductCSVListOfSupplier,
 } = require("../controller/Product");
 const {
   categorySpecificValidationRules,
@@ -58,6 +59,13 @@ router.post(
   checkAuthorization,
   authenticationNAuthorization,
   csvDownload2
+);
+
+router.post(
+  `/product-csv-download`,
+  // checkAuthorization,
+  // authenticationNAuthorization,
+  getProductCSVListOfSupplier
 );
 
 router.post(
