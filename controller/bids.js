@@ -315,16 +315,37 @@ const getAllBids1 = async (req, res) => {
  
       const allBids = await Bid.find(matchStage);
  
-      const filteredIds = allBids
-        .filter((bid) => {
-          const startDateRaw = bid.general?.startDate;
-          if (!startDateRaw) return false;
+      // const filteredIds = allBids
+      //   .filter((bid) => {
+      //     const startDateRaw = bid.general?.startDate;
+      //     if (!startDateRaw) return false;
  
-          // Date string already includes time and timezone, parse it directly
-          const startDateTime = new Date(startDateRaw);
-          return startDateTime <= now;
-        })
-        .map((bid) => bid._id);
+      //     // Date string already includes time and timezone, parse it directly
+      //     const startDateTime = new Date(startDateRaw);
+      //     return startDateTime <= now;
+      //   })
+      //   .map((bid) => bid._id);
+
+      const filteredIds = allBids
+  .filter((bid) => {
+    const startDateRaw = bid.general?.startDate;
+    const startTimeRaw = bid.general?.startTime;
+
+    if (!startDateRaw || !startTimeRaw) return false;
+
+    // Parse date part
+    const dateOnly = new Date(startDateRaw);
+
+    // Combine date + time into one datetime
+    const [hours, minutes] = startTimeRaw.split(":").map(Number);
+    dateOnly.setHours(hours, minutes, 0, 0);
+
+    const startDateTime = dateOnly;
+    const now = new Date();
+
+    return startDateTime <= now; // only include if live
+  })
+  .map((bid) => bid._id);
  
       matchStage._id = { $in: filteredIds };
     }
@@ -898,63 +919,65 @@ const addBid = async (req, res) => {
     if (!newBid) {
       return sendErrorResponse(res, 400, "Failed to create new Bid.");
     }
-    const openFor =
-      additionalDetailsArray
-        ?.map((section) => section?.openFor)
-        .filter(Boolean) || [];
-    const matchingSuppliers = await Supplier.find({
-      supplier_type: { $in: openFor },
-      "registeredAddress.country": { $in: req.body.fromCountries },
-    });
+
+
+    // const openFor =
+    //   additionalDetailsArray
+    //     ?.map((section) => section?.openFor)
+    //     .filter(Boolean) || [];
+    // const matchingSuppliers = await Supplier.find({
+    //   supplier_type: { $in: openFor },
+    //   "registeredAddress.country": { $in: req.body.fromCountries },
+    // });
  
-    const notificationMessage = `Bid Created! A new bid has been created by ${user?.buyer_name}`;
-    matchingSuppliers.forEach(async (supplier) => {
-      const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
-      const newNotification = new Notification({
-        notification_id: notificationId,
-        event_type: "Bid created",
-        event: "bid",
-        from: "buyer",
-        to: "supplier",
-        from_id: user.buyer_id,
-        to_id: supplier.supplier_id,
-        event_id: newBid._id,
-        message: notificationMessage,
-        status: 0,
-      });
-      await newNotification.save();
+    // const notificationMessage = `Bid Created! A new bid has been created by ${user?.buyer_name}`;
+    // matchingSuppliers.forEach(async (supplier) => {
+    //   const notificationId = "NOT-" + Math.random().toString(16).slice(2, 10);
+    //   const newNotification = new Notification({
+    //     notification_id: notificationId,
+    //     event_type: "Bid created",
+    //     event: "bid",
+    //     from: "buyer",
+    //     to: "supplier",
+    //     from_id: user.buyer_id,
+    //     to_id: supplier.supplier_id,
+    //     event_id: newBid._id,
+    //     message: notificationMessage,
+    //     status: 0,
+    //   });
+    //   await newNotification.save();
  
-      //Send email
-      const subject = "Invitation to Participate in Medhub Global Bid  ";
-      const recipientEmails = [
-        supplier.contact_person_email,
-        "ajo@shunyaekai.tech",
-        "shivani@shunyaekai.tech",
-      ];
-      const bidTemplateName = "bidInvitationEmail";
-      const emailContent = bidCreatedContent(user, supplier, newBid.bid_id);
-      const templateContext = {
-        buyerName: user?.contact_person_name,
-        supplierName: supplier?.contact_person_name,
-        bidId: newBid?.bid_id,
-      };
+    //   //Send email
+    //   const subject = "Invitation to Participate in Medhub Global Bid  ";
+    //   const recipientEmails = [
+    //     supplier.contact_person_email,
+    //     "ajo@shunyaekai.tech",
+    //     "shivani@shunyaekai.tech",
+    //   ];
+    //   const bidTemplateName = "bidInvitationEmail";
+    //   const emailContent = bidCreatedContent(user, supplier, newBid.bid_id);
+    //   const templateContext = {
+    //     buyerName: user?.contact_person_name,
+    //     supplierName: supplier?.contact_person_name,
+    //     bidId: newBid?.bid_id,
+    //   };
  
-      try {
-        // await sendEmail(recipientEmails, subject, emailContent);
+    //   try {
+    //     // await sendEmail(recipientEmails, subject, emailContent);
  
-        await sendTemplateEmail(
-          recipientEmails.join(","),
-          subject,
-          bidTemplateName,
-          templateContext
-        );
-      } catch (error) {
-        console.error(
-          `Error sending email to ${supplier.supplier_email}:`,
-          error
-        );
-      }
-    });
+    //     await sendTemplateEmail(
+    //       recipientEmails.join(","),
+    //       subject,
+    //       bidTemplateName,
+    //       templateContext
+    //     );
+    //   } catch (error) {
+    //     console.error(
+    //       `Error sending email to ${supplier.supplier_email}:`,
+    //       error
+    //     );
+    //   }
+    // });
  
     return sendSuccessResponse(res, 200, "Bid Created Successfully", newBid);
   } catch (error) {

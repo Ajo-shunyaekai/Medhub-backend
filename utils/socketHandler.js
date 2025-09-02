@@ -15,21 +15,21 @@ function initializeSocket(server) {
       });
     });
 
-    socket.on("createBid", async (data) => {
-      const { buyerId, message, fromCountries, openFor } = data;
-      try {
-        const suppliers = await Supplier.find({
-          supplier_type: { $in: openFor },
-          "registeredAddress.country": { $in: fromCountries }, 
-        });
+    // socket.on("createBid", async (data) => {
+    //   const { buyerId, message, fromCountries, openFor } = data;
+    //   try {
+    //     const suppliers = await Supplier.find({
+    //       supplier_type: { $in: openFor },
+    //       "registeredAddress.country": { $in: fromCountries }, 
+    //     });
 
-        suppliers.forEach(supplier => {
-          io.to(supplier.supplier_id.toString()).emit("BidCreated", message);  
-        });
-      } catch (error) {
-        console.error("Error fetching suppliers:", error);
-      }
-    });
+    //     suppliers.forEach(supplier => {
+    //       io.to(supplier.supplier_id.toString()).emit("BidCreated", message);  
+    //     });
+    //   } catch (error) {
+    //     console.error("Error fetching suppliers:", error);
+    //   }
+    // });
 
     // Notification handlers
     const notificationEvents = [
