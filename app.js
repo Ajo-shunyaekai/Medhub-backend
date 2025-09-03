@@ -50,7 +50,7 @@ app.get("/pdf-proxy/*", async (req, res) => {
 connect();
 
 //---------------------- Cron Jobs ----------------------//
-// require("./schedulers/tasks");
+require("./schedulers/tasks");
 // app.use((req, res, next) => {
 //   console.log(`${req.method} ${req.originalUrl}`);
 //   next();

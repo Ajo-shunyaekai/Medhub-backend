@@ -312,6 +312,7 @@ const bidSchema = new Schema(
       immutable: true,
     },
     other: {},
+    notified: { type: Boolean, default: false }
   },
   { timestamps: true }
 );
