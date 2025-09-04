@@ -44,32 +44,15 @@ const getTimeZoneBidComparision = async (
     // 4. Get current time in that timezone
     const now = DateTime.now().setZone(timeZone);
 
-    // // Debug output (optional)
-    // console.log("\n\n\n DETAILS:", {
-    //   country,
-    //   timeZone,
-    //   now: now.toISO(),
-    //   startDateTime: startDateTime.toISO(),
-    //   endDateTime: endDateTime.toISO(),
-    //   started: now >= startDateTime,
-    // });
-
-    // 5. Include only bids that have started
-    // return now >= startDateTime;
-
     // 5. return bid event status
     if (now < startDateTime) {
-    //   console.log("\n\n\n inactive");
       return "inactive";
     } else if (now == startDateTime) {
-    //   console.log("\n\n\n active");
       return "active";
     } else if (now > startDateTime) {
       if (now <= endDateTime) {
-        // console.log("\n\n\n active");
         return "active";
       } else {
-        // console.log("\n\n\n completed");
         return "completed";
       }
     }

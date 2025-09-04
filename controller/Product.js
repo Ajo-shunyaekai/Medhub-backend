@@ -5174,55 +5174,235 @@ module.exports = {
 
   getProductCSVListOfSupplier: async (req, res) => {
     try {
-      const { supplierId } = req?.query;
+      const { supplierId, page_no = 1, page_size = 5 } = req?.query;
+      const {
+        from,
+        to,
+        category,
+        bulkUpload = false,
+        csvDownload = false,
+      } = req?.body;
 
-      const matchCondition = {};
-      if (supplierId) {
-        matchCondition["supplier_id"] = supplierId;
-      }
+      const pageNo = parseInt(page_no) || 1;
+      const pageSize = parseInt(page_size) || 10;
+      const offset = (pageNo - 1) * pageSize;
 
-      const products = await Product.find(matchCondition).lean();
+      let pipeline = [];
 
-      const inclusiveArr = [
-        "name",
-        "upc",
-        "form",
-        "model",
-        "unit_tax",
-        "description",
-        "minimumPurchaseUnit",
-        "strength",
-        "strengthUnit",
-        "manufacturer",
-        "aboutManufacturer",
-        "countryOfOrigin",
-        "brand",
-        "tags",
-        "buyersPreferredFrom",
-        "storage",
-        "category",
-        "subCategory",
-        "anotherCategory",
-        "product_id",
-        "market",
-        "supplier_id",
-        "purchasedOn",
-        "countryAvailable",
-        "condition",
-      ];
+      const matchCondition = {
+        ...(supplierId && {
+          supplier_id: new mongoose.Types.ObjectId(supplierId),
+        }),
+        ...(typeof bulkUpload === "boolean" && { bulkUpload }),
+        ...(category && { category: { $in: category } }),
+        ...(from || to
+          ? {
+              createdAt: {
+                ...(from ? { $gte: new Date(from) } : {}),
+                ...(to ? { $lte: new Date(to) } : {}),
+              },
+            }
+          : {}),
+      };
 
-      // Flatten the data
-      const flattenedProducts = products.map((product) =>
-        flattenData(product, [], inclusiveArr, "order_list")
+      pipeline.push({ $match: matchCondition });
+
+      pipeline.push(
+        {
+          $lookup: {
+            from: "suppliers",
+            localField: "supplier_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "inventories",
+            localField: "inventory",
+            foreignField: "uuid",
+            as: "inventoryDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$userDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: "$inventoryDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        }
       );
 
-      // Convert to CSV
-      const csv = parse(flattenedProducts);
+      pipeline.push({
+        $group: {
+          _id: "$_id",
+          general: { $first: "$general" },
+          inventory: { $first: "$inventory" },
+          complianceFile: { $first: "$complianceFile" },
+          cNCFileNDate: { $first: "$cNCFileNDate" },
+          storage: { $first: "$storage" },
+          additional: { $first: "$additional" },
+          guidelinesFile: { $first: "$guidelinesFile" },
+          healthNSafety: { $first: "$healthNSafety" },
+          category: { $first: "$category" },
+          product_id: { $first: "$product_id" },
+          supplier_id: { $first: "$supplier_id" },
+          market: { $first: "$market" },
+          secondaryMarketDetails: { $first: "$secondaryMarketDetails" },
+          isDeleted: { $first: "$isDeleted" },
+          bulkUpload: { $first: "$bulkUpload" },
+          userDetails: { $first: "$userDetails" },
+          inventoryDetails: { $push: "$inventoryDetails" },
+          MedicalEquipmentAndDevices: { $first: "$MedicalEquipmentAndDevices" },
+          Pharmaceuticals: { $first: "$Pharmaceuticals" },
+          SkinHairCosmeticSupplies: { $first: "$SkinHairCosmeticSupplies" },
+          VitalHealthAndWellness: { $first: "$VitalHealthAndWellness" },
+          MedicalConsumablesAndDisposables: {
+            $first: "$MedicalConsumablesAndDisposables",
+          },
+          LaboratorySupplies: { $first: "$LaboratorySupplies" },
+          DiagnosticAndMonitoringDevices: {
+            $first: "$DiagnosticAndMonitoringDevices",
+          },
+          HospitalAndClinicSupplies: { $first: "$HospitalAndClinicSupplies" },
+          OrthopedicSupplies: { $first: "$OrthopedicSupplies" },
+          DentalProducts: { $first: "$DentalProducts" },
+          EyeCareSupplies: { $first: "$EyeCareSupplies" },
+          HomeHealthcareProducts: { $first: "$HomeHealthcareProducts" },
+          AlternativeMedicines: { $first: "$AlternativeMedicines" },
+          EmergencyAndFirstAidSupplies: {
+            $first: "$EmergencyAndFirstAidSupplies",
+          },
+          DisinfectionAndHygieneSupplies: {
+            $first: "$DisinfectionAndHygieneSupplies",
+          },
+          NutritionAndDietaryProducts: {
+            $first: "$NutritionAndDietaryProducts",
+          },
+          HealthcareITSolutions: { $first: "$HealthcareITSolutions" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          __v: { $first: "$__v" },
+          priceQuantityDetails: {
+            $push: {
+              price: "$inventoryDetails.inventoryList.price",
+              quantity: "$inventoryDetails.inventoryList.quantity",
+              deliveryTime: "$inventoryDetails.inventoryList.deliveryTime",
+            },
+          },
+        },
+      });
 
-      // Set headers
-      res.header("Content-Type", "text/csv");
-      res.attachment("supplier_products.csv");
-      return res.send(csv);
+      pipeline.push({ $sort: { createdAt: -1, _id: -1 } });
+
+      // Clone pipeline for total count calculation
+      const countPipeline = [...pipeline];
+      countPipeline.push({ $count: "total" });
+      const countResult = await Product.aggregate(countPipeline);
+      const totalProducts = countResult[0]?.total || 0;
+
+      // if (csvDownload == false) {
+      //   // Add pagination
+      //   pipeline.push({ $skip: offset });
+      //   pipeline.push({ $limit: pageSize });
+
+      //   const products = await Product.aggregate(pipeline);
+      //   if (!products)
+      //     return sendErrorResponse(res, 400, "Failed to remove the file.");
+
+      //   const totalPages = Math.ceil(totalProducts / pageSize);
+
+      //   return sendSuccessResponse(res, 200, "Success Fetching Products", {
+      //     products,
+      //     totalItems: totalProducts,
+      //     currentPage: pageNo,
+      //     itemsPerPage: pageSize,
+      //     totalPages,
+      //   });
+      // } else {
+      //   const products = await Product.aggregate(pipeline);
+      //   if (!products)
+      //     return sendErrorResponse(res, 400, "Failed to remove the file.");
+      //   // Convert Mongoose document to plain object and flatten
+      //   const inclusiveArr = [
+      //     "name",
+      //     "supplier_id",
+      //     "product_id",
+      //     "category",
+      //     "supplier_name",
+      //     "bulkUpload",
+      //   ];
+      //   const flattenedData = products.map((item) =>
+      //     flattenData(item, [], inclusiveArr, "order_list")
+      //   ); // add `.toObject()` removes internal Mongoose metadata
+
+      //   console.log("\n\nflattenedData", flattenedData);
+
+      //   // Convert the flattened data to CSV
+      //   const csv = parse(flattenedData);
+
+      //   // Set headers for file download
+      //   res.header("Content-Type", "text/csv");
+      //   res.attachment("supplier_products.csv");
+
+      //   res.status(200).send(csv);
+      // }
+
+      if (csvDownload == false) {
+        // Add pagination
+        pipeline.push({ $skip: offset });
+        pipeline.push({ $limit: pageSize });
+
+        const products = await Product.aggregate(pipeline);
+        if (!products)
+          return sendErrorResponse(res, 400, "Failed to remove the file.");
+
+        const totalPages = Math.ceil(totalProducts / pageSize);
+
+        return sendSuccessResponse(res, 200, "Success Fetching Products", {
+          products,
+          totalItems: totalProducts,
+          currentPage: pageNo,
+          itemsPerPage: pageSize,
+          totalPages,
+        });
+      } else {
+        const products = await Product.aggregate(pipeline);
+        if (!products)
+          return sendErrorResponse(res, 400, "Failed to remove the file.");
+
+        const inclusiveArr = [
+          "name",
+          "supplier_id",
+          "product_id",
+          "category",
+          "supplier_name",
+          "bulkUpload",
+        ];
+
+        const flattenedData = products?.map((item) => {
+          return {
+            "Product Name": item?.general?.name,
+            "Product Category": getCategoryNameForHeading(item?.category),
+            "Bulk Upload": item?.bulkUpload,
+            "Product Id": item?.product_id,
+            "Supplier Id": item?.userDetails?.supplier_id,
+            "Supplier Name": item?.userDetails?.supplier_name,
+          };
+        });
+
+        const csv = parse(flattenedData);
+
+        res.header("Content-Type", "text/csv");
+        res.attachment("supplier_products.csv");
+
+        return res.status(200).send(csv);
+      }
     } catch (error) {
       handleCatchBlockError(req, res, error);
     }

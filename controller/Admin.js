@@ -326,10 +326,10 @@ module.exports = {
 
   getRegReqList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, limit, filterValue, pageSize, searchKey = '', status } = reqObj;
+      const { pageNo, limit, filterValue, pageSize, searchKey = '', status, dropDown = true, } = reqObj;
 
-      const page_no = pageNo || 1; 
-      const page_size = limit || pageSize || 5; 
+      const page_no = pageNo || 1;
+      const page_size = limit || pageSize || 5;
       const offSet = (page_no - 1) * page_size;
 
       const fields = {
@@ -337,7 +337,7 @@ module.exports = {
         password: 0,
       };
 
-      let dateFilter = {}; 
+      let dateFilter = {};
 
       const startDate = moment().subtract(365, "days").startOf("day").toDate();
       const endDate = moment().endOf("day").toDate();
@@ -375,26 +375,33 @@ module.exports = {
       }
 
       const searchFilter = searchKey
-      ? {
-        supplier_name: { $regex: new RegExp(`^${searchKey}`, "i") },
-        }
-      : {};
+        ? {
+            supplier_name: { $regex: new RegExp(`^${searchKey}`, "i") },
+          }
+        : {};
 
-    const query = {
-      account_status: status,
-      ...dateFilter,
-      ...searchFilter,
-    };
+      const query = {
+        account_status: status,
+        ...dateFilter,
+        ...searchFilter,
+      };
 
-      Supplier.find(query)
+      let supplierQuery = Supplier.find(query)
         .select(fields)
-        .sort({ createdAt: -1 }) 
-        .skip(offSet)
-        .limit(page_size)
+        .sort({ createdAt: -1 });
+
+      // Apply pagination only if dropDown is false
+      if (!dropDown) {
+        supplierQuery = supplierQuery.skip(offSet).limit(page_size);
+      }
+
+      supplierQuery
         .then((data) => {
           Supplier.countDocuments(query)
             .then((totalItems) => {
-              const totalPages = Math.ceil(totalItems / page_size);
+              const totalPages = dropDown
+                ? 1
+                : Math.ceil(totalItems / page_size);
               const returnObj = {
                 data,
                 totalPages,
@@ -723,7 +730,7 @@ module.exports = {
 
   getBuyerRegReqList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, pageSize, filterValue, searchKey = '' } = reqObj;
+      const { pageNo, pageSize, filterValue, searchKey = "" } = reqObj;
 
       const page_no = pageNo || 1;
       const page_size = pageSize || 2;
