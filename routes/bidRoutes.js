@@ -6,7 +6,7 @@ const {
 const router = express.Router();
 const {
   getAllBids,
-  getAllBids1,
+  getAllBids3,
   getAllBids2,
   getBidDetails,
   addBid,
@@ -20,7 +20,7 @@ const {
 } = require("../controller/bids");
 const { addBidUpload } = require("../middleware/multer/bidMulter");
 
-router.post("/", checkAuthorization, authenticationNAuthorization, getAllBids1);
+router.post("/", checkAuthorization, authenticationNAuthorization, getAllBids3);
 router.post(
   "/add",
   checkAuthorization,
