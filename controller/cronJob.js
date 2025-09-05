@@ -10,6 +10,7 @@ const {
   sendSuccessResponse,
   handleCatchBlockError,
 } = require("../utils/commonResonse");
+const {getTimeZoneBidComparision} = require("../utils/timeZone")
 
 const markExpiredBidsAsCompletedOld = async (req, res) => {
 
@@ -147,6 +148,74 @@ const markExpiredBidsAsCompleted = async (req, res) => {
     );
   } catch (error) {
     console.error("Error in markExpiredBidsAsCompleted:", error);
+    handleCatchBlockError(req, res, error);
+  }
+};
+
+const markExpiredOrFullyQuotedBidsAsCompleted = async (req, res) => {
+  try {
+    const bidsToUpdate = await Bid.find({
+      status: { $in: ["active", "inactive"] },
+    });
+
+    let updatedCount = 0;
+
+    for (const bid of bidsToUpdate) {
+      const { startDate, startTime, endDate, endTime, country } = bid.general || {};
+
+      // Skip if essential fields are missing
+      if (!startDate || !startTime || !endDate || !endTime || !country) {
+        console.warn(`Skipping bid ${bid.bid_id}: Missing required general fields`);
+        continue;
+      }
+
+      let bidStatus;
+      try {
+        bidStatus = await getTimeZoneBidComparision(
+          startDate,
+          startTime,
+          endDate,
+          endTime,
+          country
+        );
+      } catch (err) {
+        console.warn(`Timezone comparison failed for bid ${bid.bid_id}:`, err.message);
+        continue;
+      }
+
+      console.log("[DEBUG] Bid Status Check:", {
+        bidId: bid.bid_id,
+        bidStatus,
+      });
+
+      const allQuoteRequested = bid.additionalDetails.every(
+        (item) =>
+          item.quoteRequested &&
+          mongoose.Types.ObjectId.isValid(item.quoteRequested)
+      );
+
+      if (bidStatus === "completed" || allQuoteRequested) {
+        await Bid.updateOne(
+          { _id: bid._id },
+          { $set: { status: "completed" } }
+        );
+        updatedCount++;
+        console.log(`Marked as completed: ${bid.bid_id}`);
+      } else {
+        await Bid.updateOne(
+          { _id: bid._id },
+          { $set: { status: bidStatus } }
+        );
+        console.log(`Updated status to '${bidStatus}': ${bid.bid_id}`);
+      }
+    }
+
+    return sendSuccessResponse(res, 200, "Bids updated successfully", {
+      success: true,
+      updatedCount,
+    });
+  } catch (error) {
+    console.error("Error in markExpiredOrFullyQuotedBidsAsCompleted:", error);
     handleCatchBlockError(req, res, error);
   }
 };
@@ -296,6 +365,7 @@ const markExpiredSubscriptionsAsExpired = async (req, res) => {
 
 module.exports = {
   markExpiredBidsAsCompleted,
+  markExpiredOrFullyQuotedBidsAsCompleted,
   sendNotificationsForActiveBids,
   markExpiredSubscriptionsAsExpired
 };
