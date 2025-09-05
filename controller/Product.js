@@ -5179,8 +5179,9 @@ module.exports = {
         from,
         to,
         category,
-        bulkUpload = false,
+        bulkUpload,
         csvDownload = false,
+        market,
       } = req?.body;
 
       const pageNo = parseInt(page_no) || 1;
@@ -5193,7 +5194,8 @@ module.exports = {
         ...(supplierId && {
           supplier_id: new mongoose.Types.ObjectId(supplierId),
         }),
-        ...(typeof bulkUpload === "boolean" && { bulkUpload }),
+        ...(bulkUpload && typeof bulkUpload === "boolean" && { bulkUpload }),
+        ...(market && { market }),
         ...(category && { category: { $in: category } }),
         ...(from || to
           ? {
@@ -5387,21 +5389,24 @@ module.exports = {
 
         const flattenedData = products?.map((item) => {
           return {
-            "Product Name": item?.general?.name,
-            "Product Category": getCategoryNameForHeading(item?.category),
-            "Bulk Upload": item?.bulkUpload,
-            "Product Id": item?.product_id,
-            "Supplier Id": item?.userDetails?.supplier_id,
-            "Supplier Name": item?.userDetails?.supplier_name,
+            "Product Name": item?.general?.name || "",
+            "Product Category": getCategoryNameForHeading(item?.category) || "",
+            "Bulk Upload": item?.bulkUpload ? "Yes" : "No",
+            "Product Id": item?.product_id || "",
+            "Supplier Id": item?.userDetails?.supplier_id || "",
+            "Supplier Name": item?.userDetails?.supplier_name || "",
           };
         });
 
         const csv = parse(flattenedData);
+        const csvWithBom = "\uFEFF" + csv; // Fix encoding for Excel
 
-        res.header("Content-Type", "text/csv");
-        res.attachment("supplier_products.csv");
-
-        return res.status(200).send(csv);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=product.csv"
+        );
+        res.status(200).send(csvWithBom);
       }
     } catch (error) {
       handleCatchBlockError(req, res, error);
