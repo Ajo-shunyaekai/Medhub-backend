@@ -326,7 +326,7 @@ module.exports = {
 
   getRegReqList: async (req, res, reqObj, callback) => {
     try {
-      const { pageNo, limit, filterValue, pageSize, searchKey = '', status, dropDown = true, } = reqObj;
+      const { pageNo, limit, filterValue, pageSize, searchKey = '', status, dropDown = false, } = reqObj;
 
       const page_no = pageNo || 1;
       const page_size = limit || pageSize || 5;

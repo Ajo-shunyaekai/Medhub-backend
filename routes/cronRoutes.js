@@ -2,14 +2,16 @@ const express = require("express");
 const router = express.Router();
 const { sendErrorResponse } = require("../utils/commonResonse");
 const logErrorToFile = require("../logs/errorLogs");
-const {markExpiredBidsAsCompleted, sendNotificationsForActiveBids, markExpiredSubscriptionsAsExpired} = require("../controller/cronJob")
+const {markExpiredBidsAsCompleted, markExpiredOrFullyQuotedBidsAsCompleted, 
+    sendNotificationsForActiveBids, markExpiredSubscriptionsAsExpired} = require("../controller/cronJob")
 
 
-router.post('/check-bid-expiry', markExpiredBidsAsCompleted);
+// router.post('/check-bid-expiry', markExpiredBidsAsCompleted);
+router.get('/check-bid-expiry', markExpiredOrFullyQuotedBidsAsCompleted);
 
-router.post('/send-bid-notification', sendNotificationsForActiveBids);
+router.get('/send-bid-notification', sendNotificationsForActiveBids);
 
-router.post('/check-subscription-expiry', markExpiredSubscriptionsAsExpired);
+router.get('/check-subscription-expiry', markExpiredSubscriptionsAsExpired);
 
 
 module.exports = router;

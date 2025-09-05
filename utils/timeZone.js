@@ -61,5 +61,4 @@ const getTimeZoneBidComparision = async (
   }
 };
 
-// ✅ CommonJS export
 module.exports = { getTimeZoneBidComparision };

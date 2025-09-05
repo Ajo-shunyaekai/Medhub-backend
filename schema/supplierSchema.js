@@ -30,7 +30,19 @@ const supplierSchema = new Schema(
     },
     productsIndicator: {
       type: String,
-      required: true,
+      // required: true,
+      trim: true,
+    },
+    product_contact_name: {
+      type: String,
+      trim: true,
+    },
+    product_contact_no: {
+      type: String,
+      trim: true,
+    },
+    product_contact_email: {
+      type: String,
       trim: true,
     },
     description: {
